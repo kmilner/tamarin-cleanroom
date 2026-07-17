@@ -20,3 +20,6 @@ workflows/wf_1741f4ad-48d/agent-aeaa95d99395a0136.jsonl: tool_calls=74 web=0 VIO
 workflows/wf_1741f4ad-48d/agent-af76260f88f21bcaa.jsonl: tool_calls=36 web=0 VIOLATIONS=0
 workflows/wf_1741f4ad-48d/agent-ae1942fd5bd87afee.jsonl: tool_calls=98 web=0 VIOLATIONS=0
 workflows/wf_1741f4ad-48d/agent-a92e0a97d8d241648.jsonl: tool_calls=122 web=0 VIOLATIONS=0
+workflows/wf_60530b15-4b6/agent-ab299adf6d8019f6c.jsonl: tool_calls=33 web=0 VIOLATIONS=0
+workflows/wf_60530b15-4b6/agent-a4bb77314f80cb4c2.jsonl: tool_calls=88 web=0 VIOLATIONS=0
+workflows/wf_60530b15-4b6/agent-a8ed0da34ff4e5fe5.jsonl: tool_calls=83 web=0 VIOLATIONS=0

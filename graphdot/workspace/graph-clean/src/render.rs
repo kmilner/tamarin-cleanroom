@@ -53,14 +53,72 @@ use crate::term::Term;
 /// lengths (the boundary was always flat-width 87 fits / 88 breaks).
 pub const FILL_WIDTH: usize = 87;
 
-/// The wrap DECISION at the top level: a fact stays on a single record-cell line
+/// The per-cell minimum wrap budget (BEHAVIOR.md §3f). Inside a record group the
+/// cells share the [`FILL_WIDTH`] budget, but a cell's budget never drops below
+/// this floor — a cell whose flat rendering is at most `MIN_CELL_BUDGET` columns
+/// never wraps, however wide its siblings are. Pinned by a live probe: a sibling
+/// forced far past the budget leaves the target fitting at flat ≤ 20, wrapping at
+/// flat 21.
+pub const MIN_CELL_BUDGET: usize = 20;
+
+/// The wrap budget of one cell in a record group (BEHAVIOR.md §3f). `flats` are the
+/// flat visual widths of **every** cell in the same group (premises together, or
+/// conclusions together — the info cell is its own single-cell group); `i` is the
+/// target cell. The group shares [`FILL_WIDTH`]: the budget is what remains after
+/// the *other* cells' flat widths, floored at [`MIN_CELL_BUDGET`]. The cell wraps
+/// iff its own flat width exceeds this budget — equivalently, iff the group total
+/// exceeds [`FILL_WIDTH`] and the cell's flat exceeds [`MIN_CELL_BUDGET`].
+pub fn cell_budget(flats: &[usize], i: usize) -> usize {
+    let others: usize = flats.iter().enumerate().filter(|(k, _)| *k != i).map(|(_, w)| *w).sum();
+    FILL_WIDTH.saturating_sub(others).max(MIN_CELL_BUDGET)
+}
+
+/// The wrap DECISION for a lone cell: a fact stays on a single record-cell line
 /// iff its flat (un-wrapped) rendering is at most [`FILL_WIDTH`] columns wide.
 /// `flat` is the fact's flat rendering (e.g. from [`Fact::render_flat`]); width is
 /// counted in Unicode scalars, matching the observed column count. Verified
 /// byte-exact at the boundary: an 87-column fact is single-line, an 88-column one
-/// wraps (live probe, functor-length-invariant).
+/// wraps (live probe, functor-length-invariant). For a cell sharing its group with
+/// siblings use [`cell_budget`] to obtain the reduced budget.
 pub fn fits_one_line(flat: &str) -> bool {
     flat.chars().count() <= FILL_WIDTH
+}
+
+/// Number of top-level action facts in an info cell's action list `#t : Rule[…]`
+/// (0 if there is no `[…]`). Counts the `, ` separators at bracket depth 0 inside
+/// the `[ … ]`, honoring `()`/`<>`/`[]` nesting and `'…'` quotes. Used to apply the
+/// observed rule (BEHAVIOR.md §3f): an info cell with **≥ 2** actions always renders
+/// its list vertically (one action per line), independent of width.
+pub fn count_info_actions(flat: &str) -> usize {
+    let chars: Vec<char> = flat.chars().collect();
+    let Some(open) = chars.iter().position(|&c| c == '[') else { return 0 };
+    if chars.get(open + 1) == Some(&']') {
+        return 0;
+    }
+    let mut depth = 0i32;
+    let mut in_quote = false;
+    let mut actions = 1usize;
+    let mut i = open + 1;
+    while i < chars.len() {
+        let c = chars[i];
+        if in_quote {
+            if c == '\'' {
+                in_quote = false;
+            }
+            i += 1;
+            continue;
+        }
+        match c {
+            '\'' => in_quote = true,
+            '(' | '<' | '[' => depth += 1,
+            ']' if depth == 0 => break,
+            ')' | '>' | ']' => depth -= 1,
+            ',' if depth == 0 && chars.get(i + 1) == Some(&' ') => actions += 1,
+            _ => {}
+        }
+        i += 1;
+    }
+    actions
 }
 
 /// Escape the metacharacters that are special inside a graphviz record label:
@@ -265,9 +323,15 @@ struct Unit {
 
 /// Greedy fill layout (BEHAVIOR.md §3f). Starting from `open_text` at column
 /// `start_col`, place each unit's separator on the current line and then its text,
-/// wrapping to the unit's indent when the text would pass [`FILL_WIDTH`] (or on a
-/// `hard` unit). Returns the physical lines.
-fn run_layout(open_text: &str, start_col: usize, units: &[Unit]) -> Vec<PLine> {
+/// wrapping to the unit's indent when the text would pass the cell's `budget` (or
+/// on a `hard` unit). Returns the physical lines. `budget` is the cell's shared
+/// group budget ([`cell_budget`]); for a lone cell it is [`FILL_WIDTH`].
+///
+/// `drop_break_space`: at a break, a single trailing space of the just-finished
+/// line is dropped. A **fact argument** list breaks after the bare `,` (observed
+/// `Init_1( a, b,\l…`), so it passes `true`; a **tuple element** list keeps the
+/// `, ` before the break (observed `<…, x8.4, \l…`), so it passes `false`.
+fn run_layout(open_text: &str, start_col: usize, units: &[Unit], budget: usize, drop_break_space: bool) -> Vec<PLine> {
     let mut lines: Vec<PLine> = Vec::new();
     let mut cur = open_text.to_string();
     let mut col = start_col;
@@ -276,7 +340,10 @@ fn run_layout(open_text: &str, start_col: usize, units: &[Unit]) -> Vec<PLine> {
         cur.push_str(u.sep);
         col += width(u.sep);
         let w = width(&u.text);
-        if u.hard || col + w > FILL_WIDTH {
+        if u.hard || col + w > budget {
+            if drop_break_space && cur.ends_with(' ') {
+                cur.pop();
+            }
             lines.push((line_indent, std::mem::take(&mut cur)));
             line_indent = u.indent;
             cur.push_str(&u.text);
@@ -345,8 +412,9 @@ fn is_tuple(s: &str) -> bool {
 
 /// Lay out a tuple `<e1, e2, …>` whose `<` sits at column `base_col`: fill the
 /// elements (`fillSep`) at `base_col + 1`, and peel the `>` to its own line at
-/// `base_col` iff it does not fit on the last element's line.
-fn layout_tuple(inner: &str, base_col: usize) -> Vec<PLine> {
+/// `base_col` iff it does not fit on the last element's line. `budget` is the
+/// enclosing cell's group budget ([`cell_budget`]).
+fn layout_tuple(inner: &str, base_col: usize, budget: usize) -> Vec<PLine> {
     let elems = split_top_commas(inner);
     let open_col = base_col + 1;
     let mut units: Vec<Unit> = Vec::with_capacity(elems.len() + 1);
@@ -354,16 +422,17 @@ fn layout_tuple(inner: &str, base_col: usize) -> Vec<PLine> {
         units.push(Unit { sep: if i == 0 { "" } else { ", " }, text: e.clone(), indent: open_col, hard: false });
     }
     units.push(Unit { sep: "", text: ">".to_string(), indent: base_col, hard: false });
-    run_layout("<", open_col, &units)
+    run_layout("<", open_col, &units, budget, false)
 }
 
 /// Lay out a fact / relation cell `NAME( a1, a2, … )`. If its flat rendering fits
-/// [`FILL_WIDTH`] it stays on one line. Otherwise its arguments fill at the
+/// the cell's `budget` it stays on one line. Otherwise its arguments fill at the
 /// argument column; a sole tuple argument recurses into [`layout_tuple`]; and the
 /// closing `)` peels onto its own line at column 0 (the padded ` )` space becomes
-/// the break).
-fn layout_fact(flat: &str) -> Vec<PLine> {
-    if width(flat) <= FILL_WIDTH {
+/// the break). `budget` is the cell's group budget ([`cell_budget`]); for a lone
+/// cell it is [`FILL_WIDTH`].
+fn layout_fact(flat: &str, budget: usize) -> Vec<PLine> {
+    if width(flat) <= budget {
         return vec![(0, flat.to_string())];
     }
     let Some(lp) = flat.find("( ") else {
@@ -380,7 +449,7 @@ fn layout_fact(flat: &str) -> Vec<PLine> {
     // A sole tuple argument: the fact opens "NAME( <" and the tuple fills inside.
     if args.len() == 1 && is_tuple(&args[0]) {
         let inner = &args[0][1..args[0].len() - 1];
-        let tlines = layout_tuple(inner, open_col);
+        let tlines = layout_tuple(inner, open_col, budget);
         let mut lines: Vec<PLine> = Vec::with_capacity(tlines.len() + 2);
         lines.push((0, format!("{}{}", open_str, tlines[0].1)));
         for t in &tlines[1..] {
@@ -396,17 +465,16 @@ fn layout_fact(flat: &str) -> Vec<PLine> {
         units.push(Unit { sep: if i == 0 { "" } else { ", " }, text: a.clone(), indent: open_col, hard: false });
     }
     units.push(Unit { sep: "", text: ")".to_string(), indent: 0, hard: true });
-    run_layout(open_str, open_col, &units)
+    run_layout(open_str, open_col, &units, budget, true)
 }
 
 /// Lay out an info cell `#t : Rule[a1, a2, …]`. The action list uses a vertical
-/// `sep` — one action per line when the cell overflows [`FILL_WIDTH`] — with the
-/// trailing `,` kept on each non-final line and the `]` attached to the last
-/// action.
-fn layout_info(flat: &str) -> Vec<PLine> {
-    if width(flat) <= FILL_WIDTH {
-        return vec![(0, flat.to_string())];
-    }
+/// `sep` — one action per line — and goes vertical **whenever the list has ≥ 2
+/// actions** (independent of width) OR the cell overflows its `budget` (a lone
+/// action that is too wide). The trailing `,` is kept on each non-final line and
+/// the `]` is attached to the last action (BEHAVIOR.md §3f). `budget` is the info
+/// cell's own budget ([`FILL_WIDTH`], since the info cell is alone in its group).
+fn layout_info(flat: &str, budget: usize) -> Vec<PLine> {
     let Some(lb) = flat.find('[') else {
         return vec![(0, flat.to_string())];
     };
@@ -417,6 +485,11 @@ fn layout_info(flat: &str) -> Vec<PLine> {
     let content = &flat[lb + 1..flat.len() - 1];
     let open_col = width(open_str);
     let acts = split_top_commas(content);
+    // Stay on one line only when there is at most one action AND it fits the budget;
+    // an action list of ≥ 2 always breaks vertically.
+    if acts.len() <= 1 && width(flat) <= budget {
+        return vec![(0, flat.to_string())];
+    }
     let mut units: Vec<Unit> = Vec::with_capacity(acts.len());
     for (i, a) in acts.iter().enumerate() {
         // Each action begins its own line (a vertical `sep`, hard break after the
@@ -424,7 +497,7 @@ fn layout_info(flat: &str) -> Vec<PLine> {
         let text = if i + 1 < acts.len() { format!("{},", a) } else { format!("{}]", a) };
         units.push(Unit { sep: "", text, indent: open_col, hard: i > 0 });
     }
-    run_layout(open_str, open_col, &units)
+    run_layout(open_str, open_col, &units, budget, false)
 }
 
 /// Render one record cell from its flat (un-escaped) text into the exact label
@@ -438,10 +511,21 @@ fn layout_info(flat: &str) -> Vec<PLine> {
 /// [`Fact::render_flat`]) and the pre-rendered-string path (feed the caller's
 /// already-rendered cell text): the wrap and escape apply identically.
 pub fn wrap_cell(flat: &str) -> String {
+    wrap_cell_budget(flat, FILL_WIDTH)
+}
+
+/// Render one record cell with an explicit wrap `budget` (BEHAVIOR.md §3f). The
+/// budget is the cell's share of its record group's [`FILL_WIDTH`] — see
+/// [`cell_budget`]; a lone cell uses [`FILL_WIDTH`]. An info cell (`#t : Rule[…]`)
+/// uses the vertical action `sep` (always vertical for ≥ 2 actions); a fact /
+/// relation cell (`NAME( … )`) uses the greedy argument/tuple fill with the
+/// delimiter peel. This is the single entry for both the Term-based path (feed
+/// [`Fact::render_flat`]) and the pre-rendered-string path.
+pub fn wrap_cell_budget(flat: &str, budget: usize) -> String {
     let lines = if flat.starts_with('#') && flat.contains('[') {
-        layout_info(flat)
+        layout_info(flat, budget)
     } else {
-        layout_fact(flat)
+        layout_fact(flat, budget)
     };
     if lines.len() == 1 && lines[0].0 == 0 {
         return escape_record(&lines[0].1);
@@ -608,6 +692,77 @@ BeforeExpire( \\<$A, $A, 'g'^~ex\\> )]\\l";
             a2
         );
         assert_eq!(wrap_cell(&flat), want);
+    }
+
+    // ---- Round-6: the record-level (per-group) wrap TRIGGER (BEHAVIOR.md §3f) ----
+    // Expectations traced to live 2-/3-cell sweeps and the ref_raw_1_1 Wide record.
+
+    #[test]
+    fn cell_budget_shares_the_group_width() {
+        // A lone cell gets the whole fill width.
+        assert_eq!(cell_budget(&[50], 0), FILL_WIDTH);
+        // Two cells share it: budget = 87 - other, floored at 20.
+        //   probe q=40: Fb flat 48 -> Fa budget 87-48 = 39 (Fa fits<=39, wraps>=40).
+        assert_eq!(cell_budget(&[40, 48], 0), 39);
+        assert_eq!(cell_budget(&[40, 48], 1), 47);
+        // Floor 20: a huge sibling cannot push the budget below 20.
+        assert_eq!(cell_budget(&[21, 98], 0), MIN_CELL_BUDGET);
+        // Three cells: Σ is over ALL others (probe [p,28,28] flips at 87-56 = 31).
+        assert_eq!(cell_budget(&[33, 28, 28], 0), 31);
+    }
+
+    #[test]
+    fn group_trigger_matches_wide_record() {
+        // ref_raw_1_1.dot Wide rule. Premises [Fr flat10, In flat67] T=77<=87: none
+        // wrap. Conclusions [Ack flat25, Big flat68, Out flat14] T=107>87: a cell
+        // wraps iff its flat > 20, so Ack & Big wrap, Out does not.
+        let prem = [10usize, 67];
+        assert!(prem.iter().sum::<usize>() <= FILL_WIDTH);
+        for i in 0..prem.len() {
+            assert!(prem[i] <= cell_budget(&prem, i), "premise {i} must fit");
+        }
+        let concl = [25usize, 68, 14];
+        assert!(concl.iter().sum::<usize>() > FILL_WIDTH);
+        assert!(concl[0] > cell_budget(&concl, 0)); // Ack wraps
+        assert!(concl[1] > cell_budget(&concl, 1)); // Big wraps
+        assert!(concl[2] <= cell_budget(&concl, 2)); // Out fits
+    }
+
+    #[test]
+    fn multi_arg_fact_break_drops_the_comma_space() {
+        // The Wide record's Ack cell (conclusion, group budget 20). A fact-argument
+        // break ends the line at the bare `,` (no trailing space); the tuple `>`
+        // stays with its element and the `)` peels to column 0. Byte-exact vs
+        // ref_raw_1_1.dot.
+        let flat = "Ack( ~n.4, <x1.4, x2.4> )";
+        let want = "Ack( ~n.4,\\l\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\\<x1.4, x2.4\\>\\l)\\l";
+        assert_eq!(wrap_cell_budget(flat, 20), want);
+        // Same fact as a LONE cell (budget 87) stays flat.
+        assert_eq!(wrap_cell_budget(flat, FILL_WIDTH), "Ack( ~n.4, \\<x1.4, x2.4\\> )");
+    }
+
+    #[test]
+    fn count_info_actions_counts_top_level() {
+        assert_eq!(count_info_actions("#i : Fresh"), 0); // no action list
+        assert_eq!(count_info_actions("#i : R[]"), 0); // empty list
+        assert_eq!(count_info_actions("#i : R[A( x )]"), 1);
+        assert_eq!(count_info_actions("#i : R[A( x, y ), B( z )]"), 2); // inner comma ignored
+        assert_eq!(count_info_actions("#i : R[A( <p, q> ), B( r ), C( s )]"), 3);
+    }
+
+    #[test]
+    fn info_two_actions_always_vertical_even_when_short() {
+        // Live: an info cell with >= 2 actions goes vertical regardless of width
+        // (TwoShort flat 34 wrapped). A short 1-action info stays flat.
+        let one = "#i : R[A( x )]";
+        assert_eq!(wrap_cell_budget(one, FILL_WIDTH), "#i : R[A( x )]");
+        let two = "#i : R[A( x ), B( y )]";
+        assert!(two.chars().count() < FILL_WIDTH);
+        assert_eq!(
+            wrap_cell_budget(two, FILL_WIDTH),
+            "#i : R[A( x ),\\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B( y )]\\l"
+        );
     }
 
     #[test]

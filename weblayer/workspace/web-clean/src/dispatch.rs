@@ -37,7 +37,7 @@ use crate::envelope::METHOD_FAILED_ALERT;
 use crate::page::{Flash, PageParams, RootRow, ShellKind};
 use crate::route::{
     Autoprove, AutoproveAll, AutoproveDiff, EditVerb, Handler, Index, Main, Nav, NavDir,
-    OverviewView, Route, Toplevel,
+    OverviewView, Route, ThyPath, Toplevel,
 };
 use crate::{assets, envelope, errors, forms, intdot, page};
 
@@ -236,6 +236,23 @@ pub trait ProverOps {
     /// Delete lemma `name` in place. `Some` = the modified theory (redirect to the
     /// help view); `None` = lemma not found (redirect to the delete view).
     fn delete_lemma(&self, thy: &Self::Theory, name: &str) -> Option<Self::Theory>;
+
+    // ---- del/path + verify (theory-path operations) ----
+    /// Whether `lemma` is a lemma present in `thy`. Drives the `verify/proof/…`
+    /// redirect-vs-content choice: a `verify/proof/{lemma}[/path]` redirects to the
+    /// proof view iff the lemma is present, otherwise the help pane is returned.
+    fn lemma_present(&self, thy: &Self::Theory, lemma: &str) -> bool;
+    /// Delete the proof at the lemma node `name` (`del/path/lemma/{name}`),
+    /// producing a fresh theory version. `None` if the lemma cannot be removed
+    /// (absent) — the web layer then answers a "removing the selected lemma failed"
+    /// alert.
+    fn del_lemma_path(&self, thy: &Self::Theory, name: &str) -> Option<Self::Theory>;
+    /// Remove the proof step at a proof node (`del/path/proof/…`, or the diff
+    /// `del/path/diffProof/…` when `diff`), producing a fresh theory version.
+    /// `None` if the node cannot be removed (nonexistent lemma or unremovable node)
+    /// — the web layer then answers a "removing the selected proof step failed"
+    /// alert.
+    fn del_proof_step(&self, thy: &Self::Theory, lemma: &str, path: &[String], diff: bool) -> Option<Self::Theory>;
 
     // ---- diff-mode (observational equivalence) ----
     /// Apply a diff proof method; `Some`/`None` as for [`Self::apply_method`].
@@ -447,6 +464,19 @@ impl<T: ProverOps> Server<T> {
             }
             (HttpMethod::Get, Handler::GetAndAppend(_)) => Response::bad_method(HttpMethod::Get),
             (HttpMethod::Post, Handler::Edit(tail)) => self.post_edit(kind, index, tail, req),
+
+            // del/path (both kinds) and verify (trace only). The theory-path parse
+            // decides route-match (unparseable -> 404 for any method); a parseable
+            // path with a non-GET method is a 405.
+            (_, Handler::DelPath(segs)) => self.del_path(req.method, kind, index, segs, req.path),
+            (_, Handler::Verify(segs)) => {
+                if kind == ShellKind::Trace {
+                    self.verify(req.method, index, segs, req.path)
+                } else {
+                    // `verify` is not registered for equiv theories: a miss for any method.
+                    Response::not_found(req.path)
+                }
+            }
             _ => Response::not_found(req.path),
         }
     }
@@ -552,6 +582,74 @@ impl<T: ProverOps> Server<T> {
         }
     }
 
+    // ---- del/path : delete a theory path (proof op — new version) ----
+    /// Dispatch a `del/path/…` request. The theory-path tail parses mode-aware
+    /// (`kind`); an unparseable tail is a `404` (for any method), a parseable tail
+    /// with a non-GET method is a `405`. A deletable path (a lemma or proof node)
+    /// allocates a fresh version and redirects to `overview/<same-path>`; every
+    /// other outcome is a JSON alert whose text is selected by the path type.
+    fn del_path(&mut self, method: HttpMethod, kind: ShellKind, index: u64, segs: &[String], path: &str) -> Response {
+        let diff = kind == ShellKind::Equiv;
+        let thy_path = match ThyPath::parse(segs, diff) {
+            Some(tp) => tp,
+            None => return Response::not_found(path),
+        };
+        if method != HttpMethod::Get {
+            return Response::bad_method(method);
+        }
+        match thy_path {
+            ThyPath::Lemma(name) => match self.ops.del_lemma_path(&self.versions[&index], &name) {
+                Some(new_thy) => {
+                    let new = self.commit_new_version(new_thy);
+                    Response::json(envelope::render_redirect(&overview_lemma_path(kind, new, &name)))
+                }
+                None => Response::json(envelope::render_alert(envelope::DEL_LEMMA_FAILED_ALERT)),
+            },
+            ThyPath::Proof { lemma, path } => self.del_proof(kind, index, &lemma, &path, false),
+            ThyPath::DiffProof { lemma, path } => self.del_proof(kind, index, &lemma, &path, true),
+            ThyPath::Other => Response::json(envelope::render_alert(envelope::DEL_PATH_CANT_ALERT)),
+        }
+    }
+
+    fn del_proof(&mut self, kind: ShellKind, index: u64, lemma: &str, path: &[String], diff: bool) -> Response {
+        match self.ops.del_proof_step(&self.versions[&index], lemma, path, diff) {
+            Some(new_thy) => {
+                let new = self.commit_new_version(new_thy);
+                Response::json(envelope::render_redirect(&overview_proof_path(kind, new, lemma, path, diff)))
+            }
+            None => Response::json(envelope::render_alert(envelope::DEL_PROOF_STEP_FAILED_ALERT)),
+        }
+    }
+
+    // ---- verify : re-render a theory path (trace only; never mutates) ----
+    /// Dispatch a `verify/…` request (trace theories only — the caller answers a
+    /// `404` in equiv mode). The theory-path tail parses in the trace grammar; an
+    /// unparseable tail is a `404`, a parseable tail with a non-GET method a `405`.
+    /// A `proof/{lemma}[/path]` whose lemma is present redirects to
+    /// `overview/proof/{lemma}[/path]` at the **same** version; every other path
+    /// (including a proof path to an absent lemma) returns the theory help pane.
+    fn verify(&self, method: HttpMethod, index: u64, segs: &[String], path: &str) -> Response {
+        let thy_path = match ThyPath::parse(segs, false) {
+            Some(tp) => tp,
+            None => return Response::not_found(path),
+        };
+        if method != HttpMethod::Get {
+            return Response::bad_method(method);
+        }
+        let thy = &self.versions[&index];
+        match thy_path {
+            ThyPath::Proof { lemma, path } if self.ops.lemma_present(thy, &lemma) => {
+                Response::json(envelope::render_redirect(&overview_proof_path(
+                    ShellKind::Trace, index, &lemma, &path, false,
+                )))
+            }
+            _ => {
+                let content = self.ops.main_content(thy, index, &MainReq::Help);
+                Response::json(envelope::render_content(&content.html, &content.title))
+            }
+        }
+    }
+
     // ---- structural POST: mutate in place; 303 (or 200 form on edit/add failure) ----
     fn post_edit(&mut self, kind: ShellKind, index: u64, tail: &[String], req: &Request) -> Response {
         let (verb, name) = match tail {
@@ -607,6 +705,12 @@ fn shell_kind(kind: &str) -> ShellKind {
         "equiv" => ShellKind::Equiv,
         _ => ShellKind::Trace,
     }
+}
+
+/// Build a `del/path/lemma/{name}` redirect target: the `overview/lemma/{name}`
+/// URL at version `index`.
+fn overview_lemma_path(kind: ShellKind, index: u64, name: &str) -> String {
+    format!("/thy/{}/{}/overview/lemma/{}", kind.path(), index, name)
 }
 
 /// Build the redirect target for a proof operation: an `overview/proof/…` URL for

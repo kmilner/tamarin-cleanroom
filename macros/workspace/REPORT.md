@@ -133,3 +133,54 @@ updated for preservation — plus 7 new: 5 bare-nullary + acc-lemma + case-test)
 
 Fixtures added: `fixtures/{bare_nullary,casetest,acclemma,acc_both}_{macro,expanded}.spthy`;
 captures in `captures/{bare_nullary_*,acc_both_*,bare_sorts,bare_nonnullary,formal_vs_nullary}.out`.
+
+---
+
+## Round 5 — the consumer's STAGED-MODE contract (`expand_staged`)
+
+Added a second entry point so `expand` is adoptable by the consumer's pipeline,
+which invokes expansion at a stage *earlier* than full close. Design: a private
+`Mode` enum (`FullClose` / `Staged`) threaded through `expand_item` and
+`expand_rule` only (the two functions that branch); the whole term / formula /
+process / bare-nullary traversal is shared, so the two modes cannot drift.
+
+**Two entry points.**
+- `expand(theory)` — full close. **Unchanged.** Every existing test and every
+  byte-parity / formula-parity fixture stays green (they observe the oracle on
+  the source theories, and the round-4 direct-expansion tests still call `expand`
+  and assert full expansion, incl. acc-lemma/case-test formulas and derived rule
+  forms).
+- `expand_staged(theory)` — the entry the consumer designates. Two carve-outs
+  dictated by the consumer's staging, each reconciled with a fresh parse-stage
+  probe:
+  - **(a)** acc-lemma (`... accounts for "..."`) and case-test (`test <n>: "..."`)
+    formulas are left byte-identical — a later consumer stage owns them. Reconciled
+    by `--parse-only` on `acc_both_macro.spthy`: both calls preserved verbatim
+    [Q41] (consistent with [Q2,Q38,Q39]).
+  - **(b)** only the primary rule form is rewritten; derived `variants` /
+    `left_right` fields pass through verbatim. Reconciled by `--parse-only` on
+    `issue777.spthy` + `MacroInLemmasAndRestrictions.spthy`: each rule exists only
+    as `rule (modulo E) <name>:` with no `(modulo AC)` variant / no diff
+    projection present at parse stage [Q42].
+
+  Everything else — ordinary lemmas / restrictions / predicates / processes /
+  equations / the primary rule form / bare-nullary resolution — expands exactly
+  as in full close; the `macros:` block is preserved in place [Q37].
+
+**Distinction from the reference's `--parse-only`.** That rendering is fully lazy
+(expands nothing, incl. ordinary lemmas' guarded forms [Q2]); the consumer's
+staged contract is *not* that — it eagerly expands the ordinary items and carves
+out only acc-lemma/case-test formulas [Q41] and derived rule forms [Q42].
+`expand_staged` implements the consumer's contract, not the parse-only rendering.
+
+**Also.** Fixed a stale comment in `expand_item` (it claimed `Macros` items are
+filtered out before the function — false since round 4; they pass through in place
+and are returned via `it.clone()`), flagged as a non-blocking nit in the round-4
+audit. Comments now describe current behavior only.
+
+**Acceptance (round 5).** `run_tests.sh`: **26** cargo tests (21 prior + 5 new
+staged-mode tests: acc/case-test untouched, `macros:` preserved, ordinary
+lemma/restriction/rule expanded, bare-nullary still resolves, and derived
+variant/left-right forms not recursed into — with a full-close contrast), 7
+byteparity rule fixtures, 4 formula_parity fixtures. **ALL PASS** [Q41,Q42].
+New probes logged: `QUERIES.log` [Q41,Q42].

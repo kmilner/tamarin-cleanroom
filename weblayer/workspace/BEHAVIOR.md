@@ -626,13 +626,19 @@ probe theory, so their exact redirect bytes are unobservable here; they are
 dispatched as proof ops (new version) with the redirect modelled by analogy to
 `diffMethod`/`autoprove` (documented gap).
 
-### 14.8 Negative result — `del/path` and `verify` absent in 1.13.0
-`del`, `verify`, and `path` handlers return `404` (not `405`) for every method
-and every path shape, in both trace and equiv mode, top-level and theory-scoped;
-and appear in **zero** manifest keys. They are neither in the corpus nor
-live-observable in this build. `route.rs` routes them to `Handler::Other`
-(→ `404`), matching the oracle; the exact bytes of any such route in a newer
-tamarin remain a documented gap (no fabrication).
+### 14.8 `del/path` and `verify` — the round-4 "absent" result was a PROBE-SHAPE ARTIFACT (resolved in Round 5)
+The round-4 sweep concluded `del`/`verify`/`path` return `404` for every method
+and shape. That was **wrong**: it used bogus segments (`x`/`y`/`z`) that never
+parse as theory paths, so every probe hit the "unparseable → route miss → `404`"
+branch. Both routes ARE registered in 1.13.0 and take a further **theory
+sub-path**: `del/path/<theory-path>` and `verify/<theory-path>`. A **parseable**
+theory-path with a wrong method answers `405` (not `404`) — proving registration
+([R55]). They appear in zero manifest keys only because the crawler never
+followed these context-menu-triggered UI actions, not because they are
+unregistered. Full behaviour is pinned down in **§15**; `route.rs` now routes
+them to `Handler::DelPath` / `Handler::Verify` (the old `Handler::Other` → `404`
+fallback is retained only for genuinely-unparseable tails and non-`del/path`
+`del/*` shapes).
 
 ### 14.9 ProverOps growth (Round 4)
 Added pure data/fragment producers — `root_meta`, `append_message`,
@@ -641,3 +647,91 @@ Added pure data/fragment producers — `root_meta`, `append_message`,
 `delete_lemma` to return `Option` (method-failure alert / delete-not-found
 branch). All transport (content types, status, `Location`, cache headers, version
 allocation, envelope shape) stays in `Server`.
+
+---
+
+## 15. `del/path` and `verify` theory-path routes (Round 5)
+
+Derived from live probing of the sanctioned oracle ([R50]–[R57], ports 3100–3105,
+`RevealingSignatures`/issue193.spthy `debug` lemma for trace, KCL07-UK1 diff theory
+for equiv) plus the four staged captures in `round5/` (`del_path.json`,
+`del_path_bad.json`, `verify.json`, `verify_proof.json`). Reproduced in
+`src/route.rs` (`Handler::DelPath` / `Handler::Verify` + the mode-aware
+`ThyPath` grammar) and `src/dispatch.rs` (`Server::del_path` / `Server::verify`)
+over three new `ProverOps` callbacks. All bodies live-verified byte-for-byte
+against the oracle on fresh servers.
+
+### 15.1 Shape, registration, method — reconciles §14.8
+Both routes take a two-segment-plus **theory sub-path**:
+`GET /thy/<kind>/<idx>/del/path/<theory-path>` and
+`GET /thy/<kind>/<idx>/verify/<theory-path>` (the `path` literal is fixed for
+`del`). Both are **GET-only**. Route matching is by a `PathMultiPiece` parse of the
+theory-path, and method dispatch happens **after** that parse ([R55]):
+
+| tail parse | method | result |
+|------------|--------|--------|
+| parses (a theory path) | GET | the route's logic (§15.3/§15.4) |
+| parses | non-GET | `405` Method-Not-Supported (same page as §14.1) |
+| does not parse | any | `404` full-HTML page echoing the full request path |
+
+`del` without the `path` literal (`del/lemma/…`) and `del/path` with no further
+tail → `404`.
+
+### 15.2 The theory-path grammar is MODE-DEPENDENT ([R56])
+The accepted heads differ by theory kind (tamarin's `TheoryPath` vs
+`DiffTheoryPath` — `src/route.rs::ThyPath::parse(segs, diff)`):
+
+* **trace**: `help` · `message` · `rules` · `tactic` ·
+  `cases/{raw|refined}/{level}/{n}` · `lemma/{name}` · `proof/{lemma}[/seg…]` ·
+  `method/{lemma}/{n}[/seg…]` · `add/{pos}` · `edit/{name}` · `delete/{name}`.
+  `sources`, bare `cases`, `diffProof`, `diffrules`, and unknown heads → `404`.
+* **equiv**: `help` · `diffrules` · `diffProof/{lemma}[/side…]` ·
+  `diffMethod/{lemma}/{n}[/…]`. The trace heads (`proof`/`rules`/`message`/
+  `tactic`/`cases`/`lemma`/`add`/`edit`/`delete`/`method`) → `404`.
+
+### 15.3 `verify` — trace-only, never mutates ([R50],[R51],[R57])
+`verify` is registered **only for trace theories** (in equiv every `verify/<x>`,
+including `diffProof`/`help`, is `404` for GET *and* POST — the route is absent).
+It **never** allocates a version or mutates the theory. For a parseable trace
+theory-path:
+
+* `proof/{lemma}[/path]` where **the lemma is present** → `200` JSON
+  `{"redirect":"/thy/trace/<idx>/overview/proof/{lemma}[/path]"}` at the **same**
+  index. The redirect target is `overview/` + the **verbatim** input path; the
+  predicate is **lemma existence** (a bogus sub-node of a real lemma still
+  redirects; a proof path to an absent lemma does not).
+* every other path — non-proof heads, and `proof/{absent-lemma}` — → `200` JSON
+  `{"html","title"}` = the theory **help pane**, byte-identical to `main/help`
+  (title `Theory: <NAME>`) for all of them (7/7 `cmp`).
+
+### 15.4 `del/path` — a proof operation (new version); path-typed alerts ([R52]–[R54],[R57])
+`del/path` is registered in **both** kinds. For a parseable theory-path it either
+deletes (a lemma or proof node → a **fresh version**, base retained) or answers a
+JSON `{"alert"}`. The alert **string is selected by the path TYPE** (web-layer),
+while success-vs-failure is a prover decision (an `Option`):
+
+| path type | deletable → | not deletable → alert |
+|-----------|-------------|-----------------------|
+| `lemma/{name}` | `{"redirect":".../overview/lemma/{name}"}`, new version | `{"alert":"Sorry, but removing the selected lemma failed!"}` |
+| `proof/{lemma}[/p]` (trace) / `diffProof/{lemma}[/p]` (equiv) | `{"redirect":".../overview/<proof\|diffProof>/{lemma}[/p]"}`, new version | `{"alert":"Sorry, but removing the selected proof step failed!"}` |
+| any other head (help/message/rules/tactic/cases/method/add/edit/delete; equiv help/diffrules/diffMethod) | — (never deletable) | `{"alert":"Can't delete the given theory path!"}` (no prover call, no bump) |
+
+`lemma/{absent}` → the lemma alert; `proof/{absent-lemma}` or a bogus sub-node →
+the proof-step alert. The redirect target is `overview/` + the **verbatim** input
+path at the freshly allocated index. Alerts allocate no version and mutate
+nothing.
+
+**Version-model reconciliation (with §13.1 / §14.3).** A deletable `del/path`
+allocates a **new index off the same global monotonic counter** as
+`method`/`autoprove` and leaves the base resolvable — it is a **proof operation**,
+NOT an in-place structural edit (POST `edit/delete/{name}`, which stays at the same
+index). Proven: `autoprove debug` → v2 (SOLVED); `del/path/proof/debug` on v2 → v3
+(reset to `by sorry`, the deletion persisting in the new version) while v2 stays
+SOLVED ([R53]).
+
+### 15.5 ProverOps growth (Round 5)
+Three additions (`src/dispatch.rs`): `lemma_present` (drives verify's
+redirect-vs-help choice), `del_lemma_path` (`del/path/lemma`, `Option`), and
+`del_proof_step` (`del/path/proof`|`diffProof`, `Option`, with a `diff` flag). All
+transport — envelope shape, the three alert strings, redirect assembly, version
+allocation, content type, and the `404`/`405` decisions — stays in `Server`.

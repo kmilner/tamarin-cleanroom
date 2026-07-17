@@ -284,3 +284,69 @@
       kill(no-path) 400, POST-kill 405, kill?path 200, favicon 303 headers,
       download==source octet, reload redirect ALL byte-identical to the committed
       r4_* fixtures across a fresh server instance. Stopped all servers.
+
+## Round 5 (source B) — del/path + verify families, live probing (ports 3100-3103)
+# Own wrapper scratch/wl_server5.sh (--port= form, ports 3100-3199). Theory
+# RevealingSignatures (regression/trace/issue193.spthy, one exists-trace lemma
+# `debug`) for trace; jcs19-xor/diff-models/KCL07-UK1_attack-manual.spthy for equiv.
+# Motivated by round5/ORACLE_NOTES.md: the round-4 del/verify NEGATIVE ([R47]) was a
+# probe-shape artifact — both routes take a further TWO-segment theory sub-path.
+[R50] verify family reproduces the staged captures (:3100/:3101 trace, v1) |
+      GET verify/lemma/debug -> 200 json {html,title} BYTE-IDENTICAL to main/help
+      (title "Theory: RevealingSignatures"); == round5/verify.json (modulo non-det
+      Loaded-at time + tmp path). GET verify/proof/debug -> 200 json
+      {"redirect":"/thy/trace/1/overview/proof/debug"} == round5/verify_proof.json.
+      Neither allocates a version (v2=404 after) -> verify NEVER mutates/bumps.
+[R51] verify decision rule (redirect vs content), trace | GET verify/<theory-path>:
+      proof/<lemma> where the LEMMA EXISTS -> {redirect:/thy/trace/<idx>/overview/
+      proof/<lemma>[/path]} at the SAME idx (redirect target = overview/ + verbatim
+      input path; verify/proof/debug/_/ONE/ONE -> .../overview/proof/debug/_/ONE/ONE).
+      Everything else -> {html,title} = the help pane (== main/help): rules, message,
+      tactic, help, cases/raw/0/0, lemma/<any>, method/L/n, add/edit/delete/<x>, AND
+      proof/<NONEXISTENT-lemma>. A bogus SUBNODE of a real lemma still redirects
+      (verify/proof/debug/BOGUS -> redirect) -> predicate = lemma existence, not
+      full-path resolution. verify content byte-identical to main/help for rules/
+      message/tactic/cases/add/edit/delete (7/7 cmp).
+[R52] del/path family reproduces the staged captures (:3100/:3101 trace) |
+      GET del/path/lemma/debug -> 200 json {"redirect":"/thy/trace/<new>/overview/
+      lemma/debug"} at a FRESH version (== round5/del_path.json shape; capture idx 5
+      because prior ops existed, fresh server -> idx 2). GET del/path/rules -> 200
+      json {"alert":"Can't delete the given theory path!"} == round5/del_path_bad.json,
+      no bump.
+[R53] del/path redirect target + version model | redirect = overview/ + verbatim
+      input path, at a freshly allocated index: del/path/lemma/debug->overview/lemma/
+      debug; del/path/proof/debug->overview/proof/debug; del/path/proof/debug/_/ONE->
+      overview/proof/debug/_/ONE. Each deletable op allocates a NEW index (v2..v8
+      created one-per-redirect), base retained. => del/path (deletable) is a PROOF OP
+      (new index off the global monotonic counter), NOT an in-place structural edit.
+      Proved: autoprove debug->v2 SOLVED; del/path/proof/debug on v2 -> v3 reset to
+      "by sorry" (deletion persists in the new version), v2 STILL SOLVED (base kept).
+[R54] del/path deletability + THREE alert strings, selected by path TYPE (trace) |
+      lemma/<existing> & proof/<existing-lemma>[/...] -> REDIRECT+new version.
+      lemma/<nonexistent> -> {"alert":"Sorry, but removing the selected lemma failed!"}.
+      proof/<nonexistent-lemma OR bogus subnode> -> {"alert":"Sorry, but removing the
+      selected proof step failed!"}. help/message/rules/tactic/cases/raw/0/0/method/
+      add/edit/delete -> {"alert":"Can't delete the given theory path!"} (never
+      deletable, no bump, no prover mutation).
+[R55] Route registration + method + parse ordering (OVERTURNS round-4 [R47]) | del/path
+      and verify are REGISTERED. Both GET-only: a wrong method (POST/PUT/DELETE) on a
+      PARSEABLE theory-path -> 405 Method-Not-Supported page (byte-identical to
+      r4_badmethod_post_kill.html for POST); a wrong method on an UNPARSEABLE tail ->
+      404. GET on unparseable tail -> 404. => method dispatch happens AFTER the
+      theory-path PathMultiPiece parse: unparseable=route miss (404 any method),
+      parseable+wrongmethod=405. The round-4 sweep used bogus segments (x/y/z) that
+      never parse as theory paths, so it only hit the 404 branch. 404 body echoes the
+      FULL request path (<p>/thy/trace/1/del/path/x</p>), same notfound template.
+[R56] Theory-path grammar is MODE-DEPENDENT at the route/parse level | TRACE parses
+      {help,message,rules,tactic,cases/{raw|refined}/L/N,lemma/N,proof/L[/...],
+      method/L/N,add/P,edit/N,delete/N}; 404 on {sources,cases(bare),diffProof,
+      diffrules,x,...}. EQUIV (--diff, DiffTheoryPath) parses {help,diffrules,
+      diffProof/L[/side...],diffMethod/L/N}; 404 on {message,tactic,cases,rules,proof,
+      lemma,add,edit,delete,method}. Confirmed by 404-on-both-methods vs 405-on-POST.
+[R57] Mode asymmetry of the two families | del/path is registered in BOTH trace and
+      equiv. verify is registered in TRACE ONLY: in equiv every verify/<x> (incl.
+      diffProof/help) returns 404 for GET *and* POST -> route genuinely absent under
+      --diff. EQUIV del/path: diffProof/<existing> -> {redirect:/thy/equiv/<new>/
+      overview/diffProof/<lemma>[/path]} new version; diffProof/<nonexistent|bogus> ->
+      {"alert":"Sorry, but removing the selected proof step failed!"}; help/diffrules/
+      diffMethod -> {"alert":"Can't delete the given theory path!"}.

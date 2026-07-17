@@ -151,3 +151,45 @@ Out of scope for this unit (separate passes, only noted): let-binding inlining
 process→rule translation [Q29]. `expand()` performs *only* macro substitution;
 it leaves `diff(...)`, `let`, processes, etc. structurally intact with their
 inner macro calls expanded.
+
+### 4.1 Two entry points: full close vs. the consumer's staged (parse-stage) mode
+
+The consumer's pipeline invokes expansion at a stage that is *earlier* than full
+close: a later consumer stage owns acc-lemma / case-test expansion, and rules at
+that stage exist only in their primary form. Two entry points serve this, sharing
+the entire term / formula / rule / process traversal and differing only at two
+carve-outs:
+
+- `expand(theory)` — **full close**. Expands every macro use at every use site,
+  *including* acc-lemma & case-test formulas (the generated lemmas' guarded forms
+  show the expansion [Q38,Q39]) and *including* derived `(modulo AC)` variant and
+  left/right diff rule forms [Q3,Q4,Q26]. Unchanged from round 4; all byte-parity
+  and formula-parity fixtures observe the oracle on the source theories, so they
+  are unaffected by which entry point exists.
+
+- `expand_staged(theory)` — the **staged / parse-stage** entry the consumer calls.
+  Identical to `expand` except:
+  - **(a) acc-lemma & case-test formulas are left byte-identical (untouched).**
+    Interface contract from the consumer; reconciled with the parse-stage view:
+    `--parse-only` preserves both the `test <name>: "..."` case-test call and the
+    `... accounts for "..."` acc-lemma call verbatim [Q41] (consistent with
+    [Q2,Q38,Q39]). A later consumer stage expands them (where the guarded forms
+    become visible [Q38,Q39]).
+  - **(b) only the primary rule form is rewritten.** At parse stage a rule exists
+    only as its `rule (modulo E) <name>:` primary form — no `(modulo AC)` variant
+    block, no left/right diff projection is present [Q42]. `expand_staged` rewrites
+    the primary premises / actions / conclusions / let-block / embedded
+    restrictions and carries any `variants` / `left_right` fields through verbatim
+    (it neither assumes nor recurses into derived forms).
+
+  Everything else is expanded exactly as in full close: ordinary lemmas,
+  restrictions, predicates, processes, equations, the primary rule form, and
+  bare-nullary resolution (§2.5). The `macros:` block is preserved in place in
+  both modes [Q37].
+
+  Note the distinction from the reference's own `--parse-only`, which is *fully*
+  lazy — it expands **nothing**, including ordinary lemmas' guarded forms [Q2].
+  The consumer's staged contract is not that: it eagerly expands the ordinary
+  items and carves out *only* acc-lemma/case-test formulas [Q41] and derived rule
+  forms [Q42]. `expand_staged` implements the consumer's contract, not the
+  reference's parse-only rendering.

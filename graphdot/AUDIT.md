@@ -578,3 +578,126 @@ internal names, no source magic constants, no echoed comments. One closest-call
 (library/algorithm combinator names in comments) considered and cleared, consistent
 with Round 4. Findings that survive filtration: 0. No redo instructions issued.
 VERDICT: PASS.
+
+## Round 6 incremental audit — the record-cell wrap TRIGGER (per-group shared budget)
+
+Scope (this round's delta ONLY; clean-room HEAD `8901219` → working tree, restricted
+to `graphdot/`). Code files touched: `src/render.rs` (new `cell_budget`,
+`MIN_CELL_BUDGET = 20`, `count_info_actions`, `wrap_cell_budget`; `run_layout` gains
+`budget` + `drop_break_space`; `layout_tuple`/`layout_fact`/`layout_info` thread the
+budget; `layout_info` gains the ≥2-action-vertical branch; +5 unit tests) and
+`src/generate.rs` (`build_record` → `group_cells`, per-group budgeting via
+`cell_budget`/`wrap_cell_budget`). Provenance docs: `workspace/BEHAVIOR.md` §3f (the
+"RESOLVED (Session 6)" rewrite), `QUERIES.log` Session 6, `REPORT2.md` Round 6.
+(`INTEGRATION_REPORT.md` moved this round too but is unit-G/deriv-check content —
+out of scope here.) Haskell original, both sides, followed from the record-render
+entry: `Constraint/System/Dot.hs` `mkNode` record assembly (l.310-312), `renderRow`
+(l.357-361), `renderBalanced` (l.363-379), `scaleIndent` (l.375-379), and the info
+action-list `ruleLabelM` (l.335-338).
+
+### What upstream actually does (abstraction)
+
+`mkNode` renders each of the three groups separately — `renderRow` is called once on
+`psM`, once on `asM` (the info/rule-label row), once on `csM` — then assembles
+`D.vcat $ map D.hcat $ … $ filter (not . null) [ps, as, cs]` (drop empty prem/concl
+groups; `as` is never null so info is always kept). `renderRow` runs
+`renderBalanced 100 (max 30 . round . (* 1.3)) (map snd annDocs)` over one group's
+docs: it measures each doc's flat width by `OneLineMode`, computes
+`ratio = 100 / Σ flats`, and renders doc *i* through HughesPJ `renderStyle` at
+`lineLength = max 30 (round (1.3 · ratio · flat_i)) = max 30 (round (130 · flat_i / Σ))`
+(then `scaleIndent` blows leading spaces up ×1.5, `ribbonsPerLine` default 1.5). The
+info action list is `brackets (vcat $ punctuate comma lbl)` — `vcat` is intrinsically
+vertical, one action per line for ≥2 actions.
+
+### Filtration — the new content is behavior-dictated, and independently derived
+
+- **Group independence + within-group shared budget.** The clean rule ("each of
+  premises/info/conclusions lays out independently; cells in one group share a
+  budget") is structurally the same fact upstream exhibits (`renderRow`-per-group;
+  `renderBalanced 100` shared across that group's docs). But it is a black-box
+  *observable* (a conclusion's wrap ignores premise/rule-name width; adding one
+  sibling flips it) and it is traced to a **logged probe** — QUERIES §6 probe1
+  (`:3211`: Out flat87 stays flat under In flat 69/103/198 and rule-name len 40;
+  one preceding conclusion flat12 makes it wrap). Behavior-dictated / merger — the
+  black box has exactly one such structure to reproduce.
+
+- **The FORMULA is a different expression and is measurably *less* exact than the
+  source — strong positive evidence of independent derivation.** Upstream is a
+  *proportional* per-cell line-length `max(30, round(130·flat_i/Σ))` fed to HughesPJ.
+  The clean rule is *additive*: `budget_i = max(87 − Σ_{j≠i} flat_j, 20)`, wrap iff
+  `flat_i > budget_i` (≡ `Σall > 87 ∧ flat_i > 20`). A source-copier would have
+  transcribed `130·flat/Σ` and reached ~100 %; instead the clean rule reaches
+  98.324 % of records / 99.635 % of cells with a documented ±1 residual the author
+  attributes to the pretty-printer's ribbon `fits`. The two forms only *coincide on
+  the wrap decision* because the clean constants are the ribbon-collapsed images of
+  the source's (see next). No shared symbolic form.
+
+- **Constants — the source magic numbers are ABSENT; the clean constants are
+  observable composite boundaries pinned by probes.** Upstream's 100 / 1.3 / 30 / 1.5
+  appear **nowhere** in the new code (grep-confirmed: no `1.3`, `1.5`, `130`, `ratio`,
+  `renderBalanced`, `scaleIndent`, `usedWidth`, `oneLineRender`). The clean constants
+  are `87` and `20`. `87 = round(130/1.5)` and `20 = 30/1.5` are precisely what the
+  black box exposes once the source line-length is collapsed through HughesPJ's
+  `ribbonsPerLine = 1.5` — i.e. they are the *only* boundaries a probe can land on,
+  and each was landed on directly: the `q`-fixed 2-cell sweeps (probe2/3/4:
+  q=11→76/77, q=28→58/61, q=48→39/40, q=68→19/22, each giving `budget+q = 87`) and
+  the floor probe (Fb flat98 → target fits ≤20, wraps ≥21). These are behavioral
+  boundary constants (as `FILL_WIDTH = 87` already was, accepted Rounds 4-5), not the
+  transcribed source parameters.
+
+- **Info "≥2 actions ⇒ always vertical."** This is the behavioral image of upstream
+  `vcat $ punctuate comma lbl` (`vcat` = one item per line; `punctuate comma` = the
+  trailing `,` on each non-final line, `]` on the last — both reproduced). Derived,
+  not read: QUERIES §6 probe5-8 (`TwoShort` flat34, `ThreeShort` flat43, `AB` flat22
+  all wrapped though far under 87) plus the corpus census (0 non-wrapped info cells
+  carry a top-level action comma). Implemented as an explicit action count that forces
+  the vertical `sep`; no `vcat`/`punctuate` name or structure is mirrored.
+
+- **`drop_break_space` (fact break drops the trailing space, tuple break keeps `, `).**
+  Both shapes are present in the captured corpus (`,\l` fact/info breaks and `, \l`
+  tuple-element breaks both grep-hit `oracle/dot_corpus/`); the fact case is byte-tested
+  against `ref_raw_1_1` (Ack) and the tuple case against the Round-5 `Out(<'a01'..'a12'>)`
+  fixture (`'a11', \l`). Grounded in captured output.
+
+- **Record assembly (`build_record`: drop empty prem/concl groups, keep info; ports).**
+  Mirrors the *observable* group structure = upstream `filter (not . null) [ps, as, cs]`
+  with `as` never empty; expressed in graphviz record/port vocabulary, no
+  tamarin-internal names. Behavior-dictated, consistent with Round 5.
+
+### Identifier / comment lineage
+
+No identifier overlap with the source (`cell_budget`, `MIN_CELL_BUDGET`,
+`count_info_actions`, `wrap_cell_budget`, `group_cells`, `drop_break_space`, `budget`
+are all clean-room-coined; the source names `renderBalanced`/`scaleIndent`/
+`widthRender`/`oneLineRender`/`usedWidths`/`ratio`/`conv` appear nowhere in the crate).
+No echoed comments. The only source-adjacent prose is the residual attribution to
+"HughesPJ `fits`"/ribbon in BEHAVIOR.md/REPORT2.md — `Text.PrettyPrint.HughesPJ` is the
+standard Haskell library, not a tamarin identifier; it occurs in prose about a
+*not-implemented* residual, emits no byte, and the clean CODE diverges from it (an
+additive approximation, not the proportional `renderBalanced`). Consistent with the
+combinator-name closest-call cleared in Rounds 4-5 — cleared again.
+
+### Non-blocking observations (no redo)
+
+- `count_info_actions` is defined and unit-tested but is **not** called by the
+  production layout (`layout_info` decides vertical via `split_top_commas(content).len()`).
+  It is dead/duplicate clean-room code with no source counterpart — a quality nit, not
+  a similarity concern.
+- `ref_raw_1_1.dot` (the Wide-rule witness) is a prior-agent capture not present as a
+  file in the current tree; the In-vs-Big / Ack / Out(h) behaviors it witnesses are
+  independently corpus-validated (both break shapes occur in `oracle/dot_corpus/`; the
+  98.3 %/99.6 % match) and byte-embedded in the new unit tests. Minor traceability note.
+
+### VIOLATIONS (Round 6)
+
+None. The new per-group shared-budget trigger reproduces an *observable* wrap boundary
+with a formula (`max(87 − Σothers, 20)`) that is structurally different from — and
+measurably less exact than — the source's proportional `renderBalanced`/`scaleIndent`
+machinery; the source constants (100 / 1.3 / 130 / 30 / 1.5) are absent, and the clean
+constants (87, 20) are probe-pinned observable boundaries. The info ≥2-actions-vertical
+rule and the fact/tuple break-space split are behavioral images of `vcat`/`punctuate
+comma` and captured-corpus break shapes, each traced to a logged Session-6 probe or a
+byte-embedded fixture. No mirrored internal decomposition, no shared internal names, no
+source magic constants, no echoed comments. Findings that survive filtration: 0. No redo
+instructions issued.
+VERDICT: PASS.

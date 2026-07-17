@@ -36,7 +36,7 @@
 
 use crate::alloc::NodeIdAllocator;
 use crate::model::*;
-use crate::render::{render_info, wrap_cell, Fact};
+use crate::render::{cell_budget, render_info, wrap_cell, wrap_cell_budget, Fact};
 
 /// A per-record cluster assignment (BEHAVIOR.md §4). `label` is the cluster label
 /// WITHOUT the `cluster_` prefix (e.g. `Initiator_Session_1`, observed always
@@ -459,16 +459,19 @@ pub fn generate(sys: &System) -> Graph {
 
 /// Assemble a record node's model from a [`RecordSpec`] and its allocated ports.
 /// Empty premise / conclusion groups are dropped; the info group is always kept
-/// (matches the observed group structure). Each cell's flat text is wrapped and
-/// escaped by [`wrap_cell`].
+/// (matches the observed group structure). Each group's cells share the record
+/// wrap budget: within a premise or conclusion group a cell wraps when its flat
+/// width exceeds `max(87 − Σ other cell flats, 20)` (BEHAVIOR.md §3f); the info
+/// cell is its own single-cell group (budget 87). Cell text is wrapped and escaped
+/// by [`wrap_cell_budget`].
 fn build_record(spec: &RecordSpec, ports_prem: &[String], port_info: &str, ports_concl: &[String]) -> Record {
     let mut columns: Vec<Vec<Cell>> = Vec::new();
     if !spec.premises.is_empty() {
-        columns.push(cells(&spec.premises, ports_prem));
+        columns.push(group_cells(&spec.premises, ports_prem));
     }
     columns.push(vec![Cell::new(port_info, wrap_cell(&spec.info))]);
     if !spec.conclusions.is_empty() {
-        columns.push(cells(&spec.conclusions, ports_concl));
+        columns.push(group_cells(&spec.conclusions, ports_concl));
     }
     Record {
         columns,
@@ -478,11 +481,17 @@ fn build_record(spec: &RecordSpec, ports_prem: &[String], port_info: &str, ports
     }
 }
 
-fn cells(flat_cells: &[String], ports: &[String]) -> Vec<Cell> {
+/// Wrap every cell of one record group (all premises together, or all conclusions
+/// together), sharing the group budget: each cell's budget is [`cell_budget`] over
+/// the group's flat cell widths, so a cell wraps only when the group total exceeds
+/// the fill width (BEHAVIOR.md §3f).
+fn group_cells(flat_cells: &[String], ports: &[String]) -> Vec<Cell> {
+    let widths: Vec<usize> = flat_cells.iter().map(|t| t.chars().count()).collect();
     flat_cells
         .iter()
         .zip(ports)
-        .map(|(text, p)| Cell::new(p.clone(), wrap_cell(text)))
+        .enumerate()
+        .map(|(i, (text, p))| Cell::new(p.clone(), wrap_cell_budget(text, cell_budget(&widths, i))))
         .collect()
 }
 

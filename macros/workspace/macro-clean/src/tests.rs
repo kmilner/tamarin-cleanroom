@@ -3,7 +3,7 @@
 //! ../fixtures/ that workspace/byteparity.sh proves equal to the macro theory.
 
 use super::ast::*;
-use super::expand;
+use super::{expand, expand_staged};
 
 // ---- tiny AST constructors ------------------------------------------------
 
@@ -557,4 +557,192 @@ fn case_test_formula_expanded() {
     let got = out.items.iter().find_map(|it| match it {
         TheoryItem::CaseTest(c) => Some(c.clone()), _ => None }).unwrap();
     assert_eq!(got.formula, exists_action("Blame", pair(vec![msg("sid"), msg("sid")])));
+}
+
+// ===========================================================================
+// ROUND 5 — staged (parse-stage) mode: `expand_staged`
+//
+// The consumer's pipeline calls `expand_staged` at a stage where a later stage
+// owns acc-lemma & case-test expansion [Q41] and rules exist only in their
+// primary form [Q42]. So `expand_staged` leaves acc-lemma / case-test formulas
+// and derived variant / left-right rule forms UNTOUCHED, while still fully
+// expanding ordinary lemmas / restrictions / the primary rule form and resolving
+// bare-nullary uses. Full close (`expand`) stays unchanged (its behaviour is
+// pinned by every test above).
+// ===========================================================================
+
+/// A one-restriction/one-lemma/one-rule + acc-lemma + case-test + bare-nullary
+/// theory exercising every staged carve-out at once.
+fn staged_mixed_theory() -> (Theory, TheoryItem) {
+    let x = var("x", SortHint::Untagged);
+    let macros = TheoryItem::Macros(vec![
+        mdef("m", &[x.clone()], pair(vec![msg("x"), msg("x")])),
+        mdef("konst", &[], app("h", vec![publit("k")])),
+    ]);
+    // ordinary rule (primary form): [In(x)] --[A(m(x))]-> [Out(konst)]
+    let r = Rule {
+        name: "R".into(), modulo: None, attributes: vec![], let_block: vec![],
+        premises: vec![fact("In", vec![msg("x")])],
+        actions: vec![fact("A", vec![app("m", vec![msg("x")])])],
+        conclusions: vec![fact("Out", vec![msg("konst")])], // bare-nullary use
+        embedded_restrictions: vec![], variants: vec![], left_right: None,
+    };
+    // ordinary restriction: All x #i. A(m(x))@i ==> Ex y. x=y
+    let y = var("y", SortHint::Untagged);
+    let restr = TheoryItem::Restriction(Restriction {
+        name: "Restr".into(), attributes: vec![],
+        formula: Formula::Forall(
+            vec![x.clone(), var("i", SortHint::Node)],
+            Box::new(Formula::Implies(
+                Box::new(Formula::Atom(Atom::Action(
+                    fact("A", vec![app("m", vec![msg("x")])]),
+                    Term::Var(var("i", SortHint::Node)),
+                ))),
+                Box::new(Formula::Exists(vec![y.clone()],
+                    Box::new(Formula::Atom(Atom::Eq(msg("x"), msg("y")))))),
+            )),
+        ),
+    });
+    // ordinary lemma: exists-trace Ex x #i. A(m(x))@i
+    let lem = TheoryItem::Lemma(Lemma {
+        name: "L".into(), modulo: None, attributes: vec![],
+        trace_quantifier: TraceQuantifier::ExistsTrace,
+        formula: exists_action("A", app("m", vec![msg("sid")])),
+        proof: None, plaintext: String::new(),
+    });
+    // acc-lemma & case-test both use the macro in their formula
+    let acc = TheoryItem::AccLemma(AccLemma {
+        name: "acc".into(), attributes: vec![],
+        formula: exists_action("Unequal", app("m", vec![msg("sid")])),
+        case_test_idents: vec!["blamed".into()],
+    });
+    let ctest = TheoryItem::CaseTest(CaseTest {
+        name: "blamed".into(),
+        formula: exists_action("Blame", app("m", vec![msg("sid")])),
+    });
+    let t = theory(vec![
+        macros.clone(), TheoryItem::Rule(r), restr, lem, acc, ctest,
+    ]);
+    (t, macros)
+}
+
+// ---- acc-lemma & case-test formulas are byte-identical through staged mode --
+
+#[test]
+fn staged_leaves_acc_and_case_test_untouched() {
+    let (t, _) = staged_mixed_theory();
+    let out = expand_staged(&t);
+    // The acc-lemma and case-test items are byte-identical to their inputs
+    // (whole item unchanged, macro call preserved).
+    let acc_in = t.items.iter().find(|it| matches!(it, TheoryItem::AccLemma(_))).unwrap();
+    let ct_in = t.items.iter().find(|it| matches!(it, TheoryItem::CaseTest(_))).unwrap();
+    let acc_out = out.items.iter().find(|it| matches!(it, TheoryItem::AccLemma(_))).unwrap();
+    let ct_out = out.items.iter().find(|it| matches!(it, TheoryItem::CaseTest(_))).unwrap();
+    assert_eq!(acc_out, acc_in);
+    assert_eq!(ct_out, ct_in);
+    // Concretely: the macro call still stands, un-expanded, in both formulas.
+    assert_eq!(
+        match acc_out { TheoryItem::AccLemma(a) => a.formula.clone(), _ => unreachable!() },
+        exists_action("Unequal", app("m", vec![msg("sid")])),
+    );
+    assert_eq!(
+        match ct_out { TheoryItem::CaseTest(c) => c.formula.clone(), _ => unreachable!() },
+        exists_action("Blame", app("m", vec![msg("sid")])),
+    );
+}
+
+// ---- the `macros:` block is preserved in place through staged mode ----------
+
+#[test]
+fn staged_preserves_macros_block() {
+    let (t, macros) = staged_mixed_theory();
+    let out = expand_staged(&t);
+    assert_eq!(out.items[0], macros); // unchanged, original bodies, first position
+}
+
+// ---- ordinary lemmas / restrictions / (primary) rules still fully expand ----
+
+#[test]
+fn staged_expands_ordinary_lemma_restriction_rule() {
+    let (t, _) = staged_mixed_theory();
+    let out = expand_staged(&t);
+
+    // primary rule form expanded: A(m(x)) -> A(<x,x>)
+    let r = out.items.iter().find_map(|it| match it {
+        TheoryItem::Rule(r) => Some(r), _ => None }).unwrap();
+    assert_eq!(r.actions[0], fact("A", vec![pair(vec![msg("x"), msg("x")])]));
+
+    // restriction formula expanded
+    let restr = out.items.iter().find_map(|it| match it {
+        TheoryItem::Restriction(r) => Some(r), _ => None }).unwrap();
+    let expected_restr = Formula::Forall(
+        vec![var("x", SortHint::Untagged), var("i", SortHint::Node)],
+        Box::new(Formula::Implies(
+            Box::new(Formula::Atom(Atom::Action(
+                fact("A", vec![pair(vec![msg("x"), msg("x")])]),
+                Term::Var(var("i", SortHint::Node)),
+            ))),
+            Box::new(Formula::Exists(vec![var("y", SortHint::Untagged)],
+                Box::new(Formula::Atom(Atom::Eq(msg("x"), msg("y")))))),
+        )),
+    );
+    assert_eq!(restr.formula, expected_restr);
+
+    // ordinary lemma formula expanded
+    let lem = out.items.iter().find_map(|it| match it {
+        TheoryItem::Lemma(l) => Some(l), _ => None }).unwrap();
+    assert_eq!(lem.formula, exists_action("A", pair(vec![msg("sid"), msg("sid")])));
+}
+
+// ---- bare-nullary resolution is still active in staged mode -----------------
+
+#[test]
+fn staged_bare_nullary_still_resolves() {
+    let (t, _) = staged_mixed_theory();
+    let out = expand_staged(&t);
+    let r = out.items.iter().find_map(|it| match it {
+        TheoryItem::Rule(r) => Some(r), _ => None }).unwrap();
+    // Out(konst) -> Out(h('k'))
+    assert_eq!(r.conclusions[0], fact("Out", vec![app("h", vec![publit("k")])]));
+}
+
+// ---- staged mode touches ONLY the primary rule form, not derived variants ---
+
+#[test]
+fn staged_does_not_recurse_into_rule_variants() {
+    // A rule carrying a `(modulo AC)` variant (and a left/right diff form), each
+    // holding a macro call. Staged mode expands the primary form but leaves the
+    // derived forms verbatim [Q42]; full close expands all of them.
+    let x = var("x", SortHint::Untagged);
+    let macros = TheoryItem::Macros(vec![mdef("m", &[x.clone()], pair(vec![msg("x"), msg("x")]))]);
+    let variant = rule_act("R", vec![], fact("A", vec![app("m", vec![msg("v")])]));
+    let lr_side = rule_act("R", vec![], fact("A", vec![app("m", vec![msg("l")])]));
+    let primary = Rule {
+        name: "R".into(), modulo: None, attributes: vec![], let_block: vec![],
+        premises: vec![], actions: vec![fact("A", vec![app("m", vec![msg("p")])])],
+        conclusions: vec![], embedded_restrictions: vec![],
+        variants: vec![variant.clone()],
+        left_right: Some((Box::new(lr_side.clone()), Box::new(lr_side.clone()))),
+    };
+    let t = theory(vec![macros, TheoryItem::Rule(primary)]);
+
+    // staged: primary expanded, variant + left/right untouched.
+    let staged = expand_staged(&t);
+    let sr = staged.items.iter().find_map(|it| match it {
+        TheoryItem::Rule(r) => Some(r), _ => None }).unwrap();
+    assert_eq!(sr.actions[0], fact("A", vec![pair(vec![msg("p"), msg("p")])])); // primary expanded
+    assert_eq!(sr.variants, vec![variant.clone()]);                             // variant verbatim
+    assert_eq!(
+        sr.left_right,
+        Some((Box::new(lr_side.clone()), Box::new(lr_side.clone()))),           // diff form verbatim
+    );
+
+    // full close: every form expanded (contrast — pins the mode difference).
+    let full = expand(&t);
+    let fr = full.items.iter().find_map(|it| match it {
+        TheoryItem::Rule(r) => Some(r), _ => None }).unwrap();
+    assert_eq!(fr.actions[0], fact("A", vec![pair(vec![msg("p"), msg("p")])]));
+    assert_eq!(fr.variants[0].actions[0], fact("A", vec![pair(vec![msg("v"), msg("v")])]));
+    let (fl, _) = fr.left_right.as_ref().unwrap();
+    assert_eq!(fl.actions[0], fact("A", vec![pair(vec![msg("l"), msg("l")])]));
 }

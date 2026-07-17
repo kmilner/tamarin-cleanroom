@@ -99,6 +99,15 @@ impl ProverOps for Fake {
             t
         })
     }
+    fn lemma_present(&self, thy: &Thy, lemma: &str) -> bool {
+        thy.lemmas.iter().any(|l| l == lemma)
+    }
+    fn del_lemma_path(&self, thy: &Thy, name: &str) -> Option<Thy> {
+        thy.lemmas.iter().any(|l| l == name).then(|| thy.clone())
+    }
+    fn del_proof_step(&self, thy: &Thy, lemma: &str, _path: &[String], _diff: bool) -> Option<Thy> {
+        thy.lemmas.iter().any(|l| l == lemma).then(|| thy.clone())
+    }
     fn apply_diff_method(&self, thy: &Thy, _l: &str, n: usize, _p: &[String]) -> Option<(Thy, Vec<String>)> {
         (n != 0).then(|| (thy.clone(), vec!["Rule_Destrd_0_fst".to_string()]))
     }

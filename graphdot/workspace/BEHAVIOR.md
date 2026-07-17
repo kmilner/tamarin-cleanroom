@@ -249,17 +249,44 @@ renders `{info}|{concl}`).
     `run_layout` greedy fill, `split_top_commas`), wired into
     `generate::build_record`; byte-verified against the 7 captured probe fixtures
     (`wrap_E11..E14`, `wrap_W71/W72/W74`).
-  - **NEW RESIDUAL — the wrap TRIGGER is accumulated-column (Wadler `group`/`fits`).**
-    `wrap_cell` decides to wrap on the cell's **own flat width** > 87, which is
-    correct for a cell early on its record line (all probes/fixtures). But a cell
-    deep on a wide record line wraps **earlier**: measured over 61 821 corpus
-    wrapped records, physical line-0 width ranges 19..277 (no fixed absolute page
-    width), and a 21-char fact `Y_counter( pid.1, t )` at line-start peels its `)`
-    while an identical-args instance late on a broken line stays flat — because
-    tamarin's `fits` measures the flat rendering **plus the rest of the record
-    line** against the remaining width. Reproducing that trigger needs the exact
-    record document tree (the whole label as one `group`/`nest`/`line` Doc); the
-    width (87), fill packing, peel columns, and the fill-vs-sep split are pinned.
+  - **The wrap TRIGGER is a per-GROUP shared budget — RESOLVED (Session 6).** The
+    old per-cell `flat > 87` decision is wrong for multi-cell groups. Each record
+    group (`premises`, `info`, `conclusions`) is laid out **independently** (a
+    conclusion cell's wrap ignores premise/info widths, and vice versa — live
+    probes PM/R: a lone conclusion `Out` of flat 87 stays flat with premises of
+    flat 69/103/198 and rule names of length 40). Within a group, the cells share
+    a budget:
+    > For a premise/conclusion group, let `T = Σ(flat width of every cell in the
+    > group)`. Cell *i* wraps **iff** `flat_i > budget_i`, where
+    > `budget_i = max(87 − (T − flat_i), 20)`. Equivalently: **cell *i* wraps iff
+    > `T > 87` AND `flat_i > 20`.**
+    Established by controlled live 2-/3-cell sweeps (QUERIES §6): with a fixed
+    second cell of flat *q*, the first cell's fit/wrap boundary is exactly
+    `flat = 87 − q` (q=11 → 76/77, q=28 → 58/61, q=48 → 39/40, q=68 → 19/22); a
+    third cell adds into the same Σ (3-cell [p,28,28] flips at `flat = 87−56 = 31`).
+    The **floor 20** is a per-cell minimum budget (a cell of flat ≤ 20 never wraps;
+    live: Fb flat 98 forces the sibling budget negative yet the sibling fits at
+    flat ≤ 20, wraps at 21). Verified by hand on `ref_raw_1_1` (Wide rule): premise
+    `In` flat 67 does **not** wrap (budget 87−10 = 77) while conclusion `Big` flat
+    68 **does** (budget 87−(25+14) = 48); `Ack` flat 25 wraps (budget 20), `Out(h)`
+    flat 14 fits — all four correct.
+  - **The `#t : Rule[…]` INFO cell** is its own single-cell group (budget 87,
+    independent of prem/concl), with an added rule: **an info cell with ≥ 2 action
+    facts ALWAYS goes vertical** (one action per line), regardless of width — a
+    ≤ 1-action info wraps only when its flat > 87. Corpus census: 0 non-wrapped
+    info cells carry a top-level action-list comma (all ≥2-action infos wrap).
+  - **Corpus validation at scale.** The rule matches actual `\l` on **99.635 %** of
+    776 259 cells and **98.324 %** of 160 409 records (info cells 99.968 %). Every
+    one of the 2 831 residual cells is within ~1–2 columns of its budget (mismatch
+    `T`-distribution clusters entirely at 79 ≤ T ≤ 95). At that exact boundary the
+    outcome is a **±1 HughesPJ `fits`/ribbon rounding artifact** (live: at a group
+    total of exactly `budget+1` the fit/wrap flips with atom parity; at `budget+5`
+    it wraps cleanly), depending on the cell's token structure, order, and the port
+    marker widths — reproducing it byte-exactly needs the GPL pretty-printer's
+    internal `fits`. Two residuals remain **[GAP]**: (a) this ±1 boundary flip, and
+    (b) the exact greedy fill width when a *multi-cell* cell wraps (live probeB: the
+    per-line element count is not a clean function of the budget). The budget
+    **trigger** itself (does a cell wrap) is byte-exact away from the boundary.
 
 --------------------------------------------------------------------------------
 ## 4. Clustering / simplification (§ priority 3)
@@ -534,12 +561,14 @@ Reproduced & byte-tested against captured/live payloads:
 
 Documented gaps (need the GPL solver or an unavailable backend):
 - JSON graph backend format (unavailable / not in corpus).
-- **Record-cell wrap TRIGGER** (§3f): the width (87), fill packing, delimiter peel,
-  and the fill-vs-`sep` split are byte-implemented; the remaining residual is *when*
-  a cell wraps — tamarin's Wadler `group`/`fits` wraps a cell earlier when preceding
-  cells push its absolute column high (flat width alone can be < 87), which needs the
-  exact record document tree. `wrap_cell` triggers on the cell's own flat width > 87
-  (exact for cells early on their record line).
+- **Record-cell wrap TRIGGER** (§3f): the per-GROUP shared-budget rule
+  (`budget_i = max(87 − Σ(other cell flats in the group), 20)`, wrap iff
+  `flat_i > budget_i`; info-cell ≥2-actions-always-vertical) is byte-implemented in
+  `render::wrap_cell` + `generate::build_record` and matches 98.3 % of records /
+  99.6 % of cells at corpus scale. Two boundary residuals remain **[GAP]**: (a) the
+  ±1 HughesPJ `fits` rounding flip when a cell sits exactly at its budget, and (b)
+  the exact greedy fill width when a *multi-cell* cell wraps — both need the GPL
+  pretty-printer's internal `fits` and are documented in §3f.
 - **compress/compact content** (§4, §6): which nodes/edges a raw constraint system
   yields — a solver transform. (The L1/L2/L3 level distinction is no longer a gap:
   it is proven non-existent, §7a.)

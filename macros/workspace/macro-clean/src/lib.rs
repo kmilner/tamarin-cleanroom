@@ -1,10 +1,23 @@
 //! Unit E — `.spthy` macro expansion (clean-room).
 //!
-//! `expand(theory)` returns a theory in which every macro use at every use site
-//! is replaced by its transitively-substituted body, while the `macros:`
-//! declarations are retained in place (with their original, unexpanded bodies).
-//! See ../BEHAVIOR.md for the observed semantics this implements; every rule
-//! below traces to a `[Qn]` observation.
+//! Two entry points, differing only in how much of the theory a single call is
+//! allowed to touch:
+//!  * [`expand`] — full-close view: every macro use at every use site (including
+//!    acc-lemma / case-test formulas and derived `(modulo AC)` variant and
+//!    left/right diff rule forms) is replaced by its transitively-substituted
+//!    body.
+//!  * [`expand_staged`] — the consumer's parse-stage view. Same expansion of
+//!    ordinary lemmas / restrictions / predicates / processes / the PRIMARY rule
+//!    form (and bare-nullary uses), but two carve-outs dictated by the consumer's
+//!    pipeline staging: acc-lemma and case-test formulas are left UNTOUCHED (a
+//!    later consumer stage owns their expansion [Q41]), and only the primary rule
+//!    form is rewritten — derived variant / left-right rule forms are not
+//!    recursed into, matching the parse-stage fact that a rule then exists only
+//!    in its primary form [Q42].
+//!
+//! In both, the `macros:` declarations are retained in place (with their
+//! original, unexpanded bodies). See ../BEHAVIOR.md for the observed semantics
+//! this implements; every rule below traces to a `[Qn]` observation.
 //!
 //! Summary of the semantics implemented here:
 //!  * a macro `name(f1..fk) = body`; call `name(a1..ak)` binds `fi := ai` and
@@ -44,8 +57,23 @@ impl MacroTable {
     }
 }
 
-/// Expand every macro use in `theory`, keeping the `macros:` declarations in
-/// place.
+/// How much of the theory one expansion pass is allowed to touch. The two modes
+/// share the whole term/formula/rule traversal and differ only at the two
+/// consumer-staging carve-outs (acc-lemma & case-test formulas; derived rule
+/// forms).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Mode {
+    /// Full-close view: expand every use site, including acc-lemma / case-test
+    /// formulas and derived `(modulo AC)` variant / left-right diff rule forms.
+    FullClose,
+    /// Consumer's parse-stage view: leave acc-lemma & case-test formulas
+    /// untouched (a later stage owns them [Q41]) and rewrite only the primary
+    /// rule form, not derived variant / left-right forms [Q42].
+    Staged,
+}
+
+/// Full-close macro expansion: expand every macro use at every use site, keeping
+/// the `macros:` declarations in place.
 ///
 /// The result, fed back to the oracle, reproduces the reasoning content the
 /// oracle computes for the original (modulo-AC variants / expanded-formula /
@@ -55,8 +83,33 @@ impl MacroTable {
 /// unexpanded bodies): the reference retains the block in its pretty output and
 /// the consuming pipeline requires it in place [Q37].
 pub fn expand(theory: &Theory) -> Theory {
+    expand_with(theory, Mode::FullClose)
+}
+
+/// Staged (parse-stage) macro expansion — the entry the consumer's pipeline
+/// calls.
+///
+/// Identical to [`expand`] except for two carve-outs the consumer's staging
+/// requires, because it invokes this pass before a later stage that owns them:
+///  * acc-lemma (`... accounts for "..."`) and case-test (`test <name>: "..."`)
+///    formulas are left byte-identical — untouched — so the later stage can
+///    expand them itself [Q41];
+///  * rules exist only in their primary form at this stage, so only the primary
+///    premises / actions / conclusions / let-block / embedded restrictions are
+///    rewritten; derived variant and left-right diff rule forms are not recursed
+///    into [Q42].
+///
+/// Everything else — ordinary lemmas, restrictions, predicates, processes,
+/// equations, the primary rule form, and bare-nullary resolution — is expanded
+/// exactly as in full close. The `macros:` declarations pass through unchanged
+/// [Q37].
+pub fn expand_staged(theory: &Theory) -> Theory {
+    expand_with(theory, Mode::Staged)
+}
+
+fn expand_with(theory: &Theory, mode: Mode) -> Theory {
     let table = build_table(theory);
-    let items = theory.items.iter().map(|it| expand_item(it, &table)).collect();
+    let items = theory.items.iter().map(|it| expand_item(it, &table, mode)).collect();
     Theory {
         is_diff: theory.is_diff,
         name: theory.name.clone(),
@@ -256,7 +309,7 @@ fn expand_let(b: &LetBinding, table: &MacroTable) -> LetBinding {
     }
 }
 
-fn expand_rule(r: &Rule, table: &MacroTable) -> Rule {
+fn expand_rule(r: &Rule, table: &MacroTable, mode: Mode) -> Rule {
     Rule {
         name: r.name.clone(),
         modulo: r.modulo.clone(),
@@ -270,13 +323,23 @@ fn expand_rule(r: &Rule, table: &MacroTable) -> Rule {
             .iter()
             .map(|p| expand_formula(p, table))
             .collect(),
-        variants: r.variants.iter().map(|v| expand_rule(v, table)).collect(),
-        left_right: r.left_right.as_ref().map(|(l, rr)| {
-            (
-                Box::new(expand_rule(l, table)),
-                Box::new(expand_rule(rr, table)),
-            )
-        }),
+        // Derived rule forms. Full close expands them — the `(modulo AC)` variant
+        // and left/right diff projections show the expansion [Q3,Q4,Q26]. In the
+        // staged view a rule exists only in its primary form [Q42], so these are
+        // carried through untouched.
+        variants: match mode {
+            Mode::FullClose => r.variants.iter().map(|v| expand_rule(v, table, mode)).collect(),
+            Mode::Staged => r.variants.clone(),
+        },
+        left_right: match mode {
+            Mode::FullClose => r.left_right.as_ref().map(|(l, rr)| {
+                (
+                    Box::new(expand_rule(l, table, mode)),
+                    Box::new(expand_rule(rr, table, mode)),
+                )
+            }),
+            Mode::Staged => r.left_right.clone(),
+        },
     }
 }
 
@@ -377,23 +440,32 @@ fn expand_predicate(p: &Predicate, table: &MacroTable) -> Predicate {
     }
 }
 
-fn expand_item(it: &TheoryItem, table: &MacroTable) -> TheoryItem {
+fn expand_item(it: &TheoryItem, table: &MacroTable, mode: Mode) -> TheoryItem {
     match it {
-        TheoryItem::Rule(r) => TheoryItem::Rule(expand_rule(r, table)),
-        TheoryItem::IntrRule(r) => TheoryItem::IntrRule(expand_rule(r, table)),
+        TheoryItem::Rule(r) => TheoryItem::Rule(expand_rule(r, table, mode)),
+        TheoryItem::IntrRule(r) => TheoryItem::IntrRule(expand_rule(r, table, mode)),
         TheoryItem::Restriction(r) => TheoryItem::Restriction(expand_restriction(r, table)),
         TheoryItem::LegacyAxiom(r) => TheoryItem::LegacyAxiom(expand_restriction(r, table)),
         TheoryItem::Lemma(l) => TheoryItem::Lemma(expand_lemma(l, table)),
-        TheoryItem::AccLemma(a) => TheoryItem::AccLemma(AccLemma {
-            name: a.name.clone(),
-            attributes: a.attributes.clone(),
-            formula: expand_formula(&a.formula, table),
-            case_test_idents: a.case_test_idents.clone(),
-        }),
-        TheoryItem::CaseTest(c) => TheoryItem::CaseTest(CaseTest {
-            name: c.name.clone(),
-            formula: expand_formula(&c.formula, table),
-        }),
+        // acc-lemma & case-test formulas: full close expands them (the generated
+        // lemmas' guarded forms show the expansion [Q38,Q39]); the staged view
+        // leaves them untouched because a later consumer stage owns them [Q41].
+        TheoryItem::AccLemma(a) => match mode {
+            Mode::FullClose => TheoryItem::AccLemma(AccLemma {
+                name: a.name.clone(),
+                attributes: a.attributes.clone(),
+                formula: expand_formula(&a.formula, table),
+                case_test_idents: a.case_test_idents.clone(),
+            }),
+            Mode::Staged => it.clone(),
+        },
+        TheoryItem::CaseTest(c) => match mode {
+            Mode::FullClose => TheoryItem::CaseTest(CaseTest {
+                name: c.name.clone(),
+                formula: expand_formula(&c.formula, table),
+            }),
+            Mode::Staged => it.clone(),
+        },
         TheoryItem::Predicates(ps) => {
             TheoryItem::Predicates(ps.iter().map(|p| expand_predicate(p, table)).collect())
         }
@@ -423,8 +495,9 @@ fn expand_item(it: &TheoryItem, table: &MacroTable) -> TheoryItem {
                 })
                 .collect(),
         },
-        // Items with no macro-bearing terms are carried through unchanged. Macros
-        // items are filtered out before this function is called.
+        // Items with no macro-bearing terms are carried through unchanged. The
+        // `macros:` declaration items pass through here too — retained in place
+        // with their original, unexpanded bodies [Q37].
         TheoryItem::Macros(_)
         | TheoryItem::Builtins(_)
         | TheoryItem::Functions(_)

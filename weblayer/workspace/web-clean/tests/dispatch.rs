@@ -124,6 +124,16 @@ impl ProverOps for FakeProver {
             t
         })
     }
+    fn lemma_present(&self, thy: &Thy, lemma: &str) -> bool {
+        thy.lemmas.iter().any(|(n, _)| n == lemma)
+    }
+    fn del_lemma_path(&self, thy: &Thy, name: &str) -> Option<Thy> {
+        // Deletable iff the lemma exists; the modified theory is a fresh version.
+        thy.lemmas.iter().any(|(n, _)| n == name).then(|| thy.clone())
+    }
+    fn del_proof_step(&self, thy: &Thy, lemma: &str, _path: &[String], _diff: bool) -> Option<Thy> {
+        thy.lemmas.iter().any(|(n, _)| n == lemma).then(|| thy.clone())
+    }
     fn apply_diff_method(&self, thy: &Thy, _lemma: &str, n: usize, _path: &[String]) -> Option<(Thy, Vec<String>)> {
         (n != 0).then(|| (thy.clone(), vec!["Rule_1".to_string()]))
     }

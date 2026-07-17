@@ -119,3 +119,99 @@ A numeric-only constant (`'12345678'`, no alphabetic chars) gets an **empty
 prefix**, so its abbreviation name is a bare number -- observed as `2` for the
 first such entry. The starting index for empty-prefix names was not pinned down
 (single observation); it does not affect the length/occurrence/tuple rule.
+
+================================================================================
+
+# REPORT — Round 6: the record-cell wrap TRIGGER (BEHAVIOR.md §3f gap)
+
+Clean-room continuation of `graphdot`. Everything below traces to observed oracle
+output: the captured DOT corpus (`oracle/dot_corpus/`, 12 022 payloads / 160 409
+records) and controlled probes of the black-box interactive server (autoprove →
+`interactive-graph-def`). No tamarin-prover source was read.
+
+## Result in one line
+
+> The old per-cell rule ("a cell wraps iff its own flat width > 87") is wrong for
+> multi-cell record groups. Each record group (premises, info, conclusions) is laid
+> out **independently**, and within a group the cells **share** the fill width:
+> a cell wraps **iff** `group_total_flat > 87` **AND** `cell_flat > 20`
+> — equivalently `cell_flat > max(87 − Σ(other cell flats in the group), 20)`.
+> The `#t : Rule[…]` info cell is its own single-cell group (budget 87) with an
+> extra rule: an info list of **≥ 2 action facts always goes vertical**, whatever
+> its width.
+
+The prior puzzle — first-line widths spanning 19..277 with "no fixed page width" —
+is resolved: 87 is a *per-group* budget shared across cells, so a cell deep in a
+wide group wraps far below 87 while a lone cell tolerates 87. The In-vs-Big pair in
+`ref_raw_1_1.dot` is the crisp witness: `In(<x1.4..x10.4>)` flat 67 (premise, alone
+with Fr) does NOT wrap, while the byte-identical `Big(<x1.4..x10.4>)` flat 68
+(conclusion, sharing with Ack+Out) DOES.
+
+## Evidence
+
+### (1) Groups are independent — controlled probes
+- Growing premises (In flat 69/103/198) or the rule name (len 40) leaves a lone
+  conclusion `Out` (flat 87) flat; adding ONE preceding conclusion (flat 12) makes
+  it wrap. ⇒ a conclusion's budget counts only other conclusions.
+
+### (2) Shared budget = 87 − Σ(others), floor 20 — step-1 sweeps
+- 2-cell group [Fa(p), Fb(q)]: with q fixed, Fa's fit/wrap boundary is exactly
+  `flat = 87 − q_flat` (q=11 → 76/77, q=28 → 58/61, q=48 → 39/40, q=68 → 19/22).
+- 3-cell [p,28,28] flips at `flat = 87 − 56 = 31` ⇒ Σ is over all other cells.
+- Floor: a sibling forced far past budget still leaves the target fitting at flat
+  ≤ 20, wrapping at 21 ⇒ per-cell minimum budget 20.
+- Algebra: `flat > max(87−Σothers, 20)` ⟺ `(Σall > 87) ∧ (flat > 20)`.
+
+### (3) Info cell — separate probes
+- A single-action info wraps by width at flat > 87 (independent of prem/concl).
+- An info with ≥ 2 actions ALWAYS wraps vertically (TwoShort flat 34, AB flat 22).
+  Corpus census: **0** non-wrapped info cells carry a top-level action-list comma.
+
+### (4) Corpus-exactness
+- The rule matches actual `\l` on **99.635 %** of 776 259 cells and **98.324 %** of
+  160 409 records (info cells 99.968 %). Hand-verified on the Wide record: In (77,
+  fits), Big (budget 48, wraps), Ack (budget 20, wraps), Out(h) (14, fits) — all
+  four correct; and on the 2-action info cells of `b5a8773`/`001113` (both wrap).
+
+## Accuracy and the residual (honest gaps)
+
+Every one of the 2 831 residual cells sits within ~1–2 columns of its budget
+(mismatch group-totals cluster entirely at 79 ≤ T ≤ 95). At that exact boundary the
+outcome is a **±1 rounding artifact of tamarin's HughesPJ `fits`**: a live split
+sweep at group-total = `budget + 1` flips fit/wrap with atom parity, while at
+`budget + 5` it wraps cleanly. A second residual: the exact greedy fill **width**
+when a *multi-cell* cell wraps is not a clean function of the budget (probeB: a W
+tuple keeps a 9-element first line for two different Pad widths / budgets), so the
+per-line element count of a multi-cell wrap is not byte-exact. Both need the GPL
+pretty-printer's internal `fits`; the **trigger** (does a cell wrap) is byte-exact
+away from the ±1 boundary.
+
+## What was implemented (`graph-clean`)
+
+- `render::cell_budget(flats, i) = max(87 − Σ_{j≠i} flats, 20)` and
+  `render::count_info_actions`; `MIN_CELL_BUDGET = 20`.
+- `render::wrap_cell_budget(flat, budget)` threads the group budget through the
+  fill/peel machinery (the old `wrap_cell` = `wrap_cell_budget(flat, 87)`, so all
+  single-cell fixtures are unchanged). Info cells force the vertical action `sep`
+  when ≥ 2 actions. A **fact-argument** break now ends the line at the bare `,`
+  (byte-exact vs `Init_1(...)`/Ack), while a **tuple-element** break keeps the `, `.
+- `generate::build_record` computes per-group budgets (premises together,
+  conclusions together, info alone) and wraps each cell with its budget.
+- Tests: `cell_budget_shares_the_group_width`, `group_trigger_matches_wide_record`,
+  `multi_arg_fact_break_drops_the_comma_space`, `count_info_actions_counts_top_level`,
+  `info_two_actions_always_vertical_even_when_short`. Full suite green; the
+  GRAPHCLEAN_CORPUS round-trip stays **12 022/12 022** byte-exact.
+
+## Opportunistic: role → color (characterized, not implemented)
+
+Corpus mining (15 non-`Undefined` roles): the record `fillcolor` is a **deterministic
+function of the role name** (role `A` → `#804046` in all 3321 instances, `B` →
+`#628040`, `Tag` → `#40807c`, `Process` → `#ffffff`, …), and the cluster ARGB is a
+deterministic function of the role too (`A_Session_k` → `#D836744C` for every k,
+`B` → `#3671D84C`, `Initiator` → `#4936D84C`) — the session index does not affect
+color. So the color IS name-determined (a necessary condition for derivability), and
+the values look like a name-hash → hue → HSV rendering; but the node hue and cluster
+hue differ per role (two distinct derivations), so the exact hash is unresolved.
+Reverse-engineering it needs a dedicated live campaign of crafted novel role names
+(like §5b's per-prefix numbering) — left as a documented open item; the crate keeps
+colors as caller inputs.

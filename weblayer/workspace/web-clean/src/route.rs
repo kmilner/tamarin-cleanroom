@@ -99,6 +99,15 @@ pub enum Handler {
     /// A structural-edit form target (`edit/{verb}/{name}`; POST). The tail is the
     /// `{verb}/{name}` remainder.
     Edit(Vec<String>),
+    /// Delete a theory path (`del/path/{theory-path…}`; GET). The tail is the
+    /// theory-path segments after the fixed `path` literal. It is parsed into a
+    /// [`ThyPath`] by the dispatcher (mode-aware): an unparseable tail is a `404`,
+    /// a parseable one with a non-GET method is a `405`.
+    DelPath(Vec<String>),
+    /// Verify a theory path (`verify/{theory-path…}`; GET; trace theories only).
+    /// The tail is the theory-path segments, parsed into a [`ThyPath`] by the
+    /// dispatcher.
+    Verify(Vec<String>),
     /// Unrecognized handler with its raw tail.
     Other { name: String, tail: Vec<String> },
 }
@@ -195,6 +204,12 @@ impl Route {
                 _ => Handler::Other { name: "get_and_append".to_string(), tail: owned(tail) },
             },
             "edit" => Handler::Edit(owned(tail)),
+            // `del/path/<theory-path…>` — the fixed `path` literal must follow.
+            "del" => match tail {
+                ["path", rest @ ..] => Handler::DelPath(owned(rest)),
+                _ => Handler::Other { name: "del".to_string(), tail: owned(tail) },
+            },
+            "verify" => Handler::Verify(owned(tail)),
             other => Handler::Other {
                 name: other.to_string(),
                 tail: owned(tail),
@@ -423,6 +438,68 @@ impl EditVerb {
     }
 }
 
+/// A theory navigation path, as accepted by the `del/path/…` and `verify/…`
+/// routes. The accepted heads are **mode-dependent**: a `trace` theory accepts
+/// `help` · `message` · `rules` · `tactic` · `cases/{raw|refined}/{level}/{n}` ·
+/// `lemma/{name}` · `proof/{lemma}[/seg…]` · `method/{lemma}/{n}[/seg…]` ·
+/// `add/{pos}` · `edit/{name}` · `delete/{name}`; an `equiv` (diff) theory accepts
+/// `help` · `diffrules` · `diffProof/{lemma}[/side…]` · `diffMethod/{lemma}/{n}[/…]`.
+/// A tail outside the grammar does not parse — the route then answers `404`.
+///
+/// Only the lemma and proof nodes carry data the dispatcher needs; every other
+/// accepted head collapses to [`ThyPath::Other`].
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub enum ThyPath {
+    /// `lemma/{name}` (trace).
+    Lemma(String),
+    /// `proof/{lemma}[/seg…]` (trace).
+    Proof { lemma: String, path: Vec<String> },
+    /// `diffProof/{lemma}[/side…]` (equiv).
+    DiffProof { lemma: String, path: Vec<String> },
+    /// Any other accepted theory path (a navigable view that is neither a lemma
+    /// nor a proof node).
+    Other,
+}
+
+impl ThyPath {
+    /// Parse a theory-path tail. `diff` selects the equiv (diff-theory) grammar.
+    /// Returns `None` for a tail outside the grammar (the caller then answers a
+    /// `404`).
+    pub fn parse(segs: &[String], diff: bool) -> Option<ThyPath> {
+        let s: Vec<&str> = segs.iter().map(String::as_str).collect();
+        if diff {
+            match s.as_slice() {
+                ["help"] | ["diffrules"] => Some(ThyPath::Other),
+                ["diffProof", lemma, rest @ ..] => Some(ThyPath::DiffProof {
+                    lemma: (*lemma).to_string(),
+                    path: owned(rest),
+                }),
+                ["diffMethod", _lemma, n, ..] if n.parse::<usize>().is_ok() => Some(ThyPath::Other),
+                _ => None,
+            }
+        } else {
+            match s.as_slice() {
+                ["help"] | ["message"] | ["rules"] | ["tactic"] => Some(ThyPath::Other),
+                ["cases", kind, level, n]
+                    if (*kind == "raw" || *kind == "refined")
+                        && level.parse::<usize>().is_ok()
+                        && n.parse::<usize>().is_ok() =>
+                {
+                    Some(ThyPath::Other)
+                }
+                ["lemma", name] => Some(ThyPath::Lemma((*name).to_string())),
+                ["proof", lemma, rest @ ..] => Some(ThyPath::Proof {
+                    lemma: (*lemma).to_string(),
+                    path: owned(rest),
+                }),
+                ["method", _lemma, n, ..] if n.parse::<usize>().is_ok() => Some(ThyPath::Other),
+                ["add", _] | ["edit", _] | ["delete", _] => Some(ThyPath::Other),
+                _ => None,
+            }
+        }
+    }
+}
+
 fn parse_bool(s: &str) -> Option<bool> {
     match s {
         "True" => Some(true),
@@ -523,6 +600,52 @@ mod tests {
         assert_eq!(ap.bound, 5);
         assert!(ap.all_solutions);
         assert_eq!(ap.path, vec!["_".to_string(), "B_2".to_string()]);
+    }
+
+    #[test]
+    fn parses_del_path_and_verify_handlers() {
+        // del/path strips the fixed `path` literal into the theory-path tail.
+        assert_eq!(
+            Route::parse("/thy/trace/1/del/path/lemma/debug").unwrap().handler,
+            Handler::DelPath(vec!["lemma".into(), "debug".into()])
+        );
+        // `del` without the `path` literal is not a del/path route.
+        assert!(matches!(
+            Route::parse("/thy/trace/1/del/lemma/debug").unwrap().handler,
+            Handler::Other { .. }
+        ));
+        assert_eq!(
+            Route::parse("/thy/trace/1/verify/proof/debug/_/B_2").unwrap().handler,
+            Handler::Verify(vec!["proof".into(), "debug".into(), "_".into(), "B_2".into()])
+        );
+    }
+
+    #[test]
+    fn thy_path_grammar_is_mode_dependent() {
+        let sp = |s: &str| s.split('/').map(String::from).collect::<Vec<_>>();
+        // Trace grammar.
+        assert_eq!(ThyPath::parse(&sp("lemma/debug"), false), Some(ThyPath::Lemma("debug".into())));
+        assert_eq!(
+            ThyPath::parse(&sp("proof/debug/_/ONE"), false),
+            Some(ThyPath::Proof { lemma: "debug".into(), path: vec!["_".into(), "ONE".into()] })
+        );
+        for ok in ["help", "message", "rules", "tactic", "cases/raw/0/0", "method/debug/1", "add/x", "edit/x", "delete/x"] {
+            assert_eq!(ThyPath::parse(&sp(ok), false), Some(ThyPath::Other), "trace {ok}");
+        }
+        for bad in ["sources", "cases", "diffrules", "diffProof/debug", "x", "foo/bar"] {
+            assert_eq!(ThyPath::parse(&sp(bad), false), None, "trace {bad} should 404");
+        }
+        // Equiv grammar: diff heads parse, trace heads do not.
+        assert_eq!(
+            ThyPath::parse(&sp("diffProof/L/RHS"), true),
+            Some(ThyPath::DiffProof { lemma: "L".into(), path: vec!["RHS".into()] })
+        );
+        for ok in ["help", "diffrules", "diffMethod/L/1"] {
+            assert_eq!(ThyPath::parse(&sp(ok), true), Some(ThyPath::Other), "equiv {ok}");
+        }
+        for bad in ["rules", "message", "tactic", "lemma/L", "proof/L", "cases/raw/0/0", "add/x"] {
+            assert_eq!(ThyPath::parse(&sp(bad), true), None, "equiv {bad} should 404");
+        }
     }
 
     #[test]

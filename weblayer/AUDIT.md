@@ -444,3 +444,162 @@ Handler.hs internal structure; no comment lineage. Two documentation-completenes
 recorded (speculative extra MIME mappings; unfixtured Modified row) — neither is copied
 protectable expression and neither requires redo. Findings that survive filtration: 0.
 No redo instructions issued. VERDICT: PASS.
+
+---
+
+## Round 5 — both-sides similarity audit (weblayer delta: del/path + verify)
+
+Auditor scope: this round's uncommitted delta only (clean-room HEAD 8901219 predates
+it). Delta from `git status/diff` restricted to `weblayer/`: modified
+`src/dispatch.rs`, `src/route.rs`, `src/envelope.rs`, `tests/dispatch.rs`,
+`tests/dispatch4.rs`; new `tests/dispatch5.rs`, `round5/` (four staged `*.json`
+captures + `ORACLE_NOTES.md`); plus `BEHAVIOR.md` §14.8-rewrite + §15,
+`QUERIES.log` [R50]–[R57], `REPORT.md`. Compared against upstream
+`src/Web/{Handler.hs,Types.hs,Dispatch.hs}` following the code from
+`getDeleteStepR`/`getTheoryVerifyR`. Method: abstraction–filtration–comparison; every
+behavioral claim cross-checked to a logged probe ([R50]–[R57]) or a committed capture
+(`round5/*.json`).
+
+This round REVERSES the round-4 "del/path & verify are absent" negative, which the
+round-4 audit had (correctly, on the evidence then available) treated as anti-copying
+("a copy of the route table would include them"). `round5/ORACLE_NOTES.md` re-probed
+with theory-sub-path shapes and found both routes ARE registered; §14.8 is rewritten
+and the two families implemented. The reversal is itself probe/fixture-driven, not a
+transcription — audited below.
+
+### What the delta reproduces, and the upstream it maps to
+
+* `Server::del_path` / `del_proof` (dispatch.rs) ↔ `getDeleteStepR` (Handler.hs
+  1587–1604) and `getDeleteStepDiffR` (1607–1635). Three-way branch
+  lemma→proof-node→other with a distinct JSON alert per branch, plus a fresh-version
+  redirect on a deletable node.
+* `Server::verify` (dispatch.rs) ↔ `getTheoryVerifyR` (Handler.hs 833–841): a present
+  lemma's `proof` path → same-index `overview/proof` redirect, everything else → the
+  help pane. The clean predicate `lemma_present` maps to upstream's `editProof`→
+  `lookupLemma name` existence check (Handler.hs 191–193).
+* `ThyPath` + `ThyPath::parse(segs, diff)` (route.rs) ↔ `parseTheoryPath`
+  (Types.hs 417–456) / `parseDiffTheoryPath` (459–556).
+* `Handler::DelPath`/`Verify` route grammar (route.rs) ↔ Yesod route table
+  (Types.hs 574 `verify` trace-only, 592 `del/path` trace, 615 `del/path` equiv; NO
+  equiv `verify` row).
+* Three `ProverOps` callbacks (`lemma_present`, `del_lemma_path`, `del_proof_step`).
+
+### Filtration — shared elements that carry no protectable expression
+
+1. **The three alert strings are verbatim upstream** — "Sorry, but removing the
+   selected lemma failed!", "Sorry, but removing the selected proof step failed!",
+   "Can't delete the given theory path!" (Handler.hs 1595/1601/1604, dup 1615/1621/
+   1626/1632/1634). All three are boundary output a byte-compatible reimplementation
+   MUST emit (merger/scenes-à-faire) and all three are captured: `del_path_bad.json`
+   pins the "Can't delete" string; [R54] logs the other two live. Verbatim
+   reproduction is required, not taken — same posture as METHOD_FAILED_ALERT in R4.
+2. **The URL-grammar keyword set** (help·message·rules·tactic·cases·lemma·proof·
+   method·add·edit·delete for trace; help·diffrules·diffProof·diffMethod for equiv;
+   the `del/path` two-literal prefix; `verify` single literal) is the wire interface —
+   the exact path tokens the client sends. Behavior-dictated and individually probed:
+   [R51]/[R54] exercise every trace head, [R56]/[R57] the equiv heads and the
+   `del`-without-`path` miss, [R55] the parse-before-method (unparseable→404-any-method,
+   parseable+non-GET→405) ordering. Unprotectable boundary tokens.
+3. **The redirect target forms** `overview/lemma/{name}`, `overview/proof/{lemma}
+   [/verbatim-path]`, `overview/diffProof/{lemma}[/path]`, same-index for verify /
+   fresh-index for del/path — all observable and probe-pinned ([R51],[R52],[R53],
+   [R57]; fixtures `del_path.json`, `verify_proof.json`); the help-pane envelope
+   byte-identical to `main/help` ([R50],[R51], fixture `verify.json`).
+4. **The coarse handler branch structure** (lemma vs proof-node vs other for del;
+   proof-of-present-lemma vs everything-else for verify) is dictated by the distinct
+   observable outcomes (three alert strings / redirect-vs-help), not by upstream's
+   textual arrangement.
+
+### Comparison — affirmative evidence of independent (probe-derived) construction
+
+The clean side does NOT track upstream's protectable expression where it could have:
+
+* **Different parser architecture.** `parseTheoryPath` dispatches head-then-tail
+  (`case x of "help" -> …; "lemma" -> parseLemma xs`) with per-head sub-parsers and
+  `listToMaybe`/`(kind:y:z:_)` trailing-tolerance. `ThyPath::parse` matches the WHOLE
+  slice with exact-length arms and numeric guards (`["cases", kind, level, n] if …`).
+  These are structurally unrelated implementations with different edge-case behavior
+  (see fidelity notes) — the opposite of a transcription.
+* **Coarser abstraction than the source type.** Upstream's `TheoryPath` has 11
+  constructors; the clean `ThyPath` keeps only the three the web layer branches on
+  (`Lemma`/`Proof`/`DiffProof`) and collapses the rest to a single `Other`. A copy
+  would carry TheoryHelp/TheoryRules/TheoryMessage/TheoryTactic/TheorySource/
+  TheoryMethod/TheoryEdit/TheoryAdd/TheoryDelete individually.
+* **No tamarin-internal identifiers leak.** Clean names (`ThyPath`, `DelPath`,
+  `Verify`, `del_lemma_path`, `del_proof_step`, `lemma_present`, `del_proof`,
+  variants `Lemma`/`Proof`/`DiffProof`/`Other`) share none of upstream's
+  `TheoryPath`/`DeleteStepR`/`TheoryVerifyR`/`removeLemma`/`applyProverAtPath`/
+  `sorryProver`/`editProof`/`modifyTheory`/`DiffTheoryDiffLemma` constellation. The
+  ProverOps callbacks are grouped by the web layer's needs, not per upstream route.
+* **`ProverOps` holds the deletion semantics opaque.** Upstream deletes a proof step
+  via `applyProverAtPath thy lemma proofPath (sorryProver (Just "removed"))` (the
+  "reset to by sorry" is source expression); the clean side never reproduces that —
+  `del_proof_step` returns an opaque `Option<Theory>` and the observed "reset to by
+  sorry" ([R53]) lives only in BEHAVIOR.md as a probe note.
+* **No comment lineage.** Shipped `dispatch.rs`/`route.rs`/`envelope.rs` comments
+  describe current behavior only; grep for `round-4|previously|R47|overturn|artifact`
+  across the three source files is empty (the reversal narrative is confined to
+  BEHAVIOR.md/QUERIES.log/REPORT.md, and the `[R47]`-overturn note to a dispatch5.rs
+  test comment). No upstream Haddock/Hamlet comment appears.
+
+### Non-blocking fidelity notes (untraced generalizations that DIVERGE from upstream — NOT similarity findings, no redo required)
+
+Per method I flag behavioral claims the new code embeds that are not fully traced to a
+probe. Both below are the mirror image of a copying risk: they generalize BEYOND the
+probed shapes and, where they do, DIVERGE from upstream — so they are affirmative
+non-copying evidence, but they are genuine byte-fidelity gaps the team may want to
+close. Neither is copied protectable expression; neither affects the verdict.
+
+1. **Equiv grammar omits well-formed diff heads (and `difflemma` entirely).**
+   `parseDiffTheoryPath` (Types.hs 459–556) also accepts the per-side heads
+   `rules/{LHS|RHS}/{Bool}`, `message/{LHS|RHS}/{Bool}`, `lemma/{LHS|RHS}/{name}`,
+   `proof/{LHS|RHS}/{lemma}[/…]`, `method/{LHS|RHS}/{lemma}/{n}[/…]`,
+   `cases/{LHS|RHS}/{kind}/{Bool}/{i}/{j}`, and standalone `difflemma/{name}` — for all
+   of which `getDeleteStepDiffR` runs (a real delete, or the "Can't delete" alert for
+   `difflemma`'s sibling heads). The clean equiv grammar accepts only
+   `help`·`diffrules`·`diffProof`·`diffMethod` and 404s the rest. The equiv-404 probes
+   ([R56]; dispatch5 `del_path_equiv_uses_diffproof_grammar`) tested only BARE or
+   trace-shaped forms (`rules`, `message`, `proof/L`, `lemma/L`, `cases/raw/0/0`) —
+   every one of which ALSO 404s upstream for lack of a `Side` segment — so the observed
+   404s do not license the stronger "these heads never parse under --diff" claim the
+   grammar bakes in; `difflemma` was never probed at all. Behavioral probe to close:
+   against a live --diff oracle, GET `del/path/rules/LHS/True`,
+   `del/path/lemma/LHS/<name>`, `del/path/proof/LHS/<lemma>`,
+   `del/path/method/LHS/<lemma>/1`, `del/path/cases/LHS/raw/True/0/0`, and
+   `del/path/difflemma/<name>`; record each status + body and widen the equiv grammar
+   to whatever actually parses (expected: real deletes for lemma/proof/difflemma,
+   "Can't delete" for rules/message/cases/method).
+2. **Exact-length trace matching vs upstream trailing-tolerance / signed indices.**
+   `parseTheoryPath` ignores trailing segments (`"help" -> Just TheoryHelp`,
+   `listToMaybe`, `(kind:y:z:_)`), so `help/x`, `tactic/x`, `lemma/a/b`, `edit/a/b`,
+   `cases/raw/0/0/x` all PARSE upstream; the clean arms (`["help"]`, `["lemma", name]`,
+   `["cases", kind, level, n]`, `["edit", _]`, …) are exact-length and 404 them.
+   Upstream `safeRead`s case/method indices as `Int` (negatives/large accepted); the
+   clean side uses `usize`. Only canonical shapes were probed. Non-blocking; if
+   byte-fidelity on malformed-but-accepted inputs matters, probe trailing-segment
+   variants and a negative case index and relax the arms accordingly.
+
+(Also noted, not actionable: verify's same-index redirect is probe-true [R51], but
+upstream's `editProof` re-extends the proof in place via `replaceTheory … idx`; whether
+that in-place re-derivation is observable is held opaque behind `ProverOps` and outside
+this unit. And upstream `map unprefixUnderscore` strips a leading `_` from each
+theory-path segment before parsing; the clean side passes segments verbatim — matched by
+the probed `_`-containing proof paths [R51]/[R53], unprobed for other `_`-prefixed
+segments. Both are prover/edge-case fidelity, not expression.)
+
+### VIOLATIONS (Round 5)
+
+None. Every wire string and redirect/envelope form in the delta is boundary output
+backed by a logged probe ([R50]–[R57]) or a committed capture (`round5/*.json`); the
+theory-path grammar is observed URL tokens whose whole-slice exact-match structure,
+coarse `Other` collapse, per-side omissions, and non-upstream identifiers affirmatively
+show URL/probe derivation rather than transcription of `parseTheoryPath`/
+`parseDiffTheoryPath` or the Yesod route table; the handler branch shapes are dictated
+by the three observable alert strings and the redirect-vs-help outcome, not by
+Handler.hs's textual `go`/`goDiff` arrangement; the deletion semantics stay opaque
+behind `ProverOps`; no comment lineage. Two non-blocking byte-fidelity notes recorded
+(equiv grammar under-covers well-formed diff heads incl. `difflemma`; exact-length trace
+matching vs upstream trailing-tolerance) — both are untraced generalizations that
+DIVERGE from upstream, i.e. non-copying evidence, and neither is copied protectable
+expression nor requires redo. Findings that survive filtration: 0. No redo instructions
+issued. VERDICT: PASS.

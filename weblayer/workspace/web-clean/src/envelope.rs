@@ -52,6 +52,18 @@ pub fn render_alert(message: &str) -> String {
 /// The fixed alert emitted when a proof-method application fails.
 pub const METHOD_FAILED_ALERT: &str = "Sorry, but the prover failed on the selected method!";
 
+/// The `del/path/…` alert for a theory path that is not a lemma or proof node
+/// (help/message/rules/tactic/cases/method/add/edit/delete, or equiv
+/// help/diffrules/diffMethod) — such paths are never deletable.
+pub const DEL_PATH_CANT_ALERT: &str = "Can't delete the given theory path!";
+
+/// The `del/path/lemma/{name}` alert when the lemma cannot be removed (absent).
+pub const DEL_LEMMA_FAILED_ALERT: &str = "Sorry, but removing the selected lemma failed!";
+
+/// The `del/path/proof/…` (or diff `diffProof/…`) alert when the proof step
+/// cannot be removed (nonexistent lemma or unremovable node).
+pub const DEL_PROOF_STEP_FAILED_ALERT: &str = "Sorry, but removing the selected proof step failed!";
+
 #[cfg(test)]
 mod tests {
     use super::*;

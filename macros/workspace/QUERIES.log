@@ -218,3 +218,37 @@
 # ∀/∃ logic glyphs before generating lemmas). formula_parity.sh runs the oracle
 # with a UTF-8 locale and compares only the guarded/expanded-formula blocks, so
 # it is the harness of record for the acc-lemma / case-test gaps.
+
+# ---- Round 5: reconcile the consumer's STAGED-MODE (parse-stage) contract ----
+#      with fresh parse-stage observations. Given as an INTERFACE contract:
+#      (a) acc-lemma & case-test formulas left UNTOUCHED (later stage owns them);
+#      (b) rules exist only in their PRIMARY form (no derived variant/left-right).
+
+[Q41] fixtures/acc_both_macro.spthy --parse-only
+      Purpose: reconcile interop (a) — is the parse-stage view of an acc-lemma /
+      case-test the un-expanded call? Observed: the case-test prints
+      `test blamed: "∃ sid #i. Blame( mtest(sid), x ) @ #i"` and the acc-lemma
+      prints `blamed accounts for "¬(∃ sid #i. Unequal( mfor(sid) ) @ #i)"` — both
+      macro CALLS preserved verbatim, NO expansion at parse stage (consistent with
+      [Q2,Q38,Q39]). => the parse-stage view leaves acc-lemma & case-test formulas
+      untouched; the consumer's staged expand() must too (a later stage expands
+      them, as the guarded forms at close showed [Q38,Q39]).
+
+[Q42] examples/regression/trace/issue777.spthy --parse-only;
+      examples/features/macros/MacroInLemmasAndRestrictions.spthy --parse-only
+      Purpose: reconcile interop (b) — in what form do rules exist at parse stage?
+      Observed: each rule prints ONLY as `rule (modulo E) <name>:` with its primary
+      premises/actions/conclusions (macro CALL preserved: `Out( pk(~x) )`,
+      `A( m(x) )`, `B( m2(x, y) )`). NO `(modulo AC)` variant block, NO left/right
+      diff projection is present at parse stage. => at the consumer's stage a rule
+      exists only in its primary form; there are no derived/variant rule forms to
+      recurse into. (The `(modulo AC)` variant / diff projections that DO show the
+      expansion [Q3,Q4,Q26] appear only at close — the later stage the consumer's
+      full-close entry, `expand`, still serves.)
+
+# Staged mode ([Q41,Q42]) is the consumer's parse-stage view. Note the reference's
+# --parse-only is fully lazy (expands NOTHING, incl. ordinary lemmas' guarded
+# forms [Q2]); the consumer's contract is NOT that — its staged expand eagerly
+# expands ordinary lemmas/restrictions/primary-rules (and bare-nullary uses), and
+# ONLY carves out acc-lemma/case-test formulas [Q41] and derived rule forms [Q42].
+# `expand_staged` implements that contract; `expand` remains the full-close entry.
