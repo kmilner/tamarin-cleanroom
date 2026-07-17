@@ -1,0 +1,6 @@
+theory G2FreshIdx
+begin
+functions: h/1
+rule R:
+  [ In( h(~a.2) ), In( h(b) ) ] --> [ Out('ok') ]
+end

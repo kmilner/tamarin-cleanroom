@@ -1,20 +1,29 @@
 //! Unit E — `.spthy` macro expansion (clean-room).
 //!
-//! `expand(theory)` returns an equivalent macro-free theory: every macro call
-//! at every use site is replaced by its transitively-substituted body, and the
-//! `macros:` declarations are dropped. See ../BEHAVIOR.md for the observed
-//! semantics this implements; every rule below traces to a `[Qn]` observation.
+//! `expand(theory)` returns a theory in which every macro use at every use site
+//! is replaced by its transitively-substituted body, while the `macros:`
+//! declarations are retained in place (with their original, unexpanded bodies).
+//! See ../BEHAVIOR.md for the observed semantics this implements; every rule
+//! below traces to a `[Qn]` observation.
 //!
 //! Summary of the semantics implemented here:
 //!  * a macro `name(f1..fk) = body`; call `name(a1..ak)` binds `fi := ai` and
 //!    substitutes **simultaneously** (parallel / capture-avoiding)          [Q7]
+//!  * a bare, untagged name equal to a NULLARY macro is a parenthesis-free use
+//!    of that macro and resolves to its body; `~x`/`$x` and names of arity>=1
+//!    macros are ordinary variables and do not resolve                      [Q32,Q33,Q34,Q35]
 //!  * a formal matches a body variable by **full identity incl. sort**; `~x`
 //!    and `$x` do NOT match an untagged formal `x` and stay free            [Q27,Q28]
+//!  * a nullary macro reserves its name against a same-named formal: inside a
+//!    body the name resolves to the macro, not the formal                   [Q36]
 //!  * bodies may call only strictly-earlier macros ⇒ the macro dependency
 //!    graph is a DAG, so expansion always terminates                        [Q8,Q19,Q20]
 //!  * expansion is transitive: a body's own macro calls are expanded too    [Q9,Q18]
 //!  * at the AST level a call's arg-count already equals the macro arity
-//!    (the parser packs/【rejects mismatches); `expand` no-ops on a mismatch) [Q11,Q12,Q15,Q16,Q17]
+//!    (the parser packs/rejects mismatches); `expand` no-ops on a mismatch)  [Q11,Q12,Q15,Q16,Q17]
+//!  * the `macros:` declaration block is preserved unchanged in the output;
+//!    the reference retains it in its pretty output and the consuming
+//!    pipeline requires it in place                                          [Q37]
 
 pub mod ast;
 
@@ -35,20 +44,19 @@ impl MacroTable {
     }
 }
 
-/// Expand every macro use in `theory` and drop the macro declarations.
+/// Expand every macro use in `theory`, keeping the `macros:` declarations in
+/// place.
 ///
 /// The result, fed back to the oracle, reproduces the reasoning content the
 /// oracle computes for the original (modulo-AC variants / expanded-formula /
 /// guarded-formula), which is byte-identical to a hand-inlined equivalent
-/// (verified by workspace/byteparity.sh).
+/// (verified by workspace/byteparity.sh and workspace/formula_parity.sh). The
+/// `macros:` declaration items pass through unchanged (with their original,
+/// unexpanded bodies): the reference retains the block in its pretty output and
+/// the consuming pipeline requires it in place [Q37].
 pub fn expand(theory: &Theory) -> Theory {
     let table = build_table(theory);
-    let items = theory
-        .items
-        .iter()
-        .filter(|it| !matches!(it, TheoryItem::Macros(_)))
-        .map(|it| expand_item(it, &table))
-        .collect();
+    let items = theory.items.iter().map(|it| expand_item(it, &table)).collect();
     Theory {
         is_diff: theory.is_diff,
         name: theory.name.clone(),
@@ -81,8 +89,19 @@ fn build_table(theory: &Theory) -> MacroTable {
 /// macro call is replaced by its body with formals bound to the expanded args.
 fn expand_term(t: &Term, table: &MacroTable) -> Term {
     match t {
-        Term::Var(_)
-        | Term::PubLit(_)
+        // A bare, untagged name equal to a NULLARY macro is that macro used
+        // without parentheses; resolve it to the (already-expanded) body. A
+        // fresh/pub-sorted name or the name of an arity>=1 macro is an ordinary
+        // variable and is left untouched [Q32,Q33,Q34,Q35]. A nullary macro
+        // reserves its name even against a same-named formal [Q36].
+        Term::Var(v) => match table.get(&v.name) {
+            Some((formals, body)) if v.sort == SortHint::Untagged && formals.is_empty() => {
+                body.clone()
+            }
+            _ => t.clone(),
+        },
+
+        Term::PubLit(_)
         | Term::FreshLit(_)
         | Term::NatLit(_)
         | Term::Number(_)

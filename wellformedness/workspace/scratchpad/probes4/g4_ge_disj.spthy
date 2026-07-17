@@ -1,0 +1,12 @@
+theory Tg4_ge_disj
+begin
+
+predicates: Pr(x) <=> x = x
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x), B(~x), C(~x) ]->
+   [ Out(~x) ]
+lemma L:
+  exists-trace
+  "Ex x #i. (A(x) @ #i) | (B(x) @ #i)"
+end

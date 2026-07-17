@@ -1,0 +1,6 @@
+theory G2Strong
+begin
+functions: h/1
+rule R:
+  [ In( h(<z.1, a.2, ~z.2, ~a.1, m>) ) ] --> [ Out('ok') ]
+end

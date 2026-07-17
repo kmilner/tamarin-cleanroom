@@ -1,0 +1,6 @@
+theory G3Temporal
+begin
+functions: h/1
+rule R:
+  [ In( h(#i) ) ] --> [ Out('ok') ]
+end

@@ -1,0 +1,11 @@
+WARNING: the following wellformedness checks failed!
+
+ Formula guardedness
+====================
+
+  Lemma `L' cannot be converted to a guarded formula:
+    unguarded variable(s) 'x', '#i' in the subformula
+      "∃ x #i. (A( x ) @ #i) ∨ (B( x ) @ #i)"
+    in the formula
+      "∃ x #i. (A( x ) @ #i) ∨ (B( x ) @ #i)"
+*/

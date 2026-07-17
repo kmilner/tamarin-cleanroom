@@ -1,0 +1,12 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory NSLPK3] Theory loaded
+[Theory NSLPK3] Theory translated
+[Theory NSLPK3] Derivation checks started
+[Theory NSLPK3] Derivation checks ended
+[Theory NSLPK3] Theory closed
+[Saturating Sources] Step 1 (Max 5)
+[Saturating Sources] Done
+[Saturating Sources] Step 1 (Max 5)
+[Saturating Sources] Done

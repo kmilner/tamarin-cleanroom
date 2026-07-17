@@ -1,0 +1,12 @@
+theory OrdRLFt2
+begin
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x) ]->
+   [ Out(~x) ]
+restriction Res:
+  "All x #i. (A(x) @ #i) ==> (A(rp) @ #i)"
+lemma Lem:
+  exists-trace
+  "Ex #i. A(lq) @ #i"
+end

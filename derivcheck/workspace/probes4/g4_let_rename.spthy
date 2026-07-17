@@ -1,0 +1,8 @@
+theory G4LetRename
+begin
+functions: h/1
+rule R:
+  let y = w
+  in
+  [ In( h(y) ) ] --> [ Out('ok') ]
+end

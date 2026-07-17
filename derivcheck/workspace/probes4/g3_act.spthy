@@ -1,0 +1,6 @@
+theory G3Act
+begin
+functions: h/1
+rule R:
+  [ Fr(~n) ] --[ Ev(z) ]-> [ Out(~n) ]
+end

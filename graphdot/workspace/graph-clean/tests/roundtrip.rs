@@ -67,6 +67,30 @@ fn roundtrip_invtrap_raw() {
     check("invtrap_raw", include_str!("fixtures/invtrap_raw.dot"));
 }
 
+#[test]
+fn roundtrip_cluster_process() {
+    // Live SAPIC single-cluster graph.
+    check("cluster_process", include_str!("fixtures/cluster_process.dot"));
+}
+
+#[test]
+fn roundtrip_cluster_multi() {
+    // Free ellipses + one role cluster + deduction edges.
+    check("cluster_multi", include_str!("fixtures/cluster_multi.dot"));
+}
+
+#[test]
+fn roundtrip_last_timepoint() {
+    // The `#last` designated-timepoint ellipse and its before-edge.
+    check("last_timepoint", include_str!("fixtures/last_timepoint.dot"));
+}
+
+#[test]
+fn roundtrip_wrap_e12() {
+    // A wrapped record cell (literal `\l` / `&nbsp;`) round-trips byte-exact.
+    check("wrap_e12", include_str!("fixtures/wrap_E12.dot"));
+}
+
 /// Bulk generalization check (off by default). Set `GRAPHCLEAN_CORPUS` to a
 /// directory of captured `*.dot` payloads; every one must round-trip byte-exact.
 #[test]

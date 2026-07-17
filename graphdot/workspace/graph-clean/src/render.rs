@@ -16,21 +16,33 @@
 //!     (verified across 188 192 wrapped cells: the indent always equals that
 //!     first-element column). Physical segments are separated by `\l`.
 //!
-//! The wrap DECISION (BEHAVIOR.md §3f) — previously a documented GAP — is now
-//! pinned by controlled probing: a fact is pretty-printed **from column 0 with an
-//! absolute line width of [`FILL_WIDTH`] = 87 columns**, using a greedy paragraph
-//! ("fill") layout. This was established by driving crafted single-node theories
-//! through the live server and sweeping term width one column at a time: across
-//! functor names of length 2, 3, 6 and 10 the single-line→wrap boundary always
-//! fell at total width 87 (fits) / 88 (breaks), i.e. the width is measured from
-//! the functor's own column, independent of its length. [`fits_one_line`] is that
-//! decision; [`paragraph_fill`] packs elements greedily to the same width.
+//! The wrap DECISION and the delimiter peel are byte-implemented by [`wrap_cell`],
+//! pinned by a controlled live width sweep (BEHAVIOR.md §3f, QUERIES.log round 5):
+//! a fact is laid out from its own column 0 with line width [`FILL_WIDTH`] = 87.
+//! Two combinators, each byte-verified against captured probes:
+//!   * a fact's **argument list** and a **tuple**'s elements use a greedy fill
+//!     (`fillSep`): pack elements left-to-right, the `, ` separator trails the
+//!     element it follows, and the next element wraps when it would pass column 87.
+//!   * an info cell's **action list** uses a vertical `sep` (one action per line
+//!     when the cell overflows).
 //!
-//! Residual (characterised, not byte-implemented): the exact `fsep`-style
-//! one-element lookahead makes a *continuation* line pack one more element than
-//! the first line at the same start column, and closing delimiters (`>`, `)`) peel
-//! onto their own aligned lines in overflow; unbreakable atoms wider than 87
-//! overflow verbatim. See BEHAVIOR.md §3f.
+//! The **delimiter peel** at the fill-width boundary (byte-verified over the E-/W-
+//! sweep fixtures): a tuple's `>` stays with the last element iff it fits, else it
+//! peels onto its own line at the tuple's `<` column; a fact's `)` **always** peels
+//! onto its own line at column 0 once the fact wraps (the padded ` )` space becomes
+//! the break). An action list's `]` stays attached to the last action. The
+//! continuation-line indent equals the broken group's first-element column
+//! (`&nbsp;` runs). The one-element-lookahead observed earlier is subsumed: the
+//! continuation packs greedily to the same width as the first line.
+//!
+//! Residual (characterised, not byte-implemented): [`wrap_cell`] triggers a wrap on
+//! the cell's own flat width alone (correct for cells early on their record line).
+//! When earlier cells push the absolute column high, tamarin's Wadler `group`/
+//! `fits` decision wraps a cell **earlier** (its flat width alone can be well under
+//! 87 — e.g. a 21-char fact deep in a wide record still peels its `)`), because
+//! `fits` measures the flat rendering *plus the rest of the record line* against
+//! the remaining width. Reproducing that needs the exact document tree; see
+//! BEHAVIOR.md §3f.
 
 use crate::term::Term;
 
@@ -232,6 +244,217 @@ pub fn join_wrapped(lines: &[String], open_col: usize) -> String {
     out
 }
 
+/// Width of a rendered fragment in the pretty-printer's column model: Unicode
+/// scalar count (matches the observed column boundary).
+fn width(s: &str) -> usize {
+    s.chars().count()
+}
+
+/// One physical line of a wrapped cell: its `&nbsp;` indent column and its
+/// un-escaped text (escaping is applied when the lines are joined).
+type PLine = (usize, String);
+
+/// One fill element with the separator that precedes it, the indent to use if it
+/// starts a new line, and whether a break before it is forced (`hard`).
+struct Unit {
+    sep: &'static str,
+    text: String,
+    indent: usize,
+    hard: bool,
+}
+
+/// Greedy fill layout (BEHAVIOR.md §3f). Starting from `open_text` at column
+/// `start_col`, place each unit's separator on the current line and then its text,
+/// wrapping to the unit's indent when the text would pass [`FILL_WIDTH`] (or on a
+/// `hard` unit). Returns the physical lines.
+fn run_layout(open_text: &str, start_col: usize, units: &[Unit]) -> Vec<PLine> {
+    let mut lines: Vec<PLine> = Vec::new();
+    let mut cur = open_text.to_string();
+    let mut col = start_col;
+    let mut line_indent = 0usize;
+    for u in units {
+        cur.push_str(u.sep);
+        col += width(u.sep);
+        let w = width(&u.text);
+        if u.hard || col + w > FILL_WIDTH {
+            lines.push((line_indent, std::mem::take(&mut cur)));
+            line_indent = u.indent;
+            cur.push_str(&u.text);
+            col = u.indent + w;
+        } else {
+            cur.push_str(&u.text);
+            col += w;
+        }
+    }
+    lines.push((line_indent, cur));
+    lines
+}
+
+/// Split `s` at top-level occurrences of `", "` — respecting `()`/`<>`/`[]` nesting
+/// and `'…'` quotes — into the comma-separated elements of a fill group.
+fn split_top_commas(s: &str) -> Vec<String> {
+    let chars: Vec<char> = s.chars().collect();
+    let mut parts: Vec<String> = Vec::new();
+    let mut cur = String::new();
+    let mut depth = 0i32;
+    let mut in_quote = false;
+    let mut i = 0;
+    while i < chars.len() {
+        let c = chars[i];
+        if in_quote {
+            cur.push(c);
+            if c == '\'' {
+                in_quote = false;
+            }
+            i += 1;
+            continue;
+        }
+        match c {
+            '\'' => {
+                in_quote = true;
+                cur.push(c);
+                i += 1;
+            }
+            '(' | '<' | '[' => {
+                depth += 1;
+                cur.push(c);
+                i += 1;
+            }
+            ')' | '>' | ']' => {
+                depth -= 1;
+                cur.push(c);
+                i += 1;
+            }
+            ',' if depth == 0 && i + 1 < chars.len() && chars[i + 1] == ' ' => {
+                parts.push(std::mem::take(&mut cur));
+                i += 2;
+            }
+            _ => {
+                cur.push(c);
+                i += 1;
+            }
+        }
+    }
+    parts.push(cur);
+    parts
+}
+
+fn is_tuple(s: &str) -> bool {
+    s.starts_with('<') && s.ends_with('>')
+}
+
+/// Lay out a tuple `<e1, e2, …>` whose `<` sits at column `base_col`: fill the
+/// elements (`fillSep`) at `base_col + 1`, and peel the `>` to its own line at
+/// `base_col` iff it does not fit on the last element's line.
+fn layout_tuple(inner: &str, base_col: usize) -> Vec<PLine> {
+    let elems = split_top_commas(inner);
+    let open_col = base_col + 1;
+    let mut units: Vec<Unit> = Vec::with_capacity(elems.len() + 1);
+    for (i, e) in elems.iter().enumerate() {
+        units.push(Unit { sep: if i == 0 { "" } else { ", " }, text: e.clone(), indent: open_col, hard: false });
+    }
+    units.push(Unit { sep: "", text: ">".to_string(), indent: base_col, hard: false });
+    run_layout("<", open_col, &units)
+}
+
+/// Lay out a fact / relation cell `NAME( a1, a2, … )`. If its flat rendering fits
+/// [`FILL_WIDTH`] it stays on one line. Otherwise its arguments fill at the
+/// argument column; a sole tuple argument recurses into [`layout_tuple`]; and the
+/// closing `)` peels onto its own line at column 0 (the padded ` )` space becomes
+/// the break).
+fn layout_fact(flat: &str) -> Vec<PLine> {
+    if width(flat) <= FILL_WIDTH {
+        return vec![(0, flat.to_string())];
+    }
+    let Some(lp) = flat.find("( ") else {
+        return vec![(0, flat.to_string())];
+    };
+    if !flat.ends_with(" )") {
+        return vec![(0, flat.to_string())];
+    }
+    let open_str = &flat[..lp + 2]; // "NAME( "
+    let content = &flat[lp + 2..flat.len() - 2];
+    let open_col = width(open_str);
+    let args = split_top_commas(content);
+
+    // A sole tuple argument: the fact opens "NAME( <" and the tuple fills inside.
+    if args.len() == 1 && is_tuple(&args[0]) {
+        let inner = &args[0][1..args[0].len() - 1];
+        let tlines = layout_tuple(inner, open_col);
+        let mut lines: Vec<PLine> = Vec::with_capacity(tlines.len() + 2);
+        lines.push((0, format!("{}{}", open_str, tlines[0].1)));
+        for t in &tlines[1..] {
+            lines.push(t.clone());
+        }
+        lines.push((0, ")".to_string()));
+        return lines;
+    }
+
+    // General fill of the (atomic) arguments; the fact's `)` always peels to col 0.
+    let mut units: Vec<Unit> = Vec::with_capacity(args.len() + 1);
+    for (i, a) in args.iter().enumerate() {
+        units.push(Unit { sep: if i == 0 { "" } else { ", " }, text: a.clone(), indent: open_col, hard: false });
+    }
+    units.push(Unit { sep: "", text: ")".to_string(), indent: 0, hard: true });
+    run_layout(open_str, open_col, &units)
+}
+
+/// Lay out an info cell `#t : Rule[a1, a2, …]`. The action list uses a vertical
+/// `sep` — one action per line when the cell overflows [`FILL_WIDTH`] — with the
+/// trailing `,` kept on each non-final line and the `]` attached to the last
+/// action.
+fn layout_info(flat: &str) -> Vec<PLine> {
+    if width(flat) <= FILL_WIDTH {
+        return vec![(0, flat.to_string())];
+    }
+    let Some(lb) = flat.find('[') else {
+        return vec![(0, flat.to_string())];
+    };
+    if !flat.ends_with(']') {
+        return vec![(0, flat.to_string())];
+    }
+    let open_str = &flat[..lb + 1]; // "#t : Rule["
+    let content = &flat[lb + 1..flat.len() - 1];
+    let open_col = width(open_str);
+    let acts = split_top_commas(content);
+    let mut units: Vec<Unit> = Vec::with_capacity(acts.len());
+    for (i, a) in acts.iter().enumerate() {
+        // Each action begins its own line (a vertical `sep`, hard break after the
+        // first); non-final actions carry a trailing `,`, the last carries `]`.
+        let text = if i + 1 < acts.len() { format!("{},", a) } else { format!("{}]", a) };
+        units.push(Unit { sep: "", text, indent: open_col, hard: i > 0 });
+    }
+    run_layout(open_str, open_col, &units)
+}
+
+/// Render one record cell from its flat (un-escaped) text into the exact label
+/// bytes: single line (escaped) when it fits [`FILL_WIDTH`], otherwise the wrapped
+/// form — physical lines each prefixed by their `&nbsp;` indent, escaped, and
+/// terminated by `\l` (trailing `\l` included), per BEHAVIOR.md §3f.
+///
+/// Dispatch by cell shape: an info cell (`#t : Rule[…]`) uses the vertical action
+/// `sep`; a fact / relation cell (`NAME( … )`) uses the greedy argument/tuple fill
+/// with the delimiter peel. The same entry serves the Term-based path (feed
+/// [`Fact::render_flat`]) and the pre-rendered-string path (feed the caller's
+/// already-rendered cell text): the wrap and escape apply identically.
+pub fn wrap_cell(flat: &str) -> String {
+    let lines = if flat.starts_with('#') && flat.contains('[') {
+        layout_info(flat)
+    } else {
+        layout_fact(flat)
+    };
+    if lines.len() == 1 && lines[0].0 == 0 {
+        return escape_record(&lines[0].1);
+    }
+    let mut out = String::new();
+    for (indent, text) in &lines {
+        out.push_str(&"&nbsp;".repeat(*indent));
+        out.push_str(&escape_record(text));
+        out.push_str("\\l");
+    }
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -329,6 +552,62 @@ BeforeExpire( \\<$A, $A, 'g'^~ex\\> )]\\l";
         let nelem11 = format!("Out( <{}> )", elems.join(", "));
         assert_eq!(nelem11.chars().count(), 84);
         assert!(fits_one_line(&nelem11));
+    }
+
+    // ---- Round-5: wrap_cell byte-exact wrap + delimiter peel (BEHAVIOR.md §3f) --
+    // Expectations are the exact record-cell tails observed live (wrap_E*/W* fixtures).
+
+    #[test]
+    fn wrap_cell_single_line_when_fits() {
+        // <= 87 columns: escaped flat, no `\l`.
+        assert_eq!(wrap_cell("Fr( ~s )"), "Fr( ~s )");
+        assert_eq!(
+            wrap_cell("Out( <$R, $I, 'g'^~ekR> )"),
+            "Out( \\<$R, $I, 'g'^~ekR\\> )"
+        );
+    }
+
+    #[test]
+    fn wrap_cell_tuple_fill_and_paren_peel() {
+        // Out(<'a01'..'a12'>) (flat 91): line0 packs 11 elems + trailing ", ",
+        // 'a12' wraps to col 6, tuple '>' stays, fact ')' peels to col 0.
+        let elems: Vec<String> = (1..=12).map(|k| format!("'a{:02}'", k)).collect();
+        let flat = format!("Out( <{}> )", elems.join(", "));
+        let want = "Out( \\<'a01', 'a02', 'a03', 'a04', 'a05', 'a06', 'a07', 'a08', 'a09', 'a10', 'a11', \\l\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'a12'\\>\\l)\\l";
+        assert_eq!(wrap_cell(&flat), want);
+    }
+
+    #[test]
+    fn wrap_cell_tuple_close_peels_to_open_column() {
+        // Out(<'a…a'(74), 'y'>) (flat 90): last element fills col 87 so '>' peels to
+        // the '<' column (5), then ')' peels to col 0.
+        let flat = format!("Out( <'{}', 'y'> )", "a".repeat(74));
+        let want = format!(
+            "Out( \\<'{}', 'y'\\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\\>\\l)\\l",
+            "a".repeat(74)
+        );
+        assert_eq!(wrap_cell(&flat), want);
+    }
+
+    #[test]
+    fn wrap_cell_info_action_list_is_vertical() {
+        // Info cells over 87 columns place one action per line (vertical `sep`),
+        // the `]` attached to the last action, continuation indent = prefix length.
+        let prefix = "#vr.7 : SomeLongRuleName";
+        let a1 = "FirstActionFact( $A, $B, $C, $D )";
+        let a2 = "SecondActionFact( $A, $B, $C, $D )";
+        let flat = format!("{}[{}, {}]", prefix, a1, a2);
+        assert!(flat.chars().count() > FILL_WIDTH);
+        let open_col = prefix.chars().count() + 1; // after '['
+        let want = format!(
+            "{}[{},\\l{}{}]\\l",
+            prefix,
+            a1,
+            "&nbsp;".repeat(open_col),
+            a2
+        );
+        assert_eq!(wrap_cell(&flat), want);
     }
 
     #[test]

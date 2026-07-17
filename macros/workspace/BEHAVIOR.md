@@ -62,19 +62,54 @@ A call `name(t1, ..., tn)` where `name` is a defined macro of arity `k`:
    substitution result until no macro calls remain. `a→b→c→<x,x>` chains fully
    [Q9,Q18]. Termination guaranteed by the DAG property (§1).
 
+5. **Bare nullary uses** (macro name written WITHOUT parentheses). A **0-ary**
+   macro used as a plain name is a use of that macro, treated identically to the
+   parenthesised form: `konst() = h('k')`, then bare `konst` expands to `h('k')`
+   [Q32]. Rules:
+   - Resolves in every term position — premise, action, conclusion, and nested
+     inside functions (`h(konst)` → `h('k')`) [Q32]; and inside macro bodies,
+     transitively (`wrap() = h(base)`, bare `wrap` → `h(h('k'))`) [Q33].
+   - **Untagged sort only**: `~konst` / `$konst` (fresh/pub) are *not* the macro —
+     they stay ordinary variables [Q34] (consistent with the sort-identity rule
+     §2.3). A macro-name use cannot be sort-annotated (`konst:msg` is a parse
+     error), so a bare use is always the plain untagged form [Q32].
+   - **Nullary only**: a bare name equal to an **arity ≥ 1** macro is *not* a use;
+     it is left as an ordinary (unbound) variable [Q35].
+   - **The macro reserves its name**: when a formal shares a name with an existing
+     nullary macro, the nullary macro wins inside the body — bare occurrences
+     resolve to the macro, not the formal (`base()=h('k')`, `f(base)=<base,base>`,
+     `f(a)` → `<h('k'),h('k')>`; the formal and its argument are dropped) [Q36].
+   - **Consumer interface contract:** such a bare use reaches `expand` as a plain
+     `Term::Var("konst")` (untagged), *not* an `App`; `expand` resolves it to the
+     nullary macro exactly under the conditions above.
+
 ## 3. Where expansion is visible vs. preserved
 
 | context                              | macro call | expanded form |
 |--------------------------------------|------------|---------------|
 | `--parse-only`                       | preserved  | (not produced — no expansion) [Q2] |
-| `macros:` declaration block (closed) | preserved  | — [Q3,Q9] |
+| `macros:` declaration block (closed) | preserved (original bodies) | — [Q3,Q9,Q37] |
 | function signature                   | —          | macro NOT added [Q3] |
 | rule `(modulo E)` primary            | preserved  | — [Q3,Q4] |
 | rule `(modulo AC)` variant           | —          | **expanded** [Q3,Q4] |
 | restriction `/* expanded formula */` | (primary keeps call) | **expanded** [Q4] |
 | lemma `/* guarded formula ... */`    | (primary keeps call) | **expanded** [Q4] |
+| acc-lemma → generated lemmas' `/* guarded formula */` | (primary/predicate keep call) | **expanded** [Q38] |
+| case-test → predicate + generated lemmas' `/* guarded formula */` | (primary/predicate keep call) | **expanded** [Q39] |
 | `--diff` left/right projections      | —          | **expanded** (then diff-projected) [Q26] |
 | Sapic process → translated rules     | —          | **expanded** [Q29] |
+
+**Accountability [Q38] & case tests [Q39].** `--parse-only` preserves the calls
+in both the `test <name>: "..."` case-test formula and the `... accounts for
+"..."` acc-lemma formula. On close the acc lemma is translated into several
+generated lemmas (`_suff`, `_verif_empty`, `_verif_nonempty`, `_min`, `_uniq`,
+`_inj`, `_single`) plus a `predicate:` derived from the case test; their PRIMARY
+renderings keep the macro call while the `/* guarded formula characterizing ...
+*/` blocks show the expansion — the same primary-keeps-call / guarded-shows-
+expansion pattern as ordinary lemmas [Q4]. `formula_parity.sh` verifies the
+macro theory's guarded content is byte-identical to a hand-inlined equivalent's.
+The consumer's AST holds these as `TheoryItem::AccLemma.formula` /
+`CaseTest.formula`; `expand` rewrites both.
 
 A rule that contains a macro **always** emits an explicit `(modulo AC)` variant
 block (showing the expansion), even when the expanded term is AC-trivial; a rule
@@ -101,11 +136,15 @@ A source-to-source AST transform:
 - Rewrite **every term** occurring in the theory (rule premises/actions/
   conclusions/let-values/embedded-restrictions/variants/left-right, lemma &
   restriction & predicate & acc-lemma & case-test formulas, and Sapic process
-  terms): bottom-up, replacing each macro call with its substituted macro-free
-  body (§2.2–2.3).
-- **Drop the `Macros` items** (the output theory is macro-free), preserving the
-  order of all other items. This mirrors the hand-inlined equivalent `T'`, whose
-  oracle output matches `T`'s expanded content (§3).
+  terms): bottom-up, replacing each macro call — and each bare untagged nullary
+  macro name (§2.5) — with its substituted macro-free body (§2.2–2.3).
+- **Preserve the `Macros` items in place**, unchanged (with their original,
+  un-expanded bodies), keeping the order of all items [Q37]. The reference
+  retains the `macros:` block in its pretty output, and the consuming pipeline
+  requires the declaration block in place. (Only the *use sites* are expanded;
+  the declarations remain so the pipeline can reprint the block. This is an
+  interop requirement; it does not affect `formula_parity.sh` / `byteparity.sh`,
+  which observe the oracle on the source theories, not on `expand`'s output.)
 
 Out of scope for this unit (separate passes, only noted): let-binding inlining
 [Q23], diff left/right projection [Q26], AC-variant computation [Q30], Sapic

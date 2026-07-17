@@ -1,0 +1,10 @@
+theory OrdLaQs
+begin
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x) ]->
+   [ Out(~x) ]
+lemma L [reuse]:
+  exists-trace
+  "Ex $x #i. A($x) @ #i"
+end

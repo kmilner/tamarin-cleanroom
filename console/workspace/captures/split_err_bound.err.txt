@@ -1,0 +1,6 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+tamarin-prover: bound: invalid bound given
+CallStack (from HasCallStack):
+  error, called at src/Main/Mode/Batch.hs:162:33 in main:Main.Mode.Batch

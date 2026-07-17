@@ -38,20 +38,31 @@ impl Mode {
 }
 
 /// One recognized flag: its canonical long name, optional short char, whether it
-/// accepts a value, and any additional long aliases.
+/// accepts a value, any additional long aliases, and whether it consumes the
+/// following token as its value.
+///
+/// `consumes_next` is `false` for every reference flag: the reference binary
+/// never takes a space-separated value (`--bound 5` leaves `5` as a positional).
+/// It is `true` only for the consumer-extension flags, whose surface is
+/// `--flag <value>` and which are not present in the reference at all.
 #[derive(Debug, Clone, Copy)]
 pub struct FlagSpec {
     pub long: &'static str,
     pub short: Option<char>,
     pub takes_value: bool,
     pub aliases: &'static [&'static str],
+    pub consumes_next: bool,
 }
 
 const fn boolf(long: &'static str, short: Option<char>) -> FlagSpec {
-    FlagSpec { long, short, takes_value: false, aliases: &[] }
+    FlagSpec { long, short, takes_value: false, aliases: &[], consumes_next: false }
 }
 const fn valf(long: &'static str, short: Option<char>) -> FlagSpec {
-    FlagSpec { long, short, takes_value: true, aliases: &[] }
+    FlagSpec { long, short, takes_value: true, aliases: &[], consumes_next: false }
+}
+/// A consumer-extension value flag that also accepts a space-separated value.
+const fn extf(long: &'static str) -> FlagSpec {
+    FlagSpec { long, short: None, takes_value: true, aliases: &[], consumes_next: true }
 }
 
 // The proving/output flag subset shared by the default and interactive modes.
@@ -84,6 +95,15 @@ const WITH_TOOLS: &[FlagSpec] = &[
     valf("with-maude", None),
 ];
 
+/// Consumer-extension flags, recognized in the default/batch mode only and
+/// deliberately absent from every help page. They accept both `--flag=value` and
+/// the space-separated `--flag value` form.
+pub const INTEROP_FLAGS: &[FlagSpec] = &[
+    extf("processors"),
+    extf("maude-processes"),
+    extf("data-dir"),
+];
+
 /// Flags recognized in the default/batch mode (excluding About flags).
 pub fn batch_flags() -> Vec<FlagSpec> {
     let mut v: Vec<FlagSpec> = PROVE_COMMON.to_vec();
@@ -94,10 +114,23 @@ pub fn batch_flags() -> Vec<FlagSpec> {
         valf("output", Some('o')),
         valf("Output", Some('O')),
         valf("output-module", Some('m')),
-        FlagSpec { long: "output-json", short: None, takes_value: true, aliases: &["oj"] },
-        FlagSpec { long: "output-dot", short: None, takes_value: true, aliases: &["od"] },
+        FlagSpec {
+            long: "output-json",
+            short: None,
+            takes_value: true,
+            aliases: &["oj"],
+            consumes_next: false,
+        },
+        FlagSpec {
+            long: "output-dot",
+            short: None,
+            takes_value: true,
+            aliases: &["od"],
+            consumes_next: false,
+        },
     ]);
     v.extend_from_slice(WITH_TOOLS);
+    v.extend_from_slice(INTEROP_FLAGS);
     v
 }
 
@@ -135,7 +168,7 @@ pub fn flags_for(mode: Mode) -> Vec<FlagSpec> {
         Mode::Test => test_flags(),
     };
     // About: help everywhere; version only in the default mode.
-    v.push(FlagSpec { long: "help", short: Some('?'), takes_value: false, aliases: &[] });
+    v.push(boolf("help", Some('?')));
     if mode == Mode::Batch {
         v.push(boolf("version", Some('V')));
     }

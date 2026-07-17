@@ -47,18 +47,17 @@ fn pp_atom(a: &Atom) -> String {
 }
 
 // ---------------------------------------------------------------------------
-// Multi-line layout (HughesPJ-style) for wide formulas
+// Multi-line layout for wide formulas
 // ---------------------------------------------------------------------------
 
 /// Effective page width for the formula printer (measured: a wide formula's
 /// single line fits at total column 72 and breaks by 74 - probes r3_qm).
 pub const FORMULA_WIDTH: usize = 72;
 
-/// A layout document. `Beside` glues children horizontally (each child's break
-/// indent = the column where it starts, i.e. column-aligned continuation).
-/// `Group` is an all-or-nothing break point: it is laid flat when it fits,
+/// A layout document. `Beside` glues children horizontally. `Group` is an
+/// all-or-nothing break point: it is laid flat when it fits on the current line,
 /// otherwise the first child stays on the current line and each following child
-/// starts a new line indented `base + hang`.
+/// starts a new line indented to the group's own start column plus `hang`.
 enum Doc {
     Text(String),
     Beside(Vec<Doc>),
@@ -73,18 +72,18 @@ fn flat(d: &Doc) -> String {
     }
 }
 
-/// Lay `d` beginning at column `col`; `base` is the reference indent for hanging
-/// breaks. Returns the rendered text (with baked-in leading spaces on
-/// continuation lines) and the end column of the last line.
-fn lay(d: &Doc, col: usize, base: usize, width: usize) -> (String, usize) {
+/// Lay `d` beginning at column `col`. Continuation lines break relative to the
+/// column where the enclosing group started (`col + hang`). Returns the
+/// rendered text (with baked-in leading spaces on continuation lines) and the
+/// end column of the last line.
+fn lay(d: &Doc, col: usize, width: usize) -> (String, usize) {
     match d {
         Doc::Text(s) => (s.clone(), col + s.chars().count()),
         Doc::Beside(ds) => {
             let mut out = String::new();
             let mut c = col;
             for x in ds {
-                // Column-aligned: a child's own hanging breaks start at `c`.
-                let (s, e) = lay(x, c, c, width);
+                let (s, e) = lay(x, c, width);
                 out.push_str(&s);
                 c = e;
             }
@@ -107,13 +106,16 @@ fn lay(d: &Doc, col: usize, base: usize, width: usize) -> (String, usize) {
                 }
                 (out, c)
             } else {
-                let indent = base + hang;
-                let (s0, _) = lay(&ds[0], col, base, width);
+                // Broken: the first child stays on the current line; every
+                // following child hangs at `col + hang` (the group's start
+                // column plus its hang offset).
+                let indent = col + hang;
+                let (s0, _) = lay(&ds[0], col, width);
                 let mut out = s0;
                 for x in &ds[1..] {
                     out.push('\n');
                     out.push_str(&" ".repeat(indent));
-                    let (s, _) = lay(x, indent, indent, width);
+                    let (s, _) = lay(x, indent, width);
                     out.push_str(&s);
                 }
                 let end = out.rsplit('\n').next().unwrap().chars().count();
@@ -123,14 +125,14 @@ fn lay(d: &Doc, col: usize, base: usize, width: usize) -> (String, usize) {
     }
 }
 
-/// `(doc)` - the operand of a connective is always parenthesised.
+/// `(doc)` - the operand of a logical connective is always parenthesised.
 fn parens(inner: Doc) -> Doc {
     Doc::Beside(vec![Doc::Text("(".into()), inner, Doc::Text(")".into())])
 }
 
 fn binop_doc(a: &Formula, op: &str, b: &Formula) -> Doc {
-    // sep [ (a) <op>, (b) ] : breaks after the operator, right operand hanging
-    // at the connective's start column (hang 0).
+    // Breaks after the operator; the right operand hangs at the connective's
+    // start column (hang 0). Both operands are parenthesised.
     Doc::Group(
         vec![
             Doc::Beside(vec![parens(formula_doc(a)), Doc::Text(format!(" {}", op))]),
@@ -140,11 +142,35 @@ fn binop_doc(a: &Formula, op: &str, b: &Formula) -> Doc {
     )
 }
 
+/// A relational atom `a OP b` (=, <, ⋖, ⊏): breaks after the operator with the
+/// right term hanging at the atom's start column (hang 0). The term operands are
+/// NOT parenthesised (only the whole atom is, by its enclosing connective).
+fn relation_doc(a: &Term, op: &str, b: &Term) -> Doc {
+    Doc::Group(
+        vec![
+            Doc::Text(format!("{} {}", pp_term(a), op)),
+            Doc::Text(pp_term(b)),
+        ],
+        0,
+    )
+}
+
+fn atom_doc(a: &Atom) -> Doc {
+    match a {
+        Atom::Eq(x, y) => relation_doc(x, "=", y),
+        Atom::Less(x, y) => relation_doc(x, "<", y),
+        Atom::LessMset(x, y) => relation_doc(x, "⋖", y),
+        Atom::Subterm(x, y) => relation_doc(x, "⊏", y),
+        // Action, Last and Pred atoms are laid on a single line.
+        Atom::Action(_, _) | Atom::Last(_) | Atom::Pred(_) => Doc::Text(pp_atom(a)),
+    }
+}
+
 fn formula_doc(f: &Formula) -> Doc {
     match f {
         Formula::False => Doc::Text("⊥".into()),
         Formula::True => Doc::Text("⊤".into()),
-        Formula::Atom(a) => Doc::Text(pp_atom(a)),
+        Formula::Atom(a) => atom_doc(a),
         Formula::Not(g) => Doc::Beside(vec![Doc::Text("¬".into()), parens(formula_doc(g))]),
         Formula::And(a, b) => binop_doc(a, "∧", b),
         Formula::Or(a, b) => binop_doc(a, "∨", b),
@@ -156,15 +182,17 @@ fn formula_doc(f: &Formula) -> Doc {
 }
 
 fn quantifier_doc(sym: &str, vs: &[VarSpec], g: &Formula) -> Doc {
-    // sep [ "Q v1 .. vn.", body ] : breaks after the dot, body hanging two
-    // columns past the formula base indent (hang 2).
+    // Breaks after the dot; the body hangs one column past the quantifier's
+    // start column (hang 1).
     let head = format!("{} {}.", sym, pp_bound_vars(vs));
-    Doc::Group(vec![Doc::Text(head), formula_doc(g)], 2)
+    Doc::Group(vec![Doc::Text(head), formula_doc(g)], 1)
 }
 
 /// Render a formula the way the oracle embeds it inside `"..."` in the
-/// guardedness report: starting at column `col`, with `base` the indentation of
-/// the enclosing quote. Continuation lines carry their absolute indentation.
-pub fn pp_formula_wrapped(f: &Formula, col: usize, base: usize) -> String {
-    lay(&formula_doc(f), col, base, FORMULA_WIDTH).0
+/// guardedness report: the formula's first character sits at column `col`
+/// (the oracle uses column 7, i.e. after `      "`). Continuation lines carry
+/// their absolute indentation. When the whole formula fits on one line the
+/// output is byte-identical to [`pp_formula`].
+pub fn pp_formula_wrapped(f: &Formula, col: usize) -> String {
+    lay(&formula_doc(f), col, FORMULA_WIDTH).0
 }

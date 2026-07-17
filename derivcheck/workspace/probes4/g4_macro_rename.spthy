@@ -1,0 +1,9 @@
+theory G4MacroRename
+begin
+functions: h/1
+macros: wrap(a) = h(a)
+rule R:
+  let y = w
+  in
+  [ In( wrap(y) ) ] --> [ Out('ok') ]
+end

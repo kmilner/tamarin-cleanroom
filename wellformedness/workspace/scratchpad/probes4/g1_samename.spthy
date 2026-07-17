@@ -1,0 +1,7 @@
+theory G1Same
+begin
+rule R1: [ Fr(~x) ] --[ A(~x) ]-> [ Out(~x) ]
+lemma L:
+  exists-trace
+  "Ex x #x. A(x) @ #x"
+end

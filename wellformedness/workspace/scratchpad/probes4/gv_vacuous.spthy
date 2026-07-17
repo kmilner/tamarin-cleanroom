@@ -1,0 +1,12 @@
+theory Tgv_vacuous
+begin
+
+predicates: Pr(x) <=> x = x
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x), B(~x), C(~x) ]->
+   [ Out(~x) ]
+lemma L:
+  exists-trace
+  "Ex x #i #j. A(x) @ #i"
+end

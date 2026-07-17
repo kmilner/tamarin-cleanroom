@@ -92,6 +92,192 @@ fn ellipse_kinds_and_colors() {
     assert!(dot.contains("n2[label=\"#vf.7 : isend\",shape=\"ellipse\"];"));
 }
 
+// -------------------------------------------------------------------------
+// Round 5 — record-cell WRAP wired into generation (BEHAVIOR.md §3f).
+// Each fixture is a live-probed single-node graph whose one wide conclusion cell
+// breaks across the fill-width boundary; `generate` must reproduce it byte-exact,
+// exercising the greedy fill + delimiter peel through the real record builder.
+// -------------------------------------------------------------------------
+
+/// A one-rule theory `E{n}: [Fr(~s)] --[E{n}()]-> [Out(<'a01'..'a{n}'>)]` graph:
+/// build the System and compare to the captured `wrap_E{n}.dot`.
+fn wrap_element_case(n: usize, fixture: &str) {
+    let consts: Vec<Term> = (1..=n).map(|k| Term::cst(&format!("a{:02}", k))).collect();
+    let rule = RuleInstance::new("i", &format!("E{}", n), "#d5d897")
+        .premises(vec![Fact::new("Fr", vec![fresh("s")])])
+        .actions(vec![Fact::new(&format!("E{}", n), vec![])])
+        .conclusions(vec![Fact::new("Out", vec![Term::tuple(consts)])]);
+    let sys = System { nodes: vec![GraphNode::Rule(rule)], ..System::default() };
+    assert_eq!(to_dot(&generate(&sys)), fixture);
+}
+
+#[test]
+fn wrap_e12_greedy_fill_and_paren_peel() {
+    // 12 five-column elements: line0 packs 11 + trailing ", ", 'a12' wraps to the
+    // <-column indent, the tuple '>' stays with it, the fact ')' peels to col 0.
+    wrap_element_case(12, include_str!("fixtures/wrap_E12.dot"));
+}
+
+#[test]
+fn wrap_e13_and_e14_continuation_packs_greedily() {
+    // The continuation line packs greedily to the same width as the first line
+    // (two elements for E13, three for E14) — the one-element-lookahead residual is
+    // subsumed by the greedy fill.
+    wrap_element_case(13, include_str!("fixtures/wrap_E13.dot"));
+    wrap_element_case(14, include_str!("fixtures/wrap_E14.dot"));
+}
+
+/// A one-rule theory `W{p}: … [Out(<'a…a'(p), 'y'>)]` graph, exercising the tuple
+/// `>` peel at the boundary.
+fn wrap_width_case(p: usize, fixture: &str) {
+    let atom = Term::cst(&"a".repeat(p));
+    let rule = RuleInstance::new("i", &format!("W{}", p), "#d5d897")
+        .premises(vec![Fact::new("Fr", vec![fresh("s")])])
+        .actions(vec![Fact::new(&format!("W{}", p), vec![])])
+        .conclusions(vec![Fact::new("Out", vec![Term::tuple(vec![atom, Term::cst("y")])])]);
+    let sys = System { nodes: vec![GraphNode::Rule(rule)], ..System::default() };
+    assert_eq!(to_dot(&generate(&sys)), fixture);
+}
+
+#[test]
+fn wrap_w71_fits_at_87() {
+    // Flat width 87 stays on one line (no `\l`): the boundary is inclusive.
+    wrap_width_case(71, include_str!("fixtures/wrap_W71.dot"));
+}
+
+#[test]
+fn wrap_w72_paren_peels_when_content_fits_but_close_does_not() {
+    // The tuple fits on line0 (`'y'>`); the fact ` )` (col 88) does not, so `)` peels.
+    wrap_width_case(72, include_str!("fixtures/wrap_W72.dot"));
+}
+
+#[test]
+fn wrap_w74_tuple_close_peels_to_open_column() {
+    // The last element fills to col 87, so the tuple `>` peels to the `<` column
+    // (5) on its own line, then the fact `)` peels to col 0.
+    wrap_width_case(74, include_str!("fixtures/wrap_W74.dot"));
+}
+
+// -------------------------------------------------------------------------
+// Round 5 — role CLUSTER subgraphs (BEHAVIOR.md §4).
+// -------------------------------------------------------------------------
+
+/// Reproduce `tests/fixtures/cluster_process.dot` — a live SAPIC source-case graph
+/// (`cluster_Process_Session_1`, one role record, white node fill / black font) —
+/// purely by building a clustered `System`.
+#[test]
+fn generate_reproduces_live_sapic_cluster_byte_exact() {
+    let m = |n: &str| Term::msg(n);
+    let record = RuleInstance::new("t", "eventNewKeyhk", "#ffffff")
+        .role("Process", "black")
+        .cluster("Process_Session_1", "#36A5D84C")
+        .premises(vec![Fact::new("State_111111", vec![m("h"), m("k")])])
+        .actions(vec![Fact::new("NewKey", vec![m("h"), m("k")])])
+        .conclusions(vec![Fact::new("State_1111111", vec![m("h"), m("k")])]);
+    let sys = System { nodes: vec![GraphNode::Rule(record)], ..System::default() };
+    assert_eq!(to_dot(&generate(&sys)), include_str!("fixtures/cluster_process.dot"));
+}
+
+/// Reproduce corpus `cluster_multi.dot` (79c16911ad179d51): four free ellipses
+/// (compressed intruder rules + gray `!KU`), then ONE `cluster_User_Session_1`
+/// record, then two red-dashed deduction edges — exercising the full free→cluster
+/// →edge emission order and id allocation.
+#[test]
+fn generate_reproduces_multi_cluster_corpus_byte_exact() {
+    let m = |n: &str| Term::msg(n);
+    let record = RuleInstance::new("i", "eventExclusivelmrm", "#80406c")
+        .role("User", "white")
+        .cluster("User_Session_1", "#D036D84C")
+        .premises(vec![Fact::new("State_111121111", vec![m("x"), m("y"), m("s"), m("sk")])])
+        .actions(vec![Fact::new("Exclusive", vec![m("x"), m("y")])])
+        .conclusions(vec![Fact::new("State_1111211111", vec![m("x"), m("y"), m("s"), m("sk")])]);
+    let sys = System {
+        nodes: vec![
+            GraphNode::Compressed { temporal: "k1".into(), rule: "isend[K( x )]".into() },
+            GraphNode::Compressed { temporal: "k2".into(), rule: "isend[K( y )]".into() },
+            GraphNode::Knowledge { term: "x".into(), temporal: "vk".into() },
+            GraphNode::Knowledge { term: "y".into(), temporal: "vk.1".into() },
+            GraphNode::Rule(record),
+        ],
+        edges: vec![
+            SysEdge::new(EndRef::Whole(2), EndRef::Whole(0), EdgeStyle::KnowledgeDeduction),
+            SysEdge::new(EndRef::Whole(3), EndRef::Whole(1), EdgeStyle::KnowledgeDeduction),
+        ],
+        ..System::default()
+    };
+    assert_eq!(to_dot(&generate(&sys)), include_str!("fixtures/cluster_multi.dot"));
+}
+
+// -------------------------------------------------------------------------
+// Round 5 — missing node kinds: the `#last` designated timepoint + bare
+// timepoints (BEHAVIOR.md §3d/§6).
+// -------------------------------------------------------------------------
+
+/// Reproduce corpus `last_timepoint.dot` (24a119958f784d43): a compressed rule, two
+/// darkblue actions, a gray `!KU`, and the `#last` timepoint ellipse fed by a
+/// black-dashed before-edge.
+#[test]
+fn generate_reproduces_last_timepoint_byte_exact() {
+    let sys = System {
+        nodes: vec![
+            GraphNode::Compressed { temporal: "j".into(), rule: "isend[K( s )]".into() },
+            GraphNode::Action { fact: "Secret( 'KEY', A, s )".into(), temporal: "i".into() },
+            GraphNode::Action { fact: "Reveal( K, X )".into(), temporal: "l".into() },
+            GraphNode::Knowledge { term: "s".into(), temporal: "vk".into() },
+            GraphNode::last(),
+        ],
+        edges: vec![
+            SysEdge::new(EndRef::Whole(2), EndRef::Whole(4), EdgeStyle::TemporalBlack),
+            SysEdge::new(EndRef::Whole(3), EndRef::Whole(0), EdgeStyle::KnowledgeDeduction),
+        ],
+        ..System::default()
+    };
+    assert_eq!(to_dot(&generate(&sys)), include_str!("fixtures/last_timepoint.dot"));
+}
+
+/// A bare timepoint variable renders as an uncolored `#var` ellipse (observed
+/// `#i`, `#decrypt`, `#t1`, …).
+#[test]
+fn bare_timepoint_ellipse() {
+    let sys = System {
+        nodes: vec![GraphNode::Temporal { var: "decrypt".into() }],
+        ..System::default()
+    };
+    assert!(to_dot(&generate(&sys)).contains("n0[label=\"#decrypt\",shape=\"ellipse\"];"));
+}
+
+// -------------------------------------------------------------------------
+// Round 5 — pre-rendered-cell interop entry (RawRule).
+// -------------------------------------------------------------------------
+
+/// The pre-rendered path reproduces the Term-based path exactly: building the live
+/// SAPIC cluster from PRE-RENDERED cell strings yields the same bytes.
+#[test]
+fn raw_rule_matches_term_path_byte_exact() {
+    let record = RawRule::new("#t : eventNewKeyhk[NewKey( h, k )]", "#ffffff")
+        .role("Process", "black")
+        .cluster("Process_Session_1", "#36A5D84C")
+        .premises(vec!["State_111111( h, k )".into()])
+        .conclusions(vec!["State_1111111( h, k )".into()]);
+    let sys = System { nodes: vec![GraphNode::RawRule(record)], ..System::default() };
+    assert_eq!(to_dot(&generate(&sys)), include_str!("fixtures/cluster_process.dot"));
+}
+
+/// The wrap + escape pipeline applies to pre-rendered cell strings too: feeding the
+/// E12 conclusion as a raw string reproduces the wrapped `wrap_E12.dot`.
+#[test]
+fn raw_rule_wraps_and_escapes_prerendered_cells() {
+    let out: String = {
+        let elems: Vec<String> = (1..=12).map(|k| format!("'a{:02}'", k)).collect();
+        format!("Out( <{}> )", elems.join(", "))
+    };
+    let record = RawRule::new("#i : E12[E12( )]", "#d5d897")
+        .premises(vec!["Fr( ~s )".into()])
+        .conclusions(vec![out]);
+    let sys = System { nodes: vec![GraphNode::RawRule(record)], ..System::default() };
+    assert_eq!(to_dot(&generate(&sys)), include_str!("fixtures/wrap_E12.dot"));
+}
+
 /// End-to-end abbreviation: a system with a legend emits the `{ rank="sink"; … }`
 /// block and the invis edge after it (observed order).
 #[test]

@@ -1,0 +1,12 @@
+theory Tgx_neg_ant
+begin
+
+predicates: Pr(x) <=> x = x
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x), B(~x), C(~x) ]->
+   [ Out(~x) ]
+lemma L:
+  all-traces
+  "All x #i. (not (A(x) @ #i)) ==> (x = x)"
+end

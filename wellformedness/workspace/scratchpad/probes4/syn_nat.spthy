@@ -1,0 +1,11 @@
+theory SynNat
+begin
+builtins: natural-numbers
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x) ]->
+   [ Out(~x) ]
+lemma L:
+  all-traces
+  "All x:nat #i. (A(x) @ #i) ==> (x = x)"
+end

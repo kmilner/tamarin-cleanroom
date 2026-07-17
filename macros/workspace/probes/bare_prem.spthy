@@ -1,0 +1,7 @@
+theory BarePrem
+begin
+builtins: hashing
+macros: konst() = h('k')
+rule R:
+  [ In(konst) ] --[ A(konst) ]-> [ Out(konst) ]
+end

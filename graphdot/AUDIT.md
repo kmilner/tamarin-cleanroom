@@ -420,3 +420,161 @@ a conclusion that contradicts it. No mirrored decomposition, no shared internal
 names, no echoed comments. One closest-call (`fsep` in comments) considered and
 cleared. Findings that survive filtration: 0. No redo instructions issued.
 VERDICT: PASS.
+
+## Round 5 incremental audit — generate() completion (clusters, node kinds, wrap wiring, pre-rendered entry)
+
+Scope (this round's delta ONLY; clean-room HEAD `63ed8a9` → working tree, restricted
+to `graphdot/`). Code files touched: `src/generate.rs` (cluster routing + the
+`ClusterRef` / `RawRule` / `RecordSpec` types, `GraphNode::{Temporal,Shaped,RawRule}`,
+`build_record` over `RecordSpec` + `wrap_cell`), `src/render.rs` (the record-cell
+wrap+peel implementation: `wrap_cell`, `run_layout`, `split_top_commas`, `is_tuple`,
+`layout_tuple`, `layout_fact`, `layout_info`, `width`, `Unit`, `PLine`), `src/lib.rs`
+(re-exports only), plus `tests/generate_tests.rs` / `tests/roundtrip.rs` and the new
+fixtures. Provenance docs: `workspace/BEHAVIOR.md` §3g/§3f/§4 and `QUERIES.log`
+Session 5. Haskell originals (both sides), followed from the dot/graph rendering
+entry point: `Constraint/System/Dot.hs` (`dotGraphCompact`, `dotCluster`/`roleCluster`,
+`dotNodeCompact` incl. `LastActionAtom`/`UnsolvedActionNode`/`MissingNode`, the
+`mkNode`/`renderRow`/`renderBalanced`/`scaleIndent` wrap machinery, `ruleLabelM`) and
+`Constraint/System/Graph/{GraphRepr,Graph,Simplification,Abbreviation}.hs`.
+
+### Provenance cross-check (every new behavioral claim traces to a logged probe / captured fixture)
+
+Walked each behavioral claim in the new code against BEHAVIOR §3f/§3g/§4 and
+QUERIES Session 5, and validated the fixtures against the actual corpus:
+- Cluster emission order `[free nodes][clusters][edges][legend]`, clusters contain
+  only records, free ids < clustered ids, contiguous per-cluster id ranges,
+  first-appearance == id order — `analyze_clusters.py` census over 1457 files;
+  witnessed by fixtures `cluster_process.dot` (live SAPIC) and `cluster_multi.dot`.
+- `cluster_multi.dot` (79c16911ad179d51) and `last_timepoint.dot` (24a119958f784d43)
+  are **byte-identical to the actual `oracle/dot_corpus/` files** (verified by diff),
+  i.e. real captured OUTPUT, not fabricated expectations.
+- Cluster label `<Role>_Session_<k>` — 9594/9594 census (and directly in the DOT).
+- Bare-timepoint / `#last` ellipse — node-kind census (`#last` 107, `#i` 1328,
+  `#decrypt` 790, …); `#last` as target of a `color="black",style="dashed"` edge
+  (fixture 24a). `GraphNode::Temporal`/`last()`.
+- Wrap width 87 (P=71 fits / 72 breaks), fact `)`-always-peel (E12), tuple `>` stays
+  iff fits else peels to the `<` column (W72/W74), continuation packs greedily not
+  +1-lookahead (E13→2/E14→3), info action-list = one-per-line vertical (6738eb64,
+  b5a8773) — all in QUERIES Session 5; 7 live fixtures `wrap_E11..E14`/`W71/W72/W74`
+  (the captured tails match the `wrap_cell` unit-test expectations byte-for-byte).
+- The accumulated-column wrap **TRIGGER** (Wadler `group`/`fits`) is documented a
+  RESIDUAL/GAP and NOT implemented (`measure_break.py` line-0 width 19..277; the
+  `Y_counter` probe). No unlogged behavioral claim found.
+
+### Grep sweeps (this round's files)
+- Haskell internal names — `renderBalanced`, `scaleIndent`, `renderRow`,
+  `widthRender`, `usedWidths`, `oneLineRender`, `roleCluster`, `createSubGraph`,
+  `createClusterNodeId`, `extractBaseName`, `dotCluster`, `dotNodeCompact`,
+  `simpleHash`, `generateValue`, `roleColor`, `LastActionAtom`, `UnsolvedActionNode`,
+  `SystemNode`, `MissingNode`, `mkNode`, `dotGraphCompact`, `systemToGraph`,
+  `grClusters`, `cEdges`, `mergeLessEdges`, `prettyLNFact`, `ruleLabelM`,
+  `groupNodesByRole`, `addCluster`: **NONE present** in `src/` or `tests/`.
+- Source magic constants — `100`, `1.3`, `1.5`, `30`, and the color-hash constants
+  `31`, `7`, `0.75`, `0.85`, `0.3`, `hsv`/`floor`: **NONE** (the only `0.3` hits are
+  the observable DOT attribute strings `nodesep="0.3"` etc.).
+
+### Role CLUSTERS — `generate` bucketing (Dot.hs `dotGraphCompact`/`dotCluster`/`roleCluster`, GraphRepr `addCluster`/`groupNodesByRole`) — CLEARED
+The clean side reproduces only the **observable statement order**: allocate ids in
+`System.nodes` order, route each role-record's statement into its `cluster(label,color)`
+bucket and everything else to a free top-level list, then emit free nodes → cluster
+blocks (first-appearance order) → edges → legend. That order and the id-allocation
+consequence (free ids < clustered ids) are directly visible in the DOT and verified
+1457/1457. The Haskell instead consumes a pre-computed `grClusters` produced by the
+SOLVER's role machinery — `groupNodesByRole`, `addCluster`/`createSubClusters`,
+`findConnectedComponents`/`expandCluster`, `extractBaseName`, `addClusterByRole`
+(suffix `"_Session_"`) — and emits clusters through the `roleCluster`/`D.createSubGraph`
+StateT dance with the `roleColor`(`simpleHash`/`generateValue`) hash. NONE of that
+appears on the clean side: cluster membership, label, and the 8-hex ARGB color are
+solver-supplied INPUTS (`ClusterRef{label,color}`, a documented GAP), and the color
+hash (`simpleHash` 31/7, HSV 0.75/0.85, alpha 0.3) is absent. The clean side's own
+first-appearance `HashMap` + `cluster_order` bucketing is a materially different
+expression. The per-cluster attribute block (`nodesep="0.6"`, `penwidth="2"`, `sep="4"`,
+…) it serializes is exact output bytes and lives in the pre-existing `Cluster` model,
+not this delta. Output-forced order + divergent expression + absent hash → not a
+violation.
+
+### Node kinds `#last` / bare timepoint (Dot.hs `LastActionAtom`→`mkSimpleNode (show v)`) — CLEARED
+`GraphNode::Temporal{var}` (with `last()` == `Temporal{var:"last"}`) emits an uncolored
+`#<var>` ellipse. The Haskell equivalent is the `LastActionAtom -> mkSimpleNode (show v) []`
+branch of `dotNodeCompact`. The `#last`/`#i`/`#decrypt` labels and the plain-ellipse
+form are captured OUTPUT (census + fixture 24a). Different name (`Temporal` vs
+`LastActionAtom`), and the clean side derives the node kind from the corpus label
+census rather than from the `NodeType` sum. Round 3 had *omitted* this kind as
+unobserved-live; adding it now strictly on corpus evidence is observation-driven.
+Not a violation.
+
+### `GraphNode::Shaped{label,shape,color}` (generic) vs Dot.hs `missingNode shape label` — CLEARED
+An explicit escape-hatch for shapes beyond the observed set (named for the unobserved
+`trapezium` dual). Haskell's `missingNode shape label = D.node [("label",…),("shape",shape)]`
+is the same two-attribute output shape (observable). The clean side does **not** emit
+`trapezium` from any mapping (Session-5 re-scan of NSLPK3 cases confirmed it absent in
+corpus/probe); it only exposes a caller-supplied generic node. Under-modeling to the
+observed subset → affirmative independence, not similarity.
+
+### Record-cell WRAP + delimiter PEEL — `wrap_cell` / `run_layout` / `split_top_commas` / `layout_{fact,tuple,info}` (Dot.hs `mkNode`/`renderRow`/`renderBalanced`/`scaleIndent`, `ruleLabelM`) — CLEARED (closest call)
+This is the round's substantive addition and the closest call. Abstraction–filtration:
+
+| aspect | Haskell (Dot.hs) | Clean (`render.rs`) | observable? | disposition |
+|--------|------------------|---------------------|-------------|-------------|
+| line-width budget | `renderBalanced 100 (max 30 . round . (*1.3))` — proportional per-row balance across a row's cells, fed to HughesPJ `renderStyle{lineLength=w}` | flat absolute `FILL_WIDTH=87` measured from the cell's own column 0 | YES (live width sweep W69–W74, functor-invariant) | FILTERED; constant materially different (87 vs 100/1.3/30) |
+| the break | HughesPJ `fsep`-fill inside `prettyLNFact`, driven by `renderStyle` | hand-rolled greedy `run_layout` over `Unit{sep,text,indent,hard}`, char-count width | YES (byte-verified) | FILTERED / DIVERGENT expression |
+| fill vs vertical split | `prettyLNFact` fact-args via `fsep`; `ruleLabelM` action list via `brackets (vcat …)` | `layout_fact`/`layout_tuple` greedy fill; `layout_info` vertical, dispatched by the flat string's SHAPE (`#…[…]`) | YES (info→one-per-line even when short: 6738eb64; args→greedy fill) | FILTERED (observed two modes); dispatch differs (output-shape heuristic vs builder identity) |
+| delimiter peel (`)` to col 0, `>` to `<`-col iff overflow) | emergent from `fsep`/HughesPJ, no explicit "peel" code | explicit reconstruction in `layout_fact`/`layout_tuple` | YES (E12/W72/W74 fixtures) | FILTERED; clean side reverse-engineered explicit logic the source does not contain |
+| string-splitting of flat cells (`split_top_commas`, nesting/quote aware) | NONE — Haskell operates on the structured `Doc`/term tree | required because the clean side wraps flat rendered strings | — | clean-room-only expression, no HS analog |
+| proportional row balance (`ratio`, `usedWidths`, total 100) | present | **absent** | NO | NOT reproduced — positive signal |
+| `scaleIndent` ×1.5 leading-space scale | present (375–379) | **absent** — indent is literal `&nbsp;`×open-col | NO | NOT reproduced — positive signal |
+| accumulated-column wrap TRIGGER (`group`/`fits`) | present (emergent) | **documented RESIDUAL/GAP, not implemented** (wraps on the cell's own flat width) | partially | DIVERGENT under-model — affirmative independence |
+
+The clean printer is a flat-width greedy fill over an explicit `Unit` list with an
+explicit delimiter-peel reconstruction and a nesting-aware string splitter — a
+materially different implementation from the Haskell proportional-balance
+(`renderBalanced`) + `scaleIndent` transform feeding a HughesPJ `Doc` built by
+`prettyLNFact`/`ruleLabelM`. Every source-only piece (100 / 1.3 / 30 / 1.5, the row
+balance, the ×1.5 indent scale, the accumulated-column trigger) is absent or an
+explicit GAP. The width 87 is an opaque measured boundary, not the source formula.
+Output-forced boundary + divergent expression → not a violation.
+
+**Closest call (considered, CLEARED): combinator names in comments.** `render.rs`
+comments name `fillSep`, `sep`, `fsep`, and attribute the accumulated-column effect to
+"tamarin's Wadler `group`/`fits`". FILTRATION, consistent with the Round-4 `fsep`
+disposition: (1) these are public pretty-printer *library / textbook algorithm*
+vocabulary, not tamarin identifiers — and verified against the source, tamarin's
+`Text.PrettyPrint.Class` exposes `fsep`/`sep`/`vcat`/`nest` but has **no** `fillSep`
+and **no** `group`/`fits` (those are Leijen/Wadler names tamarin does not use), so the
+comment cannot be reciting tamarin source; (2) tamarin's printer is HughesPJ (`fsep`),
+so the "Wadler `group`/`fits`" attribution is in fact slightly *wrong* about the
+mechanism — an inference from general knowledge, not a reading of the source;
+(3) the words appear only in prose characterizing observed behavior and a
+not-implemented residual, and change no emitted byte; the clean CODE diverges from
+`fsep` rather than matching it. CLEARED — no redo. (Optional, not required: describe
+the two modes purely behaviorally — "greedy fill" / "one element per line" — and the
+residual as "a break decision that depends on the whole record line" without naming
+`fillSep`/`group`/`fits`. Flagged for the transcript auditor's glance only.)
+
+### `RawRule` / `RecordSpec` pre-rendered interop — CLEARED (no HS counterpart)
+`RawRule` (accept already-rendered cell strings) and `RecordSpec` (shared flat-content
+struct feeding `build_record`) are clean-room API/refactor affordances. The Haskell has
+no pre-rendered-string entry (it always renders from structured `LNFact`s); `RecordSpec`
+is a Rust code-sharing intermediate with no analog. The interop path runs through the
+same `wrap_cell`/escape pipeline (byte-parity test). No similarity concern.
+
+### Simplification — no new counterpart
+This round adds no code against `Simplification.hs`; the compress/compact content and
+the wrap trigger remain documented solver GAPs. Consistent with prior rounds.
+
+### VIOLATIONS (Round 5)
+None. The cluster routing reproduces an output-forced statement/id order with the
+solver's role/color machinery (`groupNodesByRole`/`addCluster`/`roleColor` hash) absent
+and cluster identity/color taken as inputs; the `#last`/bare-timepoint and generic
+`Shaped` node kinds are corpus-observed labels under a divergent type vocabulary; the
+record-cell wrap+peel is a flat-width greedy fill with an explicit delimiter-peel
+reconstruction and a nesting-aware string splitter — materially different from the
+`renderBalanced`/`scaleIndent` proportional-budget + HughesPJ printer, with the 100 /
+1.3 / 30 / 1.5 constants, the row balance, the ×1.5 indent scale, and the
+accumulated-column trigger all absent or explicit GAPs. Corpus fixtures are
+byte-identical to the captured payloads; every behavioral claim traces to a logged
+Session-5 probe or captured fixture. No mirrored internal decomposition, no shared
+internal names, no source magic constants, no echoed comments. One closest-call
+(library/algorithm combinator names in comments) considered and cleared, consistent
+with Round 4. Findings that survive filtration: 0. No redo instructions issued.
+VERDICT: PASS.

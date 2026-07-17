@@ -1,0 +1,7 @@
+theory G3Nat
+begin
+builtins: natural-numbers
+functions: h/1
+rule R:
+  [ In( h(%x) ) ] --> [ Out('ok') ]
+end

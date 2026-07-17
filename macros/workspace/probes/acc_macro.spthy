@@ -1,0 +1,20 @@
+theory AccMacro
+begin
+
+macros: idt(x) = x, idl(x) = x
+
+process:
+  new sid;
+  ( event Unequal(sid); event Blame(sid, sid) )
+
+test blamed:
+  "Ex sid #i. Blame(idt(sid), x)@i"
+
+lemma acc:
+  blamed accounts for
+  "not (Ex sid #i. Unequal(idl(sid))@i)"
+
+restriction unequal_blame:
+  "All sid #i. Unequal(sid)@i ==> Ex x #j. Blame(sid, x)@j"
+
+end

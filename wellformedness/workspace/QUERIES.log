@@ -143,3 +143,43 @@ r3_nestsub/r3_notsub :: reported subformula = the failing quantifier subtree (no
 r3_gc :: guardedness decision map: ForAll body MUST be a top-level implication (conj/disj/neg/atom body -> "without toplevel implication"); antecedent-only actions guard the vars (consequent doesn't); Exists takes a conjunctive guard (Ex x #i. A(x)@#i is fine)
 # Item 4b (rule-printer wide fact-list wrap) - RESIDUAL GAP, documented:
 r3_rulewrap :: wide rule wraps: header "rule (modulo E) N:" then a broken fact list ("[" own line indent 7, facts fillSep indent 7, "]" own line), arrow "-->" own line indent 6, then conclusions; entangled with the out-of-scope Maude Message-Derivation reprint; single-line rule printer stays byte-exact for short rules (r3_rulenarrow)
+
+# --- ROUND 4 (Unit C): sort-aware binding + semantic guardedness ---
+# GAP 1: sort-aware quantifier binding + NEW "Quantifier sorts" topic
+g1_core :: All #x. (A(x)@#x)==>(#x=#x) -> Formula terms `Free x' (node binder #x does NOT bind msg use x); NO guardedness (#x guarded via @#x)
+syn_nat :: All x:nat #i. ... -> nat quantifier OK (no Quantifier sorts); msg use x free -> Free x; bound %x.1 (alpha-renamed vs free x)
+syn_pubsuffix :: All x:pub #i. ... -> NEW topic "Quantifier sorts": Lemma `L' uses quantifiers with wrong sort: ("x",LSortPub); also FT Free x, guardedness $x.1
+qs_fresh_suffix/qs_fresh_prefix/qs_pub_prefix/qs_nat_prefix/qs_msg_plain :: wrong-sort set = {Pub,Fresh}; Nat/Msg/Node OK; prefix form binds sort-exactly (no FT/GD when consistent)
+qs_multi :: All $x ~y $z #i -> QS list `("x",LSortPub), ("y",LSortFresh), ("z",LSortPub)` fillSep width69 indent4; guardedness lists only un-antecedent-guarded ~y,$z
+qs_twolem :: two lemmas wrong-sort -> QS entries joined "\n  \n"
+qs_restr :: restriction pub quantifier (guarded) -> "Restriction `Res' uses quantifiers with wrong sort:..."; QS applies to restrictions too
+# Assembly / ordering of formula-bundle {Quantifier sorts, Formula terms, Formula guardedness}
+ord_ftqs/ord_qsft :: per-item emission (sub-order QS,FT,GD); topics NOT globally fixed - determined by which lemma emits first
+ord_qs_ft_qs :: L1=QS,L2=FT,L3=QS -> THREE blocks (QS,FT,QS); same-topic merges ONLY when CONSECUTIVE in emission order
+ord_unbound_qs :: rule Unbound then lemma QS -> formula bundle sits after rule-topics (unchanged global slot)
+qs_restr/ord_rl_ft2 :: LEMMAS processed before RESTRICTIONS (restriction src-first still emits after lemma); FT merge = lemma entry then restriction entry
+ord_la_ft2 :: Lemma annotations is NOT in the per-item bundle -> emitted as a separate global check AFTER FT (L2 FT before L1 LemmaAnnot)
+# GAP 2: guardedness decision procedure
+gu_bareatom/gu_conj/gu_disj/gu_neg/gu_iff :: universal body not a top-level implication -> "universal quantifier without toplevel implication"
+gu_impl_ok/gu_true :: universal guard==>rest with all vars guarded -> SUCCESS
+ge_conj_ok/ge_bareact/ge_eqonly :: existential guarded by conjunction-reachable action atom(s) -> SUCCESS
+ge_disj/ge_impl/ge_neg :: existential body not conjunction-of-actions -> "unguarded variable(s) ..." (all quantified vars)
+ge_unguard/gv_vacuous/ge_noact :: existential with some/all vars not covered by action guards -> those vars "unguarded variable(s)" (binding order)
+gx_conj_ant :: conjunction antecedent guards all -> SUCCESS
+gx_disj_ant/gx_neg_ant :: disjunction/negation in antecedent does NOT guard (all vars unguarded)
+gx_pred_grd/gx_eq_ant/gx_less/gx_last :: predicate(expanded)/equality/Less/last atoms do NOT guard; ONLY Action atoms guard
+gx_less_act :: A(x)@#i & (#i<#j) -> only x,#i guarded; #j unguarded (Less non-guard)
+gx_quant_g :: (Ex #j. A(x)@#j) ==> ... -> quantifier in antecedent does NOT guard (no descent into quantifiers)
+gx_pair :: A(<x,y>)@#i guards x AND y (all vars of the action atom)
+gx_nest_ante/gx_nest_cons :: recursion into antecedent AND consequent finds nested failing quantifier; reported sub=inner quantifier, whole=entire lemma formula
+gr_both :: both antecedent+consequent broken -> ANTECEDENT reported first (recurse guard before rest)
+gr_sib :: two broken siblings in a conjunction -> FIRST (left) reported
+gr_restr :: unguarded RESTRICTION -> FATAL error (Guarded.hs:526), not a warning -> guardedness is LEMMA-ONLY
+# Multi-line formula printer calibration (col-relative)
+gt_and_two_all :: top-level A ∧ B breaks -> right operand hangs at formula start col (col+0), NOT base -> round-3 base+hang was off-by-one at top level
+gnest :: nested quantifier body hang = start_col + 1 (measured All at col 9 -> body col 10); binop/relational right operand hang = start_col + 0
+gnest :: relational atoms (=,<,...) BREAK at their operator (unparenthesised operands), like binops hang 0
+gact :: action atom `fact @ temporal` rendered single-line (no internal break at observed widths); gneg: ¬ then parens(operand)
+g1_samename :: Ex x #x. A(x)@#x -> SUCCESS (msg x and node #x are distinct binders, both bound)
+g1_dbsort :: All x #x. ... x = h(x) -> h(Bound 1): msg x sits under node #x on the binder stack (all binders counted; match is sort-aware)
+g1_msgnode :: All x #i. ... #x=#i -> Free #x (no node binder named x); msg binder x does not bind node use #x

@@ -1,0 +1,6 @@
+theory BareNonNullary
+begin
+macros: m(x) = <x,x>
+rule R:
+  [ In(x) ] --[ A(m) ]-> [ Out(x) ]
+end

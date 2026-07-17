@@ -11,18 +11,25 @@
 //! and live probing; see `workspace/BEHAVIOR.md` for the observed spec.
 //!
 //! Module map:
-//! * [`route`] — parse a request path into a structured route (the grammar).
+//! * [`route`] — parse a request path into a structured route (the grammar),
+//!   plus the top-level ([`route::Toplevel`]) surface.
 //! * [`dispatch`] — the UI state machine: route dispatch, theory-version
-//!   management, and response-envelope assembly, over a `ProverOps` trait.
-//! * [`envelope`] — the two JSON response shapes (`{html,title}`, `{redirect}`).
+//!   management, and response assembly over the whole surface, via a `ProverOps`
+//!   trait.
+//! * [`envelope`] — the three JSON response shapes (`{html,title}`, `{redirect}`,
+//!   `{alert}`).
 //! * [`escape`] — HTML entity escaping.
-//! * [`page`] — the full theory-view HTML shell (the `overview/*` pages).
+//! * [`page`] — the theory-view HTML shell (`overview/*`, trace and diff) and the
+//!   index page (`/`).
 //! * [`proofscript`] — the proof-script (west) pane and proof-tree line grammar.
 //! * [`forms`] — the edit / delete / add-lemma form bodies.
 //! * [`intdot`] — the `intdot` mini-page and empty-graph DOT skeleton.
 //! * [`text`] — the plain-text bodies (`source`/`message`, `next`/`prev`).
-//! * [`errors`] — the 404 Not Found page.
+//! * [`assets`] — static content-type mapping and the fixed small text bodies
+//!   (`robots.txt`, `/kill`, favicon target).
+//! * [`errors`] — the 404 / 400 / 405 status pages.
 
+pub mod assets;
 pub mod dispatch;
 pub mod envelope;
 pub mod errors;
@@ -34,5 +41,4 @@ pub mod proofscript;
 pub mod route;
 pub mod text;
 
-mod notfound_template;
 mod shell_template;

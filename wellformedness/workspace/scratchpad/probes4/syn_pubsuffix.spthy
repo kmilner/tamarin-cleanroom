@@ -1,0 +1,10 @@
+theory SynPubSuffix
+begin
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x) ]->
+   [ Out(~x) ]
+lemma L:
+  all-traces
+  "All x:pub #i. (A(x) @ #i) ==> (x = x)"
+end

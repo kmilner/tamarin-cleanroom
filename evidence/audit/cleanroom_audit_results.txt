@@ -14,3 +14,9 @@ workflows/wf_7f807521-670/agent-ac1c391bc2c48679f.jsonl: tool_calls=115 web=0 VI
 workflows/wf_7f807521-670/agent-ad2408a9cda7bbd15.jsonl: tool_calls=45 web=0 VIOLATIONS=0
 workflows/wf_bfd5a6a0-31b/agent-abad7225bcac84f4e.jsonl: tool_calls=106 web=0 VIOLATIONS=0
 workflows/wf_62e2c0ef-a3e/agent-ae1a3ead3cabd0a4c.jsonl: tool_calls=110 web=0 VIOLATIONS=0
+workflows/wf_1741f4ad-48d/agent-ad91aafe765192f45.jsonl: tool_calls=114 web=0 VIOLATIONS=0
+workflows/wf_1741f4ad-48d/agent-ac163fe10def094e0.jsonl: tool_calls=110 web=0 VIOLATIONS=0
+workflows/wf_1741f4ad-48d/agent-aeaa95d99395a0136.jsonl: tool_calls=74 web=0 VIOLATIONS=0
+workflows/wf_1741f4ad-48d/agent-af76260f88f21bcaa.jsonl: tool_calls=36 web=0 VIOLATIONS=0
+workflows/wf_1741f4ad-48d/agent-ae1942fd5bd87afee.jsonl: tool_calls=98 web=0 VIOLATIONS=0
+workflows/wf_1741f4ad-48d/agent-a92e0a97d8d241648.jsonl: tool_calls=122 web=0 VIOLATIONS=0

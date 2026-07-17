@@ -348,3 +348,99 @@ one expression-identical point (the `edit_rows` newline formula) is an output-fo
 arithmetic fit whose round-1→round-3 provenance proves observation-derivation. One
 close call considered and cleared; findings that survive filtration: 0. No redo
 instructions issued. VERDICT: PASS.
+
+---
+
+## Round 4 — both-sides similarity audit (weblayer delta)
+
+Auditor scope: this round's uncommitted delta only (clean-room HEAD 63ed8a9 predates
+it). Delta = `git status/diff` restricted to `weblayer/`: modified `src/dispatch.rs`,
+`src/route.rs`, `src/page.rs`, `src/shell_template.rs`, `src/envelope.rs`,
+`src/errors.rs`, `src/lib.rs`, `tests/dispatch.rs`; deleted `src/notfound_template.rs`;
+new `src/assets.rs`, `tests/dispatch4.rs`, `tests/fixtures/r4_*`, `REPORT4.md`; plus
+`BEHAVIOR.md` §14 and `QUERIES.log` [R40]–[R4B]. Compared against upstream
+`src/Web/{Handler.hs,Dispatch.hs,Types.hs,Settings.hs,Hamlet.hs}` following the code.
+Method: abstraction–filtration–comparison; every behavioral claim cross-checked to a
+logged probe/fixture.
+
+### What the round adds (abstraction)
+The dispatcher grows from the interactive read/proof handlers (§13) to the whole
+request path: top level (`/`, `/robots.txt`, `/favicon.ico`, `/kill`, `/static/**`),
+theory-scoped `reload`/`download`/`get_and_append`, the diff (`equiv`) analogues
+(`diffProof`/`diffMethod`/`diffrules`/`autoproveDiff`/`autoproveAll`), one global
+version-index namespace (upload allocates like a proof op), the third JSON envelope
+`{alert}`, redirect cache headers, and the 400/405 status pages generalised from the
+round-1 404. All served through the same independent `ProverOps` callback boundary +
+`Server` state machine — architecturally unrelated to Yesod's handler-per-route layout.
+
+### Filtration — every wire constant traces to a logged probe, and matches upstream
+*because it is the wire output*, which is exactly what compatibility content is:
+- `METHOD_FAILED_ALERT = "Sorry, but the prover failed on the selected method!"` —
+  upstream Handler.hs:1016 emits this identical string as the `JsonAlert` body; it is
+  the observable envelope, logged [R49]. Boundary output, not copied expression.
+- `ROBOTS_TXT "User-agent: *"` (Dispatch.hs:64, [R40]), `KILL_CANCELED "Canceled
+  request!"` (Handler.hs:1430, [R46]), `KILL_NO_PATH_MSG "No path to kill specified!"`
+  (Handler.hs:1431 `invalidArgs`, [R46]), flash `"Loaded new theory!"` /
+  `"Post request failed."` (Handler.hs:807/790, index-page, [R45]), `STATIC_NOT_FOUND
+  "File not found"` ([R41]), `FAVICON_TARGET "/static/img/favicon.ico"` ([R40]),
+  `EXPIRES_PAST "Thu, 01 Jan 1970 05:05:05 GMT"` + `CACHE_CONTROL_NOCACHE` ([R40],[R4A]).
+  All are HTTP-boundary strings; the Expires/Cache-Control pair is a Yesod-framework
+  artifact observed on the wire, not tamarin-specific. Each is logged.
+- Byte-exact templates (`PAGE_PREFIX`/`APPEND_ITEM`/`ROOT_TEMPLATE`/`SIMPLE_HEAD_A/B`/
+  `SIMPLE_TAIL`) reproduce **rendered** `defaultLayout'`/`rootTpl` output (Types.hs
+  686–723, Hamlet.hs 52–134), not Hamlet source structure. The `<head>` link set,
+  loading bar, dialog/contextMenu tail, `<p class="message">` flash placement, and the
+  index `Original`/`<em>Modified` cells are all in the composed rendered bytes; the
+  round-4 fixtures (`r4_root_single.html`, `r4_equiv_overview_kcl.html`, the 400/405
+  pages) are genuine captures (real temp path `/tmp/tmp.RTTW9GQKpy/…`), and the parity
+  tests decompose those captures. Sanctioned compatibility content — cleared.
+
+### Non-copying signals (comparison against Types.hs route table + Handler.hs)
+Strong affirmative evidence the surface was derived from observed URLs, not from
+`Types.hs` `parseRoutes`:
+- Enum/handler names are URL-segment transliterations that DIVERGE from upstream
+  constructor names: clean `GetAndAppend` vs upstream `AppendNewLemmasR`;
+  `AutoproveDiff` vs `AutoDiffProverR`; `AutoproveAll` vs `AutoProverAllR`/
+  `AutoProverAllDiffR`; `Reload`/`Download` vs `ReloadTheoryR`/`DownloadTheoryR`;
+  `ShellKind::{Trace,Equiv}` (URL segments) vs upstream `TheoryInfo`/`DiffTheoryInfo`.
+  A transcription of the route table would carry the `…R` constructor names; it does not.
+- The clean side reproduces ONLY observable routes and OMITS the upstream routes it
+  could not observe — `unload` (UnloadTheoryR), `mirror`/`interactive-mirror-def`
+  (TheoryMirrorDiffR…), `del/path` (DeleteStepR), `verify` (TheoryVerifyR) are all in
+  Types.hs but absent here, routed to `Handler::Other`→404, with [R47] documenting the
+  observed 404. A copy of the route table would include them.
+- `AutoproveAll::parse` requires exactly `{strategy}/{bound}` (the equiv shape,
+  Types.hs:607, no path) rather than the trace shape's trailing `*TheoryPath`
+  (Types.hs:584) — i.e. it follows the observed `diffProof` body links ([R49]), not the
+  source. `autoproveDiff` correctly carries NO all-solutions flag (observed), unlike
+  trace `autoprove`.
+- `ProverOps` is a callback boundary grouped by the web layer's needs (fragment
+  producers / mutations / diff ops); it does not mirror Handler.hs's HTTP-handler-per-
+  route decomposition. No comment lineage: none of upstream's Hamlet/handler comments
+  ("Robots file handler", "Template for root/welcome page", …) appear in the delta.
+- `Rule_Destrd_0_fst` (dispatch4.rs canned diff focus) initially looked like a
+  source-only internal name, but it appears VERBATIM in the captured equiv fixture body
+  links (`…/diffProof/Observational_equivalence/Rule_Destrd_0_fst`) — a boundary-
+  observable proof-state case token, not source-derived. Cleared.
+
+### Minor notes (documentation completeness; NOT protectable-expression findings)
+1. `assets::static_content_type` maps extensions beyond the probed set — [R41] observed
+   only `.css/.js/.png/.ico`/no-ext, but the fn also maps `gif/jpg/jpeg/svg/html/htm/
+   txt/json`. These are generic IANA/web MIME types (scenes-à-faire), NOT copied from
+   tamarin (upstream delegates to wai-app-static's `defaultMimeMap`, not its own code),
+   so no expression is taken; they merely exceed the logged evidence. Non-blocking.
+2. `page::render_root_row` `Modified` branch (`<em>Modified`, unclosed) is not pinned by
+   a committed round-4 fixture (only the `Original` case is in `r4_root_single.html`),
+   but the Original/Modified index-cell behavior is traced to prior-round probes
+   (QUERIES [172],[188]–[189]); a generic Hamlet table-cell artifact, not tamarin
+   expression. Non-blocking.
+
+### VIOLATIONS (Round 4)
+None. Every wire string/template in the delta is boundary output backed by a logged
+probe or a committed capture; the added route grammar is observed URL tokens whose
+naming and omissions affirmatively show URL-derivation rather than transcription of the
+Yesod route table; the architecture (Toplevel/Server/ProverOps) does not mirror
+Handler.hs internal structure; no comment lineage. Two documentation-completeness notes
+recorded (speculative extra MIME mappings; unfixtured Modified row) — neither is copied
+protectable expression and neither requires redo. Findings that survive filtration: 0.
+No redo instructions issued. VERDICT: PASS.

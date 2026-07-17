@@ -1,0 +1,13 @@
+theory OrdTwoGuard
+begin
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x) ]->
+   [ Out(~x) ]
+lemma L1:
+  all-traces
+  "All x #i #j. (A(x) @ #i) ==> (#i = #j)"
+lemma L2:
+  all-traces
+  "All x #i #j. (A(x) @ #i) ==> (#j = #i)"
+end

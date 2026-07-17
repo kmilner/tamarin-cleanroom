@@ -1,0 +1,6 @@
+theory G2NameSort
+begin
+functions: h/1
+rule R:
+  [ In( h(bbb) ), In( h(~mmm) ) ] --> [ Out('ok') ]
+end

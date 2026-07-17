@@ -1,0 +1,7 @@
+theory BareInArg
+begin
+builtins: hashing, signing
+macros: konst() = 'k'
+rule R:
+  [ In(x) ] --[ A(h(konst)) ]-> [ Out(sign(konst, x)) ]
+end

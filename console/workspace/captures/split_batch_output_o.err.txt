@@ -1,0 +1,9 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory NSLPK3] Theory loaded
+[Theory NSLPK3] Theory translated
+[Theory NSLPK3] Derivation checks started
+[Theory NSLPK3] Derivation checks ended
+[Theory NSLPK3] Theory closed
+tamarin-prover: /tmp/claude-1000/-home-kamilner-tamarin-rs/57f8e1bc-d495-4b36-93c0-033347d5034a/scratchpad/nslpk3_out.spthy: openFile: does not exist (No such file or directory)

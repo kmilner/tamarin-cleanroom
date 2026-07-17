@@ -1,0 +1,7 @@
+theory BareChain
+begin
+builtins: hashing
+macros: base() = h('k'), wrap() = h(base)
+rule R:
+  [ In(x) ] --[ A(wrap) ]-> [ Out(x) ]
+end

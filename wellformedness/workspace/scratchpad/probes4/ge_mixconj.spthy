@@ -1,0 +1,12 @@
+theory Tge_mixconj
+begin
+
+predicates: Pr(x) <=> x = x
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x), B(~x), C(~x) ]->
+   [ Out(~x) ]
+lemma L:
+  exists-trace
+  "Ex x y #i #j. (A(x) @ #i) & ((B(y) @ #j) | (C(y) @ #j))"
+end

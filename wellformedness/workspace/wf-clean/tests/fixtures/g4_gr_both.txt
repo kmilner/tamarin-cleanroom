@@ -1,0 +1,13 @@
+WARNING: the following wellformedness checks failed!
+
+ Formula guardedness
+====================
+
+  Lemma `L' cannot be converted to a guarded formula:
+    universal quantifier without toplevel implication
+      "∀ y #j. (B( y ) @ #j) ∨ (C( y ) @ #j)"
+    in the formula
+      "∀ x #i.
+        ((A( x ) @ #i) ∧ (∀ y #j. (B( y ) @ #j) ∨ (C( y ) @ #j))) ⇒
+        (∀ z #k. (A( z ) @ #k) ∨ (B( z ) @ #k))"
+*/

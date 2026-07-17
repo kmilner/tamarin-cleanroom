@@ -1,0 +1,6 @@
+theory G3Pub
+begin
+functions: h/1
+rule R:
+  [ In( h($p) ) ] --> [ Out('ok') ]
+end

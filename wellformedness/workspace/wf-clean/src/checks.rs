@@ -20,6 +20,7 @@ pub const T_MULT: &str = "Fact multiplicity issues";
 pub const T_LHSRHS: &str = "Facts occur in the left-hand-side but not in any right-hand-side ";
 pub const T_LEFT: &str = "Left rule";
 pub const T_RIGHT: &str = "Right rule";
+pub const T_QUANT_SORTS: &str = "Quantifier sorts";
 pub const T_FORMULA_TERMS: &str = "Formula terms";
 pub const T_GUARD: &str = " Formula guardedness";
 pub const T_LEMMA_ANNOT: &str = "Lemma annotations";
@@ -461,7 +462,7 @@ struct FactUse {
 ///         factTerms = [Bound 2,Bound 1]}
 /// `factTerms` uses the same de Bruijn / Free rendering as the Formula-terms
 /// check (the binder `stack` is the quantifier context at the atom).
-fn show_haskell_fact(f: &Fact, stack: &[String]) -> String {
+fn show_haskell_fact(f: &Fact, stack: &[Binder]) -> String {
     let mult = if f.persistent { "Persistent" } else { "Linear" };
     let terms: Vec<String> = f.args.iter().map(|a| show_wf_term(a, stack)).collect();
     format!(
@@ -477,7 +478,7 @@ fn show_haskell_fact(f: &Fact, stack: &[String]) -> String {
 /// quantifier binder stack for the de Bruijn rendering of the fact terms.
 fn gather_formula_facts(
     f: &Formula,
-    stack: &mut Vec<String>,
+    stack: &mut Vec<Binder>,
     owner: &str,
     out: &mut Vec<(String, FactUse)>,
 ) {
@@ -507,7 +508,7 @@ fn gather_formula_facts(
         Formula::Forall(vs, g) | Formula::Exists(vs, g) => {
             let n = vs.len();
             for v in vs {
-                stack.push(v.name.clone());
+                stack.push((v.name.clone(), var_class(v)));
             }
             gather_formula_facts(g, stack, owner, out);
             for _ in 0..n {
@@ -551,7 +552,7 @@ fn gather_fact_uses(thy: &Theory) -> Vec<(String, Vec<FactUse>)> {
                 }
             }
             TheoryItem::Lemma(l) => {
-                let mut stack: Vec<String> = Vec::new();
+                let mut stack: Vec<Binder> = Vec::new();
                 let mut uses: Vec<(String, FactUse)> = Vec::new();
                 gather_formula_facts(&l.formula, &mut stack, &l.name, &mut uses);
                 for (name, u) in uses {
@@ -904,7 +905,94 @@ pub fn public_names_report_from_pairs(pairs: Vec<(String, String)>) -> Vec<WfErr
 }
 
 // ---------------------------------------------------------------------------
-// 10. Formula terms (ill-formed terms in lemma / restriction formulas)
+// Formula-variable sorts and sort-aware binding
+// ---------------------------------------------------------------------------
+// Formula quantifiers bind sorted variables. The oracle treats a bound variable
+// and a use as the same variable only when they share a name AND a sort class,
+// so a temporal binder `#x` does NOT bind a message-position use `x`. The parser
+// tags an un-annotated message-position variable as `Untagged` and an annotated
+// one as `Msg`; the oracle treats those as one variable, so both collapse to the
+// `Msg` class here (this is what keeps a quantified message variable bound to its
+// uses across the parser's tag differences).
+
+/// Sort equivalence class of a formula variable, used for binding and guarding.
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+enum SortClass {
+    Msg,
+    Pub,
+    Fresh,
+    Node,
+    Nat,
+}
+
+fn sort_class(s: SortHint) -> SortClass {
+    match s {
+        SortHint::Msg | SortHint::Untagged | SortHint::Suffix(SuffixSort::Msg) => SortClass::Msg,
+        SortHint::Pub | SortHint::Suffix(SuffixSort::Pub) => SortClass::Pub,
+        SortHint::Fresh | SortHint::Suffix(SuffixSort::Fresh) => SortClass::Fresh,
+        SortHint::Node | SortHint::Suffix(SuffixSort::Node) => SortClass::Node,
+        SortHint::Nat | SortHint::Suffix(SuffixSort::Nat) => SortClass::Nat,
+    }
+}
+
+fn var_class(v: &VarSpec) -> SortClass {
+    sort_class(v.sort)
+}
+
+/// A binder on the quantifier stack: the bound variable's name and sort class.
+type Binder = (String, SortClass);
+
+// ---------------------------------------------------------------------------
+// Quantifier sorts (variables quantified over a disallowed sort)
+// ---------------------------------------------------------------------------
+// Quantifying over a public or fresh variable is rejected; message, temporal
+// (node) and natural-number quantifiers are allowed. Each offending variable is
+// reported as a Haskell `(name, LSort)` tuple, collected in binding order.
+
+fn wrong_lsort(s: SortHint) -> Option<&'static str> {
+    match sort_class(s) {
+        SortClass::Pub => Some("LSortPub"),
+        SortClass::Fresh => Some("LSortFresh"),
+        SortClass::Msg | SortClass::Node | SortClass::Nat => None,
+    }
+}
+
+/// Collect `(name,LSort)` tokens for every quantified variable of a disallowed
+/// sort, visiting outer binders before inner ones (binding order).
+fn wrong_quant_sorts(f: &Formula, out: &mut Vec<String>) {
+    match f {
+        Formula::Forall(vs, g) | Formula::Exists(vs, g) => {
+            for v in vs {
+                if let Some(ls) = wrong_lsort(v.sort) {
+                    out.push(format!("(\"{}\",{})", v.name, ls));
+                }
+            }
+            wrong_quant_sorts(g, out);
+        }
+        Formula::Not(g) => wrong_quant_sorts(g, out),
+        Formula::And(a, b)
+        | Formula::Or(a, b)
+        | Formula::Implies(a, b)
+        | Formula::Iff(a, b) => {
+            wrong_quant_sorts(a, out);
+            wrong_quant_sorts(b, out);
+        }
+        _ => {}
+    }
+}
+
+fn quantifier_sorts_entry(entity: &str, name: &str, f: &Formula) -> Option<String> {
+    let mut tokens = Vec::new();
+    wrong_quant_sorts(f, &mut tokens);
+    if tokens.is_empty() {
+        return None;
+    }
+    let prefix = format!("  {} `{}' uses quantifiers with wrong sort:", entity, name);
+    Some(fill_after_prefix(&prefix, &tokens, 4, FILL_WIDTH))
+}
+
+// ---------------------------------------------------------------------------
+// Formula terms (ill-formed terms in lemma / restriction formulas)
 // ---------------------------------------------------------------------------
 // A lemma/restriction formula may only use terms built from public constants
 // and BOUND node/message variables via non-reducible function symbols. A term
@@ -923,20 +1011,22 @@ pub fn public_names_report_from_pairs(pairs: Vec<(String, String)>) -> Vec<WfErr
 
 const FORMULA_TERMS_HELP: &str = "  The only allowed terms are public constants and bound node and\n  message variables. If you encounter free message variables, then\n  you might have forgotten a #-prefix. Sort prefixes can only be\n  dropped where this is unambiguous. Moreover, reducible function\n  symbols are disallowed.";
 
-/// De Bruijn index of `name` on the binder stack (outermost pushed first): the
-/// innermost matching binder is 0. `None` if the name is not bound (free).
-/// Binders are matched by NAME only (see BEHAVIOR.md round-2 fix).
-fn debruijn_index(stack: &[String], name: &str) -> Option<usize> {
+/// De Bruijn index of `(name, class)` on the binder stack (outermost pushed
+/// first): the innermost binder matching BOTH name and class is 0. `None` if no
+/// binder matches (the variable is free). Every quantified variable - including
+/// temporals and sort-mismatched ones - occupies one stack slot, so the index
+/// counts all binders between the use and its matching binder.
+fn debruijn_index(stack: &[Binder], name: &str, class: SortClass) -> Option<usize> {
     stack
         .iter()
-        .rposition(|b| b == name)
+        .rposition(|(n, c)| n == name && *c == class)
         .map(|pos| stack.len() - 1 - pos)
 }
 
 /// Render a term in the oracle's raw "wrong form" representation.
-fn show_wf_term(t: &Term, stack: &[String]) -> String {
+fn show_wf_term(t: &Term, stack: &[Binder]) -> String {
     match t {
-        Term::Var(v) => match debruijn_index(stack, &v.name) {
+        Term::Var(v) => match debruijn_index(stack, &v.name, var_class(v)) {
             Some(idx) => format!("Bound {}", idx),
             None => format!("Free {}", pp_var(v)),
         },
@@ -963,8 +1053,6 @@ fn show_wf_term(t: &Term, stack: &[String]) -> String {
             format!("diff({},{})", show_wf_term(a, stack), show_wf_term(b, stack))
         }
         Term::BinOp(op, a, b) => {
-            // Raw operator function name (best-effort; AC/DH operators in
-            // formula terms are rare - see BEHAVIOR.md gaps).
             let name = match op {
                 BinOp::Exp => "exp",
                 BinOp::Mult => "mult",
@@ -979,7 +1067,7 @@ fn show_wf_term(t: &Term, stack: &[String]) -> String {
 }
 
 /// Render a tuple as right-nested binary `pair(...)` applications.
-fn show_wf_pair(items: &[Term], stack: &[String]) -> String {
+fn show_wf_pair(items: &[Term], stack: &[Binder]) -> String {
     match items {
         [] => "pair".to_string(),
         [only] => show_wf_term(only, stack),
@@ -991,9 +1079,13 @@ fn show_wf_pair(items: &[Term], stack: &[String]) -> String {
 
 /// True iff `t` contains a free variable or a reducible function symbol, i.e.
 /// the term is "of the wrong form" for a trace formula.
-fn term_is_ill_formed(t: &Term, stack: &[String], reducible: &std::collections::BTreeSet<String>) -> bool {
+fn term_is_ill_formed(
+    t: &Term,
+    stack: &[Binder],
+    reducible: &std::collections::BTreeSet<String>,
+) -> bool {
     match t {
-        Term::Var(v) => debruijn_index(stack, &v.name).is_none(), // free -> ill
+        Term::Var(v) => debruijn_index(stack, &v.name, var_class(v)).is_none(), // free -> ill
         Term::PubLit(_)
         | Term::FreshLit(_)
         | Term::NatLit(_)
@@ -1037,10 +1129,11 @@ fn atom_terms(a: &Atom) -> Vec<&Term> {
 
 /// Walk a formula in source order collecting the RENDERED strings of every
 /// ill-formed atom term. Not deduplicated (probe r3_shapes: `x = y & x = y`
-/// reports `Free y` twice).
+/// reports `Free y` twice). Every quantified variable pushes a `(name, class)`
+/// binder, so uses are matched sort-aware.
 fn collect_ill_terms(
     f: &Formula,
-    stack: &mut Vec<String>,
+    stack: &mut Vec<Binder>,
     reducible: &std::collections::BTreeSet<String>,
     out: &mut Vec<String>,
 ) {
@@ -1064,7 +1157,7 @@ fn collect_ill_terms(
         Formula::Forall(vs, g) | Formula::Exists(vs, g) => {
             let n = vs.len();
             for v in vs {
-                stack.push(v.name.clone());
+                stack.push((v.name.clone(), var_class(v)));
             }
             collect_ill_terms(g, stack, reducible, out);
             for _ in 0..n {
@@ -1072,6 +1165,13 @@ fn collect_ill_terms(
             }
         }
     }
+}
+
+fn ill_terms(f: &Formula, reducible: &std::collections::BTreeSet<String>) -> Vec<String> {
+    let mut stack: Vec<Binder> = Vec::new();
+    let mut terms: Vec<String> = Vec::new();
+    collect_ill_terms(f, &mut stack, reducible, &mut terms);
+    terms
 }
 
 /// Lay out `tokens` after `prefix` with a fillSep (paragraph fill): place a
@@ -1111,24 +1211,16 @@ fn formula_terms_entry(entity: &str, name: &str, terms: &[String]) -> String {
     format!("{}\n  \n{}", head, FORMULA_TERMS_HELP)
 }
 
-/// Full "Formula terms" check: reports ill-formed terms (free variables and
-/// applications of any symbol in `reducible`) in lemma/restriction formulas.
+/// Standalone "Formula terms" check: reports ill-formed terms (free variables
+/// and applications of any symbol in `reducible`) in every lemma (source order)
+/// then every restriction (source order), merged into one topic block.
 pub fn formula_terms_reducible(
     thy: &Theory,
     reducible: &std::collections::BTreeSet<String>,
 ) -> Vec<WfError> {
     let mut entries: Vec<String> = Vec::new();
-    for it in &thy.items {
-        let (entity, name, formula) = match it {
-            TheoryItem::Lemma(l) => ("Lemma", &l.name, &l.formula),
-            TheoryItem::Restriction(r) | TheoryItem::LegacyAxiom(r) => {
-                ("Restriction", &r.name, &r.formula)
-            }
-            _ => continue,
-        };
-        let mut stack: Vec<String> = Vec::new();
-        let mut terms: Vec<String> = Vec::new();
-        collect_ill_terms(formula, &mut stack, reducible, &mut terms);
+    for (entity, name, formula, _) in formula_items(thy) {
+        let terms = ill_terms(formula, reducible);
         if !terms.is_empty() {
             entries.push(formula_terms_entry(entity, name, &terms));
         }
@@ -1141,111 +1233,74 @@ pub fn formula_terms_reducible(
 }
 
 /// Convenience wrapper: the free-variable-only "Formula terms" check (no
-/// reducible symbols). `check_theory` uses this; the reducible-aware entry
-/// point is `formula_terms_reducible`.
+/// reducible symbols). The reducible-aware entry point is
+/// `formula_terms_reducible`.
 pub fn formula_terms(thy: &Theory) -> Vec<WfError> {
     formula_terms_reducible(thy, &std::collections::BTreeSet::new())
 }
 
 // ---------------------------------------------------------------------------
-// 11. Formula guardedness (best-effort; single-line formula printer)
+// Formula guardedness (decision procedure over the guarded fragment)
 // ---------------------------------------------------------------------------
-
-pub fn formula_guardedness(thy: &Theory) -> Vec<WfError> {
-    let mut entries: Vec<String> = Vec::new();
-    for it in &thy.items {
-        let (name, formula) = match it {
-            TheoryItem::Lemma(l) => (&l.name, &l.formula),
-            _ => continue,
-        };
-        if let Some((fail, sub)) = find_guard_failure(formula) {
-            let reason = match fail {
-                GuardFail::Unguarded(vars) => {
-                    let vs: Vec<String> =
-                        vars.iter().map(|v| format!("'{}'", pp_var(v))).collect();
-                    format!(
-                        "unguarded variable(s) {} in the subformula",
-                        vs.join(", ")
-                    )
-                }
-                GuardFail::NoImplication => {
-                    "universal quantifier without toplevel implication".to_string()
-                }
-            };
-            // The formula is embedded as `      "..."`: the quote sits at column
-            // 6, so the formula starts at column 7 with base indent 6.
-            let pp_sub = crate::formula::pp_formula_wrapped(&sub, 7, 6);
-            let pp_whole = crate::formula::pp_formula_wrapped(formula, 7, 6);
-            entries.push(format!(
-                "  Lemma `{}' cannot be converted to a guarded formula:\n    {}\n      \"{}\"\n    in the formula\n      \"{}\"",
-                name, reason, pp_sub, pp_whole
-            ));
-        }
-    }
-    if entries.is_empty() {
-        vec![]
-    } else {
-        vec![WfError::new(T_GUARD, entries.join("\n"))]
-    }
-}
-
-/// Variables appearing in any Action or Pred atom anywhere in `f` (the guard
-/// positions). Used as a permissive over-approximation of "guarded".
-fn guard_vars(f: &Formula, out: &mut Vec<VarSpec>) {
-    match f {
-        Formula::Atom(Atom::Action(fact, t)) => {
-            collect_fact_vars(fact, out);
-            collect_term_vars(t, out);
-        }
-        Formula::Atom(Atom::Pred(fact)) => collect_fact_vars(fact, out),
-        Formula::Atom(_) | Formula::True | Formula::False => {}
-        Formula::Not(g) => guard_vars(g, out),
-        Formula::And(a, b)
-        | Formula::Or(a, b)
-        | Formula::Implies(a, b)
-        | Formula::Iff(a, b) => {
-            guard_vars(a, out);
-            guard_vars(b, out);
-        }
-        Formula::Forall(_, g) | Formula::Exists(_, g) => guard_vars(g, out),
-    }
-}
+// A LEMMA formula must be convertible to guarded form (an unguarded RESTRICTION
+// is a fatal error, not a warning, so this check is lemma-only). A universal is
+// guarded only as `guard ==> rest`; an existential as a conjunction whose action
+// atoms guard its variables. The guard of a quantifier is the set of variables
+// occurring in ACTION atoms reachable through conjunctions of the antecedent
+// (universal) or body (existential); disjunction, negation, implication,
+// equality/ordering atoms and nested quantifiers contribute no guards. The first
+// failing quantifier (antecedent before consequent, left before right) is
+// reported together with the whole lemma formula.
 
 /// A guardedness failure and its reason.
 enum GuardFail {
-    /// A quantifier binds variables not guarded by an action fact.
+    /// A quantifier binds variables not guarded by an action atom.
     Unguarded(Vec<VarSpec>),
     /// A universal quantifier's body is not a top-level implication.
     NoImplication,
 }
 
-/// Guard variable names of a (guard) formula: the variables appearing in its
-/// action/predicate atoms. Matched by NAME (see free_vars_formula rationale).
-fn guard_var_names(f: &Formula) -> std::collections::HashSet<String> {
+/// Collect the variables of every ACTION atom reachable through conjunctions of
+/// `f`. These are the variables a guard binds.
+fn collect_guard_vars(f: &Formula, out: &mut Vec<VarSpec>) {
+    match f {
+        Formula::Atom(Atom::Action(fact, t)) => {
+            collect_fact_vars(fact, out);
+            collect_term_vars(t, out);
+        }
+        Formula::And(a, b) => {
+            collect_guard_vars(a, out);
+            collect_guard_vars(b, out);
+        }
+        _ => {}
+    }
+}
+
+/// The `(name, class)` keys of a guard formula's action-atom variables.
+fn guard_key_set(f: &Formula) -> std::collections::HashSet<(String, SortClass)> {
     let mut gv = Vec::new();
-    guard_vars(f, &mut gv);
-    gv.iter().map(|v| v.name.clone()).collect()
+    collect_guard_vars(f, &mut gv);
+    gv.iter().map(|v| (v.name.clone(), var_class(v))).collect()
+}
+
+/// Quantified variables of `vs` not guarded by `gset` (matched sort-aware), in
+/// binding order.
+fn unguarded_vars(
+    vs: &[VarSpec],
+    gset: &std::collections::HashSet<(String, SortClass)>,
+) -> Vec<VarSpec> {
+    vs.iter()
+        .filter(|v| !gset.contains(&(v.name.clone(), var_class(v))))
+        .cloned()
+        .collect()
 }
 
 /// Return the first guardedness failure and the failing quantifier subformula.
-///
-/// A universal quantifier is guarded only when its body is a top-level
-/// implication `guard ==> rest` whose antecedent's action facts bind every
-/// quantified variable (observed r3_gc: a conjunction/disjunction/negation body,
-/// or a bare atom body, all fail as "without toplevel implication"; the
-/// antecedent alone - not the consequent - guards the variables). Existential
-/// quantifiers instead take a conjunctive guard (observed: `Ex x #i. A(x) @ #i`
-/// is fine); an existential whose variables are not all guarded is "unguarded".
 fn find_guard_failure(f: &Formula) -> Option<(GuardFail, Formula)> {
     match f {
         Formula::Forall(vs, body) => match &**body {
             Formula::Implies(guard, rest) => {
-                let gset = guard_var_names(guard);
-                let unguarded: Vec<VarSpec> = vs
-                    .iter()
-                    .filter(|v| !gset.contains(&v.name))
-                    .cloned()
-                    .collect();
+                let unguarded = unguarded_vars(vs, &guard_key_set(guard));
                 if !unguarded.is_empty() {
                     return Some((GuardFail::Unguarded(unguarded), f.clone()));
                 }
@@ -1254,12 +1309,7 @@ fn find_guard_failure(f: &Formula) -> Option<(GuardFail, Formula)> {
             _ => Some((GuardFail::NoImplication, f.clone())),
         },
         Formula::Exists(vs, body) => {
-            let gset = guard_var_names(body);
-            let unguarded: Vec<VarSpec> = vs
-                .iter()
-                .filter(|v| !gset.contains(&v.name))
-                .cloned()
-                .collect();
+            let unguarded = unguarded_vars(vs, &guard_key_set(body));
             if !unguarded.is_empty() {
                 return Some((GuardFail::Unguarded(unguarded), f.clone()));
             }
@@ -1272,6 +1322,115 @@ fn find_guard_failure(f: &Formula) -> Option<(GuardFail, Formula)> {
         | Formula::Iff(a, b) => find_guard_failure(a).or_else(|| find_guard_failure(b)),
         _ => None,
     }
+}
+
+/// The guardedness report entry for one lemma, or `None` when it is guarded.
+fn guardedness_entry(name: &str, f: &Formula) -> Option<String> {
+    let (fail, sub) = find_guard_failure(f)?;
+    let reason = match fail {
+        GuardFail::Unguarded(vars) => {
+            let vs: Vec<String> = vars.iter().map(|v| format!("'{}'", pp_var(v))).collect();
+            format!("unguarded variable(s) {} in the subformula", vs.join(", "))
+        }
+        GuardFail::NoImplication => {
+            "universal quantifier without toplevel implication".to_string()
+        }
+    };
+    // The formula is embedded as `      "..."`: its first character sits at
+    // column 7 (after six spaces and the quote).
+    let pp_sub = crate::formula::pp_formula_wrapped(&sub, 7);
+    let pp_whole = crate::formula::pp_formula_wrapped(f, 7);
+    Some(format!(
+        "  Lemma `{}' cannot be converted to a guarded formula:\n    {}\n      \"{}\"\n    in the formula\n      \"{}\"",
+        name, reason, pp_sub, pp_whole
+    ))
+}
+
+/// Standalone guardedness check over every lemma, merged into one topic block.
+pub fn formula_guardedness(thy: &Theory) -> Vec<WfError> {
+    let mut entries: Vec<String> = Vec::new();
+    for it in &thy.items {
+        if let TheoryItem::Lemma(l) = it {
+            if let Some(e) = guardedness_entry(&l.name, &l.formula) {
+                entries.push(e);
+            }
+        }
+    }
+    if entries.is_empty() {
+        vec![]
+    } else {
+        vec![WfError::new(T_GUARD, entries.join("\n  \n"))]
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Formula-check bundle (Quantifier sorts, Formula terms, Formula guardedness)
+// ---------------------------------------------------------------------------
+// The three per-formula checks are run together, item by item, in the oracle's
+// checking order: every lemma (source order) first, then every restriction
+// (source order). For each item the three topics are emitted in the order
+// Quantifier sorts, Formula terms, Formula guardedness (guardedness for lemmas
+// only). Consecutive entries sharing a topic merge under a single header; a
+// topic that recurs after an intervening different topic starts a fresh block
+// (observed: L1=QS, L2=FT, L3=QS renders as three blocks).
+
+/// The formula-bearing items in checking order: (entity, name, formula,
+/// is_lemma). Lemmas come before restrictions regardless of source order.
+fn formula_items(thy: &Theory) -> Vec<(&'static str, &str, &Formula, bool)> {
+    let mut out: Vec<(&'static str, &str, &Formula, bool)> = Vec::new();
+    for it in &thy.items {
+        if let TheoryItem::Lemma(l) = it {
+            out.push(("Lemma", l.name.as_str(), &l.formula, true));
+        }
+    }
+    for it in &thy.items {
+        if let TheoryItem::Restriction(r) | TheoryItem::LegacyAxiom(r) = it {
+            out.push(("Restriction", r.name.as_str(), &r.formula, false));
+        }
+    }
+    out
+}
+
+/// Merge a sequence of `(topic, entry)` pairs, joining only CONSECUTIVE
+/// same-topic entries (separator `"\n  \n"`) into one `WfError` block.
+fn merge_consecutive(seq: Vec<(&'static str, String)>) -> Vec<WfError> {
+    let mut out: Vec<WfError> = Vec::new();
+    for (topic, entry) in seq {
+        if let Some(last) = out.last_mut() {
+            if last.topic == topic {
+                last.message.push_str("\n  \n");
+                last.message.push_str(&entry);
+                continue;
+            }
+        }
+        out.push(WfError::new(topic, entry));
+    }
+    out
+}
+
+/// Run the Quantifier-sorts / Formula-terms / Formula-guardedness bundle over
+/// all lemmas and restrictions, producing the merged topic blocks in report
+/// order.
+pub fn formula_reports(
+    thy: &Theory,
+    reducible: &std::collections::BTreeSet<String>,
+) -> Vec<WfError> {
+    let mut seq: Vec<(&'static str, String)> = Vec::new();
+    for (entity, name, formula, is_lemma) in formula_items(thy) {
+        if let Some(e) = quantifier_sorts_entry(entity, name, formula) {
+            seq.push((T_QUANT_SORTS, e));
+        }
+        let terms = ill_terms(formula, reducible);
+        if !terms.is_empty() {
+            seq.push((T_FORMULA_TERMS, formula_terms_entry(entity, name, &terms)));
+        }
+        if is_lemma {
+            if let Some(e) = guardedness_entry(name, formula) {
+                seq.push((T_GUARD, e));
+            }
+        }
+    }
+    merge_consecutive(seq)
 }
 
 // ---------------------------------------------------------------------------

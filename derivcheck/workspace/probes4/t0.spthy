@@ -1,0 +1,6 @@
+theory T0
+begin
+functions: h/1
+rule R:
+  [ In( h(w) ) ] --> [ Out( 'ok' ) ]
+end

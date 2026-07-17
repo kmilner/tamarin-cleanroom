@@ -136,3 +136,85 @@
       issue777, lemmas). Purpose: automated byte-parity of expanded content
       (macro theory vs hand-expanded equivalent). Result: ALL OK — expanded
       content byte-identical after stripping the 3 known scaffolding categories.
+
+# ---- Round 4: bare nullary uses [GAP1], acc-lemma [GAP2] & case-test [GAP3]
+#      formulas, and preservation of the macros: block. ----------------------
+
+[Q32] probes/bare_nullary.spthy vs probes/paren_nullary.spthy (full close);
+      probes/bare_prem.spthy; probes/bare_inarg.spthy; probes/bare_msgsort.spthy.
+      macros: konst() = h('k').
+      Purpose: how is a 0-ary macro used WITHOUT parentheses treated?
+      Observed: a bare `konst` is treated IDENTICALLY to `konst()` — modulo-E
+      keeps the bare name `A( konst )`, modulo-AC shows `A( h('k') )`. Holds in
+      premise, action AND conclusion positions (bare_prem: In( konst ) => In(
+      h('k') )), and nested inside functions (bare_inarg: h(konst)/sign(konst,x)
+      => h('k')/sign('k',x)). A macro-name use cannot be sort-annotated:
+      `konst:msg` is a parse error ("unexpected ':'"). => a bare nullary use is
+      always the plain (untagged) form and DOES expand.
+
+[Q33] probes/bare_chain.spthy: macros: base()=h('k'), wrap()=h(base); bare wrap.
+      Purpose: does a bare nullary use inside a macro body expand?
+      Observed: declaration prints wrap( ) = h(base) (un-expanded body); use of
+      bare `wrap` => modulo-AC A( h(h('k')) ). => bare nullary uses expand
+      transitively through bodies, exactly like parenthesised calls.
+
+[Q34] probes/bare_sorts.spthy: macros: konst()=h('k'); uses ~konst and $konst.
+      Purpose: does a fresh/pub-sorted bare name resolve to the nullary macro?
+      Observed: NO. ~konst and $konst stay ordinary variables (modulo-AC
+      A( ~konst ), B( $konst.1 )) and raise unbound-variable / sort-mismatch
+      warnings. => nullary-name resolution is UNTAGGED-sort only (consistent
+      with the sort-identity rule [Q27,Q28]).
+
+[Q35] probes/bare_nonnullary.spthy: macros: m(x)=<x,x>; bare `m` (no args).
+      Purpose: does a bare name equal to an arity>=1 macro resolve?
+      Observed: NO. `A( m )` is left as-is; `m` is an unbound variable (trivial
+      AC variant, unbound-variable warning). => only a NULLARY macro is resolved
+      from a bare name.
+
+[Q36] probes/formal_vs_nullary.spthy: macros: base()=h('k'), f(base)=<base,base>;
+      call f(a).  Purpose: when a formal name equals an existing nullary macro,
+      which wins inside the body? Observed: modulo-AC A( <h('k'), h('k')> ) — the
+      NULLARY MACRO wins; the formal `base` and the argument `a` are dropped.
+      => a nullary macro reserves its name against a same-named formal; a body's
+      bare occurrences resolve to the macro before formal binding.
+
+[Q37] every full-close capture (e.g. captures/bare_nullary_macro.out,
+      captures/example_issue777.out, probes/acc_macro full close).
+      Purpose: does the reference retain the macros: block after processing?
+      Observed: YES — the pretty output always reprints `macros: <name>( args )
+      = <body>, ...` with the ORIGINAL (un-expanded) bodies, regardless of how
+      the uses are expanded elsewhere. => the declaration block is preserved in
+      place; `expand` keeps the Macros items unchanged.
+
+[Q38] fixtures/acclemma_macro.spthy vs acclemma_expanded.spthy; acc_both_macro
+      vs acc_both_expanded (full accountability close via formula_parity.sh).
+      macro `af(x)=h(x)` used in a `... accounts for "..."` formula.
+      Purpose: does the macro stage expand acc-lemma formulas, and at what
+      stage? Observed: --parse-only preserves the call (Unequal( af(sid) )). On
+      close the accountability lemma is translated into generated lemmas whose
+      PRIMARY formulas still show the call (Unequal( af(sid) )) and whose
+      `/* guarded formula characterizing ... */` shows the EXPANDED form
+      (Unequal( h(sid) )). formula_parity.sh: the macro theory's guarded content
+      is byte-identical to the hand-inlined equivalent's. => macros ARE expanded
+      in acc-lemma formulas, visible at the guarded/processing stage (same
+      pattern as ordinary lemmas [Q4]).
+
+[Q39] fixtures/casetest_macro.spthy vs casetest_expanded.spthy; acc_both pair.
+      macro `ct(x)=h(x)` used in a `test <name>: "..."` case-test formula.
+      Purpose: same probe for case tests. Observed: --parse-only preserves
+      Blame( ct(sid), x ). On close the case test feeds the generated
+      `predicate: Blamed(x) <=> ... Blame( ct(sid), x ) ...` (call kept) and the
+      generated lemmas' guarded formulas show Blame( h(sid), x ) (expanded).
+      formula_parity.sh: guarded content byte-identical to the hand-inlined
+      equivalent. => macros ARE expanded in case-test formulas at the
+      guarded/processing stage.
+
+[Q40] run_tests.sh (round 4): 21 cargo direct-expansion tests + 7 byteparity
+      rule fixtures (incl. bare_nullary) + 4 formula_parity fixtures (lemmas,
+      casetest, acclemma, acc_both). Result: ALL PASS.
+
+# Note: the byteparity.sh env-stripping harness cannot exercise accountability
+# theories (its reduced env lacks a UTF-8 locale, so the reference aborts on the
+# ∀/∃ logic glyphs before generating lemmas). formula_parity.sh runs the oracle
+# with a UTF-8 locale and compares only the guarded/expanded-formula blocks, so
+# it is the harness of record for the acc-lemma / case-test gaps.

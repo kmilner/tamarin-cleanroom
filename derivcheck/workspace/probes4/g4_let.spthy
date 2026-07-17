@@ -1,0 +1,8 @@
+theory G4Let
+begin
+functions: h/1
+rule R:
+  let y = h(w)
+  in
+  [ In( y ) ] --> [ Out('ok') ]
+end

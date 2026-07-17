@@ -1,0 +1,7 @@
+theory G3NatOrder
+begin
+builtins: natural-numbers
+functions: h/1
+rule R:
+  [ In( h(<%b, a, ~c>) ) ] --> [ Out('ok') ]
+end

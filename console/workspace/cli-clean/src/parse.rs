@@ -51,6 +51,25 @@ impl Options {
             .filter_map(|(_, v)| v.as_deref())
             .collect()
     }
+    /// The last occurrence of a flag (last-wins semantics): `None` if the flag is
+    /// absent, `Some(None)` if its last occurrence was bare, `Some(Some(v))` if
+    /// its last occurrence carried the value `v`.
+    pub fn last(&self, long: &str) -> Option<Option<&str>> {
+        self.flags
+            .iter()
+            .rev()
+            .find(|(n, _)| n == long)
+            .map(|(_, v)| v.as_deref())
+    }
+    /// Every occurrence of a repeatable flag, in order; each element is `None` for
+    /// a bare occurrence or `Some(v)` for a valued one.
+    pub fn occurrences(&self, long: &str) -> Vec<Option<String>> {
+        self.flags
+            .iter()
+            .filter(|(n, _)| n == long)
+            .map(|(_, v)| v.clone())
+            .collect()
+    }
 }
 
 /// Parse an argument vector (excluding argv[0]/program name).
@@ -79,10 +98,12 @@ pub fn parse(argv: &[String]) -> Result<Command, CliError> {
     let mut options = Options::default();
     let mut positional: Vec<String> = Vec::new();
 
-    for tok in rest {
+    let mut i = 0;
+    while i < rest.len() {
+        let tok = &rest[i];
         if let Some(body) = tok.strip_prefix("--") {
             // Long flag: `--name` or `--name=value`.
-            let (name, value) = match body.split_once('=') {
+            let (name, mut value) = match body.split_once('=') {
                 Some((n, v)) => (n, Some(v.to_string())),
                 None => (body, None),
             };
@@ -90,6 +111,16 @@ pub fn parse(argv: &[String]) -> Result<Command, CliError> {
                 .ok_or_else(|| errors::unknown_flag(&format!("--{name}")))?;
             if !spec.takes_value && value.is_some() {
                 return Err(errors::unhandled_argument(tok));
+            }
+            // A consumer-extension flag with no attached value takes the following
+            // token as its value (the `--flag <value>` surface).
+            if spec.consumes_next && value.is_none() {
+                if let Some(next) = rest.get(i + 1) {
+                    value = Some(next.clone());
+                    i += 1;
+                } else {
+                    return Err(errors::missing_value(&format!("--{name}")));
+                }
             }
             if let Some(c) = short_circuit(spec.long, mode) {
                 return Ok(c);
@@ -122,6 +153,7 @@ pub fn parse(argv: &[String]) -> Result<Command, CliError> {
             // Positional token (a FILE, or the WORKDIR for interactive).
             positional.push(tok.clone());
         }
+        i += 1;
     }
 
     // 3. Positional-arity validation that cmdargs performs at parse time.

@@ -1,0 +1,7 @@
+WARNING: the following wellformedness checks failed!
+
+Quantifier sorts
+================
+
+  Lemma `L' uses quantifiers with wrong sort: ("x",LSortPub)
+*/

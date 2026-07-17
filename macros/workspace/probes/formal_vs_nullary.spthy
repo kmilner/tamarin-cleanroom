@@ -1,0 +1,7 @@
+theory FormalVsNullary
+begin
+builtins: hashing
+macros: base() = h('k'), f(base) = <base, base>
+rule R:
+  [ In(a) ] --[ A(f(a)) ]-> [ Out(a) ]
+end

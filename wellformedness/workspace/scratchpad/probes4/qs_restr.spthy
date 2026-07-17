@@ -1,0 +1,12 @@
+theory QsRestr
+begin
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x) ]->
+   [ Out(~x) ]
+restriction Res:
+  "All $x #i. (A($x) @ #i) ==> (A($x) @ #i)"
+lemma L:
+  exists-trace
+  "Ex #i. A(~x) @ #i"
+end

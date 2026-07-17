@@ -30,6 +30,7 @@ pub fn after_public_names_topics() -> Vec<&'static str> {
         checks::T_LHSRHS,
         checks::T_LEFT,
         checks::T_RIGHT,
+        checks::T_QUANT_SORTS,
         checks::T_FORMULA_TERMS,
         checks::T_GUARD,
         checks::T_LEMMA_ANNOT,
@@ -69,9 +70,10 @@ pub fn check_theory_with_reducible(
     report.extend(checks::fact_multiplicity(thy)); // 10
     report.extend(checks::fact_lhs_occur_no_rhs(thy)); // 11
     report.extend(checks::diff_left_right(thy)); // 12, 13 (diff mode only)
-    report.extend(checks::formula_terms_reducible(thy, reducible)); // 14
-    report.extend(checks::formula_guardedness(thy)); // 15
-    report.extend(checks::lemma_annotations(thy)); // 16
+    // The Quantifier-sorts / Formula-terms / Formula-guardedness bundle is
+    // emitted per formula item (lemmas then restrictions), interleaved by topic.
+    report.extend(checks::formula_reports(thy, reducible)); // 14, 15, 16
+    report.extend(checks::lemma_annotations(thy)); // 17
     report.extend(checks::multiplication_restriction(thy)); // 17
     report.extend(checks::nat_sorts(thy)); // 18
     report.extend(checks::subterm_convergence(thy)); // 19

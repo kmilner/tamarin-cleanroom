@@ -1,0 +1,21 @@
+theory AccNonId
+begin
+builtins: hashing
+
+process:
+  new sid;
+  ( event Unequal(sid); event Blame(sid, sid) )
+
+macros: mtest(x) = h(x), mfor(x) = h(x)
+
+test blamed:
+  "Ex sid #i. Blame(mtest(sid), x)@i"
+
+lemma acc:
+  blamed accounts for
+  "not (Ex sid #i. Unequal(mfor(sid))@i)"
+
+restriction unequal_blame:
+  "All sid #i. Unequal(sid)@i ==> Ex x #j. Blame(sid, x)@j"
+
+end

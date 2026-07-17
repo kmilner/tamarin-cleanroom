@@ -1,0 +1,6 @@
+theory G3Nullary
+begin
+functions: c/0, h/1
+rule R:
+  [ In( h(c) ) ] --> [ Out('ok') ]
+end

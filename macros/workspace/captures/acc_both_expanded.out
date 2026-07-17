@@ -1,0 +1,209 @@
+[Theory AccNonId] Theory loaded
+[Theory AccNonId] Theory translated
+[Theory AccNonId] Derivation checks started
+[Theory AccNonId] Derivation checks ended
+[Theory AccNonId] Theory closed
+theory AccNonId
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, h/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+heuristic: p
+
+restriction unequal_blame:
+  "∀ sid #i. (Unequal( sid ) @ #i) ⇒ (∃ x #j. Blame( sid, x ) @ #j)"
+
+  /*
+  expanded formula:
+  "∀ sid #i. (Unequal( sid ) @ #i) ⇒ (∃ x #j. Blame( sid, x ) @ #j)"
+  */
+
+rule (modulo E) Init[color=#ffffff, process="new sid.1;", issapicrule,
+                     role='Process']:
+   [ ] --[ Init( ) ]-> [ State_( ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) newsid_0_[color=#ffffff, process="new sid.1;",
+                          issapicrule, role='Process']:
+   [ State_( ), Fr( sid.1 ) ] --> [ State_1( sid.1 ) ]
+
+  /*
+  rule (modulo AC) newsid_0_[color=#ffffff, process="new sid.1;",
+                             issapicrule, role='Process']:
+     [ State_( ), Fr( sid ) ] --> [ State_1( sid ) ]
+  */
+
+rule (modulo E) eventUnequalsid_0_1[color=#ffffff,
+                                    process="event Unequal( sid.1 );", issapicrule, role='Process']:
+   [ State_1( sid.1 ) ] --[ Unequal( sid.1 ) ]-> [ State_11( sid.1 ) ]
+
+  /*
+  rule (modulo AC) eventUnequalsid_0_1[color=#ffffff,
+                                       process="event Unequal( sid.1 );", issapicrule, role='Process']:
+     [ State_1( sid ) ] --[ Unequal( sid ) ]-> [ State_11( sid ) ]
+  */
+
+rule (modulo E) eventBlamesidsid_0_11[color=#ffffff,
+                                      process="event Blame( sid.1, sid.1 );", issapicrule, role='Process']:
+   [ State_11( sid.1 ) ]
+  --[ Blame( sid.1, sid.1 ) ]->
+   [ State_111( sid.1 ) ]
+
+  /*
+  rule (modulo AC) eventBlamesidsid_0_11[color=#ffffff,
+                                         process="event Blame( sid.1, sid.1 );", issapicrule, role='Process']:
+     [ State_11( sid ) ] --[ Blame( sid, sid ) ]-> [ State_111( sid ) ]
+  */
+
+rule (modulo E) p_0_111[color=#ffffff, process="0", issapicrule,
+                        role='Process']:
+   [ State_111( sid.1 ) ] --> [ ]
+
+  /*
+  rule (modulo AC) p_0_111[color=#ffffff, process="0", issapicrule,
+                           role='Process']:
+     [ State_111( sid ) ] --> [ ]
+  */
+
+restriction single_session:
+  "∀ #i #j. ((Init( ) @ #i) ∧ (Init( ) @ #j)) ⇒ (#i = #j)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ #i #j. ((Init( ) @ #i) ∧ (Init( ) @ #j)) ⇒ (#i = #j)"
+  */
+
+lemma acc_blamed_suff:
+  exists-trace
+  "∃ x sid #i.
+    ((Blame( h(sid), x ) @ #i) ∧
+     (∀ x.1 sid.1 #i.1. (Blame( h(sid.1), x.1 ) @ #i.1) ⇒ (x.1 = x))) ∧
+    (∀ a #i.1. (Corrupted( a ) @ #i.1) ⇒ (a = x))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ x sid #i.
+  (Blame( h(sid), x ) @ #i)
+ ∧
+  (∀ x.1 sid.1 #i.1. (Blame( h(sid.1), x.1 ) @ #i.1) ⇒ x.1 = x) ∧
+  (∀ a #i.1. (Corrupted( a ) @ #i.1) ⇒ a = x)"
+*/
+by sorry
+
+lemma acc_verif_empty:
+  all-traces
+  "(¬(∃ x sid #i. Blame( h(sid), x ) @ #i)) ⇒
+   (¬(∃ sid #i. Unequal( h(sid) ) @ #i))"
+/*
+guarded formula characterizing all counter-examples:
+"(∀ x sid #i. (Blame( h(sid), x ) @ #i) ⇒ ⊥) ∧
+ (∃ sid #i. (Unequal( h(sid) ) @ #i))"
+*/
+by sorry
+
+lemma acc_blamed_verif_nonempty:
+  all-traces
+  "∀ x sid #i.
+    (Blame( h(sid), x ) @ #i) ⇒
+    (¬(¬(∃ sid.1 #i.1. Unequal( h(sid.1) ) @ #i.1)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x sid #i.
+  (Blame( h(sid), x ) @ #i)
+ ∧
+  ∀ sid.1 #i.1. (Unequal( h(sid.1) ) @ #i.1) ⇒ ⊥"
+*/
+by sorry
+
+lemma acc_blamed_min:
+  all-traces
+  "∀ x sid #i.
+    (Blame( h(sid), x ) @ #i) ⇒
+    (¬(∃ x.1 sid.1 #i.1.
+        (Blame( h(sid.1), x.1 ) @ #i.1) ∧ ((x.1 = x) ∧ (¬(x = x.1)))))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x sid #i.
+  (Blame( h(sid), x ) @ #i)
+ ∧
+  ∃ x.1 sid.1 #i.1.
+   (Blame( h(sid.1), x.1 ) @ #i.1) ∧ (x.1 = x) ∧ ¬(x = x.1)"
+*/
+by sorry
+
+lemma acc_blamed_uniq:
+  all-traces
+  "∀ x sid #i. (Blame( h(sid), x ) @ #i) ⇒ (∃ #i.1. Corrupted( x ) @ #i.1)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x sid #i.
+  (Blame( h(sid), x ) @ #i) ∧ ∀ #i.1. (Corrupted( x ) @ #i.1) ⇒ ⊥"
+*/
+by sorry
+
+lemma acc_blamed_inj:
+  all-traces "⊤"
+/*
+guarded formula characterizing all counter-examples:
+"⊥"
+*/
+by sorry
+
+lemma acc_blamed_single:
+  exists-trace
+  "∃ x sid #i.
+    (Blame( h(sid), x ) @ #i) ∧
+    (∀ x.1 sid.1 #i.1. (Blame( h(sid.1), x.1 ) @ #i.1) ⇒ (x.1 = x))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ x sid #i.
+  (Blame( h(sid), x ) @ #i)
+ ∧
+  ∀ x.1 sid.1 #i.1. (Blame( h(sid.1), x.1 ) @ #i.1) ⇒ x.1 = x"
+*/
+by sorry
+
+predicate: Blamed( x )<=>∃ sid #i. Blame( h(sid), x ) @ #i
+
+/*
+WARNING: the following wellformedness checks failed!
+
+Accountability (RP check)
+  The specification contains at least one restriction.
+  
+  Please verify manually that your protocol fulfills the following condition:
+  
+  For each case test τ, traces t, t’, and instantiations ρ, ρ’:
+  If τ holds on t with ρ, and τ single-matches with ρ’ on t’, then
+  there exists a trace t’’ such that τ single-matches with ρ on t’’
+  and the parties corrupted in t’’ are the same as the parties
+  corrupted in t’ renamed from rng(ρ’) to rng(ρ).
+*/
+
+/*
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: fixtures/acc_both_expanded.spthy
+
+  
+  WARNING: 1 wellformedness check failed!
+  
+  acc_blamed_suff (exists-trace): analysis incomplete (1 steps)
+  acc_verif_empty (all-traces): analysis incomplete (1 steps)
+  acc_blamed_verif_nonempty (all-traces): analysis incomplete (1 steps)
+  acc_blamed_min (all-traces): analysis incomplete (1 steps)
+  acc_blamed_uniq (all-traces): analysis incomplete (1 steps)
+  acc_blamed_inj (all-traces): analysis incomplete (1 steps)
+  acc_blamed_single (exists-trace): analysis incomplete (1 steps)
+
+==============================================================================

@@ -605,3 +605,369 @@ alert`), so there is no live edit form to route yet.
   count **134 -> 134 (delta 0)**: this pass added only headerless clean sources
   (5 new files: graph_clean/{alloc,generate,options,render}.rs,
   web_clean/dispatch.rs) and touched no ported derivation surface.
+
+================================================================================
+# Dirty-room integration report — round-4 closures, units C, D, E, G
+
+Date: 2026-07-17. Integrator: dirty-room (adapters + extraction only; no logic
+transplanted from replaced files into clean code). Same protocol/precedent as
+above. Similarity audits PASSED for C, D, E, G. Outcome: **C fully swapped +
+ported paths deleted (byte-verified against the v1.13.0 oracle); D, E, G
+re-synced and KEPT with precise blockers** — each round-4 clean deliverable
+diverges from the real tamarin-parser AST / RS pipeline staging in ways a thin
+adapter cannot close without transplanting logic or risking corpus byte-parity.
+
+--------------------------------------------------------------------------------
+## C. Wellformedness round-4 — SWAPPED + DELETED (byte-verified)
+
+### C.1 Re-sync — DONE
+Re-applied the mechanical recipe (`crate::{pretty,report,formula}` -> `super::`,
+`crate::ast` kept) to the round-4 wf-clean sources:
+* `wf/checks.rs` (adds sort-aware `SortClass`/`debruijn_index`, `Quantifier
+  sorts` topic `T_QUANT_SORTS`, semantic `formula_guardedness`, the per-item
+  `formula_reports` bundle), `wf/formula.rs`, `wf/pretty.rs`, `wf/report.rs`.
+* `wf/mod.rs` rebuilt from wf-clean/lib.rs (round-4: `T_QUANT_SORTS` anchor +
+  `formula_reports` replace the split `formula_terms_reducible`/`guardedness`
+  calls); PRESERVED `wf/order.rs` + its two `pub mod order; pub use order::*;`
+  lines. Fidelity: reverse-transform is byte-identical to each clean source.
+
+### C.2 Rewire — DONE
+`run.rs` and `theory_io.rs` now route the formula-terms check through the clean
+sort-aware binding and the guardedness call sites through the clean semantic
+guardedness: the two ported inserts (`check_terms::check_terms_wf`,
+`elaborate::check_guarded_wf`) were replaced by ONE strip-and-reinsert of
+`wf::checks::formula_reports(&wf_thy, &reducible)` at the formulaReports
+position (same pattern as the Subterm/MDC swaps). Three workspace adapters make
+this byte-faithful (all headerless, no HS citation, `gen_license_headers.py`
+adds none):
+* `tamarin_theory::wf_adapt::reducible_funsym_names(&MaudeSig)` — the reducible
+  symbol-name set the clean checkTerms consumes (`fun_syms \ irreducible`).
+* `wf_adapt::normalize_temporal_sorts` — **the closure gap the round-4 clean
+  work left open.** The clean checks bind a use to a quantifier by matching sort
+  CLASS, but the real parser leaves a bare timepoint (`... @ i`) `Untagged`
+  while its binder is `#i` (Node); feeding the raw AST spuriously reported
+  `Free i`/unguarded `#i` on **every** lemma (verified end-to-end on the real
+  binary). The adapter fills the node sort into temporal-position uses (Action
+  timepoint, `<` operands, `last`) — the temporal→Node convention already used
+  by `guarded_types.rs`; a mechanical input normalization, not clean-file logic.
+* predicate expansion of the local wf clone before the bundle (the clean
+  guardedness expects predicate atoms inlined, as HS does at parse time).
+* `pretty_theory::render_wf_error_report` gained a header-less-body preamble for
+  `Quantifier sorts`/`Formula terms`/` Formula guardedness` (header + blank line,
+  matching the clean `report::render_report` / oracle layout).
+
+Byte-parity VERIFIED against the testing-tree oracle (v1.13.0): a free-variable
+Formula-terms block and a guardedness-failure block are each `diff`-identical;
+well-formed lemmas (incl. bare `@ i` timepoints) now emit no spurious wf. Gate:
+parser suite (67+2), wellformedness fixture suite 21/21/21 (parse / Rust-wf /
+Tamarin), and the captured node-binder `Free x` case (preserved in the new
+headerless test `tamarin-theory/tests/wf_formula_terms.rs`) — all green.
+
+### C.3 Deletions — DONE
+* DELETED `tamarin-theory/src/check_terms.rs` (GPL-headered) + `pub mod
+  check_terms;` + the lib.rs doc line. Its `pub(crate) show_lvar` (used only by
+  `deriv_check.rs`) was relocated verbatim into `deriv_check.rs` as a private fn
+  (byte-neutral; MDC output unchanged).
+* DELETED `elaborate::check_guarded_wf` (GPL-headered function body) and fixed
+  the `elaborate_with_diagnostics` doc reference. `arity1_noeq_names` /
+  `rewrite_arity1_formula` are NOT dead (pretty_theory + elaborate still use
+  them) — kept.
+
+--------------------------------------------------------------------------------
+## D. Console (cli-clean) round-4 — KEPT at round-3; re-sync COUPLED to the swap
+
+Round-4 cli-clean adds `args.rs` (typed `parse_args`/`Args` with value
+validation + the Rust-only flags) and `stream.rs`, and CHANGES the APIs of the
+already-vendored modules: `version.rs` (`render_version` now stream-aware),
+`errors.rs` (`CliError`->`ParseError` + per-stream tiers), `framing.rs`
+(stream-aware, needs `version::maude_preamble`), `modes.rs` (`FlagSpec` gains
+`consumes_next`), `parse.rs` (`Options::last`/`occurrences`). These are mutually
+coupled (framing->version, errors->stream, args->parse+errors) and the LIVE
+round-3 help/version routing (`cli/adapt.rs`) depends on the round-3
+`render_version` signature. Re-syncing the changed modules in isolation breaks
+`adapt.rs`; a full re-sync therefore requires re-doing `adapt.rs` against the
+round-4 version/help/errors API AND performing the parse+framing swap in one
+coupled re-integration (a ~50-field clean `Args`->ported `Args` mapping plus a
+byte-exact stdout/stderr-split rewrite of `run.rs`'s batch driver). That is not
+a thin adapter; per protocol the round-3 vendoring + the live help/version
+routing are KEPT intact and the swap is reported.
+
+kept (ported, headers intact): `cli/mod.rs` `parse_args`/`Args`/`Subcommand` +
+typed validation; `run.rs` batch framing. Vendored round-3 clean modules
+unchanged. Deleted: none. Header delta: 0.
+
+Note (out-of-scope observation, pre-existing): bare `--prove` puts `""` in
+`args.lemma_names`, so the ported `parse_args` + `check_if_lemmas_in_theory`
+emit `lemma `' referenced but not present` where the oracle prints success. Not
+introduced this round (CLI-arg layer, untouched); flagged for the D re-integration.
+
+--------------------------------------------------------------------------------
+## E. Macros (macro-clean) round-4 — RE-SYNCED; rewire BLOCKED (scope mismatch)
+
+Re-synced `macros.rs` <- round-4 macro-clean/lib.rs (mechanical: `pub mod ast;`
+dropped, `use ast::*;`->`use tamarin_parser::ast::*;`, and the external
+`#[cfg(test)] mod tests;` line dropped — its file is not vendored, matching the
+round-3 precedent). Compiles; fidelity verified.
+
+REWIRE (route `expand_theory_macros`/`macro_expanded_clone` through
+`macros::expand`) NOT performed. Round-4 did NOT add the AccLemma/CaseTest-skip
+mode the prior report flagged as required; instead the clean `expand`
+now expands MORE than the RS staged pass, so it is not a drop-in:
+1. `expand_item` expands `AccLemma.formula` and `CaseTest.formula`; the RS pass
+   deliberately leaves these `TranslationItem`s unexpanded (HS `Prover.hs:204`;
+   expansion is owned by the accountability translation). The captured tests
+   `acc_lemma_formula_is_not_macro_expanded` / `case_test_formula_is_not_macro_
+   expanded` (which must pass UNMODIFIED) assert the macro call survives — the
+   clean would break both.
+2. `expand_rule` recurses into rule `variants` and diff `left_right`; the RS
+   pass (HS `applyMacroInProtoRule`, main-rule `ruE` only) leaves them intact,
+   so an explicit `variants` block's macro call must survive unexpanded.
+Bridging both would re-implement the RS staging as a post-filter over a
+whole-theory AST rebuild — and `macro_expanded_clone` feeds the C wf pipeline
+just made byte-green, so any rebuild drift would regress it. The positional-zip
+macros:-preservation adapter alone does not cover (1)/(2). Kept ported
+(`macro_expand.rs`, header intact); vendored round-4 `macros.rs` headerless.
+A future close needs an AccLemma/CaseTest-skip + variants-passthrough mode in
+the clean expander (clean-side, per the prior report). Deleted: none. Header: 0.
+
+--------------------------------------------------------------------------------
+## G. Derivcheck (derivcheck-clean) round-4 — RE-SYNCED + AST-bridged; swap KEPT
+
+Re-synced `deriv_check_clean/mod.rs` <- round-4 lib.rs (adds the BATCHED
+`DerivabilitySolver::check_rule(&RuleProbe)`, `PerVariable` adapter, the
+single-`WfError`/heading-included output contract, and the `(idx, sort, name)`
+variable order). NEW mechanical fix this round: the round-3 self-contained
+`ast` module was dropped and `use ast::{…}` pointed at `tamarin_parser::ast`
+(the macros.rs/injfacts_clean precedent) — the clean AST is structurally
+IDENTICAL to the parser AST (verified: it compiles and its 28 vendored tests
+pass against the real AST). This substantially de-risks a future close and is
+kept as the integration-prepared form.
+
+SWAP (adapter `DerivabilitySolver` over `prove_probe`/`synthesise_probe_theory`
++ replace `check_message_derivation` with `deriv_check_clean::message_
+derivation_checks`) NOT performed. The solver adapter itself is thin
+(`check_rule` -> synthesise + prove_probe, map `show_lvar`-rendered undecidable
+set back to per-variable `NotDerivable`), but two integration-boundary gaps
+carry unverifiable corpus byte-parity risk:
+1. Candidate scope on the PARSER AST. The clean `candidate_variables` assumes a
+   declared nullary function is `Term::App(name,[])` (skipped); the real parser
+   leaves it `Term::Var(name)`, so the clean would enumerate it as a candidate.
+   Public nullary functions still resolve Derivable via the solver, but a
+   PRIVATE `f/0` would be flagged `NotDerivable` where HS / the ported
+   `collect_rule_free_vars` (explicit nullary deny-list) do not — a divergence
+   that needs a nullary-Var->App normalization adapter (analogous to C's
+   temporal fix) plus Nat/Pub-candidate handling.
+2. Verifying byte-parity requires MDC-triggering corpus theories through the
+   oracle (the topic is rarely exercised; the theory suite has no discriminating
+   MDC fixture), which cannot be done cheaply. Per "never force", the ported
+   `deriv_check.rs` is KEPT (header intact; only the byte-neutral `show_lvar`
+   relocation from C). Deleted: `deriv_check_clean/ast.rs` (headerless vendored
+   copy, superseded by the real AST). Header delta: 0.
+
+--------------------------------------------------------------------------------
+## Summary (round-4 C–G) — deleted / kept / header delta
+
+* C  SWAPPED. deleted: `check_terms.rs` (GPL-headered), `elaborate::check_
+     guarded_wf` (GPL-headered fn body). kept clean+headerless re-syncs
+     (wf/checks,formula,pretty,report,mod) + new headerless `wf_adapt.rs`,
+     `tests/wf_formula_terms.rs`. Byte-verified vs oracle.
+* D  KEPT (round-3). round-4 API re-sync is coupled to the parse+framing swap;
+     deferred as one re-integration. deleted: none.
+* E  RE-SYNCED (round-4 `macros.rs`, headerless). kept: `macro_expand.rs`
+     (AccLemma/CaseTest + variants over-expansion). deleted: none.
+* G  RE-SYNCED (round-4 `deriv_check_clean/mod.rs`, now on the real parser AST).
+     kept: `deriv_check.rs` (nullary-candidate byte-parity risk + unverifiable
+     MDC corpus). deleted: `deriv_check_clean/ast.rs` (headerless).
+
+Header-count: **134 -> 133** (net -1): only `check_terms.rs` (one GPL header)
+removed; no clean/adapter file acquired a header; no kept ported file lost one.
+`gen_license_headers.py` --check: 0 stale (identities cached 64).
+
+Validation (all green): `cargo build --workspace` 0 errors;
+`cargo test -p tamarin-parser` 67+2; `-p tamarin-theory` 489+19+5 (incl. 28
+round-4 deriv_check_clean on the real AST, 5 new formula-terms coverage);
+`-p tamarin-prover` 61+7 (cli_e2e); `-p tamarin-server` 96+routes; wf fixture
+suite 21/21/21 vs oracle; Formula-terms/guardedness blocks byte-identical to the
+v1.13.0 oracle.
+
+================================================================================
+# Dirty-room integration report — round-5 closures, units B (graph) + A (web)
+
+Date: 2026-07-17. Integrator: dirty-room (adapters + extraction only; no logic
+transplanted from replaced files into clean code). Repo: `/home/kamilner/tamarin-rs`.
+Same protocol/precedent. Similarity audits PASSED for B, A. Rebased on the
+CURRENT tree (theory-side C/D/E/G integrator already applied; header count
+inherited at 133). Outcome: **both vendored trees RE-SYNCED to round-5; the two
+headline swaps stay KEPT with precise, live-confirmed blockers; one round-4-staged
+web closure (the edit form) was completed and byte-verified.** No headered file
+deleted → header count unchanged.
+
+--------------------------------------------------------------------------------
+## A/B.0 Vendored copies RE-SYNCED from the round-5 workspaces — DONE
+
+Re-applied the established mechanical recipe (`crate::` -> `super::`; and, in
+`graph_clean/mod.rs` only, the module-doc doctest fence ` ``` ` -> ` ```ignore `).
+No license headers (relicensable clean sources; `gen_license_headers.py` adds
+none — verified: clean dirs stay headerless). Forward-transform fidelity checked
+programmatically: every vendored file equals `workspace.replace("crate::","super::")`
+byte-for-byte (mod.rs modulo the one fence line).
+
+* `graph_clean/` <- graph-clean/src/: generate.rs + render.rs materially updated
+  (round-5 adds the pre-rendered-cell `RawRule` entry and the `wrap_cell`
+  layout/peel), plus `mod.rs` re-exports (`ClusterRef`,`GraphNode`,`RawRule`,
+  `RuleInstance`,`wrap_cell`); other files byte-stable.
+* `web_clean/` <- web-clean/src/: `notfound_template.rs` REMOVED (dropped
+  upstream) and `assets.rs` ADDED; `dispatch.rs`, `route.rs`, `page.rs`,
+  `errors.rs`, `shell_template.rs`, `envelope.rs`, `forms.rs`, `mod.rs` updated.
+
+Fidelity at scale: the workspace `graph-clean` opt-in corpus gate is green in
+place — `GRAPHCLEAN_CORPUS=<oracle/dot_corpus> cargo test` = lib 18 + abbrev 16
++ alloc_corpus 2 (12 022 payloads) + generate_tests 15 + roundtrip 14 + doctest
+1, 0 failures. The vendored `tamarin-server` lib unit tests grew **96 -> 103**
+(the re-synced clean inline tests) and pass.
+
+--------------------------------------------------------------------------------
+## B. GRAPH serialization swap (system_to_dot -> clean generate) — NOT PERFORMED
+
+The round-5 `graph_clean` DID close four of the five round-4 blockers: `generate`
+now models role CLUSTERING (`ClusterRef`/`Cluster` stmt + first-appearance
+emission order), the `RawRule` pre-rendered-cell seam (the intended adapter seam —
+ported term printer -> flat cell strings -> `wrap_cell`), the `Temporal`/`Shaped`
+node kinds (`#last` bare timepoint + arbitrary `shape=` incl. `trapezium`), and the
+global `n<K>` id/port allocation (`alloc`, 12 022/12 022). The clean `dot`
+serializer emits the HS dialect exactly (`digraph "G" {`, `<nK>` ports,
+`{{..}|{..}}` bracketing).
+
+**Blocker (single, live-confirmed, fatal to a byte-exact swap): the record-cell
+wrap TRIGGER.** `graph_clean::render::wrap_cell` — the mandatory cell processor
+inside `generate::build_record`, unavoidable on the `RawRule` seam — wraps a cell
+on the cell's **own flat width > 87 columns**. The clean crate's own BEHAVIOR.md
+§3f documents this as a **"NEW RESIDUAL — the wrap TRIGGER is accumulated-column
+(Wadler `group`/`fits`)"**: HS wraps a cell **deep on a wide record line earlier**,
+because HS `renderBalanced`/`fits` (the ported `handlers/dot.rs::render_balanced`,
+per-row proportional field widths `max 30 . round . (*1.3)` over a 100-col budget
++ per-field ribbon) measures a field against its shrunken share, not a flat 87.
+
+Live gate built and run (graphdot reference-server recipe; PATH
+`/home/linuxbrew/.linuxbrew/bin`, port 3211). A purpose-built wide-record probe
+theory `Wide` (10-tuple `In`, three wide conclusions `[Ack, Big, Out]`) captured
+fresh via `interactive-graph-def/cases/raw/1/1` shows HS emitting, in the record's
+conclusion row:
+
+    Ack( ~n.4,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<x1.4, x2.4\>\l)\l
+
+i.e. HS **wraps** `Ack( ~n.4, <x1.4, x2.4> )` — flat width **25**, far under 87 —
+because it is a field in a wide 3-conclusion row. Calling the clean cell processor
+directly (`tamarin_server::graph_clean::render::wrap_cell` on the same flat text)
+returns the **flat** `Ack( ~n.4, \<x1.4, x2.4\> )` with no `\l`. So any adapter
+routing `RawRule` cells through `generate` produces byte-different DOT for this
+(and, per the corpus scan, 144 553+ other) wide records. This is exactly the
+"wide-cell" probe variant the task names, and it is intrinsic to the clean cell
+wrapper (an adapter cannot bypass `wrap_cell`, and feeding it pre-wrapped text is
+not its contract — it re-escapes/mis-measures). Reproducing the trigger needs the
+whole record label as one `group`/`nest`/`line` Doc, which the clean crate
+deliberately does not implement (BEHAVIOR.md §3f: "the width (87), fill packing,
+peel columns, and the fill-vs-sep split are pinned" — the accumulated-column
+trigger is not).
+
+Per "never force it": KEPT intact, headers untouched — `handlers/dot.rs` (the
+`render_balanced` proportional-width serializer that IS byte-faithful to HS's
+record wrapping), `graph/abbreviation.rs`, `graph/repr.rs`, `graph/simplify.rs`,
+`graph/options.rs`. These four `graph/*` modules also remain independently
+required regardless of the wrap: the clean `generate` docs list the system->graph
+mapping, the compression content, the per-rule/per-cluster color hash, and the
+abbreviation SELECTION over `LNTerm` as GAPS ("need the GPL solver; not derivable
+from output"). `routes_graph::dot_output_for_a_simple_system` is UNCHANGED (it
+pins the still-live ported dialect; switching it to the reference dialect would
+assert output the blocked swap never produces). `graph_clean` NOT renamed to
+`graph` (rename is tied to deletion, which did not happen). Deleted: none.
+
+A future close needs `graph_clean::render` to carry the accumulated-column /
+whole-label document-tree wrap decision (a clean-side change, per the crate's own
+§3f); then the `RawRule` seam becomes byte-faithful and the swap + deletions +
+rename land as specified.
+
+--------------------------------------------------------------------------------
+## A. WEB full Server adoption (dispatch::Server single request path) — NOT PERFORMED
+##    ... but the round-4-staged edit-form closure DONE + byte-verified
+
+`web_clean::dispatch::Server<ProverOps>` is re-synced, builds, and its route-parse
++ state machine now cover `root`, `static`, `kill`, `robots`, `favicon`, and the
+`main/*`, `overview/*`, `autoprove{,Diff,All}`, `next`/`prev`, `source`/`message`,
+`download`, `intdot`, `interactive-graph-def`, `reload`, `get_and_append`, and
+`edit` theory routes. Adopting it as the server's SINGLE request path is still
+blocked:
+
+1. **The clean route surface OMITS `del/path` (DeleteStepR) and `verify`
+   (TheoryVerifyR)** — verified in `web_clean/route.rs` (no `del`/`verify`
+   `Handler` arms; both fall to `Handler::Other` -> `dispatch` `_ =>` 404) and in
+   the clean web AUDIT.md ("reproduces ONLY observable routes and OMITS the
+   upstream routes it could not observe — `unload`, `mirror`/`interactive-mirror-
+   def`, `del/path`, `verify`"). But the ported server serves both as **LIVE**
+   routes with captured-HS parity fixtures (`routes_stubs`:
+   `test_del_path_lemma_returns_redirect_envelope` -> `{redirect}` + fresh idx;
+   `test_verify_lemma_returns_html_envelope` -> `{html,title}`;
+   `test_verify_proof_returns_redirect_envelope` -> `{redirect}`; fixtures
+   `del_path.json`, `verify.json`, `verify_proof.json`). Routing ALL routes
+   through `Server` 404s these four (breaking their byte assertions — which the
+   task forbids weakening).
+2. **`Server` OWNS the version map + monotonic counter, and `del/path` allocates a
+   new version.** A hybrid (Server for the covered subset, ported side-paths for
+   `del/path`/`verify`) would FORK the version state between the two — the exact
+   round-4 "inconsistency, not an adapter" defect — so the two cannot coexist
+   without unifying version state, which requires `del/path` to go through Server,
+   which requires the clean route/dispatch/ProverOps to model it (they do not).
+3. **ProverOps is ~22 pure producers to extract from ~4 000 LOC** of ported
+   `handlers/theory.rs` (1599), `theory_html.rs` (1058), `proof_tree.rs` (1315) —
+   a large refactor, tractable but gated behind (1)/(2).
+
+Per "never force it": KEPT the ported router (`routes.rs`), state (`state.rs`),
+and handlers (headers untouched). `web_clean` NOT renamed to `web`.
+
+**DONE this round (a round-4-staged closure the re-sync unblocked): the edit
+form.** Round-4 kept `edit_lemma_html` ported because the then-clean `forms::
+edit_form` hard-coded `rows="8"`; round-5 `forms.rs` adds `edit_rows` (`'\n'-count
++ 2`), closing that gap. `theory_html.rs`'s `TheoryPath::Edit` arm now routes
+through `web_clean::forms::edit_form(name, &plaintext)` (plaintext = the ported
+`getLemmaPlaintext` lookup, kept inline with its `Web/Handler.hs:178-187`
+citation), and the ported `edit_lemma_html` fn + the now-orphaned
+`NOSCRIPT_WARNING`/`WRAP_TEXT_STYLE` consts were DELETED. This completes the
+add/delete/edit forms trio through the clean layer. **Byte-verified against the
+live HS reference** (Tutorial.spthy, `main/edit/Client_auth`): the RS route output
+is now **byte-identical to HS** (1800 bytes, dynamic `rows="11"`, and the
+HS-faithful stray `</span></span>` the ported code had normalized away — so this
+is a strict byte IMPROVEMENT, not just structural parity). `routes_stubs` (15) and
+the structural parity suite stay green.
+
+--------------------------------------------------------------------------------
+## Round-5 (B, A) — deleted / kept / header delta
+
+* B  RE-SYNCED (graph_clean round-5, headerless). SWAP NOT PERFORMED — clean
+     `wrap_cell` accumulated-column residual (live-confirmed vs HS). kept:
+     `handlers/dot.rs`, `graph/{abbreviation,repr,simplify,options}.rs`. deleted:
+     none. rename: none.
+* A  RE-SYNCED (web_clean round-5, headerless). FULL Server adoption NOT PERFORMED
+     — clean surface omits `del/path`+`verify` (LIVE parity routes) + Server-owns-
+     version fork. kept: `routes.rs`, `state.rs`, handlers. rename: none.
+     DONE: edit form routed through `web_clean::forms::edit_form` (byte-identical
+     to HS); deleted the ported `edit_lemma_html` fn + 2 orphaned consts (bodies
+     inside the still-headered `theory_html.rs`).
+
+Header-count delta: **133 -> 133 (net 0).** No headered FILE was added or deleted,
+so **no upstream author's citation disappeared** campaign-wide. The expected drop
+did not materialise because both headline swaps (which would have removed
+`handlers/dot.rs` — 22 cited authors — and `routes.rs`/`state.rs`) are blocked.
+`theory_html.rs`'s header was recomputed by `gen_license_headers.py` after the
+`edit_lemma_html` deletion; the `src/Web/Handler.hs` citation was PRESERVED (the
+`getLemmaPlaintext` logic stays inline), so that file's citation set is unchanged
+from its pre-round state. `gen_license_headers.py --check`: 0 stale (identities
+cached 64).
+
+Validation (all green): `cargo build --workspace` 0 errors;
+`cargo test -p tamarin-parser` 67+2 (+ wellformedness integration 2);
+`-p tamarin-theory` 489+19+5; `-p tamarin-prover` 61+7 (cli_e2e);
+`-p tamarin-server` lib 103 + routes (autoprove 6, basic 19, graph 4,
+proof_step 3, static 3, stubs 15, upload 3); wf fixture suite 21/21/21 vs the
+v1.13.0 oracle; `GRAPHCLEAN_CORPUS` gate green (12 022 payloads);
+`gen_license_headers.py --check` 0 stale (133 headers); edit form byte-identical
+to the live HS reference.

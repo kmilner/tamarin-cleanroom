@@ -1,0 +1,6 @@
+theory G2IdxName
+begin
+functions: h/1
+rule R:
+  [ In( h(<y.1, x.2>) ) ] --> [ Out('ok') ]
+end

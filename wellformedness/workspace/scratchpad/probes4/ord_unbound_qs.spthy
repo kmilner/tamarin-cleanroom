@@ -1,0 +1,10 @@
+theory OrdUnbQs
+begin
+rule R1:
+   [ In(a) ]
+  --[ A(b) ]->
+   [ Out(a) ]
+lemma L:
+  all-traces
+  "All $x #i. (A($x) @ #i) ==> (A($x) @ #i)"
+end

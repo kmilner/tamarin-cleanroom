@@ -1,0 +1,13 @@
+theory OrdLaFt
+begin
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x) ]->
+   [ Out(~x) ]
+lemma L1 [reuse]:
+  exists-trace
+  "Ex #i. A(w) @ #i"
+lemma L2:
+  exists-trace
+  "Ex #i. A(y) @ #i"
+end

@@ -90,3 +90,56 @@ failing rule. A report writer renders a topic as
 `render_derivation_report` implements for this topic (verified byte-exact). At
 integration, thin adapters map these into the shared report and wire the real
 solver as the `DerivabilitySolver`.
+
+---
+
+# Round 4 — closing five derivation-check gaps
+
+All five gaps were pinned by fresh black-box probes (authored `probes4/*.spthy`, run through
+`oracle/hs_oracle.sh`; every observation logged in QUERIES.log under `ROUND 4`) and the crate
+`workspace/derivcheck-clean` was updated to match. `cargo test` → 28 passed, warning-clean; the
+two-rule block is byte-identical (297 bytes, `cmp`) to the captured reference fixture
+`probes4/fixture_two_rule.txt` (verified by `examples/dump_two_rule.rs`).
+
+## GAP 1 — output contract (one value, heading included)
+`message_derivation_checks` now returns the WHOLE topic as a SINGLE `WfError` whose `message` is
+the complete block INCLUDING the underlined `Message Derivation Checks` heading + 25-`=`
+underline (previously it returned intro + per-rule fragments assembled by a separate renderer).
+The consuming report renderer adds no per-topic heading; topic blocks are joined by one blank
+line, which the reference confirms (blank line between the Subterm and Derivation blocks). The
+returned message is byte-exact and carries no trailing newline. `render_derivation_report` now
+just returns that single message.
+
+## GAP 2 — multi-variable ordering (key was wrong)
+Discriminating probes (the prior fixtures all used index 0 and could not tell the keys apart)
+establish the true total order: **`(index numeric, sort-rank Fresh<Msg<Nat, name byte/ASCII)`**
+— index is PRIMARY, not the sort. Evidence: `In(h(~a.2)),In(h(b))` → `b, ~a.2` (idx-0 msg before
+idx-2 fresh); `In(h(<z.1,a.2,~z.2,~a.1,m>))` → `m, ~a.1, z.1, ~z.2, a.2`; `In(h(<apple,Zebra>))`
+→ `Zebra, apple` (ASCII, uppercase first). The old `(sort_rank, name, idx)` key is replaced by
+`(idx, sort_rank, name)` in `var_order_key`; `sort_rank` gains `Nat=2`. Trailing digits without
+a `.` stay in the name at index 0 (`x2`,`v10`).
+
+## GAP 3 — candidate scope
+Probed which classes can EVER be flagged. Candidate set = every free variable of the expanded
+rule across premises, actions AND conclusions: an action-only var (`z`) and a conclusion-only var
+(`k`) are both flagged. Public (`$p`) is a candidate but the solver always resolves it derivable
+(never flagged; the unit does not pre-filter). Natural-number vars (`%x`) CAN be flagged and are
+rendered `%`. Temporal/node vars are a parse error in message-term position — never candidates. A
+name matching a declared nullary function is a constant (`Term::App(name, [])`), contributing no
+variable — handled by the term walk. Candidate enumeration was widened to include actions and
+conclusions accordingly.
+
+## GAP 4 — pre-expansion
+Derivability is decided AFTER macro and `let` expansion; the reported names are the post-expansion
+inner names (`let y = h(w) in In(y)` → `w`; `let y = w in In(h(y))` → `w`, never `y`;
+`macros mac(x)=h(x); In(mac(w))` → `w`). The unit now expands the theory-level `macros:` table and
+the rule's `let` bindings into the rule's fact terms (`expand_rule`, `expand_term`, `subst_vars`,
+`let_substitution`) before enumerating candidates; let-bound LHS names are eliminated and never
+become candidates.
+
+## GAP 5 — solver interface shape (batched)
+`DerivabilitySolver` is now batched: `check_rule(&RuleProbe)` receives one rule with ALL its
+candidate variables and returns one verdict per variable — one saturation per rule, no wasteful
+per-variable re-saturation. The per-variable path is retained as a thin adapter: `PerVariableSolver`
++ `PerVariable<S>` wrapper. A recording-stub test asserts the solver is consulted exactly once per
+rule with the full candidate batch; fixtures/tests were updated to the batched trait.

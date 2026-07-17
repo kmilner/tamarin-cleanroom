@@ -1,0 +1,11 @@
+WARNING: the following wellformedness checks failed!
+
+ Formula guardedness
+====================
+
+  Lemma `L' cannot be converted to a guarded formula:
+    unguarded variable(s) 'y' in the subformula
+      "∃ x y #i. A( x ) @ #i"
+    in the formula
+      "∃ x y #i. A( x ) @ #i"
+*/

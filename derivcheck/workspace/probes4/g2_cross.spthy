@@ -1,0 +1,6 @@
+theory G2Cross
+begin
+functions: h/1
+rule R:
+  [ In( h(<~p.3, q>) ), In( h(<r.1, ~s>) ) ] --> [ Out('ok') ]
+end

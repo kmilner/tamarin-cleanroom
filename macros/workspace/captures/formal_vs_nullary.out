@@ -1,0 +1,40 @@
+[Theory FormalVsNullary] Theory loaded
+[Theory FormalVsNullary] Theory translated
+[Theory FormalVsNullary] Derivation checks started
+[Theory FormalVsNullary] Derivation checks ended
+[Theory FormalVsNullary] Theory closed
+theory FormalVsNullary
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, h/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+macros: base( ) =  h('k'),
+        f( base ) =  <base, base>
+
+rule (modulo E) R:
+   [ In( a ) ] --[ A( f(a) ) ]-> [ Out( a ) ]
+
+  /*
+  rule (modulo AC) R:
+     [ In( a ) ] --[ A( <h('k'), h('k')> ) ]-> [ Out( a ) ]
+  */
+
+/* All wellformedness checks were successful. */
+
+/*
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: probes/formal_vs_nullary.spthy
+
+  
+
+==============================================================================

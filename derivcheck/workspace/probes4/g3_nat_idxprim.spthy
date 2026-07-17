@@ -1,0 +1,7 @@
+theory G3NatIdxPrim
+begin
+builtins: natural-numbers
+functions: h/1
+rule R:
+  [ In( h(<%a.2, b>) ) ] --> [ Out('ok') ]
+end

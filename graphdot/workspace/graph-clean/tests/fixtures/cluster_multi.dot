@@ -1,0 +1,41 @@
+digraph "G" {
+nodesep="0.8";
+ranksep="0.8";
+sep="4";
+splines="true";
+overlap="false";
+pack="true";
+packmode="cluster";
+concentrate="true";
+compound="true";
+remincross="true";
+mclimit="10";
+nslimit="20";
+nslimit1="20";
+ordering="out";
+rankdir="TB";
+showboxes="false";
+clusterrank="local";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2",margin="0.05,0.05",shape="ellipse"];
+edge[fontsize="8",fontname="Helvetica",penwidth="1.5",arrowsize="0.5",color="black",style="solid",weight="8"];
+n0[label="#k1 : isend[K( x )]",shape="ellipse"];
+n1[label="#k2 : isend[K( y )]",shape="ellipse"];
+n2[label="!KU( x ) @ #vk",shape="ellipse",color="gray"];
+n3[label="!KU( y ) @ #vk.1",shape="ellipse",color="gray"];
+subgraph "cluster_User_Session_1" {
+nodesep="0.6";
+ranksep="0.6";
+label="User_Session_1";
+style="filled";
+color="#D036D84C";
+penwidth="2";
+fillcolor="#D036D84C";
+overlap="false";
+sep="4";
+n7[shape="record",label="{{<n4> State_111121111( x, y, s, sk )}|{<n5> #i : eventExclusivelmrm[Exclusive( x, y )]}|{<n6> State_1111211111( x, y, s, sk )}}",fillcolor="#80406c",style="filled",fontcolor="white",role="User"];
+
+}
+n2 -> n0[color="red",style="dashed"];
+n3 -> n1[color="red",style="dashed"];
+
+}

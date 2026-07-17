@@ -1,0 +1,15 @@
+
+==============================================================================
+summary of summaries:
+
+analyzed: /home/kamilner/tamarin-cleanroom/console/oracle/examples/classic/NSLPK3.spthy
+
+  output:          /tmp/claude-1000/-home-kamilner-tamarin-rs/57f8e1bc-d495-4b36-93c0-033347d5034a/scratchpad/odir/NSLPK3_analyzed.spthy
+  processing time: 0.37s
+  
+  types (all-traces): analysis incomplete (1 steps)
+  nonce_secrecy (all-traces): analysis incomplete (1 steps)
+  injective_agree (all-traces): analysis incomplete (1 steps)
+  session_key_setup_possible (exists-trace): analysis incomplete (1 steps)
+
+==============================================================================

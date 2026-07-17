@@ -1,0 +1,12 @@
+theory Tg4_gu_disj
+begin
+
+predicates: Pr(x) <=> x = x
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x), B(~x), C(~x) ]->
+   [ Out(~x) ]
+lemma L:
+  all-traces
+  "All x #i. (A(x) @ #i) | (B(x) @ #i)"
+end

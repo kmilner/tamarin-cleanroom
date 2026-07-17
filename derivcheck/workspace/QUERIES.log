@@ -58,3 +58,48 @@
      and deriv check finds nothing. => The derivation check is robustly FAST; a real
      per-rule timeout cannot be practically triggered with sane inputs. Per-rule timeout OUTPUT
      text is therefore UNOBSERVED (documented residual; conservative fail-open default chosen).
+
+# ============================ ROUND 4 (Unit G gap-closing) ============================
+2026-07-17 R4 | GAP1: re-capture exact topic-block bytes (POIDC_CMB / t0 cat -A)
+  Two-rule block (297 bytes, no trailing NL) = heading+underline(25 '=')+blank+intro+blank+
+  "Rule reSign: \nFailed to derive Variable(s): m, r2, sk2"+blank+"Rule RP_gets_idToken: \n
+  Failed to derive Variable(s): pkA". Topic blocks in report joined by one blank line ("\n\n");
+  each block CARRIES its own heading => this topic must be ONE value incl. heading.
+
+2026-07-17 R4 | GAP2: ordering discriminators (authored g2_*.spthy)
+  g2_idxname  In(h(<y.1,x.2>))            => "y.1, x.2"            (idx1<idx2; NOT name-first)
+  g2_case     In(h(<apple,Zebra>))        => "Zebra, apple"       (name ASCII byte order, Z<a)
+  g2_nodot    In(h(<x2,x10>))             => "x10, x2"            (no-dot digits stay in NAME,
+                                                                   idx0; ASCII "x10"<"x2")
+  g2_mixed    In(h(<b.2,a.10,a.2,b>)),~c  => "~c, b, a.2, b.2, a.10"  (idx PRIMARY)
+  g2_freshidx In(h(~a.2)),In(h(b))        => "b, ~a.2"            (idx0 b before idx2 ~a.2 =>
+                                                                   idx OUTRANKS sort)
+  g2_cross    In(h(<~p.3,q>)),In(h(<r.1,~s>)) => "~s, q, r.1, ~p.3" (idx,then sort fresh<msg)
+  g2_strong   In(h(<z.1,a.2,~z.2,~a.1,m>)) => "m, ~a.1, z.1, ~z.2, a.2"  (idx,sort,name exact)
+  => CONFIRMED order key = (idx numeric ASC, sort[Fresh<Msg<Nat], name ASCII). Prior
+     (sort_rank,name,idx) key is WRONG (idx must be primary).
+
+2026-07-17 R4 | GAP3: candidate scope
+  g3_concl  [Fr(~n)]-->[Store(~n,k)]        => flags "k"  (conclusion-only var IS a candidate;
+                                               also emits separate "Unbound variables" topic)
+  g3_act    [Fr(~n)]--[Ev(z)]->[Out(~n)]    => flags "z"  (action-only var IS a candidate)
+  g3_nullary functions: c/0; In(h(c))       => NO warning (c is a nullary-fn CONSTANT, not var)
+  g3_nullary_ctrl (c undeclared) In(h(c))   => flags "c"  (undeclared lowercase = variable)
+  g3_pub    In(h($p))                       => NO warning (public-sort NEVER flagged)
+  g3_temporal In(h(#i))                     => PARSE ERROR (temporal/node not expressible in
+                                               message term position => never a candidate)
+  g3_nat    builtins natural-numbers In(h(%x)) => flags "%x" (NAT-sort CAN be flagged, '%' pfx)
+
+2026-07-17 R4 | GAP3b: nat sort rank
+  g3_nat_order  In(h(<%b,a,~c>))  => "~c, a, %b"   (idx0; sort Fresh<Msg<Nat)
+  g3_nat_idx    In(h(<%n.1,~n.1,n.1>)) => "~n.1, n.1, %n.1"  (idx1,name n; Fresh<Msg<Nat)
+  g3_nat_idxprim In(h(<%a.2,b>)) => "b, %a.2"      (idx0 b before nat idx2; idx primary over nat)
+
+2026-07-17 R4 | GAP4: macro/let pre-expansion
+  g4_let        let y=h(w) in In(y)           => "w"  (post-expansion; pre would be no-warn)
+  g4_let_rename let y=w   in In(h(y))         => "w"  (NOT "y" => decided AFTER let-subst)
+  g4_macro      macros mac(x)=h(x); In(mac(w))=> "w"  (macro expanded before check)
+  g4_macro_rename wrap(a)=h(a); let y=w; In(wrap(y)) => "w" (both expansions before check)
+  g4_let_twice  let y=h(w) in In(g(y))        => "w"  (let LHS var 'y' never a candidate)
+  => CONFIRMED: derivability decided AFTER macro+let expansion; reported names are the
+     post-expansion inner names; let-bound LHS vars are eliminated (never candidates).

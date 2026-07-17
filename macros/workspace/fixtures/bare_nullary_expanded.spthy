@@ -1,0 +1,6 @@
+theory BareNullary
+begin
+builtins: hashing
+rule R:
+  [ In(x) ] --[ A(h('k')) ]-> [ Out(h('k')) ]
+end

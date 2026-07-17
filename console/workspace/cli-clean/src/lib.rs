@@ -8,21 +8,28 @@
 //! model, and framing assembly are original.
 //!
 //! Public surface:
-//! - [`parse`] : `parse(argv) -> Result<Command, CliError>` — the structured
-//!   command, or ready-to-print error text.
+//! - [`parse`] : `parse(argv) -> Result<Command, ParseError>` — the structural
+//!   command (mode, positionals, raw flag occurrences), or ready-to-print error.
+//! - [`parse_args`] : `parse_args(argv) -> Result<Parsed, ParseError>` — a typed,
+//!   value-validated command line ([`Args`]) with defaults applied.
 //! - [`render_help`] / [`render_version`] : the help pages and version banner.
-//! - [`framing`] : the batch-mode output frame around an opaque theory payload.
+//! - [`framing`] : the stream-aware batch frame around opaque theory payloads.
 //! - [`errors`] : renderers for the runtime error lines emitted after parsing.
+//! - [`stream`] : the two-stream output model ([`Stream`], [`Streams`]).
 
+pub mod args;
+pub mod errors;
+pub mod framing;
+pub mod help;
 pub mod modes;
 pub mod parse;
-pub mod help;
+pub mod stream;
 pub mod version;
-pub mod framing;
-pub mod errors;
 
-pub use errors::CliError;
+pub use args::{parse_args, Args, OutputModule, Parsed, PartialEval, StopOnTrace};
+pub use errors::{CliError, ParseError};
 pub use help::render_help;
 pub use modes::Mode;
 pub use parse::{parse, Command, Options, RunSpec};
-pub use version::{render_version, VersionInfo};
+pub use stream::{Stream, Streams};
+pub use version::{frame_version, render_version, VersionInfo};

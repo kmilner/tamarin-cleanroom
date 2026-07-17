@@ -1,0 +1,10 @@
+theory G1Core
+begin
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x) ]->
+   [ Out(~x) ]
+lemma L:
+  all-traces
+  "All #x. (A(x) @ #x) ==> (#x = #x)"
+end

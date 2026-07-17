@@ -190,3 +190,73 @@ to a new theory index), then GET interactive-graph-def/proof/<lemma>/_ .
 - Captured raw fixtures (fixtures/wrap_fixtures.json) for the crate tests. Servers
   stopped after probing. Implemented FILL_WIDTH=87 / fits_one_line / paragraph_fill
   in graph-clean/src/render.rs with tests reproducing these probes.
+
+## Session 5 — complete generate(): clusters, wrap wiring + residuals, node kinds, pre-rendered entry
+
+### Corpus reads (captured OUTPUT: oracle/dot_corpus/ 12022, captured_responses/)
+- CLUSTER structure census (analyze_clusters.py/analyze_clusters2.py over 1457
+  cluster files): top-level statement order is ALWAYS [free nodes][clusters]
+  [edges][rankblock][edges] — 0 files with a top-level node after a cluster, 0
+  clusters after an edge. Clusters contain ONLY records (50453 record cells, 0
+  ellipse/edge). Cluster label ALWAYS `<Role>_Session_<N>` (9594/9594). A cluster's
+  records occupy a contiguous id range; clusters are ordered by increasing id
+  (first-appearance == id order). ⇒ id allocation proceeds free-then-clusters in
+  emission order; free ids < clustered ids.
+- SHAPE census (all 12022 dot + all 14705 manifest dot bodies): shapes are ONLY
+  record/ellipse/plain. NO trapezium/invtrapezium in captured output.
+- Node-kind census over ellipse labels: besides `!KU(..)@#t` (79358), `#t:rule[..]`
+  (100410), `Action(..)@#t` (3586), there are BARE TIMEPOINT ellipses `#<var>` —
+  `#last` (107), `#i` (1328), `#decrypt` (790), `#t0..#t6`, `#j`, `#j.1`. `#last`
+  is uncolored `n<ID>[label="#last",shape="ellipse"]`, the target of a
+  `color="black",style="dashed"` before-edge (fixture 24a119958f784d43.dot).
+- WRAP measurement (measure_break.py): physical line-0 visual width of 61821
+  wrapped records ranges 19..277 (median 95) ⇒ NO fixed page width in absolute
+  columns; the accumulated-column effect is real. Y_counter probe (4c6f68b4...):
+  a 21-char fact `Y_counter( pid.1, t )` at line-start peels its `)` while an
+  IDENTICAL-args longer instance late on a broken line does NOT ⇒ wrap trigger is
+  Wadler `group`/`fits` (flat + rest-of-line vs remaining width), not per-cell-87.
+- INFO action-list wrap style: one action PER LINE (vertical `sep`) even when short
+  (6738eb64..: 4 actions, 4 lines; `Decrypt( m )` alone on its line), `]` attached
+  to the last action. Contrast tuple/fact args = greedy fill (`fillSep`). b5a8773..
+  info cell wraps at flat 52 (< 87) ⇒ info-cell trigger is also accumulated-column.
+
+### Live server probes (scratchpad/serve.sh, --port= form; ports 3210–3213)
+- wrap.spthy :3210 — 11 one-rule theories, each `rule EN/WP: [Fr(~s)] --[X()]->
+  [Out(<..>)]` + exists-trace lemma. Autoproved each via GET autoprove/idfs/0/False
+  /proof/l_X (returns {"redirect":"/thy/trace/<idx>/..."}), fetched
+  interactive-graph-def/proof/l_X/_. Element sweep E10..E14 (5-col 'aNN' elems):
+  11 elems fit one line (col 83 after trailing ", "), 'a12' wraps to col-6 indent;
+  continuation packs GREEDILY (E13→2, E14→3 on the second line) to the SAME width —
+  the earlier "+1 lookahead" is subsumed. Width sweep W69..W74 (`<'a…a'(P),'y'>`):
+  P=71 flat 87 fits, P=72 flat 88 breaks. Peel: tuple `>` stays with last element
+  iff it fits (W72), else peels to the `<` column on its own line (W74, indent 5);
+  fact `)` ALWAYS peels to col 0 once the fact wraps (E12 peels `)` even though it
+  would fit). Captured 7 fixtures (wrap_E11..E14, W71/W72/W74).
+- ind.spthy :3211 — autoprove ord [use_induction]; the lemma discharged
+  (redirect to `reach`) without surfacing a `#last` graph state in autoprove mode.
+  `#last` node kind validated against corpus captured output instead (107 instances).
+- decwrap-destr-manual.spthy (SAPIC) :3212 — autoprove can_create_key; captured a
+  live cluster graph `cluster_Process_Session_1` (role="Process",
+  node fillcolor="#ffffff", fontcolor="black", cluster ARGB "#36A5D84C"). Saved
+  fixture cluster_process.dot. Confirms §4 cluster emission on a role theory live.
+- NSLPK3.spthy :3213 — scanned interactive-graph-def/cases/{raw,refined}/i/j
+  (i≤12,j≤8): invtrapezium PRESENT (n6 `(#i, 0)`, target of a conclusion port
+  `n5:n2 -> n6` structural gray50 edge ⇒ invtrapezium = "conclusion feeding an
+  absent node"). Plain `trapezium` (the dual: absent SOURCE feeding a present
+  premise) ABSENT here and in every corpus/probe ⇒ recorded unobserved; the model's
+  generic `GraphNode::Shaped{label,shape,color}` can emit it if a caller supplies one.
+- All four servers stopped after probing (serve.sh stop 3210..3213).
+
+### Implemented (graph-clean)
+- render::wrap_cell — byte-exact wrap+peel: layout_fact (fill args / recurse into a
+  sole tuple / peel `)` to col 0), layout_tuple (fill + `>` peel to `<`-col),
+  layout_info (vertical action `sep`), run_layout (greedy fill), split_top_commas.
+  Wired into generate::build_record for premise/info/conclusion cells.
+- generate: cluster emission (RuleInstance/RawRule .cluster(label,color); free-then-
+  cluster bucketing in emission/id order); GraphNode::Temporal (#var, incl. .last());
+  GraphNode::Shaped (generic shape escape hatch, incl. trapezium dual); RawRule +
+  GraphNode::RawRule (pre-rendered cell strings through the same wrap/escape pipeline).
+- Tests: wrap_E12/E13/E14/W71/W72/W74 generation fixtures, cluster_process (live)
+  + cluster_multi (corpus 79c) generation fixtures, last_timepoint (corpus 24a)
+  fixture, RawRule==Term byte-parity + RawRule wrap, wrap_cell unit tests. Full
+  GRAPHCLEAN_CORPUS round-trip stays 12022/12022 byte-exact.

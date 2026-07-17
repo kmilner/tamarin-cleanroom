@@ -1,0 +1,3 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.

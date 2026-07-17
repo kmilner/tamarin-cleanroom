@@ -1,0 +1,10 @@
+Message Derivation Checks
+=========================
+
+  The variables of the following rule(s) are not derivable from their premises, you may be performing unintended pattern matching.
+
+Rule reSign: 
+Failed to derive Variable(s): m, r2, sk2
+
+Rule RP_gets_idToken: 
+Failed to derive Variable(s): pkA

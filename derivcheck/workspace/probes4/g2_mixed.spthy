@@ -1,0 +1,6 @@
+theory G2Mixed
+begin
+functions: h/1
+rule R:
+  [ In( h(<b.2, a.10, a.2, b>) ), In( h(~c) ) ] --> [ Out('ok') ]
+end

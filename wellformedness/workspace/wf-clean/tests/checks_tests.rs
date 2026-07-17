@@ -950,3 +950,368 @@ fn formula_terms_free_only_ignores_reducibility_when_set_empty() {
     let thy = theory("NoRed", vec![act_rule(), lemma("L1", f)]);
     assert!(check_theory(&thy).is_empty());
 }
+
+// ===========================================================================
+// Round 4 (Unit C): sort-aware quantifier binding + semantic guardedness
+// ===========================================================================
+
+fn exists(vs: Vec<VarSpec>, g: Formula) -> Formula { Formula::Exists(vs, Box::new(g)) }
+fn disj(a: Formula, b: Formula) -> Formula { Formula::Or(Box::new(a), Box::new(b)) }
+fn not_(g: Formula) -> Formula { Formula::Not(Box::new(g)) }
+fn less_f(a: Term, b: Term) -> Formula { Formula::Atom(Atom::Less(a, b)) }
+
+/// Rule with A/B/C unary action facts as a well-formed backdrop for lemmas.
+fn abc_rule() -> TheoryItem {
+    rule("R1", vec![fact("Fr", vec![fresh("x")])],
+        vec![fact("A", vec![fresh("x")]), fact("B", vec![fresh("x")]), fact("C", vec![fresh("x")])],
+        vec![fact("Out", vec![fresh("x")])])
+}
+fn lemma_exists(name: &str, formula: Formula) -> TheoryItem {
+    TheoryItem::Lemma(Lemma {
+        name: name.into(), modulo: None, attributes: vec![],
+        trace_quantifier: TraceQuantifier::ExistsTrace,
+        formula, proof: None, plaintext: String::new(),
+    })
+}
+fn lemma_reuse_exists(name: &str, formula: Formula) -> TheoryItem {
+    TheoryItem::Lemma(Lemma {
+        name: name.into(), modulo: None, attributes: vec![LemmaAttr::Reuse],
+        trace_quantifier: TraceQuantifier::ExistsTrace,
+        formula, proof: None, plaintext: String::new(),
+    })
+}
+
+// ---- GAP 1: sort-aware binding in the wrong-form-terms check --------------
+
+#[test]
+fn g1_temporal_binder_does_not_bind_message_use() {
+    // g1_core: `All #x. (A(x) @ #x) ==> (#x = #x)`. The temporal binder #x
+    // (node) does NOT bind the message-position use `x` -> `Free x`. #x is
+    // guarded by the temporal @#x, so there is NO guardedness warning.
+    let f = forall(
+        vec![var("x", SortHint::Node)],
+        imp(action("A", vec![mv("x")], "x"), eq(node("x"), node("x"))),
+    );
+    let thy = theory("G1Core", vec![abc_rule(), lemma_all("L", f)]);
+    expect(&thy, include_str!("fixtures/g4_g1_core.txt"));
+}
+
+#[test]
+fn g1_message_binder_does_not_bind_node_use() {
+    // g1_msgnode: `All x #i. (A(x) @ #i) ==> (#x = #i)`. The message binder x
+    // does not bind the node use #x -> `Free #x`.
+    let f = forall(
+        vec![var("x", SortHint::Msg), var("i", SortHint::Node)],
+        imp(action("A", vec![mv("x")], "i"), eq(node("x"), node("i"))),
+    );
+    let thy = theory("G1MsgNode", vec![abc_rule(), lemma_all("L", f)]);
+    expect(&thy, include_str!("fixtures/g4_g1_msgnode.txt"));
+}
+
+#[test]
+fn g1_debruijn_is_sort_aware() {
+    // g1_dbsort: `All x #x. (Act(x) @ #x) ==> (x = h(x))` with reducible `h`.
+    // The message x sits under the node #x on the binder stack, so `h(x)` ->
+    // `h(Bound 1)` (both binders counted; the match is sort-aware).
+    let f = forall(
+        vec![var("x", SortHint::Msg), var("x", SortHint::Node)],
+        imp(action("Act", vec![mv("x")], "x"), eq(mv("x"), app("h", vec![mv("x")]))),
+    );
+    let thy = theory("G1DbSort", vec![act_rule(), lemma_all("L", f)]);
+    expect_red(&thy, &red(&["h"]), include_str!("fixtures/g4_g1_dbsort.txt"));
+}
+
+// ---- GAP 1: the "Quantifier sorts" topic ----------------------------------
+
+#[test]
+fn quantifier_sorts_pub_binder() {
+    // qs_pub_prefix: `All $x #i. (A($x) @ #i) ==> (A($x) @ #i)`. A pub
+    // quantifier is the only issue: consistent use binds, and $x is guarded.
+    let f = forall(
+        vec![var("x", SortHint::Pub), var("i", SortHint::Node)],
+        imp(action("A", vec![pub_("x")], "i"), action("A", vec![pub_("x")], "i")),
+    );
+    let thy = theory("QsPub", vec![abc_rule(), lemma_all("L", f)]);
+    expect(&thy, include_str!("fixtures/g4_qs_pub.txt"));
+}
+
+#[test]
+fn quantifier_sorts_multi_var_wrap_and_guardedness() {
+    // qs_multi: `All $x ~y $z #i. (A($x) @ #i) ==> (A(~y) @ #i)`. Wrong-sort
+    // list wraps at col 69 (x pub, y fresh, z pub); guardedness lists only the
+    // vars not guarded by the antecedent (~y, $z).
+    let f = forall(
+        vec![var("x", SortHint::Pub), var("y", SortHint::Fresh),
+             var("z", SortHint::Pub), var("i", SortHint::Node)],
+        imp(action("A", vec![pub_("x")], "i"), action("A", vec![fresh("y")], "i")),
+    );
+    let thy = theory("QsMulti", vec![abc_rule(), lemma_all("L", f)]);
+    expect(&thy, include_str!("fixtures/g4_qs_multi.txt"));
+}
+
+#[test]
+fn quantifier_sorts_two_lemmas_separator() {
+    // qs_twolem: two wrong-sort lemmas -> entries joined "\n  \n".
+    let l1 = forall(
+        vec![var("x", SortHint::Pub), var("i", SortHint::Node)],
+        imp(action("A", vec![pub_("x")], "i"), action("A", vec![pub_("x")], "i")),
+    );
+    let l2 = forall(
+        vec![var("y", SortHint::Fresh), var("i", SortHint::Node)],
+        imp(action("A", vec![fresh("y")], "i"), action("A", vec![fresh("y")], "i")),
+    );
+    let thy = theory("QsTwoLem", vec![abc_rule(), lemma_all("L1", l1), lemma_all("L2", l2)]);
+    expect(&thy, include_str!("fixtures/g4_qs_twolem.txt"));
+}
+
+// ---- GAP 1: per-item assembly / consecutive-merge -------------------------
+
+#[test]
+fn formula_topics_merge_only_when_consecutive() {
+    // ord_qs_ft_qs: L1=QS, L2=FT, L3=QS -> THREE blocks (the two QS do not
+    // merge because a FT block separates them in emission order).
+    let l1 = forall(
+        vec![var("x", SortHint::Pub), var("i", SortHint::Node)],
+        imp(action("A", vec![pub_("x")], "i"), action("A", vec![pub_("x")], "i")),
+    );
+    let l2 = exists(vec![var("i", SortHint::Node)], action("A", vec![mv("y")], "i"));
+    let l3 = forall(
+        vec![var("z", SortHint::Fresh), var("i", SortHint::Node)],
+        imp(action("A", vec![fresh("z")], "i"), action("A", vec![fresh("z")], "i")),
+    );
+    let thy = theory("OrdQFQ", vec![
+        abc_rule(), lemma_all("L1", l1), lemma_exists("L2", l2), lemma_all("L3", l3),
+    ]);
+    expect(&thy, include_str!("fixtures/g4_ord_qs_ft_qs.txt"));
+}
+
+#[test]
+fn lemma_annotations_after_formula_terms() {
+    // ord_la_ft2: L1=[reuse] exists-trace (Lemma annotations), L2=free var
+    // (Formula terms). Formula terms (L2) precedes Lemma annotations (L1):
+    // Lemma annotations is a separate check after the formula bundle.
+    let l1 = exists(
+        vec![var("x", SortHint::Msg), var("i", SortHint::Node)],
+        action("A", vec![mv("x")], "i"),
+    );
+    let l2 = exists(vec![var("i", SortHint::Node)], action("A", vec![mv("y")], "i"));
+    let thy = theory("OrdLaFt2", vec![
+        abc_rule(), lemma_reuse_exists("L1", l1), lemma_exists("L2", l2),
+    ]);
+    expect(&thy, include_str!("fixtures/g4_ord_la_ft.txt"));
+}
+
+// ---- GAP 2: semantic guardedness ------------------------------------------
+
+#[test]
+fn guard_universal_disjunction_body_no_implication() {
+    // gu_disj: `All x #i. (A(x) @ #i) | (B(x) @ #i)` -> universal without
+    // toplevel implication (any non-implication body fails this way).
+    let f = forall(
+        vec![var("x", SortHint::Msg), var("i", SortHint::Node)],
+        disj(action("A", vec![mv("x")], "i"), action("B", vec![mv("x")], "i")),
+    );
+    let thy = theory("GuDisj", vec![abc_rule(), lemma_all("L", f)]);
+    expect(&thy, include_str!("fixtures/g4_gu_disj.txt"));
+}
+
+#[test]
+fn guard_existential_disjunction_unguarded() {
+    // ge_disj: `Ex x #i. (A(x) @ #i) | (B(x) @ #i)` -> a disjunctive body
+    // guards nothing, so x and #i are unguarded.
+    let f = exists(
+        vec![var("x", SortHint::Msg), var("i", SortHint::Node)],
+        disj(action("A", vec![mv("x")], "i"), action("B", vec![mv("x")], "i")),
+    );
+    let thy = theory("GeDisj", vec![abc_rule(), lemma_all("L", f)]);
+    expect(&thy, include_str!("fixtures/g4_ge_disj.txt"));
+}
+
+#[test]
+fn guard_disjunction_antecedent_does_not_guard() {
+    // gx_disj_ant: `All x y #i #j. ((A(x)@#i) | (B(y)@#j)) ==> (x = y)`. A
+    // disjunctive antecedent contributes no guards -> all four vars unguarded.
+    let f = forall(
+        vec![var("x", SortHint::Msg), var("y", SortHint::Msg),
+             var("i", SortHint::Node), var("j", SortHint::Node)],
+        imp(disj(action("A", vec![mv("x")], "i"), action("B", vec![mv("y")], "j")),
+            eq(mv("x"), mv("y"))),
+    );
+    let thy = theory("GxDisjAnt", vec![abc_rule(), lemma_all("L", f)]);
+    expect(&thy, include_str!("fixtures/g4_gx_disj_ant.txt"));
+}
+
+#[test]
+fn guard_only_action_atoms_guard_not_ordering() {
+    // gx_less: `All x #i #j. ((A(x)@#i) & (#i < #j)) ==> (#i = #j)`. Only the
+    // action atom guards (x, #i); the `#i < #j` ordering atom does not -> #j
+    // unguarded.
+    let f = forall(
+        vec![var("x", SortHint::Msg), var("i", SortHint::Node), var("j", SortHint::Node)],
+        imp(conj(action("A", vec![mv("x")], "i"), less_f(node("i"), node("j"))),
+            eq(node("i"), node("j"))),
+    );
+    let thy = theory("GxLess", vec![abc_rule(), lemma_all("L", f)]);
+    expect(&thy, include_str!("fixtures/g4_gx_less.txt"));
+}
+
+#[test]
+fn guard_existential_partial_coverage() {
+    // ge_part: `Ex x y #i. (A(x) @ #i)` -> x and #i guarded by the action, y
+    // is not -> only y reported (in binding order).
+    let f = exists(
+        vec![var("x", SortHint::Msg), var("y", SortHint::Msg), var("i", SortHint::Node)],
+        action("A", vec![mv("x")], "i"),
+    );
+    let thy = theory("GePart", vec![abc_rule(), lemma_all("L", f)]);
+    expect(&thy, include_str!("fixtures/g4_ge_part.txt"));
+}
+
+#[test]
+fn guard_antecedent_recursion_precedes_consequent() {
+    // gr_both: a broken nested quantifier in BOTH antecedent and consequent ->
+    // the ANTECEDENT's is reported (antecedent recursed before consequent).
+    // Also exercises the multi-line formula printer (whole formula wraps).
+    let inner_ante = forall(
+        vec![var("y", SortHint::Msg), var("j", SortHint::Node)],
+        disj(action("B", vec![mv("y")], "j"), action("C", vec![mv("y")], "j")),
+    );
+    let inner_cons = forall(
+        vec![var("z", SortHint::Msg), var("k", SortHint::Node)],
+        disj(action("A", vec![mv("z")], "k"), action("B", vec![mv("z")], "k")),
+    );
+    let f = forall(
+        vec![var("x", SortHint::Msg), var("i", SortHint::Node)],
+        imp(conj(action("A", vec![mv("x")], "i"), inner_ante), inner_cons),
+    );
+    let thy = theory("GrBoth", vec![abc_rule(), lemma_all("L", f)]);
+    expect(&thy, include_str!("fixtures/g4_gr_both.txt"));
+}
+
+// ---- Multi-line formula printer: relational-atom break + nested hang ------
+
+#[test]
+fn guardedness_printer_relational_break_and_nested_hang() {
+    // gnest: `not (All x #i #j. (A(x) @ #i) ==> ((AAAA = BBBB) & (#i = #j)))`
+    // with 30-char free message vars. The equality breaks at `=`, the nested
+    // quantifier body hangs one column past its start, and the negation shifts
+    // the whole formula's start column by two.
+    let a30 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    let b30 = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+    let inner = forall(
+        vec![var("x", SortHint::Msg), var("i", SortHint::Node), var("j", SortHint::Node)],
+        imp(action("A", vec![mv("x")], "i"),
+            conj(eq(mv(a30), mv(b30)), eq(node("i"), node("j")))),
+    );
+    let f = not_(inner);
+    let thy = theory("Gnest", vec![abc_rule(), lemma_all("L", f)]);
+    expect(&thy, include_str!("fixtures/g4_gnest.txt"));
+}
+
+// ---- Regression: guardedness/quantifier-sorts are lemma-vs-restriction aware
+
+#[test]
+fn quantifier_sorts_applies_to_restrictions() {
+    // A guarded restriction with a pub quantifier -> "Quantifier sorts" with
+    // entity "Restriction" (no guardedness: unguarded restrictions are fatal,
+    // and this one is guarded).
+    let rf = forall(
+        vec![var("x", SortHint::Pub), var("i", SortHint::Node)],
+        imp(action("A", vec![pub_("x")], "i"), action("A", vec![pub_("x")], "i")),
+    );
+    let restr = TheoryItem::Restriction(Restriction {
+        name: "Res".into(), formula: rf, attributes: vec![],
+    });
+    let thy = theory("QsRestrOnly", vec![abc_rule(), restr]);
+    let r = check_theory(&thy);
+    assert_eq!(topics(&r).into_iter().collect::<Vec<_>>(), vec!["Quantifier sorts".to_string()]);
+    let qs = r.iter().find(|e| e.topic == "Quantifier sorts").unwrap();
+    assert_eq!(qs.message, "  Restriction `Res' uses quantifiers with wrong sort: (\"x\",LSortPub)");
+}
+
+#[test]
+fn guardedness_top_level_conjunction_break() {
+    // g4_topand: `(All x #i. (A(x)@#i) | (B(x)@#i)) & (All y #j. ...)`. The
+    // first universal fails (disjunction body); the whole top-level conjunction
+    // breaks with its right operand hanging at the formula start column (col 7).
+    let l1 = forall(
+        vec![var("x", SortHint::Msg), var("i", SortHint::Node)],
+        disj(action("A", vec![mv("x")], "i"), action("B", vec![mv("x")], "i")),
+    );
+    let l2 = forall(
+        vec![var("y", SortHint::Msg), var("j", SortHint::Node)],
+        imp(action("A", vec![mv("y")], "j"), action("B", vec![mv("y")], "j")),
+    );
+    let f = conj(l1, l2);
+    let thy = theory("TopAnd", vec![abc_rule(), lemma_all("L", f)]);
+    expect(&thy, include_str!("fixtures/g4_topand.txt"));
+}
+
+#[test]
+fn guardedness_sibling_conjunction_first_failure() {
+    // g4_grsib: a conjunction of two universals in the consequent; the first
+    // (left) failing quantifier is reported. Exercises nested paren columns.
+    let sib1 = forall(
+        vec![var("y", SortHint::Msg), var("j", SortHint::Node)],
+        disj(action("B", vec![mv("y")], "j"), action("C", vec![mv("y")], "j")),
+    );
+    let sib2 = forall(
+        vec![var("z", SortHint::Msg), var("k", SortHint::Node)],
+        disj(action("A", vec![mv("z")], "k"), action("C", vec![mv("z")], "k")),
+    );
+    let f = forall(
+        vec![var("x", SortHint::Msg), var("i", SortHint::Node)],
+        imp(action("A", vec![mv("x")], "i"), conj(sib1, sib2)),
+    );
+    let thy = theory("GrSib", vec![abc_rule(), lemma_all("L", f)]);
+    expect(&thy, include_str!("fixtures/g4_grsib.txt"));
+}
+
+#[test]
+fn guard_conjunction_extraction_stops_at_disjunction() {
+    // gx_mix_conj: `All x y #i #j. ((A(x)@#i) & ((B(y)@#j) | (C(y)@#j))) ==> (x = y)`.
+    // The conjunctive antecedent guards x,#i via the action atom, but the nested
+    // disjunction contributes nothing -> y,#j unguarded. The whole formula wraps.
+    let f = forall(
+        vec![var("x", SortHint::Msg), var("y", SortHint::Msg),
+             var("i", SortHint::Node), var("j", SortHint::Node)],
+        imp(
+            conj(action("A", vec![mv("x")], "i"),
+                 disj(action("B", vec![mv("y")], "j"), action("C", vec![mv("y")], "j"))),
+            eq(mv("x"), mv("y")),
+        ),
+    );
+    let thy = theory("MixConj", vec![abc_rule(), lemma_all("L", f)]);
+    expect(&thy, include_str!("fixtures/g4_mixconj.txt"));
+}
+
+#[test]
+fn guard_existential_implication_body_unguarded() {
+    // ge_impl: `Ex x #i. (A(x) @ #i) ==> (B(x) @ #i)`. An implication body is
+    // not a conjunction of guards -> x, #i unguarded.
+    let f = exists(
+        vec![var("x", SortHint::Msg), var("i", SortHint::Node)],
+        imp(action("A", vec![mv("x")], "i"), action("B", vec![mv("x")], "i")),
+    );
+    let thy = theory("GeImpl", vec![abc_rule(), lemma_all("L", f)]);
+    expect(&thy, include_str!("fixtures/g4_geimpl.txt"));
+}
+
+#[test]
+fn public_names_inserted_before_quantifier_sorts() {
+    // g4_pn_qs: a public-name capitalization clash (rule) plus a pub-quantifier
+    // lemma. Public names is inserted before Quantifier sorts (the first present
+    // anchor of the formula bundle).
+    let f = forall(
+        vec![var("x", SortHint::Pub), var("i", SortHint::Node)],
+        imp(action("A", vec![pub_("x")], "i"), action("A", vec![pub_("x")], "i")),
+    );
+    let thy = theory("PnQs", vec![
+        rule("R1", vec![fact("Fr", vec![fresh("x")])],
+            vec![fact("A", vec![fresh("x")]),
+                 fact("Name", vec![pl("Alice")]), fact("Name", vec![pl("alice")])],
+            vec![fact("Out", vec![fresh("x")])]),
+        lemma_all("L", f),
+    ]);
+    expect(&thy, include_str!("fixtures/g4_pn_qs.txt"));
+}

@@ -1,0 +1,11 @@
+theory Tqs_fresh_suffix
+begin
+
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x) ]->
+   [ Out(~x) ]
+lemma L:
+  all-traces
+  "All x:fresh #i. (A(x) @ #i) ==> (x = x)"
+end

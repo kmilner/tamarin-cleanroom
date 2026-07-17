@@ -1,10 +1,10 @@
-//! Graph GENERATION (BEHAVIOR.md §6): mapping a proof-state / constraint-system
+//! Graph GENERATION (BEHAVIOR.md §4, §6): mapping a proof-state / constraint-system
 //! description onto the DOT [`Graph`] model, over an independent input model
 //! designed from observed paired `main/proof` sequents and `interactive-graph-def`
 //! graphs.
 //!
 //! What the observed system→graph mapping does, structurally (each point traces to
-//! corpus/live observation — see BEHAVIOR.md §6):
+//! corpus/live observation — see BEHAVIOR.md §4, §6):
 //!   * a **rule instance** `#t : Rule[actions]` becomes a `record` node with up to
 //!     three groups `{premises}|{info}|{conclusions}`; the **info** group (the
 //!     `#t : Rule[…]` cell) is always present (100 % of 160 409 corpus records),
@@ -12,24 +12,50 @@
 //!     with no premises renders `{info}|{concl}`);
 //!   * an intruder-knowledge fact renders as a gray `!KU( m ) @ #t` **ellipse**;
 //!     a protocol action/event as a darkblue `Fact @ #t` ellipse; a compressed
-//!     intruder rule as an uncolored `#t : rule` ellipse;
+//!     intruder rule as an uncolored `#t : rule` ellipse; a bare **timepoint**
+//!     (`#i`, `#decrypt`, the designated `#last`) as an uncolored `#var` ellipse;
 //!   * an unresolved node referenced by an open premise renders as an
 //!     **invtrapezium** `(#var, idx)` (BEHAVIOR.md §3d);
+//!   * a **role**-annotated record (role ≠ `Undefined`) is packed into a
+//!     `subgraph "cluster_<Role>_Session_<k>"` block; role-annotated theories emit
+//!     the compact header and free (non-role) nodes stay at the top level, in id
+//!     order, *before* every cluster (BEHAVIOR.md §4);
 //!   * **edges** connect a conclusion port to a premise port (structural), or an
 //!     intruder deduction (red dashed), message (gray30), temporal order (blue3 /
 //!     black dashed), etc. — the finite observed style vocabulary (§3c);
-//!   * `n<K>` ids come from [`crate::alloc`]; the header is inferred by role (§4).
+//!   * `n<K>` ids come from [`crate::alloc`]; record-cell text is wrapped/escaped
+//!     by [`crate::render::wrap_cell`]; the header is inferred by role (§4).
 //!
-//! GAPS (need the GPL solver; not derivable from output): *which* nodes/edges a
-//! raw constraint system yields (the compression content), the per-rule color
-//! hash, and record-cell line wrapping. This layer takes node/edge lists, colors,
-//! and pre-rendered cell text as INPUTS and assembles the exact DOT structure.
+//! Two cell-content input paths, both flowing through the same wrap/escape
+//! pipeline: [`RuleInstance`] carries [`Fact`]s (this crate renders + wraps them),
+//! and [`RawRule`] carries PRE-RENDERED cell strings (the consumer's own printer
+//! produced them; this crate still wraps and escapes). GAPS (need the GPL solver;
+//! not derivable from output): *which* nodes/edges/clusters a raw constraint system
+//! yields, the per-rule/per-cluster color hash, and the accumulated-column wrap
+//! trigger for cells deep on a record line (BEHAVIOR.md §3f).
 
 use crate::alloc::NodeIdAllocator;
 use crate::model::*;
-use crate::render::{escape_record, Fact};
+use crate::render::{render_info, wrap_cell, Fact};
 
-/// A rule instance: one record node with premise / info / conclusion cells.
+/// A per-record cluster assignment (BEHAVIOR.md §4). `label` is the cluster label
+/// WITHOUT the `cluster_` prefix (e.g. `Initiator_Session_1`, observed always
+/// `<Role>_Session_<k>`); `color` is the 8-hex ARGB used for the block's
+/// `color`/`fillcolor`. Both are solver-supplied (a content GAP).
+#[derive(Clone, Debug)]
+pub struct ClusterRef {
+    pub label: String,
+    pub color: String,
+}
+
+impl ClusterRef {
+    pub fn new(label: &str, color: &str) -> Self {
+        ClusterRef { label: label.into(), color: color.into() }
+    }
+}
+
+/// A rule instance: one record node with premise / info / conclusion cells, built
+/// from [`Fact`]s (the crate renders and wraps them).
 #[derive(Clone, Debug)]
 pub struct RuleInstance {
     pub temporal: String,
@@ -40,8 +66,10 @@ pub struct RuleInstance {
     pub conclusions: Vec<Fact>,
     /// Per-rule fill color (a solver-side hash — a GAP; supplied by the caller).
     pub fillcolor: String,
-    /// `black` on the light MSR palette, `white` on the saturated role palette.
+    /// `black` on the light MSR palette, `white`/`black` on the role palette.
     pub fontcolor: String,
+    /// If set, this record is packed into a `cluster_<label>` subgraph (§4).
+    pub cluster: Option<ClusterRef>,
 }
 
 impl RuleInstance {
@@ -55,6 +83,7 @@ impl RuleInstance {
             conclusions: Vec::new(),
             fillcolor: fillcolor.into(),
             fontcolor: "black".into(),
+            cluster: None,
         }
     }
     pub fn premises(mut self, f: Vec<Fact>) -> Self {
@@ -74,17 +103,113 @@ impl RuleInstance {
         self.fontcolor = fontcolor.into();
         self
     }
+    /// Pack this record into the `cluster_<label>` subgraph (BEHAVIOR.md §4).
+    pub fn cluster(mut self, label: &str, color: &str) -> Self {
+        self.cluster = Some(ClusterRef::new(label, color));
+        self
+    }
+    /// The flat, un-escaped cell strings (premises, info, conclusions), for the
+    /// shared record builder.
+    fn spec(&self) -> RecordSpec {
+        RecordSpec {
+            premises: self.premises.iter().map(Fact::render_flat).collect(),
+            info: render_info(&self.temporal, &self.rule, &self.actions),
+            conclusions: self.conclusions.iter().map(Fact::render_flat).collect(),
+            fillcolor: self.fillcolor.clone(),
+            fontcolor: self.fontcolor.clone(),
+            role: self.role.clone(),
+            cluster: self.cluster.clone(),
+        }
+    }
+}
+
+/// A rule instance whose cells are supplied as **pre-rendered flat strings**
+/// (BEHAVIOR.md interop, round 5). The consumer renders fact/term text with its own
+/// printer — including any abbreviation — and this crate's wrap + escape pipeline
+/// ([`wrap_cell`]) applies to those strings exactly as it does to a [`RuleInstance`]'s
+/// rendered facts. `info` is the whole info-cell text (`#t : Rule[…]`); `premises`
+/// and `conclusions` are one flat fact string per cell.
+#[derive(Clone, Debug, Default)]
+pub struct RawRule {
+    pub premises: Vec<String>,
+    pub info: String,
+    pub conclusions: Vec<String>,
+    pub fillcolor: String,
+    pub fontcolor: String,
+    pub role: String,
+    pub cluster: Option<ClusterRef>,
+}
+
+impl RawRule {
+    /// A raw record with the given info-cell text and per-rule fill color; role
+    /// defaults to `Undefined`, fontcolor to `black`.
+    pub fn new(info: &str, fillcolor: &str) -> Self {
+        RawRule {
+            premises: Vec::new(),
+            info: info.into(),
+            conclusions: Vec::new(),
+            fillcolor: fillcolor.into(),
+            fontcolor: "black".into(),
+            role: Role::UNDEFINED.into(),
+            cluster: None,
+        }
+    }
+    pub fn premises(mut self, cells: Vec<String>) -> Self {
+        self.premises = cells;
+        self
+    }
+    pub fn conclusions(mut self, cells: Vec<String>) -> Self {
+        self.conclusions = cells;
+        self
+    }
+    pub fn role(mut self, r: &str, fontcolor: &str) -> Self {
+        self.role = r.into();
+        self.fontcolor = fontcolor.into();
+        self
+    }
+    pub fn cluster(mut self, label: &str, color: &str) -> Self {
+        self.cluster = Some(ClusterRef::new(label, color));
+        self
+    }
+    fn spec(&self) -> RecordSpec {
+        RecordSpec {
+            premises: self.premises.clone(),
+            info: self.info.clone(),
+            conclusions: self.conclusions.clone(),
+            fillcolor: self.fillcolor.clone(),
+            fontcolor: self.fontcolor.clone(),
+            role: self.role.clone(),
+            cluster: self.cluster.clone(),
+        }
+    }
+}
+
+/// The flat (un-escaped, un-wrapped) content of a record, shared by the Term-based
+/// [`RuleInstance`] and the pre-rendered [`RawRule`]. Cell text is wrapped and
+/// escaped by [`build_record`].
+struct RecordSpec {
+    premises: Vec<String>,
+    info: String,
+    conclusions: Vec<String>,
+    fillcolor: String,
+    fontcolor: String,
+    role: String,
+    cluster: Option<ClusterRef>,
+}
+
+impl RecordSpec {
     fn cell_count(&self) -> usize {
-        let p = self.premises.len();
-        let c = self.conclusions.len();
-        p + 1 /* info */ + c
+        self.premises.len() + 1 /* info */ + self.conclusions.len()
     }
 }
 
 /// One node of the input system, in emission order.
 #[derive(Clone, Debug)]
 pub enum GraphNode {
+    /// A rule instance built from [`Fact`]s (rendered + wrapped by this crate).
     Rule(RuleInstance),
+    /// A rule instance whose cells are pre-rendered strings (still wrapped/escaped).
+    RawRule(RawRule),
     /// `!KU( term ) @ #t` — intruder knowledge (drawn as a gray ellipse). `term`
     /// is the pre-rendered message text.
     Knowledge { term: String, temporal: String },
@@ -93,9 +218,34 @@ pub enum GraphNode {
     Action { fact: String, temporal: String },
     /// `#t : rule` — a compressed rule shown as a single uncolored ellipse.
     Compressed { temporal: String, rule: String },
+    /// `#var` — a bare timepoint ellipse (uncolored). Observed for ordinary
+    /// timepoint variables (`#i`, `#decrypt`, `#t1`, …) and, when a constraint
+    /// system carries a designated last timepoint (induction), the `#last` node
+    /// (`#last` is the target of `color="black",style="dashed"` before-edges).
+    Temporal { var: String },
     /// `(#var, idx)` — an unresolved node referenced by an open premise
-    /// (invtrapezium).
+    /// (invtrapezium), the target of a conclusion→absent-node structural edge.
     OpenTarget { node_var: String, premise_index: usize },
+    /// A node with an explicit `shape` and label — the extension point for shapes
+    /// beyond the observed set (e.g. the `trapezium` dual, an unresolved source
+    /// feeding a present premise, which is spec-named but was **not observed** in
+    /// the corpus or any probe; see BEHAVIOR.md §3d).
+    Shaped { label: String, shape: String, color: Option<String> },
+}
+
+impl GraphNode {
+    /// The designated last timepoint `#last` (BEHAVIOR.md §3d/§6).
+    pub fn last() -> Self {
+        GraphNode::Temporal { var: "last".into() }
+    }
+    /// A record node from a [`RecordSpec`], if this node is one.
+    fn record_spec(&self) -> Option<RecordSpec> {
+        match self {
+            GraphNode::Rule(r) => Some(r.spec()),
+            GraphNode::RawRule(r) => Some(r.spec()),
+            _ => None,
+        }
+    }
 }
 
 /// An endpoint reference into the input system (resolved to `n<K>[:n<port>]`).
@@ -125,7 +275,8 @@ pub enum EdgeStyle {
     Deduction,
     /// `color="blue3",style="dashed"` — temporal-order edge.
     TemporalBlue,
-    /// `color="black",style="dashed"` — before / less-than temporal edge.
+    /// `color="black",style="dashed"` — before / less-than temporal edge (e.g. into
+    /// the `#last` node).
     TemporalBlack,
     /// `style="invis"` — ranking edge to the legend.
     Invis,
@@ -194,54 +345,85 @@ impl Resolved {
     }
 }
 
-/// Build the DOT [`Graph`] for a [`System`]: allocate ids, emit nodes in order,
-/// then edges, then the legend sink-block + its invis edges. Header is inferred
-/// from roles.
+/// Build the DOT [`Graph`] for a [`System`]: allocate ids in emission order (so id
+/// order == file order), emit free (non-clustered) node statements at the top
+/// level, then the `cluster_…` subgraph blocks (role records, grouped by cluster
+/// label in first-appearance order), then edges, then the legend sink-block + its
+/// invis edges. Header is inferred from roles (§4).
 pub fn generate(sys: &System) -> Graph {
     let mut alloc = NodeIdAllocator::new();
     let mut resolved: Vec<Resolved> = Vec::with_capacity(sys.nodes.len());
-    let mut g = Graph::new(Header::Simple);
 
-    // Pass 1: allocate ids and emit node statements in emission order.
+    // Free top-level node statements, in emission order.
+    let mut free: Vec<Stmt> = Vec::new();
+    // Clusters: label -> (color, record statements), with first-appearance order.
+    let mut cluster_order: Vec<String> = Vec::new();
+    let mut clusters: std::collections::HashMap<String, (String, Vec<Stmt>)> =
+        std::collections::HashMap::new();
+
+    // Pass 1: allocate ids and build node statements in emission order. A clustered
+    // record's statement is routed into its cluster bucket; everything else is free.
     for node in &sys.nodes {
-        match node {
-            GraphNode::Rule(r) => {
-                let ids = alloc.record(r.cell_count());
-                let mut it = ids.ports.into_iter();
-                let ports_prem: Vec<String> = (0..r.premises.len()).map(|_| it.next().unwrap()).collect();
-                let port_info = it.next().unwrap();
-                let ports_concl: Vec<String> = (0..r.conclusions.len()).map(|_| it.next().unwrap()).collect();
-                let rec = build_record(r, &ports_prem, &port_info, &ports_concl);
-                g.push(Stmt::Node(Node::record(ids.node.clone(), rec)));
-                resolved.push(Resolved::Record { ports_prem, ports_concl, node: ids.node });
+        if let Some(spec) = node.record_spec() {
+            let ids = alloc.record(spec.cell_count());
+            let mut it = ids.ports.into_iter();
+            let ports_prem: Vec<String> = (0..spec.premises.len()).map(|_| it.next().unwrap()).collect();
+            let port_info = it.next().unwrap();
+            let ports_concl: Vec<String> =
+                (0..spec.conclusions.len()).map(|_| it.next().unwrap()).collect();
+            let rec = build_record(&spec, &ports_prem, &port_info, &ports_concl);
+            let stmt = Stmt::Node(Node::record(ids.node.clone(), rec));
+            match &spec.cluster {
+                Some(c) => {
+                    let entry = clusters.entry(c.label.clone()).or_insert_with(|| {
+                        cluster_order.push(c.label.clone());
+                        (c.color.clone(), Vec::new())
+                    });
+                    entry.1.push(stmt);
+                }
+                None => free.push(stmt),
             }
+            resolved.push(Resolved::Record { ports_prem, ports_concl, node: ids.node });
+            continue;
+        }
+        let id = alloc.node();
+        let stmt = match node {
             GraphNode::Knowledge { term, temporal } => {
-                let id = alloc.node();
                 let label = format!("!KU( {} ) @ #{}", term, temporal);
-                g.push(Stmt::Node(Node::ellipse(id.clone(), Ellipse::colored(label, "gray"))));
-                resolved.push(Resolved::Node(id));
+                Stmt::Node(Node::ellipse(id.clone(), Ellipse::colored(label, "gray")))
             }
             GraphNode::Action { fact, temporal } => {
-                let id = alloc.node();
                 let label = format!("{} @ #{}", fact, temporal);
-                g.push(Stmt::Node(Node::ellipse(id.clone(), Ellipse::colored(label, "darkblue"))));
-                resolved.push(Resolved::Node(id));
+                Stmt::Node(Node::ellipse(id.clone(), Ellipse::colored(label, "darkblue")))
             }
             GraphNode::Compressed { temporal, rule } => {
-                let id = alloc.node();
                 let label = format!("#{} : {}", temporal, rule);
-                g.push(Stmt::Node(Node::ellipse(id.clone(), Ellipse::new(label))));
-                resolved.push(Resolved::Node(id));
+                Stmt::Node(Node::ellipse(id.clone(), Ellipse::new(label)))
+            }
+            GraphNode::Temporal { var } => {
+                Stmt::Node(Node::ellipse(id.clone(), Ellipse::new(format!("#{}", var))))
             }
             GraphNode::OpenTarget { node_var, premise_index } => {
-                let id = alloc.node();
-                g.push(Stmt::Node(Node::shaped(
-                    id.clone(),
-                    Shaped::invtrapezium(node_var, *premise_index),
-                )));
-                resolved.push(Resolved::Node(id));
+                Stmt::Node(Node::shaped(id.clone(), Shaped::invtrapezium(node_var, *premise_index)))
             }
-        }
+            GraphNode::Shaped { label, shape, color } => Stmt::Node(Node::shaped(
+                id.clone(),
+                Shaped { label: label.clone(), shape: shape.clone(), color: color.clone() },
+            )),
+            GraphNode::Rule(_) | GraphNode::RawRule(_) => unreachable!("records handled above"),
+        };
+        free.push(stmt);
+        resolved.push(Resolved::Node(id));
+    }
+
+    // Assemble: free nodes, then clusters (first-appearance order), then edges.
+    let mut g = Graph::new(Header::Simple);
+    for s in free {
+        g.push(s);
+    }
+    for label in &cluster_order {
+        let (color, body) = clusters.remove(label).unwrap();
+        g.push(Stmt::Cluster(Cluster { label: label.clone(), color, body }));
     }
 
     // Pass 2: edges.
@@ -275,32 +457,32 @@ pub fn generate(sys: &System) -> Graph {
     g
 }
 
-/// Assemble a record node's model from a rule instance and its allocated ports.
+/// Assemble a record node's model from a [`RecordSpec`] and its allocated ports.
 /// Empty premise / conclusion groups are dropped; the info group is always kept
-/// (matches the observed group structure).
-fn build_record(r: &RuleInstance, ports_prem: &[String], port_info: &str, ports_concl: &[String]) -> Record {
+/// (matches the observed group structure). Each cell's flat text is wrapped and
+/// escaped by [`wrap_cell`].
+fn build_record(spec: &RecordSpec, ports_prem: &[String], port_info: &str, ports_concl: &[String]) -> Record {
     let mut columns: Vec<Vec<Cell>> = Vec::new();
-    if !r.premises.is_empty() {
-        columns.push(cells(&r.premises, ports_prem));
+    if !spec.premises.is_empty() {
+        columns.push(cells(&spec.premises, ports_prem));
     }
-    let info_text = crate::render::render_info(&r.temporal, &r.rule, &r.actions);
-    columns.push(vec![Cell::new(port_info, escape_record(&info_text))]);
-    if !r.conclusions.is_empty() {
-        columns.push(cells(&r.conclusions, ports_concl));
+    columns.push(vec![Cell::new(port_info, wrap_cell(&spec.info))]);
+    if !spec.conclusions.is_empty() {
+        columns.push(cells(&spec.conclusions, ports_concl));
     }
     Record {
         columns,
-        fillcolor: r.fillcolor.clone(),
-        fontcolor: r.fontcolor.clone(),
-        role: Role(r.role.clone()),
+        fillcolor: spec.fillcolor.clone(),
+        fontcolor: spec.fontcolor.clone(),
+        role: Role(spec.role.clone()),
     }
 }
 
-fn cells(facts: &[Fact], ports: &[String]) -> Vec<Cell> {
-    facts
+fn cells(flat_cells: &[String], ports: &[String]) -> Vec<Cell> {
+    flat_cells
         .iter()
         .zip(ports)
-        .map(|(f, p)| Cell::new(p.clone(), escape_record(&f.render_flat())))
+        .map(|(text, p)| Cell::new(p.clone(), wrap_cell(text)))
         .collect()
 }
 

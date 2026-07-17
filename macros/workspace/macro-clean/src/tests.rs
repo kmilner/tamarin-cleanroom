@@ -59,20 +59,26 @@ fn only_rule_action_arg(t: &Theory) -> Term {
     r.actions[0].args[0].clone()
 }
 
-// ---- macros are dropped ---------------------------------------------------
+// ---- macros: declarations are preserved in place [Q37] --------------------
 
 #[test]
-fn drops_macro_declarations() {
+fn preserves_macro_declarations() {
+    // The `macros:` block is retained in place (with its original, unexpanded
+    // body) while the use site is expanded. The consuming pipeline requires the
+    // declaration block, and the reference retains it in its pretty output.
     let x = var("x", SortHint::Untagged);
+    let macros = TheoryItem::Macros(vec![mdef("m", &[x.clone()], msg("x"))]);
     let t = theory(vec![
-        TheoryItem::Macros(vec![mdef("m", &[x.clone()], msg("x"))]),
+        macros.clone(),
         TheoryItem::Rule(rule_act("R", vec![fact("In", vec![msg("x")])],
                                   fact("Act", vec![app("m", vec![msg("x")])]))),
     ]);
     let out = expand(&t);
-    assert!(!out.items.iter().any(|it| matches!(it, TheoryItem::Macros(_))),
-            "macros: declarations must be removed");
-    assert_eq!(out.items.len(), 1);
+    // declaration item retained, unchanged, in its original position
+    assert_eq!(out.items.len(), 2);
+    assert_eq!(out.items[0], macros);
+    // use site expanded: Act(m(x)) -> Act(x)
+    assert_eq!(only_rule_action_arg(&out), msg("x"));
 }
 
 // ---- Q7: simultaneous (capture-avoiding) substitution ---------------------
@@ -108,6 +114,7 @@ fn lemmas_and_restrictions_fixture() {
         mdef("m2", &[x.clone(), y.clone()], pair(vec![msg("x"), msg("y")])),
         mdef("m3", &[x.clone()], msg("x")),
     ]);
+    let macros_kept = macros.clone(); // declarations are preserved in place [Q37]
     // rule A: [In(x)] --[A(m(x))]-> []
     let a = rule_act("A", vec![fact("In", vec![msg("x")])],
                      fact("A", vec![app("m", vec![msg("x")])]));
@@ -184,7 +191,9 @@ fn lemmas_and_restrictions_fixture() {
         proof: None,
         plaintext: String::new(),
     });
-    let expected = theory(vec![TheoryItem::Rule(a_e), TheoryItem::Rule(b_e), restr_e, lem_e]);
+    let expected = theory(vec![
+        macros_kept, TheoryItem::Rule(a_e), TheoryItem::Rule(b_e), restr_e, lem_e,
+    ]);
     assert_eq!(out, expected);
 }
 
@@ -388,4 +397,164 @@ fn non_macro_app_preserved() {
     ]);
     assert_eq!(only_rule_action_arg(&expand(&t)),
                app("h", vec![pair(vec![msg("x"), msg("x")])]));
+}
+
+// ===========================================================================
+// GAP 1 — bare nullary macro uses (a macro name written without parentheses)
+// ===========================================================================
+
+fn publit(s: &str) -> Term {
+    Term::PubLit(s.into())
+}
+
+// ---- Q32/Q33: a bare untagged name equal to a nullary macro resolves ------
+
+#[test]
+fn bare_nullary_untagged_resolves() {
+    // konst() = h('k') ; the bare name `konst` (untagged, no parens) resolves
+    // to the body h('k') in premise, action and conclusion positions [Q32,Q33].
+    let body = app("h", vec![publit("k")]);
+    let macros = TheoryItem::Macros(vec![mdef("konst", &[], body.clone())]);
+    let r = Rule {
+        name: "R".into(), modulo: None, attributes: vec![], let_block: vec![],
+        premises: vec![fact("In", vec![msg("konst")])],
+        actions: vec![fact("A", vec![msg("konst")])],
+        conclusions: vec![fact("Out", vec![msg("konst")])],
+        embedded_restrictions: vec![], variants: vec![], left_right: None,
+    };
+    let out = expand(&theory(vec![macros, TheoryItem::Rule(r)]));
+    let rr = out.items.iter().find_map(|it| match it {
+        TheoryItem::Rule(r) => Some(r), _ => None }).unwrap();
+    assert_eq!(rr.premises[0], fact("In", vec![body.clone()]));
+    assert_eq!(rr.actions[0], fact("A", vec![body.clone()]));
+    assert_eq!(rr.conclusions[0], fact("Out", vec![body]));
+}
+
+// ---- Q34: a bare fresh/pub-sorted name is NOT a nullary-macro use ----------
+
+#[test]
+fn bare_nullary_wrong_sort_not_resolved() {
+    // konst() = h('k') ; ~konst (fresh) and $konst (pub) stay ordinary vars.
+    let body = app("h", vec![publit("k")]);
+    let macros = TheoryItem::Macros(vec![mdef("konst", &[], body)]);
+    let r = Rule {
+        name: "R".into(), modulo: None, attributes: vec![], let_block: vec![],
+        premises: vec![fact("In", vec![msg("x")])],
+        actions: vec![fact("A", vec![fresh("konst")]), fact("B", vec![pubv("konst")])],
+        conclusions: vec![], embedded_restrictions: vec![], variants: vec![], left_right: None,
+    };
+    let out = expand(&theory(vec![macros, TheoryItem::Rule(r)]));
+    let rr = out.items.iter().find_map(|it| match it {
+        TheoryItem::Rule(r) => Some(r), _ => None }).unwrap();
+    assert_eq!(rr.actions[0], fact("A", vec![fresh("konst")]));
+    assert_eq!(rr.actions[1], fact("B", vec![pubv("konst")]));
+}
+
+// ---- Q35: a bare name equal to an arity>=1 macro is NOT a use --------------
+
+#[test]
+fn bare_name_nonnullary_not_resolved() {
+    // m(x) = <x,x> ; the bare name `m` (no args) is left as an ordinary var.
+    let x = var("x", SortHint::Untagged);
+    let t = theory(vec![
+        TheoryItem::Macros(vec![mdef("m", &[x.clone()], pair(vec![msg("x"), msg("x")]))]),
+        TheoryItem::Rule(rule_act("R", vec![fact("In", vec![msg("x")])],
+                                  fact("A", vec![msg("m")]))),
+    ]);
+    assert_eq!(only_rule_action_arg(&expand(&t)), msg("m"));
+}
+
+// ---- Q33: a bare nullary use inside another macro body expands transitively -
+
+#[test]
+fn bare_nullary_transitive_in_body() {
+    // base() = h('k') ; wrap() = h(base) ; bare `wrap` => h(h('k')) [Q33].
+    let base_body = app("h", vec![publit("k")]);
+    let wrap_body = app("h", vec![msg("base")]); // `base` bare in wrap's body
+    let macros = TheoryItem::Macros(vec![
+        mdef("base", &[], base_body.clone()),
+        mdef("wrap", &[], wrap_body),
+    ]);
+    let t = theory(vec![
+        macros,
+        TheoryItem::Rule(rule_act("R", vec![fact("In", vec![msg("x")])],
+                                  fact("A", vec![msg("wrap")]))),
+    ]);
+    assert_eq!(only_rule_action_arg(&expand(&t)), app("h", vec![base_body]));
+}
+
+// ---- Q36: a nullary macro reserves its name against a same-named formal ----
+
+#[test]
+fn nullary_macro_reserves_name_over_formal() {
+    // base() = h('k') ; f(base) = <base,base> ; f(a) => <h('k'),h('k')> (the
+    // nullary macro wins inside the body; the formal `base` and arg `a` are
+    // dropped) [Q36].
+    let hk = app("h", vec![publit("k")]);
+    let base_formal = var("base", SortHint::Untagged);
+    let macros = TheoryItem::Macros(vec![
+        mdef("base", &[], hk.clone()),
+        mdef("f", &[base_formal], pair(vec![msg("base"), msg("base")])),
+    ]);
+    let t = theory(vec![
+        macros,
+        TheoryItem::Rule(rule_act("R", vec![fact("In", vec![msg("a")])],
+                                  fact("A", vec![app("f", vec![msg("a")])]))),
+    ]);
+    assert_eq!(only_rule_action_arg(&expand(&t)), pair(vec![hk.clone(), hk]));
+}
+
+// ===========================================================================
+// GAP 2/3 — macros inside accountability-lemma and case-test formulas
+// ===========================================================================
+
+/// A formula `Ex sid #i. <fact>(<arg>)@i`, used to carry a macro call.
+fn exists_action(fname: &str, arg: Term) -> Formula {
+    Formula::Exists(
+        vec![var("sid", SortHint::Untagged), var("i", SortHint::Node)],
+        Box::new(Formula::Atom(Atom::Action(
+            fact(fname, vec![arg]),
+            Term::Var(var("i", SortHint::Node)),
+        ))),
+    )
+}
+
+// ---- Q38: a macro call in an accountability-lemma formula is expanded ------
+
+#[test]
+fn acc_lemma_formula_expanded() {
+    // af(x) = <x,x> ; acc-lemma formula uses af(sid); expand rewrites it while
+    // keeping the case_test_idents and the preserved macros block [Q38].
+    let x = var("x", SortHint::Untagged);
+    let macros = TheoryItem::Macros(vec![mdef("af", &[x.clone()], pair(vec![msg("x"), msg("x")]))]);
+    let acc = TheoryItem::AccLemma(AccLemma {
+        name: "acc".into(),
+        attributes: vec![],
+        formula: exists_action("Unequal", app("af", vec![msg("sid")])),
+        case_test_idents: vec!["blamed".into()],
+    });
+    let out = expand(&theory(vec![macros.clone(), acc]));
+    // macros preserved in place
+    assert_eq!(out.items[0], macros);
+    let got = out.items.iter().find_map(|it| match it {
+        TheoryItem::AccLemma(a) => Some(a.clone()), _ => None }).unwrap();
+    assert_eq!(got.formula, exists_action("Unequal", pair(vec![msg("sid"), msg("sid")])));
+    assert_eq!(got.case_test_idents, vec!["blamed".to_string()]);
+}
+
+// ---- Q39: a macro call in a case-test formula is expanded ------------------
+
+#[test]
+fn case_test_formula_expanded() {
+    // ct(x) = <x,x> ; case-test formula uses ct(sid); expand rewrites it [Q39].
+    let x = var("x", SortHint::Untagged);
+    let macros = TheoryItem::Macros(vec![mdef("ct", &[x.clone()], pair(vec![msg("x"), msg("x")]))]);
+    let ctest = TheoryItem::CaseTest(CaseTest {
+        name: "blamed".into(),
+        formula: exists_action("Blame", app("ct", vec![msg("sid")])),
+    });
+    let out = expand(&theory(vec![macros, ctest]));
+    let got = out.items.iter().find_map(|it| match it {
+        TheoryItem::CaseTest(c) => Some(c.clone()), _ => None }).unwrap();
+    assert_eq!(got.formula, exists_action("Blame", pair(vec![msg("sid"), msg("sid")])));
 }

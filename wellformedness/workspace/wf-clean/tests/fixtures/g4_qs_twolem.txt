@@ -1,0 +1,9 @@
+WARNING: the following wellformedness checks failed!
+
+Quantifier sorts
+================
+
+  Lemma `L1' uses quantifiers with wrong sort: ("x",LSortPub)
+  
+  Lemma `L2' uses quantifiers with wrong sort: ("y",LSortFresh)
+*/

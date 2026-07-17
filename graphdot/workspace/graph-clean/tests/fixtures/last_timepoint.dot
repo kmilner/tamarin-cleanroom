@@ -1,0 +1,14 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n0[label="#j : isend[K( s )]",shape="ellipse"];
+n1[label="Secret( 'KEY', A, s ) @ #i",shape="ellipse",color="darkblue"];
+n2[label="Reveal( K, X ) @ #l",shape="ellipse",color="darkblue"];
+n3[label="!KU( s ) @ #vk",shape="ellipse",color="gray"];
+n4[label="#last",shape="ellipse"];
+n2 -> n4[color="black",style="dashed"];
+n3 -> n0[color="red",style="dashed"];
+
+}

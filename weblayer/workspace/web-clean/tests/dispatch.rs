@@ -10,10 +10,10 @@
 
 use serde_json::Value;
 use web_clean::dispatch::{
-    Content, HttpMethod, Meta, MainReq, ProverOps, Request, Server,
+    Content, HttpMethod, MainReq, Meta, ProverOps, Request, RootMeta, Server,
 };
 use web_clean::intdot::EMPTY_GRAPH_DOT;
-use web_clean::route::{Autoprove, NavDir};
+use web_clean::route::{Autoprove, AutoproveAll, AutoproveDiff, NavDir};
 
 // ---------------------------------------------------------------------------
 // A minimal fake prover: holds lemma sources + canned fragments.
@@ -49,6 +49,9 @@ impl ProverOps for FakeProver {
     fn meta(&self, _thy: &Thy) -> Meta {
         Meta { name: "Tutorial".into(), version: "1.13.0".into(), filename: "Tutorial.spthy".into() }
     }
+    fn root_meta(&self, _thy: &Thy) -> RootMeta {
+        RootMeta { time: "00:00:00".into(), origin: "Tutorial.spthy".into(), modified: false }
+    }
     fn source_text(&self, _thy: &Thy) -> String {
         "theory Tutorial begin\nend".into()
     }
@@ -65,6 +68,8 @@ impl ProverOps for FakeProver {
             MainReq::Cases { .. } => ("cases", "Sources".to_string()),
             MainReq::Lemma(l) => ("lemma", format!("Lemma: {l}")),
             MainReq::Proof { lemma, .. } => ("proof", format!("Lemma: {lemma}")),
+            MainReq::DiffProof { lemma, .. } => ("diffProof", format!("Lemma: {lemma}")),
+            MainReq::DiffRules => ("diffrules", "Diff rules".to_string()),
         };
         Content { html: format!("<p>{kind}@{index}</p>"), title }
     }
@@ -82,9 +87,24 @@ impl ProverOps for FakeProver {
             _ => format!("/thy/trace/{index}/main/proof/{lemma}"),
         }
     }
-    fn apply_method(&self, thy: &Thy, _lemma: &str, _n: usize, _path: &[String]) -> (Thy, Vec<String>) {
-        // Canned focus "_" as in the live method capture [L8].
-        (thy.clone(), vec!["_".to_string()])
+    fn append_message(&self, _thy: &Thy) -> String {
+        "Appended lemmas to /tmp/x/Tutorial.spthy".into()
+    }
+    fn static_file(&self, path: &[String]) -> Option<Vec<u8>> {
+        // A tiny fake static tree: css/app.css present, everything else absent.
+        (path == ["css".to_string(), "app.css".to_string()])
+            .then(|| b"body{}".to_vec())
+    }
+    fn load_theory(&self, source: &str) -> Option<Thy> {
+        // Model a parseable upload as any non-empty source mentioning `theory`.
+        source.contains("theory").then(|| Thy { lemmas: vec![] })
+    }
+    fn reload(&self, thy: &Thy) -> Thy {
+        thy.clone()
+    }
+    fn apply_method(&self, thy: &Thy, _lemma: &str, n: usize, _path: &[String]) -> Option<(Thy, Vec<String>)> {
+        // Canned focus "_" as in the live method capture [L8]; method 0 = failure.
+        (n != 0).then(|| (thy.clone(), vec!["_".to_string()]))
     }
     fn autoprove(&self, thy: &Thy, _spec: &Autoprove) -> (Thy, Vec<String>) {
         (thy.clone(), vec!["_".to_string(), "Client_1".to_string()])
@@ -96,10 +116,22 @@ impl ProverOps for FakeProver {
     fn add_lemma(&self, thy: &Thy, _pos: &str, text: &str) -> Option<Thy> {
         text.trim_start().starts_with("lemma").then(|| thy.clone())
     }
-    fn delete_lemma(&self, thy: &Thy, name: &str) -> Thy {
-        let mut t = thy.clone();
-        t.lemmas.retain(|(n, _)| n != name);
-        t
+    fn delete_lemma(&self, thy: &Thy, name: &str) -> Option<Thy> {
+        // Some = found & removed; None = lemma not present.
+        thy.lemmas.iter().any(|(n, _)| n == name).then(|| {
+            let mut t = thy.clone();
+            t.lemmas.retain(|(n, _)| n != name);
+            t
+        })
+    }
+    fn apply_diff_method(&self, thy: &Thy, _lemma: &str, n: usize, _path: &[String]) -> Option<(Thy, Vec<String>)> {
+        (n != 0).then(|| (thy.clone(), vec!["Rule_1".to_string()]))
+    }
+    fn autoprove_diff(&self, thy: &Thy, _spec: &AutoproveDiff) -> (Thy, Vec<String>) {
+        (thy.clone(), vec!["Rule_1".to_string()])
+    }
+    fn autoprove_all(&self, thy: &Thy, _spec: &AutoproveAll) -> Thy {
+        thy.clone()
     }
 }
 

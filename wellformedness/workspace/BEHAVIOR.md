@@ -54,8 +54,12 @@ Observed by kitchen-sink probes ks1 / ks3 and the round-2 ordering probes
  9. `Fact multiplicity issues`                            two into "Fact usage" - OUT OF SCOPE)
 10. `Facts occur in the left-hand-side but not in any right-hand-side ` (TRAILING space)
 10a. `Left rule` / `Right rule`                          (round2; DIFF MODE ONLY)
+10b. `Quantifier sorts`                                  (round4; per-item bundle)
 11. `Formula terms`
 12. ` Formula guardedness`   (LEADING space)
+    NOTE (round4): topics 10b/11/12 are NOT globally fixed - they are emitted
+    per formula item (see "Formula-check bundle" below); their relative order
+    depends on which item emits which topic first.
 13. `Lemma annotations`                                  (round2; always-on)
 14. `Multiplication restriction of rules`                (round2; always-on)
 15. `Nat Sorts`
@@ -224,7 +228,35 @@ shows `g^c` -> `x.1` otherwise); (b) the alternate failure mode
 the co-emitted `Message Derivation Checks` block is Maude-derived, OUT OF SCOPE;
 (d) rule_pp wrapping for long rules (see printer note).
 
-### Formula terms  (round3: FULL coverage)
+### Quantifier sorts  (round4)
+Trigger: a lemma/restriction formula quantifies over a variable whose sort is
+PUB or FRESH (message/temporal/nat quantifiers are allowed - probes
+qs_pub_prefix/qs_fresh_prefix/qs_nat_prefix/qs_msg_plain). Per item:
+    "  {Entity} `{name}' uses quantifiers with wrong sort: {tokens}"
+Entity = `Lemma`/`Restriction` (both, probe qs_restr). Each offending variable
+is a raw Haskell tuple token `("{name}",LSort{Pub|Fresh})`, collected in binding
+order (outer binders before inner), rendered as a fillSep at width 69 with a
+4-space continuation indent (same mechanism as Formula terms; probe qs_multi).
+Multiple wrong-sort items join as separate emissions in the bundle (consecutive
+ones merge with `\n  \n`; probe qs_twolem). This topic is emitted BEFORE Formula
+terms within a single item (probe syn_pubsuffix).
+
+### Formula-variable sorts and sort-aware binding  (round4 - supersedes round2)
+Formula quantifiers bind SORTED variables. A bound variable and a use are the
+same variable only when they share a name AND a sort CLASS, so a temporal binder
+`#x` does NOT bind a message-position use `x` (probe g1_core: `Free x`); a
+message binder `x` does not bind a node use `#x` (g1_msgnode: `Free #x`). Sort
+classes: {Msg, Untagged, Suffix(Msg)} collapse to Msg (this keeps a quantified
+message var bound to its uses across the parser's Untagged-vs-Msg tagging - the
+round2 false-positive fix, now done sort-aware instead of name-only);
+Pub/Fresh/Node/Nat (and their Suffix forms) are each their own class. The de
+Bruijn stack counts EVERY quantified var (temporals and sort-mismatched ones
+included); the index is the distance to the innermost binder matching (name,
+class) - probe g1_dbsort: `All x #x. ... h(x)` -> `h(Bound 1)` (msg x sits under
+node #x). Same-name/different-sort binders coexist without capture (g1_samename:
+`Ex x #x. A(x)@#x` -> SUCCESS).
+
+### Formula terms  (round3: FULL coverage; round4: sort-aware)
 Trigger: a lemma/restriction formula uses a TERM "of the wrong form". The unit
 checked is each ARGUMENT TERM of each atom (Eq/Less/.. -> both sides; Action ->
 the TEMPORAL first, then the fact args; Pred/Last -> args). A term is wrong iff
@@ -256,35 +288,62 @@ to line 2; an over-wide single term also wraps to line 2. Multiple wrong lemmas:
 each full block (header+list+help) is joined by `\n  \n`.
 fixed_help = "  The only allowed terms are public constants and bound node and\n  message variables. If you encounter free message variables, then\n  you might have forgotten a #-prefix. Sort prefixes can only be\n  dropped where this is unambiguous. Moreover, reducible function\n  symbols are disallowed."
 
-### Formula guardedness (topic has LEADING space)  (round3: two modes + wrapping)
+### Formula guardedness (topic has LEADING space)  (round4: decision procedure)
 Trigger: a LEMMA formula not convertible to guarded form. (An unguarded
-RESTRICTION is instead a FATAL error, not a warning -- observed z1; lemmas only.)
-Body:
+RESTRICTION is a FATAL error, not a warning -- observed gr_restr/z1; lemmas
+only.) Body:
     "  Lemma `{name}' cannot be converted to a guarded formula:\n    {reason}\n      \"<sub>\"\n    in the formula\n      \"<whole>\""
-where <sub> is the FAILING QUANTIFIER SUBTREE (not the whole formula) and <whole>
-is the full lemma formula. Two observed reasons (probe r3_gc):
-  - `unguarded variable(s) '#j', ... in the subformula`  (quantifier binds vars
-    not guarded by an action fact)
+where <sub> is the FAILING QUANTIFIER SUBTREE and <whole> is the full lemma
+formula. Exactly two reasons:
+  - `unguarded variable(s) '<v1>', '<v2>' in the subformula` (vars in binding
+    order, ", " joined, each `'<pp_var>'`; probes ge_unguard/qs_multi)
   - `universal quantifier without toplevel implication`
-Guardedness decision (∀): the body must be a top-level `guard ==> rest`; its
-ANTECEDENT's action facts (temporal incl.) must bind every quantified var
-(consequent does NOT guard). A conjunction/disjunction/negation/atom body -> "no
-toplevel implication". A guarded ∀ recurses into antecedent and consequent
-(finds nested failures; the reported subformula is the inner failing quantifier).
-∃ takes a conjunctive guard (`Ex x #i. A(x)@#i` is fine); an ∃ with unguarded
-vars is "unguarded variable(s)".
 
-<sub>/<whole> use the multi-line formula printer (pp_formula_wrapped): a small
-HughesPJ-style engine at page width ~72 (single line fits at total col 72, breaks
-by 74). Rules (calibrated r3_gw/r3_qm/r3_and):
-  - atom -> single-line text (never breaks); connective operands always parens'd.
-  - binary op `(a) OP (b)`: breaks after OP; the right operand hangs at the
-    connective's START COLUMN (the column just after its enclosing `(`).
-  - quantifier `Q vars. body`: breaks after the `.`; body hangs at base+2
-    (base = the quote indent 6, so body at col 8).
-The formula is embedded as `      "..."` (quote col 6, formula col 7). When a
-formula fits on one line the printer is byte-identical to the single-line
-`pp_formula`, so narrow-formula fixtures are unaffected.
+DECISION PROCEDURE (pre-order; first failure reported, antecedent before
+consequent, left before right - probes gr_both/gr_sib):
+  - `∀ vars. body`: body MUST be a top-level implication `guard ==> rest`;
+    otherwise "without toplevel implication" (bare atom, conjunction,
+    disjunction, negation, iff ALL fail this way - gu_bareatom/gu_conj/gu_disj/
+    gu_neg/gu_iff). If it is `guard ==> rest`, every quantified var must be in
+    the guard set, else "unguarded variable(s)"; then recurse into guard then
+    rest.
+  - `∃ vars. body`: every quantified var must be in the guard set of `body`,
+    else "unguarded variable(s)" (a non-conjunction body - disjunction/
+    implication/negation - guards nothing: ge_disj/ge_impl/ge_neg); then recurse
+    into body. A bare action atom or a conjunction of them is a valid guard
+    (ge_bareact/ge_conj_ok).
+  - GUARD SET of a formula = the (name, sort-class) keys of variables occurring
+    in ACTION atoms reachable through CONJUNCTIONS only. Disjunction, negation,
+    implication, equality/`<`/`⋖`/`⊏`/`last` atoms, and nested quantifiers
+    contribute NO guards (gx_disj_ant/gx_neg_ant/gx_eq_ant/gx_less/gx_last/
+    gx_quant_g). An action atom guards all its fact-arg vars AND its temporal
+    (gx_pair). Guard matching is sort-aware (syn_pubsuffix: pub `$x` is NOT
+    guarded by a msg `x` in `A(x)`). This is the only semantic change from the
+    round-3 heuristic (which recursed guards through Or/Not/quantifiers).
+  - `¬`, `∧`, `∨`, `⇒`, `⇔` at the top: recurse into operands (left first).
+  - Any non-quantified formula: no failure (gt_noquant/gt_topconj).
+
+MULTI-LINE FORMULA PRINTER (pp_formula_wrapped, col-relative; round4 fix).
+Page width 72 (single line fits at total col 72, breaks by 74). The formula is
+embedded as `      "..."`, so its first char is at column 7 (`pp_formula_wrapped(
+f, 7)`). Continuation lines break relative to the enclosing group's START column
+`col`, not a fixed base (round3's base+hang was off by one at the top level -
+gt_and_two_all):
+  - Action/Last/Pred atom -> single-line text (never breaks).
+  - relational atom `a OP b` (=,<,⋖,⊏): breaks AFTER the operator; the right
+    term hangs at `col+0`; the term operands are NOT parenthesised (gnest).
+  - logical binary op `(a) OP (b)`: breaks after OP; right operand hangs at
+    `col+0` (the group's start column, i.e. just after any enclosing `(`).
+  - `¬` -> `¬` beside a parenthesised operand (never breaks at the ¬).
+  - quantifier `Q vars. body`: breaks after the `.`; body hangs at `col+1`
+    (measured gnest: a nested quantifier at col 9 -> body at col 10).
+When a formula fits on one line the printer is byte-identical to the single-line
+`pp_formula`, so narrow-formula fixtures (p21/r3_guard_*) are unaffected.
+GAP: the printer does NOT do capture-avoiding alpha-renaming; when a bound var
+name collides with a free var of the same name the oracle renames the bound one
+(`$x.1` in syn_pubsuffix). Fixtures avoid such collisions (guardedness fixtures
+use distinct names, and the Quantifier-sorts fixtures use consistently-bound
+prefix vars so no free collision arises).
 
 ### Nat Sorts
 Trigger: var used in %+ (nat) context not of sort nat. Entries joined "\n  \n":
@@ -318,15 +377,34 @@ when short):
 GAP: long rules wrap - the arrow drops to its own line indented 6 and the
 conclusions to indent 7 (probe mul_terms). Byte-parity fixtures use short rules.
 
-## Formula variable identity (round2 fix)
-For free-variable detection (Formula terms) and guardedness the oracle treats a
-quantified message variable and its occurrences as ONE variable even when the
-parsed AST tags them with different-but-compatible sorts (Msg vs the Untagged
-default; a temporal written `@ i` vs a quantifier `#i`). Matching on the full
-sort tag produced spurious "Formula terms"/" Formula guardedness" reports on
-round2/exists_trace_reuse (the integration bug). FIX: bind/compare formula
-variables by NAME only. All prior fixtures (p05, p21, f_subterm) use consistent
-sorts and are unaffected.
+## Formula-check bundle assembly (round4)
+The three per-formula checks - Quantifier sorts, Formula terms, Formula
+guardedness - are NOT independent global checks. They are run item-by-item:
+  - PROCESSING ORDER: every LEMMA (source order) first, then every RESTRICTION
+    (source order) - lemmas precede restrictions even when a restriction is
+    source-first (probes qs_restr, ord_rl_ft2).
+  - Per item the topics are emitted in the SUB-ORDER [Quantifier sorts, Formula
+    terms, Formula guardedness] (guardedness for lemmas only) - probe
+    syn_pubsuffix.
+  - The emission sequence of (topic, entry) is then rendered by MERGING ONLY
+    CONSECUTIVE same-topic entries under one header (separator `\n  \n`). A
+    topic that recurs after an intervening different topic starts a FRESH block
+    with its own underline (probe ord_qs_ft_qs: QS,FT,QS renders THREE blocks;
+    qs_twolem: two adjacent QS merge into one).
+  - The bundle occupies the report slot after diff Left/Right and before Lemma
+    annotations; `Lemma annotations` is a SEPARATE global check AFTER the bundle,
+    NOT part of the per-item sub-order (probe ord_la_ft2: FT of a later lemma
+    precedes Lemma annotations of an earlier one). Implemented as
+    `checks::formula_reports(thy, reducible)`.
+
+## Formula variable identity (round2 fix -> superseded by round4 sort classes)
+The round2 fix bound formula variables by NAME only to remove a spurious
+"Formula terms"/" Formula guardedness" report on round2/exists_trace_reuse. Name-
+only OVER-binds: it wrongly binds a temporal `#x` to a message use `x`
+(g1_core). Round4 replaces it with sort-CLASS matching (see "Formula-variable
+sorts and sort-aware binding"): {Untagged, Msg} collapse to one class (fixing the
+round2 case) while `#x`/`$x`/`~x`/`%x` are distinct classes (fixing g1_core).
+exists_trace_reuse still reports only "Lemma annotations".
 
 ## Round 3 (Unit C) - closed and residual
 
@@ -341,6 +419,23 @@ CLOSED with byte-parity fixtures:
   toplevel implication" mode, and the multi-line formula printer (implies-break
   and And-break byte-exact).
 
+## Round 4 (Unit C) - closed and residual
+
+CLOSED with byte-parity fixtures (the two round-3 gaps that blocked full
+post-elaboration replacement):
+- GAP 1 - sort-aware quantifier binding: the wrong-form-terms de Bruijn stack
+  now matches (name, sort-class); temporal/pub/fresh/nat binders no longer bind
+  message uses. NEW topic "Quantifier sorts" (pub/fresh quantifiers) implemented
+  with the fillSep list, Lemma/Restriction entities, and per-item ordering.
+- GAP 2 - semantic guardedness: guard extraction is now a decision procedure
+  (action atoms through conjunctions only; sort-aware guard matching), replacing
+  the round-3 over-approximation that recursed guards through Or/Not/quantifiers.
+  Universal/existential sub-modes, recursion order, and lemma-only scope all
+  byte-exact.
+- Formula-check bundle assembly (lemmas-then-restrictions, per-item sub-order,
+  consecutive-merge) and the col-relative multi-line printer (top-level binop
+  break and relational-atom break fixed).
+
 ## Out-of-scope / known gaps
 - Message Derivation Checks & Derivation Checks: computed by Maude after
   translation; not derivable from the AST. Not produced by check_theory.
@@ -352,7 +447,12 @@ CLOSED with byte-parity fixtures:
   co-printed with the out-of-scope Maude derivation reprint. The single-line rule
   printer stays byte-exact for short rules (all current fixtures). Structure
   recorded from r3_rulewrap; a dedicated rule-layout engine is future work.
-- Guardedness ALGORITHM depth: ∃ failure sub-modes and exotic ∀ bodies beyond the
-  probed cases; the formula printer's deeply-nested-quantifier hang is
-  extrapolated (calibrated for outer-quantifier + binary-op breaks).
+- FORMULA-PRINTER capture-avoidance: the oracle renames a bound var that collides
+  with a same-name free var (`$x.1`); the clean printer does not. Fixtures avoid
+  collisions. Also: quantifier HEAD wrapping (very long variable lists) and
+  internal fact-argument wrapping are unprobed (fixtures stay within widths).
+- Predicate atoms in formulas: the oracle expands `predicates:` before the wf
+  check (gx_pred_grd renders `Pr(x)` as its definition `x = x`), so Pred atoms
+  are not expected to reach the checker; guard extraction treats them as
+  non-guarding defensively.
 - Nat-sort inference / subterm-convergence decision: structural scaffolding only.

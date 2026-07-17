@@ -1,0 +1,6 @@
+theory G2Collide
+begin
+functions: h/1
+rule R:
+  [ In( h(~x) ), In( h(x) ) ] --> [ Out('ok') ]
+end

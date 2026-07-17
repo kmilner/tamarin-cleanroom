@@ -1,0 +1,13 @@
+theory QsTwoLem
+begin
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x) ]->
+   [ Out(~x) ]
+lemma L1:
+  all-traces
+  "All $x #i. (A($x) @ #i) ==> (A($x) @ #i)"
+lemma L2:
+  all-traces
+  "All ~y #i. (A(~y) @ #i) ==> (A(~y) @ #i)"
+end

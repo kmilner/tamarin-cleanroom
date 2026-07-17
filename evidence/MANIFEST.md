@@ -9,7 +9,7 @@ those transcripts are collected here verbatim. `SHA256SUMS` covers all files.
 
 These agents were REQUIRED to work only from black-box oracles and captured
 program output (see ../PROTOCOL.md). Their transcripts prove non-access.
-Final audit (audit/cleanroom_audit_results.txt): 16 transcripts, 1339 tool
+Final audit (audit/cleanroom_audit_results.txt): 22 transcripts, 1893 tool
 calls, 0 forbidden accesses, 0 web accesses.
 
 | Path | Agent | Role |
@@ -30,6 +30,12 @@ calls, 0 forbidden accesses, 0 web accesses.
 | workflows/wf_7f807521-670/agent-ac1c391bc2c48679f.jsonl | round 3 (unit B) | graph generation implementer |
 | workflows/wf_bfd5a6a0-31b/agent-abad7225bcac84f4e.jsonl | round 3 cont. (unit F) | corpus-validation rebuild (36/36 agree) |
 | workflows/wf_62e2c0ef-a3e/agent-ae1a3ead3cabd0a4c.jsonl | round 4 (unit B) | simplification/wrap re-probe |
+| workflows/wf_1741f4ad-48d/agent-ad91aafe765192f45.jsonl | round 4 (unit C) | sort-aware binding + semantic guardedness |
+| workflows/wf_1741f4ad-48d/agent-ac163fe10def094e0.jsonl | round 4 (unit D) | typed parse + stream-aware framing |
+| workflows/wf_1741f4ad-48d/agent-aeaa95d99395a0136.jsonl | round 4 (unit E) | nullary/acc-lemma/case-test expansion |
+| workflows/wf_1741f4ad-48d/agent-af76260f88f21bcaa.jsonl | round 4 (unit G) | report contract, ordering, scope, batching |
+| workflows/wf_1741f4ad-48d/agent-ae1942fd5bd87afee.jsonl | round 5 (unit B) | clusters, wrap wiring, temporal nodes, RawRule entry |
+| workflows/wf_1741f4ad-48d/agent-a92e0a97d8d241648.jsonl | round 4 (unit A) | full route surface + state machine |
 
 Corresponding workspaces (../wellformedness, ../graphdot, ../weblayer) hold
 each agent's QUERIES.log, BEHAVIOR.md, REPORT*.md and code — cross-reference
@@ -46,6 +52,7 @@ the transcripts against those logs.
 | workflows/wf_bfd5a6a0-31b/agent-adb12daa8ab777100.jsonl | round-3 audits: weblayer + graphdot deltas (pass, 0) |
 | workflows/wf_bfd5a6a0-31b/agent-a69817b344aadd7bd.jsonl | round-3 audit: wellformedness delta (pass, 0) |
 | workflows/wf_62e2c0ef-a3e/agent-af3d04b49cd4b056d.jsonl | round-4 audit: graphdot re-probe delta (pass, 0; notes clean side's "levels inert" conclusion contradicts the source — affirmative non-access evidence) |
+| workflows/wf_1741f4ad-48d/agent-a*.jsonl (6 auditor transcripts among 14) | round-4/5 per-unit delta audits: C/D/E/G/B/A (all pass, 0 findings; D audit notes the clean flag-precedence order DIVERGES from the source Either-applicative order — affirmative non-access evidence) |
 
 Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUDIT.md,
 ../console/AUDIT.md, ../macros/AUDIT.md, ../injective/AUDIT.md, ../derivcheck/AUDIT.md.
@@ -58,6 +65,7 @@ Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUD
 | workflows/wf_610d94ab-e29/ | dirty-room integration agent (adapters only; see ../INTEGRATION_REPORT.md) |
 | workflows/wf_62e2c0ef-a3e/agent-ac4e655d83d5c3d56.jsonl | dirty-room integrator: units A+B re-sync (rewire blocked, see ../INTEGRATION_REPORT.md) |
 | workflows/wf_62e2c0ef-a3e/agent-a2eac17c5efa35c13.jsonl | dirty-room integrator: units C–G (partial; keeps reported per protocol) |
+| workflows/wf_1741f4ad-48d/ (2 integrator transcripts among 14) | round-4/5 integrators: theory C-swap+delete (check_terms.rs removed, 134->133) and server A/B (blocked; edit-form closure byte-verified) |
 | workflows/wf_53f48d60-3ef/ | licensing research (GPL doctrine/precedent/feasibility/literal-copy) |
 | workflows/wf_8b8fd87b-72e/ | uncited-file derivation audit + institutional-ownership research |
 | workflows/wf_5ec90b24-b26/ | tail-author affiliations, triviality classification, rewrite scoping |

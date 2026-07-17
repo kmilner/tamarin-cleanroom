@@ -1,0 +1,10 @@
+theory QsMulti
+begin
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x) ]->
+   [ Out(~x) ]
+lemma L:
+  all-traces
+  "All $x ~y $z #i. (A($x) @ #i) ==> (A(~y) @ #i)"
+end

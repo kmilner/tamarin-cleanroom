@@ -523,3 +523,121 @@ state machine: it owns the version map + monotonic counter and makes all of the
 above decisions; `ProverOps` supplies parse/edit/add/delete, apply-method,
 autoprove, next/prev target, and the opaque pretty-printed fragments (west pane,
 center content, lemma source, source text, DOT).
+
+---
+
+## 14. Full route surface — top-level + reload/download/kill/upload + diff (Round 4)
+
+Derived from live probing of the sanctioned oracle ([R40]–[R4B], ports
+3140-3143, Tutorial/NSLPK3/KCL diff theory) plus a corpus key census. This
+section extends the dispatcher from the interactive read/proof handlers (§13) to
+the **entire** request path. Reproduced in `src/dispatch.rs` over the same
+`ProverOps` boundary (grown minimally) with one global version-index namespace.
+
+### 14.1 Top-level (non-`/thy`) routes
+`src/route.rs::Toplevel` splits the surface into `/` · `/robots.txt` ·
+`/favicon.ico` · `/kill` · `/static/**` · `/thy/…` · other.
+
+| route | method | response |
+|-------|--------|----------|
+| `GET /` | GET | `200` `text/html` index page (§7); no flash paragraph |
+| `POST /` | POST | `200` `text/html` index page; success flash `<p class="message">Loaded new theory!</p>`, failure `…Post request failed.</p>` |
+| `GET /robots.txt` | GET | `200` `text/plain` body `User-agent: *` (13 bytes, no NL) |
+| `GET /favicon.ico` | GET | `303` → `/static/img/favicon.ico`, no-cache (see 14.4) |
+| `GET /kill?path=…` | GET | `200` `text/plain` `Canceled request!` (17 bytes, no NL); cancels a running search, server stays up |
+| `GET /kill` (no `path`) | GET | `400` `text/html` Invalid-Arguments page, body `<ul><li>No path to kill specified!</li>\n</ul>\n` |
+| `GET /static/<path>` | GET | `200`, content-type by extension (14.5), body = file bytes; missing → `404` `text/plain` `File not found` |
+
+Wrong method on any of the above → `405` `text/html` **Method Not Supported**
+page (`<p>Method <code>M</code> not supported</p>`). These `405`/`400` pages and
+the `404` page share the standard head + tail (`src/errors.rs`, from
+`shell_template::SIMPLE_*`) and differ only in `<title>`/`<h1>`/body — the same
+Yesod default-layout error family.
+
+### 14.2 Theory-scoped additions
+| handler | method | response |
+|---------|--------|----------|
+| `download/{file}` | GET | `200` `application/octet-stream`, **no** `Content-Disposition`; body == the `source` body verbatim (the `{file}` segment is decorative) |
+| `reload` | POST | `200` JSON `{"redirect":"/thy/<kind>/<idx>/overview/help"}`; re-reads the theory **in place** at the same index |
+| `get_and_append/{file}` | POST | `200` JSON `{"alert":"Appended lemmas to <path>"}` (the third envelope shape; path non-deterministic) |
+| `edit/{verb}/{name}` | POST | structural edit (§13.3 / 14.6) |
+
+`source` and `message` are GET-only; a POST to them (or to `download`) is `405`.
+
+### 14.3 Version lifecycle — one global index namespace (spec item: state)
+Every theory-version lives at a distinct index in **one** monotonically growing
+namespace (`= max ever allocated + 1`), regardless of how it was produced:
+* **Proof ops** (`method`, `diffMethod`, `autoprove*`) — new index, base retained.
+* **Upload** (`POST /`) — new index off the **same** counter (NSLPK3 → 5 when
+  1..4 existed). The response is the index page (200), **not** a redirect.
+* **Structural edits** and **`reload`** — mutate in place at the same index; the
+  counter is untouched and other versions stay resolvable (a proof op after a
+  reload of v1 still got index 3 when 1,2 existed). Reload does **not** reset the
+  counter or drop modified versions.
+* Every allocated index stays resolvable forever (index-page window is a display
+  cap only).
+
+### 14.4 Redirect caching headers
+All `303 See Other` responses — `edit`/`add`/`delete` success, delete-not-found,
+and the favicon redirect — carry `Cache-Control: no-cache, must-revalidate` and
+`Expires: Thu, 01 Jan 1970 05:05:05 GMT` (modelled by `Response.no_cache`). The
+JSON `{redirect}`/`{alert}` bodies (`method`, `autoprove`, `reload`,
+`get_and_append`) are ordinary `200`s with no cache headers.
+
+### 14.5 Static content types
+`/static/**` is a filesystem handler (chunked, **no** caching headers). Content
+type is chosen by the last path segment's extension, **without** a `charset`:
+`.css`→`text/css`, `.js`→`application/javascript`, `.png`→`image/png`,
+`.ico`→`image/vnd.microsoft.icon`, no/unknown extension → `application/octet-stream`
+(e.g. `/static/LICENSE`). A missing file yields the plain-text `File not found`
+(not the dynamic HTML 404). `src/assets.rs::static_content_type`.
+
+### 14.6 Structural-edit branches (refines §13.3)
+* **delete** `POST edit/delete/{name}`: lemma **found** → `303` →
+  `overview/help` (removed in place); **not found** → `303` →
+  `overview/delete/{name}` (theory unchanged). `delete_lemma` therefore returns
+  `Option` (`None` = not found).
+* **edit** `POST edit/edit/{name}`: success → `303` → `overview/edit/{name}`;
+  parse failure **or unknown lemma** → `200` full-page edit form (theory
+  unchanged).
+* **add** `POST edit/add/{pos}`: success → `303` → `overview/add/{pos}`; failure
+  → `200` add-form page.
+* **method/diffMethod** failure: `200` JSON `{"alert":"Sorry, but the prover
+  failed on the selected method!"}`, **no** version bump (`apply_method` /
+  `apply_diff_method` return `Option`).
+
+### 14.7 Diff (observational-equivalence) mode — theory-kind `equiv`
+Started with `--diff`; the index links use `/thy/equiv/…`. The overview shell is
+the trace shell parameterised by `page::ShellKind::Equiv`: `<title>DiffTheory:
+NAME`, `/thy/equiv/` links, and **no** Actions "Append modified lemmas" item
+(MID/TAIL byte-identical to trace; reproduced byte-for-byte,
+`equiv_overview_shell_byte_identical`). New handlers:
+* `main/diffProof/{lemma}[/path…]` — JSON content pane (diff proof view).
+* `main/diffMethod/{lemma}/{n}[/path…]` — proof op → `200` JSON
+  `{"redirect":"/thy/equiv/<new>/overview/diffProof/{lemma}/{focus}"}` (new
+  version) or the `{alert}` on failure.
+* `main/diffrules` — JSON content pane.
+* `autoproveDiff/{strategy}/{bound}/diffProof/{lemma}[/side…]` — **no** all-sol
+  flag (unlike trace `autoprove`).
+* `autoproveAll/{strategy}/{bound}` — autoprove every lemma.
+`intdot`/`interactive-graph-def` tails in diff mode carry a `graph/` prefix
+(opaque passthrough). autoproveDiff/autoproveAll **block the prover** on the
+probe theory, so their exact redirect bytes are unobservable here; they are
+dispatched as proof ops (new version) with the redirect modelled by analogy to
+`diffMethod`/`autoprove` (documented gap).
+
+### 14.8 Negative result — `del/path` and `verify` absent in 1.13.0
+`del`, `verify`, and `path` handlers return `404` (not `405`) for every method
+and every path shape, in both trace and equiv mode, top-level and theory-scoped;
+and appear in **zero** manifest keys. They are neither in the corpus nor
+live-observable in this build. `route.rs` routes them to `Handler::Other`
+(→ `404`), matching the oracle; the exact bytes of any such route in a newer
+tamarin remain a documented gap (no fabrication).
+
+### 14.9 ProverOps growth (Round 4)
+Added pure data/fragment producers — `root_meta`, `append_message`,
+`static_file`, `load_theory`, `reload`, and the diff ops (`apply_diff_method`,
+`autoprove_diff`, `autoprove_all`) — and refined `apply_method` and
+`delete_lemma` to return `Option` (method-failure alert / delete-not-found
+branch). All transport (content types, status, `Location`, cache headers, version
+allocation, envelope shape) stays in `Server`.

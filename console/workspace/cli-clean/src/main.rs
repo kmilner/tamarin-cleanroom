@@ -1,14 +1,16 @@
 //! Thin driver exercising the CLI text surface.
 //!
-//! Handles the pure-text paths (help, version, parse errors) byte-for-byte so
-//! they can be verified against the black-box binary. `Run` has no prover engine
-//! behind it here — real integration wires the parsed [`cli_clean::RunSpec`] into
-//! the prover and uses [`cli_clean::framing`] to wrap its output.
+//! Handles the pure-text paths (help, version, parse/validation errors)
+//! byte-for-byte so they can be verified against the black-box binary. `Run` has
+//! no prover engine behind it here — real integration wires the typed
+//! [`cli_clean::Args`] into the prover and uses [`cli_clean::framing`] to wrap its
+//! output across the two streams.
 
 use std::process::exit;
 
-use cli_clean::version::{MaudeInfo, VersionInfo};
-use cli_clean::{parse, render_version, Command};
+use cli_clean::stream::Stream;
+use cli_clean::version::{frame_version, MaudeInfo, VersionInfo};
+use cli_clean::{parse_args, Parsed};
 
 /// Version slots as observed from the reference build. Real integration injects
 /// the actual build metadata of the hosting binary.
@@ -25,25 +27,35 @@ fn observed_version_info() -> VersionInfo {
 
 fn main() {
     let argv: Vec<String> = std::env::args().skip(1).collect();
-    match parse(&argv) {
-        Ok(Command::Help(mode)) => {
+    match parse_args(&argv) {
+        Ok(Parsed::Help(mode)) => {
             print!("{}", cli_clean::render_help(mode));
             exit(0);
         }
-        Ok(Command::Version) => {
-            print!("{}", render_version(&observed_version_info()));
+        Ok(Parsed::Version) => {
+            let streams = frame_version(&observed_version_info());
+            print!("{}", streams.out);
+            eprint!("{}", streams.err);
             exit(0);
         }
-        Ok(Command::Run(spec)) => {
+        Ok(Parsed::Run(args)) => {
             // Text-surface stub: no prover engine in this crate.
             eprintln!(
-                "[cli-clean] parsed: mode={:?} positional={:?} flags={:?}",
-                spec.mode, spec.positional, spec.options.flags
+                "[cli-clean] parsed: mode={:?} positional={:?} bound={:?} stop_on_trace={:?} output_module={:?} processors={:?}",
+                args.mode,
+                args.positional,
+                args.bound,
+                args.stop_on_trace,
+                args.output_module,
+                args.processors,
             );
             exit(0);
         }
         Err(e) => {
-            eprint!("{}", e.text);
+            match e.stream {
+                Stream::Out => print!("{}", e.text),
+                Stream::Err => eprint!("{}", e.text),
+            }
             exit(e.exit_code);
         }
     }

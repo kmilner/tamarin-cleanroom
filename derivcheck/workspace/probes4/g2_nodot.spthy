@@ -1,0 +1,6 @@
+theory G2NoDot
+begin
+functions: h/1
+rule R:
+  [ In( h(<x2, x10>) ) ] --> [ Out('ok') ]
+end

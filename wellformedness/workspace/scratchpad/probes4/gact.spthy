@@ -1,0 +1,12 @@
+theory Tgact
+begin
+
+predicates: Pr(x) <=> x = x
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x), B(~x), C(~x) ]->
+   [ Out(~x) ]
+lemma L:
+  all-traces
+  "All xxxxxxxxxxxxxxx #i #j. (LongActionName(xxxxxxxxxxxxxxx, yyyyyyyyyyyyyyy) @ #i) ==> (#i = #j)"
+end

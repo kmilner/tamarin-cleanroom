@@ -46,3 +46,29 @@
 2026-07-17T13:42:38Z | hs_oracle.sh --foobar (live cross-check vs clean binary) | --foobar
 2026-07-17T13:42:38Z | hs_oracle.sh --diff (live cross-check vs clean binary) | --diff (no file)
 2026-07-17T13:42:38Z | hs_oracle.sh --version (live cross-check vs clean binary) | --version
+# ---- Round 4 (2026-07-17): split-stream framing + typed value validation ----
+# Split-stream probes invoke the same black-box binary as hs_oracle.sh but redirect
+# 1>captures/<label>.out.txt 2>captures/<label>.err.txt (via probes/split_probe.sh).
+2026-07-17T16:35:00Z | direct --version 1>out 2>err | GAP2: version banner -> STDOUT, maude preamble -> STDERR (they only interleaved in the merged oracle)
+2026-07-17T16:36:00Z | split_probe split_batch_default NSLPK3.spthy | GAP2: payload+summary -> STDOUT; maude preamble + 5 progress markers -> STDERR
+2026-07-17T16:37:00Z | split_probe split_batch_parseonly NSLPK3.spthy --parse-only | GAP2: payload -> STDOUT; single 'Theory loaded' -> STDERR; no preamble/summary
+2026-07-17T16:37:30Z | split_probe split_batch_multifile NSLPK3 fresh_public_constant | GAP2: both payloads concat (no separator) + ONE combined summary -> STDOUT; preamble + all progress -> STDERR
+2026-07-17T16:38:00Z | split_probe -o=FILE / --output=FILE single | GAP2: -o space-form does NOT consume value; '=' form writes file, suppresses payload; summary gains 'output:' line; STDOUT begins '\n===='
+2026-07-17T16:39:00Z | split_probe --Output=DIR single & multi | GAP2: writes <inputstem>_analyzed.spthy; 'output:' label used for both -o/-O; multi -> one 'output:' per theory
+2026-07-17T16:40:00Z | split_probe split_batch_prove --prove=nonce_secrecy | GAP2: same split as default; result line 'verified (54 steps)' -> STDOUT
+2026-07-17T16:40:30Z | split_probe split_variants variants | GAP2: variant payload -> STDOUT; maude preamble only -> STDERR (no progress, no summary)
+2026-07-17T16:41:00Z | split_probe help/version/errors | GAP2 routing: --help & per-mode help -> STDOUT; no-input & bad-workdir help ENVELOPES -> STDOUT; Unknown flag / Ambiguous mode / Unhandled argument (bare one-liners) -> STDERR; all runtime file/app errors -> STDERR
+2026-07-17T16:42:00Z | python repr on captures | GAP2: 'output:' value col = 19 (10 spaces after 'output:'), 'processing time:' 1 space; 'analyzed:' un-indented single space; summary block '\n'+rule+... ends '====\n'
+2026-07-17T16:43:00Z | direct --bound/open-chains/saturation/derivcheck-timeout/replication-bound =x --parse-only | GAP1: each -> 'tamarin-prover: <LABEL>: invalid bound given' + CallStack Batch.hs:162:33; labels: bound, OpenChainsLimit, SaturationLimit, derivcheck-timeout, replication-bound; STDERR, exit1; fires under --parse-only (no preamble)
+2026-07-17T16:44:00Z | direct --stop-on-trace=XYZ / --partial-evaluation=XYZ / --output-module=bogus | GAP1: stop-on-trace lowercases+echoes 'unknown stop-on-trace method: xyz'; partial-evaluation 'partial-evaluation: unknown option' (no echo); output-module 'output mode not supported.' (no echo)
+2026-07-17T16:44:30Z | direct --heuristic=Z --parse-only -> exit0 | GAP1: heuristic NOT validated at CLI (accepts any chars)
+2026-07-17T16:45:00Z | direct enum valid/case sweep | GAP1: stop-on-trace & partial-evaluation case-INSENSITIVE {dfs,bfs,seqdfs,sorry,none}/{summary,verbose}; output-module case-SENSITIVE {spthytyped,spthy,msr,proverifequiv,proverif,deepsec}
+2026-07-17T16:45:30Z | direct integer edge cases (-5,0,3.5,5abc,+5,' 5','5 ',0x10,010,5_0,overflow,tab) | GAP1: accept set = Haskell readMaybe Int (ws-trim, sign+optional ws, decimal/hex/octal, overflow wraps; reject +/./_ /trailing/empty); negatives & zero accepted (no positive-int check)
+2026-07-17T16:46:00Z | direct --processors/--maude-processes/--data-dir=... | GAP1 interop: all 'Unknown flag: --<name>' in reference (confirmed absent -> safe to add as consumer extensions)
+2026-07-17T16:46:30Z | direct bare vs '=' empty forms | GAP1: BARE value-flag (no '=') never errors; VALUED (incl empty '=') validates-or-errors (e.g. --bound= / --stop-on-trace= error, --bound / --stop-on-trace bare OK)
+2026-07-17T16:47:00Z | direct multi-invalid precedence + repeated | GAP1: fixed validation order (arg-order independent): stop-on-trace > bound > partial-evaluation > open-chains > saturation > output-module > derivcheck-timeout > replication-bound; repeated value flag = LAST occurrence wins
+2026-07-17T16:48:00Z | direct relative-path run | GAP2: 'analyzed:' shows path AS PASSED on CLI (not canonicalized) -> passthrough slot
+2026-07-17T16:55:00Z | split_probe split_version --version ; split_shortV -V | GAP2: --version/-V banner -> STDOUT (534b), maude preamble -> STDERR (78b); -V byte-identical to --version on both streams; the round-1 merged version.tmpl wrongly bundled the preamble into stdout
+2026-07-17T16:56:00Z | split_probe split_batch_prove --prove=nonce_secrecy | GAP2: under --prove, STDERR gains after 'Theory closed': 4 lines '[Saturating Sources] Step 1 (Max 5)' / '[Saturating Sources] Done' (x2); 'Max 5' = saturation limit; plain analyze emits none
+2026-07-17T16:57:00Z | live cross-check clean-binary vs reference (bound=x/open-chains=x/stop-on-trace=XYZ/=empty/partial-eval/output-module/precedence + unknown/no-input/ambiguous/help=foo, all --parse-only) | GAP1: byte-identical stdout+stderr+exit on all
+2026-07-17T16:58:00Z | live cross-check --help / interactive --help / --version / -V | both streams byte-identical after version stream fix

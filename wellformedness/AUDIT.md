@@ -606,3 +606,168 @@ explicitly below and both filter.
   source (grep of `clashesOn|conjActionsEq|remainingUnguarded|noUnguarded|
   theoryFacts|allClashes|factUsage|checkTerms|checkGuarded|factInfo|
   mostSimilar|universeBi|\.hs:` returned empty).
+
+## Round 4 incremental audit
+
+Scope: the working-tree delta since HEAD `63ed8a9` restricted to
+`wellformedness/` — `checks.rs` (+395/−185 lines), `formula.rs`, `lib.rs`,
+`checks_tests.rs` (+14 fixture-driven tests), `BEHAVIOR.md`, `QUERIES.log`, and
+20 new `tests/fixtures/g4_*.txt` byte-parity fixtures + 78 `probes4/*.spthy`
+inputs. Two closed gaps: (GAP 1) sort-aware quantifier binding + the new
+`Quantifier sorts` topic; (GAP 2) a semantic guardedness decision procedure
+replacing the round-3 over-approximation; plus the per-item formula-check bundle
+assembly and a col-relative rewrite of the multi-line printer. Audited against
+`Wellformedness.hs` (`checkQuantifiers` 948-957, `checkTerms` 960-985,
+`checkGuarded` 988-993, `formulaReports` 999-1014, `prettyWfErrorReport`
+118-125, `underlineTopic` 168-171) and `Guarded.hs` `formulaToGuarded`
+(471-566). Every behavioral claim below was traced to a logged `probes4` entry
+and, where load-bearing, re-run against the oracle.
+
+### R4-1. Sort-aware binder stack (`SortClass`, `Binder`, `sort_class`/`var_class`)
+- Clean `SortClass` (checks.rs:920), `sort_class` (928), `var_class` (938),
+  `type Binder = (String, SortClass)` (943); the de Bruijn stack and
+  `debruijn_index` (1019) now match on `(name, class)`, and every quantifier
+  push carries the class (gather_formula_facts, collect_ill_terms). This
+  replaces the round-2 name-only match.
+- Behavior observed, not read: a node binder `#x` does not bind a message use
+  `x` (`Free x`, fixture g4_g1_core.txt / probe g1_core); a message binder `x`
+  does not bind a node use `#x` (`Free #x`, g4_g1_msgnode / g1_msgnode); all
+  binders are counted so `All x #x. … h(x)` → `h(Bound 1)` (g4_g1_dbsort /
+  g1_dbsort); same-name/different-sort binders coexist (g1_samename SUCCESS).
+  `{Untagged, Msg, Suffix(Msg)}` collapse to one class — this is the round-2
+  Untagged-vs-Msg false-positive fix re-expressed sort-aware, and Untagged is a
+  *clean-side parser* tag, not an upstream one. → **Filtered: observed binding
+  behavior; own `(name, class)` key over the clean AST's own sort model.** The
+  upstream analogue is `frees`/`bvarToLVar` over `BVar`/`LSort`, structurally
+  unrelated; no identifier or constant overlaps.
+
+### R4-2. `Quantifier sorts` topic (`wrong_lsort`, `wrong_quant_sorts`, `quantifier_sorts_entry`)
+- Clean `T_QUANT_SORTS = "Quantifier sorts"` (checks.rs:23), `wrong_lsort`
+  (952), `wrong_quant_sorts` (962), `quantifier_sorts_entry` (984) vs upstream
+  `checkQuantifiers` (Wellformedness.hs:948-957).
+- Every token the clean code emits is boundary-observable: the header
+  ``  Lemma `L' uses quantifiers with wrong sort:`` and each raw Haskell tuple
+  `("x",LSortPub)` / `("y",LSortFresh)` appear verbatim in the oracle output
+  (fixtures g4_qs_pub.txt, g4_qs_multi.txt) — upstream renders them with
+  `text . show` of a `(name, LSort)` binder, so `LSortPub`/`LSortFresh` are
+  *`show`-of-the-LSort at the boundary*, not internal constants lifted from
+  source. The allowed set {Msg, Node, Nat} ↔ upstream's
+  `[LSortMsg, LSortNode, LSortNat]` (line 957) is derived per-sort by probes
+  qs_pub_prefix/qs_fresh_{prefix,suffix}/qs_nat_prefix/qs_msg_plain; binding
+  order, Lemma/Restriction entities (qs_restr), and the width-69 fillSep
+  (qs_multi, shared `fill_after_prefix` from R2/R3) are all observed. →
+  **Filtered: observed output; per-sort-probed allow-set; shared fill helper.**
+  The clean structure (walk binders, filter, format tuple) is the only way to
+  reproduce the observed list and does not mirror upstream's `foldFormula`
+  binder-collector.
+
+### R4-3. Semantic guardedness (`collect_guard_vars`, `guard_key_set`, `unguarded_vars`, `find_guard_failure`)
+- This is the strongest independence signal in the round. Upstream
+  `formulaToGuarded` (Guarded.hs:471-566) is a **polarity-carrying converter**:
+  `convert polarity` recurses with the De Morgan quantifier switch (`All↔Ex`
+  under negation), `conjActionsEqs` collects **both** `Action` **and** `EqE`
+  atoms as guard candidates, and `remainingUnguarded`/`covered` lets an
+  equality guard a variable when one side's frees are disjoint from the
+  unguarded set (the `GEqE` branch, lines 529-533). None of that appears in the
+  clean code. The clean `collect_guard_vars` (checks.rs:1265) walks **Action
+  atoms through `And` only**, `guard_key_set` (1280) keys them `(name, class)`,
+  `unguarded_vars` (1288) set-differences, and `find_guard_failure` (1299)
+  matches `Forall`/`Exists` directly with no polarity and no `EqE` handling.
+- The clean model deliberately **under-approximates** upstream: it treats
+  equality/ordering atoms as never-guarding. Confirmed against the oracle —
+  gx_eq_ant (`All x. (x = x) ==> (x = x)`) reports `unguarded variable(s) 'x'`,
+  matching the clean model — but note this probe does **not** distinguish the
+  models, because upstream's `covered` test also fails when the same var sits on
+  both sides. See the advisory below. The reasons, subformula selection
+  (failing quantifier subtree, whole-lemma context), pre-order first-failure
+  (antecedent-before-consequent gr_both, left-before-right gr_sib), and
+  lemma-only scope (gr_restr: unguarded restriction is fatal, not a warning) are
+  all probe-backed. → **Filtered: observed decision map realised by an
+  independent, simpler engine that shares no structure, identifier, or constant
+  with the GPL converter.**
+
+### R4-4. Formula-check bundle assembly (`formula_items`, `merge_consecutive`, `formula_reports`)
+- Clean `formula_items` (checks.rs:1379) = all lemmas (source order) then all
+  restrictions; `formula_reports` (1414) emits per item in sub-order
+  [Quantifier sorts, Formula terms, Formula guardedness(lemma-only)];
+  `merge_consecutive` (1396) joins only **runs** of same-topic entries.
+- This parallels upstream `formulaReports` (`annFormulas` = lemmas `<|>`
+  restrictions; per-item `msum [QuantifierSorts, FormulaTerms, Guardedness]`,
+  Wellformedness.hs:999-1014) and `prettyWfErrorReport = … map ppTopic .
+  groupOn fst` (118-125), where `groupOn` groups **consecutive** equal keys.
+  The parallel is with *observable emission/grouping order*, every facet of
+  which is independently probed: lemmas-before-restrictions (qs_restr,
+  ord_rl_ft2), per-item sub-order (syn_pubsuffix, ord_ftqs/ord_qsft),
+  consecutive-only merge → three blocks for QS,FT,QS (ord_qs_ft_qs) vs merge for
+  two adjacent QS (qs_twolem), and `Lemma annotations` as a separate global
+  check after the bundle (ord_la_ft2). No `groupOn`/`msum`/`annFormulas`
+  idiom or name is reproduced; `merge_consecutive` is a plain fold. → **Filtered:
+  observed report order & grouping; independent assembly.**
+
+### R4-5. Col-relative multi-line printer (`lay`, `relation_doc`, `atom_doc`)
+- The round-4 printer change drops the `base` parameter and hangs at `col+hang`
+  (`lay` formula.rs:79-124); adds `relation_doc` (148) / `atom_doc` (158) so
+  relational atoms (`= < ⋖ ⊏`) break at the operator with **unparenthesised**
+  term operands; quantifier body hang moves 2→1. All calibrated to observed
+  break columns: top-level `A ∧ B` right operand at `col+0` (gt_and_two_all,
+  fixing round-3's top-level off-by-one), nested quantifier body at
+  `start+1` and relational/binop operand at `start+0` (gnest, fixture
+  g4_gnest.txt), single-line action atoms (gact). Page width 72 stays an
+  empirical measurement, not HughesPJ's default. The bespoke `Doc`
+  (`Text`/`Beside`/`Group`) still does not mirror HughesPJ `P.Doc`. → **Filtered:
+  observed layout; behavior-forced grouping; custom engine + empirical width.**
+
+### Advisory (non-blocking; not a redo)
+- The comment at checks.rs:1265-1279 and BEHAVIOR.md claim "equality/`<`/`⋖`/
+  `⊏`/`last` atoms … contribute NO guards", citing probe **gx_eq_ant**. That
+  probe (`All x. (x = x) ==> (x = x)`) only exercises an equality whose *both*
+  sides carry the quantified var, which fails to guard under **both** the clean
+  model and upstream's `covered`/`remainingUnguarded` (Guarded.hs:529-533).
+  It does **not** probe the case upstream would guard — an equality with one
+  covered (var-free/closed) side, e.g. `Ex x. x = 'c'` — so the general claim
+  "equality never guards" *exceeds what the logged probe establishes* and is a
+  latent behavioral divergence from the reference on unprobed inputs. This is a
+  **correctness/completeness gap, not copied expression**: the clean code
+  *under*-claims relative to the GPL source (it omits the `covered` equality
+  logic entirely), which is consistent with clean-room independence rather than
+  copying, and no committed `g4_*` fixture depends on it. Recommended (for the
+  clean-room team, not a relicensing blocker): add a probe such as
+  `Ex x. x = '<pub>'` / `All x. (x = '<pub>') ==> …` and either confirm the
+  simplification or narrow the BEHAVIOR.md claim to "an equality both of whose
+  sides mention an unguarded var does not guard it".
+
+### Round-4 cross-checks
+- New internal identifiers — `SortClass`, `sort_class`, `var_class`, `Binder`,
+  `wrong_lsort`, `wrong_quant_sorts`, `quantifier_sorts_entry`,
+  `collect_guard_vars`, `guard_key_set`, `unguarded_vars`, `guardedness_entry`,
+  `formula_items`, `merge_consecutive`, `formula_reports`, `ill_terms`,
+  `relation_doc`, `atom_doc`, `T_QUANT_SORTS` — none appears in the Haskell.
+  Grep of the round-4 delta for `checkQuantifiers|checkTerms|checkGuarded|
+  formulaToGuarded|conjActionsEqs|remainingUnguarded|openFormulaPrefix|convAll|
+  convEx|annFormulas|boundTerms|avoidPrecise|gnotAtom|closeGuarded|sortGAtoms|
+  atomToGAtom|foldFormula|prettyLNFormula|groupOn|\.hs:` returned empty.
+- Boundary-observable strings only: `"Quantifier sorts"`, `("x",LSortPub)`,
+  `("y",LSortFresh)`, `Bound n`/`Free v`, `uses quantifiers with wrong sort:`,
+  `unguarded variable(s) … in the subformula`, `universal quantifier without
+  toplevel implication`, `cannot be converted to a guarded formula`, and the
+  `====` underline (matching `underlineTopic`'s `length topic` rule incl. the
+  leading space of `" Formula guardedness"`) all appear verbatim in the
+  captured `g4_*` fixtures — merger/behavior-dictated, not lifted constants.
+- Comments: no round-4 comment echoes a Haskell source comment; they describe
+  observed behavior and cite `g1_*`/`gu_*`/`ge_*`/`gx_*`/`gr_*`/`gt_*`/`qs_*`/
+  `ord_*` probes. The lone `HughesPJ-style` descriptor (formula.rs:6) is a
+  public pretty-printing-algorithm name, already accepted in R3-5 as a generic
+  descriptor, not an echo of the GPL `Class.hs` header. (Consistency nit, not a
+  violation: round-4 removed the other `HughesPJ`/`sep [...]` comment references
+  but left this module-doc line; the team may wish to align it.)
+- Tests are fixture-driven byte-parity (`expect(&thy,
+  include_str!("fixtures/g4_*.txt"))`) over ASTs hand-built from the clean AST;
+  expected strings come from captured oracle output, not transcribed source.
+
+### Round-4 verdict
+No copied protectable expression. All new strings, sort tokens, `Bound`/`Free`
+renderings, wrap widths, topic underlines, and report ordering are
+boundary-observable and each traces to a logged `probes4` entry; the guardedness
+engine and printer are independent (and, for guardedness, strictly simpler than)
+the GPL sources. One non-blocking correctness advisory (equality-guard claim
+under-probed) is recorded for the clean-room team. **PASS.**

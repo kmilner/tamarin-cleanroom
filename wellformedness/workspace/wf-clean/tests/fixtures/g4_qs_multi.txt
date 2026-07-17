@@ -1,0 +1,17 @@
+WARNING: the following wellformedness checks failed!
+
+Quantifier sorts
+================
+
+  Lemma `L' uses quantifiers with wrong sort: ("x",LSortPub),
+    ("y",LSortFresh), ("z",LSortPub)
+
+ Formula guardedness
+====================
+
+  Lemma `L' cannot be converted to a guarded formula:
+    unguarded variable(s) '~y', '$z' in the subformula
+      "∀ $x ~y $z #i. (A( $x ) @ #i) ⇒ (A( ~y ) @ #i)"
+    in the formula
+      "∀ $x ~y $z #i. (A( $x ) @ #i) ⇒ (A( ~y ) @ #i)"
+*/

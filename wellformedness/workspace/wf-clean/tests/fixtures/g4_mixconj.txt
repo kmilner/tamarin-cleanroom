@@ -1,0 +1,13 @@
+WARNING: the following wellformedness checks failed!
+
+ Formula guardedness
+====================
+
+  Lemma `L' cannot be converted to a guarded formula:
+    unguarded variable(s) 'y', '#j' in the subformula
+      "∀ x y #i #j.
+        ((A( x ) @ #i) ∧ ((B( y ) @ #j) ∨ (C( y ) @ #j))) ⇒ (x = y)"
+    in the formula
+      "∀ x y #i #j.
+        ((A( x ) @ #i) ∧ ((B( y ) @ #j) ∨ (C( y ) @ #j))) ⇒ (x = y)"
+*/

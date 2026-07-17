@@ -61,6 +61,14 @@ pub enum Main {
     /// 67988 body links [Q032]).
     Method { lemma: String, n: usize, path: Vec<String> },
     Proof { lemma: String, path: Vec<String> },
+    /// Observational-equivalence proof view (`main/diffProof/{lemma}[/path…]`),
+    /// the diff-mode analogue of `Proof`.
+    DiffProof { lemma: String, path: Vec<String> },
+    /// Apply a diff proof method (`main/diffMethod/{lemma}/{n}[/path…]`), the
+    /// diff-mode analogue of `Method`.
+    DiffMethod { lemma: String, n: usize, path: Vec<String> },
+    /// The diff construction/deconstruction rules view (`main/diffrules`).
+    DiffRules,
     /// Any unrecognized `main/*` tail.
     Other(Vec<String>),
 }
@@ -77,6 +85,20 @@ pub enum Handler {
     Next(Vec<String>),
     Prev(Vec<String>),
     Autoprove(Vec<String>),
+    /// Autoprove a single diff lemma (`autoproveDiff/{strategy}/{bound}/diffProof/…`).
+    AutoproveDiff(Vec<String>),
+    /// Autoprove all lemmas (`autoproveAll/{strategy}/{bound}`).
+    AutoproveAll(Vec<String>),
+    /// Re-read the theory from disk in place (`reload`; POST).
+    Reload,
+    /// Download the theory source (`download/{file}`; GET). The filename is a
+    /// decorative URL segment — the body is always the current theory's source.
+    Download(String),
+    /// Append modified lemmas to the on-disk file (`get_and_append/{file}`; POST).
+    GetAndAppend(String),
+    /// A structural-edit form target (`edit/{verb}/{name}`; POST). The tail is the
+    /// `{verb}/{name}` remainder.
+    Edit(Vec<String>),
     /// Unrecognized handler with its raw tail.
     Other { name: String, tail: Vec<String> },
 }
@@ -98,6 +120,7 @@ fn parse_main(tail: &[&str]) -> Main {
         ["help"] => Main::Help,
         ["message"] => Main::Message,
         ["rules"] => Main::Rules,
+        ["diffrules"] => Main::DiffRules,
         ["tactic"] => Main::Tactic,
         ["cases", kind, level, n]
             if (*kind == "raw" || *kind == "refined")
@@ -117,6 +140,15 @@ fn parse_main(tail: &[&str]) -> Main {
         ["method", lemma, n, rest @ ..] if n.parse::<usize>().is_ok() => Main::Method {
             lemma: (*lemma).to_string(),
             n: n.parse().unwrap(),
+            path: owned(rest),
+        },
+        ["diffMethod", lemma, n, rest @ ..] if n.parse::<usize>().is_ok() => Main::DiffMethod {
+            lemma: (*lemma).to_string(),
+            n: n.parse().unwrap(),
+            path: owned(rest),
+        },
+        ["diffProof", lemma, rest @ ..] => Main::DiffProof {
+            lemma: (*lemma).to_string(),
             path: owned(rest),
         },
         [proof, lemma, rest @ ..] if *proof == "proof" => Main::Proof {
@@ -151,6 +183,18 @@ impl Route {
             "next" => Handler::Next(owned(tail)),
             "prev" => Handler::Prev(owned(tail)),
             "autoprove" => Handler::Autoprove(owned(tail)),
+            "autoproveDiff" => Handler::AutoproveDiff(owned(tail)),
+            "autoproveAll" => Handler::AutoproveAll(owned(tail)),
+            "reload" => Handler::Reload,
+            "download" => match tail {
+                [file] => Handler::Download((*file).to_string()),
+                _ => Handler::Other { name: "download".to_string(), tail: owned(tail) },
+            },
+            "get_and_append" => match tail {
+                [file] => Handler::GetAndAppend((*file).to_string()),
+                _ => Handler::Other { name: "get_and_append".to_string(), tail: owned(tail) },
+            },
+            "edit" => Handler::Edit(owned(tail)),
             other => Handler::Other {
                 name: other.to_string(),
                 tail: owned(tail),
@@ -161,6 +205,50 @@ impl Route {
             index,
             handler,
         })
+    }
+}
+
+/// The full request surface: the top-level (non-`/thy`) routes plus the
+/// theory-scoped `/thy/<kind>/<index>/…` routes.
+///
+/// `Toplevel::parse` takes the URL **path** only (any `?query` must be split off
+/// by the caller and passed separately to the dispatcher).
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub enum Toplevel {
+    /// `/` — the index page (GET) / theory upload (POST).
+    Root,
+    /// `/robots.txt`.
+    Robots,
+    /// `/favicon.ico` — a `303` redirect to the static icon.
+    Favicon,
+    /// `/kill` — cancel a running proof search (requires a `path` query arg).
+    Kill,
+    /// `/static/<path…>` — a filesystem-backed asset.
+    Static(Vec<String>),
+    /// A theory-scoped route.
+    Thy(Route),
+    /// Anything else (→ 404).
+    Other(String),
+}
+
+impl Toplevel {
+    pub fn parse(path: &str) -> Toplevel {
+        let trimmed = path.strip_prefix('/').unwrap_or(path);
+        if trimmed.is_empty() {
+            return Toplevel::Root;
+        }
+        let segs: Vec<&str> = trimmed.split('/').collect();
+        match segs[0] {
+            "robots.txt" if segs.len() == 1 => Toplevel::Robots,
+            "favicon.ico" if segs.len() == 1 => Toplevel::Favicon,
+            "kill" if segs.len() == 1 => Toplevel::Kill,
+            "static" => Toplevel::Static(owned(&segs[1..])),
+            "thy" => match Route::parse(path) {
+                Some(r) => Toplevel::Thy(r),
+                None => Toplevel::Other(path.to_string()),
+            },
+            _ => Toplevel::Other(path.to_string()),
+        }
     }
 }
 
@@ -194,6 +282,54 @@ impl Autoprove {
                     path: rest.to_vec(),
                 })
             }
+            _ => None,
+        }
+    }
+}
+
+/// A parsed `autoproveDiff/{strategy}/{bound}/diffProof/{lemma}[/side…]` request
+/// (observational-equivalence autoprove). Unlike [`Autoprove`], the diff form
+/// carries **no** all-solutions flag (observed in the diff-proof body links).
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub struct AutoproveDiff {
+    pub strategy: String,
+    pub bound: u64,
+    pub lemma: String,
+    pub path: Vec<String>,
+}
+
+impl AutoproveDiff {
+    /// Parse the tail of an `autoproveDiff/…` route.
+    pub fn parse(tail: &[String]) -> Option<AutoproveDiff> {
+        match tail {
+            [strategy, bound, marker, lemma, rest @ ..] if marker == "diffProof" => {
+                Some(AutoproveDiff {
+                    strategy: strategy.clone(),
+                    bound: bound.parse().ok()?,
+                    lemma: lemma.clone(),
+                    path: rest.to_vec(),
+                })
+            }
+            _ => None,
+        }
+    }
+}
+
+/// A parsed `autoproveAll/{strategy}/{bound}` request (autoprove every lemma).
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub struct AutoproveAll {
+    pub strategy: String,
+    pub bound: u64,
+}
+
+impl AutoproveAll {
+    /// Parse the tail of an `autoproveAll/…` route.
+    pub fn parse(tail: &[String]) -> Option<AutoproveAll> {
+        match tail {
+            [strategy, bound] => Some(AutoproveAll {
+                strategy: strategy.clone(),
+                bound: bound.parse().ok()?,
+            }),
             _ => None,
         }
     }
@@ -236,8 +372,14 @@ impl Nav {
 pub enum OverviewView {
     Help,
     Proof { lemma: String, path: Vec<String> },
+    /// The diff-mode proof view (`overview/diffProof/{lemma}[/path…]`), the target
+    /// of a `diffMethod`/`autoproveDiff` redirect.
+    DiffProof { lemma: String, path: Vec<String> },
     Edit(String),
     Add(String),
+    /// The delete-confirmation view (`overview/delete/{name}`), the target of a
+    /// failed (lemma-not-found) delete.
+    Delete(String),
     Other(Vec<String>),
 }
 
@@ -249,8 +391,13 @@ impl OverviewView {
                 lemma: (*lemma).to_string(),
                 path: rest.iter().map(|s| s.to_string()).collect(),
             },
+            ["diffProof", lemma, rest @ ..] => OverviewView::DiffProof {
+                lemma: (*lemma).to_string(),
+                path: rest.iter().map(|s| s.to_string()).collect(),
+            },
             ["edit", name] => OverviewView::Edit((*name).to_string()),
             ["add", pos] => OverviewView::Add((*pos).to_string()),
+            ["delete", name] => OverviewView::Delete((*name).to_string()),
             _ => OverviewView::Other(tail.to_vec()),
         }
     }

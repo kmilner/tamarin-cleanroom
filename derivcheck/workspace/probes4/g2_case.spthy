@@ -1,0 +1,6 @@
+theory G2Case
+begin
+functions: h/1
+rule R:
+  [ In( h(<apple, Zebra>) ) ] --> [ Out('ok') ]
+end

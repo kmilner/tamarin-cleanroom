@@ -1,0 +1,12 @@
+theory Tgnest
+begin
+
+predicates: Pr(x) <=> x = x
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x), B(~x), C(~x) ]->
+   [ Out(~x) ]
+lemma L:
+  all-traces
+  "not (All x #i #j. (A(x) @ #i) ==> ((aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb) & (#i = #j)))"
+end

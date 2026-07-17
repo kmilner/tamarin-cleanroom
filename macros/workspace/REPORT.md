@@ -80,4 +80,56 @@ intact with their inner macro calls expanded.
 bash workspace/run_tests.sh          # cargo test + all byte-parity fixtures
 cd workspace/macro-clean && cargo test
 bash workspace/byteparity.sh <macro.spthy> <hand-inlined.spthy>
+bash workspace/formula_parity.sh <macro.spthy> <hand-inlined.spthy>  # lemma/acc/case-test
 ```
+
+---
+
+## Round 4 — three expansion-semantics gaps + declaration preservation
+
+Closed three gaps and reconciled the declaration-preservation interop contract.
+Every claim traces to a round-4 oracle probe ([Q32]–[Q40], `probes/`, `captures/`).
+
+**GAP 1 — bare nullary macro uses.** A 0-ary macro used as a plain name (no
+parentheses) is a use of that macro, treated identically to the parenthesised
+form: `konst()=h('k')`, bare `konst` → `h('k')` [Q32]. Characterised the exact
+resolution conditions: it fires in every term position and transitively through
+bodies [Q32,Q33]; **untagged sort only** (`~konst`/`$konst` stay ordinary vars,
+and a macro-name use can't be sort-annotated) [Q34,Q32]; **nullary only** (a bare
+name for an arity ≥ 1 macro stays an ordinary variable) [Q35]; and a nullary
+macro **reserves its name against a same-named formal** [Q36]. Per the interface
+contract such a use reaches `expand` as `Term::Var("konst")`; `expand_term` now
+resolves an untagged `Var` whose name is a nullary macro to that macro's body —
+and the existing "expand body first, then bind formals" order reproduces the
+name-reservation result [Q36] by construction.
+
+**GAP 2 — accountability-lemma formulas** and **GAP 3 — case-test formulas.**
+The reference's macro stage DOES expand macros used in `... accounts for "..."`
+acc-lemma formulas and `test <name>: "..."` case-test formulas. Stage behaviour:
+`--parse-only` preserves the call; on close the acc lemma is translated into
+generated lemmas (+`predicate:`) whose primary renderings keep the call and whose
+`/* guarded formula ... */` blocks show the expansion — the exact
+primary-keeps-call / guarded-shows-expansion pattern of ordinary lemmas [Q4].
+Confirmed with identity and non-identity (`h(x)`) macros [Q38,Q39]. `expand`
+already rewrites `AccLemma.formula` and `CaseTest.formula`; added parity fixtures
+prove it.
+
+**Declaration preservation.** Probed that the reference retains the `macros:`
+block (with original, un-expanded bodies) in its pretty output after processing
+[Q37]. Per the interop contract, `expand` now **preserves the `Macros` items in
+place** (previously it dropped them); only use sites are expanded.
+
+**New harness — `formula_parity.sh`.** `byteparity.sh`'s env-stripping approach
+cannot exercise accountability theories (its reduced env lacks a UTF-8 locale, so
+the reference aborts on ∀/∃ glyphs before generating lemmas). `formula_parity.sh`
+runs the oracle with a UTF-8 locale and compares only the guarded/expanded-formula
+blocks — the harness of record for the lemma/acc-lemma/case-test gaps.
+
+**Acceptance (round 4).** `run_tests.sh`: **21** cargo direct-expansion tests
+(14 prior — one renamed `drops_→preserves_macro_declarations` and one fixture
+updated for preservation — plus 7 new: 5 bare-nullary + acc-lemma + case-test),
+7 byteparity rule fixtures (incl. `bare_nullary`), and 4 formula_parity fixtures
+(`lemmas`, `casetest`, `acclemma`, `acc_both`). **ALL PASS** [Q40].
+
+Fixtures added: `fixtures/{bare_nullary,casetest,acclemma,acc_both}_{macro,expanded}.spthy`;
+captures in `captures/{bare_nullary_*,acc_both_*,bare_sorts,bare_nonnullary,formal_vs_nullary}.out`.

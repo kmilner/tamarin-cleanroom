@@ -157,10 +157,25 @@ adds one more shape:
   (`n5:n2 -> n9[style="bold",weight="10.0",color="gray50"]`). Appears in both the
   compressed default and the uncompressed variant, in every source-case graph
   tested. Attr order = ellipse's (`label,shape`).
-- **`trapezium`** (spec-named dual) was **NOT observed** in any probe (all case
-  graphs of two theories, compressed + uncompressed) nor the corpus. Recorded as
-  unobserved; the serializer accepts any shape string so it can be emitted if a
-  caller supplies one.
+- **`trapezium`** (spec-named dual: an unresolved *source* node feeding a present
+  premise) was **NOT observed** in any probe (Session-3 NAXOS/NSLPK3 case graphs,
+  Session-5 re-scan of NSLPK3 `cases/{raw,refined}/i/j` for i≤12,j≤8) nor anywhere
+  in the corpus/manifests. The invtrapezium is the *conclusion→absent-node* case
+  (its edge points **into** it: `n5:n2 -> n6`), i.e. the "conclusion feeding a node
+  absent from the graph"; the un-seen dual would be the mirror (`absent -> premise`).
+  Recorded unobserved; `GraphNode::Shaped{label,shape,color}` (generic) can emit any
+  shape a caller supplies.
+
+### 3g. Bare-timepoint ellipse + the `#last` designated timepoint (§ Round-5 item 3)
+An uncolored ellipse whose label is a bare timepoint variable `#<var>`:
+`n<ID>[label="#<var>",shape="ellipse"];`. Corpus census of ellipse labels found,
+besides the `!KU(..)@#t` / `#t:rule[..]` / `Action(..)@#t` forms, bare-timepoint
+nodes `#i` (1328), `#decrypt` (790), `#t0…#t6`, `#j`, `#j.1`, and the **designated
+last timepoint `#last`** (107, e.g. `24a119958f784d43.dot`). `#last` arises when a
+constraint system carries a last timepoint (induction / trace-property proofs); it
+is the target of a `color="black",style="dashed"` before-edge. All render as the
+plain uncolored ellipse above. Modelled as `GraphNode::Temporal{var}` (with
+`GraphNode::last()` for `#last`).
 
 ### 3e. Node-id / port allocation (§ Round-3 item 3) — byte-verified over 12 022
 One global monotonic counter, ids handed out in **emission order** so file order ==
@@ -212,19 +227,39 @@ renders `{info}|{concl}`).
     §3f indent. Example `Out(<'a01'…'a12'>)` (flat 91): line 0 =
     `Out( <'a01', … 'a11', ` (eleven elements + trailing `, `, ending col 83),
     `'a12'>` on the next line, then the fact's `)` on its own line.
-  - **Delimiter peel.** The fact's closing `)` peels onto its own physical line at
-    the **functor column** (col 0) whenever the fact breaks; a tuple's `>` peels to
-    the **`<` column** when the last element fills the line
-    (`Out( <'aa…(74)', 'y'` │ `>` │ `)`); an unbreakable atom wider than the budget
-    overflows and only the trailing delimiters wrap.
-  - **KNOWN RESIDUAL** (`fsep` lookahead): the underlying combinator's one-element
-    lookahead lets a *continuation* line hold **one more** element than the first
-    line at the same start column (first line 11, continuation 12 for the 5-col
-    `'aNN'` elements). The width (87), the top-level fit, the first-line packing and
-    the peel columns are byte-verified; reproducing the ±1 continuation lookahead
-    and the boundary peel byte-for-byte would require the exact `fsep`/`nest` doc
-    tree. `graph-clean::render` implements `FILL_WIDTH=87`, `fits_one_line`, and
-    `paragraph_fill` (first-line-exact), tested against these captured probes.
+  - **Delimiter peel — BYTE-IMPLEMENTED (Session 5).** Re-probed the boundary with
+    fresh single-node sweeps (`E10..E14`, `W69..W74`, ports 3210): a **tuple's `>`**
+    stays with the last element iff it fits (`Out( <'aaa(72)', 'y'>` │ `)`), else it
+    peels onto its own line at the tuple's **`<` column** (`W74`: `…'y'` │ `<5sp>>`
+    │ `)`); a **fact's `)` ALWAYS** peels onto its own line at **col 0** once the
+    fact wraps — even when it would fit (`E12`: `'a12'>` │ `)`) — because the padded
+    ` )` space is the break. An **info action-list `]`** stays attached to its last
+    action. An unbreakable atom wider than the budget overflows verbatim; only the
+    trailing delimiters wrap.
+  - **Continuation lookahead — RESOLVED (subsumed).** The old "first line 11,
+    continuation 12" claim is a mis-read: the continuation packs **greedily to the
+    same width 87** as the first line (`E13`→2, `E14`→3 elements on the second line,
+    each ending well under 87). There is no ±1 combinator lookahead to reproduce.
+  - **Info action-list = vertical `sep`, not fill.** An overflowing info cell puts
+    **one action per line** (corpus `6738eb64…`: 4 actions → 4 lines, short actions
+    included), `]` on the last; whereas a tuple / fact-arg list uses the greedy
+    fill. Two distinct combinators, both byte-implemented.
+  - **`graph-clean::render::wrap_cell`** implements all of the above (`layout_fact`
+    fill+`)`-peel, `layout_tuple` fill+`>`-peel, `layout_info` vertical `sep`,
+    `run_layout` greedy fill, `split_top_commas`), wired into
+    `generate::build_record`; byte-verified against the 7 captured probe fixtures
+    (`wrap_E11..E14`, `wrap_W71/W72/W74`).
+  - **NEW RESIDUAL — the wrap TRIGGER is accumulated-column (Wadler `group`/`fits`).**
+    `wrap_cell` decides to wrap on the cell's **own flat width** > 87, which is
+    correct for a cell early on its record line (all probes/fixtures). But a cell
+    deep on a wide record line wraps **earlier**: measured over 61 821 corpus
+    wrapped records, physical line-0 width ranges 19..277 (no fixed absolute page
+    width), and a 21-char fact `Y_counter( pid.1, t )` at line-start peels its `)`
+    while an identical-args instance late on a broken line stays flat — because
+    tamarin's `fits` measures the flat rendering **plus the rest of the record
+    line** against the remaining width. Reproducing that trigger needs the exact
+    record document tree (the whole label as one `group`/`nest`/`line` Doc); the
+    width (87), fill packing, peel columns, and the fill-vs-sep split are pinned.
 
 --------------------------------------------------------------------------------
 ## 4. Clustering / simplification (§ priority 3)
@@ -258,7 +293,25 @@ n<ID>[shape="record",label="…",fillcolor="#RRGGBB",style="filled",fontcolor="w
 - Cluster name = `cluster_<clusterlabel>`; `label` = the clusterlabel
   (`<Role>_Session_<k>`). Nodes grouped by (role, session instance).
 - `color`/`fillcolor` are an 8-hex ARGB (alpha `4C`, ~30%) hashed from the
-  cluster; node `fillcolor` is the saturated per-role color. Exact hash **[GAP]**.
+  cluster; node `fillcolor` is the saturated per-role color (live SAPIC probe
+  `cluster_Process_Session_1` had node `fillcolor="#ffffff"`, `fontcolor="black"`
+  — so the node fill is not always saturated). Exact hash **[GAP]**.
+
+### Cluster EMISSION ORDER (§ Round-5 item 1) — byte-verified over 1457 corpus files
+The top-level statement order of a clustered graph is **always**
+`[free nodes] [clusters] [edges] [rankblock/legend] [invis edges]`: 0 files have a
+top-level node after a cluster, 0 clusters after an edge. **Clusters contain only
+records** (50 453 record cells, 0 ellipse/edge). A cluster's records occupy a
+**contiguous** id range and clusters are ordered by increasing id (first-appearance
+== id order). Since id order == emission order (§3e), the global id counter runs
+over the free (non-role) nodes first — giving them the low ids — then over the
+clustered records grouped by cluster. `graph-clean::generate` reproduces this:
+Pass 1 allocates ids in `System.nodes` order, routing each role-record's statement
+into its `cluster(label,color)` bucket and everything else to the free top level,
+then emits free nodes, then cluster blocks in first-appearance order, then edges,
+then the legend. Byte-exact on a live SAPIC single-cluster graph
+(`cluster_process.dot`) and the multi-cluster corpus payload
+`79c16911ad179d51.dot` (4 free ellipses + 1 cluster + 2 deduction edges).
 
 ### What "simplification" means here
 There is no exposed simplification *level*; the corpus reflects one fixed
@@ -461,12 +514,19 @@ Reproduced & byte-tested against captured/live payloads:
 - **Node-id/port allocation** (§3e): `NodeIdAllocator`; validated 12 022/12 022 via
   the crate model (`tests/alloc_corpus.rs`).
 - **Record-cell rendering** (§3f): fact/function/tuple spacing, info-cell shape,
-  group-drop rule, record escaping, the wrap FORMAT (alignment indent + `\l`,
-  reproducing an observed wrapped cell byte-exact), and the wrap **DECISION** —
-  fixed width `FILL_WIDTH=87` with `fits_one_line` (top-level fit, boundary
-  byte-verified) and `paragraph_fill` (first-line packing) in `src/render.rs`.
-- **System → graph GENERATION** (§6): `generate` over the independent `System`
-  model; reproduces a live source-case graph byte-exact (`tests/generate_tests.rs`).
+  group-drop rule, record escaping, and the wrap **DECISION + FORMAT + PEEL** —
+  `wrap_cell` (`FILL_WIDTH=87`, greedy `fillSep` for fact-arg/tuple lists, vertical
+  `sep` for info action lists, tuple-`>` peel to the `<` column, fact-`)` peel to
+  col 0), wired into generation and byte-verified against 7 live boundary probes.
+- **System → graph GENERATION** (§4, §6): `generate` over the independent `System`
+  model — free/ellipse/record/invtrapezium nodes, **role clusters** (`subgraph
+  cluster_…`, free-then-cluster id/emission order), the **`#last`/bare-timepoint**
+  ellipse, the finite edge vocabulary, id/port allocation, and the wired record-cell
+  wrap. Byte-exact on live + corpus fixtures (invtrap, single/multi cluster,
+  `#last`, wrap sweep) in `tests/generate_tests.rs`.
+- **Pre-rendered-cell interop** (§ round 5): `RawRule` / `GraphNode::RawRule` accept
+  already-rendered cell strings and run them through the same wrap/escape pipeline,
+  byte-identical to the Term-based path (`raw_rule_matches_term_path_byte_exact`).
 - **Simplification/abbreviation options** (§7): `Options` query-string model; the
   **L1/L2/L3 level number is proven inert** (§7a) — channel-verified negative.
 - Abbreviation naming, numbering, legend HTML (65-space indent), and the SELECTION
@@ -474,9 +534,12 @@ Reproduced & byte-tested against captured/live payloads:
 
 Documented gaps (need the GPL solver or an unavailable backend):
 - JSON graph backend format (unavailable / not in corpus).
-- **Record-cell wrap residual** (§3f): the `fsep` one-element lookahead (±1 element
-  on continuation lines) and the exact boundary delimiter-peel; the width (87),
-  top-level fit, first-line packing and peel columns are pinned.
+- **Record-cell wrap TRIGGER** (§3f): the width (87), fill packing, delimiter peel,
+  and the fill-vs-`sep` split are byte-implemented; the remaining residual is *when*
+  a cell wraps — tamarin's Wadler `group`/`fits` wraps a cell earlier when preceding
+  cells push its absolute column high (flat width alone can be < 87), which needs the
+  exact record document tree. `wrap_cell` triggers on the cell's own flat width > 87
+  (exact for cells early on their record line).
 - **compress/compact content** (§4, §6): which nodes/edges a raw constraint system
   yields — a solver transform. (The L1/L2/L3 level distinction is no longer a gap:
   it is proven non-existent, §7a.)

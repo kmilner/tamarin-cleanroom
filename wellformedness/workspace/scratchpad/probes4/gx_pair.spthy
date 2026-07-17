@@ -1,0 +1,12 @@
+theory Tgx_pair
+begin
+
+predicates: Pr(x) <=> x = x
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x), B(~x), C(~x) ]->
+   [ Out(~x) ]
+lemma L:
+  all-traces
+  "All x y #i. (A(<x, y>) @ #i) ==> (x = y)"
+end

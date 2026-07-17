@@ -1,0 +1,11 @@
+WARNING: the following wellformedness checks failed!
+
+ Formula guardedness
+====================
+
+  Lemma `L' cannot be converted to a guarded formula:
+    unguarded variable(s) '#j' in the subformula
+      "∀ x #i #j. ((A( x ) @ #i) ∧ (#i < #j)) ⇒ (#i = #j)"
+    in the formula
+      "∀ x #i #j. ((A( x ) @ #i) ∧ (#i < #j)) ⇒ (#i = #j)"
+*/

@@ -272,4 +272,129 @@ from parse().
 - WARNING-line vs lemma-line ordering in the summary when both present.
 - Whether `--output-json`/`--output-dot` error at output time when value omitted
   (only parse-time / --parse-only observed, where no error occurs).
-- Additional per-proof progress lines under heavy `--prove` (none seen on NSLPK3).
+- (RESOLVED in R4) Under `--prove`, extra stderr progress lines DO appear after
+  `Theory closed` — see §10a.
+- Interactive-mode value validation (`--port`, `--interface`, `--image-format`):
+  the server starts even on garbage values (`--port=x .` -> exit 124 server run;
+  `--image-format=BOGUS .` -> server run), so there is NO CLI-level validation
+  error to reproduce for those flags `[R4 interactive probes]`.
+
+## 10. Stream separation (Round 4)  [split_* captures: <label>.out.txt / .err.txt]
+
+The Round 1–3 oracle merged streams (`2>&1`). Re-probing with
+`1>out 2>err` (probes/split_probe.sh) shows a clean, deterministic split. Each
+stream is byte-complete on its own; the merged-mode interleaving of §4 was purely
+a flush artifact of combining two FDs.
+
+STDOUT carries:
+- the opaque theory payload(s) `theory … end` `[split_batch_default.out]`,
+- the whole "summary of summaries" block `[split_batch_default.out]`,
+- the `--version`/`-V` banner (tamarin line + warranty + `Generated from:` block)
+  `[split_version.out — banner ONLY; the merged version.tmpl of §4 wrongly bundled
+  the maude preamble into stdout]`,
+- every `--help` / per-mode help page `[split_help.out == help_global.txt]`,
+- the two cmdargs VALIDATION envelopes `error: … \n\n<full help>`
+  (no-input, bad-workdir) `[split_err_noinput.out == err_noinput_diff.txt,
+  split_err_workdir.out == err_two_modes.txt]`.
+
+STDERR carries:
+- the 3-line maude preamble (§5) `[split_batch_default.err]`,
+- the per-theory progress markers `[Theory <name>] <phase>` `[split_batch_default.err]`,
+- the bare cmdargs one-liners: `Unknown flag`, `Ambiguous mode`,
+  `Unhandled argument to flag` `[split_err_unknown.err == err_unknown_flag.txt,
+  split_err_ambig.err == noargs.txt]`,
+- all runtime errors: file-open failures and the app `error`/CallStack lines
+  `[split_err_missing.err, split_err_bound.err]`.
+
+`--parse-only` STDERR = one `Theory loaded` line per theory, no preamble; STDOUT =
+concatenated payloads `[split_batch_parseonly.err/out, split_parseonly_multi]`.
+`variants` STDOUT = variant payload; STDERR = preamble only `[split_variants.*]`.
+
+### 10a. Multi-theory framing  [split_batch_multifile.*]
+- STDERR: preamble once, then each theory's full 5-phase progress block in order.
+- STDOUT: payloads concatenated directly (payload_k ends `end\n`, payload_{k+1}
+  begins `theory …` with NO separator), then ONE combined summary listing every
+  theory. Payloads are printed only for theories NOT written to an output file.
+
+Under `--prove`, a theory's stderr progress block gains extra engine lines AFTER
+`[Theory <name>] Theory closed`, verbatim `[split_batch_prove.err]`:
+
+    [Saturating Sources] Step 1 (Max 5)
+    [Saturating Sources] Done
+    [Saturating Sources] Step 1 (Max 5)
+    [Saturating Sources] Done
+
+(`Max 5` = the `--saturation` limit.) A plain analyze run emits none of these. The
+framing model treats these as an opaque per-theory `extra_progress` slot appended
+to that theory's five closed phases; the engine supplies the exact text.
+
+### 10b. summary-of-summaries exact layout  [split_batch_multifile.out, split_batch_output_single.out]
+The summary section on STDOUT is:
+
+    \n                                  <- separates payload from summary (always emitted)
+    ==============================================================================   (78 '=')
+    summary of summaries:
+    <per theory, each preceded by a blank line:>
+      analyzed: <PATH-as-passed-on-CLI>
+      <blank>
+      [  output:          <OUTPUT-PATH>]   <- only when an output file was written
+        processing time: <T>s
+      <2-space line "  ">
+      <result lines, each "  <text>">
+    <blank>
+    ==============================================================================
+    (final newline)
+
+Key/value alignment inside the indented block: labels right-padded to the width of
+`processing time:` (16), then one space, so values start at column 19 →
+`  output:` + 10 spaces + value; `  processing time: ` + value. `analyzed:` is a
+separate un-indented header line with a single space. `output:` is the label for
+BOTH `-o FILE` and `-O DIR` (the latter writes `<inputstem>_analyzed.spthy`).
+`analyzed:` echoes the path exactly as given on the command line (relative stays
+relative) `[R4 relative-path probe]`.
+
+## 11. Typed value validation (Round 4)
+
+Validation fires ONLY when a value string is present (via `=value`, `--oj=…`, or a
+short-attached `-b5`); a BARE value flag (`--bound`, `--stop-on-trace`, …) never
+errors `[R4 bare-vs-valued sweep]`. An empty `=` value IS a present value and is
+validated (`--bound=` → error, `--stop-on-trace=` → `… method: `). All these errors
+go to STDERR, exit 1, and use the app `error` shape
+`tamarin-prover: <msg>\nCallStack (from HasCallStack):\n  error, called at
+src/Main/Mode/Batch.hs:162:33 in main:Main.Mode.Batch`. In a normal run they follow
+the maude preamble; under `--parse-only` no preamble precedes them.
+
+Integer flags → `<LABEL>: invalid bound given` `[R4 numeric sweep]`:
+`--bound`→`bound`, `-c/--open-chains`→`OpenChainsLimit`,
+`-s/--saturation`→`SaturationLimit`, `-d/--derivcheck-timeout`→`derivcheck-timeout`,
+`--replication-bound`→`replication-bound`.
+Accepted integer set = Haskell `readMaybe Int`: trims leading/trailing ASCII
+whitespace, optional `-` (with optional whitespace before the digits), decimal /
+`0x`hex / `0o`octal, silent overflow wrap; REJECTS `+`, `.`, `_`, trailing
+non-whitespace, and empty. Negatives and 0 are accepted for ALL of them (the
+"PositiveInteger" help annotation is not enforced at the CLI).
+
+Enum flags:
+- `--stop-on-trace`: value lowercased, valid ∈ {dfs,bfs,seqdfs,sorry,none};
+  invalid → `unknown stop-on-trace method: <lowercased-value>` (echoes value).
+- `--partial-evaluation`: case-insensitive, valid ∈ {summary,verbose};
+  invalid → `partial-evaluation: unknown option` (no echo).
+- `--output-module` (`-m`): case-SENSITIVE, valid ∈
+  {spthytyped,spthy,msr,proverifequiv,proverif,deepsec};
+  invalid → `output mode not supported.` (no echo).
+`--heuristic` is NOT validated (any chars accepted).
+
+Repeated valued flag → LAST occurrence wins / is the one validated
+`[R4 repeated probe]`.
+
+Multi-invalid precedence is a FIXED order, independent of CLI arg order
+`[R4 precedence sweep, all pairwise relations consistent]`:
+`stop-on-trace > bound > partial-evaluation > open-chains > saturation >
+output-module > derivcheck-timeout > replication-bound`.
+
+### 11a. Consumer-extension flags (NOT in the reference, NOT in help)
+`--processors <positive int>`, `--maude-processes <positive int>`,
+`--data-dir <path>` all yield `Unknown flag: --<name>` in the reference
+`[R4 interop probe]`, confirming they are absent. The clean crate accepts them as
+typed flags with its OWN validation (positive integer; any path); their rejection
+texts are original (no reference to reproduce) and they are omitted from help.

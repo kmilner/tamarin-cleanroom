@@ -1,0 +1,6 @@
+theory G2SortName3
+begin
+functions: h/1
+rule R:
+  [ In( h(<zzz, aaa>) ), In( h(~zzz) ), In( h(~aaa) ) ] --> [ Out('ok') ]
+end

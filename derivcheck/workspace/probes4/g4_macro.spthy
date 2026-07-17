@@ -1,0 +1,7 @@
+theory G4Macro
+begin
+functions: h/1
+macros: mac(x) = h(x)
+rule R:
+  [ In( mac(w) ) ] --> [ Out('ok') ]
+end

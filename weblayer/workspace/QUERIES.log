@@ -212,3 +212,75 @@
       as local, so a foreign peer cannot be synthesized on one host. Documented gap.
 [L16] Captured Round-3 fixtures | edit/add/delete form JSON envelopes, method redirect
       JSON, next/prev text, raw lemma texts -> tests/fixtures/r3_*. Stopped all servers.
+
+## Round 4 (source B) — full route surface, live probing (ports 3140-3143)
+# Own wrapper scratch/wl_server4.sh (--port= form). Tutorial.spthy, NSLPK3.spthy,
+# and the diff theory round2/jcs19-xor/diff-models/KCL07-UK1_attack-manual.spthy.
+[R40] Root/robots/favicon (:3140 Tutorial) | GET / -> 200 text/html "Welcome to the
+      Tamarin prover" (Content-Length varies; rows non-det). GET /robots.txt -> 200
+      text/plain "User-agent: *" (13 bytes, no trailing NL). GET /favicon.ico ->
+      303 See Other, Location /static/img/favicon.ico, Cache-Control:
+      no-cache,must-revalidate, Expires: Thu, 01 Jan 1970 05:05:05 GMT, len 0.
+[R41] Static assets (:3140/:3142) | /static/<f> served by a filesystem handler
+      (chunked, NO caching headers). content-type by extension: .css=text/css,
+      .js=application/javascript, .png=image/png, .ico=image/vnd.microsoft.icon,
+      no-ext (LICENSE)=application/octet-stream; all WITHOUT charset. Missing file
+      -> 404 text/plain body "File not found" (14 bytes) — distinct from the
+      dynamic full-HTML 404. GET /static -> 200 wai autoindex; POST /static -> 405.
+[R42] download / source / message (:3140) | GET download/{file} -> 200
+      application/octet-stream, NO Content-Disposition; body == the `source` body
+      byte-for-byte (the {file} URL segment is decorative). POST download -> 405.
+[R43] reload (:3140) | POST reload -> 200 JSON {"redirect":"/thy/trace/1/overview/
+      help"} (application/json). In place at same index; other versions RETAINED
+      and the monotonic counter is NOT reset (method after reload got index 3 when
+      1,2 existed). GET reload -> 405.
+[R44] get_and_append (:3140) | POST get_and_append/{file} -> 200 JSON
+      {"alert":"Appended lemmas to /tmp/.../Tutorial.spthy"} — a THIRD json
+      envelope shape {alert} (path non-det). GET -> 405.
+[R45] Upload POST / (:3140) | multipart field `uploadedTheory`. Success -> 200
+      text/html = the index page WITH <p class="message">Loaded new theory!</p>
+      (NOT a redirect); the new theory gets a fresh index = (global max)+1 off the
+      SAME counter as proof ops (NSLPK3 -> 5 when 1..4 existed). Missing/empty file
+      -> 200 index page WITH <p class="message">Post request failed.</p>. Plain
+      GET / has NO message paragraph.
+[R46] /kill (:3140/:3142/:3143) | GET-only. GET /kill (no path arg) -> 400
+      "<title>Invalid Arguments</title>" page, body <ul><li>No path to kill
+      specified!</li></ul>. GET /kill?path=<x> -> 200 text/plain "Canceled
+      request!" (17 bytes, no NL); server stays alive (cancels a running search).
+      POST /kill -> 405 "<title>Method Not Supported</title>", body <p>Method
+      <code>POST</code> not supported</p>. => Yesod error pages share the standard
+      head+tail (as the 404) and vary only in title/h1/body. Saved
+      r4_invalidargs_kill.html / r4_badmethod_post_kill.html.
+[R47] del/path and verify — NEGATIVE (absent in 1.13.0) | Swept GET/POST/PUT/DELETE
+      on /thy/trace/1/{del,verify,path}[/x[/y[/z]]], /thy/equiv/1/... , main/{del,
+      verify}/... , and top-level /{del,verify,path}: ALL 404 (no 405 anywhere ->
+      route genuinely unregistered). Corpus grep of normalized keys: 0 `del`,
+      `verify`, `path`, or `equiv` handler keys across all 81 manifests. => these
+      routes are neither in the corpus nor live-probeable here; documented gap.
+[R48] Diff/equiv mode (:3141, --diff, KCL diff theory) | root lists /thy/EQUIV/1/...
+      Overview title "DiffTheory: NAME" (vs "Theory: NAME"); the shell is otherwise
+      the trace shell with /thy/equiv/ links and NO Actions "Append modified
+      lemmas" item (MID/TAIL byte-identical). New main-subs: main/diffProof/{lemma}
+      [/path] (200 json), main/diffMethod/{lemma}/{n} (200 json), main/diffrules
+      (200 json). intdot tail carries a `graph/` prefix. Saved
+      r4_equiv_overview_kcl.html.
+[R49] diffMethod + diff autoprove (:3141) | GET main/diffMethod/L/1 -> 200 JSON
+      {"redirect":"/thy/equiv/2/overview/diffProof/L/{focus}"} (new version, same
+      global counter). Invalid method n -> 200 JSON {"alert":"Sorry, but the prover
+      failed on the selected method!"} (NO version bump) — same {alert} shape as
+      get_and_append and confirms proof-method failure is a client alert. Route
+      shapes (from diffProof body links): autoproveDiff/{strategy}/{bound}/diffProof
+      /{lemma} (NO allSol flag) and autoproveAll/{strategy}/{bound}. Both
+      autoproveDiff and autoproveAll BLOCK the prover on this theory (curl --max-time
+      20/25 -> exit 28); their exact redirect bytes are unobservable here — modelled
+      by analogy to diffMethod (documented).
+[R4A] Delete success/failure branch (:3142 NSLPK3) | POST edit/delete/{existing}
+      -> 303 Location .../overview/help (removed in place). POST edit/delete/
+      {absent} -> 303 Location .../overview/DELETE/{name} (theory unchanged). Both
+      303s carry Cache-Control: no-cache,must-revalidate + Expires: Thu, 01 Jan
+      1970 05:05:05 GMT (as do edit/add success 303s and the favicon 303).
+      Refines the round-3 "delete -> always overview/help".
+[R4B] Fresh-server determinism cross-check (:3143 Tutorial) | robots.txt,
+      kill(no-path) 400, POST-kill 405, kill?path 200, favicon 303 headers,
+      download==source octet, reload redirect ALL byte-identical to the committed
+      r4_* fixtures across a fresh server instance. Stopped all servers.

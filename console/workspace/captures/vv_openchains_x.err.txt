@@ -1,0 +1,3 @@
+tamarin-prover: OpenChainsLimit: invalid bound given
+CallStack (from HasCallStack):
+  error, called at src/Main/Mode/Batch.hs:162:33 in main:Main.Mode.Batch

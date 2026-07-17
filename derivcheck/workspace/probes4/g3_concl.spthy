@@ -1,0 +1,6 @@
+theory G3Concl
+begin
+functions: h/1
+rule R:
+  [ Fr(~n) ] --> [ Store(~n, k) ]
+end
