@@ -1,0 +1,56 @@
+D2_a24_p51	D2 a=24 p=51 predict~55
+D2_a24_p52	D2 a=24 p=52 predict~55
+D2_a24_p53	D2 a=24 p=53 predict~55
+D2_a24_p54	D2 a=24 p=54 predict~55
+D2_a24_p55	D2 a=24 p=55 predict~55
+D2_a24_p56	D2 a=24 p=56 predict~55
+D2_a24_p57	D2 a=24 p=57 predict~55
+D2_a24_p58	D2 a=24 p=58 predict~55
+D2_a30_p45	D2 a=30 p=45 predict~49
+D2_a30_p46	D2 a=30 p=46 predict~49
+D2_a30_p47	D2 a=30 p=47 predict~49
+D2_a30_p48	D2 a=30 p=48 predict~49
+D2_a30_p49	D2 a=30 p=49 predict~49
+D2_a30_p50	D2 a=30 p=50 predict~49
+D2_a30_p51	D2 a=30 p=51 predict~49
+D2_a30_p52	D2 a=30 p=52 predict~49
+D2_a40_p35	D2 a=40 p=35 predict~39
+D2_a40_p36	D2 a=40 p=36 predict~39
+D2_a40_p37	D2 a=40 p=37 predict~39
+D2_a40_p38	D2 a=40 p=38 predict~39
+D2_a40_p39	D2 a=40 p=39 predict~39
+D2_a40_p40	D2 a=40 p=40 predict~39
+D2_a40_p41	D2 a=40 p=41 predict~39
+D2_a40_p42	D2 a=40 p=42 predict~39
+D2_a50_p25	D2 a=50 p=25 predict~29
+D2_a50_p26	D2 a=50 p=26 predict~29
+D2_a50_p27	D2 a=50 p=27 predict~29
+D2_a50_p28	D2 a=50 p=28 predict~29
+D2_a50_p29	D2 a=50 p=29 predict~29
+D2_a50_p30	D2 a=50 p=30 predict~29
+D2_a50_p31	D2 a=50 p=31 predict~29
+D2_a50_p32	D2 a=50 p=32 predict~29
+D3_a24_p39	D3 a=24 p=39 predict~43
+D3_a24_p40	D3 a=24 p=40 predict~43
+D3_a24_p41	D3 a=24 p=41 predict~43
+D3_a24_p42	D3 a=24 p=42 predict~43
+D3_a24_p43	D3 a=24 p=43 predict~43
+D3_a24_p44	D3 a=24 p=44 predict~43
+D3_a24_p45	D3 a=24 p=45 predict~43
+D3_a24_p46	D3 a=24 p=46 predict~43
+D3_a30_p27	D3 a=30 p=27 predict~31
+D3_a30_p28	D3 a=30 p=28 predict~31
+D3_a30_p29	D3 a=30 p=29 predict~31
+D3_a30_p30	D3 a=30 p=30 predict~31
+D3_a30_p31	D3 a=30 p=31 predict~31
+D3_a30_p32	D3 a=30 p=32 predict~31
+D3_a30_p33	D3 a=30 p=33 predict~31
+D3_a30_p34	D3 a=30 p=34 predict~31
+D3_a40_p12	D3 a=40 p=12 predict~11
+D3_a40_p13	D3 a=40 p=13 predict~11
+D3_a40_p14	D3 a=40 p=14 predict~11
+D4_f24	D4 read occ of Wp flat 24 (wraps)
+D4_f30	D4 read occ of Wp flat 30 (wraps)
+D4_f40	D4 read occ of Wp flat 40 (wraps)
+D4_f50	D4 read occ of Wp flat 50 (wraps)
+D4_f60	D4 read occ of Wp flat 60 (wraps)

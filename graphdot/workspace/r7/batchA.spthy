@@ -1,0 +1,157 @@
+theory R7A
+begin
+
+rule AF_q10:
+  [ Fr(~s) ] --[ AF_q10() ]-> [ Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>), Sib('b') ]
+
+rule AS_q10:
+  [ Fr(~s) ] --[ AS_q10() ]-> [ Sib('b'), Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>) ]
+
+rule AF_q12:
+  [ Fr(~s) ] --[ AF_q12() ]-> [ Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>), Sib('bbb') ]
+
+rule AS_q12:
+  [ Fr(~s) ] --[ AS_q12() ]-> [ Sib('bbb'), Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>) ]
+
+rule AF_q14:
+  [ Fr(~s) ] --[ AF_q14() ]-> [ Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>), Sib('bbbbb') ]
+
+rule AS_q14:
+  [ Fr(~s) ] --[ AS_q14() ]-> [ Sib('bbbbb'), Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>) ]
+
+rule AF_q16:
+  [ Fr(~s) ] --[ AF_q16() ]-> [ Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>), Sib('bbbbbbb') ]
+
+rule AS_q16:
+  [ Fr(~s) ] --[ AS_q16() ]-> [ Sib('bbbbbbb'), Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>) ]
+
+rule AF_q18:
+  [ Fr(~s) ] --[ AF_q18() ]-> [ Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>), Sib('bbbbbbbbb') ]
+
+rule AS_q18:
+  [ Fr(~s) ] --[ AS_q18() ]-> [ Sib('bbbbbbbbb'), Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>) ]
+
+rule AF_q20:
+  [ Fr(~s) ] --[ AF_q20() ]-> [ Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>), Sib('bbbbbbbbbbb') ]
+
+rule AS_q20:
+  [ Fr(~s) ] --[ AS_q20() ]-> [ Sib('bbbbbbbbbbb'), Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>) ]
+
+rule AF_q22:
+  [ Fr(~s) ] --[ AF_q22() ]-> [ Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>), Sib('bbbbbbbbbbbbb') ]
+
+rule AS_q22:
+  [ Fr(~s) ] --[ AS_q22() ]-> [ Sib('bbbbbbbbbbbbb'), Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>) ]
+
+rule AF_q24:
+  [ Fr(~s) ] --[ AF_q24() ]-> [ Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>), Sib('bbbbbbbbbbbbbbb') ]
+
+rule AS_q24:
+  [ Fr(~s) ] --[ AS_q24() ]-> [ Sib('bbbbbbbbbbbbbbb'), Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>) ]
+
+rule AF_q28:
+  [ Fr(~s) ] --[ AF_q28() ]-> [ Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>), Sib('bbbbbbbbbbbbbbbbbbb') ]
+
+rule AS_q28:
+  [ Fr(~s) ] --[ AS_q28() ]-> [ Sib('bbbbbbbbbbbbbbbbbbb'), Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>) ]
+
+rule AF_q34:
+  [ Fr(~s) ] --[ AF_q34() ]-> [ Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule AS_q34:
+  [ Fr(~s) ] --[ AS_q34() ]-> [ Sib('bbbbbbbbbbbbbbbbbbbbbbbbb'), Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>) ]
+
+rule AF_q40:
+  [ Fr(~s) ] --[ AF_q40() ]-> [ Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule AS_q40:
+  [ Fr(~s) ] --[ AS_q40() ]-> [ Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>) ]
+
+rule AF_q48:
+  [ Fr(~s) ] --[ AF_q48() ]-> [ Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule AS_q48:
+  [ Fr(~s) ] --[ AS_q48() ]-> [ Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>) ]
+
+rule AF_q58:
+  [ Fr(~s) ] --[ AF_q58() ]-> [ Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule AS_q58:
+  [ Fr(~s) ] --[ AS_q58() ]-> [ Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>) ]
+
+rule AF_q68:
+  [ Fr(~s) ] --[ AF_q68() ]-> [ Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule AS_q68:
+  [ Fr(~s) ] --[ AS_q68() ]-> [ Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>) ]
+
+rule AF_q78:
+  [ Fr(~s) ] --[ AF_q78() ]-> [ Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule AS_q78:
+  [ Fr(~s) ] --[ AS_q78() ]-> [ Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>) ]
+
+rule AF_q88:
+  [ Fr(~s) ] --[ AF_q88() ]-> [ Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule AS_q88:
+  [ Fr(~s) ] --[ AS_q88() ]-> [ Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>) ]
+
+rule AF_q98:
+  [ Fr(~s) ] --[ AF_q98() ]-> [ Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule AS_q98:
+  [ Fr(~s) ] --[ AS_q98() ]-> [ Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>) ]
+
+rule ALONE:
+  [ Fr(~s) ] --[ ALONE() ]-> [ Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', 'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'>) ]
+
+rule WIDE_big25_14:
+  [ Fr(~s) ] --[ WIDE_big25_14() ]-> [ Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10'>), Ack('bbbbbbbbbbbbbbbb'), Out('bbbbb') ]
+
+rule WIDE_25_big_14:
+  [ Fr(~s) ] --[ WIDE_25_big_14() ]-> [ Ack('bbbbbbbbbbbbbbbb'), Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10'>), Out('bbbbb') ]
+
+rule WIDE_14_25_big:
+  [ Fr(~s) ] --[ WIDE_14_25_big() ]-> [ Out('bbbbb'), Ack('bbbbbbbbbbbbbbbb'), Big(<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10'>) ]
+
+lemma l_AF_q10: exists-trace "Ex #i. AF_q10() @ #i"
+lemma l_AS_q10: exists-trace "Ex #i. AS_q10() @ #i"
+lemma l_AF_q12: exists-trace "Ex #i. AF_q12() @ #i"
+lemma l_AS_q12: exists-trace "Ex #i. AS_q12() @ #i"
+lemma l_AF_q14: exists-trace "Ex #i. AF_q14() @ #i"
+lemma l_AS_q14: exists-trace "Ex #i. AS_q14() @ #i"
+lemma l_AF_q16: exists-trace "Ex #i. AF_q16() @ #i"
+lemma l_AS_q16: exists-trace "Ex #i. AS_q16() @ #i"
+lemma l_AF_q18: exists-trace "Ex #i. AF_q18() @ #i"
+lemma l_AS_q18: exists-trace "Ex #i. AS_q18() @ #i"
+lemma l_AF_q20: exists-trace "Ex #i. AF_q20() @ #i"
+lemma l_AS_q20: exists-trace "Ex #i. AS_q20() @ #i"
+lemma l_AF_q22: exists-trace "Ex #i. AF_q22() @ #i"
+lemma l_AS_q22: exists-trace "Ex #i. AS_q22() @ #i"
+lemma l_AF_q24: exists-trace "Ex #i. AF_q24() @ #i"
+lemma l_AS_q24: exists-trace "Ex #i. AS_q24() @ #i"
+lemma l_AF_q28: exists-trace "Ex #i. AF_q28() @ #i"
+lemma l_AS_q28: exists-trace "Ex #i. AS_q28() @ #i"
+lemma l_AF_q34: exists-trace "Ex #i. AF_q34() @ #i"
+lemma l_AS_q34: exists-trace "Ex #i. AS_q34() @ #i"
+lemma l_AF_q40: exists-trace "Ex #i. AF_q40() @ #i"
+lemma l_AS_q40: exists-trace "Ex #i. AS_q40() @ #i"
+lemma l_AF_q48: exists-trace "Ex #i. AF_q48() @ #i"
+lemma l_AS_q48: exists-trace "Ex #i. AS_q48() @ #i"
+lemma l_AF_q58: exists-trace "Ex #i. AF_q58() @ #i"
+lemma l_AS_q58: exists-trace "Ex #i. AS_q58() @ #i"
+lemma l_AF_q68: exists-trace "Ex #i. AF_q68() @ #i"
+lemma l_AS_q68: exists-trace "Ex #i. AS_q68() @ #i"
+lemma l_AF_q78: exists-trace "Ex #i. AF_q78() @ #i"
+lemma l_AS_q78: exists-trace "Ex #i. AS_q78() @ #i"
+lemma l_AF_q88: exists-trace "Ex #i. AF_q88() @ #i"
+lemma l_AS_q88: exists-trace "Ex #i. AS_q88() @ #i"
+lemma l_AF_q98: exists-trace "Ex #i. AF_q98() @ #i"
+lemma l_AS_q98: exists-trace "Ex #i. AS_q98() @ #i"
+lemma l_ALONE: exists-trace "Ex #i. ALONE() @ #i"
+lemma l_WIDE_big25_14: exists-trace "Ex #i. WIDE_big25_14() @ #i"
+lemma l_WIDE_25_big_14: exists-trace "Ex #i. WIDE_25_big_14() @ #i"
+lemma l_WIDE_14_25_big: exists-trace "Ex #i. WIDE_14_25_big() @ #i"
+
+end

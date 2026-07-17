@@ -701,3 +701,125 @@ byte-embedded fixture. No mirrored internal decomposition, no shared internal na
 source magic constants, no echoed comments. Findings that survive filtration: 0. No redo
 instructions issued.
 VERDICT: PASS.
+
+## Round 7 incremental audit — the record-cell wrap FILL budget (how a wrapped cell packs)
+
+Delta this round (working tree vs clean HEAD 75807c0, `graphdot/` only):
+`src/generate.rs` (`group_cells` gains a two-budget model), `src/render.rs`
+(`layout_cell` extracted), `tests/generate_tests.rs` +
+`tests/fixtures/wide_{group,record}.dot` (one new byte-exact test), and the workspace
+records `BEHAVIOR.md` §3f, `QUERIES.log` Session 7, `REPORT2.md` Round 7. Round 6
+already cleared the wrap *trigger* (the flat-sum budget); Round 7 adds only *how a cell
+that has been triggered to wrap packs its elements* — the FILL width — plus a local
+refactor, a test, and residual documentation.
+
+Reference re-read: `lib/theory/src/Theory/Constraint/System/Dot.hs`
+`mkNode`/`renderRow`/`renderBalanced`/`scaleIndent` (357–379) and its
+`Text.PrettyPrint.Class` import (46–58: `renderStyle`, `defaultStyle`, `lineLength`,
+`OneLineMode`, `fsep`, `vcat`, `punctuate`, `comma`).
+
+### The source machinery this delta could plagiarise — and does not
+
+Upstream lays out a record row in ONE proportional pass (`renderBalanced 100 (max 30 .
+round . (* 1.3))`): `usedWidths_i = length(oneLineRender doc_i)`, `ratio = 100/Σusedᵢ`,
+each cell rendered at `lineLength = max(30, round(1.3·ratio·usedᵢ))`, then `scaleIndent`
+multiplies leading-space runs ×1.5. It is a single `zipWith`, no sort, no iteration, no
+per-cell floor other than 30, no separate "does it break" vs "how does it pack" split,
+and it hands the width straight to HughesPJ, whose internal `fits`/`fillSep` does the
+actual element packing.
+
+The Round-7 clean code is a different construction on every axis:
+
+- **Two budgets, not one.** `group_cells` computes a flat-sum *trigger*
+  (`cell_budget = max(87 − Σ other flats, 20)`, decides whether a cell breaks) AND a
+  smallest-flat-first greedy *fill* budget (decides packing once broken), capped at
+  `flat − 1`. Upstream has a single `lineLength`. The trigger was cleared Round 6; the
+  fill allocation is the only new machinery.
+- **Subtractive + iterative, not proportional + single-pass.** The fill loop sorts
+  cells by flat width and accumulates `alloc[j] = min(flat_j, budget_j)`, giving each
+  later cell `max(87 − Σ allocations, 20)`. Upstream multiplies a proportional share.
+  On the very datum the code targets (`[Ack 25, Big 68, Out 11]`): upstream
+  `renderBalanced` yields per-cell line-widths `[31, 85, 30]`; the clean trigger yields
+  `[20, 51, 20]` and the clean fill `[20, 56, 20]` — no numeric resemblance. The clean
+  model is deliberately *less* exact than a transcription would be (its own bake-off:
+  flat-sum 41.45 %, sibling-occ 43.29 %, this greedy 44.11 % of multi-line cells; a
+  source transcription would approach 100 %). A model that underfits the source is
+  affirmative evidence of non-access, not of copying.
+- **Source constants absent.** 100 / 1.3 / 130 / 30 / 1.5 (the `* 1.3`, `max 30`,
+  `scaleIndent` ×1.5) appear nowhere. The clean constants are `FILL_WIDTH = 87` and
+  `MIN_CELL_BUDGET = 20`, both probe-pinned observable boundaries (batchB "alone → 87
+  exact"; batchC "floor 20"), already accepted Rounds 4–6. FILTRATION + logged
+  provenance.
+
+Abstraction–filtration–comparison: the *idea* "cells share a bounded row width, a
+sibling that wraps frees room so a neighbour packs one more element, floor the budget"
+is behaviour dictated by the observable DOT and merges to few expressions; the greedy
+`min(flat,budget)` allocation, the trigger/fill split, and the `flat−1` cap are
+clean-room expression that diverges from — and underperforms — the source's proportional
+`renderBalanced`. No protectable expression carried over.
+
+### `render.rs` `layout_cell` extraction — pure local DRY, no source structure
+
+The refactor lifts the pre-existing `if flat.starts_with('#') && flat.contains('[')`
+dispatch (info-cell vs fact-cell) out of `wrap_cell_budget` into a named helper. The
+predicate sniffs the observable *string* shape (`#t : Rule[…]`) because the crate
+consumes POST-render text; upstream instead dispatches on the *typed* `Doc` built
+differently per cell kind in `renderRow`/`ruleLabelM` (`vcat`/`brackets` vs `fsep`),
+never on a `'#'`/`'['` string test. Different mechanism, driven by the clean side
+receiving strings the Haskell side never has. No structure mirrored.
+
+### Test + fixtures — provenance anchored
+
+`wide_conclusion_group_fill_byte_exact` embeds `wide_record.dot` (the crate's record
+line) and is verified byte-equal to `wide_group.dot`. Provenance: the `Wide` rule is the
+prior-agent `wide.spthy` / `ref_raw_1_1` capture logged at QUERIES.log:275; the
+`[Ack 25, Big 68, Out 11]` → Big-packs-8 datum is corpus/probe-backed (Session-7 batchA,
+`vc_fill` 44.11 %). `wide_group.dot` is a genuine external full-graph capture — it
+carries the `isend` action node, ten `!KU` nodes and 22 edges that the clean crate
+(single `RawRule` → single record, as `wide_record.dot` shows) cannot itself emit — so
+the fixture is not circular. Its record line is byte-identical to the crate's output.
+
+### Documentation (BEHAVIOR.md / QUERIES.log / REPORT2.md) — every claim logged, residuals honest
+
+The Session-7 prose decomposes the trigger residual (false-positive occ-relief 1 320;
+false-negative 1 459, of which 954 are decided on the *unabbreviated* term; ~505 ±1
+`fits`) and the fill `[GAP]`. These describe mechanisms the crate deliberately does NOT
+implement — attributed to the unavailable GPL `fillSep`/HughesPJ `fits` over the
+*pre-abbreviation* document. Every quantitative claim traces to a logged artifact:
+batchA–G live probes (ports 3200–3205) and `vc_r7`/`vc_resid`/`vc_expand`/`vc_fill`
+corpus scripts, all present under `r7/` with matching numbers (99.5488 %, 41.45/43.29/
+44.11 %, 954/1459). "HughesPJ"/"`fillSep`"/"`fits`" are standard Haskell-library names,
+not tamarin identifiers; they emit no byte and the clean code diverges from them.
+Consistent with the combinator-name closest-calls cleared Rounds 4–6. No unlogged claim.
+
+### Identifier / comment lineage
+
+No overlap with the source. New names this round — `layout_cell`, `trigger`, `fill`,
+`alloc`, `order`, plus the reused `FILL_WIDTH`/`MIN_CELL_BUDGET`/`cell_budget`/
+`group_cells`/`wrap_cell_budget` — are clean-room-coined; the source names
+`renderBalanced`/`scaleIndent`/`widthRender`/`oneLineRender`/`usedWidths`/`ratio`/`conv`
+appear nowhere. No echoed comments; the source's `-- magic factor 1.3` comment and its
+`1.3` are not reproduced (the clean side has no such factor).
+
+### Non-blocking observation (no redo)
+
+- `layout_cell`'s doc comment says it is "Shared by [`wrap_cell_budget`] … and
+  [`cell_occ`] (which measures them)", but no `cell_occ` exists in the crate — an
+  apparent leftover from the abandoned "sibling-occ" fill model (the 43.29 % candidate).
+  This is a stale/broken intra-doc link (comment-describes-nonexistent-code), a quality
+  nit only: `cell_occ` is not a source identifier and no byte is affected, so it is not
+  a similarity concern. Sibling to the Round-6 `count_info_actions` dead-code note.
+
+### VIOLATIONS (Round 7)
+
+None. The sole new machinery — the smallest-flat-first greedy FILL-budget allocation —
+is a behavioural approximation of HughesPJ `fillSep`'s coupling that is structurally
+unlike, numerically unlike, and measurably less exact than the source's proportional
+`renderBalanced`/`scaleIndent`; the source constants (100 / 1.3 / 130 / 30 / 1.5) are
+absent and the clean constants (87, 20) are probe-pinned observable boundaries. The
+`layout_cell` extraction is a local DRY refactor on a string-shape predicate the source
+does not use. The new test/fixture is anchored to a genuine external `Wide` capture, and
+every Session-7 quantitative claim is backed by a logged `r7/` probe or corpus script.
+No mirrored internal decomposition, no shared internal names, no source magic constants,
+no echoed comments. Findings that survive filtration: 0. No redo instructions issued.
+VERDICT: pass

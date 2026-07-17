@@ -316,3 +316,47 @@ which corrupted the first EQ/TQ sweeps).
   the same W tuple though budgets differ 53 vs 38) — same intractable pretty-printer.
   The wrapped-content byte layout of a multi-cell wrap is a residual.
 - All servers stopped (serve.sh stop 3210..3221).
+
+## Session 7 — refine the group wrap BUDGET (fill width) + decompose the residual
+
+### Live server probes (scratchpad/serve.sh --port= form; ports 3200-3205)
+Autoprove flow as Session 6. Distinct fill chars per fact (fix: equal-length atoms
+across siblings collide -> occ>=2 -> ABBREVIATED, which corrupted the first
+3-cell/equal-sibling sweeps; genlib.atom_fact takes a `fill` char now).
+- batchA (:3200, 38 rules): reproduce the datum. 2-cell [Big(<30 5-char elems>),
+  Sib(q)] both orders; read Big's line-0 element count M (budget in [7M+4,7M+10]).
+  ORDER IRRELEVANT (AF==AS for every q). Fill budget FALLS SUB-LINEARLY with q and
+  is FAR above the flat-sum 87-q: q=10 -> M=11 (budget 81-87, not 77); q=68 -> M=8
+  (60-66). 3-cell wide-datum [big,25,14] -> M=7 (53-59), all 3 orders identical.
+- batchB (:3201, 120 rules): fine PAD+'y' bisection of the fill budget. Alone -> 87
+  exact. But the 2-element target gives a DIFFERENT budget than the 30-element one
+  for the same sibling (q=10: batchA 81+, batchB <78) => the fill is fits-based
+  (fillSep), NOT a single per-cell budget.
+- batchC (:3202, 99 rules): single-atom target TRIGGER boundary (the ')' peel).
+  budget = 87 - Sigma(other flats), floor 20, EXACT for 2-cell q=10..58 and 3-cell
+  [25,14]->48, [10,10]->67. Deviation only when a sibling is FORCED to wrap at the
+  target's boundary: [Ta,68]-> 21 (=87-occ(Hg)=87-66), not floor 20.
+- batchD/E (:3203/:3204, 56+111 rules): CLEAN distinct fills. With no abbreviation
+  contamination the earlier "+3" 3-cell deviations VANISH: [30,30]->27, [24,24]->39,
+  [40,10]->37, [25,14]->48 all = flat-sum(floor). The lone occ effect [Ta,Hg68]->21
+  is real (sibling occ = flat-2 = 66; D4 confirmed a wrapped single-atom occ = flat-2).
+- batchG (:3205, 66 rules): ORDER test with COMPARABLE cells at the margin and with
+  WRAPPING siblings. [A,B]==[B,A] boundary 47 (q40) / 27 (q60); [A,30,30] gives the
+  same A boundary in all 3 positions. ORDER DEFINITIVELY IRRELEVANT.
+- All servers stopped (serve.sh stop 3200..3205); ports 3200-3299 clear.
+
+### Corpus analysis (captured OUTPUT: oracle/dot_corpus/ 12022)
+- vc_r7 / vc_resid: flat-sum TRIGGER = 99.5488% of 615850 prem/concl cells (0.45%
+  mismatch). Residual: false_pos 1320 (T 88-97; 1309 have a WRAPPING sibling ->
+  occ-relief, a small cell fits beside a wide wrapping sibling), false_neg 1459
+  (T 79-87). Naive occ-everywhere is WORSE (1.24%); guarded occ-relief also worse
+  (0.82%) => flat-sum is the best closed-form trigger.
+- vc_expand: 954/1459 false_neg (65%) explained by the cell's UNABBREVIATED width
+  exceeding its budget (KD19/EN2 etc. expand past 87; abbreviations substituted into
+  the already-broken layout). Rest ~505 are the +-1 fits boundary.
+- vc_fill (Python port of render.rs fill): FILL byte-exactness of 142540 wrapping
+  prem/concl cells under candidate budgets: flat-sum 41.45%, sibling-occ 43.29%,
+  smallest-first greedy min(flat,budget) 44.11% (best). The last reproduces the live
+  Wide record byte-exact (Ack@20, Big@56 -> 8 elements). Implemented in
+  generate::group_cells; corpus round-trip stays 12022/12022; new test
+  wide_conclusion_group_fill_byte_exact (fixture wide_record.dot vs live wide_group.dot).

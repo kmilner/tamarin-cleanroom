@@ -1,0 +1,11 @@
+theory BareIndexedBaseline
+begin
+builtins: hashing
+macros: konst() = h('k')
+
+// `notmac` is NOT a macro; an indexed plain variable notmac.1 is expected to
+// parse as an ordinary indexed variable (baseline for the index decoration).
+rule R:
+  [ In(notmac.1) ] --[ A(notmac.1) ]-> [ Out(x) ]
+
+end

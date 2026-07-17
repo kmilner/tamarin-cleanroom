@@ -267,9 +267,12 @@ from parse().
 
 ## 9. LIMITATIONS / unobserved (documented, not guessed in code)
 - True zero-argument behavior: not observable through this oracle.
-- `falsified (<N> steps)` exact string: inferred counterpart of `verified`; not
-  directly captured (no small example produced it within probe budget).
-- WARNING-line vs lemma-line ordering in the summary when both present.
+- (RESOLVED in R5) `falsified` verdict string: directly captured — it is NOT a
+  bare `falsified` but a kind-dependent `falsified - found trace` (all-traces) /
+  `falsified - no trace found` (exists-trace). See §12c.
+- (RESOLVED in R5) WARNING-line vs lemma-line ordering when both present: the
+  warning section comes first, separated from the lemma lines by a `  ` line,
+  and gains an advisory second line under `--prove`. See §12a–b.
 - Whether `--output-json`/`--output-dot` error at output time when value omitted
   (only parse-time / --parse-only observed, where no error occurs).
 - (RESOLVED in R4) Under `--prove`, extra stderr progress lines DO appear after
@@ -398,3 +401,83 @@ output-module > derivcheck-timeout > replication-bound`.
 `[R4 interop probe]`, confirming they are absent. The clean crate accepts them as
 typed flags with its OWN validation (positive integer; any path); their rejection
 texts are original (no reference to reproduce) and they are omitted from help.
+
+## 12. Summary body content (Round 5)  [r5_* captures]
+
+The `<result lines>` slot of §6/§10b (the summary-of-summaries body under the
+`processing time:` line) has more structure than §6 recorded. Probed with
+self-authored theories `probes/round5/*.spthy` (own fixtures, not the GPL
+examples), split-stream, on both `--prove` and default runs.
+
+### 12a. Body layout — an opening line plus up to two sections
+After the `  processing time: <T>s` line the body is, byte-exactly:
+
+    "  \n"                                   <- opening two-space line (ALWAYS present)
+    <warning section, if any>                <- comes first
+    "  \n" between the two sections          <- present iff BOTH sections present
+    <lemma section, if any>
+
+i.e. an opening `  ` line, then the present sections joined by another `  ` line.
+- No warnings, no lemmas → body is just `  \n` `[r5_nolemma_default]`.
+- Lemmas only → `  \n` + lemma lines `[split_batch_default / r5_exists_verified]`.
+- Warning only → `  \n` + warning section `[round2_fresh_public_constant / r5_freshpub_prove]`.
+- Warning + lemmas → `  \n` + warning + `  \n` + lemmas `[r5_warn_lemma_*]`.
+
+### 12b. Warning section — one or two lines
+    "  WARNING: <N> wellformedness check failed!\n"   (noun stays singular "check")
+    "           The analysis results might be wrong!\n"   (SECOND line, conditional)
+The advisory second line is left-padded 11 spaces — exactly the width of the
+prefix `  WARNING: ` — so it aligns under the text after `WARNING: `. It is
+emitted **iff the run is a proving run (`--prove`)**, independent of whether any
+lemma was actually proved: a `--prove` run whose lemma prefix matches nothing
+(all lemmas "analysis incomplete") still emits it `[r5_falsify_nomatch]`, and a
+proving run with a warning but no lemmas emits it with no following separator
+`[r5_freshpub_prove]`; a plain analyze run never does `[r5_warn_lemma_default]`.
+A run with no warning never shows this line regardless of `--prove`
+`[r5_nslpk3_prove_bound2, r5_nolemma_prove]`.
+
+### 12c. Lemma verdict lines — `  <name> (<kind>): <verdict> (<N> steps)`
+Observed `<verdict>` forms (the step count is the explored proof depth):
+- `verified` — uniform for BOTH `all-traces` and `exists-trace`
+  `[r5_exists_verified: can_ping/always_true both "verified"]`.
+- `analysis incomplete` — default/unselected lemmas, AND `--prove` lemmas cut off
+  by `--bound` (only the step count grows; NO extra line for the bound)
+  `[r5_nslpk3_prove_bound2: nonce_secrecy "analysis incomplete (6 steps)"]`.
+- `falsified` — carries a **kind-dependent suffix** `[r5_falsify_prove]`:
+  - all-traces → `falsified - found trace` (a counter-example trace was produced),
+  - exists-trace → `falsified - no trace found` (no witnessing trace exists).
+  (Corrects the R2 guess that falsified prints as a bare `falsified`.)
+
+### 12d. Between-theory joining (multi-file)  [r5_multi_warn_prove]
+Each theory's block is preceded by a single `\n` (blank line) before its
+`analyzed:` header — unchanged from §10b; confirmed with a lemmas-only theory
+followed by a warning+lemma theory. The per-theory warning/lemma structure of
+§12a–c is entirely local to each block.
+
+Corresponding STDERR (unchanged framing, §10a): preamble once, then per theory
+its five closed phases + any `[Saturating Sources] …` extra progress; the number
+of saturating-sources lines is theory-specific (NSLPK3 emits four, the tiny
+`WarnAndLemma`/`FreshPubConst` theories emit none) — treated as the opaque
+per-theory `extra_progress` slot.
+
+## 13. Streaming emission contract (Round 5, INTEROP)
+
+The assembled framing of §6/§10 hands back complete `Streams` at the end. A
+consumer that flushes output *as the prover runs* needs to drive emission
+event-by-event. The clean crate adds an incremental surface (`src/emit.rs`) that
+is a pure re-ordering of the SAME byte content — no new observable strings, so no
+new oracle facts; it is an internal API shape, verified by equivalence against
+the assembled model rather than against the oracle:
+- `Sink::emit(stream, text)` — the consumer's byte destination; the consumer
+  chooses flush timing (flush-per-call = true line streaming; buffering = coalesced).
+- `BatchEmitter` — `begin` (preamble→stderr) / `progress`,`closed_phases`,
+  `extra_progress` (→stderr) / `payload` (→stdout) / `record_summary` (buffered) /
+  `finish` (combined summary→stdout). The summary is the one unavoidable trailing
+  barrier (it spans every theory), matching the reference which prints it last.
+- Equivalence property: for identical inputs the emitter's per-stream bytes equal
+  `frame_batch`'s. The cross-stream interleaving differs in wall-clock time (the
+  point of streaming) but each stream's byte sequence is identical, because on
+  each stream both paths emit in the same order: stderr = preamble then per-theory
+  progress; stdout = payloads in order then the single summary. Proven by tests
+  `streaming_matches_assembled_on_shared_inputs` and
+  `streaming_reproduces_captured_multifile_streams`.

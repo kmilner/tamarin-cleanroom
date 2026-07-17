@@ -36,7 +36,7 @@
 
 use crate::alloc::NodeIdAllocator;
 use crate::model::*;
-use crate::render::{cell_budget, render_info, wrap_cell, wrap_cell_budget, Fact};
+use crate::render::{cell_budget, render_info, wrap_cell, wrap_cell_budget, Fact, FILL_WIDTH, MIN_CELL_BUDGET};
 
 /// A per-record cluster assignment (BEHAVIOR.md §4). `label` is the cluster label
 /// WITHOUT the `cluster_` prefix (e.g. `Initiator_Session_1`, observed always
@@ -482,16 +482,63 @@ fn build_record(spec: &RecordSpec, ports_prem: &[String], port_info: &str, ports
 }
 
 /// Wrap every cell of one record group (all premises together, or all conclusions
-/// together), sharing the group budget: each cell's budget is [`cell_budget`] over
-/// the group's flat cell widths, so a cell wraps only when the group total exceeds
-/// the fill width (BEHAVIOR.md §3f).
+/// together), sharing the group's [`FILL_WIDTH`] budget (BEHAVIOR.md §3f).
+///
+/// Two budgets per cell, both derived only from the group's cell widths:
+///  * the **wrap TRIGGER** (does a cell break at all) is the flat-sum budget
+///    [`cell_budget`] = `max(87 − Σ other cells' flat widths, 20)`: a cell wraps
+///    iff its flat width exceeds this. Byte-exact away from the ±1 `fits` boundary
+///    (matches 99.5 % of corpus prem/concl cells).
+///  * the **FILL width** used *once* a cell wraps is wider than the flat-sum
+///    budget, because a sibling that itself wraps occupies only the width it is
+///    ALLOCATED, not its full flat width. So a wide cell packs more elements per
+///    line than the flat-sum budget predicts — the observed "one more element" in a
+///    group like `[Ack 25, Big 68, Out 11]`, where `Big`'s effective fill budget is
+///    `87 − 20 − 11 = 56` (`Ack` wraps and is allocated 20), not `87 − 25 − 11 = 51`.
+///
+/// The fill budgets come from a **smallest-flat-first** allocation that reproduces
+/// the greedy pretty-printer's coupling. Process cells in increasing flat width;
+/// each cell's fill budget is `max(87 − Σ others' allocations, 20)`, where an
+/// already-processed sibling contributes `min(flat, its own budget)` (a wrapping
+/// sibling occupies just its budget) and an un-processed (wider) sibling still
+/// contributes its full flat width. So the narrow cells are packed tight first and
+/// the widest cell expands into the room their allocations leave — e.g. `Ack`, seen
+/// before `Big` is placed, faces `Big`'s full flat 68 and is squeezed to 20, while
+/// `Big`, placed last, sees `Ack`'s allocation 20 and gets 56.
 fn group_cells(flat_cells: &[String], ports: &[String]) -> Vec<Cell> {
     let widths: Vec<usize> = flat_cells.iter().map(|t| t.chars().count()).collect();
+    let n = flat_cells.len();
+    let trigger: Vec<usize> = (0..n).map(|i| cell_budget(&widths, i)).collect();
+
+    // Smallest-flat-first fill-budget allocation. `alloc[j]` starts at the flat
+    // width and becomes `min(flat, budget)` once cell j is processed.
+    let mut order: Vec<usize> = (0..n).collect();
+    order.sort_by_key(|&i| widths[i]); // stable: ties keep group order
+    let mut alloc = widths.clone();
+    let mut fill = vec![0usize; n];
+    for &i in &order {
+        let others: usize = (0..n).filter(|&j| j != i).map(|j| alloc[j]).sum();
+        let budget = FILL_WIDTH.saturating_sub(others).max(MIN_CELL_BUDGET);
+        fill[i] = budget;
+        alloc[i] = widths[i].min(budget);
+    }
+
     flat_cells
         .iter()
         .zip(ports)
         .enumerate()
-        .map(|(i, (text, p))| Cell::new(p.clone(), wrap_cell_budget(text, cell_budget(&widths, i))))
+        .map(|(i, (text, p))| {
+            // The flat-sum trigger decides whether the cell breaks; the fill budget
+            // (≥ the trigger budget) governs how it packs once it does. Capping at
+            // `flat − 1` keeps a flat-sum-triggered break even in the rare case the
+            // wider fill budget alone would leave the cell on one line.
+            let budget = if widths[i] <= trigger[i] {
+                trigger[i]
+            } else {
+                fill[i].min(widths[i] - 1).max(trigger[i])
+            };
+            Cell::new(p.clone(), wrap_cell_budget(text, budget))
+        })
         .collect()
 }
 

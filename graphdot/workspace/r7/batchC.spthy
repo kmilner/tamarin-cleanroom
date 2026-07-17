@@ -1,0 +1,401 @@
+theory R7C
+begin
+
+rule C2_q10_p74:
+  [ Fr(~s) ] --[ C2_q10_p74() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('b') ]
+
+rule C2_q10_p75:
+  [ Fr(~s) ] --[ C2_q10_p75() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('b') ]
+
+rule C2_q10_p76:
+  [ Fr(~s) ] --[ C2_q10_p76() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('b') ]
+
+rule C2_q10_p77:
+  [ Fr(~s) ] --[ C2_q10_p77() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('b') ]
+
+rule C2_q10_p78:
+  [ Fr(~s) ] --[ C2_q10_p78() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('b') ]
+
+rule C2_q10_p79:
+  [ Fr(~s) ] --[ C2_q10_p79() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('b') ]
+
+rule C2_q10_p80:
+  [ Fr(~s) ] --[ C2_q10_p80() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('b') ]
+
+rule C2_q14_p70:
+  [ Fr(~s) ] --[ C2_q14_p70() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbb') ]
+
+rule C2_q14_p71:
+  [ Fr(~s) ] --[ C2_q14_p71() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbb') ]
+
+rule C2_q14_p72:
+  [ Fr(~s) ] --[ C2_q14_p72() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbb') ]
+
+rule C2_q14_p73:
+  [ Fr(~s) ] --[ C2_q14_p73() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbb') ]
+
+rule C2_q14_p74:
+  [ Fr(~s) ] --[ C2_q14_p74() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbb') ]
+
+rule C2_q14_p75:
+  [ Fr(~s) ] --[ C2_q14_p75() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbb') ]
+
+rule C2_q14_p76:
+  [ Fr(~s) ] --[ C2_q14_p76() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbb') ]
+
+rule C2_q20_p64:
+  [ Fr(~s) ] --[ C2_q20_p64() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbb') ]
+
+rule C2_q20_p65:
+  [ Fr(~s) ] --[ C2_q20_p65() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbb') ]
+
+rule C2_q20_p66:
+  [ Fr(~s) ] --[ C2_q20_p66() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbb') ]
+
+rule C2_q20_p67:
+  [ Fr(~s) ] --[ C2_q20_p67() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbb') ]
+
+rule C2_q20_p68:
+  [ Fr(~s) ] --[ C2_q20_p68() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbb') ]
+
+rule C2_q20_p69:
+  [ Fr(~s) ] --[ C2_q20_p69() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbb') ]
+
+rule C2_q20_p70:
+  [ Fr(~s) ] --[ C2_q20_p70() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbb') ]
+
+rule C2_q24_p60:
+  [ Fr(~s) ] --[ C2_q24_p60() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbb') ]
+
+rule C2_q24_p61:
+  [ Fr(~s) ] --[ C2_q24_p61() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbb') ]
+
+rule C2_q24_p62:
+  [ Fr(~s) ] --[ C2_q24_p62() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbb') ]
+
+rule C2_q24_p63:
+  [ Fr(~s) ] --[ C2_q24_p63() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbb') ]
+
+rule C2_q24_p64:
+  [ Fr(~s) ] --[ C2_q24_p64() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbb') ]
+
+rule C2_q24_p65:
+  [ Fr(~s) ] --[ C2_q24_p65() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbb') ]
+
+rule C2_q24_p66:
+  [ Fr(~s) ] --[ C2_q24_p66() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbb') ]
+
+rule C2_q28_p56:
+  [ Fr(~s) ] --[ C2_q28_p56() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q28_p57:
+  [ Fr(~s) ] --[ C2_q28_p57() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q28_p58:
+  [ Fr(~s) ] --[ C2_q28_p58() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q28_p59:
+  [ Fr(~s) ] --[ C2_q28_p59() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q28_p60:
+  [ Fr(~s) ] --[ C2_q28_p60() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q28_p61:
+  [ Fr(~s) ] --[ C2_q28_p61() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q28_p62:
+  [ Fr(~s) ] --[ C2_q28_p62() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q34_p50:
+  [ Fr(~s) ] --[ C2_q34_p50() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q34_p51:
+  [ Fr(~s) ] --[ C2_q34_p51() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q34_p52:
+  [ Fr(~s) ] --[ C2_q34_p52() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q34_p53:
+  [ Fr(~s) ] --[ C2_q34_p53() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q34_p54:
+  [ Fr(~s) ] --[ C2_q34_p54() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q34_p55:
+  [ Fr(~s) ] --[ C2_q34_p55() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q34_p56:
+  [ Fr(~s) ] --[ C2_q34_p56() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q40_p44:
+  [ Fr(~s) ] --[ C2_q40_p44() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q40_p45:
+  [ Fr(~s) ] --[ C2_q40_p45() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q40_p46:
+  [ Fr(~s) ] --[ C2_q40_p46() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q40_p47:
+  [ Fr(~s) ] --[ C2_q40_p47() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q40_p48:
+  [ Fr(~s) ] --[ C2_q40_p48() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q40_p49:
+  [ Fr(~s) ] --[ C2_q40_p49() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q40_p50:
+  [ Fr(~s) ] --[ C2_q40_p50() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q48_p36:
+  [ Fr(~s) ] --[ C2_q48_p36() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q48_p37:
+  [ Fr(~s) ] --[ C2_q48_p37() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q48_p38:
+  [ Fr(~s) ] --[ C2_q48_p38() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q48_p39:
+  [ Fr(~s) ] --[ C2_q48_p39() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q48_p40:
+  [ Fr(~s) ] --[ C2_q48_p40() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q48_p41:
+  [ Fr(~s) ] --[ C2_q48_p41() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q48_p42:
+  [ Fr(~s) ] --[ C2_q48_p42() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q58_p26:
+  [ Fr(~s) ] --[ C2_q58_p26() ]-> [ Ta('bbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q58_p27:
+  [ Fr(~s) ] --[ C2_q58_p27() ]-> [ Ta('bbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q58_p28:
+  [ Fr(~s) ] --[ C2_q58_p28() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q58_p29:
+  [ Fr(~s) ] --[ C2_q58_p29() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q58_p30:
+  [ Fr(~s) ] --[ C2_q58_p30() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q58_p31:
+  [ Fr(~s) ] --[ C2_q58_p31() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q58_p32:
+  [ Fr(~s) ] --[ C2_q58_p32() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q68_p16:
+  [ Fr(~s) ] --[ C2_q68_p16() ]-> [ Ta('bbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q68_p17:
+  [ Fr(~s) ] --[ C2_q68_p17() ]-> [ Ta('bbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q68_p18:
+  [ Fr(~s) ] --[ C2_q68_p18() ]-> [ Ta('bbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q68_p19:
+  [ Fr(~s) ] --[ C2_q68_p19() ]-> [ Ta('bbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q68_p20:
+  [ Fr(~s) ] --[ C2_q68_p20() ]-> [ Ta('bbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q68_p21:
+  [ Fr(~s) ] --[ C2_q68_p21() ]-> [ Ta('bbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q68_p22:
+  [ Fr(~s) ] --[ C2_q68_p22() ]-> [ Ta('bbbbbbbbbbbbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C2_q78_p12:
+  [ Fr(~s) ] --[ C2_q78_p12() ]-> [ Ta('bbbb'), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C3_a25_b14_p45:
+  [ Fr(~s) ] --[ C3_a25_b14_p45() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Ca('bbbbbbbbbbbbbbbbb'), Cb('bbbbbb') ]
+
+rule C3_a25_b14_p46:
+  [ Fr(~s) ] --[ C3_a25_b14_p46() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Ca('bbbbbbbbbbbbbbbbb'), Cb('bbbbbb') ]
+
+rule C3_a25_b14_p47:
+  [ Fr(~s) ] --[ C3_a25_b14_p47() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Ca('bbbbbbbbbbbbbbbbb'), Cb('bbbbbb') ]
+
+rule C3_a25_b14_p48:
+  [ Fr(~s) ] --[ C3_a25_b14_p48() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Ca('bbbbbbbbbbbbbbbbb'), Cb('bbbbbb') ]
+
+rule C3_a25_b14_p49:
+  [ Fr(~s) ] --[ C3_a25_b14_p49() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Ca('bbbbbbbbbbbbbbbbb'), Cb('bbbbbb') ]
+
+rule C3_a25_b14_p50:
+  [ Fr(~s) ] --[ C3_a25_b14_p50() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Ca('bbbbbbbbbbbbbbbbb'), Cb('bbbbbb') ]
+
+rule C3_a25_b14_p51:
+  [ Fr(~s) ] --[ C3_a25_b14_p51() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Ca('bbbbbbbbbbbbbbbbb'), Cb('bbbbbb') ]
+
+rule C3_a10_b10_p64:
+  [ Fr(~s) ] --[ C3_a10_b10_p64() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Ca('bb'), Cb('bb') ]
+
+rule C3_a10_b10_p65:
+  [ Fr(~s) ] --[ C3_a10_b10_p65() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Ca('bb'), Cb('bb') ]
+
+rule C3_a10_b10_p66:
+  [ Fr(~s) ] --[ C3_a10_b10_p66() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Ca('bb'), Cb('bb') ]
+
+rule C3_a10_b10_p67:
+  [ Fr(~s) ] --[ C3_a10_b10_p67() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Ca('bb'), Cb('bb') ]
+
+rule C3_a10_b10_p68:
+  [ Fr(~s) ] --[ C3_a10_b10_p68() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Ca('bb'), Cb('bb') ]
+
+rule C3_a10_b10_p69:
+  [ Fr(~s) ] --[ C3_a10_b10_p69() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Ca('bb'), Cb('bb') ]
+
+rule C3_a10_b10_p70:
+  [ Fr(~s) ] --[ C3_a10_b10_p70() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Ca('bb'), Cb('bb') ]
+
+rule C3_a50_b20_p14:
+  [ Fr(~s) ] --[ C3_a50_b20_p14() ]-> [ Ta('bbbbbb'), Ca('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Cb('bbbbbbbbbbbb') ]
+
+rule C3_a50_b20_p15:
+  [ Fr(~s) ] --[ C3_a50_b20_p15() ]-> [ Ta('bbbbbbb'), Ca('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Cb('bbbbbbbbbbbb') ]
+
+rule C3_a50_b20_p16:
+  [ Fr(~s) ] --[ C3_a50_b20_p16() ]-> [ Ta('bbbbbbbb'), Ca('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Cb('bbbbbbbbbbbb') ]
+
+rule C3_a50_b20_p17:
+  [ Fr(~s) ] --[ C3_a50_b20_p17() ]-> [ Ta('bbbbbbbbb'), Ca('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Cb('bbbbbbbbbbbb') ]
+
+rule C3_a50_b20_p18:
+  [ Fr(~s) ] --[ C3_a50_b20_p18() ]-> [ Ta('bbbbbbbbbb'), Ca('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Cb('bbbbbbbbbbbb') ]
+
+rule C3_a50_b20_p19:
+  [ Fr(~s) ] --[ C3_a50_b20_p19() ]-> [ Ta('bbbbbbbbbbb'), Ca('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Cb('bbbbbbbbbbbb') ]
+
+rule C3_a50_b20_p20:
+  [ Fr(~s) ] --[ C3_a50_b20_p20() ]-> [ Ta('bbbbbbbbbbbb'), Ca('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Cb('bbbbbbbbbbbb') ]
+
+rule C3_a30_b30_p24:
+  [ Fr(~s) ] --[ C3_a30_b30_p24() ]-> [ Ta('bbbbbbbbbbbbbbbb'), Ca('bbbbbbbbbbbbbbbbbbbbbb'), Cb('bbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C3_a30_b30_p25:
+  [ Fr(~s) ] --[ C3_a30_b30_p25() ]-> [ Ta('bbbbbbbbbbbbbbbbb'), Ca('bbbbbbbbbbbbbbbbbbbbbb'), Cb('bbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C3_a30_b30_p26:
+  [ Fr(~s) ] --[ C3_a30_b30_p26() ]-> [ Ta('bbbbbbbbbbbbbbbbbb'), Ca('bbbbbbbbbbbbbbbbbbbbbb'), Cb('bbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C3_a30_b30_p27:
+  [ Fr(~s) ] --[ C3_a30_b30_p27() ]-> [ Ta('bbbbbbbbbbbbbbbbbbb'), Ca('bbbbbbbbbbbbbbbbbbbbbb'), Cb('bbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C3_a30_b30_p28:
+  [ Fr(~s) ] --[ C3_a30_b30_p28() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbb'), Ca('bbbbbbbbbbbbbbbbbbbbbb'), Cb('bbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C3_a30_b30_p29:
+  [ Fr(~s) ] --[ C3_a30_b30_p29() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbb'), Ca('bbbbbbbbbbbbbbbbbbbbbb'), Cb('bbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule C3_a30_b30_p30:
+  [ Fr(~s) ] --[ C3_a30_b30_p30() ]-> [ Ta('bbbbbbbbbbbbbbbbbbbbbb'), Ca('bbbbbbbbbbbbbbbbbbbbbb'), Cb('bbbbbbbbbbbbbbbbbbbbbb') ]
+
+lemma l_C2_q10_p74: exists-trace "Ex #i. C2_q10_p74() @ #i"
+lemma l_C2_q10_p75: exists-trace "Ex #i. C2_q10_p75() @ #i"
+lemma l_C2_q10_p76: exists-trace "Ex #i. C2_q10_p76() @ #i"
+lemma l_C2_q10_p77: exists-trace "Ex #i. C2_q10_p77() @ #i"
+lemma l_C2_q10_p78: exists-trace "Ex #i. C2_q10_p78() @ #i"
+lemma l_C2_q10_p79: exists-trace "Ex #i. C2_q10_p79() @ #i"
+lemma l_C2_q10_p80: exists-trace "Ex #i. C2_q10_p80() @ #i"
+lemma l_C2_q14_p70: exists-trace "Ex #i. C2_q14_p70() @ #i"
+lemma l_C2_q14_p71: exists-trace "Ex #i. C2_q14_p71() @ #i"
+lemma l_C2_q14_p72: exists-trace "Ex #i. C2_q14_p72() @ #i"
+lemma l_C2_q14_p73: exists-trace "Ex #i. C2_q14_p73() @ #i"
+lemma l_C2_q14_p74: exists-trace "Ex #i. C2_q14_p74() @ #i"
+lemma l_C2_q14_p75: exists-trace "Ex #i. C2_q14_p75() @ #i"
+lemma l_C2_q14_p76: exists-trace "Ex #i. C2_q14_p76() @ #i"
+lemma l_C2_q20_p64: exists-trace "Ex #i. C2_q20_p64() @ #i"
+lemma l_C2_q20_p65: exists-trace "Ex #i. C2_q20_p65() @ #i"
+lemma l_C2_q20_p66: exists-trace "Ex #i. C2_q20_p66() @ #i"
+lemma l_C2_q20_p67: exists-trace "Ex #i. C2_q20_p67() @ #i"
+lemma l_C2_q20_p68: exists-trace "Ex #i. C2_q20_p68() @ #i"
+lemma l_C2_q20_p69: exists-trace "Ex #i. C2_q20_p69() @ #i"
+lemma l_C2_q20_p70: exists-trace "Ex #i. C2_q20_p70() @ #i"
+lemma l_C2_q24_p60: exists-trace "Ex #i. C2_q24_p60() @ #i"
+lemma l_C2_q24_p61: exists-trace "Ex #i. C2_q24_p61() @ #i"
+lemma l_C2_q24_p62: exists-trace "Ex #i. C2_q24_p62() @ #i"
+lemma l_C2_q24_p63: exists-trace "Ex #i. C2_q24_p63() @ #i"
+lemma l_C2_q24_p64: exists-trace "Ex #i. C2_q24_p64() @ #i"
+lemma l_C2_q24_p65: exists-trace "Ex #i. C2_q24_p65() @ #i"
+lemma l_C2_q24_p66: exists-trace "Ex #i. C2_q24_p66() @ #i"
+lemma l_C2_q28_p56: exists-trace "Ex #i. C2_q28_p56() @ #i"
+lemma l_C2_q28_p57: exists-trace "Ex #i. C2_q28_p57() @ #i"
+lemma l_C2_q28_p58: exists-trace "Ex #i. C2_q28_p58() @ #i"
+lemma l_C2_q28_p59: exists-trace "Ex #i. C2_q28_p59() @ #i"
+lemma l_C2_q28_p60: exists-trace "Ex #i. C2_q28_p60() @ #i"
+lemma l_C2_q28_p61: exists-trace "Ex #i. C2_q28_p61() @ #i"
+lemma l_C2_q28_p62: exists-trace "Ex #i. C2_q28_p62() @ #i"
+lemma l_C2_q34_p50: exists-trace "Ex #i. C2_q34_p50() @ #i"
+lemma l_C2_q34_p51: exists-trace "Ex #i. C2_q34_p51() @ #i"
+lemma l_C2_q34_p52: exists-trace "Ex #i. C2_q34_p52() @ #i"
+lemma l_C2_q34_p53: exists-trace "Ex #i. C2_q34_p53() @ #i"
+lemma l_C2_q34_p54: exists-trace "Ex #i. C2_q34_p54() @ #i"
+lemma l_C2_q34_p55: exists-trace "Ex #i. C2_q34_p55() @ #i"
+lemma l_C2_q34_p56: exists-trace "Ex #i. C2_q34_p56() @ #i"
+lemma l_C2_q40_p44: exists-trace "Ex #i. C2_q40_p44() @ #i"
+lemma l_C2_q40_p45: exists-trace "Ex #i. C2_q40_p45() @ #i"
+lemma l_C2_q40_p46: exists-trace "Ex #i. C2_q40_p46() @ #i"
+lemma l_C2_q40_p47: exists-trace "Ex #i. C2_q40_p47() @ #i"
+lemma l_C2_q40_p48: exists-trace "Ex #i. C2_q40_p48() @ #i"
+lemma l_C2_q40_p49: exists-trace "Ex #i. C2_q40_p49() @ #i"
+lemma l_C2_q40_p50: exists-trace "Ex #i. C2_q40_p50() @ #i"
+lemma l_C2_q48_p36: exists-trace "Ex #i. C2_q48_p36() @ #i"
+lemma l_C2_q48_p37: exists-trace "Ex #i. C2_q48_p37() @ #i"
+lemma l_C2_q48_p38: exists-trace "Ex #i. C2_q48_p38() @ #i"
+lemma l_C2_q48_p39: exists-trace "Ex #i. C2_q48_p39() @ #i"
+lemma l_C2_q48_p40: exists-trace "Ex #i. C2_q48_p40() @ #i"
+lemma l_C2_q48_p41: exists-trace "Ex #i. C2_q48_p41() @ #i"
+lemma l_C2_q48_p42: exists-trace "Ex #i. C2_q48_p42() @ #i"
+lemma l_C2_q58_p26: exists-trace "Ex #i. C2_q58_p26() @ #i"
+lemma l_C2_q58_p27: exists-trace "Ex #i. C2_q58_p27() @ #i"
+lemma l_C2_q58_p28: exists-trace "Ex #i. C2_q58_p28() @ #i"
+lemma l_C2_q58_p29: exists-trace "Ex #i. C2_q58_p29() @ #i"
+lemma l_C2_q58_p30: exists-trace "Ex #i. C2_q58_p30() @ #i"
+lemma l_C2_q58_p31: exists-trace "Ex #i. C2_q58_p31() @ #i"
+lemma l_C2_q58_p32: exists-trace "Ex #i. C2_q58_p32() @ #i"
+lemma l_C2_q68_p16: exists-trace "Ex #i. C2_q68_p16() @ #i"
+lemma l_C2_q68_p17: exists-trace "Ex #i. C2_q68_p17() @ #i"
+lemma l_C2_q68_p18: exists-trace "Ex #i. C2_q68_p18() @ #i"
+lemma l_C2_q68_p19: exists-trace "Ex #i. C2_q68_p19() @ #i"
+lemma l_C2_q68_p20: exists-trace "Ex #i. C2_q68_p20() @ #i"
+lemma l_C2_q68_p21: exists-trace "Ex #i. C2_q68_p21() @ #i"
+lemma l_C2_q68_p22: exists-trace "Ex #i. C2_q68_p22() @ #i"
+lemma l_C2_q78_p12: exists-trace "Ex #i. C2_q78_p12() @ #i"
+lemma l_C3_a25_b14_p45: exists-trace "Ex #i. C3_a25_b14_p45() @ #i"
+lemma l_C3_a25_b14_p46: exists-trace "Ex #i. C3_a25_b14_p46() @ #i"
+lemma l_C3_a25_b14_p47: exists-trace "Ex #i. C3_a25_b14_p47() @ #i"
+lemma l_C3_a25_b14_p48: exists-trace "Ex #i. C3_a25_b14_p48() @ #i"
+lemma l_C3_a25_b14_p49: exists-trace "Ex #i. C3_a25_b14_p49() @ #i"
+lemma l_C3_a25_b14_p50: exists-trace "Ex #i. C3_a25_b14_p50() @ #i"
+lemma l_C3_a25_b14_p51: exists-trace "Ex #i. C3_a25_b14_p51() @ #i"
+lemma l_C3_a10_b10_p64: exists-trace "Ex #i. C3_a10_b10_p64() @ #i"
+lemma l_C3_a10_b10_p65: exists-trace "Ex #i. C3_a10_b10_p65() @ #i"
+lemma l_C3_a10_b10_p66: exists-trace "Ex #i. C3_a10_b10_p66() @ #i"
+lemma l_C3_a10_b10_p67: exists-trace "Ex #i. C3_a10_b10_p67() @ #i"
+lemma l_C3_a10_b10_p68: exists-trace "Ex #i. C3_a10_b10_p68() @ #i"
+lemma l_C3_a10_b10_p69: exists-trace "Ex #i. C3_a10_b10_p69() @ #i"
+lemma l_C3_a10_b10_p70: exists-trace "Ex #i. C3_a10_b10_p70() @ #i"
+lemma l_C3_a50_b20_p14: exists-trace "Ex #i. C3_a50_b20_p14() @ #i"
+lemma l_C3_a50_b20_p15: exists-trace "Ex #i. C3_a50_b20_p15() @ #i"
+lemma l_C3_a50_b20_p16: exists-trace "Ex #i. C3_a50_b20_p16() @ #i"
+lemma l_C3_a50_b20_p17: exists-trace "Ex #i. C3_a50_b20_p17() @ #i"
+lemma l_C3_a50_b20_p18: exists-trace "Ex #i. C3_a50_b20_p18() @ #i"
+lemma l_C3_a50_b20_p19: exists-trace "Ex #i. C3_a50_b20_p19() @ #i"
+lemma l_C3_a50_b20_p20: exists-trace "Ex #i. C3_a50_b20_p20() @ #i"
+lemma l_C3_a30_b30_p24: exists-trace "Ex #i. C3_a30_b30_p24() @ #i"
+lemma l_C3_a30_b30_p25: exists-trace "Ex #i. C3_a30_b30_p25() @ #i"
+lemma l_C3_a30_b30_p26: exists-trace "Ex #i. C3_a30_b30_p26() @ #i"
+lemma l_C3_a30_b30_p27: exists-trace "Ex #i. C3_a30_b30_p27() @ #i"
+lemma l_C3_a30_b30_p28: exists-trace "Ex #i. C3_a30_b30_p28() @ #i"
+lemma l_C3_a30_b30_p29: exists-trace "Ex #i. C3_a30_b30_p29() @ #i"
+lemma l_C3_a30_b30_p30: exists-trace "Ex #i. C3_a30_b30_p30() @ #i"
+
+end

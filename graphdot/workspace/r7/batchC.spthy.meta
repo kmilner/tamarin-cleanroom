@@ -1,0 +1,99 @@
+C2_q10_p74	2cell q=10 p=74 expect~77
+C2_q10_p75	2cell q=10 p=75 expect~77
+C2_q10_p76	2cell q=10 p=76 expect~77
+C2_q10_p77	2cell q=10 p=77 expect~77
+C2_q10_p78	2cell q=10 p=78 expect~77
+C2_q10_p79	2cell q=10 p=79 expect~77
+C2_q10_p80	2cell q=10 p=80 expect~77
+C2_q14_p70	2cell q=14 p=70 expect~73
+C2_q14_p71	2cell q=14 p=71 expect~73
+C2_q14_p72	2cell q=14 p=72 expect~73
+C2_q14_p73	2cell q=14 p=73 expect~73
+C2_q14_p74	2cell q=14 p=74 expect~73
+C2_q14_p75	2cell q=14 p=75 expect~73
+C2_q14_p76	2cell q=14 p=76 expect~73
+C2_q20_p64	2cell q=20 p=64 expect~67
+C2_q20_p65	2cell q=20 p=65 expect~67
+C2_q20_p66	2cell q=20 p=66 expect~67
+C2_q20_p67	2cell q=20 p=67 expect~67
+C2_q20_p68	2cell q=20 p=68 expect~67
+C2_q20_p69	2cell q=20 p=69 expect~67
+C2_q20_p70	2cell q=20 p=70 expect~67
+C2_q24_p60	2cell q=24 p=60 expect~63
+C2_q24_p61	2cell q=24 p=61 expect~63
+C2_q24_p62	2cell q=24 p=62 expect~63
+C2_q24_p63	2cell q=24 p=63 expect~63
+C2_q24_p64	2cell q=24 p=64 expect~63
+C2_q24_p65	2cell q=24 p=65 expect~63
+C2_q24_p66	2cell q=24 p=66 expect~63
+C2_q28_p56	2cell q=28 p=56 expect~59
+C2_q28_p57	2cell q=28 p=57 expect~59
+C2_q28_p58	2cell q=28 p=58 expect~59
+C2_q28_p59	2cell q=28 p=59 expect~59
+C2_q28_p60	2cell q=28 p=60 expect~59
+C2_q28_p61	2cell q=28 p=61 expect~59
+C2_q28_p62	2cell q=28 p=62 expect~59
+C2_q34_p50	2cell q=34 p=50 expect~53
+C2_q34_p51	2cell q=34 p=51 expect~53
+C2_q34_p52	2cell q=34 p=52 expect~53
+C2_q34_p53	2cell q=34 p=53 expect~53
+C2_q34_p54	2cell q=34 p=54 expect~53
+C2_q34_p55	2cell q=34 p=55 expect~53
+C2_q34_p56	2cell q=34 p=56 expect~53
+C2_q40_p44	2cell q=40 p=44 expect~47
+C2_q40_p45	2cell q=40 p=45 expect~47
+C2_q40_p46	2cell q=40 p=46 expect~47
+C2_q40_p47	2cell q=40 p=47 expect~47
+C2_q40_p48	2cell q=40 p=48 expect~47
+C2_q40_p49	2cell q=40 p=49 expect~47
+C2_q40_p50	2cell q=40 p=50 expect~47
+C2_q48_p36	2cell q=48 p=36 expect~39
+C2_q48_p37	2cell q=48 p=37 expect~39
+C2_q48_p38	2cell q=48 p=38 expect~39
+C2_q48_p39	2cell q=48 p=39 expect~39
+C2_q48_p40	2cell q=48 p=40 expect~39
+C2_q48_p41	2cell q=48 p=41 expect~39
+C2_q48_p42	2cell q=48 p=42 expect~39
+C2_q58_p26	2cell q=58 p=26 expect~29
+C2_q58_p27	2cell q=58 p=27 expect~29
+C2_q58_p28	2cell q=58 p=28 expect~29
+C2_q58_p29	2cell q=58 p=29 expect~29
+C2_q58_p30	2cell q=58 p=30 expect~29
+C2_q58_p31	2cell q=58 p=31 expect~29
+C2_q58_p32	2cell q=58 p=32 expect~29
+C2_q68_p16	2cell q=68 p=16 expect~19
+C2_q68_p17	2cell q=68 p=17 expect~19
+C2_q68_p18	2cell q=68 p=18 expect~19
+C2_q68_p19	2cell q=68 p=19 expect~19
+C2_q68_p20	2cell q=68 p=20 expect~19
+C2_q68_p21	2cell q=68 p=21 expect~19
+C2_q68_p22	2cell q=68 p=22 expect~19
+C2_q78_p12	2cell q=78 p=12 expect~9
+C3_a25_b14_p45	3cell a=25 b=14 p=45 expect~48
+C3_a25_b14_p46	3cell a=25 b=14 p=46 expect~48
+C3_a25_b14_p47	3cell a=25 b=14 p=47 expect~48
+C3_a25_b14_p48	3cell a=25 b=14 p=48 expect~48
+C3_a25_b14_p49	3cell a=25 b=14 p=49 expect~48
+C3_a25_b14_p50	3cell a=25 b=14 p=50 expect~48
+C3_a25_b14_p51	3cell a=25 b=14 p=51 expect~48
+C3_a10_b10_p64	3cell a=10 b=10 p=64 expect~67
+C3_a10_b10_p65	3cell a=10 b=10 p=65 expect~67
+C3_a10_b10_p66	3cell a=10 b=10 p=66 expect~67
+C3_a10_b10_p67	3cell a=10 b=10 p=67 expect~67
+C3_a10_b10_p68	3cell a=10 b=10 p=68 expect~67
+C3_a10_b10_p69	3cell a=10 b=10 p=69 expect~67
+C3_a10_b10_p70	3cell a=10 b=10 p=70 expect~67
+C3_a50_b20_p14	3cell a=50 b=20 p=14 expect~17
+C3_a50_b20_p15	3cell a=50 b=20 p=15 expect~17
+C3_a50_b20_p16	3cell a=50 b=20 p=16 expect~17
+C3_a50_b20_p17	3cell a=50 b=20 p=17 expect~17
+C3_a50_b20_p18	3cell a=50 b=20 p=18 expect~17
+C3_a50_b20_p19	3cell a=50 b=20 p=19 expect~17
+C3_a50_b20_p20	3cell a=50 b=20 p=20 expect~17
+C3_a30_b30_p24	3cell a=30 b=30 p=24 expect~27
+C3_a30_b30_p25	3cell a=30 b=30 p=25 expect~27
+C3_a30_b30_p26	3cell a=30 b=30 p=26 expect~27
+C3_a30_b30_p27	3cell a=30 b=30 p=27 expect~27
+C3_a30_b30_p28	3cell a=30 b=30 p=28 expect~27
+C3_a30_b30_p29	3cell a=30 b=30 p=29 expect~27
+C3_a30_b30_p30	3cell a=30 b=30 p=30 expect~27

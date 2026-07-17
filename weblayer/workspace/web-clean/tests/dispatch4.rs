@@ -11,7 +11,7 @@
 use web_clean::dispatch::{
     Content, HttpMethod, MainReq, Meta, ProverOps, Request, RootMeta, Server,
 };
-use web_clean::page::{render_page_kind, render_root, Flash, PageParams, RootRow, ShellKind};
+use web_clean::page::{render_page_kind, render_root, Flash, Origin, PageParams, RootRow, ShellKind};
 use web_clean::route::{Autoprove, AutoproveAll, AutoproveDiff, NavDir, Toplevel};
 
 // ---------------------------------------------------------------------------
@@ -34,7 +34,12 @@ impl ProverOps for Fake {
     type Theory = Thy;
 
     fn meta(&self, thy: &Thy) -> Meta {
-        Meta { name: thy.name.clone(), version: "1.13.0".into(), filename: format!("{}.spthy", thy.name) }
+        Meta {
+            name: thy.name.clone(),
+            version: "1.13.0".into(),
+            filename: format!("{}.spthy", thy.name),
+            origin: Origin::Local,
+        }
     }
     fn root_meta(&self, thy: &Thy) -> RootMeta {
         RootMeta { time: "00:00:00".into(), origin: format!("{}.spthy", thy.name), modified: false }
@@ -319,6 +324,8 @@ fn equiv_overview_shell_byte_identical() {
         index: 1,
         version: "1.13.0",
         filename: "KCL07_UK1_attack_manual.spthy",
+        // The round-4 equiv fixture is a command-line (Local) diff theory.
+        origin: Origin::Local,
     };
     let got = render_page_kind(ShellKind::Equiv, &params, west, center);
     assert_eq!(got, fixture);

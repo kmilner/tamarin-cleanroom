@@ -1,0 +1,6 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+"workspace/probes/bare_typed.spthy" (line 7, column 24):
+unexpected ":"
+expecting "," or ")"

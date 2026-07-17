@@ -287,6 +287,53 @@ renders `{info}|{concl}`).
     (b) the exact greedy fill width when a *multi-cell* cell wraps (live probeB: the
     per-line element count is not a clean function of the budget). The budget
     **trigger** itself (does a cell wrap) is byte-exact away from the boundary.
+  - **The FILL width once a cell wraps ≠ the trigger budget — REFINED (Session 7).**
+    The wrap *trigger* is the flat-sum budget above (which cell breaks). The *fill*
+    width (how a broken cell packs) is **wider**: a sibling that itself wraps
+    occupies only the width it is ALLOCATED, not its flat width, so the remaining
+    cell packs more elements per line. Live datum (`Wide` conclusion group
+    `[Ack 25, Big 68, Out 11]`): the 68-flat `Big` cell packs **8** tuple elements
+    on line 0, as if its budget were **56** — not the flat-sum `87−(25+11) = 51`
+    (which packs 7). The fill budgets come from a **smallest-flat-first** greedy
+    allocation: process cells by increasing flat; each cell's budget is
+    `max(87 − Σ others' allocations, 20)` where a processed sibling contributes
+    `min(flat, its budget)` and an un-processed (wider) one its full flat. For
+    `Wide`: `Out`(11) fits; `Ack`, seen while `Big` is still at flat 68, is squeezed
+    to budget 20 and wraps (breaking after `~n.4`); `Big`, placed last, sees `Ack`'s
+    allocation 20 and gets `87 − 20 − 11 = 56` → 8 elements. This reproduces the
+    whole `Wide` record byte-exact (fixture `wide_record.dot`, verified against the
+    live `wide_group.dot` capture) and, applied to every wrapping prem/concl cell in
+    the corpus, raises multi-line fill byte-exactness from **41.45 %** (flat-sum) to
+    **44.11 %** (best of the models tried: flat-sum 41.45 %, sibling-occ 43.29 %,
+    this greedy `min(flat,budget)` 44.11 %). The fill is nonetheless still largely
+    the GPL `fillSep`'s `fits`, not a per-cell budget — 56 % of multi-line cells
+    remain **[GAP]**: a single non-wrapping sibling of flat 10 barely reduces a wide
+    cell's fill budget (live batchA: still 11 elements), whereas a wrapping sibling
+    of the same flat reduces it a lot, so the sibling contribution is not a clean
+    function of its width (batchA fitting-sibling vs Wide wrapping-sibling).
+  - **The TRIGGER residual, decomposed — Session 7.** The 2 831 flat-sum
+    mispredictions split, for prem/concl cells (2 779), into two mechanisms, each
+    beyond a rendering-crate closed form:
+    * **false-positive (1 320; group total 88–97):** flat-sum predicts wrap but the
+      cell FITS, because a *wide* sibling wraps and frees room for a *small* cell
+      (live hg68: `[Ta, Hg 68]` → `Ta` fits at flat 21 because `Hg` wraps and
+      occupies 66, so `Ta`'s budget is `87 − 66 = 21`, not `87 − 68`). This
+      occ-relief is the greedy printer's coupled `fits`: it saves a small cell but
+      NOT a large one beside a comparable sibling (live `[49,58]` both wrap), and no
+      closed rule captures it — feeding the ACTUAL occupied widths back universally
+      is *worse* (0.82 % vs 0.45 %), so flat-sum stands.
+    * **false-negative (1 459; group total 79–87):** flat-sum predicts fit but the
+      cell WRAPS. **954 (65 %)** are explained by the wrap being decided on the
+      **unabbreviated** term: e.g. `St_3_eNB( ~eNB_ID, KD19, ~MME_ID, EN2, ~gNB_ID )`
+      displays at flat 48 but its abbreviations (`KD19`, `EN2`) expand well past 87,
+      so it breaks; abbreviations are substituted into the already-broken layout.
+      This is structurally outside a rendering crate that receives POST-abbreviation
+      cell text — an honest **[GAP]**. The remaining ~505 are the ±1 `fits` boundary.
+  - **Order-independence — re-confirmed (Session 7).** Cell ORDER within a group
+    never affects a wrap boundary, even for comparable cells at the margin and even
+    with wrapping siblings (live G: `[A,B]` ≡ `[B,A]`, and `[A,30,30]` gives the
+    same `A` boundary in every position). So the fill allocation is order-free
+    (sorted by flat, not by position).
 
 --------------------------------------------------------------------------------
 ## 4. Clustering / simplification (§ priority 3)
@@ -559,16 +606,26 @@ Reproduced & byte-tested against captured/live payloads:
 - Abbreviation naming, numbering, legend HTML (65-space indent), and the SELECTION
   rule (§5c, REPORT2.md), plus the cluster/compact trigger (§4).
 
-Documented gaps (need the GPL solver or an unavailable backend):
+- **Record-cell group WRAP** (§3f): the per-GROUP flat-sum TRIGGER
+  (`budget_i = max(87 − Σ(other cell flats), 20)`, wrap iff `flat_i > budget_i`;
+  info-cell ≥2-actions-always-vertical) plus the **smallest-flat-first fill-budget
+  allocation** for how a wrapped cell packs (`generate::group_cells`,
+  `wrap_cell_budget`). Trigger matches 98.3 % of records / 99.6 % of cells; the fill
+  reproduces the live `Wide` record byte-exact (`wide_conclusion_group_fill_byte_exact`)
+  and 44.1 % of all multi-line prem/concl cells corpus-wide.
+
+Documented gaps (need the GPL solver / pretty-printer or an unavailable backend):
 - JSON graph backend format (unavailable / not in corpus).
-- **Record-cell wrap TRIGGER** (§3f): the per-GROUP shared-budget rule
-  (`budget_i = max(87 − Σ(other cell flats in the group), 20)`, wrap iff
-  `flat_i > budget_i`; info-cell ≥2-actions-always-vertical) is byte-implemented in
-  `render::wrap_cell` + `generate::build_record` and matches 98.3 % of records /
-  99.6 % of cells at corpus scale. Two boundary residuals remain **[GAP]**: (a) the
-  ±1 HughesPJ `fits` rounding flip when a cell sits exactly at its budget, and (b)
-  the exact greedy fill width when a *multi-cell* cell wraps — both need the GPL
-  pretty-printer's internal `fits` and are documented in §3f.
+- **Record-cell wrap residuals** (§3f, refined Session 7) — all need the GPL
+  HughesPJ `fits`/`fillSep` over the *pre-abbreviation* document, not derivable from
+  the rendered output the crate consumes:
+  (a) the ±1 `fits` boundary flip when a cell sits exactly at its budget;
+  (b) the exact greedy fill of a multi-line cell (a sibling's contribution is not a
+      clean function of its width — 56 % of multi-line cells);
+  (c) the occ-relief false-positives (a small cell fitting beside a wide wrapping
+      sibling — the greedy coupling, uncapturable by a closed rule);
+  (d) the false-negatives where a cell wraps on its **unabbreviated** width
+      (abbreviations substituted into an already-broken layout).
 - **compress/compact content** (§4, §6): which nodes/edges a raw constraint system
   yields — a solver transform. (The L1/L2/L3 level distinction is no longer a gap:
   it is proven non-existent, §7a.)

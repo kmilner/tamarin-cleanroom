@@ -1,0 +1,8 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n5[shape="record",label="{{<n0> Fr( ~s )}|{<n1> #i : E_ord_ATB_p32[E_ord_ATB_p32( )]}|{<n2> Ca( 'cccccccccccccccccccccc'\l)\l|<n3> Ta( 'zzzzzzzzzzzzzzzzzzzzzzzz'\l)\l|<n4> Cb( 'dddddddddddddddddddddd'\l)\l}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+
+}

@@ -350,3 +350,50 @@
       overview/diffProof/<lemma>[/path]} new version; diffProof/<nonexistent|bogus> ->
       {"alert":"Sorry, but removing the selected proof step failed!"}; help/diffrules/
       diffMethod -> {"alert":"Can't delete the given theory path!"}.
+
+## Round 6 (source B) — origin-aware page shell, live probing (ports 3110-3112)
+# Own wrapper scratch/wl_server5.sh (--port= form, ports 3100-3199). Tutorial.spthy
+# (trace, :3110); jcs19-xor/diff-models/KCL07-UK1_attack-manual.spthy (equiv, --diff,
+# :3111); determinism cross-check :3112. Round-4 gave working upload (POST /), so the
+# round-3 non-local NEGATIVE ([L15], a *network*-origin question) is now re-posed as a
+# *theory*-origin question: command-line/disk load vs POST upload.
+[R60] Command-line load vs POST upload — shell + header byte-compare (trace :3110) |
+      Loaded Tutorial.spthy from the command line (index 1), then uploaded the SAME
+      Tutorial.spthy via POST / (multipart uploadedTheory, filename Tutorial.spthy) ->
+      index 2 (new index off the global counter, confirms [R45]). GET
+      overview/help of BOTH; index-normalized `diff` of the two full pages.
+      * HEADERS byte-identical except Date + Content-Length (both derived/non-det);
+        no origin-dependent header (Vary/X-XSS-Protection/Content-Type all equal).
+      * SHELL differs in EXACTLY two north-bar items, both present only for the
+        command-line load and ABSENT for the upload (index-normalized prefix diff, 0
+        other bytes differ):
+          (a) "Reload file" <li> (a POST form to /thy/<k>/<i>/reload), between the
+              Index <li> and the Actions <li>;
+          (b) "Append modified lemmas to file" <li> (a POST form to get_and_append),
+              the last item of the Actions submenu.
+      * Center-pane help text (a prover fragment) also carries the origin: Local load
+        prints `(Loaded at HH:MM:SS from Local "<tmp-path>")`, upload prints
+        `(... from Upload "<uploaded-name>")` — non-det, out of web-layer scope.
+      * Shell FILENAME (download/append link) = "<theory-name>.spthy" derived from the
+        theory NAME, not the uploaded filename (equiv upload of kcl_diff.spthy still
+        shows KCL07_UK1_attack_manual.spthy).
+[R61] kind x origin matrix for the two items (trace :3110 + equiv :3111) | uploaded
+      the diff theory to the --diff server too; grepped Reload/Append across all four:
+        trace+Local : Reload=1 Append=1     trace+Upload : Reload=0 Append=0
+        equiv+Local : Reload=1 Append=0     equiv+Upload : Reload=0 Append=0
+      => Reload present  <=> origin==Local (independent of kind).
+         Append present  <=> origin==Local AND kind==trace.
+      (Reconciles round-4 [R48]: the equiv shell's missing Append is the kind gate;
+      its Reload was always present for the command-line KCL fixture — origin==Local.)
+[R62] Origin is INHERITED through proof ops (trace :3110) | applied main/method/L/1 to
+      the Local index 1 -> index 3 and to the Upload index 2 -> index 4. GET
+      overview/help: index 3 (derived-from-Local) shows Reload+Append and "from Local";
+      index 4 (derived-from-Upload) shows neither and "from Upload". => origin is a
+      per-version theory property that propagates from the base a version is derived
+      from (modelled as prover-reported Meta.origin, not a web-layer choice).
+[R63] Fresh-server determinism cross-check (:3112 Tutorial) | reloaded a fresh server,
+      re-captured overview/help for the command-line (idx1) and upload (idx2) theories.
+      The deterministic parts of both pages — the shell PREFIX (up to the west
+      container) and the TAIL (after the center pane), index-normalized — are
+      byte-identical to the committed r6_overview_trace_{local,upload}.html fixtures.
+      Only the center-pane "Loaded at" text differs (non-det). All servers stopped.

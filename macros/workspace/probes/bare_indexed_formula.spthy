@@ -1,0 +1,12 @@
+theory BareIndexedFormula
+begin
+builtins: hashing
+macros: konst() = h('k')
+
+rule R:
+  [ In(x) ] --[ A(x) ]-> [ Out(x) ]
+
+lemma L:
+  exists-trace "Ex #i. A(konst.1) @ #i"
+
+end

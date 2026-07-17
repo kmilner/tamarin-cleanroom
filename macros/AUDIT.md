@@ -235,3 +235,89 @@ Non-blocking observations (not similarity violations; no redo):
   describes current pass-through-in-place behavior [Q37].
 
 Verdict: pass.
+
+## Round 6 audit
+
+Reviewer: similarity auditor (both-sides). Scope: THIS round's delta only, from
+clean-room HEAD `75807c0`. Restricted `git diff` under `macros/`:
+`workspace/macro-clean/src/{lib.rs,tests.rs}`, `BEHAVIOR.md`, `QUERIES.log`,
+`REPORT.md`, plus untracked `probes/bare_{indexed,indexed_zero,indexed_sorted,
+indexed_baseline,typed,formula_plain,indexed_formula,formula_indexed_baseline}.spthy`
+and their `captures/*.out`. Compared against upstream Haskell:
+`lib/term/src/Term/Macro.hs` (`applyMacros`/`applyMacro`/`macroToFunSym`/
+`findMatchingMacro`), the parser's nullary/signature machinery —
+`Theory/Text/Parser/Term.hs` (`nullaryApp`, l.143–148) and
+`Theory/Text/Parser/Token.hs` (`addMacrosToSignature`/`addMacroSym`, l.198–204) —
+and, for the decoration behavior, the reference's variable/index/sort grammar
+that `nullaryApp` does NOT participate in.
+
+Delta content: one guard-tightening. The `expand_term` `Var` arm previously
+resolved a bare nullary-macro name on the sort decoration alone
+(`sort == Untagged`); it now requires the fully-undecorated name
+(`formals.is_empty() && sort == Untagged && idx == 0 && typ.is_none()`), so an
+indexed (`konst.1`) or type-annotated (`konst:msg`) `Var` stays an ordinary
+variable [Q43,Q44]. Supporting docs (BEHAVIOR §2.5 decoration matrix, REPORT
+round-6 entry, QUERIES [Q43,Q44]); 4 new tests (+2 helpers `ivar`/`tvar`).
+
+**Findings: none (0).** No copied protectable expression in the delta.
+
+Abstraction-filtration-comparison of the delta:
+
+- The tightened guard is a genuinely DIFFERENT mechanism, not a mirror, and the
+  divergence is structural. The reference never represents a "decorated Var that
+  might be a macro": macro names are injected into the Maude signature as arity-0
+  funsyms (`addMacrosToSignature`/`macroToFunSym`), and `nullaryApp`
+  (Term.hs:143–148) matches a *bare token* against `funSyms ∪ macroNames` and
+  emits `fApp fs []` (an **App**). A trailing `.` or `:` is simply not consumed by
+  `nullaryApp` — it is left for the surrounding grammar to reject, whence the
+  observed parse errors. So decoration-blocking is an emergent property of the
+  reference grammar, resolved at PARSE, with no index/type/sort predicate anywhere
+  near the macro path. The clean unit has no signature and no parser; it resolves
+  at expansion time on a `Term::Var`'s own AST fields. The 4-way conjunction is
+  dictated by (i) the vendored clean AST's four decoration-bearing fields
+  (`VarSpec{name,idx,sort,typ}`, ast.rs:351–355, a round-1 structure) and (ii) the
+  boundary-observed fact that each decoration blocks resolution — merger, the only
+  faithful predicate given the observed behavior and the clean unit's own AST.
+- `idx == 0` is not a smuggled magic constant. It is the AST encoding of "no
+  explicit index"; the surface `.0` rejection is itself boundary-observable
+  (`captures/bare_indexed_zero.out`: parse error "unexpected '.'"), and the note
+  that `konst.0` is indistinguishable from plain `konst` in the AST (both idx 0)
+  is the clean unit reasoning about ITS OWN representation, not the reference's.
+- Identifiers/comments/constants: the delta reproduces no upstream source name —
+  `applyMacros`, `applyMacro`, `macroToFunSym`, `findMatchingMacro`, `nullaryApp`,
+  `addMacrosToSignature`, `addMacroSym`, `macroNames`, `NoEq`, `Private`,
+  `Destructor`, `BNMacro`, `lnMacrosToBNMacros` are all absent (grepped the diff:
+  zero hits). The tamarin surface tokens the new comments quote — `konst`,
+  `~konst`/`$konst`, `konst.1`, `konst:msg` — all appear verbatim in the probe
+  `.spthy` inputs and the captured parse-error `.out` output, i.e.
+  boundary-observable scenes-a-faire, not lifted internal expression. Upstream's
+  own comments (Macro.hs "Apply and substitute all the macros"; Term.hs's
+  "FIXME: This try should not be necessary") are NOT echoed. No non-boundary
+  magic constant introduced.
+
+Behavioral-claim ↔ probe cross-check (all trace to logged probes/captures, which
+I read this audit and which corroborate every sub-claim):
+Q43 (rule-term matrix) → `probes/bare_indexed{,_zero,_sorted,_baseline}.spthy` +
+`probes/bare_typed.spthy` with matching captures — `konst.1`/`.2`/`.0` parse-error
+"unexpected '.'"; `~konst.1`/`$konst.1` parse OK, stay variables (unbound + sort
+warnings); `notmac.1` parse OK, ordinary indexed var; `konst:msg` parse-error
+"unexpected ':'". Q44 (formula matrix) → `probes/bare_formula_plain.spthy` (plain
+`konst` resolves, guarded form `A( h('k') )`), `probes/bare_indexed_formula.spthy`
+(`konst.1` parse-error), `probes/bare_formula_indexed_baseline.spthy` (`notmac.1`
+parse OK, formula-terms warning). `#[test]` count in tests.rs = 30, matching the
+REPORT's claim (26 prior + 4 new); +2 test helpers.
+
+Non-blocking observations (not similarity violations; no redo):
+- The round-4 `bare_typed`/[Q32] parse-error sub-claim, previously logged without a
+  saved capture, now has one (`captures/bare_typed.out`) — evidence trail for the
+  type-annotation row is closed this round.
+- The formula-position `konst.1` rejection surfaces as a different parser message
+  ("unexpected '(' expecting letter or digit, '.' or '='",
+  `captures/bare_indexed_formula.out`) than the rule-term case ("unexpected '.'").
+  QUERIES [Q44] states "PARSE ERROR (formula parser rejects the indexed macro
+  name)" without quoting a message, so the claim is accurate; the mechanism (the
+  formula grammar consumes the `.1` as a node-index continuation and then chokes on
+  the `(`) differs from the rule-term path but reaches the same "not a macro use"
+  observable. Does not affect the verdict.
+
+Verdict: pass.

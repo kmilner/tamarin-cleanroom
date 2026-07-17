@@ -1,0 +1,66 @@
+G1_q40_AB_p43	[A,B] q=40 p=43
+G1_q40_BA_p43	[B,A] q=40 p=43
+G1_q40_AB_p44	[A,B] q=40 p=44
+G1_q40_BA_p44	[B,A] q=40 p=44
+G1_q40_AB_p45	[A,B] q=40 p=45
+G1_q40_BA_p45	[B,A] q=40 p=45
+G1_q40_AB_p46	[A,B] q=40 p=46
+G1_q40_BA_p46	[B,A] q=40 p=46
+G1_q40_AB_p47	[A,B] q=40 p=47
+G1_q40_BA_p47	[B,A] q=40 p=47
+G1_q40_AB_p48	[A,B] q=40 p=48
+G1_q40_BA_p48	[B,A] q=40 p=48
+G1_q40_AB_p49	[A,B] q=40 p=49
+G1_q40_BA_p49	[B,A] q=40 p=49
+G1_q40_AB_p50	[A,B] q=40 p=50
+G1_q40_BA_p50	[B,A] q=40 p=50
+G1_q40_AB_p51	[A,B] q=40 p=51
+G1_q40_BA_p51	[B,A] q=40 p=51
+G1_q60_AB_p23	[A,B] q=60 p=23
+G1_q60_BA_p23	[B,A] q=60 p=23
+G1_q60_AB_p24	[A,B] q=60 p=24
+G1_q60_BA_p24	[B,A] q=60 p=24
+G1_q60_AB_p25	[A,B] q=60 p=25
+G1_q60_BA_p25	[B,A] q=60 p=25
+G1_q60_AB_p26	[A,B] q=60 p=26
+G1_q60_BA_p26	[B,A] q=60 p=26
+G1_q60_AB_p27	[A,B] q=60 p=27
+G1_q60_BA_p27	[B,A] q=60 p=27
+G1_q60_AB_p28	[A,B] q=60 p=28
+G1_q60_BA_p28	[B,A] q=60 p=28
+G1_q60_AB_p29	[A,B] q=60 p=29
+G1_q60_BA_p29	[B,A] q=60 p=29
+G1_q60_AB_p30	[A,B] q=60 p=30
+G1_q60_BA_p30	[B,A] q=60 p=30
+G1_q60_AB_p31	[A,B] q=60 p=31
+G1_q60_BA_p31	[B,A] q=60 p=31
+G3_ABC_p20	perm ('A', 'B', 'C') p=20
+G3_ABC_p21	perm ('A', 'B', 'C') p=21
+G3_ABC_p22	perm ('A', 'B', 'C') p=22
+G3_ABC_p23	perm ('A', 'B', 'C') p=23
+G3_ABC_p24	perm ('A', 'B', 'C') p=24
+G3_ABC_p25	perm ('A', 'B', 'C') p=25
+G3_ABC_p26	perm ('A', 'B', 'C') p=26
+G3_ABC_p27	perm ('A', 'B', 'C') p=27
+G3_ABC_p28	perm ('A', 'B', 'C') p=28
+G3_ABC_p29	perm ('A', 'B', 'C') p=29
+G3_BAC_p20	perm ('B', 'A', 'C') p=20
+G3_BAC_p21	perm ('B', 'A', 'C') p=21
+G3_BAC_p22	perm ('B', 'A', 'C') p=22
+G3_BAC_p23	perm ('B', 'A', 'C') p=23
+G3_BAC_p24	perm ('B', 'A', 'C') p=24
+G3_BAC_p25	perm ('B', 'A', 'C') p=25
+G3_BAC_p26	perm ('B', 'A', 'C') p=26
+G3_BAC_p27	perm ('B', 'A', 'C') p=27
+G3_BAC_p28	perm ('B', 'A', 'C') p=28
+G3_BAC_p29	perm ('B', 'A', 'C') p=29
+G3_BCA_p20	perm ('B', 'C', 'A') p=20
+G3_BCA_p21	perm ('B', 'C', 'A') p=21
+G3_BCA_p22	perm ('B', 'C', 'A') p=22
+G3_BCA_p23	perm ('B', 'C', 'A') p=23
+G3_BCA_p24	perm ('B', 'C', 'A') p=24
+G3_BCA_p25	perm ('B', 'C', 'A') p=25
+G3_BCA_p26	perm ('B', 'C', 'A') p=26
+G3_BCA_p27	perm ('B', 'C', 'A') p=27
+G3_BCA_p28	perm ('B', 'C', 'A') p=28
+G3_BCA_p29	perm ('B', 'C', 'A') p=29

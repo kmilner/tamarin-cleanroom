@@ -10,7 +10,7 @@ use serde_json::Value;
 use web_clean::envelope::{render_content, render_redirect};
 use web_clean::forms::{add_form, delete_form, edit_form};
 use web_clean::intdot::{render_intdot, EMPTY_GRAPH_DOT};
-use web_clean::page::{render_page, PageParams};
+use web_clean::page::{render_page, render_page_kind, Origin, PageParams, ShellKind};
 use web_clean::proofscript::{render_proof_script, Item, Lemma, Overview, Proof, ProofLine};
 use web_clean::text::{main_proof_path, nav_target, source_body};
 
@@ -96,6 +96,7 @@ fn page_shell_chaum_byte_identical() {
         index: 1,
         version: "1.13.0",
         filename: "Chaum_Unforgeability.spthy",
+        origin: Origin::Local,
     };
     assert_eq!(render_page(&params, west, center), expected);
 }
@@ -110,8 +111,64 @@ fn page_shell_issue_byte_identical() {
         index: 1,
         version: "1.13.0",
         filename: "issue515.spthy",
+        origin: Origin::Local,
     };
     assert_eq!(render_page(&params, west, center), expected);
+}
+
+// ---------------------------------------------------------------------------
+// Origin-aware page shell (round 6). A theory loaded from an on-disk file
+// (command line, or derived from one) renders the north-bar "Reload file" item
+// and — trace only — the Actions "Append modified lemmas" item; an uploaded
+// theory (POST /) omits both. Each fixture is a live capture (QUERIES.log
+// [R60]); the shell is reproduced byte-for-byte from the same (west, center)
+// decomposition the other page tests use, with only `origin` (and kind) varying.
+// ---------------------------------------------------------------------------
+
+/// Split a captured overview page into its west and center inner-HTML panes
+/// using the fixed shell delimiters, then assert the shell reproduces the whole
+/// page byte-for-byte for the given kind + origin.
+fn assert_shell_reproduces(fixture: &str, kind: ShellKind, origin: Origin, name: &str, index: u64, file: &str) {
+    const WEST_OPEN: &str = r#"<div class="monospace" id="proof">"#;
+    const WEST_CLOSE: &str = r#"</div></div></div><div class="ui-layout-east">"#;
+    const CENTER_OPEN: &str = r#"<div id="ui-main-display">"#;
+    const CENTER_CLOSE: &str = r#"</div></div></div><div id="dialog">"#;
+    let west = between(fixture, WEST_OPEN, WEST_CLOSE).expect("west pane");
+    let center = between(fixture, CENTER_OPEN, CENTER_CLOSE).expect("center pane");
+    let params = PageParams { theory_name: name, index, version: "1.13.0", filename: file, origin };
+    assert_eq!(render_page_kind(kind, &params, west, center), fixture);
+}
+
+#[test]
+fn overview_shell_trace_local_byte_identical() {
+    assert_shell_reproduces(
+        include_str!("fixtures/r6_overview_trace_local.html"),
+        ShellKind::Trace, Origin::Local, "Tutorial", 1, "Tutorial.spthy",
+    );
+}
+
+#[test]
+fn overview_shell_trace_upload_byte_identical() {
+    assert_shell_reproduces(
+        include_str!("fixtures/r6_overview_trace_upload.html"),
+        ShellKind::Trace, Origin::Uploaded, "Tutorial", 2, "Tutorial.spthy",
+    );
+}
+
+#[test]
+fn overview_shell_equiv_local_byte_identical() {
+    assert_shell_reproduces(
+        include_str!("fixtures/r6_overview_equiv_local.html"),
+        ShellKind::Equiv, Origin::Local, "KCL07_UK1_attack_manual", 1, "KCL07_UK1_attack_manual.spthy",
+    );
+}
+
+#[test]
+fn overview_shell_equiv_upload_byte_identical() {
+    assert_shell_reproduces(
+        include_str!("fixtures/r6_overview_equiv_upload.html"),
+        ShellKind::Equiv, Origin::Uploaded, "KCL07_UK1_attack_manual", 2, "KCL07_UK1_attack_manual.spthy",
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -256,6 +313,7 @@ fn page_shell_proof_view_byte_identical() {
         index: 3,
         version: "1.13.0",
         filename: "Chaum_Unforgeability.spthy",
+        origin: Origin::Local,
     };
     assert_eq!(render_page(&params, west, center), expected);
 }
@@ -402,6 +460,8 @@ fn html_page_generality_sample_byte_identical() {
                     index: idx,
                     version: &r.ver,
                     filename: &r.file,
+                    // The whole captured corpus was loaded from disk (Local origin).
+                    origin: Origin::Local,
                 };
                 assert_eq!(render_page(&params, west, center), r.b, "overview mismatch for {}", r.u);
                 overview += 1;

@@ -1,0 +1,8 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n5[shape="record",label="{{<n0> Fr( ~s )}|{<n1> #i : C3_a10_b10_p68[C3_a10_b10_p68( )]}|{<n2> Ta( 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'\l)\l|<n3> Ca( 'bb' )|<n4> Cb( 'bb' )}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+
+}

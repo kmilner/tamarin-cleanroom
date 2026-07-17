@@ -1,0 +1,8 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n4[shape="record",label="{{<n0> Fr( ~s )}|{<n1> #i : BF_q88_w48[BF_q88_w48( )]}|{<n2> Tgt( \<\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'y'\>\l)\l|<n3> Sib( 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'\l)\l}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+
+}

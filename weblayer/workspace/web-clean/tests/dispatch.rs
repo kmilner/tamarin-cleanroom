@@ -13,6 +13,7 @@ use web_clean::dispatch::{
     Content, HttpMethod, MainReq, Meta, ProverOps, Request, RootMeta, Server,
 };
 use web_clean::intdot::EMPTY_GRAPH_DOT;
+use web_clean::page::Origin;
 use web_clean::route::{Autoprove, AutoproveAll, AutoproveDiff, NavDir};
 
 // ---------------------------------------------------------------------------
@@ -47,7 +48,12 @@ impl ProverOps for FakeProver {
     type Theory = Thy;
 
     fn meta(&self, _thy: &Thy) -> Meta {
-        Meta { name: "Tutorial".into(), version: "1.13.0".into(), filename: "Tutorial.spthy".into() }
+        Meta {
+            name: "Tutorial".into(),
+            version: "1.13.0".into(),
+            filename: "Tutorial.spthy".into(),
+            origin: Origin::Local,
+        }
     }
     fn root_meta(&self, _thy: &Thy) -> RootMeta {
         RootMeta { time: "00:00:00".into(), origin: "Tutorial.spthy".into(), modified: false }

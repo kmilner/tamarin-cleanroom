@@ -69,10 +69,28 @@ A call `name(t1, ..., tn)` where `name` is a defined macro of arity `k`:
    - Resolves in every term position — premise, action, conclusion, and nested
      inside functions (`h(konst)` → `h('k')`) [Q32]; and inside macro bodies,
      transitively (`wrap() = h(base)`, bare `wrap` → `h(h('k'))`) [Q33].
-   - **Untagged sort only**: `~konst` / `$konst` (fresh/pub) are *not* the macro —
-     they stay ordinary variables [Q34] (consistent with the sort-identity rule
-     §2.3). A macro-name use cannot be sort-annotated (`konst:msg` is a parse
-     error), so a bare use is always the plain untagged form [Q32].
+   - **Fully-undecorated plain name only.** The consumer's var node carries
+     `(name, idx, sort, typ)` (`VarSpec`); a bare nullary-macro use resolves only
+     when **all** of `sort` is untagged, `idx` is 0, and `typ` is absent. Every
+     decoration blocks resolution and leaves the name an ordinary variable — the
+     full matrix [Q34,Q43,Q44,Q32], identical in rule-term and formula positions:
+
+     | decoration            | surface   | reference behavior            |
+     |-----------------------|-----------|-------------------------------|
+     | none (plain)          | `konst`   | **resolves** to the body [Q32,Q44] |
+     | fresh / pub sort      | `~konst` / `$konst` | stays a variable [Q34] |
+     | explicit index        | `konst.1`, `konst.2`, `konst.0` | **parse error** — an indexed macro name is not a use [Q43,Q44] |
+     | sort + index          | `~konst.1` / `$konst.1` | stays a variable [Q43] |
+     | type annotation       | `konst:msg` | **parse error** [Q32] |
+
+     The index and type cases are *parse errors* in the reference (an indexed/typed
+     nullary-macro name is never a macro use); the `.`-index and `:`-type
+     decorations are themselves legal only on an *ordinary* variable (`notmac.1`
+     parses as a plain indexed variable [Q43,Q44]). So in the consumer's AST an
+     indexed or type-annotated `Var` must stay a variable — resolving it (as a
+     sort-only guard did) would fire too broadly. `konst.0` is indistinguishable
+     from plain `konst` in the AST (both `idx==0`), so `idx==0` is the faithful
+     resolving predicate; the reference rejects the surface `.0` at parse anyway.
    - **Nullary only**: a bare name equal to an **arity ≥ 1** macro is *not* a use;
      it is left as an ordinary (unbound) variable [Q35].
    - **The macro reserves its name**: when a formal shares a name with an existing
@@ -80,8 +98,10 @@ A call `name(t1, ..., tn)` where `name` is a defined macro of arity `k`:
      resolve to the macro, not the formal (`base()=h('k')`, `f(base)=<base,base>`,
      `f(a)` → `<h('k'),h('k')>`; the formal and its argument are dropped) [Q36].
    - **Consumer interface contract:** such a bare use reaches `expand` as a plain
-     `Term::Var("konst")` (untagged), *not* an `App`; `expand` resolves it to the
-     nullary macro exactly under the conditions above.
+     `Term::Var` whose `VarSpec` is `(name, idx=0, sort=Untagged, typ=None)`, *not*
+     an `App`; `expand` resolves it to the nullary macro exactly under the
+     undecorated conditions above (the `expand_term` `Var` arm is shared by both
+     entry points, so the guard holds in full-close and staged modes alike).
 
 ## 3. Where expansion is visible vs. preserved
 
@@ -136,8 +156,9 @@ A source-to-source AST transform:
 - Rewrite **every term** occurring in the theory (rule premises/actions/
   conclusions/let-values/embedded-restrictions/variants/left-right, lemma &
   restriction & predicate & acc-lemma & case-test formulas, and Sapic process
-  terms): bottom-up, replacing each macro call — and each bare untagged nullary
-  macro name (§2.5) — with its substituted macro-free body (§2.2–2.3).
+  terms): bottom-up, replacing each macro call — and each bare *undecorated*
+  nullary macro name (§2.5: untagged, no index, no type) — with its substituted
+  macro-free body (§2.2–2.3).
 - **Preserve the `Macros` items in place**, unchanged (with their original,
   un-expanded bodies), keeping the order of all items [Q37]. The reference
   retains the `macros:` block in its pretty output, and the consuming pipeline

@@ -1,0 +1,8 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory FalsifyMe] Theory loaded
+[Theory FalsifyMe] Theory translated
+[Theory FalsifyMe] Derivation checks started
+[Theory FalsifyMe] Derivation checks ended
+[Theory FalsifyMe] Theory closed

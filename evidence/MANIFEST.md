@@ -9,7 +9,7 @@ those transcripts are collected here verbatim. `SHA256SUMS` covers all files.
 
 These agents were REQUIRED to work only from black-box oracles and captured
 program output (see ../PROTOCOL.md). Their transcripts prove non-access.
-Final audit (audit/cleanroom_audit_results.txt): 25 transcripts, 2097 tool
+Final audit (audit/cleanroom_audit_results.txt): 29 transcripts, 2393 tool
 calls, 0 forbidden accesses, 0 web accesses.
 
 | Path | Agent | Role |
@@ -39,6 +39,10 @@ calls, 0 forbidden accesses, 0 web accesses.
 | workflows/wf_60530b15-4b6/agent-a4bb77314f80cb4c2.jsonl | round 5 (unit A) | del/path + verify families |
 | workflows/wf_60530b15-4b6/agent-a8ed0da34ff4e5fe5.jsonl | round 6 (unit B) | record-level group-budget wrap trigger |
 | workflows/wf_60530b15-4b6/agent-ab299adf6d8019f6c.jsonl | round 5 (unit E) | staged-mode expansion contract |
+| workflows/wf_a3b4feac-a25/agent-acb7bffc97984afe3.jsonl | round 6 (unit E) | bare-nullary decoration guard |
+| workflows/wf_a3b4feac-a25/agent-af2c6e9e0d378f62e.jsonl | round 5 (unit D) | summary content + incremental emitter |
+| workflows/wf_a3b4feac-a25/agent-a861412dfce110af9.jsonl | round 6 (unit A) | origin-aware shell + StateOps trait |
+| workflows/wf_a3b4feac-a25/agent-a7981ceb299f1dfa5.jsonl | round 7 (unit B) | trigger/fill budget split, greedy allocation |
 
 Corresponding workspaces (../wellformedness, ../graphdot, ../weblayer) hold
 each agent's QUERIES.log, BEHAVIOR.md, REPORT*.md and code — cross-reference
@@ -57,6 +61,7 @@ the transcripts against those logs.
 | workflows/wf_62e2c0ef-a3e/agent-af3d04b49cd4b056d.jsonl | round-4 audit: graphdot re-probe delta (pass, 0; notes clean side's "levels inert" conclusion contradicts the source — affirmative non-access evidence) |
 | workflows/wf_1741f4ad-48d/agent-a*.jsonl (6 auditor transcripts among 14) | round-4/5 per-unit delta audits: C/D/E/G/B/A (all pass, 0 findings; D audit notes the clean flag-precedence order DIVERGES from the source Either-applicative order — affirmative non-access evidence) |
 | workflows/wf_60530b15-4b6/agent-{ae835430920982249,aa7a475a42e7f0a16,a13ca9ba2bbcd5182}.jsonl | round-5/6 delta audits: E / A / B (all pass, 0 findings) |
+| workflows/wf_a3b4feac-a25/agent-{a9df6213a26883a9d,a49c583ac48623111,a1250a539cbe74da9,aab79db7bb6b49c3c}.jsonl | round-5/6/7 delta audits: E / D / A / B (all pass, 0 findings) |
 
 Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUDIT.md,
 ../console/AUDIT.md, ../macros/AUDIT.md, ../injective/AUDIT.md, ../derivcheck/AUDIT.md.
@@ -71,6 +76,7 @@ Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUD
 | workflows/wf_62e2c0ef-a3e/agent-a2eac17c5efa35c13.jsonl | dirty-room integrator: units C–G (partial; keeps reported per protocol) |
 | workflows/wf_1741f4ad-48d/ (2 integrator transcripts among 14) | round-4/5 integrators: theory C-swap+delete (check_terms.rs removed, 134->133) and server A/B (blocked; edit-form closure byte-verified) |
 | workflows/wf_60530b15-4b6/agent-{aba0d9334e4c1f215,ae21d5199beeba498,a59a476a912c12eee,ab0787ce52d9ab2af}.jsonl | wave-2 dirty room: G swap COMPLETE (deriv_check.rs deleted, 10/10 byte gate); D partial (version-stream swap; parse/framing blocked); E+B integrator (both kept, blockers refined to byte-precision); A integrator (del/verify re-synced; adoption blocked on origin-shell + async-state) |
+| workflows/wf_a3b4feac-a25/agent-{a66029e08d55564f9,acb62e977f9aaf9c3}.jsonl | wave-3 integrators: E SWAPPED (ported macro-expansion driver deleted, live byte-verified vs HS); D summary/emitter landed, driver swap kept (9-verdict taxonomy gap); B kept (fill is fillSep/fits — Ack cell diverges at byte 318); A kept (async-serialization design conflict, code-evidenced) |
 | workflows/wf_53f48d60-3ef/ | licensing research (GPL doctrine/precedent/feasibility/literal-copy) |
 | workflows/wf_8b8fd87b-72e/ | uncited-file derivation audit + institutional-ownership research |
 | workflows/wf_5ec90b24-b26/ | tail-author affiliations, triviality classification, rewrite scoping |

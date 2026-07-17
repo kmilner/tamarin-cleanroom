@@ -1,0 +1,8 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory WarnAndLemma] Theory loaded
+[Theory WarnAndLemma] Theory translated
+[Theory WarnAndLemma] Derivation checks started
+[Theory WarnAndLemma] Derivation checks ended
+[Theory WarnAndLemma] Theory closed

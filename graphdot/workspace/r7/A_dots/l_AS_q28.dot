@@ -1,0 +1,8 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n4[shape="record",label="{{<n0> Fr( ~s )}|{<n1> #i : AS_q28[AS_q28( )]}|{<n2> Sib( 'bbbbbbbbbbbbbbbbbbb'\l)\l|<n3> Big( \<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09', 'e10', \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'e11', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18', 'e19', 'e20', 'e21', \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'e22', 'e23', 'e24', 'e25', 'e26', 'e27', 'e28', 'e29', 'e30'\>\l)\l}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+
+}

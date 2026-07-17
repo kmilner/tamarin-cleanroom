@@ -1,0 +1,8 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory FreshPubConst] Theory loaded
+[Theory FreshPubConst] Theory translated
+[Theory FreshPubConst] Derivation checks started
+[Theory FreshPubConst] Derivation checks ended
+[Theory FreshPubConst] Theory closed

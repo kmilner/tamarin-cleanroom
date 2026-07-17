@@ -31,7 +31,7 @@ use std::io::{BufRead, BufReader};
 
 use serde::Deserialize;
 use web_clean::intdot::{dotsrc_path, render_intdot};
-use web_clean::page::{render_page, PageParams};
+use web_clean::page::{render_page, Origin, PageParams};
 
 #[derive(Deserialize)]
 struct Rec {
@@ -192,6 +192,8 @@ fn main() {
                     index: idx,
                     version: &r.ver,
                     filename: &r.file,
+                    // Every captured corpus theory was loaded from disk (Local).
+                    origin: Origin::Local,
                 };
                 let got = render_page(&params, west, center);
                 overview.entry(sub).or_default().record(got == r.b, &r.u);

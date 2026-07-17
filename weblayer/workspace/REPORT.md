@@ -181,3 +181,85 @@ the equiv diffProof redirect/alerts).
 - What each deletion removes from the theory (lemma vs proof subtree) is a prover
   concern held opaque behind the `Option`-returning callbacks; the web layer only
   decides version allocation, redirect target, and alert string.
+
+---
+
+## Round 6 — origin-aware page shell + state delegation
+
+Two adoption-critical items. Black-box only: live probing ([R60]–[R63], ports
+3110-3112, Tutorial.spthy trace + KCL07-UK1 diff theory) plus four committed
+captures. No file under `/home/kamilner/tamarin-rs/` was read. All servers stopped.
+
+### Item 1 — origin-aware page shell (closes the round-3 [L15] honest negative)
+
+Round 4's working `POST /` upload made the origin distinction observable at last.
+Loading a theory from the **command line** (on-disk / **Local**) vs uploading it via
+**`POST /`** (no on-disk file / **Upload**) changes the `overview` shell in **exactly
+two** north-bar items — nothing else, and the HTTP headers are identical modulo the
+derived `Date`/`Content-Length` ([R60], index-normalized full-page diff):
+
+* **"Reload file"** (a POST form to `reload`, between *Index* and *Actions*) — present
+  iff **Local**.
+* **"Append modified lemmas to file"** (last *Actions* item) — present iff **Local AND
+  trace**.
+
+Full kind×origin matrix pinned ([R61]); origin is **inherited** through proof ops
+([R62]), so it is a per-version theory property (`Meta.origin`), not a web-layer
+choice. This reconciles round-4 [R48] (the equiv shell's absent Append is the kind
+gate; its present Reload was the Local command-line load).
+
+Threaded through rendering: `page::Origin { Local, Uploaded }` is a `PageParams`
+field; `shell_template` gained a `§RELOAD§` slot (`RELOAD_ITEM`) beside `§APPEND§`;
+`page::reload_item` / `page::append_item` fill them; `Server::get_overview` passes
+`meta.origin`. **Fixtures** for all four cells
+(`r6_overview_{trace,equiv}_{local,upload}.html`) with byte-parity tests
+(`overview_shell_*`, 4) plus a dispatch-level thread-through and origin-inheritance
+test (`dispatch6.rs`). Fresh-server determinism cross-check [R63] confirmed the
+deterministic shell prefix/tail reproduce the fixtures.
+
+### Item 2 — state-delegation redesign (`StateOps` backend)
+
+`Server` no longer owns the version `BTreeMap`/counter. Every state operation it
+performed is extracted to a **`StateOps`** trait so the consumer's asynchronous,
+internally-caching backend can remain the single owner of theory state:
+
+* `insert_new` (monotonic fresh-version allocation), `get` (retrieval by index),
+  `replace` (in-place mutation for edit/reload), `entries` (enumeration for the root
+  page), `remove` (deletion).
+* `Server<P: ProverOps, S: StateOps<Theory = P::Theory> = InMemoryState<P::Theory>>`
+  keeps ALL dispatch/transport/envelope logic and drives state only through `S`.
+* The probed lifecycle (monotonic allocation, retention, in-place-vs-new-version) is
+  the **documented contract** on the trait; `InMemoryState<T>` is the in-memory
+  reference impl. `Server::new(ops, base)` uses it (base at index 1);
+  `Server::with_state(ops, state)` injects a custom backend.
+
+All prior tests keep running byte-identical (they resolve to the default
+`InMemoryState`). `dispatch6.rs` adds a custom-backend dispatch test (proving the
+Server is generic over the state owner) and `InMemoryState` contract tests
+(monotonicity, retention, in-place replace, remove).
+
+**Choice + honesty.** Separate `StateOps` (not folded into `ProverOps`) because the
+interop story has the state backend as a distinct async component from the prover
+fragment producer; the two share `type Theory`. `remove` (deletion) is on the trait
+for backend ownership completeness but is **not invoked by any current route** — under
+the observed retention invariant the web layer never drops a version; it is documented
+as a contract-surface method, not a live path. The trait is a synchronous facade (its
+`get` hands out a borrow); the consumer's async cache adapts behind it — the contract
+this round pins is the *lifecycle*, which is what the observed behaviour constrains.
+
+### Deliverables
+
+- `src/page.rs` — `Origin` enum; `PageParams.origin`; `reload_item`/`append_item`.
+- `src/shell_template.rs` — `RELOAD_ITEM` + `§RELOAD§` slot (Reload item was
+  previously hardcoded); `APPEND_ITEM`/`§APPEND§` now gated on (kind, origin).
+- `src/dispatch.rs` — `StateOps` trait + `InMemoryState`; `Server<P, S>` refactor
+  (`new`/`with_state`); `Meta.origin`; `get_overview` threads origin.
+- `tests/parity.rs` (+4 origin byte-parity tests, +`assert_shell_reproduces`),
+  `tests/dispatch6.rs` (7 tests), four `r6_overview_*` fixtures; the round-3/4/5
+  `FakeProver`s gained `Meta.origin`.
+- BEHAVIOR.md §16; QUERIES.log [R60]–[R63].
+
+`cargo test` → **102 passing** (26 unit + 15 dispatch + 17 dispatch4 + 14 dispatch5 +
+7 dispatch6 + 23 parity), `cargo clippy --tests --examples` clean. Every ITEM-1 body
+was live-captured and reproduced byte-for-byte; the fresh-server determinism check
+confirms reproducibility.

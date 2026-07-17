@@ -1,0 +1,485 @@
+theory R7B
+begin
+
+rule BL_w67:
+  [ Fr(~s) ] --[ BL_w67() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>) ]
+
+rule BL_w68:
+  [ Fr(~s) ] --[ BL_w68() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>) ]
+
+rule BL_w69:
+  [ Fr(~s) ] --[ BL_w69() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>) ]
+
+rule BL_w70:
+  [ Fr(~s) ] --[ BL_w70() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>) ]
+
+rule BL_w71:
+  [ Fr(~s) ] --[ BL_w71() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>) ]
+
+rule BL_w72:
+  [ Fr(~s) ] --[ BL_w72() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>) ]
+
+rule BL_w73:
+  [ Fr(~s) ] --[ BL_w73() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>) ]
+
+rule BL_w74:
+  [ Fr(~s) ] --[ BL_w74() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>) ]
+
+rule BL_w75:
+  [ Fr(~s) ] --[ BL_w75() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>) ]
+
+rule BL_w76:
+  [ Fr(~s) ] --[ BL_w76() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>) ]
+
+rule BL_w77:
+  [ Fr(~s) ] --[ BL_w77() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>) ]
+
+rule BL_w78:
+  [ Fr(~s) ] --[ BL_w78() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>) ]
+
+rule BL_w79:
+  [ Fr(~s) ] --[ BL_w79() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>) ]
+
+rule BL_w80:
+  [ Fr(~s) ] --[ BL_w80() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>) ]
+
+rule BL_w81:
+  [ Fr(~s) ] --[ BL_w81() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>) ]
+
+rule BF_q10_w65:
+  [ Fr(~s) ] --[ BF_q10_w65() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('b') ]
+
+rule BF_q10_w66:
+  [ Fr(~s) ] --[ BF_q10_w66() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('b') ]
+
+rule BF_q10_w67:
+  [ Fr(~s) ] --[ BF_q10_w67() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('b') ]
+
+rule BF_q10_w68:
+  [ Fr(~s) ] --[ BF_q10_w68() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('b') ]
+
+rule BF_q10_w69:
+  [ Fr(~s) ] --[ BF_q10_w69() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('b') ]
+
+rule BF_q10_w70:
+  [ Fr(~s) ] --[ BF_q10_w70() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('b') ]
+
+rule BF_q10_w71:
+  [ Fr(~s) ] --[ BF_q10_w71() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('b') ]
+
+rule BF_q10_w72:
+  [ Fr(~s) ] --[ BF_q10_w72() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('b') ]
+
+rule BF_q10_w73:
+  [ Fr(~s) ] --[ BF_q10_w73() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('b') ]
+
+rule BF_q10_w74:
+  [ Fr(~s) ] --[ BF_q10_w74() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('b') ]
+
+rule BF_q10_w75:
+  [ Fr(~s) ] --[ BF_q10_w75() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('b') ]
+
+rule BF_q10_w76:
+  [ Fr(~s) ] --[ BF_q10_w76() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('b') ]
+
+rule BF_q10_w77:
+  [ Fr(~s) ] --[ BF_q10_w77() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('b') ]
+
+rule BF_q10_w78:
+  [ Fr(~s) ] --[ BF_q10_w78() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('b') ]
+
+rule BF_q10_w79:
+  [ Fr(~s) ] --[ BF_q10_w79() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('b') ]
+
+rule BF_q20_w58:
+  [ Fr(~s) ] --[ BF_q20_w58() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbb') ]
+
+rule BF_q20_w59:
+  [ Fr(~s) ] --[ BF_q20_w59() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbb') ]
+
+rule BF_q20_w60:
+  [ Fr(~s) ] --[ BF_q20_w60() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbb') ]
+
+rule BF_q20_w61:
+  [ Fr(~s) ] --[ BF_q20_w61() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbb') ]
+
+rule BF_q20_w62:
+  [ Fr(~s) ] --[ BF_q20_w62() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbb') ]
+
+rule BF_q20_w63:
+  [ Fr(~s) ] --[ BF_q20_w63() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbb') ]
+
+rule BF_q20_w64:
+  [ Fr(~s) ] --[ BF_q20_w64() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbb') ]
+
+rule BF_q20_w65:
+  [ Fr(~s) ] --[ BF_q20_w65() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbb') ]
+
+rule BF_q20_w66:
+  [ Fr(~s) ] --[ BF_q20_w66() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbb') ]
+
+rule BF_q20_w67:
+  [ Fr(~s) ] --[ BF_q20_w67() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbb') ]
+
+rule BF_q20_w68:
+  [ Fr(~s) ] --[ BF_q20_w68() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbb') ]
+
+rule BF_q20_w69:
+  [ Fr(~s) ] --[ BF_q20_w69() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbb') ]
+
+rule BF_q20_w70:
+  [ Fr(~s) ] --[ BF_q20_w70() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbb') ]
+
+rule BF_q20_w71:
+  [ Fr(~s) ] --[ BF_q20_w71() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbb') ]
+
+rule BF_q20_w72:
+  [ Fr(~s) ] --[ BF_q20_w72() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbb') ]
+
+rule BF_q34_w57:
+  [ Fr(~s) ] --[ BF_q34_w57() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q34_w58:
+  [ Fr(~s) ] --[ BF_q34_w58() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q34_w59:
+  [ Fr(~s) ] --[ BF_q34_w59() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q34_w60:
+  [ Fr(~s) ] --[ BF_q34_w60() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q34_w61:
+  [ Fr(~s) ] --[ BF_q34_w61() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q34_w62:
+  [ Fr(~s) ] --[ BF_q34_w62() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q34_w63:
+  [ Fr(~s) ] --[ BF_q34_w63() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q34_w64:
+  [ Fr(~s) ] --[ BF_q34_w64() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q34_w65:
+  [ Fr(~s) ] --[ BF_q34_w65() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q34_w66:
+  [ Fr(~s) ] --[ BF_q34_w66() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q34_w67:
+  [ Fr(~s) ] --[ BF_q34_w67() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q34_w68:
+  [ Fr(~s) ] --[ BF_q34_w68() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q34_w69:
+  [ Fr(~s) ] --[ BF_q34_w69() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q34_w70:
+  [ Fr(~s) ] --[ BF_q34_w70() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q34_w71:
+  [ Fr(~s) ] --[ BF_q34_w71() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q48_w51:
+  [ Fr(~s) ] --[ BF_q48_w51() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q48_w52:
+  [ Fr(~s) ] --[ BF_q48_w52() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q48_w53:
+  [ Fr(~s) ] --[ BF_q48_w53() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q48_w54:
+  [ Fr(~s) ] --[ BF_q48_w54() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q48_w55:
+  [ Fr(~s) ] --[ BF_q48_w55() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q48_w56:
+  [ Fr(~s) ] --[ BF_q48_w56() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q48_w57:
+  [ Fr(~s) ] --[ BF_q48_w57() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q48_w58:
+  [ Fr(~s) ] --[ BF_q48_w58() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q48_w59:
+  [ Fr(~s) ] --[ BF_q48_w59() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q48_w60:
+  [ Fr(~s) ] --[ BF_q48_w60() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q48_w61:
+  [ Fr(~s) ] --[ BF_q48_w61() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q48_w62:
+  [ Fr(~s) ] --[ BF_q48_w62() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q48_w63:
+  [ Fr(~s) ] --[ BF_q48_w63() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q48_w64:
+  [ Fr(~s) ] --[ BF_q48_w64() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q48_w65:
+  [ Fr(~s) ] --[ BF_q48_w65() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q68_w44:
+  [ Fr(~s) ] --[ BF_q68_w44() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q68_w45:
+  [ Fr(~s) ] --[ BF_q68_w45() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q68_w46:
+  [ Fr(~s) ] --[ BF_q68_w46() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q68_w47:
+  [ Fr(~s) ] --[ BF_q68_w47() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q68_w48:
+  [ Fr(~s) ] --[ BF_q68_w48() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q68_w49:
+  [ Fr(~s) ] --[ BF_q68_w49() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q68_w50:
+  [ Fr(~s) ] --[ BF_q68_w50() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q68_w51:
+  [ Fr(~s) ] --[ BF_q68_w51() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q68_w52:
+  [ Fr(~s) ] --[ BF_q68_w52() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q68_w53:
+  [ Fr(~s) ] --[ BF_q68_w53() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q68_w54:
+  [ Fr(~s) ] --[ BF_q68_w54() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q68_w55:
+  [ Fr(~s) ] --[ BF_q68_w55() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q68_w56:
+  [ Fr(~s) ] --[ BF_q68_w56() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q68_w57:
+  [ Fr(~s) ] --[ BF_q68_w57() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q68_w58:
+  [ Fr(~s) ] --[ BF_q68_w58() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q88_w44:
+  [ Fr(~s) ] --[ BF_q88_w44() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q88_w45:
+  [ Fr(~s) ] --[ BF_q88_w45() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q88_w46:
+  [ Fr(~s) ] --[ BF_q88_w46() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q88_w47:
+  [ Fr(~s) ] --[ BF_q88_w47() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q88_w48:
+  [ Fr(~s) ] --[ BF_q88_w48() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q88_w49:
+  [ Fr(~s) ] --[ BF_q88_w49() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q88_w50:
+  [ Fr(~s) ] --[ BF_q88_w50() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q88_w51:
+  [ Fr(~s) ] --[ BF_q88_w51() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q88_w52:
+  [ Fr(~s) ] --[ BF_q88_w52() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q88_w53:
+  [ Fr(~s) ] --[ BF_q88_w53() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q88_w54:
+  [ Fr(~s) ] --[ BF_q88_w54() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q88_w55:
+  [ Fr(~s) ] --[ BF_q88_w55() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q88_w56:
+  [ Fr(~s) ] --[ BF_q88_w56() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q88_w57:
+  [ Fr(~s) ] --[ BF_q88_w57() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q88_w58:
+  [ Fr(~s) ] --[ BF_q88_w58() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q98_w44:
+  [ Fr(~s) ] --[ BF_q98_w44() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q98_w45:
+  [ Fr(~s) ] --[ BF_q98_w45() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q98_w46:
+  [ Fr(~s) ] --[ BF_q98_w46() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q98_w47:
+  [ Fr(~s) ] --[ BF_q98_w47() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q98_w48:
+  [ Fr(~s) ] --[ BF_q98_w48() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q98_w49:
+  [ Fr(~s) ] --[ BF_q98_w49() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q98_w50:
+  [ Fr(~s) ] --[ BF_q98_w50() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q98_w51:
+  [ Fr(~s) ] --[ BF_q98_w51() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q98_w52:
+  [ Fr(~s) ] --[ BF_q98_w52() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q98_w53:
+  [ Fr(~s) ] --[ BF_q98_w53() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q98_w54:
+  [ Fr(~s) ] --[ BF_q98_w54() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q98_w55:
+  [ Fr(~s) ] --[ BF_q98_w55() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q98_w56:
+  [ Fr(~s) ] --[ BF_q98_w56() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q98_w57:
+  [ Fr(~s) ] --[ BF_q98_w57() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule BF_q98_w58:
+  [ Fr(~s) ] --[ BF_q98_w58() ]-> [ Tgt(<'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'y'>), Sib('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+lemma l_BL_w67: exists-trace "Ex #i. BL_w67() @ #i"
+lemma l_BL_w68: exists-trace "Ex #i. BL_w68() @ #i"
+lemma l_BL_w69: exists-trace "Ex #i. BL_w69() @ #i"
+lemma l_BL_w70: exists-trace "Ex #i. BL_w70() @ #i"
+lemma l_BL_w71: exists-trace "Ex #i. BL_w71() @ #i"
+lemma l_BL_w72: exists-trace "Ex #i. BL_w72() @ #i"
+lemma l_BL_w73: exists-trace "Ex #i. BL_w73() @ #i"
+lemma l_BL_w74: exists-trace "Ex #i. BL_w74() @ #i"
+lemma l_BL_w75: exists-trace "Ex #i. BL_w75() @ #i"
+lemma l_BL_w76: exists-trace "Ex #i. BL_w76() @ #i"
+lemma l_BL_w77: exists-trace "Ex #i. BL_w77() @ #i"
+lemma l_BL_w78: exists-trace "Ex #i. BL_w78() @ #i"
+lemma l_BL_w79: exists-trace "Ex #i. BL_w79() @ #i"
+lemma l_BL_w80: exists-trace "Ex #i. BL_w80() @ #i"
+lemma l_BL_w81: exists-trace "Ex #i. BL_w81() @ #i"
+lemma l_BF_q10_w65: exists-trace "Ex #i. BF_q10_w65() @ #i"
+lemma l_BF_q10_w66: exists-trace "Ex #i. BF_q10_w66() @ #i"
+lemma l_BF_q10_w67: exists-trace "Ex #i. BF_q10_w67() @ #i"
+lemma l_BF_q10_w68: exists-trace "Ex #i. BF_q10_w68() @ #i"
+lemma l_BF_q10_w69: exists-trace "Ex #i. BF_q10_w69() @ #i"
+lemma l_BF_q10_w70: exists-trace "Ex #i. BF_q10_w70() @ #i"
+lemma l_BF_q10_w71: exists-trace "Ex #i. BF_q10_w71() @ #i"
+lemma l_BF_q10_w72: exists-trace "Ex #i. BF_q10_w72() @ #i"
+lemma l_BF_q10_w73: exists-trace "Ex #i. BF_q10_w73() @ #i"
+lemma l_BF_q10_w74: exists-trace "Ex #i. BF_q10_w74() @ #i"
+lemma l_BF_q10_w75: exists-trace "Ex #i. BF_q10_w75() @ #i"
+lemma l_BF_q10_w76: exists-trace "Ex #i. BF_q10_w76() @ #i"
+lemma l_BF_q10_w77: exists-trace "Ex #i. BF_q10_w77() @ #i"
+lemma l_BF_q10_w78: exists-trace "Ex #i. BF_q10_w78() @ #i"
+lemma l_BF_q10_w79: exists-trace "Ex #i. BF_q10_w79() @ #i"
+lemma l_BF_q20_w58: exists-trace "Ex #i. BF_q20_w58() @ #i"
+lemma l_BF_q20_w59: exists-trace "Ex #i. BF_q20_w59() @ #i"
+lemma l_BF_q20_w60: exists-trace "Ex #i. BF_q20_w60() @ #i"
+lemma l_BF_q20_w61: exists-trace "Ex #i. BF_q20_w61() @ #i"
+lemma l_BF_q20_w62: exists-trace "Ex #i. BF_q20_w62() @ #i"
+lemma l_BF_q20_w63: exists-trace "Ex #i. BF_q20_w63() @ #i"
+lemma l_BF_q20_w64: exists-trace "Ex #i. BF_q20_w64() @ #i"
+lemma l_BF_q20_w65: exists-trace "Ex #i. BF_q20_w65() @ #i"
+lemma l_BF_q20_w66: exists-trace "Ex #i. BF_q20_w66() @ #i"
+lemma l_BF_q20_w67: exists-trace "Ex #i. BF_q20_w67() @ #i"
+lemma l_BF_q20_w68: exists-trace "Ex #i. BF_q20_w68() @ #i"
+lemma l_BF_q20_w69: exists-trace "Ex #i. BF_q20_w69() @ #i"
+lemma l_BF_q20_w70: exists-trace "Ex #i. BF_q20_w70() @ #i"
+lemma l_BF_q20_w71: exists-trace "Ex #i. BF_q20_w71() @ #i"
+lemma l_BF_q20_w72: exists-trace "Ex #i. BF_q20_w72() @ #i"
+lemma l_BF_q34_w57: exists-trace "Ex #i. BF_q34_w57() @ #i"
+lemma l_BF_q34_w58: exists-trace "Ex #i. BF_q34_w58() @ #i"
+lemma l_BF_q34_w59: exists-trace "Ex #i. BF_q34_w59() @ #i"
+lemma l_BF_q34_w60: exists-trace "Ex #i. BF_q34_w60() @ #i"
+lemma l_BF_q34_w61: exists-trace "Ex #i. BF_q34_w61() @ #i"
+lemma l_BF_q34_w62: exists-trace "Ex #i. BF_q34_w62() @ #i"
+lemma l_BF_q34_w63: exists-trace "Ex #i. BF_q34_w63() @ #i"
+lemma l_BF_q34_w64: exists-trace "Ex #i. BF_q34_w64() @ #i"
+lemma l_BF_q34_w65: exists-trace "Ex #i. BF_q34_w65() @ #i"
+lemma l_BF_q34_w66: exists-trace "Ex #i. BF_q34_w66() @ #i"
+lemma l_BF_q34_w67: exists-trace "Ex #i. BF_q34_w67() @ #i"
+lemma l_BF_q34_w68: exists-trace "Ex #i. BF_q34_w68() @ #i"
+lemma l_BF_q34_w69: exists-trace "Ex #i. BF_q34_w69() @ #i"
+lemma l_BF_q34_w70: exists-trace "Ex #i. BF_q34_w70() @ #i"
+lemma l_BF_q34_w71: exists-trace "Ex #i. BF_q34_w71() @ #i"
+lemma l_BF_q48_w51: exists-trace "Ex #i. BF_q48_w51() @ #i"
+lemma l_BF_q48_w52: exists-trace "Ex #i. BF_q48_w52() @ #i"
+lemma l_BF_q48_w53: exists-trace "Ex #i. BF_q48_w53() @ #i"
+lemma l_BF_q48_w54: exists-trace "Ex #i. BF_q48_w54() @ #i"
+lemma l_BF_q48_w55: exists-trace "Ex #i. BF_q48_w55() @ #i"
+lemma l_BF_q48_w56: exists-trace "Ex #i. BF_q48_w56() @ #i"
+lemma l_BF_q48_w57: exists-trace "Ex #i. BF_q48_w57() @ #i"
+lemma l_BF_q48_w58: exists-trace "Ex #i. BF_q48_w58() @ #i"
+lemma l_BF_q48_w59: exists-trace "Ex #i. BF_q48_w59() @ #i"
+lemma l_BF_q48_w60: exists-trace "Ex #i. BF_q48_w60() @ #i"
+lemma l_BF_q48_w61: exists-trace "Ex #i. BF_q48_w61() @ #i"
+lemma l_BF_q48_w62: exists-trace "Ex #i. BF_q48_w62() @ #i"
+lemma l_BF_q48_w63: exists-trace "Ex #i. BF_q48_w63() @ #i"
+lemma l_BF_q48_w64: exists-trace "Ex #i. BF_q48_w64() @ #i"
+lemma l_BF_q48_w65: exists-trace "Ex #i. BF_q48_w65() @ #i"
+lemma l_BF_q68_w44: exists-trace "Ex #i. BF_q68_w44() @ #i"
+lemma l_BF_q68_w45: exists-trace "Ex #i. BF_q68_w45() @ #i"
+lemma l_BF_q68_w46: exists-trace "Ex #i. BF_q68_w46() @ #i"
+lemma l_BF_q68_w47: exists-trace "Ex #i. BF_q68_w47() @ #i"
+lemma l_BF_q68_w48: exists-trace "Ex #i. BF_q68_w48() @ #i"
+lemma l_BF_q68_w49: exists-trace "Ex #i. BF_q68_w49() @ #i"
+lemma l_BF_q68_w50: exists-trace "Ex #i. BF_q68_w50() @ #i"
+lemma l_BF_q68_w51: exists-trace "Ex #i. BF_q68_w51() @ #i"
+lemma l_BF_q68_w52: exists-trace "Ex #i. BF_q68_w52() @ #i"
+lemma l_BF_q68_w53: exists-trace "Ex #i. BF_q68_w53() @ #i"
+lemma l_BF_q68_w54: exists-trace "Ex #i. BF_q68_w54() @ #i"
+lemma l_BF_q68_w55: exists-trace "Ex #i. BF_q68_w55() @ #i"
+lemma l_BF_q68_w56: exists-trace "Ex #i. BF_q68_w56() @ #i"
+lemma l_BF_q68_w57: exists-trace "Ex #i. BF_q68_w57() @ #i"
+lemma l_BF_q68_w58: exists-trace "Ex #i. BF_q68_w58() @ #i"
+lemma l_BF_q88_w44: exists-trace "Ex #i. BF_q88_w44() @ #i"
+lemma l_BF_q88_w45: exists-trace "Ex #i. BF_q88_w45() @ #i"
+lemma l_BF_q88_w46: exists-trace "Ex #i. BF_q88_w46() @ #i"
+lemma l_BF_q88_w47: exists-trace "Ex #i. BF_q88_w47() @ #i"
+lemma l_BF_q88_w48: exists-trace "Ex #i. BF_q88_w48() @ #i"
+lemma l_BF_q88_w49: exists-trace "Ex #i. BF_q88_w49() @ #i"
+lemma l_BF_q88_w50: exists-trace "Ex #i. BF_q88_w50() @ #i"
+lemma l_BF_q88_w51: exists-trace "Ex #i. BF_q88_w51() @ #i"
+lemma l_BF_q88_w52: exists-trace "Ex #i. BF_q88_w52() @ #i"
+lemma l_BF_q88_w53: exists-trace "Ex #i. BF_q88_w53() @ #i"
+lemma l_BF_q88_w54: exists-trace "Ex #i. BF_q88_w54() @ #i"
+lemma l_BF_q88_w55: exists-trace "Ex #i. BF_q88_w55() @ #i"
+lemma l_BF_q88_w56: exists-trace "Ex #i. BF_q88_w56() @ #i"
+lemma l_BF_q88_w57: exists-trace "Ex #i. BF_q88_w57() @ #i"
+lemma l_BF_q88_w58: exists-trace "Ex #i. BF_q88_w58() @ #i"
+lemma l_BF_q98_w44: exists-trace "Ex #i. BF_q98_w44() @ #i"
+lemma l_BF_q98_w45: exists-trace "Ex #i. BF_q98_w45() @ #i"
+lemma l_BF_q98_w46: exists-trace "Ex #i. BF_q98_w46() @ #i"
+lemma l_BF_q98_w47: exists-trace "Ex #i. BF_q98_w47() @ #i"
+lemma l_BF_q98_w48: exists-trace "Ex #i. BF_q98_w48() @ #i"
+lemma l_BF_q98_w49: exists-trace "Ex #i. BF_q98_w49() @ #i"
+lemma l_BF_q98_w50: exists-trace "Ex #i. BF_q98_w50() @ #i"
+lemma l_BF_q98_w51: exists-trace "Ex #i. BF_q98_w51() @ #i"
+lemma l_BF_q98_w52: exists-trace "Ex #i. BF_q98_w52() @ #i"
+lemma l_BF_q98_w53: exists-trace "Ex #i. BF_q98_w53() @ #i"
+lemma l_BF_q98_w54: exists-trace "Ex #i. BF_q98_w54() @ #i"
+lemma l_BF_q98_w55: exists-trace "Ex #i. BF_q98_w55() @ #i"
+lemma l_BF_q98_w56: exists-trace "Ex #i. BF_q98_w56() @ #i"
+lemma l_BF_q98_w57: exists-trace "Ex #i. BF_q98_w57() @ #i"
+lemma l_BF_q98_w58: exists-trace "Ex #i. BF_q98_w58() @ #i"
+
+end

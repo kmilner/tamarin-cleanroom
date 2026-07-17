@@ -6,12 +6,13 @@
 //! byte-for-byte. The `vv_*` fixtures are the value-validation error texts.
 
 use cli_clean::args::{parse_args, read_haskell_int, Args, OutputModule, Parsed, PartialEval, StopOnTrace};
+use cli_clean::emit::{drive_batch, BatchEmitter, StreamCollector};
 use cli_clean::errors::{app_error, open_file_error, OpenFileError, ParseError};
 use cli_clean::framing::{
-    frame_batch, frame_parse_only, frame_variants, render_summary, BatchTheory, LemmaResult,
-    LoadedTheory, Summary, SummaryEntry, TraceKind,
+    frame_batch, frame_parse_only, frame_variants, render_summary, BatchTheory, LemmaOutcome,
+    LemmaResult, LoadedTheory, Summary, TraceKind, WarningSummary,
 };
-use cli_clean::stream::Stream;
+use cli_clean::stream::{Stream, Streams};
 use cli_clean::version::{frame_version, MaudeInfo, VersionInfo};
 use cli_clean::{parse, render_help, render_version, Command, Mode};
 
@@ -372,11 +373,11 @@ fn summary_start(out: &str) -> usize {
     out.find(&sep).expect("summary rule")
 }
 
-fn lemma(name: &str, kind: TraceKind, result: LemmaResult, steps: u64) -> SummaryEntry {
-    SummaryEntry::Lemma { name: s(name), kind, result, steps }
+fn lemma(name: &str, kind: TraceKind, result: LemmaResult, steps: u64) -> LemmaOutcome {
+    LemmaOutcome { name: s(name), kind, result, steps }
 }
 
-fn nslpk3_entries(nonce_result: LemmaResult, nonce_steps: u64) -> Vec<SummaryEntry> {
+fn nslpk3_entries(nonce_result: LemmaResult, nonce_steps: u64) -> Vec<LemmaOutcome> {
     vec![
         lemma("types", TraceKind::AllTraces, LemmaResult::AnalysisIncomplete, 1),
         lemma("nonce_secrecy", TraceKind::AllTraces, nonce_result, nonce_steps),
@@ -400,7 +401,8 @@ fn frame_batch_default_reproduces_both_streams() {
             analyzed,
             output,
             processing_time: time,
-            entries: nslpk3_entries(LemmaResult::AnalysisIncomplete, 1),
+            warnings: None,
+            lemmas: nslpk3_entries(LemmaResult::AnalysisIncomplete, 1),
         },
     };
     let streams = frame_batch(&MaudeInfo::default(), &[theory]);
@@ -427,7 +429,8 @@ fn frame_batch_prove_reproduces_both_streams() {
             analyzed,
             output,
             processing_time: time,
-            entries: nslpk3_entries(LemmaResult::Verified, 54),
+            warnings: None,
+            lemmas: nslpk3_entries(LemmaResult::Verified, 54),
         },
     };
     let streams = frame_batch(&MaudeInfo::default(), &[theory]);
@@ -450,7 +453,8 @@ fn frame_batch_output_file_summary_has_aligned_output_line() {
             analyzed,
             output,
             processing_time: time,
-            entries: nslpk3_entries(LemmaResult::AnalysisIncomplete, 1),
+            warnings: None,
+            lemmas: nslpk3_entries(LemmaResult::AnalysisIncomplete, 1),
         },
     };
     let streams = frame_batch(&MaudeInfo::default(), &[theory]);
@@ -474,7 +478,8 @@ fn frame_batch_multifile_reproduces_both_streams() {
             analyzed: blocks[0].0.clone(),
             output: blocks[0].1.clone(),
             processing_time: blocks[0].2,
-            entries: nslpk3_entries(LemmaResult::AnalysisIncomplete, 1),
+            warnings: None,
+            lemmas: nslpk3_entries(LemmaResult::AnalysisIncomplete, 1),
         },
     };
     let t2 = BatchTheory {
@@ -485,7 +490,9 @@ fn frame_batch_multifile_reproduces_both_streams() {
             analyzed: blocks[1].0.clone(),
             output: blocks[1].1.clone(),
             processing_time: blocks[1].2,
-            entries: vec![SummaryEntry::Warning { count: 1 }],
+            // Default-mode warning theory: count line only, no advisory line.
+            warnings: Some(WarningSummary { failed_checks: 1, analysis_maybe_wrong: false }),
+            lemmas: vec![],
         },
     };
     let streams = frame_batch(&MaudeInfo::default(), &[t1, t2]);
@@ -531,7 +538,8 @@ fn summary_output_column_alignment_is_exact() {
         analyzed: s("T.spthy"),
         output: Some(s("/out/T.spthy")),
         processing_time: 0.4,
-        entries: vec![],
+        warnings: None,
+        lemmas: vec![],
     };
     let block = render_summary(std::slice::from_ref(&summary));
     let output_line = format!("  output:{}{}", " ".repeat(10), "/out/T.spthy");
@@ -543,6 +551,392 @@ fn summary_output_column_alignment_is_exact() {
             assert_eq!(2 + "output:".len() + (rest.len() - rest.trim_start().len()), 19);
         }
     }
+}
+
+// ---- GAP 1 (Round 5): summary content — warnings + lemmas, verdicts, bounded ---
+
+/// Frame a single closed theory from its captured `.out`/`.err` fixture: slice the
+/// opaque payload and summary slots out of stdout, recover the theory's
+/// `extra_progress` (anything after its `Theory closed` marker) from stderr, and
+/// reassemble both streams with the given summary content.
+fn frame_single(
+    out_cap: &str,
+    err_cap: &str,
+    name: &str,
+    warnings: Option<WarningSummary>,
+    lemmas: Vec<LemmaOutcome>,
+) -> Streams {
+    let cut = summary_start(out_cap);
+    let (analyzed, output, time) = slots(&out_cap[cut..]).remove(0);
+    let marker = format!("[Theory {name}] Theory closed\n");
+    let closed_end = err_cap.find(&marker).expect("closed marker") + marker.len();
+    let theory = BatchTheory {
+        name: s(name),
+        payload: Some(out_cap[..cut].to_string()),
+        extra_progress: err_cap[closed_end..].to_string(),
+        summary: Summary { analyzed, output, processing_time: time, warnings, lemmas },
+    };
+    frame_batch(&MaudeInfo::default(), &[theory])
+}
+
+fn warn(failed_checks: u64, analysis_maybe_wrong: bool) -> Option<WarningSummary> {
+    Some(WarningSummary { failed_checks, analysis_maybe_wrong })
+}
+
+#[test]
+fn summary_warning_and_lemma_under_prove() {
+    // A single theory with BOTH a wellformedness warning and a proved lemma: the
+    // warning heading carries the advisory second line (proving run), a `  ` line
+    // separates the warning heading from the lemma line, and the lemma is verified.
+    let out_cap = include_str!("fixtures/r5_warn_lemma_prove.out.txt");
+    let err_cap = include_str!("fixtures/r5_warn_lemma_prove.err.txt");
+    let streams = frame_single(
+        out_cap,
+        err_cap,
+        "WarnAndLemma",
+        warn(1, true),
+        vec![lemma("trivial_true", TraceKind::AllTraces, LemmaResult::Verified, 2)],
+    );
+    assert_eq!(streams.out, out_cap);
+    assert_eq!(streams.err, err_cap);
+}
+
+#[test]
+fn summary_warning_and_lemma_default_has_no_advisory_line() {
+    // Same theory, plain analyze: the warning heading is the count line only (no
+    // advisory), still separated from the lemma line by a `  ` line; the lemma is
+    // analysis-incomplete.
+    let out_cap = include_str!("fixtures/r5_warn_lemma_default.out.txt");
+    let err_cap = include_str!("fixtures/r5_warn_lemma_default.err.txt");
+    let streams = frame_single(
+        out_cap,
+        err_cap,
+        "WarnAndLemma",
+        warn(1, false),
+        vec![lemma("trivial_true", TraceKind::AllTraces, LemmaResult::AnalysisIncomplete, 1)],
+    );
+    assert_eq!(streams.out, out_cap);
+    assert_eq!(streams.err, err_cap);
+}
+
+#[test]
+fn summary_falsified_wording_depends_on_trace_kind() {
+    // all-traces falsified -> "falsified - found trace"; exists-trace falsified ->
+    // "falsified - no trace found". Warning + advisory precede the lemma lines.
+    let out_cap = include_str!("fixtures/r5_falsify_prove.out.txt");
+    let err_cap = include_str!("fixtures/r5_falsify_prove.err.txt");
+    let streams = frame_single(
+        out_cap,
+        err_cap,
+        "FalsifyMe",
+        warn(1, true),
+        vec![
+            lemma("secrecy_all", TraceKind::AllTraces, LemmaResult::Falsified, 3),
+            lemma("never_happens", TraceKind::ExistsTrace, LemmaResult::Falsified, 2),
+        ],
+    );
+    assert_eq!(streams.out, out_cap);
+    assert_eq!(streams.err, err_cap);
+    // Lock the exact verdict phrases in the observed bytes.
+    assert!(streams.out.contains("secrecy_all (all-traces): falsified - found trace (3 steps)\n"));
+    assert!(streams
+        .out
+        .contains("never_happens (exists-trace): falsified - no trace found (2 steps)\n"));
+}
+
+#[test]
+fn summary_warning_no_lemma_under_prove_has_advisory_no_separator() {
+    // Warning, no lemmas, proving run: count line + advisory line, and NO trailing
+    // `  ` separator (there is no lemma section to separate from).
+    let out_cap = include_str!("fixtures/r5_freshpub_prove.out.txt");
+    let err_cap = include_str!("fixtures/r5_freshpub_prove.err.txt");
+    let streams = frame_single(out_cap, err_cap, "FreshPubConst", warn(1, true), vec![]);
+    assert_eq!(streams.out, out_cap);
+    assert_eq!(streams.err, err_cap);
+}
+
+#[test]
+fn summary_no_warning_no_lemma_is_just_the_opening_line() {
+    // A well-formed theory with no lemmas: the body is only the opening `  ` line.
+    let out_cap = include_str!("fixtures/r5_nolemma_default.out.txt");
+    let err_cap = include_str!("fixtures/r5_nolemma_default.err.txt");
+    let streams = frame_single(out_cap, err_cap, "NoLemmaClean", None, vec![]);
+    assert_eq!(streams.out, out_cap);
+    assert_eq!(streams.err, err_cap);
+}
+
+#[test]
+fn summary_verified_wording_uniform_across_trace_kinds() {
+    // Both an exists-trace and an all-traces verified lemma print plain "verified".
+    let out_cap = include_str!("fixtures/r5_exists_verified.out.txt");
+    let err_cap = include_str!("fixtures/r5_exists_verified.err.txt");
+    let streams = frame_single(
+        out_cap,
+        err_cap,
+        "ExistsVerified",
+        None,
+        vec![
+            lemma("can_ping", TraceKind::ExistsTrace, LemmaResult::Verified, 2),
+            lemma("always_true", TraceKind::AllTraces, LemmaResult::Verified, 2),
+        ],
+    );
+    assert_eq!(streams.out, out_cap);
+    assert_eq!(streams.err, err_cap);
+}
+
+#[test]
+fn summary_bounded_prove_yields_only_incomplete_lines() {
+    // GAP 1(a): a proving run cut short by `--bound` adds no extra summary line —
+    // every unclosed lemma is a plain "analysis incomplete (<explored> steps)",
+    // and with no warning there is no advisory line. Only the step counts differ.
+    let out_cap = include_str!("fixtures/r5_nslpk3_prove_bound2.out.txt");
+    let err_cap = include_str!("fixtures/r5_nslpk3_prove_bound2.err.txt");
+    let streams = frame_single(
+        out_cap,
+        err_cap,
+        "NSLPK3",
+        None,
+        vec![
+            lemma("types", TraceKind::AllTraces, LemmaResult::AnalysisIncomplete, 1),
+            lemma("nonce_secrecy", TraceKind::AllTraces, LemmaResult::AnalysisIncomplete, 6),
+            lemma("injective_agree", TraceKind::AllTraces, LemmaResult::AnalysisIncomplete, 1),
+            lemma("session_key_setup_possible", TraceKind::ExistsTrace, LemmaResult::AnalysisIncomplete, 1),
+        ],
+    );
+    assert_eq!(streams.out, out_cap);
+    assert_eq!(streams.err, err_cap);
+}
+
+#[test]
+fn summary_multifile_lemmas_then_warn_and_lemma_under_prove() {
+    // GAP 1(b) between-theory joining: a lemmas-only theory followed by a
+    // warn+lemma theory, one combined summary. Each theory block is preceded by a
+    // blank line; the warn theory carries advisory + `  ` separator internally.
+    let out_cap = include_str!("fixtures/r5_multi_warn_prove.out.txt");
+    let err_cap = include_str!("fixtures/r5_multi_warn_prove.err.txt");
+    let cut = summary_start(out_cap);
+    let payload_region = &out_cap[..cut];
+    let split = payload_region.find("theory WarnAndLemma").expect("second theory");
+    let blocks = slots(&out_cap[cut..]);
+    // NSLPK3's extra progress is everything on stderr between its `Theory closed`
+    // marker and the start of the next theory's progress block.
+    let m1 = "[Theory NSLPK3] Theory closed\n";
+    let m2 = "[Theory WarnAndLemma] Theory loaded\n";
+    let s1 = err_cap.find(m1).unwrap() + m1.len();
+    let s2 = err_cap.find(m2).unwrap();
+    let extra1 = err_cap[s1..s2].to_string();
+    let t1 = BatchTheory {
+        name: s("NSLPK3"),
+        payload: Some(payload_region[..split].to_string()),
+        extra_progress: extra1,
+        summary: Summary {
+            analyzed: blocks[0].0.clone(),
+            output: blocks[0].1.clone(),
+            processing_time: blocks[0].2,
+            warnings: None,
+            lemmas: vec![
+                lemma("types", TraceKind::AllTraces, LemmaResult::Verified, 32),
+                lemma("nonce_secrecy", TraceKind::AllTraces, LemmaResult::Verified, 54),
+                lemma("injective_agree", TraceKind::AllTraces, LemmaResult::Verified, 92),
+                lemma("session_key_setup_possible", TraceKind::ExistsTrace, LemmaResult::Verified, 5),
+            ],
+        },
+    };
+    let t2 = BatchTheory {
+        name: s("WarnAndLemma"),
+        payload: Some(payload_region[split..].to_string()),
+        extra_progress: String::new(),
+        summary: Summary {
+            analyzed: blocks[1].0.clone(),
+            output: blocks[1].1.clone(),
+            processing_time: blocks[1].2,
+            warnings: warn(1, true),
+            lemmas: vec![lemma("trivial_true", TraceKind::AllTraces, LemmaResult::Verified, 2)],
+        },
+    };
+    let streams = frame_batch(&MaudeInfo::default(), &[t1, t2]);
+    assert_eq!(streams.out, out_cap);
+    assert_eq!(streams.err, err_cap);
+}
+
+#[test]
+fn summary_section_bytes_are_exact() {
+    // Pin the exact body bytes for the warn+lemma+prove shape independent of any
+    // captured payload: opening `  ` line, warning count line, advisory line
+    // (11-space aligned), `  ` separator, then the lemma line.
+    let summary = Summary {
+        analyzed: s("T.spthy"),
+        output: None,
+        processing_time: 0.06,
+        warnings: warn(1, true),
+        lemmas: vec![lemma("trivial_true", TraceKind::AllTraces, LemmaResult::Verified, 2)],
+    };
+    let block = render_summary(std::slice::from_ref(&summary));
+    let expected_body = concat!(
+        "  processing time: 0.06s\n",
+        "  \n",
+        "  WARNING: 1 wellformedness check failed!\n",
+        "           The analysis results might be wrong!\n",
+        "  \n",
+        "  trivial_true (all-traces): verified (2 steps)\n",
+    );
+    assert!(block.contains(expected_body), "block was: {block:?}");
+    // Advisory line aligns exactly under the text after "  WARNING: " (11 cols).
+    for line in block.lines() {
+        if line.trim_start().starts_with("The analysis results") {
+            assert_eq!(line.len() - line.trim_start().len(), "  WARNING: ".len());
+        }
+    }
+}
+
+// ---- GAP 2 (Round 5): incremental (streaming) emission ------------------------
+
+/// Drive the incremental emitter over a `&[BatchTheory]` and return the per-stream
+/// buffers it accumulated.
+fn streamed(theories: &[BatchTheory]) -> Streams {
+    let mut sink = StreamCollector::default();
+    drive_batch(&mut sink, &MaudeInfo::default(), theories);
+    sink.streams
+}
+
+fn nslpk3_theory(result: LemmaResult, nonce_steps: u64, payload: &str) -> BatchTheory {
+    BatchTheory {
+        name: s("NSLPK3"),
+        payload: Some(payload.to_string()),
+        extra_progress: String::new(),
+        summary: Summary {
+            analyzed: s("classic/NSLPK3.spthy"),
+            output: None,
+            processing_time: 0.4,
+            warnings: None,
+            lemmas: nslpk3_entries(result, nonce_steps),
+        },
+    }
+}
+
+#[test]
+fn streaming_matches_assembled_on_shared_inputs() {
+    // The interop equivalence: for the same inputs, the incremental emitter's
+    // per-stream bytes equal the assembled frame_batch model's.
+    let warn_theory = BatchTheory {
+        name: s("WarnAndLemma"),
+        payload: Some(s("theory WarnAndLemma\n...opaque payload...\nend\n")),
+        extra_progress: String::new(),
+        summary: Summary {
+            analyzed: s("warn_and_lemma.spthy"),
+            output: None,
+            processing_time: 0.06,
+            warnings: warn(1, true),
+            lemmas: vec![lemma("trivial_true", TraceKind::AllTraces, LemmaResult::Verified, 2)],
+        },
+    };
+    let cases: Vec<Vec<BatchTheory>> = vec![
+        vec![],
+        vec![nslpk3_theory(LemmaResult::AnalysisIncomplete, 1, "theory NSLPK3\n..payload..\nend\n")],
+        vec![BatchTheory {
+            extra_progress: s("[Saturating Sources] Step 1 (Max 5)\n[Saturating Sources] Done\n"),
+            ..nslpk3_theory(LemmaResult::Verified, 54, "theory NSLPK3\n..payload..\nend\n")
+        }],
+        vec![
+            nslpk3_theory(LemmaResult::Verified, 54, "theory NSLPK3\n..p1..\nend\n"),
+            warn_theory.clone(),
+        ],
+        // A theory written to an output file emits no payload, only its summary.
+        vec![BatchTheory {
+            payload: None,
+            summary: Summary {
+                output: Some(s("/out/NSLPK3.spthy")),
+                ..nslpk3_theory(LemmaResult::AnalysisIncomplete, 1, "").summary
+            },
+            ..nslpk3_theory(LemmaResult::AnalysisIncomplete, 1, "")
+        }],
+    ];
+    for theories in &cases {
+        let assembled = frame_batch(&MaudeInfo::default(), theories);
+        let streamed = streamed(theories);
+        assert_eq!(streamed.out, assembled.out, "stdout mismatch for {theories:?}");
+        assert_eq!(streamed.err, assembled.err, "stderr mismatch for {theories:?}");
+    }
+}
+
+#[test]
+fn streaming_reproduces_captured_multifile_streams() {
+    // Drive the emitter from the real multi-theory capture and check byte parity
+    // against the fixture on both streams (streaming path, end to end).
+    let out_cap = include_str!("fixtures/r5_multi_warn_prove.out.txt");
+    let err_cap = include_str!("fixtures/r5_multi_warn_prove.err.txt");
+    let cut = summary_start(out_cap);
+    let payload_region = &out_cap[..cut];
+    let split = payload_region.find("theory WarnAndLemma").expect("second theory");
+    let blocks = slots(&out_cap[cut..]);
+    let m1 = "[Theory NSLPK3] Theory closed\n";
+    let m2 = "[Theory WarnAndLemma] Theory loaded\n";
+    let s1 = err_cap.find(m1).unwrap() + m1.len();
+    let s2 = err_cap.find(m2).unwrap();
+    let t1 = BatchTheory {
+        name: s("NSLPK3"),
+        payload: Some(payload_region[..split].to_string()),
+        extra_progress: err_cap[s1..s2].to_string(),
+        summary: Summary {
+            analyzed: blocks[0].0.clone(),
+            output: blocks[0].1.clone(),
+            processing_time: blocks[0].2,
+            warnings: None,
+            lemmas: vec![
+                lemma("types", TraceKind::AllTraces, LemmaResult::Verified, 32),
+                lemma("nonce_secrecy", TraceKind::AllTraces, LemmaResult::Verified, 54),
+                lemma("injective_agree", TraceKind::AllTraces, LemmaResult::Verified, 92),
+                lemma("session_key_setup_possible", TraceKind::ExistsTrace, LemmaResult::Verified, 5),
+            ],
+        },
+    };
+    let t2 = BatchTheory {
+        name: s("WarnAndLemma"),
+        payload: Some(payload_region[split..].to_string()),
+        extra_progress: String::new(),
+        summary: Summary {
+            analyzed: blocks[1].0.clone(),
+            output: blocks[1].1.clone(),
+            processing_time: blocks[1].2,
+            warnings: warn(1, true),
+            lemmas: vec![lemma("trivial_true", TraceKind::AllTraces, LemmaResult::Verified, 2)],
+        },
+    };
+    let streams = streamed(&[t1, t2]);
+    assert_eq!(streams.out, out_cap);
+    assert_eq!(streams.err, err_cap);
+}
+
+#[test]
+fn streaming_manual_drive_orders_streams_correctly() {
+    // The emitter, driven by hand event-by-event (as a real consumer would while
+    // the prover runs), yields the same per-stream bytes as frame_batch. This is
+    // the "consumer chooses flush timing" surface — the collector is one Sink;
+    // ordering and content are the emitter's contract.
+    let theory = BatchTheory {
+        name: s("NSLPK3"),
+        payload: Some(s("theory NSLPK3\n..payload..\nend\n")),
+        extra_progress: s("[Saturating Sources] Step 1 (Max 5)\n[Saturating Sources] Done\n"),
+        summary: Summary {
+            analyzed: s("classic/NSLPK3.spthy"),
+            output: None,
+            processing_time: 0.4,
+            warnings: None,
+            lemmas: nslpk3_entries(LemmaResult::Verified, 54),
+        },
+    };
+    let mut sink = StreamCollector::default();
+    {
+        let mut e = BatchEmitter::begin(&mut sink, &MaudeInfo::default());
+        e.closed_phases("NSLPK3");
+        e.extra_progress("[Saturating Sources] Step 1 (Max 5)\n[Saturating Sources] Done\n");
+        e.payload(Some("theory NSLPK3\n..payload..\nend\n"));
+        e.record_summary(theory.summary.clone());
+        e.finish();
+    }
+    let assembled = frame_batch(&MaudeInfo::default(), std::slice::from_ref(&theory));
+    assert_eq!(sink.streams.out, assembled.out);
+    assert_eq!(sink.streams.err, assembled.err);
 }
 
 // ---- runtime error renderers --------------------------------------------------

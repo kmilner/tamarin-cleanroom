@@ -1,0 +1,111 @@
+E_30_30_p27	3cell a=30 b=30 p=27 predict~31
+E_30_30_p28	3cell a=30 b=30 p=28 predict~31
+E_30_30_p29	3cell a=30 b=30 p=29 predict~31
+E_30_30_p30	3cell a=30 b=30 p=30 predict~31
+E_30_30_p31	3cell a=30 b=30 p=31 predict~31
+E_30_30_p32	3cell a=30 b=30 p=32 predict~31
+E_30_30_p33	3cell a=30 b=30 p=33 predict~31
+E_30_30_p34	3cell a=30 b=30 p=34 predict~31
+E_30_30_p35	3cell a=30 b=30 p=35 predict~31
+E_24_24_p39	3cell a=24 b=24 p=39 predict~43
+E_24_24_p40	3cell a=24 b=24 p=40 predict~43
+E_24_24_p41	3cell a=24 b=24 p=41 predict~43
+E_24_24_p42	3cell a=24 b=24 p=42 predict~43
+E_24_24_p43	3cell a=24 b=24 p=43 predict~43
+E_24_24_p44	3cell a=24 b=24 p=44 predict~43
+E_24_24_p45	3cell a=24 b=24 p=45 predict~43
+E_24_24_p46	3cell a=24 b=24 p=46 predict~43
+E_24_24_p47	3cell a=24 b=24 p=47 predict~43
+E_40_40_p16	3cell a=40 b=40 p=16 predict~20
+E_40_40_p17	3cell a=40 b=40 p=17 predict~20
+E_40_40_p18	3cell a=40 b=40 p=18 predict~20
+E_40_40_p19	3cell a=40 b=40 p=19 predict~20
+E_40_40_p20	3cell a=40 b=40 p=20 predict~20
+E_40_40_p21	3cell a=40 b=40 p=21 predict~20
+E_40_40_p22	3cell a=40 b=40 p=22 predict~20
+E_40_40_p23	3cell a=40 b=40 p=23 predict~20
+E_40_40_p24	3cell a=40 b=40 p=24 predict~20
+E_50_20_p17	3cell a=50 b=20 p=17 predict~21
+E_50_20_p18	3cell a=50 b=20 p=18 predict~21
+E_50_20_p19	3cell a=50 b=20 p=19 predict~21
+E_50_20_p20	3cell a=50 b=20 p=20 predict~21
+E_50_20_p21	3cell a=50 b=20 p=21 predict~21
+E_50_20_p22	3cell a=50 b=20 p=22 predict~21
+E_50_20_p23	3cell a=50 b=20 p=23 predict~21
+E_50_20_p24	3cell a=50 b=20 p=24 predict~21
+E_50_20_p25	3cell a=50 b=20 p=25 predict~21
+E_40_10_p35	3cell a=40 b=10 p=35 predict~39
+E_40_10_p36	3cell a=40 b=10 p=36 predict~39
+E_40_10_p37	3cell a=40 b=10 p=37 predict~39
+E_40_10_p38	3cell a=40 b=10 p=38 predict~39
+E_40_10_p39	3cell a=40 b=10 p=39 predict~39
+E_40_10_p40	3cell a=40 b=10 p=40 predict~39
+E_40_10_p41	3cell a=40 b=10 p=41 predict~39
+E_40_10_p42	3cell a=40 b=10 p=42 predict~39
+E_40_10_p43	3cell a=40 b=10 p=43 predict~39
+E_60_10_p23	3cell a=60 b=10 p=23 predict~27
+E_60_10_p24	3cell a=60 b=10 p=24 predict~27
+E_60_10_p25	3cell a=60 b=10 p=25 predict~27
+E_60_10_p26	3cell a=60 b=10 p=26 predict~27
+E_60_10_p27	3cell a=60 b=10 p=27 predict~27
+E_60_10_p28	3cell a=60 b=10 p=28 predict~27
+E_60_10_p29	3cell a=60 b=10 p=29 predict~27
+E_60_10_p30	3cell a=60 b=10 p=30 predict~27
+E_60_10_p31	3cell a=60 b=10 p=31 predict~27
+E_25_14_p44	3cell a=25 b=14 p=44 predict~48
+E_25_14_p45	3cell a=25 b=14 p=45 predict~48
+E_25_14_p46	3cell a=25 b=14 p=46 predict~48
+E_25_14_p47	3cell a=25 b=14 p=47 predict~48
+E_25_14_p48	3cell a=25 b=14 p=48 predict~48
+E_25_14_p49	3cell a=25 b=14 p=49 predict~48
+E_25_14_p50	3cell a=25 b=14 p=50 predict~48
+E_25_14_p51	3cell a=25 b=14 p=51 predict~48
+E_25_14_p52	3cell a=25 b=14 p=52 predict~48
+E_hg68_p17	2cell huge q=68 p=17 predict~21
+E_hg68_p18	2cell huge q=68 p=18 predict~21
+E_hg68_p19	2cell huge q=68 p=19 predict~21
+E_hg68_p20	2cell huge q=68 p=20 predict~21
+E_hg68_p21	2cell huge q=68 p=21 predict~21
+E_hg68_p22	2cell huge q=68 p=22 predict~21
+E_hg68_p23	2cell huge q=68 p=23 predict~21
+E_hg68_p24	2cell huge q=68 p=24 predict~21
+E_hg68_p25	2cell huge q=68 p=25 predict~21
+E_hg78_p16	2cell huge q=78 p=16 predict~20
+E_hg78_p17	2cell huge q=78 p=17 predict~20
+E_hg78_p18	2cell huge q=78 p=18 predict~20
+E_hg78_p19	2cell huge q=78 p=19 predict~20
+E_hg78_p20	2cell huge q=78 p=20 predict~20
+E_hg78_p21	2cell huge q=78 p=21 predict~20
+E_hg78_p22	2cell huge q=78 p=22 predict~20
+E_hg78_p23	2cell huge q=78 p=23 predict~20
+E_hg78_p24	2cell huge q=78 p=24 predict~20
+E_hg88_p16	2cell huge q=88 p=16 predict~20
+E_hg88_p17	2cell huge q=88 p=17 predict~20
+E_hg88_p18	2cell huge q=88 p=18 predict~20
+E_hg88_p19	2cell huge q=88 p=19 predict~20
+E_hg88_p20	2cell huge q=88 p=20 predict~20
+E_hg88_p21	2cell huge q=88 p=21 predict~20
+E_hg88_p22	2cell huge q=88 p=22 predict~20
+E_hg88_p23	2cell huge q=88 p=23 predict~20
+E_hg88_p24	2cell huge q=88 p=24 predict~20
+E_hg98_p16	2cell huge q=98 p=16 predict~20
+E_hg98_p17	2cell huge q=98 p=17 predict~20
+E_hg98_p18	2cell huge q=98 p=18 predict~20
+E_hg98_p19	2cell huge q=98 p=19 predict~20
+E_hg98_p20	2cell huge q=98 p=20 predict~20
+E_hg98_p21	2cell huge q=98 p=21 predict~20
+E_hg98_p22	2cell huge q=98 p=22 predict~20
+E_hg98_p23	2cell huge q=98 p=23 predict~20
+E_hg98_p24	2cell huge q=98 p=24 predict~20
+E_ord_ABT_p29	order ord_ABT p=29
+E_ord_ABT_p30	order ord_ABT p=30
+E_ord_ABT_p31	order ord_ABT p=31
+E_ord_ABT_p32	order ord_ABT p=32
+E_ord_TAB_p29	order ord_TAB p=29
+E_ord_TAB_p30	order ord_TAB p=30
+E_ord_TAB_p31	order ord_TAB p=31
+E_ord_TAB_p32	order ord_TAB p=32
+E_ord_ATB_p29	order ord_ATB p=29
+E_ord_ATB_p30	order ord_ATB p=30
+E_ord_ATB_p31	order ord_ATB p=31
+E_ord_ATB_p32	order ord_ATB p=32

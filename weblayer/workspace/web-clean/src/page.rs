@@ -18,8 +18,26 @@
 
 use crate::escape::html_escape;
 use crate::shell_template::{
-    APPEND_ITEM, PAGE_MID, PAGE_PREFIX, PAGE_TAIL, ROOT_TEMPLATE,
+    APPEND_ITEM, PAGE_MID, PAGE_PREFIX, PAGE_TAIL, RELOAD_ITEM, ROOT_TEMPLATE,
 };
+
+/// Where a theory version was loaded from, as it affects the page shell.
+///
+/// Observed live (round 6): a theory loaded from an on-disk file (the server
+/// command line, or a version derived from one) renders the north-bar "Reload
+/// file" item and — for trace theories — the Actions-menu "Append modified
+/// lemmas to file" item; a theory uploaded through `POST /` (which has no on-disk
+/// file) omits both. The distinction is inherited: a proof-derived version of an
+/// uploaded theory is still [`Origin::Uploaded`].
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub enum Origin {
+    /// Loaded from an on-disk source file: "Reload file" is shown, and (trace
+    /// only) "Append modified lemmas to file".
+    Local,
+    /// Uploaded via `POST /` — no on-disk file, so both "Reload file" and "Append
+    /// modified lemmas to file" are omitted regardless of theory kind.
+    Uploaded,
+}
 
 /// Parameters that vary between rendered theory-view pages.
 pub struct PageParams<'a> {
@@ -31,15 +49,19 @@ pub struct PageParams<'a> {
     pub version: &'a str,
     /// Source filename used in the download / append links (e.g. `"foo.spthy"`).
     pub filename: &'a str,
+    /// Where this version was loaded from (gates the "Reload file"/"Append"
+    /// north-bar items).
+    pub origin: Origin,
 }
 
 /// Which theory-view shell variant to render.
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum ShellKind {
-    /// Ordinary trace analysis: `/thy/trace/`, `Theory:` title, append item present.
+    /// Ordinary trace analysis: `/thy/trace/`, `Theory:` title. The "Append
+    /// modified lemmas" item is present for a Local-origin trace theory.
     Trace,
     /// Observational-equivalence (diff) analysis: `/thy/equiv/`, `DiffTheory:`
-    /// title, no append item.
+    /// title, no append item (for any origin).
     Equiv,
 }
 
@@ -57,11 +79,23 @@ impl ShellKind {
             ShellKind::Equiv => "Diff",
         }
     }
-    fn append(self) -> &'static str {
-        match self {
-            ShellKind::Trace => APPEND_ITEM,
-            ShellKind::Equiv => "",
-        }
+}
+
+/// The `§RELOAD§` slot content: the "Reload file" item, present iff the theory has
+/// an on-disk source file (Local origin).
+fn reload_item(origin: Origin) -> &'static str {
+    match origin {
+        Origin::Local => RELOAD_ITEM,
+        Origin::Uploaded => "",
+    }
+}
+
+/// The `§APPEND§` slot content: the "Append modified lemmas to file" item, present
+/// iff the theory is a trace theory (not diff) of Local origin.
+fn append_item(kind: ShellKind, origin: Origin) -> &'static str {
+    match (kind, origin) {
+        (ShellKind::Trace, Origin::Local) => APPEND_ITEM,
+        _ => "",
     }
 }
 
@@ -78,10 +112,11 @@ pub fn render_page_kind(
     center_inner: &str,
 ) -> String {
     let idx = p.index.to_string();
-    // Fill the append slot first so its own KIND/IDX/FILENAME slots are then
-    // resolved by the scalar substitutions below.
+    // Fill the reload/append slots first so their own KIND/IDX/FILENAME slots are
+    // then resolved by the scalar substitutions below.
     let prefix = PAGE_PREFIX
-        .replace("§APPEND§", kind.append())
+        .replace("§RELOAD§", reload_item(p.origin))
+        .replace("§APPEND§", append_item(kind, p.origin))
         .replace("§DIFF§", kind.title_diff())
         .replace("§NAME§", &html_escape(p.theory_name))
         .replace("§KIND§", kind.path())

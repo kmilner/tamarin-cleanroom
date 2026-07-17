@@ -1,0 +1,9 @@
+theory BareTyped
+begin
+builtins: hashing
+macros: konst() = h('k')
+
+rule R:
+  [ In(x) ] --[ A(konst:msg) ]-> [ Out(x) ]
+
+end

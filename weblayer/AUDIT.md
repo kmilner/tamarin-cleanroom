@@ -603,3 +603,144 @@ matching vs upstream trailing-tolerance) — both are untraced generalizations t
 DIVERGE from upstream, i.e. non-copying evidence, and neither is copied protectable
 expression nor requires redo. Findings that survive filtration: 0. No redo instructions
 issued. VERDICT: PASS.
+
+---
+
+## Round 6 — both-sides similarity audit (weblayer delta: origin-aware page shell + state delegation)
+
+Delta audited: `git diff` against HEAD 75807c0, restricted to `weblayer/`. Two items.
+**ITEM 1** — an origin-aware page shell: `page::Origin { Local, Uploaded }`, a
+`PageParams.origin`/`Meta.origin` field, a new `§RELOAD§` template slot with
+`RELOAD_ITEM`, and `page::reload_item`/`append_item` gating the north-bar "Reload
+file" and "Append modified lemmas to file" items. **ITEM 2** — a behaviour-neutral
+state-delegation refactor: the `StateOps` trait + `InMemoryState` reference impl, with
+`Server<P, S>` now generic over the state backend. Upstream mapped: `Web/Hamlet.hs`
+`headerTpl` (166–210) / `headerDiffTpl` (222–262); `Web/Types.hs` `TheoryOrigin`
+(168), `GenericTheoryInfo` (174–183), `WebUI.theoryVar :: MVar TheoryMap` (96/142);
+`Web/Handler.hs` `getTheory`/`putTheory`/`replaceTheory` (173–382), `checkReloadOrigin`
+(386–387).
+
+### Provenance cross-check (every embedded behavioural claim is logged)
+
+| claim baked into the code | probe |
+|---|---|
+| Reload present ⇔ origin==Local (independent of kind) | [R61] matrix; [R60] two-item diff |
+| Append present ⇔ origin==Local AND kind==trace | [R61] matrix |
+| Reload `<li>` sits between *Index* and *Actions*; Append is last *Actions* item | [R60] index-normalized full-page diff |
+| origin is inherited through proof ops (per-version property) | [R62] |
+| deterministic shell prefix/tail reproduce the four fixtures | [R63]; `r6_overview_*` captures |
+| version model StateOps documents (monotonic-from-1, retained, in-place-vs-new) | §§13.1/14.3, [R45] (prior rounds) |
+
+No claim in the delta lacks logged provenance. The four `r6_overview_*` fixtures carry
+exactly the probed kind×origin matrix (trace+Local 1/1, trace+Upload 0/0, equiv+Local
+1/0, equiv+Upload 0/0). BEHAVIOR §16 states "No file under `/home/kamilner/tamarin-rs/`
+was read."
+
+### Filtration
+
+**ITEM 1 — the two gated items are boundary output; the gating is a merger truth table.**
+The rendered markup of both items (`<li><form class="ajax-form ajax-form-full
+reload-confirm" method="POST" action="…/reload">…Reload file…` and the
+`get_and_append` append form) is the literal bytes the reference server emits, probed
+byte-for-byte ([R60]) and committed as fixtures. Crucially the reload markup is **not
+new this round**: the diff shows it was already inline in the prior-round `PAGE_PREFIX`
+(it passed earlier audits as boundary output); this round only **relocates** it verbatim
+into the named `RELOAD_ITEM` constant and adds the `§RELOAD§` slot. The gating logic
+(`reload_item`: Local→item else ""; `append_item`: (Trace,Local)→item else "") is the
+minimal encoding of the observed 2×2 truth table — merger. FILTERED.
+
+**ITEM 2 — a behaviour-neutral internal refactor with no observable surface.** `StateOps`
+/ `InMemoryState` / `Server<P,S>` change no served byte (all prior parity/dispatch tests
+pass byte-identical against the default `InMemoryState`). There is therefore no boundary
+output to compare; the only similarity question is whether the internal decomposition or
+names transcribe upstream's state model — see comparison below. The lifecycle *contract*
+it documents (monotonic-from-1, retention, in-place mutation) is the already-probed
+version model of §§13.1/14.3, not new content. FILTERED (idea-level behaviour + prior-probed
+lifecycle).
+
+### Comparison — affirmative evidence of independent, observation-only construction
+
+* **`Origin` is a 2-way OBSERVED distinction, not upstream's 3-way TYPE.** Upstream
+  `TheoryOrigin = Local FilePath | Upload String | Interactive` (Types.hs 168) is a
+  three-constructor sum carrying payloads (a FilePath, a name). The clean `Origin {
+  Local, Uploaded }` is a payload-free two-valued enum: it collapses upstream's two
+  non-Local cases (`Upload`, `Interactive`) into one because they render byte-identical
+  shells (both are `not isLocalOrigin` → no Reload, no Append). This is a textbook
+  filtration result — the clean model reflects the observed shell outcomes (two), not
+  the source type (three). Even the shared token `Local` is boundary-derived, not
+  transcribed: the probed help-pane text prints `from Local "<path>"` / `from Upload
+  "<name>"` ([R60]), and the enum name `Uploaded` (past participle) ≠ upstream
+  constructor `Upload`.
+* **No `isLocalOrigin` helper; a different template decomposition.** Upstream inlines
+  `$if isLocalOrigin origin` guards **inside** two separate Hamlet templates
+  (`headerTpl` for trace, `headerDiffTpl` for diff), the diff template structurally
+  **omitting** the append block. The clean side has one `PAGE_PREFIX` with two
+  substitution slots filled by `reload_item(origin)` / `append_item(kind, origin)` —
+  its own pre-existing slot machinery, with the kind gate centralized in a `(kind,
+  origin)` match rather than expressed by which of two templates you are in. The
+  upstream helper name `isLocalOrigin` appears nowhere.
+* **Rendered-attribute order confirms probe derivation.** The clean/emitted reload form
+  orders attributes `class … method … action …`; the Hamlet source (Hamlet.hs 179)
+  orders them `method … action … class …`. The clean side matched the **rendered**
+  bytes (what Yesod emits), not the template source order — a black-box tell.
+* **`Meta`/`PageParams` are grouped by shell need, not upstream's `TheoryInfo`.** The
+  clean structs carry `{name, version, filename, origin}` / `{theory_name, index,
+  version, filename, origin}`. Upstream `GenericTheoryInfo` (Types.hs 174–183) carries
+  `{index, theory, time, parent, primary, origin, autoProver, errorsHtml}` — the
+  proof-search/bookkeeping fields (`parent`, `primary`, `autoProver`, `errorsHtml`) are
+  absent from the clean grouping. Only `origin`/`index` overlap, both
+  behaviour-descriptive and inevitable. Notably the clean side models origin
+  **inheritance** as a prover-reported `Meta.origin` ([R62]) and does **not** reproduce
+  upstream's `parent :: Maybe TheoryIdx` pointer through which upstream propagates origin.
+* **`StateOps` is a Rust-idiomatic pluggable backend, not upstream's MVar+Map.** Upstream
+  owns version state as `WebUI.theoryVar :: MVar (M.Map TheoryIdx EitherTheoryInfo)`
+  (Types.hs 96/142), mutated by `getTheory` (`M.lookup` under `withMVar`, Handler.hs
+  173–176), `putTheory` / `replaceTheory` (`M.insert` under `modifyMVar`, 341–382).
+  The clean trait exposes `insert_new` / `get` / `replace` / `remove` / `entries` over
+  an abstract backend so a consumer can supply an async caching owner. No identifier
+  overlaps beyond the generic verbs `get`/`replace`; `insert_new` ≠ `putTheory`,
+  `entries` ≠ the `withMVar … pure` whole-map read, and the MVar/Map/`theoryVar`/
+  `TheoryMap` machinery has no clean counterpart. A grep of the whole delta (src +
+  tests) for upstream state/type identifiers (`TheoryInfo`, `theoryVar`, `TheoryMap`,
+  `getTheory`, `putTheory`, `replaceTheory`, `isLocalOrigin`, `TheoryOrigin`,
+  `modifyMVar`, `parent`, `primary`, `EitherTheory`, `WebUI`) returns nothing — the only
+  `Interactive` hits are the pre-existing `interactive-graph-def` route, unrelated to
+  the `TheoryOrigin.Interactive` constructor.
+* **No upstream comment lineage.** No Haddock/Hamlet comment is reproduced; upstream's
+  `-- Check if theory origin is a local file (needed for reload functionality)`
+  (Hamlet.hs 208) has no clean echo (the clean docs describe the observed shell effect).
+
+### Non-blocking notes (NOT similarity findings, no redo)
+
+1. **Comment-hygiene regression — process narration in shipped source.** The new doc
+   comments carry provenance/round narration: `page.rs` Origin doc says "Observed live
+   (round 6): …", and the `dispatch.rs` `StateOps` doc says "(probed live; `BEHAVIOR.md`
+   §§13.1/14.3, §16)" and "see the honesty note in `REPORT.md`." This is **not** upstream
+   comment lineage and **not** copied protectable expression — so it does not bear on the
+   verdict — but it regresses the clean-room's own "comments describe current state only"
+   standard that rounds 4–5 held (round 5 verified shipped comments were narration-free).
+   Team may want to strip the round/"probed live"/§-reference phrasing so the shipped
+   comments describe only current behaviour, keeping provenance in BEHAVIOR/QUERIES/REPORT.
+2. **`Origin::Uploaded` is behaviourally broader than its name.** It encodes "any
+   non-Local origin," i.e. it also covers upstream's `Interactive` (interactively-created)
+   case, which is likewise non-Local and produces the same (no Reload/no Append) shell.
+   Behaviourally complete for the shell and affirmatively non-copying (upstream's third
+   constructor is not reproduced). Only if the index-page origin **column** text
+   (upstream renders `"(interactively created)"`, Hamlet.hs 139) ever enters web-layer
+   scope would a third case be observable — currently that string is a non-deterministic
+   prover fragment held opaque in `RootMeta`, out of scope, and unprobed this round.
+
+### VIOLATIONS (Round 6)
+
+None. ITEM 1's two gated items are boundary output (the reload markup relocated verbatim
+from the already-audited `PAGE_PREFIX`, the append item pre-existing), each present/absent
+per a logged kind×origin probe ([R60]–[R63]); the gating is the minimal truth-table
+encoding (merger); the `Origin` model is a 2-way observed distinction that affirmatively
+diverges from upstream's 3-way `TheoryOrigin` type, uses none of upstream's identifiers
+(`isLocalOrigin`/`Upload`/`Interactive`/`parent`), and matches rendered — not
+Hamlet-source — attribute order. ITEM 2 is a behaviour-neutral refactor whose `StateOps`
+backend shares no identifier or structure with upstream's `MVar TheoryMap` +
+`getTheory`/`putTheory` model. Two non-blocking notes recorded (shipped-comment process
+narration to scrub; `Uploaded` broader than its name) — neither is copied protectable
+expression nor requires redo. Findings that survive filtration: 0. No redo instructions
+issued. VERDICT: PASS.

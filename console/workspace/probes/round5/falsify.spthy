@@ -1,0 +1,18 @@
+theory FalsifyMe
+begin
+
+// The adversary learns ~x directly, so any "secrecy" claim about it is false.
+rule Emit:
+  [ Fr(~x) ] --[ SecretVal(~x) ]-> [ Out(~x) ]
+
+// all-traces lemma that is FALSE (adversary knows ~x): expect falsified.
+lemma secrecy_all:
+  "All x #i. SecretVal(x) @ i ==> not (Ex #j. K(x) @ j)"
+
+// exists-trace lemma that is FALSE (no such event ever happens): expect
+// falsified for the exists-trace kind.
+lemma never_happens:
+  exists-trace
+  "Ex #i #j. SecretVal(~unrelated) @ i & SecretVal(~unrelated) @ j & not(#i = #j)"
+
+end

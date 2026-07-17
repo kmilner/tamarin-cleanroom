@@ -1,0 +1,14 @@
+theory BareFormulaIndexedBaseline
+begin
+builtins: hashing
+macros: konst() = h('k')
+
+rule R:
+  [ In(x) ] --[ A(x) ]-> [ Out(x) ]
+
+// `notmac` is NOT a macro; an indexed plain message variable notmac.1 in a
+// formula is the baseline for the index decoration in formula position.
+lemma L:
+  exists-trace "Ex #i. A(notmac.1) @ #i"
+
+end

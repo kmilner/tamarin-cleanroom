@@ -1,0 +1,6 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+"workspace/probes/bare_indexed_formula.spthy" (line 10, column 25):
+unexpected "("
+expecting letter or digit, "." or "="

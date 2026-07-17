@@ -1,0 +1,8 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n5[shape="record",label="{{<n0> Fr( ~s )}|{<n1> #i : G3_ABC_p20[G3_ABC_p20( )]}|{<n2> Aa( 'aaaaaaaaaaaa' )|<n3> Bb( 'bbbbbbbbbbbbbbbbbbbbbb' )|<n4> Cc( 'cccccccccccccccccccccc' )}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+
+}

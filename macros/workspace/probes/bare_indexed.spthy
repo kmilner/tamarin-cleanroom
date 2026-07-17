@@ -1,0 +1,9 @@
+theory BareIndexed
+begin
+builtins: hashing
+macros: konst() = h('k')
+
+rule R:
+  [ In(x) ] --[ A(konst.1), B(konst.2) ]-> [ Out(konst) ]
+
+end

@@ -1,0 +1,9 @@
+theory BareIndexedSorted
+begin
+builtins: hashing
+macros: konst() = h('k')
+
+rule R:
+  [ In(x) ] --[ A(~konst.1), B($konst.1) ]-> [ Out(x) ]
+
+end

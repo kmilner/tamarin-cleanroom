@@ -514,6 +514,19 @@ pub fn wrap_cell(flat: &str) -> String {
     wrap_cell_budget(flat, FILL_WIDTH)
 }
 
+/// Lay a cell's flat text out into physical lines at `budget`, dispatching by
+/// cell shape: an info cell (`#t : Rule[…]`) uses the vertical action `sep`; a
+/// fact / relation cell (`NAME( … )`) uses the greedy argument/tuple fill with the
+/// delimiter peel. Shared by [`wrap_cell_budget`] (which escapes + joins the lines)
+/// and [`cell_occ`] (which measures them).
+fn layout_cell(flat: &str, budget: usize) -> Vec<PLine> {
+    if flat.starts_with('#') && flat.contains('[') {
+        layout_info(flat, budget)
+    } else {
+        layout_fact(flat, budget)
+    }
+}
+
 /// Render one record cell with an explicit wrap `budget` (BEHAVIOR.md §3f). The
 /// budget is the cell's share of its record group's [`FILL_WIDTH`] — see
 /// [`cell_budget`]; a lone cell uses [`FILL_WIDTH`]. An info cell (`#t : Rule[…]`)
@@ -522,11 +535,7 @@ pub fn wrap_cell(flat: &str) -> String {
 /// delimiter peel. This is the single entry for both the Term-based path (feed
 /// [`Fact::render_flat`]) and the pre-rendered-string path.
 pub fn wrap_cell_budget(flat: &str, budget: usize) -> String {
-    let lines = if flat.starts_with('#') && flat.contains('[') {
-        layout_info(flat, budget)
-    } else {
-        layout_fact(flat, budget)
-    };
+    let lines = layout_cell(flat, budget);
     if lines.len() == 1 && lines[0].0 == 0 {
         return escape_record(&lines[0].1);
     }

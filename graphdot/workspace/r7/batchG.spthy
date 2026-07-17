@@ -1,0 +1,269 @@
+theory R7G
+begin
+
+rule G1_q40_AB_p43:
+  [ Fr(~s) ] --[ G1_q40_AB_p43() ]-> [ Aa('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule G1_q40_BA_p43:
+  [ Fr(~s) ] --[ G1_q40_BA_p43() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') ]
+
+rule G1_q40_AB_p44:
+  [ Fr(~s) ] --[ G1_q40_AB_p44() ]-> [ Aa('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule G1_q40_BA_p44:
+  [ Fr(~s) ] --[ G1_q40_BA_p44() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') ]
+
+rule G1_q40_AB_p45:
+  [ Fr(~s) ] --[ G1_q40_AB_p45() ]-> [ Aa('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule G1_q40_BA_p45:
+  [ Fr(~s) ] --[ G1_q40_BA_p45() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') ]
+
+rule G1_q40_AB_p46:
+  [ Fr(~s) ] --[ G1_q40_AB_p46() ]-> [ Aa('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule G1_q40_BA_p46:
+  [ Fr(~s) ] --[ G1_q40_BA_p46() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') ]
+
+rule G1_q40_AB_p47:
+  [ Fr(~s) ] --[ G1_q40_AB_p47() ]-> [ Aa('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule G1_q40_BA_p47:
+  [ Fr(~s) ] --[ G1_q40_BA_p47() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') ]
+
+rule G1_q40_AB_p48:
+  [ Fr(~s) ] --[ G1_q40_AB_p48() ]-> [ Aa('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule G1_q40_BA_p48:
+  [ Fr(~s) ] --[ G1_q40_BA_p48() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') ]
+
+rule G1_q40_AB_p49:
+  [ Fr(~s) ] --[ G1_q40_AB_p49() ]-> [ Aa('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule G1_q40_BA_p49:
+  [ Fr(~s) ] --[ G1_q40_BA_p49() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') ]
+
+rule G1_q40_AB_p50:
+  [ Fr(~s) ] --[ G1_q40_AB_p50() ]-> [ Aa('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule G1_q40_BA_p50:
+  [ Fr(~s) ] --[ G1_q40_BA_p50() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') ]
+
+rule G1_q40_AB_p51:
+  [ Fr(~s) ] --[ G1_q40_AB_p51() ]-> [ Aa('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule G1_q40_BA_p51:
+  [ Fr(~s) ] --[ G1_q40_BA_p51() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') ]
+
+rule G1_q60_AB_p23:
+  [ Fr(~s) ] --[ G1_q60_AB_p23() ]-> [ Aa('aaaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule G1_q60_BA_p23:
+  [ Fr(~s) ] --[ G1_q60_BA_p23() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaaa') ]
+
+rule G1_q60_AB_p24:
+  [ Fr(~s) ] --[ G1_q60_AB_p24() ]-> [ Aa('aaaaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule G1_q60_BA_p24:
+  [ Fr(~s) ] --[ G1_q60_BA_p24() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaaaa') ]
+
+rule G1_q60_AB_p25:
+  [ Fr(~s) ] --[ G1_q60_AB_p25() ]-> [ Aa('aaaaaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule G1_q60_BA_p25:
+  [ Fr(~s) ] --[ G1_q60_BA_p25() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaaaaa') ]
+
+rule G1_q60_AB_p26:
+  [ Fr(~s) ] --[ G1_q60_AB_p26() ]-> [ Aa('aaaaaaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule G1_q60_BA_p26:
+  [ Fr(~s) ] --[ G1_q60_BA_p26() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaaaaaa') ]
+
+rule G1_q60_AB_p27:
+  [ Fr(~s) ] --[ G1_q60_AB_p27() ]-> [ Aa('aaaaaaaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule G1_q60_BA_p27:
+  [ Fr(~s) ] --[ G1_q60_BA_p27() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaaaaaaa') ]
+
+rule G1_q60_AB_p28:
+  [ Fr(~s) ] --[ G1_q60_AB_p28() ]-> [ Aa('aaaaaaaaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule G1_q60_BA_p28:
+  [ Fr(~s) ] --[ G1_q60_BA_p28() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaaaaaaaa') ]
+
+rule G1_q60_AB_p29:
+  [ Fr(~s) ] --[ G1_q60_AB_p29() ]-> [ Aa('aaaaaaaaaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule G1_q60_BA_p29:
+  [ Fr(~s) ] --[ G1_q60_BA_p29() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaaaaaaaaa') ]
+
+rule G1_q60_AB_p30:
+  [ Fr(~s) ] --[ G1_q60_AB_p30() ]-> [ Aa('aaaaaaaaaaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule G1_q60_BA_p30:
+  [ Fr(~s) ] --[ G1_q60_BA_p30() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaaaaaaaaaa') ]
+
+rule G1_q60_AB_p31:
+  [ Fr(~s) ] --[ G1_q60_AB_p31() ]-> [ Aa('aaaaaaaaaaaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') ]
+
+rule G1_q60_BA_p31:
+  [ Fr(~s) ] --[ G1_q60_BA_p31() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaaaaaaaaaaa') ]
+
+rule G3_ABC_p20:
+  [ Fr(~s) ] --[ G3_ABC_p20() ]-> [ Aa('aaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbb'), Cc('cccccccccccccccccccccc') ]
+
+rule G3_ABC_p21:
+  [ Fr(~s) ] --[ G3_ABC_p21() ]-> [ Aa('aaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbb'), Cc('cccccccccccccccccccccc') ]
+
+rule G3_ABC_p22:
+  [ Fr(~s) ] --[ G3_ABC_p22() ]-> [ Aa('aaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbb'), Cc('cccccccccccccccccccccc') ]
+
+rule G3_ABC_p23:
+  [ Fr(~s) ] --[ G3_ABC_p23() ]-> [ Aa('aaaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbb'), Cc('cccccccccccccccccccccc') ]
+
+rule G3_ABC_p24:
+  [ Fr(~s) ] --[ G3_ABC_p24() ]-> [ Aa('aaaaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbb'), Cc('cccccccccccccccccccccc') ]
+
+rule G3_ABC_p25:
+  [ Fr(~s) ] --[ G3_ABC_p25() ]-> [ Aa('aaaaaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbb'), Cc('cccccccccccccccccccccc') ]
+
+rule G3_ABC_p26:
+  [ Fr(~s) ] --[ G3_ABC_p26() ]-> [ Aa('aaaaaaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbb'), Cc('cccccccccccccccccccccc') ]
+
+rule G3_ABC_p27:
+  [ Fr(~s) ] --[ G3_ABC_p27() ]-> [ Aa('aaaaaaaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbb'), Cc('cccccccccccccccccccccc') ]
+
+rule G3_ABC_p28:
+  [ Fr(~s) ] --[ G3_ABC_p28() ]-> [ Aa('aaaaaaaaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbb'), Cc('cccccccccccccccccccccc') ]
+
+rule G3_ABC_p29:
+  [ Fr(~s) ] --[ G3_ABC_p29() ]-> [ Aa('aaaaaaaaaaaaaaaaaaaaa'), Bb('bbbbbbbbbbbbbbbbbbbbbb'), Cc('cccccccccccccccccccccc') ]
+
+rule G3_BAC_p20:
+  [ Fr(~s) ] --[ G3_BAC_p20() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaa'), Cc('cccccccccccccccccccccc') ]
+
+rule G3_BAC_p21:
+  [ Fr(~s) ] --[ G3_BAC_p21() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaa'), Cc('cccccccccccccccccccccc') ]
+
+rule G3_BAC_p22:
+  [ Fr(~s) ] --[ G3_BAC_p22() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaa'), Cc('cccccccccccccccccccccc') ]
+
+rule G3_BAC_p23:
+  [ Fr(~s) ] --[ G3_BAC_p23() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaaa'), Cc('cccccccccccccccccccccc') ]
+
+rule G3_BAC_p24:
+  [ Fr(~s) ] --[ G3_BAC_p24() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaaaa'), Cc('cccccccccccccccccccccc') ]
+
+rule G3_BAC_p25:
+  [ Fr(~s) ] --[ G3_BAC_p25() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaaaaa'), Cc('cccccccccccccccccccccc') ]
+
+rule G3_BAC_p26:
+  [ Fr(~s) ] --[ G3_BAC_p26() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaaaaaa'), Cc('cccccccccccccccccccccc') ]
+
+rule G3_BAC_p27:
+  [ Fr(~s) ] --[ G3_BAC_p27() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaaaaaaa'), Cc('cccccccccccccccccccccc') ]
+
+rule G3_BAC_p28:
+  [ Fr(~s) ] --[ G3_BAC_p28() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaaaaaaaa'), Cc('cccccccccccccccccccccc') ]
+
+rule G3_BAC_p29:
+  [ Fr(~s) ] --[ G3_BAC_p29() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbb'), Aa('aaaaaaaaaaaaaaaaaaaaa'), Cc('cccccccccccccccccccccc') ]
+
+rule G3_BCA_p20:
+  [ Fr(~s) ] --[ G3_BCA_p20() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbb'), Cc('cccccccccccccccccccccc'), Aa('aaaaaaaaaaaa') ]
+
+rule G3_BCA_p21:
+  [ Fr(~s) ] --[ G3_BCA_p21() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbb'), Cc('cccccccccccccccccccccc'), Aa('aaaaaaaaaaaaa') ]
+
+rule G3_BCA_p22:
+  [ Fr(~s) ] --[ G3_BCA_p22() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbb'), Cc('cccccccccccccccccccccc'), Aa('aaaaaaaaaaaaaa') ]
+
+rule G3_BCA_p23:
+  [ Fr(~s) ] --[ G3_BCA_p23() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbb'), Cc('cccccccccccccccccccccc'), Aa('aaaaaaaaaaaaaaa') ]
+
+rule G3_BCA_p24:
+  [ Fr(~s) ] --[ G3_BCA_p24() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbb'), Cc('cccccccccccccccccccccc'), Aa('aaaaaaaaaaaaaaaa') ]
+
+rule G3_BCA_p25:
+  [ Fr(~s) ] --[ G3_BCA_p25() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbb'), Cc('cccccccccccccccccccccc'), Aa('aaaaaaaaaaaaaaaaa') ]
+
+rule G3_BCA_p26:
+  [ Fr(~s) ] --[ G3_BCA_p26() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbb'), Cc('cccccccccccccccccccccc'), Aa('aaaaaaaaaaaaaaaaaa') ]
+
+rule G3_BCA_p27:
+  [ Fr(~s) ] --[ G3_BCA_p27() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbb'), Cc('cccccccccccccccccccccc'), Aa('aaaaaaaaaaaaaaaaaaa') ]
+
+rule G3_BCA_p28:
+  [ Fr(~s) ] --[ G3_BCA_p28() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbb'), Cc('cccccccccccccccccccccc'), Aa('aaaaaaaaaaaaaaaaaaaa') ]
+
+rule G3_BCA_p29:
+  [ Fr(~s) ] --[ G3_BCA_p29() ]-> [ Bb('bbbbbbbbbbbbbbbbbbbbbb'), Cc('cccccccccccccccccccccc'), Aa('aaaaaaaaaaaaaaaaaaaaa') ]
+
+lemma l_G1_q40_AB_p43: exists-trace "Ex #i. G1_q40_AB_p43() @ #i"
+lemma l_G1_q40_BA_p43: exists-trace "Ex #i. G1_q40_BA_p43() @ #i"
+lemma l_G1_q40_AB_p44: exists-trace "Ex #i. G1_q40_AB_p44() @ #i"
+lemma l_G1_q40_BA_p44: exists-trace "Ex #i. G1_q40_BA_p44() @ #i"
+lemma l_G1_q40_AB_p45: exists-trace "Ex #i. G1_q40_AB_p45() @ #i"
+lemma l_G1_q40_BA_p45: exists-trace "Ex #i. G1_q40_BA_p45() @ #i"
+lemma l_G1_q40_AB_p46: exists-trace "Ex #i. G1_q40_AB_p46() @ #i"
+lemma l_G1_q40_BA_p46: exists-trace "Ex #i. G1_q40_BA_p46() @ #i"
+lemma l_G1_q40_AB_p47: exists-trace "Ex #i. G1_q40_AB_p47() @ #i"
+lemma l_G1_q40_BA_p47: exists-trace "Ex #i. G1_q40_BA_p47() @ #i"
+lemma l_G1_q40_AB_p48: exists-trace "Ex #i. G1_q40_AB_p48() @ #i"
+lemma l_G1_q40_BA_p48: exists-trace "Ex #i. G1_q40_BA_p48() @ #i"
+lemma l_G1_q40_AB_p49: exists-trace "Ex #i. G1_q40_AB_p49() @ #i"
+lemma l_G1_q40_BA_p49: exists-trace "Ex #i. G1_q40_BA_p49() @ #i"
+lemma l_G1_q40_AB_p50: exists-trace "Ex #i. G1_q40_AB_p50() @ #i"
+lemma l_G1_q40_BA_p50: exists-trace "Ex #i. G1_q40_BA_p50() @ #i"
+lemma l_G1_q40_AB_p51: exists-trace "Ex #i. G1_q40_AB_p51() @ #i"
+lemma l_G1_q40_BA_p51: exists-trace "Ex #i. G1_q40_BA_p51() @ #i"
+lemma l_G1_q60_AB_p23: exists-trace "Ex #i. G1_q60_AB_p23() @ #i"
+lemma l_G1_q60_BA_p23: exists-trace "Ex #i. G1_q60_BA_p23() @ #i"
+lemma l_G1_q60_AB_p24: exists-trace "Ex #i. G1_q60_AB_p24() @ #i"
+lemma l_G1_q60_BA_p24: exists-trace "Ex #i. G1_q60_BA_p24() @ #i"
+lemma l_G1_q60_AB_p25: exists-trace "Ex #i. G1_q60_AB_p25() @ #i"
+lemma l_G1_q60_BA_p25: exists-trace "Ex #i. G1_q60_BA_p25() @ #i"
+lemma l_G1_q60_AB_p26: exists-trace "Ex #i. G1_q60_AB_p26() @ #i"
+lemma l_G1_q60_BA_p26: exists-trace "Ex #i. G1_q60_BA_p26() @ #i"
+lemma l_G1_q60_AB_p27: exists-trace "Ex #i. G1_q60_AB_p27() @ #i"
+lemma l_G1_q60_BA_p27: exists-trace "Ex #i. G1_q60_BA_p27() @ #i"
+lemma l_G1_q60_AB_p28: exists-trace "Ex #i. G1_q60_AB_p28() @ #i"
+lemma l_G1_q60_BA_p28: exists-trace "Ex #i. G1_q60_BA_p28() @ #i"
+lemma l_G1_q60_AB_p29: exists-trace "Ex #i. G1_q60_AB_p29() @ #i"
+lemma l_G1_q60_BA_p29: exists-trace "Ex #i. G1_q60_BA_p29() @ #i"
+lemma l_G1_q60_AB_p30: exists-trace "Ex #i. G1_q60_AB_p30() @ #i"
+lemma l_G1_q60_BA_p30: exists-trace "Ex #i. G1_q60_BA_p30() @ #i"
+lemma l_G1_q60_AB_p31: exists-trace "Ex #i. G1_q60_AB_p31() @ #i"
+lemma l_G1_q60_BA_p31: exists-trace "Ex #i. G1_q60_BA_p31() @ #i"
+lemma l_G3_ABC_p20: exists-trace "Ex #i. G3_ABC_p20() @ #i"
+lemma l_G3_ABC_p21: exists-trace "Ex #i. G3_ABC_p21() @ #i"
+lemma l_G3_ABC_p22: exists-trace "Ex #i. G3_ABC_p22() @ #i"
+lemma l_G3_ABC_p23: exists-trace "Ex #i. G3_ABC_p23() @ #i"
+lemma l_G3_ABC_p24: exists-trace "Ex #i. G3_ABC_p24() @ #i"
+lemma l_G3_ABC_p25: exists-trace "Ex #i. G3_ABC_p25() @ #i"
+lemma l_G3_ABC_p26: exists-trace "Ex #i. G3_ABC_p26() @ #i"
+lemma l_G3_ABC_p27: exists-trace "Ex #i. G3_ABC_p27() @ #i"
+lemma l_G3_ABC_p28: exists-trace "Ex #i. G3_ABC_p28() @ #i"
+lemma l_G3_ABC_p29: exists-trace "Ex #i. G3_ABC_p29() @ #i"
+lemma l_G3_BAC_p20: exists-trace "Ex #i. G3_BAC_p20() @ #i"
+lemma l_G3_BAC_p21: exists-trace "Ex #i. G3_BAC_p21() @ #i"
+lemma l_G3_BAC_p22: exists-trace "Ex #i. G3_BAC_p22() @ #i"
+lemma l_G3_BAC_p23: exists-trace "Ex #i. G3_BAC_p23() @ #i"
+lemma l_G3_BAC_p24: exists-trace "Ex #i. G3_BAC_p24() @ #i"
+lemma l_G3_BAC_p25: exists-trace "Ex #i. G3_BAC_p25() @ #i"
+lemma l_G3_BAC_p26: exists-trace "Ex #i. G3_BAC_p26() @ #i"
+lemma l_G3_BAC_p27: exists-trace "Ex #i. G3_BAC_p27() @ #i"
+lemma l_G3_BAC_p28: exists-trace "Ex #i. G3_BAC_p28() @ #i"
+lemma l_G3_BAC_p29: exists-trace "Ex #i. G3_BAC_p29() @ #i"
+lemma l_G3_BCA_p20: exists-trace "Ex #i. G3_BCA_p20() @ #i"
+lemma l_G3_BCA_p21: exists-trace "Ex #i. G3_BCA_p21() @ #i"
+lemma l_G3_BCA_p22: exists-trace "Ex #i. G3_BCA_p22() @ #i"
+lemma l_G3_BCA_p23: exists-trace "Ex #i. G3_BCA_p23() @ #i"
+lemma l_G3_BCA_p24: exists-trace "Ex #i. G3_BCA_p24() @ #i"
+lemma l_G3_BCA_p25: exists-trace "Ex #i. G3_BCA_p25() @ #i"
+lemma l_G3_BCA_p26: exists-trace "Ex #i. G3_BCA_p26() @ #i"
+lemma l_G3_BCA_p27: exists-trace "Ex #i. G3_BCA_p27() @ #i"
+lemma l_G3_BCA_p28: exists-trace "Ex #i. G3_BCA_p28() @ #i"
+lemma l_G3_BCA_p29: exists-trace "Ex #i. G3_BCA_p29() @ #i"
+
+end

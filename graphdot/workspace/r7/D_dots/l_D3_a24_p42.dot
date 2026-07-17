@@ -1,0 +1,14 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n5[shape="record",label="{{<n0> Fr( ~s )}|{<n1> #i : D3_a24_p42[D3_a24_p42( )]}|{<n2> Ta( 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' )|<n3> Aa( BB1 )|<n4> Ac( BB1 )}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+{
+rank="sink";
+n6[shape="plain",label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="3" CELLPADDING="1"><TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">BB1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">'bbbbbbbbbbbbbbbb'</TD></TR></TABLE>>];
+
+}
+n5:n1 -> n6[style="invis"];
+
+}

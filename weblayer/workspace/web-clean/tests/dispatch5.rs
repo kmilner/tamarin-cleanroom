@@ -10,6 +10,7 @@
 //! (405), envelope shape, redirect target, version allocation, and alert selection.
 
 use web_clean::dispatch::{Content, MainReq, Meta, ProverOps, Request, RootMeta, Server};
+use web_clean::page::Origin;
 use web_clean::route::{Autoprove, AutoproveAll, AutoproveDiff, NavDir, Route, ThyPath};
 
 // ---------------------------------------------------------------------------
@@ -41,7 +42,12 @@ impl ProverOps for Fake {
     type Theory = Thy;
 
     fn meta(&self, thy: &Thy) -> Meta {
-        Meta { name: thy.name.clone(), version: "1.13.0".into(), filename: format!("{}.spthy", thy.name) }
+        Meta {
+            name: thy.name.clone(),
+            version: "1.13.0".into(),
+            filename: format!("{}.spthy", thy.name),
+            origin: Origin::Local,
+        }
     }
     fn root_meta(&self, thy: &Thy) -> RootMeta {
         RootMeta { time: "00:00:00".into(), origin: format!("{}.spthy", thy.name), modified: false }

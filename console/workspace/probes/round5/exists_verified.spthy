@@ -1,0 +1,16 @@
+theory ExistsVerified
+begin
+
+rule Emit:
+  [ Fr(~x) ] --[ Ping(~x) ]-> [ ]
+
+// exists-trace lemma that IS satisfiable: expect verified for exists-trace kind.
+lemma can_ping:
+  exists-trace
+  "Ex x #i. Ping(x) @ i"
+
+// all-traces lemma that is TRUE: expect verified for all-traces.
+lemma always_true:
+  "All x #i. Ping(x) @ i ==> Ping(x) @ i"
+
+end

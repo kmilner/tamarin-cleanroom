@@ -14,10 +14,13 @@
 //!   value-validated command line ([`Args`]) with defaults applied.
 //! - [`render_help`] / [`render_version`] : the help pages and version banner.
 //! - [`framing`] : the stream-aware batch frame around opaque theory payloads.
+//! - [`emit`] : an incremental ([`Sink`]-driven) emitter producing the same
+//!   per-stream bytes as [`framing`] while the run is still in progress.
 //! - [`errors`] : renderers for the runtime error lines emitted after parsing.
 //! - [`stream`] : the two-stream output model ([`Stream`], [`Streams`]).
 
 pub mod args;
+pub mod emit;
 pub mod errors;
 pub mod framing;
 pub mod help;
@@ -27,7 +30,12 @@ pub mod stream;
 pub mod version;
 
 pub use args::{parse_args, Args, OutputModule, Parsed, PartialEval, StopOnTrace};
+pub use emit::{drive_batch, BatchEmitter, Sink, StreamCollector};
 pub use errors::{CliError, ParseError};
+pub use framing::{
+    frame_batch, frame_parse_only, frame_variants, render_summary, BatchTheory, LemmaOutcome,
+    LemmaResult, LoadedTheory, Summary, TraceKind, WarningSummary,
+};
 pub use help::render_help;
 pub use modes::Mode;
 pub use parse::{parse, Command, Options, RunSpec};

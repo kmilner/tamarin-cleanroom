@@ -1,0 +1,13 @@
+theory WarnAndLemma
+begin
+
+// Triggers the `Fresh public constants` wellformedness warning (~'foo').
+rule Bad:
+   [ ] --[ Ev() ]-> [ Out(~'foo') ]
+
+// A trivially-true all-traces lemma so the summary shows BOTH a WARNING line
+// and a lemma-result line for one theory.
+lemma trivial_true:
+  "All #i. Ev() @ i ==> Ex #j. Ev() @ j"
+
+end

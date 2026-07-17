@@ -735,3 +735,86 @@ redirect-vs-help choice), `del_lemma_path` (`del/path/lemma`, `Option`), and
 `del_proof_step` (`del/path/proof`|`diffProof`, `Option`, with a `diff` flag). All
 transport — envelope shape, the three alert strings, redirect assembly, version
 allocation, content type, and the `404`/`405` decisions — stays in `Server`.
+
+---
+
+## 16. Origin-aware page shell + state delegation (Round 6)
+
+Two adoption-critical closures. Derived from live probing of the sanctioned oracle
+([R60]–[R63], ports 3110-3112, Tutorial.spthy trace + KCL07-UK1 diff theory) and four
+committed captures. No file under `/home/kamilner/tamarin-rs/` was read. All servers
+stopped.
+
+### 16.1 The shell depends on theory ORIGIN (resolves the round-3 [L15] gap)
+Round 3's non-local NEGATIVE ([L15]/§13.5) asked whether the *network* peer changed
+the shell (it did not — all local interfaces classify as local). The **observable**
+origin distinction is the **theory's** load origin: **Local** (loaded from an on-disk
+file — the server command line, or a version derived from one) vs **Upload** (loaded
+through `POST /`, which has no on-disk file). Byte-comparing the `overview/help` page
+of a command-line Tutorial (index 1) against the SAME Tutorial re-uploaded (index 2),
+after index-normalization, the shells differ in **exactly two** north-bar `<li>`
+items — no other byte differs, and the HTTP headers are byte-identical modulo the
+derived `Date`/`Content-Length` ([R60]):
+
+| item | markup | present when |
+|------|--------|--------------|
+| **Reload file** | `<li><form … action="…/reload">…Reload file…</form></li>`, between the *Index* `<li>` and the *Actions* `<li>` | origin == **Local** |
+| **Append modified lemmas to file** | `<li><form … action="…/get_and_append/{file}">…</form></li>`, the last item of the *Actions* submenu | origin == **Local** AND kind == **trace** |
+
+Full kind × origin matrix ([R61]):
+
+| | Reload file | Append modified lemmas |
+|-|:-:|:-:|
+| trace + Local  | ✓ | ✓ |
+| trace + Upload | – | – |
+| equiv + Local  | ✓ | – |
+| equiv + Upload | – | – |
+
+So **Reload** gates on `origin == Local` alone; **Append** gates on `origin == Local
+&& kind == trace`. This reconciles round-4 [R48] (the equiv shell's missing Append is
+the *kind* gate; its Reload was present because the KCL fixture was a command-line —
+Local — load). The origin also surfaces in the prover's help-pane text (`Loaded at …
+from Local "<path>"` vs `… from Upload "<name>"`) — a non-deterministic prover
+fragment, out of web-layer scope. The shell **FILENAME** (download/append link) is
+`<theory-name>.spthy`, derived from the theory name, not the uploaded filename.
+
+**Origin is inherited** ([R62]): a proof-derived version reports the same origin as
+the base it came from (method on the Upload index → a new Upload-styled version). It
+is therefore a per-version **theory property**, modelled as `Meta.origin` reported by
+`ProverOps::meta`, not a web-layer choice.
+
+Implementation: `page::Origin { Local, Uploaded }` is a `PageParams` field; the shell
+template gained a `§RELOAD§` slot (`RELOAD_ITEM`) alongside the existing `§APPEND§`
+(`APPEND_ITEM`), filled by `page::reload_item(origin)` / `page::append_item(kind,
+origin)`. `Server::get_overview` threads `meta.origin` into `PageParams`. Byte-parity
+tests reproduce all four matrix cells (`overview_shell_{trace,equiv}_{local,upload}`)
+plus a dispatch-level thread-through (`dispatch6.rs`). Fresh-server determinism
+cross-check [R63] confirmed the deterministic shell prefix/tail reproduce the
+committed fixtures.
+
+### 16.2 State delegation — `StateOps` backend (interop requirement)
+`Server` no longer owns the version `BTreeMap` + counter; that state is delegated to
+a **`StateOps`** backend so a consumer's asynchronous, internally-caching backend can
+remain the single owner of theory/version state. `Server<P: ProverOps, S:
+StateOps<Theory = P::Theory> = InMemoryState<P::Theory>>` keeps ALL dispatch /
+transport / envelope logic and drives state only through the trait.
+
+The state operations the web layer performs, extracted to the trait:
+
+| trait method | web-layer callers | contract |
+|--------------|-------------------|----------|
+| `insert_new(thy) -> u64` | proof ops, autoprove\*, del/path, **upload** | monotonic `= max ever + 1`, first is `1`, never reused |
+| `get(index) -> Option<&thy>` | every read/resolve | retained forever (index-page window is display-only) |
+| `replace(index, thy)` | `reload`, structural `edit`/`add`/`delete` | in-place; counter + other versions untouched |
+| `entries() -> [(u64, &thy)]` | index/root page, `versions()` | ascending index order |
+| `remove(index) -> Option<thy>` | *(unused — see honesty note)* | drops a version; part of the backend ownership surface |
+
+`InMemoryState<T>` (BTreeMap + monotonic counter) is the reference implementation;
+`Server::new(ops, base)` uses it (base at index 1), `Server::with_state(ops, state)`
+injects a custom backend. The lifecycle rules of §§13.1/14.3 are now the **documented
+contract** a backend must satisfy (monotonic allocation, retention, in-place mutation,
+enumeration). Deletion (`remove`) is exposed for backend completeness but is **not**
+invoked by any current route — under the observed retention invariant the web layer
+never drops a version. All prior tests keep running byte-identical (they use
+`Server::new` → the default `InMemoryState`); `dispatch6.rs` adds a custom-backend
+dispatch test and `InMemoryState` contract tests.

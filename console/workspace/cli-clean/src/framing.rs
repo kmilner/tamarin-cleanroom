@@ -72,42 +72,88 @@ impl TraceKind {
     }
 }
 
-/// Per-lemma verdict.
-#[derive(Debug, Clone, Copy)]
+/// Per-lemma verdict. The printed text of a falsified verdict depends on the
+/// lemma's [`TraceKind`] (see [`LemmaOutcome::result_text`]); verified and
+/// incomplete verdicts print the same for both kinds.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LemmaResult {
     Verified,
     Falsified,
     AnalysisIncomplete,
 }
 
-impl LemmaResult {
-    fn text(self) -> &'static str {
-        match self {
+/// One lemma's verdict line in a theory's summary body:
+/// `<name> (<kind>): <verdict> (<steps> steps)`.
+#[derive(Debug, Clone)]
+pub struct LemmaOutcome {
+    pub name: String,
+    pub kind: TraceKind,
+    pub result: LemmaResult,
+    /// The `<N>` in `(<N> steps)` — the number of proof steps explored (also the
+    /// value shown for bounded/incomplete analyses, reflecting the explored depth).
+    pub steps: u64,
+}
+
+impl LemmaOutcome {
+    /// The verdict phrase. `verified` and `analysis incomplete` are uniform; a
+    /// `falsified` verdict reads `falsified - found trace` for an all-traces lemma
+    /// (a counter-example was produced) and `falsified - no trace found` for an
+    /// exists-trace lemma (no witnessing trace exists).
+    fn result_text(&self) -> &'static str {
+        match self.result {
             LemmaResult::Verified => "verified",
-            LemmaResult::Falsified => "falsified",
             LemmaResult::AnalysisIncomplete => "analysis incomplete",
+            LemmaResult::Falsified => match self.kind {
+                TraceKind::AllTraces => "falsified - found trace",
+                TraceKind::ExistsTrace => "falsified - no trace found",
+            },
         }
+    }
+
+    /// The single result line, without its `  ` indent.
+    fn line(&self) -> String {
+        format!(
+            "{} ({}): {} ({} steps)",
+            self.name,
+            self.kind.text(),
+            self.result_text(),
+            self.steps
+        )
     }
 }
 
-/// One line of a theory's summary body.
+/// Prefix shared by the `WARNING:` line and its aligned advisory continuation.
+const WARNING_PREFIX: &str = "  WARNING: ";
+
+/// The wellformedness-warning heading of a theory's summary body. Present only
+/// when at least one wellformedness check failed.
 #[derive(Debug, Clone)]
-pub enum SummaryEntry {
-    Lemma { name: String, kind: TraceKind, result: LemmaResult, steps: u64 },
-    /// `WARNING: <count> wellformedness check failed!` (note the singular "check").
-    Warning { count: u64 },
+pub struct WarningSummary {
+    /// The `<N>` in `WARNING: <N> wellformedness check failed!` (the noun stays
+    /// singular "check" regardless of `<N>`).
+    pub failed_checks: u64,
+    /// Whether the advisory line `The analysis results might be wrong!` follows
+    /// the count line. Observed: emitted exactly when the run is a proving run
+    /// (`--prove`), independent of how many lemmas were actually proved (a
+    /// proving run with zero matched lemmas still emits it; a plain analyze run
+    /// never does).
+    pub analysis_maybe_wrong: bool,
 }
 
-impl SummaryEntry {
-    fn text(&self) -> String {
-        match self {
-            SummaryEntry::Lemma { name, kind, result, steps } => {
-                format!("{} ({}): {} ({} steps)", name, kind.text(), result.text(), steps)
+impl WarningSummary {
+    /// The warning heading (one or two lines, each `\n`-terminated). The advisory
+    /// continuation is left-padded to align under the text after `WARNING: `.
+    fn render(&self) -> String {
+        let mut s = String::new();
+        s.push_str(WARNING_PREFIX);
+        s.push_str(&format!("{} wellformedness check failed!\n", self.failed_checks));
+        if self.analysis_maybe_wrong {
+            for _ in 0..WARNING_PREFIX.len() {
+                s.push(' ');
             }
-            SummaryEntry::Warning { count } => {
-                format!("WARNING: {} wellformedness check failed!", count)
-            }
+            s.push_str("The analysis results might be wrong!\n");
         }
+        s
     }
 }
 
@@ -121,13 +167,19 @@ pub struct Summary {
     pub output: Option<String>,
     /// Rendered as seconds with two decimals (e.g. `0.39s`).
     pub processing_time: f64,
-    pub entries: Vec<SummaryEntry>,
+    /// The wellformedness-warning heading, when any check failed.
+    pub warnings: Option<WarningSummary>,
+    /// The per-lemma verdict lines, in report order.
+    pub lemmas: Vec<LemmaOutcome>,
 }
 
 impl Summary {
     /// The theory's block: the `analyzed:` header, a blank line, the aligned
-    /// key/value rows (`output:` when present, then `processing time:`), the
-    /// two-space separator line, then one line per entry.
+    /// key/value rows (`output:` when present, then `processing time:`), then the
+    /// body. The body opens with a `  ` (two-space) line and carries up to two
+    /// sections — the warning heading and the lemma lines, in that order — each
+    /// section preceded by a `  ` line (so a `  ` line also separates the two when
+    /// both are present).
     fn render_block(&self) -> String {
         let mut b = String::new();
         b.push_str(&format!("analyzed: {}\n", self.analyzed));
@@ -152,10 +204,23 @@ impl Summary {
             b.push('\n');
         }
 
-        b.push_str("  \n"); // literal two-space separator line
-        for e in &self.entries {
-            b.push_str(&format!("  {}\n", e.text()));
+        // Body: an opening `  ` (two-space) line, then the present sections joined
+        // by another `  ` line — the warning heading first, then the lemma lines.
+        b.push_str("  \n");
+        let mut sections: Vec<String> = Vec::new();
+        if let Some(w) = &self.warnings {
+            sections.push(w.render());
         }
+        if !self.lemmas.is_empty() {
+            let mut lines = String::new();
+            for l in &self.lemmas {
+                lines.push_str("  ");
+                lines.push_str(&l.line());
+                lines.push('\n');
+            }
+            sections.push(lines);
+        }
+        b.push_str(&sections.join("  \n"));
         b
     }
 }

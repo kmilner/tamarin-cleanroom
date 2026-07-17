@@ -1,0 +1,8 @@
+theory NoLemmaClean
+begin
+
+// Well-formed theory with NO lemmas and NO wellformedness warnings.
+rule Step:
+  [ Fr(~x) ] --[ ]-> [ Out(~x) ]
+
+end

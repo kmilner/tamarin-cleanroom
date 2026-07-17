@@ -22,9 +22,11 @@
 //! Summary of the semantics implemented here:
 //!  * a macro `name(f1..fk) = body`; call `name(a1..ak)` binds `fi := ai` and
 //!    substitutes **simultaneously** (parallel / capture-avoiding)          [Q7]
-//!  * a bare, untagged name equal to a NULLARY macro is a parenthesis-free use
-//!    of that macro and resolves to its body; `~x`/`$x` and names of arity>=1
-//!    macros are ordinary variables and do not resolve                      [Q32,Q33,Q34,Q35]
+//!  * a bare, fully-UNDECORATED name equal to a NULLARY macro (untagged sort,
+//!    no index, no type annotation) is a parenthesis-free use of that macro and
+//!    resolves to its body; any decoration keeps it an ordinary variable —
+//!    `~x`/`$x` (sort), `x.1` (index) and `x:msg` (type) — as do names of
+//!    arity>=1 macros                                       [Q32,Q33,Q34,Q35,Q43,Q44]
 //!  * a formal matches a body variable by **full identity incl. sort**; `~x`
 //!    and `$x` do NOT match an untagged formal `x` and stay free            [Q27,Q28]
 //!  * a nullary macro reserves its name against a same-named formal: inside a
@@ -142,13 +144,24 @@ fn build_table(theory: &Theory) -> MacroTable {
 /// macro call is replaced by its body with formals bound to the expanded args.
 fn expand_term(t: &Term, table: &MacroTable) -> Term {
     match t {
-        // A bare, untagged name equal to a NULLARY macro is that macro used
-        // without parentheses; resolve it to the (already-expanded) body. A
-        // fresh/pub-sorted name or the name of an arity>=1 macro is an ordinary
-        // variable and is left untouched [Q32,Q33,Q34,Q35]. A nullary macro
-        // reserves its name even against a same-named formal [Q36].
+        // A bare nullary-macro use is the fully-UNDECORATED plain name: a
+        // NULLARY macro's name written with untagged sort, no index and no type
+        // annotation resolves to the (already-expanded) body [Q32,Q33]. Every
+        // decoration blocks resolution and leaves the name an ordinary variable:
+        //  * a fresh/pub sort (`~konst`/`$konst`)                          [Q34]
+        //  * an explicit index (`konst.1`, `konst.2`) — the reference rejects an
+        //    indexed macro name at parse, so an indexed Var must stay a variable
+        //    here, not resolve                                        [Q43,Q44]
+        //  * a type annotation (`konst:msg`) — likewise rejected at parse   [Q32]
+        // The name of an arity>=1 macro never resolves from a bare name    [Q35];
+        // a nullary macro reserves its name even against a same-named formal[Q36].
         Term::Var(v) => match table.get(&v.name) {
-            Some((formals, body)) if v.sort == SortHint::Untagged && formals.is_empty() => {
+            Some((formals, body))
+                if formals.is_empty()
+                    && v.sort == SortHint::Untagged
+                    && v.idx == 0
+                    && v.typ.is_none() =>
+            {
                 body.clone()
             }
             _ => t.clone(),

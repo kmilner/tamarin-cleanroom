@@ -179,3 +179,101 @@ completeness margin remarks, not copyright findings, and neither is a copied
 protectable expression.
 
 Verdict: pass.
+
+## Round 5 audit
+
+Reviewer: similarity auditor (both-sides). Scope: this round's delta only, as
+seen from clean-room HEAD `75807c0` — `git status/diff` restricted to `console/`.
+Compared against upstream `src/Main/Mode/Batch.hs` (`ppSummary`/`ppRep`, `ppWf`),
+`lib/theory/src/ClosedTheory.hs` (`prettyClosedSummary`), and
+`lib/theory/src/Theory/Proof.hs` (`showProofStatus`). The round fills in the
+summary-body content (`<result lines>` slot) and adds an incremental emitter:
+
+- REWRITE `src/framing.rs`: `LemmaResult` gains kind-dependent falsified text via
+  new `LemmaOutcome { name, kind, result, steps }` (`result_text`/`line`); new
+  `WarningSummary { failed_checks, analysis_maybe_wrong }` (`render`, `WARNING_PREFIX`);
+  `Summary` swaps its flat `entries: Vec<SummaryEntry>` for `warnings: Option<..>`
+  + `lemmas: Vec<..>`, and `render_block` grows the two-section body assembly.
+- NEW `src/emit.rs`: `Sink` trait, `StreamCollector`, `BatchEmitter`
+  (`begin`/`progress`/`closed_phases`/`extra_progress`/`payload`/`record_summary`/
+  `finish`), `drive_batch`; new re-exports in `lib.rs`.
+- `tests/cli_tests.rs`: GAP-1 summary-content tests + GAP-2 streaming-equivalence
+  tests; new `probes/round5/*.spthy` (self-authored) and `tests/fixtures/r5_*`
+  golden captures.
+
+**Findings: none (0).** No identifier constellation, internal-structure mirror,
+non-boundary magic constant, or comment lineage survives filtration.
+
+Items considered and filtered out:
+
+- **Falsified/verdict wording** (`framing.rs` `LemmaOutcome::result_text`). The
+  literals `verified` / `analysis incomplete` / `falsified - found trace`
+  (all-traces) / `falsified - no trace found` (exists-trace) are byte-exact
+  interop tokens the crate must reproduce; each is directly captured, not guessed
+  (`BEHAVIOR.md` §12c; `QUERIES.log 22:05:00` r5_falsify_prove, `22:09:00`
+  r5_exists_verified). Merger. Crucially the clean DECOMPOSITION is not the
+  source's: upstream `showProofStatus` is an 8-arm flat match keyed on
+  `(SystemTraceQuantifier, ProofStatus)` over a 6-value status enum
+  (`TraceFound/CompleteProof/UnfinishableProof/IncompleteProof/UndeterminedProof/
+  InvalidatedProof`); the clean collapses to a 3-value observed enum
+  (`Verified/Falsified/AnalysisIncomplete`) and branches on `kind` only inside the
+  `Falsified` arm. It omits the three un-probed statuses entirely — the signature
+  of observed-only reconstruction, not transcription. No source identifier
+  (`showProofStatus`, `ProofStatus`, `SystemTraceQuantifier`) is carried.
+
+- **Warning heading + advisory** (`framing.rs` `WarningSummary::render`). The
+  strings `WARNING: <N> wellformedness check failed!` (singular noun) and
+  `The analysis results might be wrong!` are captured interop tokens
+  (`BEHAVIOR.md` §12b; `QUERIES.log 22:06:00` r5_warn_lemma_prove). The `--prove`
+  gating of the advisory is a black-box fact triangulated across four logged
+  probes (`22:07:00` default = no advisory; `22:08:00` zero-lemma still emits;
+  `22:08:30` zero-match still emits; `22:09:30` no-warning never emits), not read
+  off the source's `[ … | thyLoadOptions.proveMode ]` guard — and the field is
+  named `analysis_maybe_wrong` for the observable, not `proveMode`. The 11-space
+  advisory indent is DERIVED as `WARNING_PREFIX.len()` (alignment relationship,
+  §12b), not the source's hardcoded 9-space literal `"         The analysis…"`
+  (upstream gets the other 2 from `nest 2`). Deriving the constant from the prefix
+  rather than copying the magic literal is dispositive of non-copying.
+
+- **Summary body layout** (`framing.rs` `Summary::render_block`). The
+  opening `"  \n"` line + present-sections-joined-by-`"  \n"` (warning first,
+  then lemmas) is reconstructed imperatively from the captured 4-case truth table
+  (`BEHAVIOR.md` §12a; captures r5_nolemma_default / r5_exists_verified /
+  r5_freshpub_prove / r5_warn_lemma_*). It does NOT mirror the source's
+  Pretty-combinator mechanics — `ppRep`'s `nest 2 $ vcat [ …, "", ppWf $--$
+  lemmas ]`, where the `  ` separators are `Pretty.text ""` under `nest 2` and the
+  section short-circuits fall out of `emptyDoc`/`$--$`. Bytes-first, not
+  structure-first. `LemmaOutcome::line`'s `<name> (<kind>): <verdict> (<N> steps)`
+  is the observed row format (upstream `prettyClosedSummary`'s
+  `<-> analysisType <> colon <-> … <-> parens (integer siz <-> "steps")`); the
+  `(N steps)` / `steps` token is interop content, and the clean carries the step
+  count as an opaque input rather than replicating the `foldProof proofStepSummary`
+  step-counting fold. No source comment (the `prettyClosedSummary` "hacky
+  construction" / "Just annotation invariant" block) is echoed.
+
+- **Incremental emitter** (`src/emit.rs`). No upstream counterpart: `Batch.hs`
+  emits with `mapM_ (putStrLn . renderDoc) docs` then one `putStrLn … ppSummary`
+  — no streaming/`Sink` architecture. The `Sink`/`BatchEmitter`/`StreamCollector`/
+  `drive_batch` surface and its `begin/progress/payload/record_summary/finish`
+  lifecycle are original Rust API, reusing the crate's own `framing` primitives
+  (`progress_line`, `render_summary`, `maude_preamble`). Introduces no new
+  observable strings — a pure per-stream re-ordering verified by equivalence
+  against `frame_batch` (`BEHAVIOR.md` §13), so the absence of a dedicated oracle
+  probe is correct, not a provenance gap. No identifier or structure is derived
+  from tamarin.
+
+- **Round-5 probes/fixtures.** `probes/round5/{falsify,warn_and_lemma,
+  exists_verified,nolemma_clean}.spthy` are self-authored (own theory names
+  `FalsifyMe`/`WarnAndLemma`/`ExistsVerified`/`NoLemmaClean`, own comments),
+  matching the `BEHAVIOR.md` §12 claim "own fixtures, not the GPL examples." The
+  `r5_nslpk3_*` / `r5_multi_*` captures use `classic/NSLPK3.spthy` as probe INPUT
+  only; the `tests/fixtures/r5_*.out.txt/.err.txt` are the reference program's own
+  emitted bytes (golden oracle artifacts, consistent with prior rounds), not
+  authored expression in the clean crate. Probe-derived — filtered.
+
+Every behavioral claim added this round traces to a logged Round-5 probe
+(`QUERIES.log 22:05:00–22:11:00`) or a captured fixture; the streaming layer is a
+no-new-oracle-facts internal API validated by byte-equivalence tests. Nothing in
+the delta is a copied protectable expression.
+
+Verdict: pass.

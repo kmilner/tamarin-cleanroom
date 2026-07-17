@@ -278,6 +278,29 @@ fn raw_rule_wraps_and_escapes_prerendered_cells() {
     assert_eq!(to_dot(&generate(&sys)), include_str!("fixtures/wrap_E12.dot"));
 }
 
+/// Reproduce the conclusion-group FILL of the live `Wide` record byte-exact
+/// (BEHAVIOR.md §3f, round 7). The conclusion group `[Ack 25, Big 68, Out 11]`
+/// exercises the smallest-flat-first fill-budget allocation: `Ack` wraps and is
+/// allocated 20 (breaking after `~n.4`), `Out` fits, and `Big` — placed last —
+/// gets fill budget `87 − 20 − 11 = 56`, packing eight tuple elements on line 0
+/// (not the seven a flat-sum budget of 51 would give). The record line is the one
+/// captured live in `tests/fixtures/wide_group.dot`.
+#[test]
+fn wide_conclusion_group_fill_byte_exact() {
+    let record = RawRule::new("#vr.3 : Wide[Made( ~n.4 )]", "#d5d897")
+        .premises(vec![
+            "In( <x1.4, x2.4, x3.4, x4.4, x5.4, x6.4, x7.4, x8.4, x9.4, x10.4> )".into(),
+            "Fr( ~n.4 )".into(),
+        ])
+        .conclusions(vec![
+            "Ack( ~n.4, <x1.4, x2.4> )".into(),
+            "Big( <x1.4, x2.4, x3.4, x4.4, x5.4, x6.4, x7.4, x8.4, x9.4, x10.4> )".into(),
+            "Out( x1.4 )".into(),
+        ]);
+    let sys = System { nodes: vec![GraphNode::RawRule(record)], ..System::default() };
+    assert_eq!(to_dot(&generate(&sys)), include_str!("fixtures/wide_record.dot"));
+}
+
 /// End-to-end abbreviation: a system with a legend emits the `{ rank="sink"; … }`
 /// block and the invis edge after it (observed order).
 #[test]

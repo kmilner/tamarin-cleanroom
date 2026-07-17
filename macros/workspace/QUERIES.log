@@ -252,3 +252,60 @@
 # expands ordinary lemmas/restrictions/primary-rules (and bare-nullary uses), and
 # ONLY carves out acc-lemma/case-test formulas [Q41] and derived rule forms [Q42].
 # `expand_staged` implements that contract; `expand` remains the full-close entry.
+
+# ---- Round 6: the INDEXED bare-name decoration — does `konst.1` resolve? ------
+#      Round 4 covered SORT decorations [Q34]; the interop AST var node also
+#      carries a numeric INDEX and an optional TYPE. Pin the full decoration
+#      matrix for a NULLARY macro name in both rule terms and formula positions.
+
+[Q43] RULE-TERM decoration matrix. macros: konst() = h('k').
+      probes/bare_indexed.spthy       : [In(x)] --[A(konst.1),B(konst.2)]-> [Out(konst)]
+      probes/bare_indexed_zero.spthy  : --[A(konst.0)]->
+      probes/bare_indexed_sorted.spthy: --[A(~konst.1),B($konst.1)]->
+      probes/bare_indexed_baseline.spthy: [In(notmac.1)] --[A(notmac.1)]-> (notmac NOT a macro)
+      probes/bare_typed.spthy         : --[A(konst:msg)]->
+      Purpose: which var-node decorations block bare-nullary resolution?
+      Observed:
+       - `konst.1` / `konst.2` / `konst.0` (untagged + ANY explicit index) =>
+         PARSE ERROR: "unexpected '.' expecting ',' or ')'" (col of the '.').
+         => an indexed nullary-macro NAME is rejected at parse; it is never a
+         macro use. (captures/bare_indexed.out, bare_indexed_zero.out)
+       - `~konst.1` / `$konst.1` (sorted + indexed) => parse OK, stay ORDINARY
+         variables (modulo-E A( ~konst.1 ), B( $konst.1 ); AC A( ~konst ) [renamed],
+         B( $konst.1 ); unbound-variable + sort-mismatch warnings). The sort
+         already blocks resolution [Q34]; the index rides along on a variable.
+         (captures/bare_indexed_sorted.out)
+       - `notmac.1` (NON-macro untagged + index) => parse OK, ORDINARY indexed
+         variable (modulo-E In( notmac.1 ); AC In( notmac )). => the '.'-index
+         itself is legal on a plain variable; the parse error above is specific to
+         a nullary-MACRO name. (captures/bare_indexed_baseline.out)
+       - `konst:msg` (type annotation) => PARSE ERROR "unexpected ':' expecting
+         ',' or ')'" — reconfirms [Q32]. (captures/bare_typed.out)
+      => a bare nullary-macro use is ONLY the fully-undecorated plain name
+      (untagged, no index, no type). Index and type each block resolution, on top
+      of the sort rule [Q34]. In the consumer AST an indexed/typed `Var` must stay
+      a variable — the previous guard (sort-only) resolved it TOO BROADLY.
+
+[Q44] FORMULA-POSITION decoration matrix (same macro konst() = h('k')).
+      probes/bare_formula_plain.spthy         : lemma "Ex #i. A(konst) @ #i"
+      probes/bare_indexed_formula.spthy       : lemma "Ex #i. A(konst.1) @ #i"
+      probes/bare_formula_indexed_baseline.spthy: lemma "Ex #i. A(notmac.1) @ #i"
+      Purpose: does the same matrix hold inside a trace formula?
+      Observed:
+       - plain `konst` => RESOLVES: primary keeps A( konst ); the guarded formula
+         shows the expansion "∃ #i. (A( h('k') ) @ #i)".
+         (captures/bare_formula_plain.out) — formula-position confirmation of [Q32].
+       - `konst.1` => PARSE ERROR (formula parser rejects the indexed macro name).
+         (captures/bare_indexed_formula.out)
+       - `notmac.1` (non-macro) => parse OK, stays the variable `notmac.1`
+         (guarded "∃ #i. (A( notmac.1 ) @ #i)"; a Formula-terms wellformedness
+         warning, but NO parse error). (captures/bare_formula_indexed_baseline.out)
+      => the decoration matrix is identical in rule-term and formula positions:
+      only the plain undecorated name resolves; an index blocks it.
+
+# Round 6 fix: the `expand_term` Var arm now resolves a nullary macro's bare name
+# ONLY when sort==Untagged AND idx==0 AND typ==None (previously sort-only), so an
+# indexed/typed decorated Var stays a variable [Q43,Q44]. The arm is shared by
+# `expand` and `expand_staged`, so the guard applies in BOTH modes. `konst.0` is
+# indistinguishable from plain `konst` in the AST (both idx 0), so idx==0 is the
+# faithful resolving case; the reference rejects the surface `.0` at parse anyway.

@@ -1,0 +1,8 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n4[shape="record",label="{{<n0> Fr( ~s )}|{<n1> #i : C2_q40_p44[C2_q40_p44( )]}|{<n2> Ta( 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' )|<n3> Sib( 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' )}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+
+}

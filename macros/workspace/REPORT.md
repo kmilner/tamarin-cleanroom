@@ -184,3 +184,48 @@ lemma/restriction/rule expanded, bare-nullary still resolves, and derived
 variant/left-right forms not recursed into — with a full-close contrast), 7
 byteparity rule fixtures, 4 formula_parity fixtures. **ALL PASS** [Q41,Q42].
 New probes logged: `QUERIES.log` [Q41,Q42].
+
+---
+
+## Round 6 — bare-nullary resolution was firing too broadly (indexed/typed names)
+
+One precise gap: the `expand_term` `Var` arm resolved a nullary macro's bare name
+on the **sort** decoration alone (`sort == Untagged`), ignoring the var node's
+other decorations — the numeric **index** and the optional **type**. Round 4
+[Q34] had covered sorts (`~konst`/`$konst` stay variables) but never an INDEXED
+bare name.
+
+**Probe — full decoration matrix** (`konst() = h('k')`), rule-term [Q43] and
+formula [Q44] positions, both cross-checked against a NON-macro baseline:
+
+| decoration        | surface              | reference behavior                         |
+|-------------------|----------------------|--------------------------------------------|
+| none (plain)      | `konst`              | resolves to `h('k')` (rule + guarded formula) |
+| fresh / pub sort  | `~konst` / `$konst`  | stays a variable [Q34]                     |
+| explicit index    | `konst.1/.2/.0`      | **parse error** — indexed macro name is not a use |
+| sort + index      | `~konst.1` / `$konst.1` | stays a variable                        |
+| type annotation   | `konst:msg`          | **parse error** (reconfirms [Q32])         |
+
+The baselines pin that the decorations are legal on an *ordinary* variable
+(`notmac.1` parses as a plain indexed variable in both positions [Q43,Q44]); the
+parse errors are specific to a nullary-*macro* name. So the reference treats an
+indexed/typed nullary-macro name as **never a macro use**. In the consumer's AST
+(where a var node carries `(name, idx, sort, typ)` and macro resolution is
+deferred to `expand`) such a decorated `Var` must therefore stay a variable — the
+old sort-only guard resolved it, firing too broadly.
+
+**Fix.** The `Var` arm now resolves only the fully-undecorated plain name:
+`formals.is_empty() && sort == Untagged && idx == 0 && typ.is_none()`. The arm is
+shared by `expand` (full close) and `expand_staged`, so the tightened guard holds
+in **both modes**. `konst.0` is indistinguishable from plain `konst` in the AST
+(both `idx==0`), so `idx==0` is the faithful resolving predicate — the reference
+rejects the surface `.0` at parse regardless.
+
+**Acceptance (round 6).** `run_tests.sh`: **30** cargo tests (26 prior + 4 new:
+indexed-not-resolved with plain-still-resolves contrast; typed-not-resolved;
+sort+index-not-resolved; and the index guard in a formula position under BOTH
+`expand` and `expand_staged`), 7 byteparity rule fixtures, 4 formula_parity
+fixtures. **ALL PASS**. Every prior test/fixture stays green (the plain-name
+uses they exercise have `idx==0`/`typ==None`, so they still resolve). New probes
+`QUERIES.log` [Q43,Q44]; captures in
+`captures/{bare_indexed,bare_indexed_zero,bare_indexed_sorted,bare_indexed_baseline,bare_typed,bare_formula_plain,bare_indexed_formula,bare_formula_indexed_baseline}.out`.

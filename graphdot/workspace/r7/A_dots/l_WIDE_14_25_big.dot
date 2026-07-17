@@ -1,0 +1,8 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n5[shape="record",label="{{<n0> Fr( ~s )}|{<n1> #i : WIDE_14_25_big[WIDE_14_25_big( )]}|{<n2> Out( 'bbbbb' )|<n3> Ack( 'bbbbbbbbbbbbbbbb'\l)\l|<n4> Big( \<'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'e08', 'e09', 'e10'\>\l)\l}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+
+}

@@ -505,6 +505,143 @@ fn nullary_macro_reserves_name_over_formal() {
 }
 
 // ===========================================================================
+// ROUND 6 — bare-nullary resolution fires ONLY on the fully-undecorated name
+//
+// A bare nullary-macro use is the plain identifier: untagged sort, no index and
+// no type annotation. Every decoration blocks resolution. The reference rejects
+// an indexed (`konst.1`) or typed (`konst:msg`) macro name at parse [Q43,Q44,
+// Q32]; in the consumer AST such a decorated `Var` must therefore stay a
+// variable, not resolve (fresh/pub sort already blocked — Q34). The guard lives
+// in the shared `expand_term` `Var` arm, so it applies in both full-close and
+// staged modes.
+// ===========================================================================
+
+/// An indexed variable term: `name.idx` with the given sort, no type.
+fn ivar(name: &str, idx: u64, sort: SortHint) -> Term {
+    Term::Var(VarSpec { name: name.into(), idx, sort, typ: None })
+}
+/// A type-annotated variable term: `name:typ` (untagged, index 0).
+fn tvar(name: &str, typ: &str) -> Term {
+    Term::Var(VarSpec { name: name.into(), idx: 0, sort: SortHint::Untagged, typ: Some(typ.into()) })
+}
+
+// ---- Q43: an explicit index blocks resolution; plain (idx 0) still resolves --
+
+#[test]
+fn bare_nullary_indexed_not_resolved() {
+    // konst() = h('k'). `konst.1` / `konst.2` (untagged, explicit index) are NOT
+    // the macro — the reference rejects an indexed macro name at parse [Q43], so
+    // expand keeps them as ordinary indexed variables. Only the idx-0 plain name
+    // resolves.
+    let body = app("h", vec![publit("k")]);
+    let macros = TheoryItem::Macros(vec![mdef("konst", &[], body.clone())]);
+    let r = Rule {
+        name: "R".into(), modulo: None, attributes: vec![], let_block: vec![],
+        premises: vec![fact("In", vec![msg("x")])],
+        actions: vec![
+            fact("A", vec![ivar("konst", 1, SortHint::Untagged)]),
+            fact("B", vec![ivar("konst", 2, SortHint::Untagged)]),
+            fact("P", vec![msg("konst")]), // plain (idx 0) still resolves
+        ],
+        conclusions: vec![], embedded_restrictions: vec![], variants: vec![], left_right: None,
+    };
+    let out = expand(&theory(vec![macros, TheoryItem::Rule(r)]));
+    let rr = out.items.iter().find_map(|it| match it {
+        TheoryItem::Rule(r) => Some(r), _ => None }).unwrap();
+    assert_eq!(rr.actions[0], fact("A", vec![ivar("konst", 1, SortHint::Untagged)]));
+    assert_eq!(rr.actions[1], fact("B", vec![ivar("konst", 2, SortHint::Untagged)]));
+    assert_eq!(rr.actions[2], fact("P", vec![body])); // plain resolves
+}
+
+// ---- Q32: a type annotation blocks resolution -----------------------------
+
+#[test]
+fn bare_nullary_typed_not_resolved() {
+    // `konst:msg` (type-annotated) is not the macro — the reference rejects it at
+    // parse [Q32]; expand leaves the typed variable untouched.
+    let body = app("h", vec![publit("k")]);
+    let macros = TheoryItem::Macros(vec![mdef("konst", &[], body)]);
+    let t = theory(vec![
+        macros,
+        TheoryItem::Rule(rule_act("R", vec![fact("In", vec![msg("x")])],
+                                  fact("A", vec![tvar("konst", "msg")]))),
+    ]);
+    assert_eq!(only_rule_action_arg(&expand(&t)), tvar("konst", "msg"));
+}
+
+// ---- Q43 (sorted rows): sort AND index each independently block resolution --
+
+#[test]
+fn bare_nullary_indexed_and_sorted_not_resolved() {
+    // `~konst.1` / `$konst.1` (sorted + indexed) stay ordinary variables — either
+    // decoration alone already blocks, and both together certainly do [Q43].
+    let body = app("h", vec![publit("k")]);
+    let macros = TheoryItem::Macros(vec![mdef("konst", &[], body)]);
+    let r = Rule {
+        name: "R".into(), modulo: None, attributes: vec![], let_block: vec![],
+        premises: vec![fact("In", vec![msg("x")])],
+        actions: vec![
+            fact("A", vec![ivar("konst", 1, SortHint::Fresh)]),
+            fact("B", vec![ivar("konst", 1, SortHint::Pub)]),
+        ],
+        conclusions: vec![], embedded_restrictions: vec![], variants: vec![], left_right: None,
+    };
+    let out = expand(&theory(vec![macros, TheoryItem::Rule(r)]));
+    let rr = out.items.iter().find_map(|it| match it {
+        TheoryItem::Rule(r) => Some(r), _ => None }).unwrap();
+    assert_eq!(rr.actions[0], fact("A", vec![ivar("konst", 1, SortHint::Fresh)]));
+    assert_eq!(rr.actions[1], fact("B", vec![ivar("konst", 1, SortHint::Pub)]));
+}
+
+// ---- Q44: same guard in a formula position AND under expand_staged ---------
+
+#[test]
+fn bare_nullary_indexed_guard_in_formula_both_modes() {
+    // In a lemma formula: `konst.1` stays a variable while plain `konst` resolves
+    // to h('k') [Q44]. The guard is in the shared term arm, so both the
+    // full-close and the staged entry point behave identically here.
+    let body = app("h", vec![publit("k")]);
+    let macros = TheoryItem::Macros(vec![mdef("konst", &[], body.clone())]);
+    // lemma: Ex #i. A(konst.1)@i & B(konst)@i
+    let lem = TheoryItem::Lemma(Lemma {
+        name: "L".into(), modulo: None, attributes: vec![],
+        trace_quantifier: TraceQuantifier::ExistsTrace,
+        formula: Formula::Exists(
+            vec![var("i", SortHint::Node)],
+            Box::new(Formula::And(
+                Box::new(Formula::Atom(Atom::Action(
+                    fact("A", vec![ivar("konst", 1, SortHint::Untagged)]),
+                    Term::Var(var("i", SortHint::Node))))),
+                Box::new(Formula::Atom(Atom::Action(
+                    fact("B", vec![msg("konst")]),
+                    Term::Var(var("i", SortHint::Node))))),
+            )),
+        ),
+        proof: None, plaintext: String::new(),
+    });
+    let t = theory(vec![macros, lem]);
+    for out in [expand(&t), expand_staged(&t)] {
+        let l = out.items.iter().find_map(|it| match it {
+            TheoryItem::Lemma(l) => Some(l), _ => None }).unwrap();
+        let (a, b) = match &l.formula {
+            Formula::Exists(_, inner) => match inner.as_ref() {
+                Formula::And(a, b) => (a.clone(), b.clone()),
+                _ => unreachable!(),
+            },
+            _ => unreachable!(),
+        };
+        // konst.1 unresolved (still an indexed variable)
+        assert_eq!(*a, Formula::Atom(Atom::Action(
+            fact("A", vec![ivar("konst", 1, SortHint::Untagged)]),
+            Term::Var(var("i", SortHint::Node)))));
+        // plain konst resolved to the body
+        assert_eq!(*b, Formula::Atom(Atom::Action(
+            fact("B", vec![body.clone()]),
+            Term::Var(var("i", SortHint::Node)))));
+    }
+}
+
+// ===========================================================================
 // GAP 2/3 — macros inside accountability-lemma and case-test formulas
 // ===========================================================================
 

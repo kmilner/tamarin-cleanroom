@@ -1632,3 +1632,429 @@ fixtures `del_path.json`/`verify.json`/`verify_proof.json`) + routes_upload 3
 (doctest 1 ignored). wf fixture suite 2/2 over the >=20-fixture corpus
 (`fixture_count_is_at_least_twenty`, `every_fixture_parses_and_matches`).
 `gen_license_headers.py` --check 0 stale (133 headers).
+
+================================================================================
+# Dirty-room integration report — wave-2 close, units E (macros) SWAP+DELETE + D (console) round-5 re-sync
+
+Date: 2026-07-17. Integrator: dirty-room (adapters + extraction only; no logic
+transplanted from replaced files into clean code). Repo: `/home/kamilner/tamarin-rs`.
+Rebased on the CURRENT tree (round-6 A/D and round-5 E/B applied; header count
+inherited at 133). Audits PASSED this round for E, B, A, D; this pass integrated
+the two in the task scope: **E — macros SWAP COMPLETED + ported driver DELETED
+(byte-verified end-to-end); D — round-5 clean modules RE-SYNCED (summary content
++ incremental emitter), run-driver contract swap KEPT with two now-concrete
+blockers (one clean-side, one ported-scale).** No headered file deleted → header
+count unchanged (133 → 133).
+
+--------------------------------------------------------------------------------
+## E. Macros (macro-clean) — RE-SYNCED to round-6, REWIRED, ported driver DELETED
+
+**Re-sync (clean, headerless).** `crates/tamarin-theory/src/macros.rs` <- macros
+round-6 workspace `lib.rs` (mechanical: drop `pub mod ast;`, `use ast::*;` ->
+`use tamarin_parser::ast::*;`, drop `#[cfg(test)] mod tests;`). The round-6 delta
+is the one guard-tightening the round-5 report named as the blocker: the
+`expand_term` `Var` arm now resolves a bare nullary-macro name only when the name
+is fully undecorated —
+`formals.is_empty() && v.sort == Untagged && v.idx == 0 && v.typ.is_none()` — so an
+indexed (`konst.1`) or type-annotated (`konst:msg`) `Var` stays an ordinary
+variable. That is the exact discrimination the ported `apply_macros_term` already
+carried and the precise gap that failed `bare_nullary_macro_name_expands` last
+round. macros.rs stays headerless (tripwire verified — `gen_license_headers.py`
+adds no header).
+
+**Rewire (ported glue -> clean).** `macro_expand::expand_theory_macros` and
+`macro_expanded_clone` now route through `crate::macros::expand_staged`
+(`expand_theory_macros` = `*thy = expand_staged(thy)`; `macro_expanded_clone` =
+`expand_staged(parsed)`). These are the two whole-theory entry points every
+consumer uses (`elaborate.rs:407`, `run.rs` batch/web WF re-checks in
+`theory_io.rs` + `run.rs`, `wf_formula_terms.rs`).
+
+**Gate (all UNMODIFIED, green).** All **nine** `macro_expand` captured tests pass
+through the clean staged entry with no edits — incl. the hard gate
+`bare_nullary_macro_name_expands` (konst -> h('seed'); `konst.1`/`konst:pub` stay
+vars), `acc_lemma_formula_is_not_macro_expanded` and
+`case_test_formula_is_not_macro_expanded` (Staged carve-out leaves them untouched),
+`nested_macro_is_re_expanded`, `macro_inside_ifdef_is_expanded`, etc. Theory suite
+green (lib 489, oracle_solver 19, wf_formula_terms 5). WF pipeline fixtures green
+(`macro_expanded_clone` feeds the WF checks; parser `wellformedness` 2/2).
+
+**Delete (ported).** Removed the ported `expand_theory_macros` body (item-collect +
+walk), `expand_items`, and `expand_rule` from `macro_expand.rs` — the driver that
+mirrored the HS per-item appliers (ClosedTheory/Lemma/Rule/Restriction/Model.Rule/
+CaseTestItem/Prover call-sites). KEPT as thin staging glue, header intact: the two
+routing entry points, plus the term/fact/formula machinery that is SHARED and still
+independently required — `apply_macros_term` (port of `applyMacros`, used by
+`pretty_theory`), `apply_macros_fact`/`apply_macros_formula` (ports of
+`applyMacroInFact`/`applyMacroInFormula`, used by `pretty_theory`),
+`subst_term_by_name` (shared with `predicate_expand`), and the reusable walkers
+`map_fact_terms`/`map_atom_terms`/`map_formula_terms` (shared with `elaborate` and
+`rule_restriction`). The module doc was updated to describe current code only (the
+deleted driver's HS call-site list removed; the shared machinery + glue described).
+
+**End-to-end byte-verification (live oracle).** A macro theory exercising every
+resolved path — bare nullary (`konst() = h('seed')`), multi-arg
+(`wrap(x,k) = senc(x,k)`), and nested/pair (`dh(x,y) = h(<x,y>)`) — run through the
+FULL analyze path (elaborate + WF + close + render), `--prove=reachable`: RS stdout
+is **byte-identical to the v1.13.0 HS binary** modulo the two build-metadata lines
+(`Git revision:` / `Compiled at:`) and `processing time:`. The `rule (modulo AC)`
+block shows the expansion (`Made( senc(~m, ~k) )`, `Seed( h('seed') )`,
+`Nest( h(<~m, ~k>) )`) exactly. (Orthogonal, pre-existing: bare `--prove` with no
+lemma name emits a spurious `lemma `' referenced but not present` WF line on RS —
+reproduced on non-macro NSLPK3 too, and absent with a named `--prove=reachable`; a
+unit-C/D CLI-lemma-filter divergence, not touched by this work.)
+
+**Header delta / citations (E).** `macro_expand.rs` stays headered (the shared
+ported machinery remains), so **no headered file was deleted** and the header count
+is unchanged. `gen_license_headers.py` re-derived the file's provenance from the
+now-smaller ported content and dropped **two author citations from THIS file's
+header — `gilcu3`, `katrielalex`** — and the upstream-source lines for the deleted
+drivers (`ClosedTheory.hs`, `Items/CaseTestItem.hs`, `Lemma.hs`, `Rule.hs`,
+`Theory/Model/Restriction.hs`, `Theory/Model/Rule.hs`). **Neither author
+disappeared campaign-wide**: `gilcu3` and `katrielalex` each remain cited in ~10
+other headered files (verified by `git grep`). No clean file acquired a header.
+
+--------------------------------------------------------------------------------
+## D. Console (cli-clean) round-5 — RE-SYNCED; run-driver swap KEPT (2 blockers)
+
+**Re-sync (clean, headerless).** Vendored the round-5 console delta:
+* `cli/framing.rs` <- workspace `framing.rs` (mechanical `crate::` -> `super::`):
+  the summary-body content the round-4 model left as a slot. `LemmaResult` gains
+  `PartialEq/Eq`; NEW `LemmaOutcome { name, kind, result, steps }` with
+  kind-dependent falsified text (`falsified - found trace` / `falsified - no trace
+  found`); NEW `WarningSummary { failed_checks, analysis_maybe_wrong }` with the
+  `WARNING: N wellformedness check failed!` heading + the `--prove`-gated
+  `The analysis results might be wrong!` advisory (11-space aligned to
+  `WARNING_PREFIX.len()`); `Summary` swaps `entries: Vec<SummaryEntry>` for
+  `warnings: Option<WarningSummary>` + `lemmas: Vec<LemmaOutcome>`; `render_block`
+  grows the two-section body (`  ` opener; warning then lemmas joined by `  `).
+* NEW `cli/emit.rs` <- workspace `emit.rs` (`crate::` -> `super::`): the incremental
+  emission API — `Sink` trait, `StreamCollector`, `BatchEmitter`
+  (`begin`/`progress`/`closed_phases`/`extra_progress`/`payload`/`record_summary`/
+  `finish`), and `drive_batch`. Registered `pub mod emit;` in `cli/mod.rs`. Both
+  clean files stay headerless (tripwire verified).
+* Re-ported the round-5 test delta into `tests/console_split_parity.rs` (import
+  paths `cli_clean::` -> `tamarin_prover::cli::`, fixture dir -> `console_fixtures/`)
+  and copied the 8 `r5_*` golden capture pairs. The suite grew **33 -> 45**: the
+  round-4 framing tests updated to the round-5 API, the GAP-1 summary-content tests
+  (warning+lemma under prove / default, falsified wording by trace-kind, warning-no-
+  lemma advisory-no-separator, no-warning-no-lemma, verified-uniform, bounded-prove
+  incomplete, multifile join, exact-body pin), and the GAP-2 streaming-equivalence
+  tests (`drive_batch`/`BatchEmitter` per-stream bytes == `frame_batch`). This
+  exercises the whole round-5 surface so none of it is dead code.
+
+**Run-driver contract swap — KEPT ported (the four blockers re-confirmed with live
+oracle evidence this pass; two now pin to a hard clean-side/ported-scale gap).**
+Per protocol ("never force a swap; keep-and-report anything that still blocks"), the
+ported parse (`cli/mod.rs` `parse_args`/`Args`/validation) and run-driver framing
+(`run.rs` `print_maude_banner` / `[Theory X]` markers / `print_overall_summary` /
+`format_lemma_summary_line`) are KEPT intact (headers untouched). Live captures
+(linuxbrew HS v1.13.0 via `split_probe.sh`-style separation) re-confirm the target
+divergences:
+
+1. **Value-validation ORDERING (blocker 1).** `RS --bound=x NSLPK3.spthy` -> 0
+   stdout, 8637-byte stderr `error: bound: expected integer, got "x"` + global
+   help, NO preamble. HS -> 0 stdout, 225-byte stderr = the 3-line maude preamble
+   THEN `tamarin-prover: bound: invalid bound given` + CallStack
+   (`Batch.hs:162:33`). Faithful reproduction requires the value flags to be forced
+   AFTER the preamble inside the run driver — a ported-file change coupled to (2).
+2. **Structural-error stream taxonomy (blocker 2).** `RS --foobar` -> 0 stdout,
+   8627-byte stderr `error: unknown flag: --foobar` + full help. HS -> 0 stdout,
+   **23-byte** stderr `Unknown flag: --foobar` (bare, no help). `RS` no-input -> 0
+   stdout, 8626-byte stderr `error: no input files given` + help. HS -> **8625-byte
+   STDOUT** `error: no input files given` + global help, 0 stderr. The clean
+   `parse`+`errors` already reproduce this taxonomy (proven in
+   `console_split_parity`: `error_streams_are_assigned`, `unknown_long_flag`,
+   `no_input_files_envelope_includes_global_help`), but wiring them requires
+   converting `main.rs`'s single `error: <msg>\n\n<help> -> stderr` contract into
+   the bare-stderr / stdout-envelope split — and this lands only together with (1).
+3. **`stop_on_trace` presence (blocker 3).** Recoverable via an `Options::is_set`
+   re-parse; meaningful only once (1)/(2)/(4) land. (The ported `Args` already
+   carries the absent/present distinction as `Option<StopOnTrace>`; the clean
+   `args::Args` flattens it, so the re-parse belongs to the clean-args route.)
+4. **Summary VERDICT-TAXONOMY gap — NEW hard blocker, clean-side (blocker 4).** The
+   round-5 additions closed the layout/advisory/warning gaps the round-3/4 reports
+   named, and the `emit.rs` streaming layer closes the streaming-vs-buffered
+   mismatch. But the clean summary model (`LemmaResult` = {Verified, Falsified,
+   AnalysisIncomplete}) reconstructs only the **3 verdicts the corpus probes
+   observed**, while `run.rs`'s `LemmaVerdict` renders **9** with distinct HS
+   `showProofStatus` strings (Proof.hs:1105-1112): `Unfinishable` -> "analysis
+   cannot be finished (reducible operators in subterms)", `Undetermined` ->
+   "analysis undetermined", `Invalidated` -> "proof has been invalidated", and
+   `Error(msg)` -> "error: <msg>" — none of which `render_summary` /
+   `BatchEmitter::record_summary` can produce. Routing the batch summary through the
+   clean emitter would silently map those four to "analysis incomplete" — a **silent
+   byte regression no green gate catches** (the 5 named live scenarios and the two
+   in-repo suites only exercise verified / falsified / analysis-incomplete; the
+   `run.rs` unit test `lemma_summary_distinguishes_undetermined_and_invalidated`
+   pins the missing strings and would have to be deleted to force the swap). Per the
+   round-6 A2 precedent (silent regressions must not be forced), this blocks the
+   deletion of the ported `print_overall_summary` / `format_lemma_summary_line` and
+   the `frame_batch`/`emit` batch routing. Closing it is a **clean-side change** the
+   dirty room may not author — the clean crate must add the `Unfinishable` /
+   `Undetermined` / `Invalidated` / error verdicts to `LemmaResult` from a probe of
+   a subterm-reducible theory and an invalidated/undetermined proof.
+
+**Also blocking the `parse_args`/`Args` deletion (ported-scale).** `run.rs` consumes
+the ported `Args` across ~40 run-driver fields (incl. the three Rust-only interop
+flags `--processors` / `--maude-processes` / `--data-dir`); the clean `args::Args`
+is a differently-shaped struct (round-4 audit: "grouped by the clean-room's own
+categories"). Deleting the ported `parse_args`/`Args` means re-wiring the entire
+1800-line run driver to the clean typed args — not an adapter — and cannot be
+validated green without the full example-corpus byte-parity gate (the named 5-
+scenario gate would not catch a corpus regression). `cli_e2e` currently PINS the
+non-faithful contract it would change (`--bound=not-a-number` = parse-time error;
+no-input = `RunError`), so the swap also requires rewriting those gates.
+
+Deleted (D): none. KEPT ported: `cli/mod.rs` (`parse_args`/`Args`/validation),
+`run.rs` (`print_maude_banner` / markers / `print_overall_summary` /
+`format_lemma_summary_line`), `main.rs` error contract. The vendored round-5 clean
+modules stay ready for the future close.
+
+--------------------------------------------------------------------------------
+## Wave-2 close (E, D) — deleted / kept / header delta
+
+* E  RE-SYNCED (`macros.rs` round-6 decoration-guarded bare-nullary arm,
+     headerless) + REWIRED (`expand_theory_macros`/`macro_expanded_clone` ->
+     `macros::expand_staged`) + DELETED ported `expand_theory_macros` body /
+     `expand_items` / `expand_rule`. kept: the shared ported machinery
+     (`apply_macros_term`/`apply_macros_fact`/`apply_macros_formula`/
+     `subst_term_by_name`/`map_*_terms`) + thin glue, header intact. 9 captured
+     tests pass UNMODIFIED; live end-to-end byte-parity confirmed.
+* D  RE-SYNCED (`cli/framing.rs` round-5 summary content + NEW `cli/emit.rs`
+     incremental emitter, both headerless; `console_split_parity` 33 -> 45).
+     run-driver swap NOT PERFORMED — blocked by the clean-side summary
+     verdict-taxonomy gap (blocker 4) + the ported-scale `Args` re-wire. kept:
+     `cli/mod.rs`, `run.rs`, `main.rs` (ported). deleted: none.
+
+Header-count delta: **133 -> 133 (net 0).** No headered FILE added or deleted.
+Author citations that disappeared from a file: `gilcu3`, `katrielalex` dropped from
+`crates/tamarin-theory/src/macro_expand.rs`'s own header (the deleted ported drivers
+they authored) — **both survive campaign-wide** (~10 other headered files each), so
+no upstream author lost their sole citation. Side effect of running the sanctioned
+tool: `crates/tamarin-term/src/macro_expand.rs`'s header author line was canonicalised
+by `gen_license_headers.py` (`"Tom" (github BTom-GH), "ValentinYuri" (github)` ->
+`ValentinYuri, BTom-GH`) — same authors, cosmetic format only. The three re-synced /
+new clean files (`macros.rs`, `cli/framing.rs`, `cli/emit.rs`) stay headerless
+(tripwire verified — none acquired a GPL header). `--check`: 0 stale (133 headers).
+
+Validation (all green): `cargo build --workspace` 0 errors, 0 warnings in touched
+files; `cargo test -p tamarin-parser` = lib 67 + wellformedness 2; `-p
+tamarin-theory` = lib 489 (+1 ignored) + oracle_solver 19 (+9 ignored) +
+wf_formula_terms 5; `-p tamarin-prover` = lib 61 + cli_e2e 7 + console_split_parity
+**45**; `-p tamarin-server` = lib 110 + routes (autoprove 6 / basic 19 / graph 4 /
+proof_step 3 / static 3 / stubs 15 / upload 3). wf fixture suite 2/2 over the
+>=20-fixture corpus. `gen_license_headers.py` --check 0 stale (133 headers). Live
+oracle: 9 macro captured tests + end-to-end macro-theory byte-parity (E); the four
+D-swap blockers re-captured against the v1.13.0 HS binary.
+
+================================================================================
+# Dirty-room integration report — wave-2 round-7/6, units B (graph) + A (web)
+
+Date: 2026-07-18. Integrator: dirty-room (adapters + extraction only; no logic
+transplanted from replaced files into clean code). Repo: `/home/kamilner/tamarin-rs`.
+Rebased on the CURRENT tree (the wave-2 E-swap + D-resync integrator ran just
+before; header count inherited at 133). Audits PASSED this round for E, B, A, D;
+this pass integrated the two in the task scope: **B — graph_clean RE-SYNCED to
+round-7 (fill budget refined beyond flat-sum); the serialization swap stays KEPT,
+now with a FRESH live-oracle divergence that pins the residual precisely. A —
+web_clean RE-SYNCED to round-6 (origin-aware page shell + state-delegation trait);
+FULL Server adoption NOT PERFORMED — a genuine, code-evidenced async-execution
+serialization design conflict, per the task's explicit escape hatch.** No headered
+file deleted → header count unchanged (133 → 133).
+
+--------------------------------------------------------------------------------
+## B. GRAPH serialization swap (system_to_dot -> clean generate) — NOT PERFORMED
+
+**Re-sync (clean, headerless).** `crates/tamarin-server/src/graph_clean/` <- graph
+round-7 workspace: only `generate.rs` and `render.rs` changed vs the round-6
+vendored copy (the other seven byte-stable after `crate::`->`super::`; `mod.rs` =
+`lib.rs` modulo the one ` ```ignore ` doctest fence). Forward transform verified
+byte-exact both files. The round-7 delta is the "budget function refined beyond
+flat-sum" the task names: `generate::group_cells` keeps the flat-sum `cell_budget`
+as the wrap *trigger* but now computes a separate **fill** budget by a
+smallest-flat-first greedy allocation (`render.rs` exposes `FILL_WIDTH`/
+`MIN_CELL_BUDGET`; a processed sibling contributes `min(flat, its budget)`, an
+unprocessed one its full flat). For the `Wide` conclusion group `[Ack 25, Big 65,
+Out 11]` this gives `Big` a fill budget of 56 (was flat-sum 51). All 23 graph_clean
+inline tests pass, incl. `group_trigger_matches_wide_record` and
+`multi_arg_fact_break_drops_the_comma_space`. graph_clean stays headerless
+(`gen_license_headers.py` adds none — tripwire verified). Corpus SERIALIZER
+roundtrip gate 400/400 byte-exact on a fresh sample (re-sync did not regress the
+`to_dot` serializer).
+
+**Live byte gate REBUILT and RUN (drives the ACTUAL RawRule seam).** graphdot
+reference-server recipe: 1.13.0 stack binary, PATH `/home/linuxbrew/.linuxbrew/bin`,
+`interactive <dir> --port=3211` (equals-form). A purpose-built `Wide` probe theory
+(rule with a 10-tuple `In10` premise and three conclusions `[Ack, Big, Out]`)
+captured fresh at `interactive-graph-def/cases/raw/1/1` (HTTP 200, 622 bytes).
+The gate then drove the **actual clean generate seam**: a `graph_clean::generate::
+System` with one `GraphNode::RawRule` carrying the flat cell strings extracted from
+the HS capture (premises `Fr( ~n.4 )` / `In10( ~n.7×10 )`, info
+`#vr.3 : Wide[Fired( ~n.4 )]`, conclusions `Ack( ~n.4, <~n.7, ~n.7> )` /
+`Big( ~n.7×10 )` / `Out( ~n.4 )`, `fillcolor="#d5d897"`), the `(#i,0)`
+invtrapezium open-target, and the structural conclusion→target edge; then
+`to_dot(generate(&sys))`.
+
+Result: **DIVERGES at byte 318 — inside the `Ack` conclusion cell.** Round-7 CLOSED
+round-6's failure: the `Big` cell is now byte-identical
+(`Big( ~n.7, ~n.7, ~n.7, ~n.7, ~n.7, ~n.7, ~n.7, ~n.7,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~n.7, ~n.7\l)\l`
+— 8 elements on line 0, the fill-budget 56 reproducing HS). But a SIBLING cell in
+the same record now diverges:
+
+    HS:     Ack( ~n.4, \<~n.7, ~n.7\>\l)\l          (one line; only ) peels)
+    clean:  Ack( ~n.4,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<~n.7, ~n.7\>\l)\l   (breaks after ~n.4,)
+
+HS keeps flat-25 `Ack` on one line; the clean smallest-flat-first allocation, seeing
+`Big` still at full flat 65 when it places `Ack`, squeezes `Ack`'s budget to the
+floor 20 and breaks it after `~n.4,`. This is exactly the residual the clean crate's
+own BEHAVIOR.md §3f documents as an honest **[GAP]** — the fill packing is "still
+largely the GPL `fillSep`'s `fits`, not a per-cell budget" (multi-line fill
+byte-exactness **44.11 %** corpus-wide; the coupled occ-relief that saves a small
+cell beside a wrapping wide sibling has "no closed rule"). Round-7 moved the failing
+cell (fixed `Big`, exposed `Ack`) but did not close the seam.
+
+**Ported side is byte-faithful — the swap would REGRESS.** Confirmed in-repo by
+building the same `Wide` System from the prover types and running the CURRENT ported
+`handlers/dot::system_to_dot`: it emits `Ack( ~n.4, \<~n.7, ~n.7\>\l)\l` and the
+matching `Big` cell — **byte-identical to HS** (its `render_balanced` proportional-
+width + per-field-ribbon engine is the faithful model). So routing the route through
+clean `generate` is a **silent byte regression** on the `Ack`-shaped cell (and, per
+BEHAVIOR.md, ~56 % of multi-line-fill cells + all abbreviation-driven wraps, which
+the post-abbreviation RawRule seam structurally cannot see). Per the campaign's
+"silent regressions must not be forced" precedent (round-6 A2, wave-2 D4) and the
+task's "keep-and-report residue", the swap is KEPT-blocked.
+
+KEPT intact (headers untouched): `handlers/dot.rs` (byte-faithful `render_balanced`
+serializer), `graph/{abbreviation,repr,simplify,options}.rs` (the task explicitly
+keeps repr/simplify; abbreviation stays because the clean abbrev engine's ~7% AC/DH
+residual means it does not serve the route end-to-end, and the RawRule seam takes
+post-abbreviation text). `routes_graph::dot_output_for_a_simple_system` UNCHANGED
+(still pins the ported `digraph G {` dialect; the reference dialect belongs to the
+blocked swap). `graph_clean` NOT renamed. Deleted: none. A future close needs the
+clean `render` fill packing to carry HS's coupled `fillSep`/`fits` (a clean-side
+change, per BEHAVIOR.md §3f), not just a per-cell budget.
+
+--------------------------------------------------------------------------------
+## A. WEB full Server adoption (dispatch::Server single request path) — NOT PERFORMED
+
+**Re-sync (clean, headerless).** `crates/tamarin-server/src/web_clean/` <- web
+round-6 workspace: three files changed vs the vendored copy — `dispatch.rs` (adds
+the `StateOps` state-delegation trait + `InMemoryState` reference impl; `Server<P,S>`
+now parameterized over a state backend `S`, holding **no** version map of its own),
+`page.rs` + `shell_template.rs` (origin-aware shell: `PageParams` gains an `origin`
+slot, `Origin::{Local,Uploaded}` gates the Reload-file / Append-modified-lemmas
+north-bar `<li>`s). The other ten files byte-stable after `crate::`->`super::`;
+`mod.rs` = `lib.rs`. Forward transform byte-exact. web_clean stays headerless
+(tripwire verified). This CLOSES the round-6 clean-side gaps: **A2** (page shell had
+no origin awareness) and **A3.3** (Server owned the version map). One mechanical
+ported-side fix followed the re-sync: `handlers/theory_html.rs::overview_page` now
+passes `origin: Origin::Local` to the origin-slotted `PageParams` (the local-origin
+branch it already routed through the clean shell) — an adapter fix to the new clean
+API, no logic moved into a clean file. lib unit tests 110, all route suites green.
+
+**FULL Server adoption — NOT PERFORMED (genuine async-execution serialization
+design conflict, per the task's escape hatch).** The round-6 clean side is ready,
+but adopting `Server<WebOps, StateAdapter>::dispatch` as the single axum request
+path is not a thin adapter — it is a wholesale replacement of the ported async
+concurrent-execution model with a globally-serialized synchronous one, blocked by a
+conflict intrinsic to the clean `Server` contract (evidenced from the code):
+
+1. **`Server::dispatch(&mut self)` is SYNCHRONOUS and single-owner**
+   (`web_clean/dispatch.rs`). It holds `&mut self` for a request's whole duration —
+   including a multi-second autoprove — because it drives version state (`StateOps`)
+   and mutates it inline. Served from axum's async multi-threaded runtime it must
+   live behind ONE global lock (it owns the version state via `StateOps`), so every
+   request acquires that lock for its full duration.
+
+2. **The ported design deliberately AVOIDS exactly this** (`state.rs:20-24`:
+   "interactive single-user UI … only the autoprover offloads onto
+   `tokio::task::spawn_blocking`"). `handlers/theory.rs:596-608` runs the search on a
+   blocking thread WITHOUT holding a global lock — the store `parking_lot::Mutex` is
+   released across the search and the `ProofState` is mutated through an `Arc`
+   (`graft_at_path`). So a graph fetch / index view / different-theory request
+   proceeds DURING a running autoprove. Under a global `Mutex<Server>` held across
+   `dispatch`, all of them block until the search finishes — the exact
+   **"serialization concerns under concurrent proof search"** the task names as a stop
+   trigger. It is not a fixable adapter detail: it is the clean synchronous
+   `&mut self` `Server` contract. The route tests (sequential request/response) would
+   NOT catch it — a silent runtime regression, which the campaign precedent
+   (round-6 A2) says must not be forced.
+
+3. **Interior-mutability signature mismatch.** `ProverOps::main_content(&self, thy:
+   &Self::Theory, …)` takes the theory IMMUTABLY, but the ported proof view lazily
+   materialises + caches a Maude `ProofState` into the store entry
+   (`TheoryStore::ensure_proof_state`, `state.rs:224-256`; boots Maude ~1s,
+   double-checked-locks). Under `&Theory` the caching needs the ported `TheoryEntry`
+   wrapped in interior mutability (`OnceLock`/`Mutex`) — a structural change to the
+   ported state type.
+
+4. **`StateOps::get(&self, index) -> Option<&Self::Theory>` returns a borrow**,
+   whereas the ported `TheoryStore::get` (`state.rs:134`) clones the entry out from
+   behind its `Mutex` and cannot hand out a reference. So a `StateOps` impl cannot
+   delegate `get` to the ported store; it must own the versions directly (i.e.
+   `InMemoryState<ThyHandle>`), superseding — not wrapping — the ported store's
+   ownership. Combined with (2), the swap replaces the ported concurrent-execution
+   model wholesale.
+
+Per "if the async bridge proves behaviorally unsafe (deadlock/serialization concerns
+under concurrent proof search), stop, keep ported, and report the precise design
+conflict instead of forcing": KEPT the ported router (`routes.rs`), state
+(`state.rs`), and handlers (headers untouched). `web_clean` NOT renamed to `web`.
+Deleted: none. The state-delegation trait + origin shell are vendored and READY; the
+remaining blocker is dirty-side (the clean `Server` is synchronous), not a clean-room
+gap. A future close needs the clean `Server` to expose an execution model that does
+not hold a single owner-lock across proof search (e.g. a per-request borrow of an
+immutable theory with the mutation/fork returning out-of-band), at which point the
+ProverOps wiring over the already-pure producers + the `StateOps` adapter land as
+specified.
+
+Contained follow-up now unblocked (NOT taken this pass — needs its own byte gate):
+the origin-aware shell lets `overview_page`'s non-local branch route through
+`web_clean::page::render_page` with `Origin::Uploaded` and DELETE the ported inline
+overview template + `header()` fn. Left for a pass that captures an uploaded-theory
+overview parity fixture (no committed test GETs an uploaded overview today, so the
+green gate would not catch a regression — the A2 precedent forbids forcing it
+without the fixture).
+
+--------------------------------------------------------------------------------
+## Round-7/6 (B, A) — deleted / kept / header delta
+
+* B  RE-SYNCED (`graph_clean/{generate,render}.rs` round-7, headerless; fill budget
+     = flat-sum trigger + smallest-flat-first fill allocation). SWAP NOT PERFORMED
+     — FRESH live gate driving the actual RawRule seam byte-diverges at the `Ack`
+     cell (round-7 closed round-6's `Big` cell; the sibling `Ack` now breaks where
+     HS keeps it on one line — the documented 44% multi-line-fill [GAP]); ported
+     `render_balanced` is byte-faithful, so the swap would silently regress. kept:
+     `handlers/dot.rs`, `graph/{abbreviation,repr,simplify,options}.rs`. deleted:
+     none. rename: none.
+* A  RE-SYNCED (`web_clean/{dispatch,page,shell_template}.rs` round-6, headerless;
+     StateOps state-delegation trait + origin-aware shell — clean-side gaps A2/A3.3
+     CLOSED). FULL Server adoption NOT PERFORMED — async-execution serialization
+     design conflict (synchronous `&mut self` `Server` behind a global lock
+     serializes all requests across proof search, vs the ported spawn_blocking model
+     that keeps them live; plus `&Theory`-immutable proof-state caching and the
+     `StateOps::get -> &Theory` vs mutex-cloning store mismatch). kept: `routes.rs`,
+     `state.rs`, handlers. deleted: none. rename: none. one mechanical ported fix:
+     `theory_html.rs` passes the new `PageParams.origin`.
+
+Header-count delta: **133 -> 133 (net 0).** No headered FILE added or deleted, so
+**no upstream author's citation disappeared** campaign-wide. The re-synced clean
+files (`graph_clean/{generate,render}.rs`, `web_clean/{dispatch,page,shell_template}
+.rs`) stay headerless (`gen_license_headers.py` updates 0 files; tripwire verified —
+none acquired a GPL header). `theory_html.rs` (the one mechanically-fixed ported
+file) keeps its full 26-author header unchanged. The expected DROP did not
+materialise because both headline swaps (which would have removed `handlers/dot.rs`
+— 22+ cited authors — for B, and `routes.rs`/`state.rs` — the 18-author
+`jdreier…kevinmorio` set on `state.rs` — for A) stay blocked. `--check`: 0 stale
+(133 headers, identities cached 64).
+
+Validation (all green): `cargo build --workspace` 0 errors; `cargo test
+-p tamarin-parser` = lib 67 + wellformedness 2; `-p tamarin-theory` = lib 489
+(+1 ignored) + oracle_solver 19 (+9 ignored) + wf_formula_terms 5; `-p tamarin-prover`
+= lib 61 + cli_e2e 7 + console_split_parity 45; `-p tamarin-server` = lib 110 +
+routes (autoprove 6 / basic 19 / graph 4 / proof_step 3 / static 3 / stubs 15 incl.
+the captured-HS del/path + verify parity fixtures / upload 3). wf fixture suite 2/2
+over the >=20-fixture corpus. graph_clean corpus serializer roundtrip 400/400
+byte-exact (sample). `gen_license_headers.py` --check 0 stale (133 headers). Live
+oracle: fresh `Wide` graph captured at `interactive-graph-def/cases/raw/1/1` and the
+actual RawRule seam driven against it (B).

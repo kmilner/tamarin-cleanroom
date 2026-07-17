@@ -215,3 +215,79 @@ hue differ per role (two distinct derivations), so the exact hash is unresolved.
 Reverse-engineering it needs a dedicated live campaign of crafted novel role names
 (like §5b's per-prefix numbering) — left as a documented open item; the crate keeps
 colors as caller inputs.
+
+================================================================================
+
+# REPORT — Round 7: the group wrap BUDGET (fill width) refined + residual decomposed
+
+Clean-room continuation of `graphdot`. Everything below traces to observed oracle
+output: the captured DOT corpus (`oracle/dot_corpus/`, 12 022 payloads / 160 409
+records) and controlled autoprove→`interactive-graph-def` probes of the black-box
+server (ports 3200–3205). No tamarin-prover source was read.
+
+## Result in one line
+
+> The wrap **TRIGGER** (does a cell break) is the flat-sum budget
+> `max(87 − Σ other cells' flat, 20)` — best closed form, 99.55 % of cells. The
+> **FILL** width (how a broken cell packs) is *wider*: a sibling that itself wraps
+> occupies only the width it is ALLOCATED, so the remaining cell packs more per
+> line. A **smallest-flat-first greedy** allocation (each processed sibling
+> contributes `min(flat, its budget)`, an un-processed one its full flat)
+> reproduces the live `Wide` record byte-exact and is the best fill model.
+
+## The datum reproduced
+
+`Wide` conclusion group `[Ack 25, Big 68, Out 11]`: the reference packs **8** tuple
+elements on `Big`'s first line, as if its budget were 56 — one MORE than the
+flat-sum `87 − (25+11) = 51` (7 elements) predicts. The greedy allocation gives it:
+`Out`(11) fits; `Ack`, seen while `Big` is still flat 68, is squeezed to budget 20
+and wraps (breaking after `~n.4`); `Big`, placed last, sees `Ack`'s allocation 20
+and gets `87 − 20 − 11 = 56` → 8 elements. This reproduces the WHOLE `Wide` record
+(premise `In` flat 67 stays flat, `Fr` flat, `Ack` breaks after `~n.4`, `Big` 8
+elements, `Out` flat) byte-for-byte against the live `wide_group.dot` capture.
+
+## Evidence
+
+- **Order is irrelevant** (batchA, batchG): `[A,B] ≡ [B,A]` at the margin, and a
+  cell's boundary is the same in every group position, even with wrapping siblings.
+  So the allocation is order-free (sort by flat).
+- **The fill is fits-based, not a single budget**: a NON-wrapping sibling of flat 10
+  barely lowers a wide cell's fill budget (batchA still 11 elements), whereas a
+  WRAPPING sibling of the same flat lowers it a lot (Wide). The two 2-element vs
+  30-element targets give different budgets for the same sibling (batchA vs batchB).
+- **Trigger clean data** (batchC/D/E, distinct fills to avoid the abbreviation trap
+  that corrupted equal-length siblings): flat-sum with floor 20 is EXACT except when
+  a sibling is forced to wrap even at the target's boundary (live `[Ta, Hg 68]` →
+  `Ta` fits at 21 because `Hg` occupies 66 = flat−2).
+- **Model bake-off on the corpus** (142 540 wrapping prem/concl cells, full-layout
+  byte match): flat-sum 41.45 %, sibling-occ 43.29 %, greedy `min(flat,budget)`
+  **44.11 %** (best) — the one implemented.
+
+## The trigger residual, decomposed (2 779 prem/concl mispredictions)
+
+- **false-positive 1 320** (group total 88–97): flat-sum says wrap, cell FITS,
+  because a wide sibling wraps and frees room for a small cell (occ-relief). This is
+  the greedy printer's coupled `fits` — it saves a *small* cell but not a *large*
+  one beside a comparable sibling; feeding actual occupied widths back universally
+  is worse (0.82 %), so flat-sum stands. **[GAP]** (needs GPL `fits`).
+- **false-negative 1 459** (group total 79–87): flat-sum says fit, cell WRAPS.
+  **954 (65 %)** are decided on the **unabbreviated** term (e.g. `St_3_eNB(…KD19…EN2…)`
+  displays at flat 48 but its abbreviations expand past 87), then abbreviations are
+  substituted into the already-broken layout — structurally outside a crate that
+  receives POST-abbreviation text. **[GAP]**. The rest (~505) are the ±1 `fits`
+  boundary.
+
+Net: the census cannot reach 100 % with a rendering-crate closed form; 99.55 % (cell)
+/ 98.3 % (record) is the ceiling, with every residual traced to a GPL-pretty-printer
+mechanism (occ-relief coupling, unabbreviated-width decision, or ±1 `fits`).
+
+## What was implemented (`graph-clean`)
+
+- `generate::group_cells`: two budgets per cell — the flat-sum `cell_budget` decides
+  the wrap TRIGGER, and a smallest-flat-first greedy allocation
+  (`alloc[j] = min(flat, budget)`) gives the FILL budget used once a cell wraps
+  (capped at `flat − 1` so a flat-sum-triggered break is honoured). `render.rs`
+  refactored (`layout_cell` shared by `wrap_cell_budget`).
+- Test `wide_conclusion_group_fill_byte_exact` (fixture `wide_record.dot`, byte-equal
+  to the live `wide_group.dot` record line). Full suite green; corpus round-trip
+  stays **12 022/12 022** byte-exact.
