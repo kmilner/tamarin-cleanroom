@@ -1,0 +1,25 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n8[shape="record",label="{{<n0> Fr( ~eskR.4 )|<n1> !Ltk( $R.4, ~lkR.4 )|<n2> !Pk( $I.4, 'g'^~x.4 )|<n3> In( X.4 )}|{<n4> #vr.3 : Resp_1[Accept( ~eskR.4, $R.4, $I.4,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h2(\<'g'^(~x.4*h1(\<~eskR.4, ~lkR.4\>)), z.4, z.5, $I.4, $R.4\>)\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sid( ~eskR.4, \<'Resp', $R.4, $I.4, X.4, 'g'^h1(\<~eskR.4, ~lkR.4\>)\> ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Match( ~eskR.4, \<'Init', $I.4, $R.4, X.4, 'g'^h1(\<~eskR.4, ~lkR.4\>)\> )]\l}|{<n5> Out( 'g'^h1(\<\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~eskR.4, ~lkR.4\>)\l)\l|<n6> !Ephk( ~eskR.4,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~eskR.4\l)\l|<n7> !Sessk( ~eskR.4,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h2(\<'g'^(~x.4*h1(\<~eskR.4, ~lkR.4\>)), z.4, z.5, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$I.4, $R.4\>)\l)\l}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+n11[shape="record",label="{{<n9> #vf.6 : Fresh}|{<n10> Fr( ~eskR.4 )}}",fillcolor="#dca7ef",style="filled",fontcolor="black",role="Undefined"];
+n15[shape="record",label="{{<n12> !KU( X.4 )}|{<n13> #vf.7 : isend[K( X.4 )]}|{<n14> In( X.4 )}}",fillcolor="#b9a5ec",style="filled",fontcolor="black",role="Undefined"];
+n21[shape="record",label="{{<n16> Fr( ~lkR.4 )}|{<n17> #vr.9 : generate_ltk[RegKey( $R.4 )]}|{<n18> !Ltk( $R.4, ~lkR.4 )|<n19> !Pk( $R.4, 'g'^~lkR.4 )|<n20> Out( 'g'^~lkR.4 )}}",fillcolor="#b1dc9a",style="filled",fontcolor="black",role="Undefined"];
+n24[shape="record",label="{{<n22> #vf.11 : Fresh}|{<n23> Fr( ~lkR.4 )}}",fillcolor="#dca7ef",style="filled",fontcolor="black",role="Undefined"];
+n30[shape="record",label="{{<n25> Fr( ~x.4 )}|{<n26> #vr.12 : generate_ltk[RegKey( $I.4 )]}|{<n27> !Ltk( $I.4, ~x.4 )|<n28> !Pk( $I.4, 'g'^~x.4 )|<n29> Out( 'g'^~x.4 )}}",fillcolor="#b1dc9a",style="filled",fontcolor="black",role="Undefined"];
+n33[shape="record",label="{{<n31> #vf.14 : Fresh}|{<n32> Fr( ~x.4 )}}",fillcolor="#dca7ef",style="filled",fontcolor="black",role="Undefined"];
+n34[label="!KU( X.4 ) @ #vk.8",shape="ellipse",color="gray"];
+n35[label="(#i, 0)",shape="invtrapezium"];
+n8:n6 -> n35[style="bold",weight="10.0",color="gray50"];
+n11:n10 -> n8:n0[color="gray30"];
+n15:n14 -> n8:n3[color="gray30"];
+n21:n18 -> n8:n1[style="bold",weight="10.0",color="gray50"];
+n24:n23 -> n21:n16[color="gray30"];
+n30:n28 -> n8:n2[style="bold",weight="10.0",color="gray50"];
+n33:n32 -> n30:n25[color="gray30"];
+n34 -> n15:n13[color="red",style="dashed"];
+n21:n17 -> n8:n4[color="blue3",style="dashed"];
+
+}

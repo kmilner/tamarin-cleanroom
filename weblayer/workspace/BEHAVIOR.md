@@ -78,13 +78,14 @@ per handler:
 | `source`                 | text        | 81    | (none) |
 | `message`                | text        | 81    | (none) |
 
-`autoprove/idfs/{bound}/False/proof/{lemma}` is the observed autoprove request
-shape (`idfs` = the search strategy, `{bound}` a numeric depth bound, `False` a
-flag). It answers with a `{redirect}` to the resolved `overview/proof/{lemma}`
-whose index is **bumped** by the applied proof — live probe [L6] shows
+`autoprove/{strategy}/{bound}/{allSol}/proof/{lemma}[/path…]` is the full
+autoprove shape (see §13.2). It answers with a `{redirect}` to the resolved
+`overview/proof/{lemma}` at a **new** version index — live probe [L6]/[L9] show
 `autoprove/idfs/0/False/proof/types` on a version-1 theory returning
-`{"redirect":"/thy/trace/2/overview/proof/nonce_secrecy"}`. On the 6 corpus
-timeouts the same route instead returns HTTP status 0 with a text body.
+`{"redirect":"/thy/trace/2/overview/proof/nonce_secrecy"}`. The 6 corpus
+"status 0" entries carry the body `REQUEST_ERROR: TimeoutError('timed out')`,
+which is the **crawler's own** timeout string (the client gave up while the
+prover ran), not a web-layer response family ([Q035] — corrects the earlier note).
 
 `next`/`prev` are pure text: a single navigation URL. The target need not be a
 proof node — live probe shows `prev/normal/proof/types` (the first lemma)
@@ -412,4 +413,113 @@ Key observations that made this exact:
 
 Permanent regression: `html_page_generality_sample_byte_identical`
 (`tests/fixtures/html_sample.ndjson`, 20 bodies across 6 theories, indices
-1/3/8/16, both families) locks generality into `cargo test` (now **38** tests).
+1/3/8/16, both families) locks generality into `cargo test` (38 tests at round 2;
+**55** after the round-3 `dispatch` suite — see §13).
+
+---
+
+## 13. Handler semantics — the UI state machine (Round 3)
+
+Derived from live probing of the sanctioned oracle ([L7]–[L16], Tutorial.spthy,
+ports 3137-3141) plus corpus route/link census ([Q029]–[Q035]). This section
+pins down *what each route returns and how theory-version state evolves*; the
+per-body bytes are §§1–12. Reproduced in `src/dispatch.rs` over a `ProverOps`
+callback trait (the prover supplies fragments/mutations; the web layer decides
+version allocation, route dispatch, and the response envelope).
+
+### 13.1 Version model (spec item 1)
+* **Version 1** = the theory as loaded ("Original"); higher indices are
+  "Modified". Every version stays **resolvable by index** forever, even after it
+  scrolls out of the index-page table.
+* **Proof operations** — `main/method/{lemma}/{n}[/path…]` and `autoprove/…` —
+  allocate a **fresh** index `= (max ever allocated) + 1` (monotonic global
+  counter, independent of the base index), leaving the base untouched ([L8],[L9]).
+* **Structural edits** — POST `edit/{edit,add,delete}/{name}` — mutate the theory
+  **in place at the same index** (no new version) ([L12]).
+* **Navigation / views** (`overview`, `main/*` reads, `next`, `prev`, `source`,
+  `intdot`, `interactive-graph-def`) never change the version set ([L10]).
+* The index page lists the Original row plus a **capped window** of the most
+  recent Modified rows (= the manifests' `capped` flag); dropped rows still
+  resolve ([L11]). Row `Time`/`Origin` are non-deterministic (§7).
+
+### 13.2 autoprove variants (spec item 2)
+Route: `autoprove/{strategy}/{bound}/{allSol}/proof/{lemma}[/path…]`.
+* `strategy` ∈ {`idfs` (solve/prove), `characterize` (characterization — e.g.
+  exists-trace / observational goals)} ([Q030]).
+* `bound` — a numeric depth bound; observed `0` (unbounded) and `5` (bounded).
+* `allSol` ∈ {`False`, `True`}.
+Keyboard-help mapping ([Q031], the "a/b/all/characterization" matrix):
+
+| key | meaning | route projection |
+|-----|---------|------------------|
+| `a` | autoprove focused step, stop after first solution | `idfs/0/False` |
+| `A` | …search for **all** solutions | `idfs/0/True` |
+| `b` | **bounded**-depth autoprove, stop at first | `idfs/5/False` |
+| `B` | bounded, all solutions | `idfs/5/True` |
+| `s`/`S` | autoprove **all** lemmas (stop / all) | idfs, per-lemma |
+| — | characterization | `characterize/{0,5}/{False,True}` |
+
+So "all" = the `True` (all-solutions) flag and "characterization" = the
+`characterize` strategy. **Response:** HTTP `200` + JSON
+`{"redirect":"/thy/trace/{new}/overview/proof/{lemma}/{focus}"}`, `{new}` the
+freshly allocated index and `{focus}` the prover's resulting focus path ([L9]).
+
+### 13.3 Proof-step application, del, add (spec item 3)
+* **Apply method** `GET main/method/{lemma}/{n}[/path…]` — the method number
+  precedes the case-name path ([Q032]). Response = `200` + JSON
+  `{"redirect":"/thy/trace/{new}/overview/proof/{lemma}/{focus}"}` ([L8]).
+* **Delete lemma** `POST edit/delete/{name}` — `303 See Other`, `Location:
+  /thy/trace/{v}/overview/help`, empty body, in place ([L12]).
+* **Edit lemma** `POST edit/edit/{name}` (form field `lemma-text`) — on success
+  `303` → `overview/edit/{name}`; on parse/wf failure `200` re-rendering the
+  full-page **edit form** (theory unchanged) ([L12],[L13]).
+* **Add lemma** `POST edit/add/{pos}` (`lemma-text`) — on success `303` →
+  `overview/add/{pos}`; failure `200` add-form page. `{pos}` is a lemma name or
+  `%3Cfirst%3E` ([L12]). These `overview/edit|add/…` full pages appear ONLY as
+  POST-redirect targets (not in the crawl).
+
+### 13.4 Proof-tree traversal & path encoding (spec item 1)
+* `GET next|prev/{mode}/proof/{lemma}` → `200` `text/plain`, a **bare URL** at the
+  **same** version. Target is the prover's `nextThyPath`-style computation: an
+  adjacent proof node (`main/proof/{lemma}[/path]`) or a non-proof node
+  (`main/cases/refined/0/0` before the first lemma); the last lemma's `next` is
+  itself ([L10]). `mode` (`normal` in the corpus; `smart`/others accepted live)
+  is passed opaquely to the prover.
+* **Proof path** = raw `/`-join of case-name segments, root marker `_`. Segments
+  are prover identifiers `[A-Za-z0-9_]` (up to ~112 chars observed); **no
+  percent-encoding** anywhere in proof paths ([Q034]). The redirect focus after a
+  proof op already includes the leading `_`.
+
+### 13.5 Integration blocker (a): non-local page shell — NEGATIVE RESULT
+Bound the oracle to all IPv4 interfaces (`--interface=*4`, `=` form; the space
+form hits the workdir-positional bug) and fetched every route BOTH via loopback
+`127.0.0.1` and via the machine's non-loopback `212.100.173.110` (the server LOG
+confirms the peer address is `212.100.173.110`). Result: **byte-identical** on
+every route — read views, forms, index `/`, 404, and mutating GET/POST (method,
+edit, delete, reload all succeed and match). Host header
+(`127.0.0.1`/`localhost`/`212.x`/`evil.com`) and `X-Forwarded-For`/`X-Real-IP`/
+`X-Forwarded-Host` have **no** effect ([L15]). => In oracle **1.13.0** the served
+shell is **origin-independent**. The locality predicate evidently treats all of
+the machine's own interface addresses (loopback + `212.x`) as local, so a foreign
+peer cannot be synthesised on a single host; the non-local shell's bytes are
+**unobservable here**. The renderer is therefore parameterised over an
+`origin_local` hook (see §13.7 / REPORT3) for the ported prover to drive, with
+the exact non-local bytes left as a documented gap pending a multi-host capture.
+
+### 13.6 Integration blocker (b): edit-form textarea `rows=` — SOLVED
+`rows = (count of '\n' in the raw lemma source) + 2`. Verified over 4 lemmas
+(newlines 9/11/7/10 → rows 11/13/9/12) ([L14]); HTML-escaping preserves newline
+count, so it is computed on the raw text. Implemented as `forms::edit_rows`,
+replacing the round-1 hardcoded `rows="8"` (a single-capture constant flagged by
+the similarity audit). The **add** form's textarea has no `rows` attribute (fixed
+placeholder `Enter your new Lemma`).
+
+### 13.7 Content-types & the ProverOps boundary
+Content-types ([L6]/verified [L16]): JSON `application/json; charset=utf-8`; HTML
+`text/html; charset=utf-8`; text, `next`/`prev`, and **DOT**
+`text/plain; charset=utf-8`. Proof ops answer `200` (JSON body), structural POSTs
+`303` (Location header). `src/dispatch.rs` implements the `Server<T: ProverOps>`
+state machine: it owns the version map + monotonic counter and makes all of the
+above decisions; `ProverOps` supplies parse/edit/add/delete, apply-method,
+autoprove, next/prev target, and the opaque pretty-printed fragments (west pane,
+center content, lemma source, source text, DOT).

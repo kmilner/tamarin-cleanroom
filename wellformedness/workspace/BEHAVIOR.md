@@ -49,6 +49,7 @@ Observed by kitchen-sink probes ks1 / ks3 and the round-2 ordering probes
  5a. `Reserved prefixes`                                 (round2; DIFF MODE ONLY)
  6. `Fr facts must only use a fresh- or a msg-variable`
  7. `Special facts`
+ 7b. `Fact capitalization issues`                        (round3; before arity)
  8. `Fact arity issues`                                  (non-diff; diff merges these
  9. `Fact multiplicity issues`                            two into "Fact usage" - OUT OF SCOPE)
 10. `Facts occur in the left-hand-side but not in any right-hand-side ` (TRAILING space)
@@ -132,13 +133,30 @@ Trigger: same fact name with >1 arity. Body:
     "Same fact is used with different arities, i.e., Fact('A','B') is different from Fact('A'). \nCheck the arguments of your facts.\n  " + factBlocks
 facts sorted by lowercased name; factBlock (each prefixed "\n"):
     "\n  Fact `foo':\n\n" + items + "\n  "
-item i: "    {i}. Rule `R', arity {n}\n         {factPP}"; items joined "\n    \n".
-Lemma-sourced facts render as raw Haskell `Fact {factTag = ...}` (gap).
+item i: "    {i}. {Label} `{owner}', arity {n}\n         {render}"; items joined
+"\n    \n". Rules and LEMMAS both contribute (interleaved in theory-item order);
+restrictions do NOT (r3_restrarity). Rule facts: Label=`Rule`, render=fact pp.
+Lemma action facts: Label=`Lemma`, render = raw Haskell `Fact {factTag =
+ProtoFact {Linear|Persistent} "{name}" {arity}, factAnnotations = fromList [],
+factTerms = [{de-Bruijn terms}]}` (r3_lemarity). Rule items dedup per
+(label,owner,arity); lemma facts likewise. Multiplicity is analogous and ALSO
+gathers lemma facts (r3_lemmult, item = `... multiplicity (persistence) ...`).
 
 ### Fact multiplicity issues
 Same structure keyed on multiplicity; header:
     "Same fact is used with different multiplicities, i.e., !Fact() (Persistent fact) exists along with Fact() (Linear) in your rules. \nCheck the multiplicity (persistence) of your facts.\n  " + factBlocks
-item i: "    {i}. Rule `R', multiplicity (persistence) {Linear|Persistent}\n         {factPP}".
+item i: "    {i}. {Label} `{owner}', multiplicity (persistence) {Linear|Persistent}\n         {render}".
+
+### Fact capitalization issues (round3; precedes Fact arity issues)
+Trigger: two facts whose names are equal under ASCII-lowercasing but differ in
+exact spelling (e.g. `Send` vs `SEND`; facts must start upper-case, so the
+difference is in non-first letters). Same block shape as Fact arity, header:
+    "Fact names are case-sensitive, different capitalizations are considered as different facts, i.e., Fact() is different from FAct(). \nCheck the capitalization of your fact names.\n  " + factBlocks
+Unlike arity, EVERY occurrence is listed (NO per-(rule,cap) dedup - `Send` twice
+in one rule -> two items; r3_capord). item i:
+    "    {i}. Rule `{rule}', capitalization \"{exactName}\"\n         {factPP}".
+Groups keyed by lowercased name, sorted; a group needs >=2 distinct spellings.
+Gathers rule facts across premises/actions/conclusions (source order).
 
 ### Facts occur in the left-hand-side but not in any right-hand-side  (fact_lhs_occur_no_rhs)
 Trigger: user fact identity (name,arity,mult) in some premise, never in any
@@ -153,9 +171,10 @@ Trigger: a fresh-name literal (`~'foo'`, AST `Term::FreshLit`) used directly in
 a rule. Constants collected in the order premises, conclusions, actions
 (probe fpc_positions). Per rule with >=1 hit, entries joined "\n  \n":
     "  rule `NAME': fresh public constants are not allowed: ~'foo', ~'bar'"
-constants rendered by the term printer, ", " joined. GAP: for a long constant
-list the oracle word-wraps with a 4-space continuation indent (fpc_positions);
-implementation emits a single line, so byte-parity fixtures use short lists.
+constants rendered by the term printer. The list is a fillSep at width 69 with a
+4-space continuation indent, begun after the header `  rule `{name}': fresh
+public constants are not allowed:` (round3: r3_freshwrap; identical mechanism to
+the Formula-terms list). CLOSED - was a documented gap.
 
 ### Reserved prefixes (round2; DIFF MODE ONLY)
 Trigger (diff theories only): a fact whose name starts with `DiffIntr` or
@@ -205,21 +224,67 @@ shows `g^c` -> `x.1` otherwise); (b) the alternate failure mode
 the co-emitted `Message Derivation Checks` block is Maude-derived, OUT OF SCOPE;
 (d) rule_pp wrapping for long rules (see printer note).
 
-### Formula terms
-Trigger: lemma/restriction uses a term that is not a public constant nor a bound
-node/message variable (free var or reducible function). Body:
-    "  Lemma `L1' uses terms of the wrong form: `Free y'\n  \n" + fixed_help
-Short single term -> inline; longer/complex -> indented next line
-`    `t1', `t2'` (reducible terms use de Bruijn `Bound N` - gap).
-fixed_help = "  The only allowed terms are public constants and bound node and\n  message variables. If you encounter free message variables, then\n  you might have forgotten a #-prefix. Sort prefixes can only be\n  dropped where this is unambiguous. Moreover, reducible function\n  symbols are disallowed."
-Entity label `Lemma` or `Restriction`.
+### Formula terms  (round3: FULL coverage)
+Trigger: a lemma/restriction formula uses a TERM "of the wrong form". The unit
+checked is each ARGUMENT TERM of each atom (Eq/Less/.. -> both sides; Action ->
+the TEMPORAL first, then the fact args; Pred/Last -> args). A term is wrong iff
+it contains a FREE variable OR a REDUCIBLE function symbol; the WHOLE top-level
+term is then reported (not the offending subterm). Body:
+    "  {Entity} `{name}' uses terms of the wrong form: {termlist}\n  \n" + fixed_help
+Entity = `Lemma` or `Restriction`. Terms are collected in source order and are
+NOT deduplicated (`x=y & x=y` -> `Free y', `Free y'`). Reducibility is decided by
+the CALLER, which supplies a set of reducible function-symbol names; the checker
+only consumes it (entry point `formula_terms_reducible(thy, &reducible)`;
+`formula_terms(thy)` = the empty-set convenience wrapper - free variables only).
 
-### Formula guardedness (topic has LEADING space)
+Raw term rendering (each term wrapped in `` `...' ``):
+  - bound variable   -> `Bound N`   (de Bruijn: 0 = innermost binder; EVERY
+                                      quantified var, incl. temporals, pushes one)
+  - free variable    -> `Free <pp_var>`  (keeps the sort prefix, e.g. `Free #j`)
+  - function app      -> `f(a,b)`   (args comma-joined, NO space)
+  - tuple             -> `pair(a,pair(b,c))`  (right-nested binary pairs)
+  - public constant   -> `'name'`
+De Bruijn evidence: `All x y #i. h(x,y)` -> `h(Bound 2,Bound 1)`; nesting adds
+depth (`All x #i.(Ex y #j. h(x))` -> `h(Bound 3)`). Free-inside-term evidence:
+`f(y)` (f non-reducible, y free) -> `f(Free y)`; `f(h(x))` -> `f(h(Bound 1))`.
+
+Term-list layout is a fillSep at width 69 with a 4-space continuation indent,
+begun after the header (`  {Entity} `{name}' uses terms of the wrong form:`): a
+token (term + trailing comma, except the last) stays on the line while
+`col + 1 + width <= 69`, else wraps. A long entity/name can push the entire list
+to line 2; an over-wide single term also wraps to line 2. Multiple wrong lemmas:
+each full block (header+list+help) is joined by `\n  \n`.
+fixed_help = "  The only allowed terms are public constants and bound node and\n  message variables. If you encounter free message variables, then\n  you might have forgotten a #-prefix. Sort prefixes can only be\n  dropped where this is unambiguous. Moreover, reducible function\n  symbols are disallowed."
+
+### Formula guardedness (topic has LEADING space)  (round3: two modes + wrapping)
 Trigger: a LEMMA formula not convertible to guarded form. (An unguarded
-RESTRICTION is instead a FATAL error, not a warning -- observed z1; so this
-check applies to lemmas only.) Body:
-    "  Lemma `L2' cannot be converted to a guarded formula:\n    unguarded variable(s) '#j' in the subformula\n      \"<pp>\"\n    in the formula\n      \"<pp>\""
-<pp> = unicode formula pretty-print (full printer + guardedness algorithm partial - gap).
+RESTRICTION is instead a FATAL error, not a warning -- observed z1; lemmas only.)
+Body:
+    "  Lemma `{name}' cannot be converted to a guarded formula:\n    {reason}\n      \"<sub>\"\n    in the formula\n      \"<whole>\""
+where <sub> is the FAILING QUANTIFIER SUBTREE (not the whole formula) and <whole>
+is the full lemma formula. Two observed reasons (probe r3_gc):
+  - `unguarded variable(s) '#j', ... in the subformula`  (quantifier binds vars
+    not guarded by an action fact)
+  - `universal quantifier without toplevel implication`
+Guardedness decision (∀): the body must be a top-level `guard ==> rest`; its
+ANTECEDENT's action facts (temporal incl.) must bind every quantified var
+(consequent does NOT guard). A conjunction/disjunction/negation/atom body -> "no
+toplevel implication". A guarded ∀ recurses into antecedent and consequent
+(finds nested failures; the reported subformula is the inner failing quantifier).
+∃ takes a conjunctive guard (`Ex x #i. A(x)@#i` is fine); an ∃ with unguarded
+vars is "unguarded variable(s)".
+
+<sub>/<whole> use the multi-line formula printer (pp_formula_wrapped): a small
+HughesPJ-style engine at page width ~72 (single line fits at total col 72, breaks
+by 74). Rules (calibrated r3_gw/r3_qm/r3_and):
+  - atom -> single-line text (never breaks); connective operands always parens'd.
+  - binary op `(a) OP (b)`: breaks after OP; the right operand hangs at the
+    connective's START COLUMN (the column just after its enclosing `(`).
+  - quantifier `Q vars. body`: breaks after the `.`; body hangs at base+2
+    (base = the quote indent 6, so body at col 8).
+The formula is embedded as `      "..."` (quote col 6, formula col 7). When a
+formula fits on one line the printer is byte-identical to the single-line
+`pp_formula`, so narrow-formula fixtures are unaffected.
 
 ### Nat Sorts
 Trigger: var used in %+ (nat) context not of sort nat. Entries joined "\n  \n":
@@ -263,11 +328,31 @@ round2/exists_trace_reuse (the integration bug). FIX: bind/compare formula
 variables by NAME only. All prior fixtures (p05, p21, f_subterm) use consistent
 sorts and are unaffected.
 
+## Round 3 (Unit C) - closed and residual
+
+CLOSED with byte-parity fixtures:
+- Formula terms FULL coverage: reducible functions + de Bruijn `Bound N`, free
+  vars inside terms, no-dedup source order, fillSep(69) list wrap, multi-lemma
+  `\n  \n` separator (`formula_terms_reducible` / `check_theory_with_reducible`).
+- Fact capitalization issues topic.
+- Lemma-sourced fact arity/multiplicity (raw Haskell `Fact {..}` render).
+- Fresh-const list wrapping; multi-group public-names separator.
+- Guardedness: nested-subformula selection, the "universal quantifier without
+  toplevel implication" mode, and the multi-line formula printer (implies-break
+  and And-break byte-exact).
+
 ## Out-of-scope / known gaps
 - Message Derivation Checks & Derivation Checks: computed by Maude after
   translation; not derivable from the AST. Not produced by check_theory.
-- AC operator argument ordering (xor/multiset) needs the term ordering.
-- de Bruijn `Bound N` term rendering + reducible detection in Formula terms /
-  raw lemma-fact rendering in arity/multiplicity: partial.
-- Full unicode formula pretty-printer + guardedness algorithm: partial.
+- AC operator argument ordering (xor/multiset) needs the term ordering; the raw
+  Formula-terms show of BinOp/AlgApp operators is a best-effort name guess.
+- RULE-PRINTER wide wrapping (RESIDUAL, item 4b): a wide rule wraps to a
+  multi-line form - `[` / facts-fillSep / `]` for a broken fact list, `-->` on
+  its own line (indent 6), header at 4 - and in the Multiplication context is
+  co-printed with the out-of-scope Maude derivation reprint. The single-line rule
+  printer stays byte-exact for short rules (all current fixtures). Structure
+  recorded from r3_rulewrap; a dedicated rule-layout engine is future work.
+- Guardedness ALGORITHM depth: ∃ failure sub-modes and exotic ∀ bodies beyond the
+  probed cases; the formula printer's deeply-nested-quantifier hang is
+  extrapolated (calibrated for outer-quantifier + binary-op breaks).
 - Nat-sort inference / subterm-convergence decision: structural scaffolding only.

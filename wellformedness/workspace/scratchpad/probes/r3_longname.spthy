@@ -1,0 +1,10 @@
+theory LongName
+begin
+rule R1:
+   [ Fr(~x) ]
+  --[ Act(~x) ]->
+   [ Out(~x) ]
+lemma ThisIsAVeryLongLemmaNameIndeed:
+  all-traces
+  "All x #i. Act(x) @ #i ==> (x = aaaaaa & x = bbbbbb & x = cccccc)"
+end

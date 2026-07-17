@@ -1,0 +1,15 @@
+theory CapOrd
+begin
+rule R1:
+   [ Fr(~x) ]
+  --[ Foo(~x) ]->
+   [ Send(~x), Send(~x) ]
+rule R2:
+   [ SEND(~y) ]
+  --[ ]->
+   [ Bar(~y) ]
+rule R3:
+   [ In(~z) ]
+  --[ ]->
+   [ Bar(~z, ~z) ]
+end

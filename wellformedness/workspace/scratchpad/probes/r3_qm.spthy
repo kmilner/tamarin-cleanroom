@@ -1,0 +1,10 @@
+theory QM
+begin
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x) ]->
+   [ Out(~x) ]
+lemma L1:
+  all-traces
+  "All x #i #j. A(x) @ #i ==> (aaaaaaaaa = aaaaaaaaa & #i = #j)"
+end

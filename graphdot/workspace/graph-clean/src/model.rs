@@ -108,6 +108,10 @@ impl Node {
     pub fn plain(id: impl Into<String>, html: impl Into<String>) -> Self {
         Node { id: id.into(), kind: NodeKind::Plain { html: html.into() } }
     }
+    /// A node with an arbitrary `shape` (e.g. `invtrapezium`).
+    pub fn shaped(id: impl Into<String>, s: Shaped) -> Self {
+        Node { id: id.into(), kind: NodeKind::Shaped(s) }
+    }
     pub fn has_defined_role(&self) -> bool {
         matches!(&self.kind, NodeKind::Record(r) if !r.role.is_undefined())
     }
@@ -119,6 +123,19 @@ pub enum NodeKind {
     Record(Record),
     /// Atomic knowledge / action / temporal node drawn as an ellipse.
     Ellipse(Ellipse),
+    /// A node with an explicit `shape` other than `record`/`ellipse`/`plain`.
+    ///
+    /// Observed live (never in the crawled proof-graph corpus, which is all
+    /// solved states): a `(#var, idx)` placeholder for an *unresolved graph node*
+    /// referenced by a still-open premise is drawn `shape="invtrapezium"` — e.g.
+    /// `n9[label="(#i, 0)",shape="invtrapezium"]`, fed by the conclusion that must
+    /// satisfy premise `idx` of the missing node `#var`. Serialization matches an
+    /// [`Ellipse`] exactly (`label,shape[,color]`); only the `shape` string
+    /// differs, so this variant also carries the observed `"invtrapezium"`.
+    /// `"trapezium"` is named by the spec as the dual but was **not observed** in
+    /// the corpus or any live probe (see BEHAVIOR.md §3d); the serializer supports
+    /// any shape string so it can be emitted if a caller supplies one.
+    Shaped(Shaped),
     /// The abbreviation legend, an HTML-like label. `html` is the inner content
     /// between `label=<` and `>` (i.e. it starts with `<TABLE …`).
     Plain { html: String },
@@ -161,6 +178,28 @@ impl Ellipse {
     }
     pub fn colored(label: impl Into<String>, color: impl Into<String>) -> Self {
         Ellipse { label: label.into(), color: Some(color.into()) }
+    }
+}
+
+/// A node carrying an explicit `shape` string (anything but record/ellipse/plain).
+/// Serialized identically to an [`Ellipse`] — `label="…",shape="…"[,color="…"]` —
+/// with `shape` supplied verbatim. Observed value: `invtrapezium` (BEHAVIOR.md §3d).
+#[derive(Clone, Debug)]
+pub struct Shaped {
+    pub label: String,
+    pub shape: String,
+    pub color: Option<String>,
+}
+
+impl Shaped {
+    pub fn new(shape: impl Into<String>, label: impl Into<String>) -> Self {
+        Shaped { label: label.into(), shape: shape.into(), color: None }
+    }
+    /// The observed `invtrapezium` placeholder for an unresolved node referenced
+    /// by an open premise, labelled `(#var, idx)`. `node_var` is the temporal
+    /// variable name without its `#` sigil (e.g. `"i"` ⇒ `(#i, 0)`).
+    pub fn invtrapezium(node_var: &str, premise_index: usize) -> Self {
+        Shaped::new("invtrapezium", format!("(#{}, {})", node_var, premise_index))
     }
 }
 

@@ -1,0 +1,30 @@
+# QUERIES.log — every oracle interaction, with purpose.
+# Format: <ISO-ish timestamp/seq> | <purpose> | <oracle invocation>
+
+001 | discover where injective facts surface in CLI output | hs_oracle.sh classic/NSLPK3.spthy --precompute-only  → only summary lines (MSR rules / Raw/Refined sources); word "injective" only as lemma name
+002 | check --help for an injective/output flag | hs_oracle.sh NSLPK3 --help  → no injective flag; output modules spthy/spthytyped/msr/proverif/deepsec
+003 | full CLI analysis, grep injective | hs_oracle.sh NSLPK3 (full)  → "injective" only as lemma name injective_agree
+004 | look for injective in precompute of stateful theories | hs_oracle.sh {Yubikey,Typing_and_Destructors,PKCS11,issue532,revealingSig} --precompute-only  → none print "inject"
+005 | verbose precompute Yubikey | hs_oracle.sh Yubikey --precompute-only --verbose  → 3293 lines of goal-solving trace, no "inject"/"instance"
+006 | try to write precomputed theory to file | hs_oracle.sh NSLPK3 --precompute-only -o FILE ; -m msr -o FILE  → precompute-only writes no theory; msr writer needs dir for sapic
+007 | launch interactive web server to inspect message/rules pages | hs_oracle.sh interactive <workdir=NSLPK3+Yubikey> --port=3399 --no-logging  → server up on :3399
+008 | discover web routes | curl / , /thy/trace/2/overview/help  → routes: main/message, main/rules, main/cases/{raw,refined}, main/proof/<lemma>
+009 | LABELED ORACLE FOUND: /thy/trace/<i>/main/rules contains "Fact Symbols with Injective Instances" line | curl main/rules for NSLPK3 & Yubikey  → both "None"
+
+# --- Probe campaign (interactive web server, /main/rules "Fact Symbols with Injective Instances") ---
+010 | probe batch1 p01..p11 (fresh-loop / consume-only / persistent / from-In / fresh-2nd / two-produced / reproduce-newfresh / const / mixed-producers / fresh-first-extra) | server :3400 | inj: p01=AA(id), p07=GG(id), p11=KK(id,=); rest None
+011 | exact byte formatting of injective render | curl :3400 p01 main/rules raw | '<h2>Fact Symbols with Injective Instances</h2><br/>\n<p class="monospace rules">AA(id)</p>'
+012 | probe batch2 b01..b08 (loop+double-produce / 2producers-noloop / loop-only / produce-only / pubvar-first / funterm-first / consume-double / In-then-loop) | server :3401 | inj: b01=LL(id), b03=OO(id), b07=RR(id); rest None
+013 | probe batch3 c01,c02,c03,c06 (consumer-msg-first / two-facts / producer-msg+loop / loop-msg-carried) | server :3402 | inj: c01=UU(id), c02="MB(id), ZA(id)" (sorted, ", " sep), c06=WW(id); c03=None
+014 | probe batch4 d01,d02,d04,d05 (reproduce-from-In / reproduce-from-nonF / fresh-sort-nonFr / carry-fresh) | server :3403 | inj: d05=F5(id); d01/d02/d04=None
+015 | probe batch5 e01,e02,e03 (multiarg-carry / dup-carried / two-same-fresh) | server :3404 | inj: e01=HH(id,.); e02/e03=None (counting matters)
+016 | probe batch6 g01,g02 (grow-matched / bad-match) | server :3405 | inj: g01=GA(id); g02=None (multiset matching confirmed)
+017 | CORPUS validation: per-theory isolated servers, scrape injective line for all 49 flattened theories | driver.sh ports 3501+ | results -> corpus_results.tsv
+018 | end-to-end validation: parse rendered MSR rules from each theory's /main/rules -> injfacts binary -> compare to oracle injective line | validate.py over corpus_html/ | 5G binding+nonbinding reproduce Sqn_HSS+Sqn_UE exactly; all completed theories match
+
+# --- Rebuilt validation, now PERSISTENT under workspace/validation/ (harness 017/018 lived in a lost temp dir) ---
+019 | REBUILD corpus scrape: one isolated interactive server per theory (single-theory workdir), block on log "Theory closed", then scrape the rendered rules page | scrape.sh / run_corpus.sh, ports 3700+ | 49 theories captured to validation/corpus_html/*.json: 36 trace via /thy/trace/1/main/rules, 13 diff via --diff /thy/equiv/1/main/diffrules
+020 | classify + route: trace theories use /thy/trace/<i>/main/rules; theories with diff( or "run with --diff" need --diff and 404 on /main/rules | probed /thy/equiv/1/<path> on round2/diff_right_rule_mismatch | diff-rules route = /main/diffrules (renders parent+left+right); FINDING: diff mode surfaces NO "Fact Symbols with Injective Instances" section anywhere (absent on diffrules; no per-side trace index exists) -> injective is a trace-mode-only analysis
+021 | accountability/dmn-message-tracing fails to close: heuristic o "./oracle-dmn-message-tracing" -> readCreateProcess posix_spawnp does not exist | added no-op passthrough oracle stub in the isolated workdir (stub only affects proof-search goal ranking, not injective precompute), re-ran server on 3670 | Theory closed; injective line = None
+022 | two fm24-cardpayments closed but root listed no /thy/trace idx at first scrape (large-theory web-registration lag) | poll root for the index after "Theory closed" (scrape.sh) | resolved; both injective = None
+023 | END-TO-END compare: render each captured page's MSR rules into the injfacts binary grammar and diff (name,arity) tag sets vs the oracle injective line; sapic rule headers carry multiline [color=...,process="...",issapicrule] attribute blocks (colons+newlines) that a naive header regex truncated (PKCS11 2 vs 231 headers) -> fixed header regex to consume the attr block | parse_and_compare.py over corpus_html/ -> validation/corpus_results.tsv | 36/36 trace AGREE (5G binding+nonbinding = "Sqn_HSS/5, Sqn_UE/5"; other 34 = None), 13 diff n/a; 0 mismatch, 0 fail

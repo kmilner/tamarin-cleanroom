@@ -1,0 +1,9 @@
+WARNING: the following wellformedness checks failed!
+
+Fresh public constants
+======================
+
+  rule `R1': fresh public constants are not allowed: ~'aaaaaa',
+    ~'bbbbbb', ~'cccccc', ~'dddddd', ~'eeeeee', ~'ffffff', ~'gggggg',
+    ~'hhhhhh'
+*/

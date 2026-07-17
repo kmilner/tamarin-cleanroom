@@ -1,0 +1,11 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+GraphViz tool: 'dot'
+ checking version: dot - graphviz version 15.1.0 (20260618.0150). OK.
+ checking PNG support: OK.
+[Theory Yubikey] Theory loaded
+[Theory Yubikey] Theory translated
+[Theory Yubikey] Derivation checks started
+[Theory Yubikey] Derivation checks ended
+[Theory Yubikey] Theory closed

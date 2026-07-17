@@ -1,0 +1,10 @@
+theory ActOrd
+begin
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x) ]->
+   [ Out(~x) ]
+lemma L1:
+  all-traces
+  "All x #i. A(x) @ #i ==> (Ex j. B(w) @ j)"
+end

@@ -96,6 +96,13 @@ fn render_node(n: &Node) -> String {
             ),
             None => format!("{}[label=\"{}\",shape=\"ellipse\"];", n.id, e.label),
         },
+        NodeKind::Shaped(s) => match &s.color {
+            Some(c) => format!(
+                "{}[label=\"{}\",shape=\"{}\",color=\"{}\"];",
+                n.id, s.label, s.shape, c
+            ),
+            None => format!("{}[label=\"{}\",shape=\"{}\"];", n.id, s.label, s.shape),
+        },
         NodeKind::Plain { html } => {
             format!("{}[shape=\"plain\",label=<{}>];", n.id, html)
         }

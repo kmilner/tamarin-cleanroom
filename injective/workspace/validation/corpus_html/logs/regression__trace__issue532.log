@@ -1,0 +1,11 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+GraphViz tool: 'dot'
+ checking version: dot - graphviz version 15.1.0 (20260618.0150). OK.
+ checking PNG support: OK.
+[Theory issue532] Theory loaded
+[Theory issue532] Theory translated
+[Theory issue532] Derivation checks started
+[Theory issue532] Derivation checks ended
+[Theory issue532] Theory closed

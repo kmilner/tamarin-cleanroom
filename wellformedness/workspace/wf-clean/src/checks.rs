@@ -14,6 +14,7 @@ pub const T_RESERVED: &str = "Reserved names";
 pub const T_RESERVED_PREFIX: &str = "Reserved prefixes";
 pub const T_FR: &str = "Fr facts must only use a fresh- or a msg-variable";
 pub const T_SPECIAL: &str = "Special facts";
+pub const T_FACT_CAP: &str = "Fact capitalization issues";
 pub const T_ARITY: &str = "Fact arity issues";
 pub const T_MULT: &str = "Fact multiplicity issues";
 pub const T_LHSRHS: &str = "Facts occur in the left-hand-side but not in any right-hand-side ";
@@ -447,30 +448,117 @@ pub fn special_facts(thy: &Theory) -> Vec<WfError> {
 // ---------------------------------------------------------------------------
 
 struct FactUse {
-    rule: String,
+    label: &'static str, // "Rule" or "Lemma"
+    owner: String,       // rule/lemma name
     arity: usize,
     persistent: bool,
-    pp: String,
+    render: String, // pp_fact for rules; raw Haskell `Fact {..}` show for lemmas
 }
 
-/// Gather every fact occurrence in protocol rules (name -> uses), in source
-/// order.
+/// Raw Haskell `Show` of a lemma-sourced fact, as the oracle prints it in the
+/// arity/multiplicity blocks (observed r3_lemarity / r3_lemmult):
+///   Fact {factTag = ProtoFact Linear "Act" 2, factAnnotations = fromList [],
+///         factTerms = [Bound 2,Bound 1]}
+/// `factTerms` uses the same de Bruijn / Free rendering as the Formula-terms
+/// check (the binder `stack` is the quantifier context at the atom).
+fn show_haskell_fact(f: &Fact, stack: &[String]) -> String {
+    let mult = if f.persistent { "Persistent" } else { "Linear" };
+    let terms: Vec<String> = f.args.iter().map(|a| show_wf_term(a, stack)).collect();
+    format!(
+        "Fact {{factTag = ProtoFact {} \"{}\" {}, factAnnotations = fromList [], factTerms = [{}]}}",
+        mult,
+        f.name,
+        f.args.len(),
+        terms.join(",")
+    )
+}
+
+/// Collect action-fact uses from a lemma formula (label "Lemma"), tracking the
+/// quantifier binder stack for the de Bruijn rendering of the fact terms.
+fn gather_formula_facts(
+    f: &Formula,
+    stack: &mut Vec<String>,
+    owner: &str,
+    out: &mut Vec<(String, FactUse)>,
+) {
+    match f {
+        Formula::False | Formula::True => {}
+        Formula::Atom(Atom::Action(fact, _)) => {
+            out.push((
+                fact.name.clone(),
+                FactUse {
+                    label: "Lemma",
+                    owner: owner.to_string(),
+                    arity: fact.args.len(),
+                    persistent: fact.persistent,
+                    render: show_haskell_fact(fact, stack),
+                },
+            ));
+        }
+        Formula::Atom(_) => {}
+        Formula::Not(g) => gather_formula_facts(g, stack, owner, out),
+        Formula::And(a, b)
+        | Formula::Or(a, b)
+        | Formula::Implies(a, b)
+        | Formula::Iff(a, b) => {
+            gather_formula_facts(a, stack, owner, out);
+            gather_formula_facts(b, stack, owner, out);
+        }
+        Formula::Forall(vs, g) | Formula::Exists(vs, g) => {
+            let n = vs.len();
+            for v in vs {
+                stack.push(v.name.clone());
+            }
+            gather_formula_facts(g, stack, owner, out);
+            for _ in 0..n {
+                stack.pop();
+            }
+        }
+    }
+}
+
+/// Gather every fact occurrence in the theory (name -> uses) in source order.
+/// Protocol rules contribute their premise/action/conclusion facts (rendered by
+/// the term pretty-printer); lemmas contribute their formula action facts
+/// (rendered as the raw Haskell `Fact {..}` show). Restrictions do NOT
+/// contribute (observed r3_restrarity: a restriction action arity mismatch is
+/// silent).
 fn gather_fact_uses(thy: &Theory) -> Vec<(String, Vec<FactUse>)> {
     let mut map: Vec<(String, Vec<FactUse>)> = Vec::new();
-    for r in protocol_rules(thy) {
-        for facts in [&r.premises, &r.actions, &r.conclusions] {
-            for f in facts {
-                let entry = FactUse {
-                    rule: r.name.clone(),
-                    arity: f.args.len(),
-                    persistent: f.persistent,
-                    pp: pp_fact(f),
-                };
-                match map.iter_mut().find(|(n, _)| *n == f.name) {
-                    Some((_, uses)) => uses.push(entry),
-                    None => map.push((f.name.clone(), vec![entry])),
+    let push = |name: String, u: FactUse, map: &mut Vec<(String, Vec<FactUse>)>| {
+        match map.iter_mut().find(|(n, _)| *n == name) {
+            Some((_, uses)) => uses.push(u),
+            None => map.push((name, vec![u])),
+        }
+    };
+    for it in &thy.items {
+        match it {
+            TheoryItem::Rule(r) => {
+                for facts in [&r.premises, &r.actions, &r.conclusions] {
+                    for f in facts {
+                        push(
+                            f.name.clone(),
+                            FactUse {
+                                label: "Rule",
+                                owner: r.name.clone(),
+                                arity: f.args.len(),
+                                persistent: f.persistent,
+                                render: pp_fact(f),
+                            },
+                            &mut map,
+                        );
+                    }
                 }
             }
+            TheoryItem::Lemma(l) => {
+                let mut stack: Vec<String> = Vec::new();
+                let mut uses: Vec<(String, FactUse)> = Vec::new();
+                gather_formula_facts(&l.formula, &mut stack, &l.name, &mut uses);
+                for (name, u) in uses {
+                    push(name, u, &mut map);
+                }
+            }
+            _ => {}
         }
     }
     map
@@ -491,6 +579,73 @@ fn render_fact_blocks(conflicts: &[(String, Vec<String>)], intro1: &str, intro2:
     body
 }
 
+// ---------------------------------------------------------------------------
+// Fact capitalization issues (precedes Fact arity issues)
+// ---------------------------------------------------------------------------
+// Fact names that are equal under ASCII-lowercasing but differ in their exact
+// spelling (e.g. `Send` vs `SEND`) are distinct facts. Reported like the arity
+// block, but EVERY occurrence is listed (no per-(rule,cap) deduplication -
+// observed r3_capord: `Send` twice in one rule yields two items).
+pub fn fact_capitalization(thy: &Theory) -> Vec<WfError> {
+    struct Occ {
+        name: String,
+        rule: String,
+        pp: String,
+    }
+    let mut occ: Vec<Occ> = Vec::new();
+    for r in protocol_rules(thy) {
+        for facts in [&r.premises, &r.actions, &r.conclusions] {
+            for f in facts {
+                occ.push(Occ {
+                    name: f.name.clone(),
+                    rule: r.name.clone(),
+                    pp: pp_fact(f),
+                });
+            }
+        }
+    }
+    // Group by lowercased name, preserving first-seen order.
+    let mut groups: Vec<(String, Vec<&Occ>)> = Vec::new();
+    for o in &occ {
+        let key = o.name.to_lowercase();
+        match groups.iter_mut().find(|(k, _)| *k == key) {
+            Some((_, v)) => v.push(o),
+            None => groups.push((key, vec![o])),
+        }
+    }
+    let mut conflicts: Vec<(String, Vec<String>)> = Vec::new();
+    for (key, os) in &groups {
+        let distinct: std::collections::BTreeSet<&String> = os.iter().map(|o| &o.name).collect();
+        if distinct.len() < 2 {
+            continue; // no capitalization conflict
+        }
+        let items: Vec<String> = os
+            .iter()
+            .enumerate()
+            .map(|(i, o)| {
+                format!(
+                    "    {}. Rule `{}', capitalization \"{}\"\n         {}",
+                    i + 1,
+                    o.rule,
+                    o.name,
+                    o.pp
+                )
+            })
+            .collect();
+        conflicts.push((key.clone(), items));
+    }
+    if conflicts.is_empty() {
+        return vec![];
+    }
+    conflicts.sort_by(|a, b| a.0.cmp(&b.0));
+    let msg = render_fact_blocks(
+        &conflicts,
+        "Fact names are case-sensitive, different capitalizations are considered as different facts, i.e., Fact() is different from FAct(). ",
+        "Check the capitalization of your fact names.",
+    );
+    vec![WfError::new(T_FACT_CAP, msg)]
+}
+
 pub fn fact_arity(thy: &Theory) -> Vec<WfError> {
     let uses = gather_fact_uses(thy);
     let mut conflicts: Vec<(String, Vec<String>)> = Vec::new();
@@ -499,19 +654,19 @@ pub fn fact_arity(thy: &Theory) -> Vec<WfError> {
         if arities.len() < 2 {
             continue;
         }
-        // one item per distinct (rule, arity), first pp kept, source order.
-        let mut seen: Vec<(String, usize)> = Vec::new();
+        // one item per distinct (label, owner, arity), first render kept.
+        let mut seen: Vec<(&str, String, usize)> = Vec::new();
         let mut items: Vec<String> = Vec::new();
         for u in us {
-            let k = (u.rule.clone(), u.arity);
+            let k = (u.label, u.owner.clone(), u.arity);
             if seen.contains(&k) {
                 continue;
             }
             seen.push(k);
             let n = items.len() + 1;
             items.push(format!(
-                "    {}. Rule `{}', arity {}\n         {}",
-                n, u.rule, u.arity, u.pp
+                "    {}. {} `{}', arity {}\n         {}",
+                n, u.label, u.owner, u.arity, u.render
             ));
         }
         conflicts.push((name.to_lowercase(), items));
@@ -536,10 +691,10 @@ pub fn fact_multiplicity(thy: &Theory) -> Vec<WfError> {
         if mults.len() < 2 {
             continue;
         }
-        let mut seen: Vec<(String, bool)> = Vec::new();
+        let mut seen: Vec<(&str, String, bool)> = Vec::new();
         let mut items: Vec<String> = Vec::new();
         for u in us {
-            let k = (u.rule.clone(), u.persistent);
+            let k = (u.label, u.owner.clone(), u.persistent);
             if seen.contains(&k) {
                 continue;
             }
@@ -547,8 +702,8 @@ pub fn fact_multiplicity(thy: &Theory) -> Vec<WfError> {
             let n = items.len() + 1;
             let m = if u.persistent { "Persistent" } else { "Linear" };
             items.push(format!(
-                "    {}. Rule `{}', multiplicity (persistence) {}\n         {}",
-                n, u.rule, m, u.pp
+                "    {}. {} `{}', multiplicity (persistence) {}\n         {}",
+                n, u.label, u.owner, m, u.render
             ));
         }
         conflicts.push((name.to_lowercase(), items));
@@ -749,86 +904,219 @@ pub fn public_names_report_from_pairs(pairs: Vec<(String, String)>) -> Vec<WfErr
 }
 
 // ---------------------------------------------------------------------------
-// 10. Formula terms (free variables in lemma / restriction formulas)
+// 10. Formula terms (ill-formed terms in lemma / restriction formulas)
 // ---------------------------------------------------------------------------
+// A lemma/restriction formula may only use terms built from public constants
+// and BOUND node/message variables via non-reducible function symbols. A term
+// is reported "of the wrong form" if it contains a FREE variable or a REDUCIBLE
+// function symbol. The whole offending top-level term (each argument of each
+// atom) is reported, rendered in the oracle's raw term representation:
+//   - a bound variable  -> `Bound N` (de Bruijn: 0 = innermost binder)
+//   - a free  variable  -> `Free <pp_var>`  (keeps the sort prefix)
+//   - a function app    -> `f(a,b)`  (args comma-joined, NO space)
+//   - a tuple           -> `pair(a,pair(b,c))` (right-nested binary pairs)
+//   - a public constant -> `'name'`
+// The set of reducible function symbol names is caller-supplied (the caller
+// computes reducibility from the equation theory / Maude); this module only
+// consumes it. `formula_terms` is the zero-reducible-symbols convenience
+// wrapper (free variables only). See BEHAVIOR.md.
 
 const FORMULA_TERMS_HELP: &str = "  The only allowed terms are public constants and bound node and\n  message variables. If you encounter free message variables, then\n  you might have forgotten a #-prefix. Sort prefixes can only be\n  dropped where this is unambiguous. Moreover, reducible function\n  symbols are disallowed.";
 
-// Bound variables are matched by NAME only. The oracle treats a quantified
-// message variable and its occurrences as the same variable even when the
-// parsed AST tags them with different-but-compatible sorts (e.g. Msg vs the
-// Untagged default, or a temporal written `@ i` vs a quantifier `#i`); matching
-// on the full sort tag produces spurious "free variable" reports (observed on
-// round2/exists_trace_reuse). See BEHAVIOR.md.
-fn free_vars_formula(f: &Formula, bound: &mut Vec<String>, out: &mut Vec<VarSpec>) {
+/// De Bruijn index of `name` on the binder stack (outermost pushed first): the
+/// innermost matching binder is 0. `None` if the name is not bound (free).
+/// Binders are matched by NAME only (see BEHAVIOR.md round-2 fix).
+fn debruijn_index(stack: &[String], name: &str) -> Option<usize> {
+    stack
+        .iter()
+        .rposition(|b| b == name)
+        .map(|pos| stack.len() - 1 - pos)
+}
+
+/// Render a term in the oracle's raw "wrong form" representation.
+fn show_wf_term(t: &Term, stack: &[String]) -> String {
+    match t {
+        Term::Var(v) => match debruijn_index(stack, &v.name) {
+            Some(idx) => format!("Bound {}", idx),
+            None => format!("Free {}", pp_var(v)),
+        },
+        Term::PubLit(s) => format!("'{}'", s),
+        Term::FreshLit(s) => format!("~'{}'", s),
+        Term::NatLit(s) => format!("%'{}'", s),
+        Term::Number(n) => n.to_string(),
+        Term::NumberOne => "1".to_string(),
+        Term::NatOne => "%1".to_string(),
+        Term::DhNeutral => "DH_neutral".to_string(),
+        Term::App(name, args) => {
+            if args.is_empty() {
+                name.clone()
+            } else {
+                let parts: Vec<String> = args.iter().map(|a| show_wf_term(a, stack)).collect();
+                format!("{}({})", name, parts.join(","))
+            }
+        }
+        Term::AlgApp(name, a, b) => {
+            format!("{}({},{})", name, show_wf_term(a, stack), show_wf_term(b, stack))
+        }
+        Term::Pair(items) => show_wf_pair(items, stack),
+        Term::Diff(a, b) => {
+            format!("diff({},{})", show_wf_term(a, stack), show_wf_term(b, stack))
+        }
+        Term::BinOp(op, a, b) => {
+            // Raw operator function name (best-effort; AC/DH operators in
+            // formula terms are rare - see BEHAVIOR.md gaps).
+            let name = match op {
+                BinOp::Exp => "exp",
+                BinOp::Mult => "mult",
+                BinOp::Union => "union",
+                BinOp::Xor => "xor",
+                BinOp::NatPlus => "tadd",
+            };
+            format!("{}({},{})", name, show_wf_term(a, stack), show_wf_term(b, stack))
+        }
+        Term::PatMatch(inner) => show_wf_term(inner, stack),
+    }
+}
+
+/// Render a tuple as right-nested binary `pair(...)` applications.
+fn show_wf_pair(items: &[Term], stack: &[String]) -> String {
+    match items {
+        [] => "pair".to_string(),
+        [only] => show_wf_term(only, stack),
+        [head, rest @ ..] => {
+            format!("pair({},{})", show_wf_term(head, stack), show_wf_pair(rest, stack))
+        }
+    }
+}
+
+/// True iff `t` contains a free variable or a reducible function symbol, i.e.
+/// the term is "of the wrong form" for a trace formula.
+fn term_is_ill_formed(t: &Term, stack: &[String], reducible: &std::collections::BTreeSet<String>) -> bool {
+    match t {
+        Term::Var(v) => debruijn_index(stack, &v.name).is_none(), // free -> ill
+        Term::PubLit(_)
+        | Term::FreshLit(_)
+        | Term::NatLit(_)
+        | Term::Number(_)
+        | Term::NumberOne
+        | Term::NatOne
+        | Term::DhNeutral => false,
+        Term::App(name, args) => {
+            reducible.contains(name) || args.iter().any(|a| term_is_ill_formed(a, stack, reducible))
+        }
+        Term::AlgApp(name, a, b) => {
+            reducible.contains(name)
+                || term_is_ill_formed(a, stack, reducible)
+                || term_is_ill_formed(b, stack, reducible)
+        }
+        Term::Pair(items) => items.iter().any(|a| term_is_ill_formed(a, stack, reducible)),
+        Term::Diff(a, b) | Term::BinOp(_, a, b) => {
+            term_is_ill_formed(a, stack, reducible) || term_is_ill_formed(b, stack, reducible)
+        }
+        Term::PatMatch(inner) => term_is_ill_formed(inner, stack, reducible),
+    }
+}
+
+/// The argument terms of an atom, in the oracle's reporting order. For an
+/// action atom the TEMPORAL variable is reported before the fact arguments
+/// (observed via probe r3_actord).
+fn atom_terms(a: &Atom) -> Vec<&Term> {
+    match a {
+        Atom::Eq(x, y) | Atom::Less(x, y) | Atom::LessMset(x, y) | Atom::Subterm(x, y) => {
+            vec![x, y]
+        }
+        Atom::Action(f, t) => {
+            let mut v = vec![t];
+            v.extend(f.args.iter());
+            v
+        }
+        Atom::Last(t) => vec![t],
+        Atom::Pred(f) => f.args.iter().collect(),
+    }
+}
+
+/// Walk a formula in source order collecting the RENDERED strings of every
+/// ill-formed atom term. Not deduplicated (probe r3_shapes: `x = y & x = y`
+/// reports `Free y` twice).
+fn collect_ill_terms(
+    f: &Formula,
+    stack: &mut Vec<String>,
+    reducible: &std::collections::BTreeSet<String>,
+    out: &mut Vec<String>,
+) {
     match f {
         Formula::False | Formula::True => {}
         Formula::Atom(a) => {
-            let mut vs = Vec::new();
-            atom_vars(a, &mut vs);
-            for v in vs {
-                if !bound.contains(&v.name) {
-                    out.push(v);
+            for t in atom_terms(a) {
+                if term_is_ill_formed(t, stack, reducible) {
+                    out.push(show_wf_term(t, stack));
                 }
             }
         }
-        Formula::Not(g) => free_vars_formula(g, bound, out),
+        Formula::Not(g) => collect_ill_terms(g, stack, reducible, out),
         Formula::And(a, b)
         | Formula::Or(a, b)
         | Formula::Implies(a, b)
         | Formula::Iff(a, b) => {
-            free_vars_formula(a, bound, out);
-            free_vars_formula(b, bound, out);
+            collect_ill_terms(a, stack, reducible, out);
+            collect_ill_terms(b, stack, reducible, out);
         }
         Formula::Forall(vs, g) | Formula::Exists(vs, g) => {
-            let added: Vec<String> = vs.iter().map(|v| v.name.clone()).collect();
-            let n = added.len();
-            bound.extend(added);
-            free_vars_formula(g, bound, out);
+            let n = vs.len();
+            for v in vs {
+                stack.push(v.name.clone());
+            }
+            collect_ill_terms(g, stack, reducible, out);
             for _ in 0..n {
-                bound.pop();
+                stack.pop();
             }
         }
     }
 }
 
-fn atom_vars(a: &Atom, out: &mut Vec<VarSpec>) {
-    match a {
-        Atom::Eq(x, y)
-        | Atom::Less(x, y)
-        | Atom::LessMset(x, y)
-        | Atom::Subterm(x, y) => {
-            collect_term_vars(x, out);
-            collect_term_vars(y, out);
+/// Lay out `tokens` after `prefix` with a fillSep (paragraph fill): place a
+/// token on the current line while `col + 1 + width <= width`, else break to a
+/// new line indented `indent`. Each token but the last carries a trailing
+/// comma. Matches the oracle's wrapping at column 69 (probes r3_wrap/r3_w2).
+fn fill_after_prefix(prefix: &str, tokens: &[String], indent: usize, width: usize) -> String {
+    let mut line = prefix.to_string();
+    let mut col = prefix.chars().count();
+    let pad = " ".repeat(indent);
+    let n = tokens.len();
+    for (i, tok) in tokens.iter().enumerate() {
+        let piece = if i + 1 < n {
+            format!("{},", tok)
+        } else {
+            tok.clone()
+        };
+        let w = piece.chars().count();
+        if col + 1 + w <= width {
+            line.push(' ');
+            line.push_str(&piece);
+            col += 1 + w;
+        } else {
+            line.push('\n');
+            line.push_str(&pad);
+            line.push_str(&piece);
+            col = indent + w;
         }
-        Atom::Action(f, t) => {
-            collect_fact_vars(f, out);
-            collect_term_vars(t, out);
-        }
-        Atom::Last(t) => collect_term_vars(t, out),
-        Atom::Pred(f) => collect_fact_vars(f, out),
     }
+    line
 }
 
-fn formula_terms_entry(entity: &str, name: &str, free: &[VarSpec]) -> String {
-    let terms: Vec<String> = free.iter().map(|v| format!("`Free {}'", pp_var(v))).collect();
-    let head = if terms.len() == 1 {
-        format!(
-            "  {} `{}' uses terms of the wrong form: {}",
-            entity, name, terms[0]
-        )
-    } else {
-        format!(
-            "  {} `{}' uses terms of the wrong form:\n    {}",
-            entity,
-            name,
-            terms.join(", ")
-        )
-    };
+fn formula_terms_entry(entity: &str, name: &str, terms: &[String]) -> String {
+    let prefix = format!("  {} `{}' uses terms of the wrong form:", entity, name);
+    let tokens: Vec<String> = terms.iter().map(|t| format!("`{}'", t)).collect();
+    let head = fill_after_prefix(&prefix, &tokens, 4, FILL_WIDTH);
     format!("{}\n  \n{}", head, FORMULA_TERMS_HELP)
 }
 
-pub fn formula_terms(thy: &Theory) -> Vec<WfError> {
+/// Full "Formula terms" check: reports ill-formed terms (free variables and
+/// applications of any symbol in `reducible`) in lemma/restriction formulas.
+pub fn formula_terms_reducible(
+    thy: &Theory,
+    reducible: &std::collections::BTreeSet<String>,
+) -> Vec<WfError> {
     let mut entries: Vec<String> = Vec::new();
     for it in &thy.items {
         let (entity, name, formula) = match it {
@@ -838,19 +1126,25 @@ pub fn formula_terms(thy: &Theory) -> Vec<WfError> {
             }
             _ => continue,
         };
-        let mut bound = Vec::new();
-        let mut free = Vec::new();
-        free_vars_formula(formula, &mut bound, &mut free);
-        let free = dedup_vars(free);
-        if !free.is_empty() {
-            entries.push(formula_terms_entry(entity, name, &free));
+        let mut stack: Vec<String> = Vec::new();
+        let mut terms: Vec<String> = Vec::new();
+        collect_ill_terms(formula, &mut stack, reducible, &mut terms);
+        if !terms.is_empty() {
+            entries.push(formula_terms_entry(entity, name, &terms));
         }
     }
     if entries.is_empty() {
         vec![]
     } else {
-        vec![WfError::new(T_FORMULA_TERMS, entries.join("\n"))]
+        vec![WfError::new(T_FORMULA_TERMS, entries.join("\n  \n"))]
     }
+}
+
+/// Convenience wrapper: the free-variable-only "Formula terms" check (no
+/// reducible symbols). `check_theory` uses this; the reducible-aware entry
+/// point is `formula_terms_reducible`.
+pub fn formula_terms(thy: &Theory) -> Vec<WfError> {
+    formula_terms_reducible(thy, &std::collections::BTreeSet::new())
 }
 
 // ---------------------------------------------------------------------------
@@ -864,16 +1158,27 @@ pub fn formula_guardedness(thy: &Theory) -> Vec<WfError> {
             TheoryItem::Lemma(l) => (&l.name, &l.formula),
             _ => continue,
         };
-        if let Some((unguarded, sub)) = find_unguarded(formula) {
-            let vars: Vec<String> = unguarded.iter().map(|v| format!("'{}'", pp_var(v))).collect();
-            let pp_sub = crate::formula::pp_formula(&sub);
-            let pp_whole = crate::formula::pp_formula(formula);
+        if let Some((fail, sub)) = find_guard_failure(formula) {
+            let reason = match fail {
+                GuardFail::Unguarded(vars) => {
+                    let vs: Vec<String> =
+                        vars.iter().map(|v| format!("'{}'", pp_var(v))).collect();
+                    format!(
+                        "unguarded variable(s) {} in the subformula",
+                        vs.join(", ")
+                    )
+                }
+                GuardFail::NoImplication => {
+                    "universal quantifier without toplevel implication".to_string()
+                }
+            };
+            // The formula is embedded as `      "..."`: the quote sits at column
+            // 6, so the formula starts at column 7 with base indent 6.
+            let pp_sub = crate::formula::pp_formula_wrapped(&sub, 7, 6);
+            let pp_whole = crate::formula::pp_formula_wrapped(formula, 7, 6);
             entries.push(format!(
-                "  Lemma `{}' cannot be converted to a guarded formula:\n    unguarded variable(s) {} in the subformula\n      \"{}\"\n    in the formula\n      \"{}\"",
-                name,
-                vars.join(", "),
-                pp_sub,
-                pp_whole
+                "  Lemma `{}' cannot be converted to a guarded formula:\n    {}\n      \"{}\"\n    in the formula\n      \"{}\"",
+                name, reason, pp_sub, pp_whole
             ));
         }
     }
@@ -906,31 +1211,65 @@ fn guard_vars(f: &Formula, out: &mut Vec<VarSpec>) {
     }
 }
 
-/// Returns the first quantifier whose bound variables are not all guarded,
-/// together with that subformula.
-fn find_unguarded(f: &Formula) -> Option<(Vec<VarSpec>, Formula)> {
+/// A guardedness failure and its reason.
+enum GuardFail {
+    /// A quantifier binds variables not guarded by an action fact.
+    Unguarded(Vec<VarSpec>),
+    /// A universal quantifier's body is not a top-level implication.
+    NoImplication,
+}
+
+/// Guard variable names of a (guard) formula: the variables appearing in its
+/// action/predicate atoms. Matched by NAME (see free_vars_formula rationale).
+fn guard_var_names(f: &Formula) -> std::collections::HashSet<String> {
+    let mut gv = Vec::new();
+    guard_vars(f, &mut gv);
+    gv.iter().map(|v| v.name.clone()).collect()
+}
+
+/// Return the first guardedness failure and the failing quantifier subformula.
+///
+/// A universal quantifier is guarded only when its body is a top-level
+/// implication `guard ==> rest` whose antecedent's action facts bind every
+/// quantified variable (observed r3_gc: a conjunction/disjunction/negation body,
+/// or a bare atom body, all fail as "without toplevel implication"; the
+/// antecedent alone - not the consequent - guards the variables). Existential
+/// quantifiers instead take a conjunctive guard (observed: `Ex x #i. A(x) @ #i`
+/// is fine); an existential whose variables are not all guarded is "unguarded".
+fn find_guard_failure(f: &Formula) -> Option<(GuardFail, Formula)> {
     match f {
-        Formula::Forall(vs, g) | Formula::Exists(vs, g) => {
-            let mut gv = Vec::new();
-            guard_vars(g, &mut gv);
-            // Match guard variables by name (see free_vars_formula rationale).
-            let gset: std::collections::HashSet<String> =
-                gv.iter().map(|v| v.name.clone()).collect();
+        Formula::Forall(vs, body) => match &**body {
+            Formula::Implies(guard, rest) => {
+                let gset = guard_var_names(guard);
+                let unguarded: Vec<VarSpec> = vs
+                    .iter()
+                    .filter(|v| !gset.contains(&v.name))
+                    .cloned()
+                    .collect();
+                if !unguarded.is_empty() {
+                    return Some((GuardFail::Unguarded(unguarded), f.clone()));
+                }
+                find_guard_failure(guard).or_else(|| find_guard_failure(rest))
+            }
+            _ => Some((GuardFail::NoImplication, f.clone())),
+        },
+        Formula::Exists(vs, body) => {
+            let gset = guard_var_names(body);
             let unguarded: Vec<VarSpec> = vs
                 .iter()
                 .filter(|v| !gset.contains(&v.name))
                 .cloned()
                 .collect();
             if !unguarded.is_empty() {
-                return Some((unguarded, f.clone()));
+                return Some((GuardFail::Unguarded(unguarded), f.clone()));
             }
-            find_unguarded(g)
+            find_guard_failure(body)
         }
-        Formula::Not(g) => find_unguarded(g),
+        Formula::Not(g) => find_guard_failure(g),
         Formula::And(a, b)
         | Formula::Or(a, b)
         | Formula::Implies(a, b)
-        | Formula::Iff(a, b) => find_unguarded(a).or_else(|| find_unguarded(b)),
+        | Formula::Iff(a, b) => find_guard_failure(a).or_else(|| find_guard_failure(b)),
         _ => None,
     }
 }
@@ -1049,11 +1388,13 @@ pub fn fresh_public_constants(thy: &Theory) -> Vec<WfError> {
         if lits.is_empty() {
             continue;
         }
-        entries.push(format!(
-            "  rule `{}': fresh public constants are not allowed: {}",
-            r.name,
-            lits.join(", ")
-        ));
+        // The constant list is a fillSep wrapped at column 69 with a 4-space
+        // continuation indent (probe r3_freshwrap).
+        let prefix = format!(
+            "  rule `{}': fresh public constants are not allowed:",
+            r.name
+        );
+        entries.push(fill_after_prefix(&prefix, &lits, 4, FILL_WIDTH));
     }
     if entries.is_empty() {
         vec![]

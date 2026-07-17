@@ -1,0 +1,144 @@
+ORACLE: hs_oracle.sh interactive <wd:ake/bilinear/RYY_PFS.spthy> --port=3701 --no-logging 
+ORACLE: hs_oracle.sh interactive <wd:asiaccs20-POIDC/OIDC_CodeFlow_with_ClientSecret.spthy> --port=3703 --no-logging 
+ORACLE: hs_oracle.sh interactive <wd:asiaccs20-eccDAA/CERTIFY/TPM_DAA_JoinCertify_with_fix_BSN.spthy> --port=3702 --no-logging 
+ORACLE: hs_oracle.sh interactive <wd:accountability/csf21-acc-unbounded/mixnets/message-tracing/dmn-message-tracing-all-4.spthy> --port=3700 --no-logging 
+ORACLE: hs_oracle.sh interactive <wd:ccs18-5G/5G-AKA-bindingChannel/proofs/5G_aka_attack_weakagreement_ue_seaf_keyConf_noAsyKeyRev_noSupiRev_noSqnRev_noKeyRev.spthy> --port=3704 --no-logging 
+ORACLE: hs_oracle.sh interactive <wd:ccs18-5G/5G-AKA-nonBindingChannel/proofs/5G_aka_attack_secrecy_seaf_kseaf_noKeyRev_noSupiRev_noSqnRev_noAsyKeyRev.spthy> --port=3705 --no-logging 
+STATUS=accountability__csf21-acc-unbounded__mixnets__message-tracing__dmn-message-tracing-all-4 FAIL(notclosed)
+ORACLE: hs_oracle.sh interactive <wd:classic/NSLPK3.spthy> --port=3706 --no-logging 
+ORACLE: GET /thy/trace/1/main/rules  (ake/bilinear/RYY_PFS.spthy) -> ake__bilinear__RYY_PFS.trace1.json
+STATUS=ake__bilinear__RYY_PFS OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:csf12/NAXOS_eCK.spthy> --port=3707 --no-logging 
+ORACLE: GET /thy/trace/1/main/rules  (classic/NSLPK3.spthy) -> classic__NSLPK3.trace1.json
+STATUS=classic__NSLPK3 OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:csf18-xor/KCL07.spthy> --port=3708 --no-logging 
+ORACLE: GET /thy/trace/1/main/rules  (csf18-xor/KCL07.spthy) -> csf18-xor__KCL07.trace1.json
+STATUS=csf18-xor__KCL07 OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:csf20-disputeResolution/PR3_ShHh.spthy> --port=3709 --no-logging 
+ORACLE: GET /thy/trace/1/main/rules  (asiaccs20-POIDC/OIDC_CodeFlow_with_ClientSecret.spthy) -> asiaccs20-POIDC__OIDC_CodeFlow_with_ClientSecret.trace1.json
+STATUS=asiaccs20-POIDC__OIDC_CodeFlow_with_ClientSecret OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:eurosp19-eccDAA/analysed/ISOIEC_20008_2013_2_ECC_DAA_FIXED.analysed.spthy> --port=3710 --no-logging 
+ORACLE: GET /thy/trace/1/main/rules  (csf20-disputeResolution/PR3_ShHh.spthy) -> csf20-disputeResolution__PR3_ShHh.trace1.json
+STATUS=csf20-disputeResolution__PR3_ShHh OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:experiments/RF_dist_bound.spthy> --port=3711 --no-logging 
+ORACLE: GET /thy/trace/1/main/rules  (experiments/RF_dist_bound.spthy) -> experiments__RF_dist_bound.trace1.json
+STATUS=experiments__RF_dist_bound OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:features/auto-sources/spore/WooLam_Pi_f.spthy> --port=3712 --no-logging 
+ORACLE: GET /thy/trace/1/main/rules  (csf12/NAXOS_eCK.spthy) -> csf12__NAXOS_eCK.trace1.json
+STATUS=csf12__NAXOS_eCK OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:features/auto-sources/tamarin-repo/csf18-alethea/alethea_votingphase_RF-without-SL.spthy> --port=3713 --no-logging --diff
+ORACLE: GET /thy/trace/1/main/rules  (features/auto-sources/spore/WooLam_Pi_f.spthy) -> features__auto-sources__spore__WooLam_Pi_f.trace1.json
+STATUS=features__auto-sources__spore__WooLam_Pi_f OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:features/derivation-checks/revealingSignatureDerivationTest.spthy> --port=3714 --no-logging 
+ORACLE: GET /thy/trace/1/main/rules  (features/derivation-checks/revealingSignatureDerivationTest.spthy) -> features__derivation-checks__revealingSignatureDerivationTest.trace1.json
+STATUS=features__derivation-checks__revealingSignatureDerivationTest OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:features/equivalence/N5N6DiffTest.spthy> --port=3715 --no-logging --diff
+ORACLE: GET /thy/equiv/1/main/diffrules  (features/equivalence/N5N6DiffTest.spthy) -> features__equivalence__N5N6DiffTest.equiv1.json
+STATUS=features__equivalence__N5N6DiffTest OK(equiv,1)
+ORACLE: hs_oracle.sh interactive <wd:features/noise/anonymity_Responder_peer_revealed_psk_revealed_passive_trusted_pki_NX.spthy> --port=3716 --no-logging --diff
+ORACLE: GET /thy/equiv/1/main/diffrules  (features/auto-sources/tamarin-repo/csf18-alethea/alethea_votingphase_RF-without-SL.spthy) -> features__auto-sources__tamarin-repo__csf18-alethea__alethea_votingphase_RF-without-SL.equiv1.json
+STATUS=features__auto-sources__tamarin-repo__csf18-alethea__alethea_votingphase_RF-without-SL OK(equiv,1)
+ORACLE: hs_oracle.sh interactive <wd:features/xor/CRxor.spthy> --port=3717 --no-logging 
+ORACLE: GET /thy/trace/1/main/rules  (features/xor/CRxor.spthy) -> features__xor__CRxor.trace1.json
+STATUS=features__xor__CRxor OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:fm24-cardpayments/offlineAndOnlineAuthorized/models-n-proofs/C8_LocalAuth_NoCopyIAD_NoCVM_High.spthy> --port=3718 --no-logging 
+ORACLE: GET /thy/trace/1/main/rules  (ccs18-5G/5G-AKA-bindingChannel/proofs/5G_aka_attack_weakagreement_ue_seaf_keyConf_noAsyKeyRev_noSupiRev_noSqnRev_noKeyRev.spthy) -> ccs18-5G__5G-AKA-bindingChannel__proofs__5G_aka_attack_weakagreement_ue_seaf_keyConf_noAsyKeyRev_noSupiRev_noSqnRev_noKeyRev.trace1.json
+STATUS=ccs18-5G__5G-AKA-bindingChannel__proofs__5G_aka_attack_weakagreement_ue_seaf_keyConf_noAsyKeyRev_noSupiRev_noSqnRev_noKeyRev OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:fm24-cardpayments/onlineAuthorized/models-n-proofs/C8_LocalAuth_CopyIAD_OnlinePIN_High.spthy> --port=3719 --no-logging 
+ORACLE: GET /thy/trace/1/main/rules  (ccs18-5G/5G-AKA-nonBindingChannel/proofs/5G_aka_attack_secrecy_seaf_kseaf_noKeyRev_noSupiRev_noSqnRev_noAsyKeyRev.spthy) -> ccs18-5G__5G-AKA-nonBindingChannel__proofs__5G_aka_attack_secrecy_seaf_kseaf_noKeyRev_noSupiRev_noSqnRev_noAsyKeyRev.trace1.json
+STATUS=ccs18-5G__5G-AKA-nonBindingChannel__proofs__5G_aka_attack_secrecy_seaf_kseaf_noKeyRev_noSupiRev_noSqnRev_noAsyKeyRev OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:idbased/BP_IBS_0.spthy> --port=3720 --no-logging 
+ORACLE: GET /thy/equiv/1/main/diffrules  (features/noise/anonymity_Responder_peer_revealed_psk_revealed_passive_trusted_pki_NX.spthy) -> features__noise__anonymity_Responder_peer_revealed_psk_revealed_passive_trusted_pki_NX.equiv1.json
+STATUS=features__noise__anonymity_Responder_peer_revealed_psk_revealed_passive_trusted_pki_NX OK(equiv,1)
+ORACLE: hs_oracle.sh interactive <wd:jcs19-xor/LAK06.spthy> --port=3721 --no-logging 
+ORACLE: GET /thy/trace/1/main/rules  (jcs19-xor/LAK06.spthy) -> jcs19-xor__LAK06.trace1.json
+STATUS=jcs19-xor__LAK06 OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:loops/Typing_and_Destructors.spthy> --port=3722 --no-logging 
+ORACLE: GET /thy/trace/1/main/rules  (asiaccs20-eccDAA/CERTIFY/TPM_DAA_JoinCertify_with_fix_BSN.spthy) -> asiaccs20-eccDAA__CERTIFY__TPM_DAA_JoinCertify_with_fix_BSN.trace1.json
+STATUS=asiaccs20-eccDAA__CERTIFY__TPM_DAA_JoinCertify_with_fix_BSN OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:regression/trace/issue532.spthy> --port=3723 --no-logging 
+ORACLE: GET /thy/trace/1/main/rules  (loops/Typing_and_Destructors.spthy) -> loops__Typing_and_Destructors.trace1.json
+STATUS=loops__Typing_and_Destructors OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:related_work/TPM_DKRS_CSF11/TPM_Exclusive_Secrets.spthy> --port=3724 --no-logging 
+ORACLE: GET /thy/trace/1/main/rules  (regression/trace/issue532.spthy) -> regression__trace__issue532.trace1.json
+STATUS=regression__trace__issue532 OK(trace,1)
+ORACLE: GET /thy/trace/1/main/rules  (eurosp19-eccDAA/analysed/ISOIEC_20008_2013_2_ECC_DAA_FIXED.analysed.spthy) -> eurosp19-eccDAA__analysed__ISOIEC_20008_2013_2_ECC_DAA_FIXED.analysed.trace1.json
+STATUS=eurosp19-eccDAA__analysed__ISOIEC_20008_2013_2_ECC_DAA_FIXED.analysed OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:round2/diff_left_right_mismatch.spthy> --port=3725 --no-logging --diff
+ORACLE: hs_oracle.sh interactive <wd:round2/diff_reserved_prefix.spthy> --port=3726 --no-logging --diff
+ORACLE: GET /thy/trace/1/main/rules  (related_work/TPM_DKRS_CSF11/TPM_Exclusive_Secrets.spthy) -> related_work__TPM_DKRS_CSF11__TPM_Exclusive_Secrets.trace1.json
+STATUS=related_work__TPM_DKRS_CSF11__TPM_Exclusive_Secrets OK(trace,1)
+ORACLE: GET /thy/equiv/1/main/diffrules  (round2/diff_left_right_mismatch.spthy) -> round2__diff_left_right_mismatch.equiv1.json
+STATUS=round2__diff_left_right_mismatch OK(equiv,1)
+ORACLE: hs_oracle.sh interactive <wd:round2/diff_right_rule_mismatch.spthy> --port=3727 --no-logging --diff
+ORACLE: hs_oracle.sh interactive <wd:round2/exists_trace_reuse.spthy> --port=3728 --no-logging 
+ORACLE: GET /thy/equiv/1/main/diffrules  (round2/diff_reserved_prefix.spthy) -> round2__diff_reserved_prefix.equiv1.json
+STATUS=round2__diff_reserved_prefix OK(equiv,1)
+ORACLE: hs_oracle.sh interactive <wd:round2/fresh_public_constant.spthy> --port=3729 --no-logging 
+ORACLE: GET /thy/equiv/1/main/diffrules  (round2/diff_right_rule_mismatch.spthy) -> round2__diff_right_rule_mismatch.equiv1.json
+STATUS=round2__diff_right_rule_mismatch OK(equiv,1)
+ORACLE: GET /thy/trace/1/main/rules  (round2/exists_trace_reuse.spthy) -> round2__exists_trace_reuse.trace1.json
+STATUS=round2__exists_trace_reuse OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:round2/jcs19-xor/diff-models/CH07-UK2.spthy> --port=3730 --no-logging --diff
+ORACLE: GET /thy/trace/1/main/rules  (round2/fresh_public_constant.spthy) -> round2__fresh_public_constant.trace1.json
+STATUS=round2__fresh_public_constant OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:round2/jcs19-xor/diff-models/CH07-UK3.spthy> --port=3731 --no-logging --diff
+ORACLE: hs_oracle.sh interactive <wd:round2/jcs19-xor/diff-models/KCL07-UK1_attack-manual.spthy> --port=3732 --no-logging --diff
+ORACLE: GET /thy/equiv/1/main/diffrules  (round2/jcs19-xor/diff-models/KCL07-UK1_attack-manual.spthy) -> round2__jcs19-xor__diff-models__KCL07-UK1_attack-manual.equiv1.json
+STATUS=round2__jcs19-xor__diff-models__KCL07-UK1_attack-manual OK(equiv,1)
+ORACLE: hs_oracle.sh interactive <wd:round2/jcs19-xor/diff-models/KCL07-UK1.spthy> --port=3733 --no-logging --diff
+ORACLE: GET /thy/equiv/1/main/diffrules  (round2/jcs19-xor/diff-models/KCL07-UK1.spthy) -> round2__jcs19-xor__diff-models__KCL07-UK1.equiv1.json
+STATUS=round2__jcs19-xor__diff-models__KCL07-UK1 OK(equiv,1)
+ORACLE: hs_oracle.sh interactive <wd:round2/jcs19-xor/diff-models/LAK06-UK1.spthy> --port=3734 --no-logging --diff
+ORACLE: GET /thy/equiv/1/main/diffrules  (round2/jcs19-xor/diff-models/CH07-UK3.spthy) -> round2__jcs19-xor__diff-models__CH07-UK3.equiv1.json
+STATUS=round2__jcs19-xor__diff-models__CH07-UK3 OK(equiv,1)
+ORACLE: GET /thy/equiv/1/main/diffrules  (round2/jcs19-xor/diff-models/CH07-UK2.spthy) -> round2__jcs19-xor__diff-models__CH07-UK2.equiv1.json
+STATUS=round2__jcs19-xor__diff-models__CH07-UK2 OK(equiv,1)
+ORACLE: hs_oracle.sh interactive <wd:round2/jcs19-xor/diff-models/OTYT06_UK1_proof.spthy> --port=3735 --no-logging --diff
+ORACLE: hs_oracle.sh interactive <wd:round2/multiplication_in_rule_lhs.spthy> --port=3736 --no-logging 
+ORACLE: GET /thy/trace/1/main/rules  (round2/multiplication_in_rule_lhs.spthy) -> round2__multiplication_in_rule_lhs.trace1.json
+STATUS=round2__multiplication_in_rule_lhs OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:sapic/deprecated/csf21-acc-unbounded/mixvote/mixvote_SmHh-multi-session-5-fixed.spthy> --port=3737 --no-logging 
+ORACLE: GET /thy/equiv/1/main/diffrules  (round2/jcs19-xor/diff-models/OTYT06_UK1_proof.spthy) -> round2__jcs19-xor__diff-models__OTYT06_UK1_proof.equiv1.json
+STATUS=round2__jcs19-xor__diff-models__OTYT06_UK1_proof OK(equiv,1)
+ORACLE: hs_oracle.sh interactive <wd:sapic/fast/basic/boundonce.spthy> --port=3738 --no-logging 
+ORACLE: GET /thy/trace/1/main/rules  (sapic/fast/basic/boundonce.spthy) -> sapic__fast__basic__boundonce.trace1.json
+STATUS=sapic__fast__basic__boundonce OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:sapic/fast/basic/operator-precedence-5.spthy> --port=3739 --no-logging 
+ORACLE: GET /thy/equiv/1/main/diffrules  (round2/jcs19-xor/diff-models/LAK06-UK1.spthy) -> round2__jcs19-xor__diff-models__LAK06-UK1.equiv1.json
+STATUS=round2__jcs19-xor__diff-models__LAK06-UK1 OK(equiv,1)
+ORACLE: hs_oracle.sh interactive <wd:sapic/fast/feature-predicates/decwrap-destr-manual.spthy> --port=3740 --no-logging 
+ORACLE: GET /thy/trace/1/main/rules  (sapic/fast/basic/operator-precedence-5.spthy) -> sapic__fast__basic__operator-precedence-5.trace1.json
+STATUS=sapic__fast__basic__operator-precedence-5 OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:sapic/fast/MoedersheimWebService/set-abstr.spthy> --port=3741 --no-logging 
+ORACLE: GET /thy/trace/1/main/rules  (sapic/fast/MoedersheimWebService/set-abstr.spthy) -> sapic__fast__MoedersheimWebService__set-abstr.trace1.json
+STATUS=sapic__fast__MoedersheimWebService__set-abstr OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:sapic/manual-proofs/Yubikey/complete_proof.spthy> --port=3742 --no-logging 
+ORACLE: GET /thy/trace/1/main/rules  (sapic/fast/feature-predicates/decwrap-destr-manual.spthy) -> sapic__fast__feature-predicates__decwrap-destr-manual.trace1.json
+STATUS=sapic__fast__feature-predicates__decwrap-destr-manual OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:sapic/slow/PKCS11/pkcs11-templates.spthy> --port=3743 --no-logging 
+STATUS=fm24-cardpayments__offlineAndOnlineAuthorized__models-n-proofs__C8_LocalAuth_NoCopyIAD_NoCVM_High FAIL(no-index)
+ORACLE: hs_oracle.sh interactive <wd:thesis-benedikt/running-examples/UM_one_pass_private.spthy> --port=3744 --no-logging 
+STATUS=fm24-cardpayments__onlineAuthorized__models-n-proofs__C8_LocalAuth_CopyIAD_OnlinePIN_High FAIL(no-index)
+ORACLE: hs_oracle.sh interactive <wd:thesis-LaraSchmid-evoting/chapter4_DisputeResolution/aletheaDR_ShHh_RF.spthy> --port=3745 --no-logging --diff
+ORACLE: GET /thy/trace/1/main/rules  (thesis-benedikt/running-examples/UM_one_pass_private.spthy) -> thesis-benedikt__running-examples__UM_one_pass_private.trace1.json
+STATUS=thesis-benedikt__running-examples__UM_one_pass_private OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:thesis-LaraSchmid-evoting/chapter4_DisputeResolution/PR7_ShHm.spthy> --port=3746 --no-logging 
+ORACLE: GET /thy/trace/1/main/rules  (sapic/manual-proofs/Yubikey/complete_proof.spthy) -> sapic__manual-proofs__Yubikey__complete_proof.trace1.json
+STATUS=sapic__manual-proofs__Yubikey__complete_proof OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:thesis-SvenHammann-POIDC/Pairwise_POIDC_H.spthy> --port=3747 --no-logging 
+ORACLE: GET /thy/trace/1/main/rules  (thesis-LaraSchmid-evoting/chapter4_DisputeResolution/PR7_ShHm.spthy) -> thesis-LaraSchmid-evoting__chapter4_DisputeResolution__PR7_ShHm.trace1.json
+STATUS=thesis-LaraSchmid-evoting__chapter4_DisputeResolution__PR7_ShHm OK(trace,1)
+ORACLE: hs_oracle.sh interactive <wd:Tutorial.spthy> --port=3748 --no-logging 
+ORACLE: GET /thy/trace/1/main/rules  (Tutorial.spthy) -> Tutorial.trace1.json
+STATUS=Tutorial OK(trace,1)
+ORACLE: GET /thy/trace/1/main/rules  (sapic/slow/PKCS11/pkcs11-templates.spthy) -> sapic__slow__PKCS11__pkcs11-templates.trace1.json
+STATUS=sapic__slow__PKCS11__pkcs11-templates OK(trace,1)
+ORACLE: GET /thy/equiv/1/main/diffrules  (thesis-LaraSchmid-evoting/chapter4_DisputeResolution/aletheaDR_ShHh_RF.spthy) -> thesis-LaraSchmid-evoting__chapter4_DisputeResolution__aletheaDR_ShHh_RF.equiv1.json
+STATUS=thesis-LaraSchmid-evoting__chapter4_DisputeResolution__aletheaDR_ShHh_RF OK(equiv,1)
+ORACLE: GET /thy/trace/1/main/rules  (thesis-SvenHammann-POIDC/Pairwise_POIDC_H.spthy) -> thesis-SvenHammann-POIDC__Pairwise_POIDC_H.trace1.json
+STATUS=thesis-SvenHammann-POIDC__Pairwise_POIDC_H OK(trace,1)
+ORACLE: GET /thy/trace/1/main/rules  (idbased/BP_IBS_0.spthy) -> idbased__BP_IBS_0.trace1.json
+STATUS=idbased__BP_IBS_0 OK(trace,1)
+ORACLE: GET /thy/trace/1/main/rules  (sapic/deprecated/csf21-acc-unbounded/mixvote/mixvote_SmHh-multi-session-5-fixed.spthy) -> sapic__deprecated__csf21-acc-unbounded__mixvote__mixvote_SmHh-multi-session-5-fixed.trace1.json
+STATUS=sapic__deprecated__csf21-acc-unbounded__mixvote__mixvote_SmHh-multi-session-5-fixed OK(trace,1)

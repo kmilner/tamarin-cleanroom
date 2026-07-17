@@ -1,0 +1,11 @@
+[package]
+name = "macro-clean"
+version = "0.1.0"
+edition = "2021"
+description = "Clean-room .spthy macro expansion (Unit E)"
+
+[lib]
+name = "macro_clean"
+path = "src/lib.rs"
+
+[dependencies]

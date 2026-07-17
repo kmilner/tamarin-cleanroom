@@ -1,0 +1,7 @@
+theory PNMulti
+begin
+rule R1:
+   [ Fr(~x) ]
+  --[ A('Alice', 'alice'), B('Bob', 'bob') ]->
+   [ Out(~x) ]
+end

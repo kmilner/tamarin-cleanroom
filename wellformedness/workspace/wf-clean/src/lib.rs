@@ -24,6 +24,7 @@ pub fn after_public_names_topics() -> Vec<&'static str> {
         checks::T_RESERVED_PREFIX,
         checks::T_FR,
         checks::T_SPECIAL,
+        checks::T_FACT_CAP,
         checks::T_ARITY,
         checks::T_MULT,
         checks::T_LHSRHS,
@@ -38,8 +39,22 @@ pub fn after_public_names_topics() -> Vec<&'static str> {
     ]
 }
 
-/// Run every check in the oracle's report order.
+/// Run every check in the oracle's report order. The "Formula terms" check runs
+/// in free-variable-only mode; for reducible-function coverage use
+/// [`check_theory_with_reducible`].
 pub fn check_theory(thy: &Theory) -> WfReport {
+    check_theory_with_reducible(thy, &std::collections::BTreeSet::new())
+}
+
+/// Run every check in the oracle's report order, passing a caller-computed set
+/// of reducible function-symbol names to the "Formula terms" check (theories
+/// with `equations:` make some user functions reducible; the caller derives
+/// that set - typically from the equation theory / Maude - and this pipeline
+/// only consumes it).
+pub fn check_theory_with_reducible(
+    thy: &Theory,
+    reducible: &std::collections::BTreeSet<String>,
+) -> WfReport {
     let mut report: WfReport = Vec::new();
     // Base pipeline (public names inserted afterwards at its anchor point).
     report.extend(checks::unbound_variables(thy)); // 1
@@ -49,11 +64,12 @@ pub fn check_theory(thy: &Theory) -> WfReport {
     report.extend(checks::reserved_prefixes(thy)); // 6 (diff mode only)
     report.extend(checks::fr_facts(thy)); // 7
     report.extend(checks::special_facts(thy)); // 8
+    report.extend(checks::fact_capitalization(thy)); // 8b (precedes arity)
     report.extend(checks::fact_arity(thy)); // 9
     report.extend(checks::fact_multiplicity(thy)); // 10
     report.extend(checks::fact_lhs_occur_no_rhs(thy)); // 11
     report.extend(checks::diff_left_right(thy)); // 12, 13 (diff mode only)
-    report.extend(checks::formula_terms(thy)); // 14
+    report.extend(checks::formula_terms_reducible(thy, reducible)); // 14
     report.extend(checks::formula_guardedness(thy)); // 15
     report.extend(checks::lemma_annotations(thy)); // 16
     report.extend(checks::multiplication_restriction(thy)); // 17
@@ -86,5 +102,6 @@ pub fn check_if_lemmas_in_theory(lemma_names: &[String], thy: &Theory) -> WfRepo
 
 // Re-export the public secondary entry points named in required_api.md.
 pub use checks::{
-    fact_lhs_occur_no_rhs, public_names_report, public_names_report_from_pairs,
+    fact_lhs_occur_no_rhs, formula_terms, formula_terms_reducible, public_names_report,
+    public_names_report_from_pairs,
 };

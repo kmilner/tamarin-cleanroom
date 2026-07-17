@@ -1,0 +1,5 @@
+theory Cap
+begin
+rule R:
+  [ In(x), In(y) ] --[ Act(<y,x>) ]-> [ ]
+end

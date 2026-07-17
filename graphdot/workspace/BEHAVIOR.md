@@ -29,10 +29,13 @@ rendering backend (`tamarin-prover interactive --help`). No JSON rendering tool
 is installed here and no `interactive-graph-def` body in the corpus is JSON —
 the entire corpus is the DOT backend. JSON graph format is therefore unobserved.
 
-**Graph options** [GAP]: query params on the graph URL
-(`?simplification=`, `?abbreviate=`, `?level=`, `?compress=`, `?simplify=`, …)
-produced byte-identical output; there is no per-request simplification-level
-knob, and no CLI simplification-level flag. See §5.
+**Graph options** [RESOLVED §8]: the graph URL *does* take query parameters, but
+they are cookie-driven and added by the UI JS — `simplification=N` (level, default
+2, always sent), plus the flags `uncompact=`/`uncompress=` (sent at level 0),
+`unabbreviate=`, `no-auto-sources=`, `clustering=true`. The earlier
+"byte-identical" observation was because varying only `simplification=1/2/3` does
+not change output on any probed graph (see §8). The real transforms are triggered
+by the boolean flags. See §8.
 
 --------------------------------------------------------------------------------
 ## 2. DOT document structure
@@ -141,6 +144,87 @@ comma-separated attribute list, in observed key order. Frequent styles:
 | `color="black",style="dashed"` | before/less-than temporal edge |
 | `style="invis"` | ranking edge to the legend node |
 | `color="green",style="dotted"` / `purple`/`darkorange3` dashed | other goal edges |
+
+### 3d. Node shapes (§ Round-3 item 2)
+Corpus census (all 12 022 dot + 81 manifests): only `record`, `ellipse`, `plain`.
+**No trapezium appears in the crawl** — because the crawl captured only *proof*
+graphs (solved states). Live probing (NAXOS_eCK, NSLPK3 case-distinction graphs)
+adds one more shape:
+- **`invtrapezium`** — a `(#var, idx)` placeholder for an **unresolved graph node**
+  referenced by a still-open premise, e.g. `n9[label="(#i, 0)",shape="invtrapezium"]`.
+  `#var` is the (temporal) node variable, `idx` the premise index; the node is fed
+  by a structural edge from the conclusion that must satisfy that premise
+  (`n5:n2 -> n9[style="bold",weight="10.0",color="gray50"]`). Appears in both the
+  compressed default and the uncompressed variant, in every source-case graph
+  tested. Attr order = ellipse's (`label,shape`).
+- **`trapezium`** (spec-named dual) was **NOT observed** in any probe (all case
+  graphs of two theories, compressed + uncompressed) nor the corpus. Recorded as
+  unobserved; the serializer accepts any shape string so it can be emitted if a
+  caller supplies one.
+
+### 3e. Node-id / port allocation (§ Round-3 item 3) — byte-verified over 12 022
+One global monotonic counter, ids handed out in **emission order** so file order ==
+id order. For each node in order:
+- a **record** takes one id per cell (in cell order: premises, then the info cell,
+  then conclusions) and **then** one id for the node itself — so a `k`-cell record
+  occupies `n<p>…n<p+k-1>` (ports) and `n<p+k>` (node);
+- every other kind (ellipse / plain / invtrapezium) takes exactly one id.
+
+Example: a 4-prem/1-info/3-concl record takes ports `n0…n6`, node `n7`; the next
+ellipse is `n8`. Verified 12022/12022 in `mine_ids.py` and again in Rust
+(`tests/alloc_corpus.rs`, via `NodeIdAllocator`).
+
+### 3f. Record-cell term rendering + line wrapping (§ Round-3 item 1)
+**Group structure** (byte-verified over 160 409 records): the label is
+`{grp}|{grp}|{grp}` where the groups are the *non-empty* ones among
+`[premises, info, conclusions]`, in that order; the **info** group is always
+present (100 %). An empty premise or conclusion group is dropped (a source rule
+renders `{info}|{concl}`).
+- **Info cell**: `#<temporal> : <RuleName>` and, if the rule has action facts,
+  `[<action>, …]` (e.g. `#i : I_Complete[Complete( … ), …]`, or bare `#vf.5 : Fresh`).
+- **Premise/conclusion cell**: a single fact.
+- **Fact spacing**: a fact pads — `Name( a, b )`, and `Name( )` with no args;
+  a **function application** does not — `f(a, b)`; a **tuple** is `<a, b>`. Verified
+  against the corpus.
+- **Escaping**: inside a record label, `< > { } |` each get a leading backslash;
+  everything else (quotes, `~ $ ^ * ⊕`, spaces) is literal.
+- **Line wrapping FORMAT** (byte-exact). When a group breaks, physical lines are
+  separated by `\l` (with a trailing `\l`), and each continuation line is indented
+  with a `&nbsp;` run **equal to the column of the broken group's first element**
+  (just after `( ` for a fact, after `<` for a tuple, after `[` for an action
+  list). Verified across 188 192 wrapped cells.
+- **Line wrapping DECISION — RESOLVED (Session 4): a fixed-width paragraph fill,
+  width = 87 columns, measured per fact from column 0.** The Round-3 claim ("first
+  line 5..87, not a flat width, not derivable") is **refuted**: it *is* a flat
+  width. Established by driving crafted single-node theories
+  (`Out(<'a01', …, 'aN'>)`, `Out(<'aa…a', 'y'>)`) through the live server and
+  sweeping the term width one column at a time:
+  - **W = 87 absolute, functor-invariant.** A fact stays on one line iff its flat
+    rendering is ≤ 87 columns; at 88 it breaks. Tested with functor names of length
+    2, 3, 6, 10 (`Ba`,`Out`,`Fact12`,`Factabcdef`): the boundary was **always** at
+    flat width 87 fits / 88 breaks, so the budget is counted from the functor's own
+    column 0, *including* the functor name (a longer name simply fits fewer args).
+    Corpus-consistent: 99.2 % of 190 044 physical lines have fact-content ≤ 87; the
+    residual are single unbreakable atoms wider than 87 (which overflow verbatim).
+  - **Greedy paragraph fill.** When a group overflows, elements pack left-to-right;
+    the separator `, ` trails the element it follows and stays on the line, and the
+    next element wraps when it would pass column 87. Continuation lines use the
+    §3f indent. Example `Out(<'a01'…'a12'>)` (flat 91): line 0 =
+    `Out( <'a01', … 'a11', ` (eleven elements + trailing `, `, ending col 83),
+    `'a12'>` on the next line, then the fact's `)` on its own line.
+  - **Delimiter peel.** The fact's closing `)` peels onto its own physical line at
+    the **functor column** (col 0) whenever the fact breaks; a tuple's `>` peels to
+    the **`<` column** when the last element fills the line
+    (`Out( <'aa…(74)', 'y'` │ `>` │ `)`); an unbreakable atom wider than the budget
+    overflows and only the trailing delimiters wrap.
+  - **KNOWN RESIDUAL** (`fsep` lookahead): the underlying combinator's one-element
+    lookahead lets a *continuation* line hold **one more** element than the first
+    line at the same start column (first line 11, continuation 12 for the 5-col
+    `'aNN'` elements). The width (87), the top-level fit, the first-line packing and
+    the peel columns are byte-verified; reproducing the ±1 continuation lookahead
+    and the boundary peel byte-for-byte would require the exact `fsep`/`nest` doc
+    tree. `graph-clean::render` implements `FILL_WIDTH=87`, `fits_one_line`, and
+    `paragraph_fill` (first-line-exact), tested against these captured probes.
 
 --------------------------------------------------------------------------------
 ## 4. Clustering / simplification (§ priority 3)
@@ -287,31 +371,115 @@ Byte-parity of the selection set is claimed for non-AC/DH terms and gated by the
 caller supplying the full-system term multiset.
 
 --------------------------------------------------------------------------------
-## 6. What the crate reproduces vs. gaps
+## 6. System → graph mapping (§ Round-3 item 4)
 
-Reproduced & byte-tested against captured payloads:
+From paired `main/proof` sequents and `interactive-graph-def` graphs, the
+structural mapping a proof state yields (each point traces to §3d/§3f and the
+content census; the *content* — which nodes/edges exist — is a solver GAP):
+- a **rule instance** `#t : Rule[actions]` → a `record` node with groups
+  `{premises}|{info}|{conclusions}` (empty prem/concl dropped, info always kept);
+- an **intruder-knowledge fact** → a gray `!KU( m ) @ #t` ellipse;
+- a **protocol action/event** → a darkblue `Fact @ #t` ellipse;
+- a **compressed intruder rule** → an uncolored `#t : rule` ellipse (§4 compression);
+- an **unresolved node** referenced by an open premise → an `invtrapezium`
+  `(#var, idx)` (§3d);
+- **edges** connect conclusion-port → premise-port (structural bold w10 [gray50]),
+  intruder deduction (red dashed), message (gray30), temporal order
+  (blue3/black dashed), etc. — the finite §3c vocabulary;
+- ids from §3e; header from §4 (role); legend from §5.
+
+`graph-clean::generate` implements this over an independent input model
+(`System`/`GraphNode`/`RuleInstance`/`SysEdge`), taking node/edge lists, colors,
+and cell text as INPUTS. `tests/generate_tests.rs` reproduces a live source-case
+graph (`nsl_invtrap.dot`) **byte-exact** end-to-end.
+
+--------------------------------------------------------------------------------
+## 7. Simplification / abbreviation options (§ Round-3 item 5)
+
+The UI's "Graph simplification off/L1/L2/L3" menu and abbreviation toggle are
+cookie-driven and appended by the JS as graph-URL **query params** (mined from
+`/static/js/tamarin-prover-ui.js`, confirmed by live diffs — QUERIES.log):
+
+| param              | UI sends when                    | observed effect                          |
+|--------------------|----------------------------------|------------------------------------------|
+| `simplification=N` | always (N=level, default 2)      | **inert** — the *number* changes nothing (see below) |
+| `uncompact=`       | level 0 only                     | node COMPACTION off (lone intruder rule → full record vs ellipse) |
+| `uncompress=`      | level 0 only                     | system COMPRESSION off (Fresh sources + intruder rules re-expand to records) |
+| `unabbreviate=`    | abbreviate cookie off            | abbreviation off (terms inlined, legend block omitted) |
+| `no-auto-sources=` | auto-sources cookie off          | disables auto-source precomputation      |
+| `clustering=true`  | clustering cookie on             | forces role clustering                   |
+
+### 7a. The L1/L2/L3 distinction — RESOLVED (channel-verified negative, Session 4)
+
+The Round-3 GAP ("simplification 1/2/3 produced byte-identical graphs") is **not a
+probing artifact and not a hidden session channel** — it is the genuine server
+behavior: **there is no L1/L2/L3 distinction; the `simplification=N` *number* is
+inert for every N.** Established under the session-state lens the follow-up
+demanded:
+
+- **Channel.** The served JS (`tamarin-prover-ui.js`, lines 78–100 / 476–500)
+  reads a *client-side* `simplification` cookie (default 2) and converts it into
+  the graph-URL query param; at level 0 it *additionally* appends `uncompact=` +
+  `uncompress=`. Levels 1/2/3 send **only** `simplification=N`. The server emits
+  **no `Set-Cookie` on any response** (root, case-graph, main/cases json, proof
+  method) — there is *no server-side session state*; the param is the only channel.
+- **Change verified before diffing.** Driving the *flags* through the URL param
+  demonstrably changes the graph (e.g. rich NSLPK3 case `refined/6/5`: default
+  5 668 B → `uncompact=&uncompress=` 7 792 B), and the result is byte-identical
+  whether or not a matching cookie is also sent. So the URL param **is** honored.
+- **The number is inert.** On that 17-node case graph and on a **39-node, 27 KB**
+  DH/bilinear proof-state graph (`eurosp19-eccDAA` analysed,
+  `proof/functional_correctness/_`), every probe of `simplification` ∈
+  {0,1,2,3,4,5,10,99} — via URL param, via cookie, and via both together, and
+  crossed with every flag combination — collapses to a **single** md5. `flags_L0`
+  … `flags_L99` are byte-identical. (Second theory NAXOS_eCK case `refined/4/1`
+  reproduces this.)
+- **Mechanism.** The UI's four-item menu (`for i<4`: off / L1 / L2 / L3) dresses up
+  a *binary*: "off" (level 0) = the UI adds the two flags; "L1/L2/L3" = no flags,
+  and the server never consumes the level integer. The real transforms are the
+  independent boolean flags, each with a distinct, measured effect on the 39-node
+  graph: `uncompact=` 39 nodes→richer records (27 361→30 880 B); `uncompress=`
+  39→**74** nodes (re-expands compressed chains, 31 407 B); `unabbreviate=` drops
+  the legend node (39→38) and inlines terms (36 690 B, 0 legend rows);
+  level 0 (`uncompact`+`uncompress`) = 74 nodes, byte-identical to the two flags
+  sent explicitly.
+
+`graph-clean::options::Options` models the knobs and reproduces the exact query
+string; `simplification=N` is carried but is documented inert. The abbreviation
+on/off transform is applied directly (drop legend / inline). Remaining **GAP**
+here: the *content* of compress/compact (a solver transform — the caller supplies
+the already-(un)compressed node set).
+
+--------------------------------------------------------------------------------
+## 8. What the crate reproduces vs. gaps
+
+Reproduced & byte-tested against captured/live payloads:
 - DOT document assembly: both headers, block/whitespace rule, node lines
-  (record/ellipse/plain), edge lines with ports & attrs, cluster subgraphs,
-  legend sink-block + invis edges, empty graph.
-  VALIDATION: a parser for this dialect ingests each captured payload into the
-  crate's model; re-serializing reproduces the original bytes for **all 14705
-  DOT payloads in the corpus (14705/14705 byte-exact)**, incl. every clustered
-  and every largest graph. See `graph-clean/tests/roundtrip.rs`.
-- Abbreviation naming (prefix derivation incl. operator map), per-prefix
-  numbering over a supplied order, and legend-table HTML (incl. the 65-space
-  hang indent and HTML escaping).
-- Abbreviation SELECTION rule (§5c, REPORT2.md): renderLen ≥ 10 ∧ occ ≥ 2 ∧
-  ¬tuple, bottom-up. Three necessary gates corpus-exact over 97 538 legend
-  entries (0 counterexamples) and each confirmed by a controlled live probe;
-  implemented as `abbrev::select` with tests. Exact for non-AC/DH terms.
-- Cluster/compact trigger rule (role ≠ Undefined).
+  (record/ellipse/plain/**invtrapezium**), edge lines with ports & attrs, cluster
+  subgraphs, legend sink-block + invis edges, empty graph. Round-trip reproduces
+  **12 022/12 022** corpus payloads byte-exact (`tests/roundtrip.rs`).
+- **Node-id/port allocation** (§3e): `NodeIdAllocator`; validated 12 022/12 022 via
+  the crate model (`tests/alloc_corpus.rs`).
+- **Record-cell rendering** (§3f): fact/function/tuple spacing, info-cell shape,
+  group-drop rule, record escaping, the wrap FORMAT (alignment indent + `\l`,
+  reproducing an observed wrapped cell byte-exact), and the wrap **DECISION** —
+  fixed width `FILL_WIDTH=87` with `fits_one_line` (top-level fit, boundary
+  byte-verified) and `paragraph_fill` (first-line packing) in `src/render.rs`.
+- **System → graph GENERATION** (§6): `generate` over the independent `System`
+  model; reproduces a live source-case graph byte-exact (`tests/generate_tests.rs`).
+- **Simplification/abbreviation options** (§7): `Options` query-string model; the
+  **L1/L2/L3 level number is proven inert** (§7a) — channel-verified negative.
+- Abbreviation naming, numbering, legend HTML (65-space indent), and the SELECTION
+  rule (§5c, REPORT2.md), plus the cluster/compact trigger (§4).
 
 Documented gaps (need the GPL solver or an unavailable backend):
 - JSON graph backend format (unavailable / not in corpus).
-- Abbreviation of AC/DH sub-terms (§5c residual): occurrence is counted over the
-  solver's normalised (AC-flattened, DH-normal-form) term, not the surface
-  rendering — not derivable from output alone (~93% of §5c exceptions).
-- Canonical per-prefix numbering tie-break (§5b); empty-prefix (numeric-constant)
-  start index.
-- Term line-wrapping inside record labels and the color hashes (§3a, §4).
-- The constraint-system → graph compression content (§4).
+- **Record-cell wrap residual** (§3f): the `fsep` one-element lookahead (±1 element
+  on continuation lines) and the exact boundary delimiter-peel; the width (87),
+  top-level fit, first-line packing and peel columns are pinned.
+- **compress/compact content** (§4, §6): which nodes/edges a raw constraint system
+  yields — a solver transform. (The L1/L2/L3 level distinction is no longer a gap:
+  it is proven non-existent, §7a.)
+- Per-rule/per-cluster **color hashes** (§3a, §4); the `trapezium` dual (§3d, unobserved).
+- Abbreviation of AC/DH sub-terms (§5c residual, normalised-form occurrence).
+- Canonical per-prefix numbering tie-break (§5b); empty-prefix start index.

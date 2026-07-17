@@ -1,0 +1,9 @@
+theory RestrArity
+begin
+rule R1:
+   [ Fr(~x) ]
+  --[ Act(~x) ]->
+   [ Out(~x) ]
+restriction Res1:
+  "All x y #i. Act(x, y) @ #i ==> x = y"
+end

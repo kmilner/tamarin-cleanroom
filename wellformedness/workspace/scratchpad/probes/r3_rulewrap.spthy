@@ -1,0 +1,8 @@
+theory RuleWrap
+begin
+builtins: diffie-hellman
+rule Bad:
+   [ In(aaaaaa), In(bbbbbb), In(cccccc), In(dddddd), In(eeeeee), In(ffffff), In(gggggg) ]
+  --[ ]->
+   [ Out(aaaaaa*bbbbbb) ]
+end

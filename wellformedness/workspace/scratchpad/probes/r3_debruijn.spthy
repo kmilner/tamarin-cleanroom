@@ -1,0 +1,16 @@
+theory RedDB
+begin
+
+functions: h/2
+equations: h(x,y) = x
+
+rule R1:
+   [ Fr(~x) ]
+  --[ Act(~x) ]->
+   [ Out(~x) ]
+
+lemma L1:
+  all-traces
+  "All x y #i. Act(x) @ #i ==> x = h(x, y)"
+
+end

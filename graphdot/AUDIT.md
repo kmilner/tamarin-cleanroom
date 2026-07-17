@@ -213,3 +213,210 @@ whereas the HS comments describe the weight design and its `cleandot.py` origin.
 ### VIOLATIONS (Round 2)
 None. No finding survives filtration as non-observable expression. No redo
 instructions. VERDICT: PASS.
+
+## Round 3 incremental audit
+
+Scope (the round-3 GENERATION delta per SPEC_ROUND3 / REPORT3): `src/alloc.rs`
+(the `NodeIdAllocator`), `src/render.rs` (record-cell rendering + wrap FORMAT),
+`src/generate.rs` (system→graph mapping + edge-style vocabulary), `src/options.rs`
+(simplification/abbreviation flags + query string), and the `invtrapezium` support
+in `src/model.rs` (`Shaped`) / `src/dot.rs`. Haskell originals (both sides):
+`Constraint/System/Dot.hs`, `Graph/{Graph,GraphRepr,Abbreviation,Simplification}.hs`.
+Key questions from the task: is the `NodeIdAllocator` / record-cell renderer's Haskell
+EXPRESSION materially different or output-forced, given the corpus-derived
+(12022/12022) provenance? Grepped the round-3 clean files for Haskell internal names
+(`dotNodeCompact`, `mkNode`, `renderRow`, `renderBalanced`, `scaleIndent`,
+`setDefaultAttributesIfCluster`, `mergeLessEdges`, `dotGenEdge`, `missingNode`,
+`systemToGraph`, `computeBasicGraphRepr`, `goSimplificationLevel`, `goShowAutoSource`,
+`prettyNodePrem`, `BoringNodeStyle`): NONE present.
+
+### alloc.rs (`NodeIdAllocator`) vs Dot.hs record/node id allocation — CLEARED
+
+- Clean allocator (alloc.rs:19–55): one `usize` counter; `record(n_cells)` takes
+  `n_cells` port ids in cell order then one node id; `node()` takes one. Haskell has
+  no explicit allocator — ids are produced monadically inside the `Text.Dot` DSL: a
+  record's ports and node id fall out of `D.record attrs $ D.vcat . map D.hcat .
+  map (map (uncurry D.portField))` (Dot.hs:310–312) over `filter (not . null)
+  [ps,as,cs]`, and simple nodes from `D.node`/`D.nextId`. Materially different
+  EXPRESSION (a plain incrementing counter vs `StateT`-threaded `nextId` in a
+  pretty-printer monad). The ORDER it reproduces — global counter, emission order,
+  one id per cell (premises→info→conclusions) then the node id, one id for other kinds
+  — is output-forced: it is `id order == file order`, verified 12022/12022 in the
+  corpus [mine_ids.py] and re-verified in Rust (tests/alloc_corpus.rs). Output-forced
+  scheme + divergent expression → not a violation.
+
+### render.rs (record-cell renderer + wrap FORMAT) vs Dot.hs `renderLNFact`/`renderRow`/`renderBalanced` — CLEARED
+
+- Fact spacing `Name( a, b )` / `Name( )` (`pad`, render.rs:77–83), metachar escaping
+  `< > { } |` (`escape_record`, 30–42), and the info-cell shape `#t : Rule[…]`
+  (`render_info`, 88–95) reproduce surface bytes mined across the corpus
+  (fact-vs-function spacing, escaping, info-cell census — QUERIES.log session 3). The
+  Haskell produces those bytes via `prettyLNFact` (Dot.hs:225–233) plus the record
+  `ruleLabelM` (330–339) and graphviz record-label escaping — an entirely different
+  code path (a `Document` pretty-printer, not string concatenation). Compatibility
+  content; different expression.
+- The wrap FORMAT (`fill`/`join_wrapped`, render.rs:105–157): `\l`-separated physical
+  lines with a `&nbsp;`-run continuation indent equal to the broken group's
+  first-element column. This is the exact observed format [mine_indent.py/mine_wrap.py,
+  188 192 cells]. Crucially the clean side documents the BREAK DECISION (the line-width
+  budget) as a GAP and does not model it, whereas Haskell decides breaks with
+  `renderBalanced 100 (max 30 . round . (* 1.3))` + `scaleIndent` (×1.5 leading
+  spaces) (Dot.hs:357–379) — proportional column-width budgeting with magic factors.
+  None of that non-observable width machinery appears on the clean side; `fill` is a
+  generic greedy word-fill parameterized by an externally supplied width. Divergent,
+  not mirrored.
+
+### generate.rs (system→graph mapping + edge styles) vs Dot.hs `dotNodeCompact`/`dotEdge`/`dotLessEdge` — CLEARED
+
+- Node kinds (generate.rs:85–99, 206–245): the clean side emits records, gray `!KU(
+  m ) @ #t` ellipses, darkblue `Fact @ #t` ellipses, uncolored `#t : rule` compressed
+  ellipses, and `invtrapezium` open targets. Haskell `dotNodeCompact` (Dot.hs:236–275)
+  covers the same via `SystemNode`→record, `UnsolvedActionNode`→ellipse colored gray
+  iff `any isKUFact` else darkblue, the compact boring-node `show v ++ " : " ++
+  showDotRuleCaseName` branch (301), and `MissingNode`→`invtrapezium`/`trapezium`. The
+  clean split into `Knowledge`/`Action` (by observed gray-vs-darkblue) and `Compressed`
+  is a re-derivation from OUTPUT colors/labels, and the clean side OMITS what the corpus
+  never showed — `LastActionAtom` (a bare `#t` ellipse) and `trapezium` (only
+  `invtrapezium` was observed live; [L]/BEHAVIOR §3d). Under-modeling to the observed
+  subset is affirmative independence evidence, not similarity.
+- `build_record` drops empty premise/conclusion groups and always keeps info
+  (generate.rs:281–297), reproducing `filter (not . null) [ps,as,cs]` (Dot.hs:312) with
+  info never null. The group set is output-forced (mine_groups.py: 100% carry info,
+  empty prem/concl dropped); the clean expression (explicit conditionals) differs from
+  the Haskell `filter`. Not a violation.
+- Edge-style vocabulary (`EdgeStyle`, generate.rs:114–151): a flat enum whose eight
+  variants emit the exact observed attribute lists. Haskell instead computes attrs by
+  PREDICATE — `check isProtoFact`/`isPersistentFact`/`isKFact` in `dotEdge`
+  (Dot.hs:390–397) and `Reason`→color in `dotLessEdge`/`toColor` (599–606). The clean
+  side even RE-CATEGORIZES by appearance (`KnowledgeDeduction = red,dashed` — which in
+  the source is the `Adversary` *less-edge* reason, not a `SystemEdge`), i.e. it
+  grouped by observed bytes, not by the Haskell's source-structural taxonomy. The 11
+  fixed styles are the observed census (mine_content.py). Output-forced strings +
+  divergent classification → not a violation.
+
+### options.rs vs Graph.hs `GraphOptions` / `SimplificationLevel` — CLEARED
+
+- Clean `Options {level, abbreviate, compact, compress, clustering}` (options.rs:40–52,
+  default level 2 / abbreviate / compact / compress / no-cluster) vs Haskell
+  `GraphOptions {_goSimplificationLevel(SL2), _goShowAutoSource(False), _goClustering,
+  _goAbbreviate(True), _goCompress(True)}` (Graph.hs:56–73). The overlapping fields and
+  their defaults are the observed UI/query semantics: `simplification=N` (default 2),
+  `unabbreviate`, `uncompress`, `uncompact`, `clustering=true` were read out of the
+  SERVED `tamarin-prover-ui.js` and confirmed by live level-0 diffs (QUERIES.log session
+  3). Note the field sets DIVERGE — the clean struct carries `compact` (Haskell's
+  compaction lives in `DotOptions.BoringNodeStyle`, Dot.hs:70, not in `GraphOptions`)
+  and OMITS `showAutoSource`; and `query_string` (options.rs:73–87) reconstructs the JS
+  parameter order (`uncompact=&uncompress=&…&simplification=N`), a served-artifact byte
+  shape with no Haskell counterpart. Different field names (`level/abbreviate/compact`
+  vs `_goSimplificationLevel/_goAbbreviate/_goCompress`), observation-derived. Not a
+  violation.
+
+### invtrapezium support (model.rs `Shaped`, dot.rs) vs Dot.hs `missingNode`/`dotPremC` — CLEARED
+
+- `Shaped::invtrapezium` (model.rs:201–203) builds label `(#var, idx)` with
+  `shape="invtrapezium"`; dot.rs:99–105 serializes `label="…",shape="…"[,color]`.
+  Haskell `dotPremC` (Dot.hs:281) is `missingNode "invtrapezium" (prettyNodePrem prem)`
+  and `missingNode shape label = D.node [("label", render label),("shape",shape)]`
+  (280). The `(#i, N)` label text, the `invtrapezium` shape string, and the
+  `label,shape` attribute order are all observed live output ([L] fixtures
+  nsl_invtrap.dot / invtrap_compressed.dot; BEHAVIOR §3d). Compatibility content; the
+  clean side additionally notes the `trapezium` dual as spec-named-but-unobserved
+  rather than emitting it — matching only what the probe showed. Not a violation.
+
+### VIOLATIONS (Round 3)
+None. The `NodeIdAllocator` and the record-cell renderer reproduce corpus-forced byte
+schemes (id order == file order 12022/12022; fact spacing / escaping / wrap indent
+mined at scale) through expressions materially different from the Haskell `Text.Dot`
+monadic DSL and the `renderBalanced`/`scaleIndent` width machinery (which is a
+documented GAP on the clean side, absent entirely). The generation mapping, edge
+vocabulary, options, and invtrapezium are observed output or served-JS/live-probe
+behavior, and where the clean side had latitude it diverged (under-modeled to the
+observed subset, re-categorized edges by appearance, dropped `trapezium`/`showAutoSource`/
+`LastActionAtom`). No mirrored decomposition, no shared internal names, no echoed
+comments, none of the source-only apparatus (color hashing, `renderBalanced` budget,
+system simplification/clustering). Findings that survive filtration: 0. No redo
+instructions issued. VERDICT: PASS.
+
+## Simplification re-probe audit
+
+Scope (the newest session's delta — Session 4 in `workspace/BEHAVIOR.md`; identified
+by git-less mtime: `src/render.rs` at 16:48, the sole code file touched, ~2 h newer
+than every other src/test file, all Round-3 era ≤14:57; `options.rs` UNCHANGED at
+14:53). The delta is the record-cell wrap **DECISION** now pinned in
+`src/render.rs`: the constant `FILL_WIDTH = 87` (37–42), `fits_one_line` (44–52),
+`paragraph_fill` (160–207), and their inline Round-4 tests (305–352). The
+"simplification" half is a *re-probe*, not new code: Session 4 re-affirmed that the
+`simplification=N` level number is inert (BEHAVIOR §7a) and left `options.rs`
+untouched. Haskell originals audited (both sides): the wrap machinery in
+`Constraint/System/Dot.hs` (`renderRow`/`renderBalanced`/`scaleIndent`,
+Dot.hs:357–379, and `fsep`-based `renderLNFact`/`prettyLNFact`, 225–233/268) and the
+whole of `Graph/Simplification.hs` (`simplifySystem`/`compressSystem`/
+`transitiveReduction`/`dropEntailedOrdConstraints`/`tryHideNodeId`).
+
+Grepped the clean side for Haskell wrap/simplification internal names
+(`renderBalanced`, `scaleIndent`, `renderRow`, `renderStyle`, `OneLineMode`,
+`lineLength`, `usedWidths`, `widthRender`, `simplifySystem`, `compressSystem`,
+`transitiveReduction`, `transRed`, `reachableSet`, `dropEntailed`, `tryHideNode`,
+`LessAtom`, `rawLessRel`, `Dag`) and for the source magic constants
+(`100`, `1.3`, `30`, `1.5`): **NONE present** in `src/` or `tests/`.
+
+### Wrap DECISION — `FILL_WIDTH=87` / `fits_one_line` / `paragraph_fill` (Dot.hs `renderBalanced`/`scaleIndent`/`fsep`) — CLEARED
+
+| aspect | Haskell (Dot.hs) | Clean (`render.rs`) | observable? | disposition |
+|--------|------------------|---------------------|-------------|-------------|
+| line-width budget | `renderBalanced 100 (max 30 . round . (*1.3))` — a *proportional* per-row balance: total 100 cols split by each cell's one-line width, ×1.3, floored at 30 (357–374) | flat absolute `FILL_WIDTH = 87` from column 0 | YES — a live one-column width sweep across functor lengths 2/3/6/10 pinned the single-line→wrap boundary at flat 87 fits / 88 breaks, functor-invariant (QUERIES.log S4) | FILTERED (output-forced boundary); constant materially different (87 vs 100/1.3/30) |
+| the break itself | HughesPJ `renderStyle{lineLength=w}` with `fsep`-fill inside `prettyLNFact` | `fits_one_line` = `chars().count() <= 87`; `paragraph_fill` = hand-rolled greedy loop, separator trails, first-line-exact | YES (boundary + first-line packing byte-verified vs captured probes) | FILTERED / DIVERGENT expression (char-count + plain loop vs pretty-printer monad) |
+| leading-indent scaling | `scaleIndent` multiplies leading-space runs ×1.5 (375–379) | **absent** — indent is literal `&nbsp;`×`open_col` from the FORMAT observation (Round-3), no scale factor | NO (a source-only transform on spaces) | NOT reproduced — positive signal |
+| proportional row balance (`ratio`, `usedWidths`, total 100) | present | **absent** | NO | NOT reproduced — positive signal |
+| `fsep` one-element continuation lookahead + closing-delimiter peel | present (emergent from `fsep`/HughesPJ) | **deliberately NOT modelled** — documented as KNOWN RESIDUAL / GAP (render.rs:29–33, 170–175); `paragraph_fill` packs the first line exactly and a continuation one element short | partially (the ±1 shows in probes) | DIVERGENT under-model — affirmative independence |
+
+The clean width is an *opaque measured* constant (87), not a reverse-engineering of
+the source formula: the whole 100 / 1.3 / 30 / 1.5 balance-and-scale apparatus is
+absent, and the clean printer is a flat-width greedy fill rather than a
+proportional per-row budget fed to a pretty-printer monad. Materially different
+expression reproducing an output-forced boundary. Not a violation.
+
+**Closest call (considered, CLEARED): the word `fsep` in two comments**
+(render.rs:29, 170) names the HughesPJ combinator tamarin actually uses. FILTRATION:
+(1) it appears only in prose describing the residual the clean side does **not**
+implement — it is not program expression and changes no emitted byte; (2) `fsep` is
+public `Text.PrettyPrint` library API, not a tamarin-internal identifier; (3) the
+observed fingerprint it names (a continuation line holding one more element than the
+first line at the same start column) *is* the defining behavior of a fill-with-
+lookahead, so attributing it to an "`fsep`-style combinator" reads as behavioral
+characterization / general Haskell knowledge, not recitation of hidden source. The
+clean CODE diverges from `fsep` rather than matching it. CLEARED — no redo. (Optional
+distancing, not required: describe the residual purely behaviorally — "a fill
+combinator with one-element lookahead" — without naming the combinator. Flagged for
+the transcript auditor's glance, but it carries no expressive similarity.)
+
+### Simplification re-probe vs `Graph/Simplification.hs` — NO CLEAN COUNTERPART
+
+The Session-4 re-probe concluded "the `simplification=N` number is inert; L1≡L2≡L3
+byte-identical" (BEHAVIOR §7a) and added no code. The clean side has **zero** analog
+to `simplifySystem`, `compressSystem`, `transitiveReduction`,
+`dropEntailedOrdConstraints`, or `tryHideNodeId` — none of the DAG/`transRed`/
+`reachableSet`/`LessAtom` ordering machinery, no shared names, no mirrored
+decomposition; `options.rs::level` is carried but documented inert and the
+compress/compact *content* is left a solver GAP (caller supplies the node set).
+Notably the clean "level is inert" conclusion is behaviorally **wrong** against the
+source — `simplifySystem` genuinely branches (`i==3` → full `transitiveReduction`,
+`i==2` → partial keeping `Formula`/`Adversary` less-atoms, else no-op), differing
+only on graphs carrying redundant ordering (`Less`) edges, which none of the probed
+graphs had. An incorrect black-box inference that contradicts the source is
+affirmative evidence of NON-access, not similarity. (The wrongness is a
+behavioral-parity note for the acceptance team, outside the similarity remit.) Not a
+violation.
+
+### VIOLATIONS (Simplification re-probe)
+None. The wrap DECISION reproduces an output-forced boundary (flat width 87,
+live-swept and functor-invariant; first-line packing byte-verified) through an
+expression materially different from the Haskell `renderBalanced`/`scaleIndent`
+proportional-budget + `fsep`/HughesPJ printer — every source-only piece (the 100 /
+1.3 / 30 / 1.5 constants, the proportional row balance, the ×1.5 indent scale, the
+`fsep` lookahead and delimiter peel) is absent or explicitly left a GAP. The
+simplification re-probe adds no counterpart to `Simplification.hs` and even reaches
+a conclusion that contradicts it. No mirrored decomposition, no shared internal
+names, no echoed comments. One closest-call (`fsep` in comments) considered and
+cleared. Findings that survive filtration: 0. No redo instructions issued.
+VERDICT: PASS.

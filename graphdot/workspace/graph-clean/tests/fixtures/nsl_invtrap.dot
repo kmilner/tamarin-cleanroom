@@ -1,0 +1,12 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n5[shape="record",label="{{<n0> Fr( ~ltkA.4 )}|{<n1> #vr.3 : Register_pk}|{<n2> !Ltk( $A.4, ~ltkA.4 )|<n3> !Pk( $A.4, pk(~ltkA.4) )|<n4> Out( pk(~ltkA.4) )}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+n8[shape="record",label="{{<n6> #vf.5 : Fresh}|{<n7> Fr( ~ltkA.4 )}}",fillcolor="#a8a4eb",style="filled",fontcolor="black",role="Undefined"];
+n9[label="(#i, 0)",shape="invtrapezium"];
+n5:n2 -> n9[style="bold",weight="10.0",color="gray50"];
+n8:n7 -> n5:n0[color="gray30"];
+
+}

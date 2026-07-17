@@ -1,0 +1,138 @@
+# QUERIES.log — Unit E (macro expansion), clean-room oracle interactions.
+# Oracle = oracle/hs_oracle.sh <file.spthy> [extra args]; wraps the black-box HS
+# tamarin-prover binary. Every entry: purpose -> what was observed (summary).
+# All exact strings used in BEHAVIOR.md / tests trace to these observations.
+
+[Q1]  hs_oracle.sh --help
+      Purpose: discover output modes. Observed: flags --parse-only ("parse and
+      pretty print as-is"), -m/--output-module {spthytyped,spthy,msr,...},
+      --diff, -D defines, etc.
+
+[Q2]  hs_oracle.sh issue777.spthy --parse-only  (and  --parse-only -m spthy)
+      Purpose: does parse-only expand macros? Observed: NO. macros: block and
+      the call Out( pk(~x) ) both preserved verbatim; no expansion.
+
+[Q3]  hs_oracle.sh issue777.spthy   (default full close)
+      Purpose: see expansion in closed theory. Observed: macros: block
+      preserved; primary rule (modulo E) A keeps Out( pk(~x) ); the
+      /* rule (modulo AC) A ... Out( 'g'^~x ) */ variant shows the EXPANSION
+      pk(x)='g'^x -> 'g'^~x. Function signature does NOT list pk.
+
+[Q4]  hs_oracle.sh MacroInLemmasAndRestrictions.spthy  (full close)
+      Purpose: expansion in rules/lemmas/restrictions + nesting. Observed:
+      rules keep macro call in modulo-E, expand in modulo-AC (A(m(x))->A(x),
+      B(m2(x,y))->B(<x,y>)); restriction shows call then /* expanded formula:
+      ...A( x )... */; lemma shows call then /* guarded formula ...A( x )...*/.
+      Nested m(m3(x)) fully expands to x. Rule C (no macro) => trivial AC variant.
+
+[Q5]  Byte-parity diff: issue777.spthy (macro) vs hand-written issue777_expanded
+      Purpose: pin down exactly what is observably equal. Observed: outputs
+      differ ONLY in (a) macros: line, (b) modulo-E rule call vs expanded term,
+      (c) explicit modulo-AC block vs "trivial AC variant". The expanded term
+      (macro AC-variant) is byte-identical to the hand-expanded primary rule.
+
+[Q6]  Byte-parity diff: MacroInLemmasAndRestrictions vs lemmas_expanded
+      Purpose: same, for lemmas/restrictions. Observed: same 3 scaffolding
+      diffs; all expanded terms/formulas byte-identical.
+
+[Q7]  probe capture.spthy: swap(x,y)=<x,y>, call swap(y,x)
+      Purpose: substitution capture behaviour. Observed AC: Act( <y, x> ) =>
+      SIMULTANEOUS (parallel) substitution, not sequential (no capture bug).
+
+[Q8]  probe bodyref_fwd.spthy: macros: a(x)=b(x), b(x)=<x,x>   (forward ref)
+      Purpose: can a body call a later macro? Observed: PARSE ERROR at b(x) in
+      a's body. => body may reference only EARLIER macros.
+
+[Q9]  probe bodyref_rev.spthy: macros: b(x)=<x,x>, a(x)=b(x)
+      Purpose: body calls earlier macro. Observed: OK. Declaration prints
+      a( x ) = b(x) (un-expanded); use-site AC = Act( <x, x> ) (transitive).
+
+[Q10] probe zeroarg.spthy: macros: z()=~x, rule uses z()
+      Purpose: nullary macro + free var in body. Observed: modulo-E Act( z )
+      / Out( z ) (call printed w/o parens); AC Act( ~x ) / Out( ~x ). Body free
+      var ~x captured by surrounding Fr(~x). z()=body substitutes body.
+
+[Q11] probe arity_over.spthy: macros: m(x)=x, call m(a,b)
+      Purpose: over-application of unary macro. Observed: NO error; parser packs
+      args into a pair: modulo-E Act( m(<a, b>) ), AC Act( <a, b> ).
+
+[Q12] probe arity_under.spthy: macros: m(x,y)=<x,y>, call m(a)  (under)
+      Purpose: under-application. Observed: PARSE ERROR.
+
+[Q13] probe dup.spthy: macros: m(x)=x, m(x)=<x,x>
+      Purpose: duplicate macro name. Observed: ERROR "Conflicting name for macro m".
+
+[Q14] probe redef_builtin.spthy: builtins: hashing + macros: h(x)=x
+      Purpose: macro name == builtin. Observed: ERROR "Conflicting name for macro h".
+
+[Q15] probe over_u3.spthy: macros: m(x)=<x,x>, call m(a,b,c)
+      Purpose: unary macro, 3 args. Observed: args pack to <a,b,c>; AC =
+      Act( <<a, b, c>, a, b, c> ) (= pair(<a,b,c>,<a,b,c>) w/ right-nest flatten
+      print). Confirms parser packs excess args into a pair for arity-1.
+
+[Q16] probe over_b3.spthy: macros: m2(x,y)=<x,y>, call m2(a,b,c)
+      Purpose: binary macro, 3 args. Observed: PARSE ERROR. => arity>=2 needs
+      EXACT arg count.
+
+[Q17] probe under_b1.spthy: m2(x,y)=<x,y> call m2(a).  Observed: PARSE ERROR.
+
+[Q18] probe chain3.spthy: macros: c(x)=<x,x>, b(x)=c(x), a(x)=b(x), call a(x)
+      Purpose: multi-level transitive. Observed: AC Act( <x, x> ) (3-level).
+
+[Q19] probe rec_self.spthy: macros: r(x)=r(x)
+      Purpose: self recursion. Observed: PARSE ERROR (r not in scope in own
+      body). => no recursion; expansion always terminates (macros form a DAG).
+
+[Q20] probe rec_mutual.spthy: macros: a(x)=b(x), b(x)=a(x)
+      Purpose: mutual recursion. Observed: PARSE ERROR (forward ref). => none.
+
+[Q21] probe fun_collide.spthy: functions: f/1 + macros: f(x)=x
+      Purpose: macro name == user function. Observed: ERROR "Conflicting name
+      for macro f".
+
+[Q22] probe shadow_formal.spthy: macros: m(x,x)=<x,x>
+      Purpose: duplicate formal names. Observed: ERROR "m have two arguments
+      with the same name" (Theory/Text/Parser/Macro.hs).
+
+[Q23] probe letbind.spthy: macros: m(x)=<x,x>, rule let a=m(b) in ...Act(a)
+      Purpose: macro inside let value. Observed: let inlined + macro expanded;
+      AC Act( <b, b> ), Out( <b, b> ). (let-inlining is a separate pass.)
+
+[Q24] probe unused.spthy: macros: used(x)=<x,x>, never(y)=h(y) (no hashing)
+      Purpose: incidental. Observed: PARSE ERROR at h(y) — body cannot call an
+      undeclared function.
+
+[Q25] hs_oracle.sh issue753-3.spthy: macros: h(x)=x, NO builtins
+      Purpose: macro named h without hashing. Observed: OK (no conflict); macro
+      name conflicts only with ACTIVELY declared functions/builtins.
+
+[Q26] probe diffmacro.spthy --diff: macros: m(x)=<x,x>, Out(diff(x,m(x)))
+      Purpose: expansion under diff. Observed: modulo-E keeps diff(x, m(x));
+      left proj Out( x ), right proj Out( <x, x> ); Act(m(x)) => <x,x> both
+      sides. Macro expands inside diff() term; diff-projection is separate.
+
+[Q27] probe sortmatch.spthy: macros: m(x)=~x, n(x)=x; M(m(a)), N(n(~b))
+      Purpose: is formal matching sort-sensitive? Observed: AC M( ~x ) (formal
+      x [untagged] does NOT match body ~x [fresh]; ~x left free -> unbound-var
+      warning) and N( ~b ) (x matches x, arg ~b substituted). => substitution
+      matches formal-to-body-var by full identity incl. SORT. Unmatched formal's
+      argument is simply dropped.
+
+[Q28] probe sortmatch2.spthy: macros: p(x)=$x, call p(a).  Observed: AC P( $x )
+      — $x [pub] does not match formal x [untagged] either.
+
+[Q29] probe procmacro.spthy (parse-only + full): macro in a Sapic process
+      Purpose: expansion inside processes. Observed: process translates to rules;
+      modulo-AC of the translated rules show A( <y, y> ), Out( <y,y> ) => macros
+      expand inside processes too.
+
+[Q30] MacroWithRestrictionCRxor.spthy (full): hashedxor(x,y,z)=h(x XOR y XOR z)
+      Purpose: xor-macro rendering. Observed: modulo-E keeps hashedxor(...);
+      expanded form h(x XOR y XOR z), but AC-variant machinery abstracts it to
+      h(z) with a variant table. Confounded by AC variants -> NOT used as a
+      strict byte-parity fixture (structural expansion is still App("h",[Xor..])).
+
+[Q31] byteparity.sh on 6 fixture pairs (capture, chain3, over_u3, sortmatch,
+      issue777, lemmas). Purpose: automated byte-parity of expanded content
+      (macro theory vs hand-expanded equivalent). Result: ALL OK — expanded
+      content byte-identical after stripping the 3 known scaffolding categories.

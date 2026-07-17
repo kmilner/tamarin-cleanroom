@@ -1,0 +1,24 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n8[shape="record",label="{{<n0> Fr( ~eskR.4 )|<n1> !Ltk( $R.4, ~lkR.4 )|<n2> !Pk( $I.4, 'g'^~x.4 )|<n3> In( X.4 )}|{<n4> #vr.3 : Resp_1[Accept( ~eskR.4, $R.4, $I.4, H3 ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sid( ~eskR.4, \<'Resp', $R.4, $I.4, X.4, 'g'^h1(\<~eskR.4, ~lkR.4\>)\> ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Match( ~eskR.4, \<'Init', $I.4, $R.4, X.4, 'g'^h1(\<~eskR.4, ~lkR.4\>)\> )]\l}|{<n5> Out( 'g'^h1(\<~eskR.4, ~lkR.4\>) )|<n6> !Ephk( ~eskR.4, ~eskR.4 )|<n7> !Sessk( ~eskR.4, H3 )}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+n9[label="#vf.7 : isend",shape="ellipse"];
+n15[shape="record",label="{{<n10> Fr( ~lkR.4 )}|{<n11> #vr.9 : generate_ltk[RegKey( $R.4 )]}|{<n12> !Ltk( $R.4, ~lkR.4 )|<n13> !Pk( $R.4, EX1 )|<n14> Out( EX1 )}}",fillcolor="#b1dc9a",style="filled",fontcolor="black",role="Undefined"];
+n21[shape="record",label="{{<n16> Fr( ~x.4 )}|{<n17> #vr.12 : generate_ltk[RegKey( $I.4 )]}|{<n18> !Ltk( $I.4, ~x.4 )|<n19> !Pk( $I.4, 'g'^~x.4 )|<n20> Out( 'g'^~x.4 )}}",fillcolor="#b1dc9a",style="filled",fontcolor="black",role="Undefined"];
+n22[label="!KU( X.4 ) @ #vk.8",shape="ellipse",color="gray"];
+n23[label="(#i, 0)",shape="invtrapezium"];
+n8:n6 -> n23[style="bold",weight="10.0",color="gray50"];
+n9 -> n8:n3[color="gray30"];
+n15:n12 -> n8:n1[style="bold",weight="10.0",color="gray50"];
+n21:n19 -> n8:n2[style="bold",weight="10.0",color="gray50"];
+n22 -> n9[color="red",style="dashed"];
+{
+rank="sink";
+n24[shape="plain",label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="3" CELLPADDING="1"><TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">EX1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">'g'^~lkR.4</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">H3</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">h2(&lt;'g'^(~x.4*h1(&lt;~eskR.4, ~lkR.4&gt;)), z.4, z.5, $I.4, $R.4&gt;)</TD></TR></TABLE>>];
+
+}
+
+}

@@ -1,0 +1,11 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+GraphViz tool: 'dot'
+ checking version: dot - graphviz version 15.1.0 (20260618.0150). OK.
+ checking PNG support: OK.
+[Theory mixvote_SmHh_acc_multi5] Theory loaded
+[Theory mixvote_SmHh_acc_multi5] Theory translated
+[Theory mixvote_SmHh_acc_multi5] Derivation checks started
+[Theory mixvote_SmHh_acc_multi5] Derivation checks ended
+[Theory mixvote_SmHh_acc_multi5] Theory closed

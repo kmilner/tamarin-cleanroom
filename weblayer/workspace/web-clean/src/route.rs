@@ -55,7 +55,11 @@ pub enum Main {
     Add(String),
     Edit(String),
     Delete(String),
-    Method { lemma: String, n: usize },
+    /// Apply proof method `n` at the node identified by `path` (a `/`-joined
+    /// sequence of case-name segments, root `_`). The method number precedes the
+    /// path in the URL: `method/{lemma}/{n}[/path…]` (observed live [L8] and in
+    /// 67988 body links [Q032]).
+    Method { lemma: String, n: usize, path: Vec<String> },
     Proof { lemma: String, path: Vec<String> },
     /// Any unrecognized `main/*` tail.
     Other(Vec<String>),
@@ -110,9 +114,10 @@ fn parse_main(tail: &[&str]) -> Main {
         ["add", pos] => Main::Add((*pos).to_string()),
         ["edit", name] => Main::Edit((*name).to_string()),
         ["delete", name] => Main::Delete((*name).to_string()),
-        ["method", lemma, n] if n.parse::<usize>().is_ok() => Main::Method {
+        ["method", lemma, n, rest @ ..] if n.parse::<usize>().is_ok() => Main::Method {
             lemma: (*lemma).to_string(),
             n: n.parse().unwrap(),
+            path: owned(rest),
         },
         [proof, lemma, rest @ ..] if *proof == "proof" => Main::Proof {
             lemma: (*lemma).to_string(),
@@ -159,6 +164,126 @@ impl Route {
     }
 }
 
+/// A parsed `autoprove/{strategy}/{bound}/{allSol}/proof/{lemma}[/path…]` request.
+///
+/// Observed variant matrix (corpus [Q030], keyboard help [Q031]): `strategy` is
+/// `idfs` (solve/prove) or `characterize` (characterization, e.g. exists-trace);
+/// `bound` is a depth bound (`0` = unbounded — the `a`/`A`/`s`/`S` shortcuts; `5`
+/// = bounded — the `b`/`B` shortcuts); `all_solutions` is the `True`/`False` flag
+/// (`False` = stop after the first solution, the lowercase shortcuts; `True` =
+/// search for all solutions, the uppercase shortcuts).
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub struct Autoprove {
+    pub strategy: String,
+    pub bound: u64,
+    pub all_solutions: bool,
+    pub lemma: String,
+    pub path: Vec<String>,
+}
+
+impl Autoprove {
+    /// Parse the tail of an `autoprove/…` route (everything after `autoprove/`).
+    pub fn parse(tail: &[String]) -> Option<Autoprove> {
+        match tail {
+            [strategy, bound, flag, proof, lemma, rest @ ..] if proof == "proof" => {
+                Some(Autoprove {
+                    strategy: strategy.clone(),
+                    bound: bound.parse().ok()?,
+                    all_solutions: parse_bool(flag)?,
+                    lemma: lemma.clone(),
+                    path: rest.to_vec(),
+                })
+            }
+            _ => None,
+        }
+    }
+}
+
+/// Navigation direction for `next`/`prev`.
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub enum NavDir {
+    Next,
+    Prev,
+}
+
+/// A parsed `next|prev/{mode}/proof/{lemma}` request. `mode` (`normal` observed;
+/// the server also accepts other tokens and passes them to the prover) selects the
+/// prover's traversal function.
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub struct Nav {
+    pub dir: NavDir,
+    pub mode: String,
+    pub lemma: String,
+}
+
+impl Nav {
+    pub fn parse(dir: NavDir, tail: &[String]) -> Option<Nav> {
+        match tail {
+            [mode, proof, lemma] if proof == "proof" => Some(Nav {
+                dir,
+                mode: mode.clone(),
+                lemma: lemma.clone(),
+            }),
+            _ => None,
+        }
+    }
+}
+
+/// The full-page `overview/*` views. `help` and `proof/…` appear in the crawl;
+/// `edit/{name}` and `add/{pos}` appear only as POST-redirect (303) targets
+/// (live [L12]).
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub enum OverviewView {
+    Help,
+    Proof { lemma: String, path: Vec<String> },
+    Edit(String),
+    Add(String),
+    Other(Vec<String>),
+}
+
+impl OverviewView {
+    pub fn parse(tail: &[String]) -> OverviewView {
+        match tail.iter().map(String::as_str).collect::<Vec<_>>().as_slice() {
+            ["help"] => OverviewView::Help,
+            ["proof", lemma, rest @ ..] => OverviewView::Proof {
+                lemma: (*lemma).to_string(),
+                path: rest.iter().map(|s| s.to_string()).collect(),
+            },
+            ["edit", name] => OverviewView::Edit((*name).to_string()),
+            ["add", pos] => OverviewView::Add((*pos).to_string()),
+            _ => OverviewView::Other(tail.to_vec()),
+        }
+    }
+}
+
+/// The structural-edit verb of a POST `edit/{verb}/{name}` form target
+/// (live [L12]/[L13]).
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub enum EditVerb {
+    Edit,
+    Add,
+    Delete,
+}
+
+impl EditVerb {
+    pub fn parse(s: &str) -> Option<EditVerb> {
+        match s {
+            "edit" => Some(EditVerb::Edit),
+            "add" => Some(EditVerb::Add),
+            "delete" => Some(EditVerb::Delete),
+            _ => None,
+        }
+    }
+}
+
+fn parse_bool(s: &str) -> Option<bool> {
+    match s {
+        "True" => Some(true),
+        "False" => Some(false),
+        _ => None,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -197,7 +322,15 @@ mod tests {
     fn parses_method_and_dot_and_text() {
         assert_eq!(
             Route::parse("/thy/trace/#/main/method/exec/1").unwrap().handler,
-            Handler::Main(Main::Method { lemma: "exec".to_string(), n: 1 })
+            Handler::Main(Main::Method { lemma: "exec".to_string(), n: 1, path: vec![] })
+        );
+        assert_eq!(
+            Route::parse("/thy/trace/3/main/method/exec/2/_/B_2").unwrap().handler,
+            Handler::Main(Main::Method {
+                lemma: "exec".to_string(),
+                n: 2,
+                path: vec!["_".to_string(), "B_2".to_string()],
+            })
         );
         assert!(matches!(
             Route::parse("/thy/trace/#/interactive-graph-def/proof/exec").unwrap().handler,
@@ -213,5 +346,57 @@ mod tests {
     fn rejects_non_thy() {
         assert!(Route::parse("/static/css/x.css").is_none());
         assert!(Route::parse("/").is_none());
+    }
+
+    #[test]
+    fn parses_autoprove_variants() {
+        let r = Route::parse("/thy/trace/1/autoprove/idfs/0/False/proof/types").unwrap();
+        let tail = match r.handler {
+            Handler::Autoprove(t) => t,
+            _ => panic!("not autoprove"),
+        };
+        assert_eq!(
+            Autoprove::parse(&tail).unwrap(),
+            Autoprove {
+                strategy: "idfs".into(),
+                bound: 0,
+                all_solutions: false,
+                lemma: "types".into(),
+                path: vec![],
+            }
+        );
+        // characterize, bounded, all-solutions, with a path.
+        let r = Route::parse("/thy/trace/1/autoprove/characterize/5/True/proof/L/_/B_2").unwrap();
+        let tail = match r.handler {
+            Handler::Autoprove(t) => t,
+            _ => panic!(),
+        };
+        let ap = Autoprove::parse(&tail).unwrap();
+        assert_eq!(ap.strategy, "characterize");
+        assert_eq!(ap.bound, 5);
+        assert!(ap.all_solutions);
+        assert_eq!(ap.path, vec!["_".to_string(), "B_2".to_string()]);
+    }
+
+    #[test]
+    fn parses_nav_and_overview_views() {
+        let r = Route::parse("/thy/trace/1/next/normal/proof/Client_auth").unwrap();
+        if let Handler::Next(t) = r.handler {
+            assert_eq!(
+                Nav::parse(NavDir::Next, &t).unwrap(),
+                Nav { dir: NavDir::Next, mode: "normal".into(), lemma: "Client_auth".into() }
+            );
+        } else {
+            panic!();
+        }
+        assert_eq!(OverviewView::parse(&owned(&["help"])), OverviewView::Help);
+        assert_eq!(
+            OverviewView::parse(&owned(&["edit", "L"])),
+            OverviewView::Edit("L".into())
+        );
+        assert_eq!(
+            OverviewView::parse(&owned(&["proof", "L", "_", "B_2"])),
+            OverviewView::Proof { lemma: "L".into(), path: vec!["_".into(), "B_2".into()] }
+        );
     }
 }

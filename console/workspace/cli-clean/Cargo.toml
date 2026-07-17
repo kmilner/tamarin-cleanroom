@@ -1,0 +1,18 @@
+[package]
+name = "cli-clean"
+version = "0.1.0"
+edition = "2021"
+description = "Clean-room reimplementation of the tamarin-prover CLI/console text surface (Unit D)."
+
+# Standalone workspace root so this crate never joins any parent Cargo workspace.
+[workspace]
+
+[lib]
+name = "cli_clean"
+path = "src/lib.rs"
+
+[[bin]]
+name = "cli-clean"
+path = "src/main.rs"
+
+[dependencies]

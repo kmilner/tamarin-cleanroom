@@ -1,0 +1,9 @@
+lemma Client_auth:
+  "     ( All S k #i.  SessKeyC(S, k) @ #i
+       ==>
+                ( (Ex #a. AnswerRequest(S, k) @ a)
+                | (Ex #r. LtkReveal(S) @ r & r < i)
+       )
+    )
+  "
+

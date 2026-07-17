@@ -1,0 +1,4 @@
+theory SortMatch
+begin
+rule R: [ In(a), Fr(~b) ] --[ M(~x), N(~b) ]-> [ ]
+end

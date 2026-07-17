@@ -1,0 +1,13 @@
+theory TwoLem
+begin
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x) ]->
+   [ Out(~x) ]
+lemma L1:
+  all-traces
+  "All x #i. A(x) @ #i ==> x = y"
+lemma L2:
+  all-traces
+  "All x #i. A(x) @ #i ==> x = z"
+end

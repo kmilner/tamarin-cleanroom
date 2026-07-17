@@ -31,10 +31,17 @@
 //! ```
 
 pub mod abbrev;
+pub mod alloc;
 pub mod dot;
+pub mod generate;
 pub mod model;
+pub mod options;
+pub mod render;
 pub mod term;
 
+pub use alloc::NodeIdAllocator;
 pub use dot::to_dot;
+pub use generate::{generate, System};
 pub use model::{Graph, Header};
+pub use options::Options;
 pub use term::Term;

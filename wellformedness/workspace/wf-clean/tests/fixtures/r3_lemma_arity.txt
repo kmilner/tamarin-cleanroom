@@ -1,0 +1,18 @@
+WARNING: the following wellformedness checks failed!
+
+Fact arity issues
+=================
+
+Same fact is used with different arities, i.e., Fact('A','B') is different from Fact('A'). 
+Check the arguments of your facts.
+  
+
+  Fact `act':
+
+    1. Rule `R1', arity 1
+         Act( ~x )
+    
+    2. Lemma `L1', arity 2
+         Fact {factTag = ProtoFact Linear "Act" 2, factAnnotations = fromList [], factTerms = [Bound 2,Bound 1]}
+  
+*/

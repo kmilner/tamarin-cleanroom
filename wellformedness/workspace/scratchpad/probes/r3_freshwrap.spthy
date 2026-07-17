@@ -1,0 +1,7 @@
+theory FreshWrap
+begin
+rule R1:
+   [ ]
+  --[ ]->
+   [ Out(<~'aaaaaa', ~'bbbbbb', ~'cccccc', ~'dddddd', ~'eeeeee', ~'ffffff', ~'gggggg', ~'hhhhhh'>) ]
+end

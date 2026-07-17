@@ -1,0 +1,6 @@
+theory Cap
+begin
+macros: swap(x,y) = <x,y>
+rule R:
+  [ In(x), In(y) ] --[ Act(swap(y,x)) ]-> [ ]
+end

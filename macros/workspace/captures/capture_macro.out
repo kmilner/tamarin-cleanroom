@@ -1,0 +1,43 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory Cap] Theory loaded
+[Theory Cap] Theory translated
+[Theory Cap] Derivation checks started
+[Theory Cap] Derivation checks ended
+[Theory Cap] Theory closed
+theory Cap
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+macros: swap( x, y ) =  <x, y>
+
+rule (modulo E) R:
+   [ In( x ), In( y ) ] --[ Act( swap(y, x) ) ]-> [ ]
+
+  /*
+  rule (modulo AC) R:
+     [ In( x ), In( y ) ] --[ Act( <y, x> ) ]-> [ ]
+  */
+
+/* All wellformedness checks were successful. */
+
+/*
+Generated from:
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: /home/kamilner/tamarin-cleanroom/macros/workspace/fixtures/capture_macro.spthy
+
+  
+
+==============================================================================

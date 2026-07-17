@@ -1,0 +1,43 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory DiffReservedPrefix] Theory loaded
+[Theory DiffReservedPrefix] Theory translated
+[Theory DiffReservedPrefix] Derivation checks started
+[Theory DiffReservedPrefix] Derivation checks ended
+[Theory DiffReservedPrefix] Theory closed
+theory DiffReservedPrefix
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) Bad:
+   [ Fr( ~x ) ] --> [ DiffIntrPriv( ~x ) ]
+
+  /* has exactly the trivial AC variant */
+
+/* All wellformedness checks were successful. */
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: /home/kamilner/tamarin-cleanroom/console/oracle/examples/round2/diff_reserved_prefix.spthy
+
+  processing time: 0.07s
+  
+
+==============================================================================

@@ -80,9 +80,28 @@ fn plain_rule(name: &str, prem: Vec<Fact>, act: Vec<Fact>, concl: Vec<Fact>) -> 
 
 fn diff_term(a: Term, b: Term) -> Term { Term::Diff(Box::new(a), Box::new(b)) }
 
+fn app(name: &str, args: Vec<Term>) -> Term { Term::App(name.into(), args) }
+fn action(name: &str, args: Vec<Term>, temporal: &str) -> Formula {
+    Formula::Atom(Atom::Action(fact(name, args), node(temporal)))
+}
+fn eq(a: Term, b: Term) -> Formula { Formula::Atom(Atom::Eq(a, b)) }
+fn imp(a: Formula, b: Formula) -> Formula { Formula::Implies(Box::new(a), Box::new(b)) }
+fn conj(a: Formula, b: Formula) -> Formula { Formula::And(Box::new(a), Box::new(b)) }
+fn forall(vs: Vec<VarSpec>, g: Formula) -> Formula { Formula::Forall(vs, Box::new(g)) }
+fn red(names: &[&str]) -> std::collections::BTreeSet<String> {
+    names.iter().map(|s| s.to_string()).collect()
+}
+
 /// Assert render_report(check_theory(thy)) equals the oracle fixture.
 fn expect(thy: &Theory, fixture: &str) {
     let got = render_report(&check_theory(thy));
+    let want = format!("/*\n{}", fixture.trim_end_matches('\n'));
+    assert_eq!(got, want, "\n--- got ---\n{}\n--- want ---\n{}", got, want);
+}
+
+/// Like `expect` but drives the reducible-aware full pipeline.
+fn expect_red(thy: &Theory, reducible: &std::collections::BTreeSet<String>, fixture: &str) {
+    let got = render_report(&check_theory_with_reducible(thy, reducible));
     let want = format!("/*\n{}", fixture.trim_end_matches('\n'));
     assert_eq!(got, want, "\n--- got ---\n{}\n--- want ---\n{}", got, want);
 }
@@ -664,4 +683,270 @@ fn fact_lhs_occur_no_rhs_no_suggestion_when_far() {
     let r = fact_lhs_occur_no_rhs(&thy);
     assert_eq!(r.len(), 1);
     assert!(!r[0].message.contains("Perhaps"), "unexpected suggestion: {}", r[0].message);
+}
+
+// ---- Round 3: Formula terms full coverage (reducible fns + de Bruijn) -----
+
+/// Standard `Act`-emitting rule used as a well-formed backdrop for lemmas.
+fn act_rule() -> TheoryItem {
+    rule("R1", vec![fact("Fr", vec![fresh("x")])],
+        vec![fact("Act", vec![fresh("x")])],
+        vec![fact("Out", vec![fresh("x")])])
+}
+
+#[test]
+fn formula_terms_reducible_bound_debruijn() {
+    // r3_reducible: reducible `h`; `All x #i. Act(x) @ #i ==> x = h(x)` where x
+    // is bound at de Bruijn index 1 -> `h(Bound 1)`.
+    let f = forall(
+        vec![var("x", SortHint::Msg), var("i", SortHint::Node)],
+        imp(action("Act", vec![mv("x")], "i"), eq(mv("x"), app("h", vec![mv("x")]))),
+    );
+    let thy = theory("RedFn", vec![act_rule(), lemma("L1", f)]);
+    expect_red(&thy, &red(&["h"]), include_str!("fixtures/r3_reducible.txt"));
+}
+
+#[test]
+fn formula_terms_free_var_inside_nonreducible_fn() {
+    // r3_freenest: `f` NOT reducible, but `f(y)` with y free is still ill-formed
+    // -> `f(Free y)` (the whole top-level term, not the bare variable).
+    let f = forall(
+        vec![var("x", SortHint::Msg), var("i", SortHint::Node)],
+        imp(action("Act", vec![mv("x")], "i"), eq(mv("x"), app("f", vec![mv("y")]))),
+    );
+    let thy = theory("FreeNest", vec![act_rule(), lemma("L1", f)]);
+    // Empty reducible set: the free variable alone makes the term wrong.
+    expect(&thy, include_str!("fixtures/r3_freenest.txt"));
+}
+
+#[test]
+fn formula_terms_list_wraps_at_col_69() {
+    // r3_wrap6: six free vars -> the term list fills to column 69 then wraps to
+    // a 4-space-indented continuation (fillSep).
+    let mut body = eq(mv("x"), mv("ffffff1"));
+    for n in 2..=6 {
+        body = conj(body, eq(mv("x"), mv(&format!("ffffff{}", n))));
+    }
+    let f = forall(
+        vec![var("x", SortHint::Msg), var("i", SortHint::Node)],
+        imp(action("Act", vec![mv("x")], "i"), body),
+    );
+    let thy = theory("Wrap", vec![act_rule(), lemma("L1", f)]);
+    expect(&thy, include_str!("fixtures/r3_wrap6.txt"));
+}
+
+#[test]
+fn formula_terms_pair_right_nested() {
+    // r3_pair3: `<x, x, y>` (y free) -> `pair(Bound 1,pair(Bound 1,Free y))`.
+    let f = forall(
+        vec![var("x", SortHint::Msg), var("i", SortHint::Node)],
+        imp(action("A", vec![mv("x")], "i"),
+            eq(mv("x"), Term::Pair(vec![mv("x"), mv("x"), mv("y")]))),
+    );
+    let a_rule = rule("R1", vec![fact("Fr", vec![fresh("x")])],
+        vec![fact("A", vec![fresh("x")])],
+        vec![fact("Out", vec![fresh("x")])]);
+    let thy = theory("Pair3", vec![a_rule, lemma("L1", f)]);
+    expect(&thy, include_str!("fixtures/r3_pair.txt"));
+}
+
+#[test]
+fn formula_terms_two_lemmas_separator() {
+    // r3_2lem: two lemmas each with a free var -> entries joined by "\n  \n".
+    let mk = |rhs: &str| forall(
+        vec![var("x", SortHint::Msg), var("i", SortHint::Node)],
+        imp(action("A", vec![mv("x")], "i"), eq(mv("x"), mv(rhs))),
+    );
+    let a_rule = rule("R1", vec![fact("Fr", vec![fresh("x")])],
+        vec![fact("A", vec![fresh("x")])],
+        vec![fact("Out", vec![fresh("x")])]);
+    let thy = theory("TwoLem", vec![a_rule, lemma("L1", mk("y")), lemma("L2", mk("z"))]);
+    expect(&thy, include_str!("fixtures/r3_twolem.txt"));
+}
+
+#[test]
+fn formula_terms_no_dedup_source_order() {
+    // r3_shapes L2: `x = y & x = y & x = h(x)` -> `Free y`, `Free y`, `h(Bound 1)`
+    // (duplicates NOT removed; source order preserved).
+    let f = forall(
+        vec![var("x", SortHint::Msg), var("i", SortHint::Node)],
+        imp(action("Act", vec![mv("x")], "i"),
+            conj(conj(eq(mv("x"), mv("y")), eq(mv("x"), mv("y"))),
+                 eq(mv("x"), app("h", vec![mv("x")])))),
+    );
+    let thy = theory("Shapes", vec![act_rule(), lemma("L2", f)]);
+    let r = check_theory_with_reducible(&thy, &red(&["h"]));
+    let ft = r.iter().find(|e| e.topic == "Formula terms").unwrap();
+    assert!(ft.message.starts_with(
+        "  Lemma `L2' uses terms of the wrong form: `Free y', `Free y',"),
+        "got: {}", ft.message);
+    assert!(ft.message.contains("`h(Bound 1)'"));
+}
+
+// ---- Round 3: guardedness multi-line formula wrapping ---------------------
+
+#[test]
+fn guardedness_wide_formula_wraps() {
+    // r3_gw: `All x #i #j. A(x) @ #i ==> (aaaa = bbbb & #i = #j)` with 14-char
+    // free vars. The whole formula is too wide for one line: the quantifier
+    // breaks after the dot (body at indent 8) and the implication keeps its
+    // consequent on one line. Also triggers Formula terms (aaaa, bbbb free).
+    let big_a = "aaaaaaaaaaaaaa";
+    let big_b = "bbbbbbbbbbbbbb";
+    let f = forall(
+        vec![var("x", SortHint::Msg), var("i", SortHint::Node), var("j", SortHint::Node)],
+        imp(action("A", vec![mv("x")], "i"),
+            conj(eq(mv(big_a), mv(big_b)),
+                 Formula::Atom(Atom::Eq(node("i"), node("j"))))),
+    );
+    let thy = theory("GW", vec![
+        rule("R1", vec![fact("Fr", vec![fresh("x")])],
+            vec![fact("A", vec![fresh("x")])],
+            vec![fact("Out", vec![fresh("x")])]),
+        lemma("L1", f),
+    ]);
+    expect(&thy, include_str!("fixtures/r3_guard_wide.txt"));
+}
+
+#[test]
+fn guardedness_no_toplevel_implication_and_break() {
+    // r3_and: `All x #i #j #k. (E1 & E2 & E3 & E4)`. The universal quantifier's
+    // body is a (left-nested) conjunction, not an implication -> "universal
+    // quantifier without toplevel implication". Wide -> exercises the And-break
+    // layout. Free vars E1/E2 also trigger Formula terms.
+    let a = "aaaaaaaaaaaaaaaaaa";
+    let b = "bbbbbbbbbbbbbbbbbb";
+    let c = "cccccccccccccccccc";
+    let d = "dddddddddddddddddd";
+    let e1 = eq(mv(a), mv(b));
+    let e2 = eq(mv(c), mv(d));
+    let e3 = Formula::Atom(Atom::Eq(node("i"), node("j")));
+    let e4 = Formula::Atom(Atom::Eq(node("j"), node("k")));
+    let body = conj(conj(conj(e1, e2), e3), e4);
+    let f = forall(
+        vec![var("x", SortHint::Msg), var("i", SortHint::Node),
+             var("j", SortHint::Node), var("k", SortHint::Node)],
+        body,
+    );
+    let thy = theory("AndBreak", vec![
+        rule("R1", vec![fact("Fr", vec![fresh("x")])],
+            vec![fact("Action", vec![fresh("x")])],
+            vec![fact("Out", vec![fresh("x")])]),
+        lemma("L1", f),
+    ]);
+    expect(&thy, include_str!("fixtures/r3_guard_and.txt"));
+}
+
+// ---- Round 3: guardedness nested-subformula selection ---------------------
+
+#[test]
+fn guardedness_nested_subformula_selection() {
+    // r3_notsub: `not (All y #i #j. B(y) @ #i ==> #i = #j)`. The reported
+    // subformula is the failing quantifier subtree (`All y #i #j. ...`), NOT the
+    // whole formula (which is the negation). Both fit on one line here.
+    let inner = forall(
+        vec![var("y", SortHint::Msg), var("i", SortHint::Node), var("j", SortHint::Node)],
+        imp(action("B", vec![mv("y")], "i"),
+            Formula::Atom(Atom::Eq(node("i"), node("j")))),
+    );
+    let f = Formula::Not(Box::new(inner));
+    let thy = theory("NotSub", vec![
+        rule("R1", vec![fact("Fr", vec![fresh("x")])],
+            vec![fact("B", vec![fresh("x")])],
+            vec![fact("Out", vec![fresh("x")])]),
+        lemma("L1", f),
+    ]);
+    expect(&thy, include_str!("fixtures/r3_guard_nested.txt"));
+}
+
+// ---- Round 3: lemma-sourced fact arity conflicts --------------------------
+
+#[test]
+fn lemma_fact_arity_conflict_raw_haskell() {
+    // r3_lemarity: rule `Act(~x)` (arity 1) vs lemma action `Act(x, y)` (arity
+    // 2). The lemma-sourced fact renders as the raw Haskell `Fact {..}` show,
+    // with de Bruijn `factTerms = [Bound 2,Bound 1]`.
+    let f = forall(
+        vec![var("x", SortHint::Msg), var("y", SortHint::Msg), var("i", SortHint::Node)],
+        imp(action("Act", vec![mv("x"), mv("y")], "i"), eq(mv("x"), mv("y"))),
+    );
+    let thy = theory("LemArity", vec![act_rule(), lemma("L1", f)]);
+    expect(&thy, include_str!("fixtures/r3_lemma_arity.txt"));
+}
+
+// ---- Round 3: wide-list fillSep wrapping + multi-group separators ---------
+
+#[test]
+fn fresh_public_constants_list_wraps() {
+    // r3_freshwrap: eight fresh-name literals in one rule -> the list is a
+    // fillSep wrapped at column 69 (4-space continuation indent).
+    let lits: Vec<Term> = ["aaaaaa", "bbbbbb", "cccccc", "dddddd", "eeeeee", "ffffff", "gggggg", "hhhhhh"]
+        .iter().map(|s| flit(s)).collect();
+    let thy = theory("FreshWrap", vec![rule(
+        "R1", vec![], vec![], vec![fact("Out", vec![Term::Pair(lits)])],
+    )]);
+    expect(&thy, include_str!("fixtures/r3_fresh_wrap.txt"));
+}
+
+#[test]
+fn public_names_multiple_groups_separator() {
+    // r3_pnmulti: two independent capitalization groups (Alice/alice, Bob/bob)
+    // -> numbered items joined by "\n  \n".
+    let thy = theory("PNMulti", vec![rule(
+        "R1",
+        vec![fact("Fr", vec![fresh("x")])],
+        vec![fact("A", vec![pl("Alice"), pl("alice")]), fact("B", vec![pl("Bob"), pl("bob")])],
+        vec![fact("Out", vec![fresh("x")])],
+    )]);
+    expect(&thy, include_str!("fixtures/r3_pn_multi.txt"));
+}
+
+// ---- Round 3: Fact capitalization issues ----------------------------------
+
+#[test]
+fn fact_capitalization_cross_rule() {
+    // r3_capclean: `Send` (R1) vs `SEND` (R2) -> "Fact capitalization issues".
+    let thy = theory("CapClean", vec![
+        rule("R1", vec![fact("Fr", vec![fresh("x")])], vec![], vec![fact("Send", vec![fresh("x")])]),
+        rule("R2", vec![fact("Fr", vec![fresh("y")])], vec![], vec![fact("SEND", vec![fresh("y")])]),
+    ]);
+    expect(&thy, include_str!("fixtures/r3_fact_cap.txt"));
+}
+
+#[test]
+fn fact_capitalization_before_arity_and_lists_every_occurrence() {
+    // Two `Send` in one rule -> two items (no dedup, unlike arity); topic order
+    // places capitalization before arity.
+    let thy = theory("CapOrd", vec![
+        rule("R1", vec![fact("Fr", vec![fresh("x")])], vec![],
+             vec![fact("Send", vec![fresh("x")]), fact("Send", vec![fresh("x")])]),
+        rule("R2", vec![fact("Fr", vec![fresh("y")])], vec![], vec![fact("SEND", vec![fresh("y")])]),
+    ]);
+    let r = check_theory(&thy);
+    let cap = r.iter().find(|e| e.topic == "Fact capitalization issues").unwrap();
+    // three occurrences listed (Send, Send, SEND)
+    assert!(cap.message.contains("    1. Rule `R1', capitalization \"Send\""));
+    assert!(cap.message.contains("    2. Rule `R1', capitalization \"Send\""));
+    assert!(cap.message.contains("    3. Rule `R2', capitalization \"SEND\""));
+}
+
+#[test]
+fn fact_capitalization_same_spelling_is_silent() {
+    // Same exact spelling across rules -> no conflict.
+    let thy = theory("Same", vec![
+        rule("R1", vec![fact("Fr", vec![fresh("x")])], vec![], vec![fact("Send", vec![fresh("x")])]),
+        rule("R2", vec![fact("Send", vec![fresh("y")])], vec![], vec![fact("Out", vec![fresh("y")])]),
+    ]);
+    assert!(check_theory(&thy).iter().all(|e| e.topic != "Fact capitalization issues"));
+}
+
+#[test]
+fn formula_terms_free_only_ignores_reducibility_when_set_empty() {
+    // Sanity: with an empty reducible set, `h(x)` (x bound) is well-formed.
+    let f = forall(
+        vec![var("x", SortHint::Msg), var("i", SortHint::Node)],
+        imp(action("Act", vec![mv("x")], "i"), eq(mv("x"), app("h", vec![mv("x")]))),
+    );
+    let thy = theory("NoRed", vec![act_rule(), lemma("L1", f)]);
+    assert!(check_theory(&thy).is_empty());
 }

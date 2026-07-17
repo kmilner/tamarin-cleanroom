@@ -1,0 +1,5 @@
+theory Chain3
+begin
+macros: c(x) = <x,x>, b(x) = c(x), a(x) = b(x)
+rule R: [ In(x) ] --[ Act(a(x)) ]-> [ ]
+end

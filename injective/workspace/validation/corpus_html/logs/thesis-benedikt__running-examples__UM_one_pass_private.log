@@ -1,0 +1,11 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+GraphViz tool: 'dot'
+ checking version: dot - graphviz version 15.1.0 (20260618.0150). OK.
+ checking PNG support: OK.
+[Theory UM_one_pass_private] Theory loaded
+[Theory UM_one_pass_private] Theory translated
+[Theory UM_one_pass_private] Derivation checks started
+[Theory UM_one_pass_private] Derivation checks ended
+[Theory UM_one_pass_private] Theory closed

@@ -1,0 +1,2 @@
+[Theory NSLPK3] Theory loaded
+tamarin-prover: 5: openFile: does not exist (No such file or directory)

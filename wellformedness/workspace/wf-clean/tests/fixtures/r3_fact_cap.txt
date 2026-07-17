@@ -1,0 +1,18 @@
+WARNING: the following wellformedness checks failed!
+
+Fact capitalization issues
+==========================
+
+Fact names are case-sensitive, different capitalizations are considered as different facts, i.e., Fact() is different from FAct(). 
+Check the capitalization of your fact names.
+  
+
+  Fact `send':
+
+    1. Rule `R1', capitalization "Send"
+         Send( ~x )
+    
+    2. Rule `R2', capitalization "SEND"
+         SEND( ~y )
+  
+*/

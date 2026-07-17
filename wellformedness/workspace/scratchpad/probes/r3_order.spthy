@@ -1,0 +1,12 @@
+theory Ord
+begin
+functions: h/1
+equations: h(x) = x
+rule R1:
+   [ Fr(~x) ]
+  --[ Act(~x), B(~x) ]->
+   [ Out(~x) ]
+lemma L1:
+  all-traces
+  "All x #i. Act(x) @ #i ==> (Ex #j. B(h(x)) @ #j & h(x) = q)"
+end

@@ -1,0 +1,7 @@
+lemma Client_session_key_honest_setup:
+  exists-trace
+  " Ex S k #i.
+        SessKeyC(S, k) @ #i
+      & not(Ex #r. LtkReveal(S) @ r)
+  "
+

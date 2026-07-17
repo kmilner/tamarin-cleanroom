@@ -401,3 +401,208 @@ divergences are recorded below as independence evidence.
   comment is behavior/probe-cited in the clean author's own words.
 - No `.hs:` citation or Haskell-internal identifier appears in any round-2 clean
   source (grep-confirmed empty).
+
+---
+
+## Round 3 incremental audit
+
+Scope: the round-3 delta ONLY (BEHAVIOR.md §"Round 3 (Unit C)"): the term-based
+`formula_terms` rewrite + `formula_terms_reducible`; the `pp_formula_wrapped`
+multi-line formula printer (custom `Doc`/`lay` engine); `fact_capitalization`;
+the two-mode guardedness detection; the lemma-sourced fact arity/multiplicity
+gather; and the `fillSep`-69 wrapping (`fill_after_prefix`, and its reuse by the
+fresh-const list). Method unchanged: abstraction–filtration–comparison against
+`Wellformedness.hs`, `Theory/Constraint/System/Guarded.hs`,
+`Theory/Model/Formula.hs`, `Theory/Text/Pretty.hs`, and
+`Text/PrettyPrint/Class.hs`. Every suspicious identical string was cross-checked
+against `QUERIES.log` and the byte-parity fixtures `tests/fixtures/r3_*.txt`
+(each carries the oracle's `WARNING …`/`*/` framing = observed program output).
+
+**Round-3 verdict: PASS. No violations survive filtration (0 redo).** Every
+round-3 string, layout, width, indent, ordering, and trigger is corroborated as
+observed oracle output by a named `r3_*` probe in `QUERIES.log` and by an
+`r3_*.txt` fixture; where the code touches an algorithm it is either forced by
+the observed output + the `ast.rs` data model, or a materially different (simpler
+/ over-approximating) implementation than the Haskell. Two items a skeptical
+reviewer would raise (`show_haskell_fact`, the `atom_terms` name) are analysed
+explicitly below and both filter.
+
+### R3-1. Formula terms — term-based rewrite + `formula_terms_reducible`
+- Clean `formula_terms_reducible`/`formula_terms` (checks.rs:1116-1148),
+  `term_is_ill_formed` (checks.rs:994-1018), `show_wf_term`/`show_wf_pair`
+  (checks.rs:937-990), `atom_terms` (checks.rs:1023-1036), `collect_ill_terms`
+  (checks.rs:1041-1075), `debruijn_index` (checks.rs:929-934) vs Haskell
+  `checkTerms` (Wellformedness.hs:960-985), `formulaTerms`/`atomTerms`
+  (Wellformedness.hs:908-920).
+- The raw `` `Bound N' ``/`` `Free <pp>' ``/`f(a,b)`/`pair(a,pair(b,c))`/`'c'`
+  renderings, the no-dedup source order, the temporal-first Action ordering, and
+  reducibility gating are all observed (QUERIES r3_reducible/r3_debruijn*/
+  r3_redfree/r3_nested/r3_freenest/r3_both/r3_shapes/r3_actord/r3_toppair;
+  fixtures r3_reducible/r3_pair/r3_freenest). → **Filtered: observed output.**
+- Filtration of the algorithm: Haskell's `allowed` predicate keys on an
+  *irreducible* function-symbol set (`o \`S.member\` irreducible`) and specially
+  whitelists `FUnion`; the clean side inverts to a caller-supplied **reducible**
+  set (`reducible.contains(name)`, the interface entry point
+  `formula_terms_reducible(thy,&reducible)` per required_api / BEHAVIOR.md) and
+  has no union special-case. The clean side must also carry a binder **stack**
+  (push/pop over `Forall`/`Exists`) to synthesise de Bruijn indices, because
+  `ast.rs` represents quantified vars by NAME; Haskell needs none since its
+  `LNFormula` already holds `Bound`/`Free`. Different key polarity + forced
+  stack-tracking = materially different expression. → **Filtered: data-model-
+  forced; not Haskell's predicate.**
+- `atom_terms` (checks.rs:1023) is a non-observable internal helper whose name
+  snake-cases Haskell's internal `atomTerms` (Wellformedness.hs:908). It survives
+  filtration on two independent grounds: (a) it is a maximally obvious descriptive
+  name — the function returns the terms of an `Atom`, and the `ast.rs` type is
+  literally `Atom`, so the name merges with the idea (any competent author picks
+  it); (b) the clean function's *behavior diverges* — it returns the temporal
+  first then fact args for `Action`, and returns `Pred` argument terms, whereas
+  Haskell `atomTerms` returns `[]` for the predicate atom (`Syntactic`). A shared
+  obvious name over divergent behavior is not evidence of access. → **Filtered:
+  obvious/merger name; divergent behavior. Noted, no redo.**
+- `FORMULA_TERMS_HELP` (checks.rs:924) reproduces the fixed help paragraph with
+  its exact wrap points and 2-space continuation indent. Haskell emits this via
+  `wrappedText "…"` (Wellformedness.hs:968-973, an `fsep` re-wrap). The clean
+  side hardcodes the *observed* wrapped bytes, present verbatim in
+  `oracle/captures/…Typing_and_Destructors….out` and fixtures r3_guard_wide/
+  r3_guard_and. → **Filtered: observed output; not the `fsep` mechanism.**
+
+### R3-2. `fillSep`-69 wrapping (`fill_after_prefix`) and fresh-const reuse
+- Clean `fill_after_prefix` (checks.rs:1081-1105), used by `formula_terms_entry`
+  (checks.rs:1107-1112) and `fresh_public_constants` (checks.rs:1377-1404;
+  fill at 1397) vs Haskell `prettyLNTermList = fsep . punctuate comma …`
+  (Wellformedness.hs:146-147) and the `checkTerms` `fsep`
+  (Wellformedness.hs:963-966) rendered through HughesPJ `P.fsep`
+  (Class.hs:184, library default `lineLength=100`, ribbon 1.5).
+- The token list wraps; a wrapper is behavior-forced. `fill_after_prefix` is a
+  from-scratch greedy column fill (`col + 1 + w <= width`) that carries the
+  comma inside each token and begins after a literal prefix, at the *empirically
+  measured* width **69** with continuation indent **4** (QUERIES r3_wrap/r3_w2/
+  r3_longname/r3_overflow/r3_freshwrap; fixtures r3_wrap6/r3_fresh_wrap). 69 is
+  not a Haskell constant (HughesPJ uses 100/1.5); this is a distinct algorithm
+  reproducing only the observed break column, and a second, prefix-aware variant
+  of the already-cleared round-2 `fill_words` (checks.rs:170-194). → **Filtered:
+  observed/empirical width; own algorithm.**
+
+### R3-3. `fact_capitalization` + lemma-sourced arity/multiplicity gather
+- Clean `fact_capitalization` (checks.rs:589-647), `render_fact_blocks`
+  (checks.rs:567-580), `fact_arity`/`fact_multiplicity` (checks.rs:649-721),
+  `gather_fact_uses` (checks.rs:526-565), `gather_formula_facts`
+  (checks.rs:478-518), `show_haskell_fact` (checks.rs:464-474) vs Haskell
+  `factUsage` (Wellformedness.hs:636-689: `capIssues`/`arityIssues`/
+  `multipIssues`, `allClashes`, `formatCapIssue`, `capIssueMsg`) and the
+  lemma-fact branch of `theoryFacts` (Wellformedness.hs:602-605).
+- The topic "Fact capitalization issues", the two intro sentences, the
+  `Fact \`send':` block, the item shape `Rule \`R1', capitalization "Send"`, the
+  NO-dedup (every occurrence numbered), and the fact ordering are all observed
+  (QUERIES r3_factcap/r3_capclean/r3_capord; fixture r3_fact_cap). → **Filtered:
+  observed output.**
+- `show_haskell_fact` reconstructs the string
+  `Fact {factTag = ProtoFact Linear "Act" 2, factAnnotations = fromList [],
+  factTerms = [Bound 2,Bound 1]}`. Although those tokens are Haskell record
+  field / constructor names (`factTag`, `ProtoFact`, `factAnnotations`,
+  `factTerms`, `fromList []`), this exact string is **emitted by the oracle**
+  (Haskell `text (show fa)`, Wellformedness.hs:605) and is present verbatim in
+  fixture r3_lemma_arity.txt and QUERIES r3_lemarity/r3_lemmult. Per PROTOCOL
+  §"Forbidden … Exact output strings … MUST be taken from observed oracle
+  output", it is compatibility content the clean side templates from the
+  observation — not a memory reconstruction of an internal. The helper *name*
+  labels what it reproduces (a Haskell `show`), it is not itself a Haskell
+  identifier. This is the same category as the round-2 `(ProtoFact Linear
+  "DiffIntrPriv" 1,1,Linear)` line (R2-2). → **Filtered: observed output.**
+- Filtration of the decomposition: Haskell computes `allClashes` **once**
+  (sort-by-lowercased-name → group → keep len>1) and *filters* that single list
+  three ways (cap/arity/mult), and its `theoryFacts` puts **all rule facts before
+  all lemma facts** (`<|>` order + stable `sortOn`). The clean side instead
+  (a) gives `fact_capitalization` its **own** rule-only gather (premise/action/
+  conclusion `Occ`s), separate from arity/mult; (b) shares a **single**
+  `gather_fact_uses` across arity+mult only; and (c) gathers rules and lemmas
+  **interleaved in theory-item source order** (BEHAVIOR.md:132) rather than
+  rules-then-lemmas; and (d) explicitly dedups arity/mult items per
+  `(label,owner,arity|persistent)` and, unlike Haskell `numbered'`
+  (Class.hs:252-264), does not flush-right-pad the item numbers. Four structural
+  divergences from `factUsage`. The one shared trait — grouping facts by
+  lowercased name — is behavior (both checks key on per-name grouping, which is
+  the observable group order). And the clean side factors the three near-identical
+  Haskell formatters (`formatCapIssue`/`formatArityIssue`/`formatMultipIssue`)
+  into one `render_fact_blocks` helper, a DRY refactor Haskell does not have.
+  → **Filtered: behavior-driven grouping; decomposition diverges from Haskell.**
+
+### R3-4. Two-mode guardedness detection
+- Clean `formula_guardedness` (checks.rs:1154-1190), `GuardFail`
+  (checks.rs:1215-1220), `find_guard_failure` (checks.rs:1239-1275), `guard_vars`
+  (checks.rs:1194-1212), `guard_var_names` (checks.rs:1224-1228) vs Haskell
+  `checkGuarded` (Wellformedness.hs:988-993) → `formulaToGuarded`
+  (Guarded.hs:471-563: `convAll`/`convEx`, `noUnguardedVars`, `conjActionsEqs`,
+  `remainingUnguarded`, `covered`).
+- The wrapper message "Lemma \`{name}' cannot be converted to a guarded
+  formula:", the two reason strings ("unguarded variable(s) '…' in the
+  subformula", "universal quantifier without toplevel implication"), the
+  failing-subtree selection (sub ≠ whole), and the `… in the formula …` framing
+  are observed (QUERIES r3_gc/r3_and/r3_nestsub; fixtures r3_guard_wide/
+  r3_guard_and). The two-variant `GuardFail` enum mirrors the **two observable
+  outcomes**, not a concealed internal shape. → **Filtered: observed output.**
+- Filtration of the algorithm: Haskell decides guardedness by the full
+  polarity-tracking `formulaToGuarded` conversion — `conjActionsEqs` gathers only
+  *top-level* conjuncts of the antecedent and treats `EqE` atoms as guards, and
+  `remainingUnguarded`/`covered` reason about which side of an equation is
+  covered. The clean `find_guard_failure` is a self-declared **permissive
+  over-approximation**: `guard_vars` collects vars from *any* Action/Pred atom
+  *anywhere* in the guard formula (no polarity, no `EqE` guard, no `covered`, no
+  conjunctive-prefix restriction). The ∀ arm ("body must be `Implies`, else
+  NoImplication; antecedent guards, then recurse guard/rest") and the ∃ arm are
+  the natural realisation of the observed decision map (r3_gc) over a different,
+  simpler engine. Nothing like Haskell's converter. → **Filtered: observed
+  behavior; own (over-approximating) algorithm.**
+
+### R3-5. `pp_formula_wrapped` multi-line formula printer
+- Clean `pp_formula_wrapped` (formula.rs:168-170) and its engine — `Doc`
+  (formula.rs:62-66), `flat` (68-74), `lay` (79-124), `parens` (127-129),
+  `binop_doc` (131-141), `formula_doc` (143-156), `quantifier_doc` (158-163),
+  `FORMULA_WIDTH=72` (55) — vs Haskell `prettyLFormula`
+  (Formula.hs:471-511: `sep [opParens p' <-> ppOp op, opParens q']` for
+  connectives, `sep [ Q vs. , nest 1 body ]` for quantifiers) rendered through
+  HughesPJ `P.sep`/`P.nest` (Class.hs:96,182,186).
+- The wrapped layout is observed byte-for-byte (fixtures r3_guard_wide/
+  r3_guard_and; QUERIES r3_gwide/r3_gw/r3_qm/r3_and): quantifier breaks after the
+  `.` with body hanging at base+2 (col 8); a binary connective breaks after its
+  operator with the right operand hanging at the enclosing `(` column; operands
+  are fully parenthesised (`opParens` is unconditional, Highlight.hs:58-59, and
+  the parens appear in the oracle output). → **Filtered: observed output.**
+- Filtration of the engine: the clean `Doc` is a bespoke 3-constructor mini-
+  layout (`Text`/`Beside`/`Group(children,hang)` with a `flat`-fits test) — it
+  does **not** mirror HughesPJ's `P.Doc` (Empty/NilAbove/TextBeside/Nest/Union).
+  The "sep of two: [left+op] then [right]" and "[Q vars.] then [body]" groupings
+  are *forced by the observed break-after-operator / break-after-dot layout*
+  (there is no materially different way to emit exactly those breaks at those
+  hang columns), and the clean HANG model even differs from Haskell's — clean
+  hangs the quantifier body at `base+2` where Haskell uses `nest 1` relative to
+  the `sep` column, and the effective page width **72** is an empirical
+  measurement (r3_qm), not HughesPJ's 100. The "HughesPJ-style" comment is a
+  generic algorithm descriptor (publicly-known pretty-printing), not an echo of
+  the GPL Class.hs header. → **Filtered: observed layout; behavior-forced
+  grouping; custom engine + empirical width.**
+
+### Round-3 cross-checks
+- No round-3 internal identifier matches a Haskell internal: `term_is_ill_formed`,
+  `show_wf_term`, `show_wf_pair`, `collect_ill_terms`, `debruijn_index`,
+  `fill_after_prefix`, `formula_terms_entry`, `gather_fact_uses`,
+  `gather_formula_facts`, `show_haskell_fact`, `render_fact_blocks`,
+  `fact_capitalization`, `GuardFail`, `find_guard_failure`, `guard_vars`,
+  `guard_var_names`, `Doc`/`flat`/`lay`/`binop_doc`/`formula_doc`/
+  `quantifier_doc`, `FORMULA_WIDTH` — none appear in the Haskell. The single
+  near-collision, `atom_terms`↔`atomTerms`, is an obvious descriptive name over
+  divergent behavior (R3-1). Public entry names (`formula_terms`,
+  `formula_terms_reducible`, `formula_guardedness`, `fact_arity`,
+  `fact_multiplicity`, `fresh_public_constants`) are topic-/interface-derived.
+- No round-3 comment echoes a Haskell source comment (checked against
+  Wellformedness.hs:634-635/691-694/893/917/959, Guarded.hs:463-465/521-522,
+  Formula.hs:470/514, Class.hs:6-8); the clean comments describe observed
+  behavior in the author's own words and cite `r3_*` probes / BEHAVIOR.md. The
+  overlap between the `formula_terms` doc-comment and the emitted help paragraph
+  tracks the *observable* help string, not the Haskell comment
+  ("check that only bound variables and public names are used").
+- No `.hs:` citation or Haskell-internal identifier appears in any round-3 clean
+  source (grep of `clashesOn|conjActionsEq|remainingUnguarded|noUnguarded|
+  theoryFacts|allClashes|factUsage|checkTerms|checkGuarded|factInfo|
+  mostSimilar|universeBi|\.hs:` returned empty).

@@ -1,0 +1,10 @@
+[package]
+name = "derivcheck-clean"
+version = "0.1.0"
+edition = "2021"
+description = "Clean-room reimplementation of tamarin-prover's Message Derivation Checks wellformedness topic (Unit G)."
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]

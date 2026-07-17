@@ -9,7 +9,7 @@ those transcripts are collected here verbatim. `SHA256SUMS` covers all files.
 
 These agents were REQUIRED to work only from black-box oracles and captured
 program output (see ../PROTOCOL.md). Their transcripts prove non-access.
-Final audit (audit/cleanroom_audit_results.txt): 7 transcripts, 537 tool
+Final audit (audit/cleanroom_audit_results.txt): 16 transcripts, 1339 tool
 calls, 0 forbidden accesses, 0 web accesses.
 
 | Path | Agent | Role |
@@ -21,6 +21,15 @@ calls, 0 forbidden accesses, 0 web accesses.
 | workflows/wf_6e112628-91d/agent-ae38332cc1eb5f790.jsonl | round 2 | wellformedness gap-closer |
 | workflows/wf_db8cc474-1b6/agent-aa7e30d4b753e4fb7.jsonl | round 2 | graph abbreviation-selection miner |
 | workflows/wf_db8cc474-1b6/agent-acd8fb9a8d13fc15f.jsonl | round 2 | web page-generality |
+| workflows/wf_7f807521-670/agent-a27fa6413061022ae.jsonl | round 3 (unit C) | wellformedness completion |
+| workflows/wf_7f807521-670/agent-ad2408a9cda7bbd15.jsonl | round 3 (unit D) | console/CLI implementer |
+| workflows/wf_7f807521-670/agent-a2df8d6d0f01ac441.jsonl | round 3 (unit E) | macro-expansion implementer |
+| workflows/wf_7f807521-670/agent-a842511ba769df7f3.jsonl | round 3 (unit F) | injective-facts implementer |
+| workflows/wf_7f807521-670/agent-a4c19ed19405e64bb.jsonl | round 3 (unit G) | derivation-checks implementer |
+| workflows/wf_7f807521-670/agent-a7d8ac2b487df1e33.jsonl | round 3 (unit A) | web interactive-UI state machine |
+| workflows/wf_7f807521-670/agent-ac1c391bc2c48679f.jsonl | round 3 (unit B) | graph generation implementer |
+| workflows/wf_bfd5a6a0-31b/agent-abad7225bcac84f4e.jsonl | round 3 cont. (unit F) | corpus-validation rebuild (36/36 agree) |
+| workflows/wf_62e2c0ef-a3e/agent-ae1a3ead3cabd0a4c.jsonl | round 4 (unit B) | simplification/wrap re-probe |
 
 Corresponding workspaces (../wellformedness, ../graphdot, ../weblayer) hold
 each agent's QUERIES.log, BEHAVIOR.md, REPORT*.md and code — cross-reference
@@ -33,8 +42,13 @@ the transcripts against those logs.
 | workflows/wf_7197ba11-003/agent-*.jsonl (3) | round-1 audits: wf / graph / web (verdicts: pass, 0 findings) |
 | standalone-agents/agent-aac7737a5d3b7d6e7.jsonl | wf round-2 incremental audit (pass, 0) |
 | standalone-agents/agent-ac1b65c4df499573b.jsonl | graph+web round-2 incremental audit (pass, 0) |
+| workflows/wf_bfd5a6a0-31b/agent-a44d06c824ea88b18.jsonl | round-3 audits: console/macros/injective/derivcheck (all pass, 0) |
+| workflows/wf_bfd5a6a0-31b/agent-adb12daa8ab777100.jsonl | round-3 audits: weblayer + graphdot deltas (pass, 0) |
+| workflows/wf_bfd5a6a0-31b/agent-a69817b344aadd7bd.jsonl | round-3 audit: wellformedness delta (pass, 0) |
+| workflows/wf_62e2c0ef-a3e/agent-af3d04b49cd4b056d.jsonl | round-4 audit: graphdot re-probe delta (pass, 0; notes clean side's "levels inert" conclusion contradicts the source — affirmative non-access evidence) |
 
-Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUDIT.md.
+Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUDIT.md,
+../console/AUDIT.md, ../macros/AUDIT.md, ../injective/AUDIT.md, ../derivcheck/AUDIT.md.
 
 ## Dirty-room and campaign-research transcripts
 
@@ -42,6 +56,8 @@ Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUD
 |------|------|
 | main-session-dirty-room.jsonl | the orchestrating session: header generation, oracle/corpus construction, interoperability-header extraction, integration fixes, all audits as run |
 | workflows/wf_610d94ab-e29/ | dirty-room integration agent (adapters only; see ../INTEGRATION_REPORT.md) |
+| workflows/wf_62e2c0ef-a3e/agent-ac4e655d83d5c3d56.jsonl | dirty-room integrator: units A+B re-sync (rewire blocked, see ../INTEGRATION_REPORT.md) |
+| workflows/wf_62e2c0ef-a3e/agent-a2eac17c5efa35c13.jsonl | dirty-room integrator: units C–G (partial; keeps reported per protocol) |
 | workflows/wf_53f48d60-3ef/ | licensing research (GPL doctrine/precedent/feasibility/literal-copy) |
 | workflows/wf_8b8fd87b-72e/ | uncited-file derivation audit + institutional-ownership research |
 | workflows/wf_5ec90b24-b26/ | tail-author affiliations, triviality classification, rewrite scoping |
@@ -51,6 +67,8 @@ Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUD
 
 - launch-scripts/ — the workflow scripts (contain the verbatim prompts given to
   every agent; prompts are also embedded in each transcript's first message).
+  Exception: the round-3 implementation wave (wf_7f807521-670) has no persisted
+  launch script; its prompts survive only in the transcripts' first messages.
 - task-results/ — result summaries as returned to the orchestrator (rescued
   from volatile /tmp).
 - journal.jsonl inside each workflow dir — the workflow engine's own record of
@@ -60,7 +78,9 @@ Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUD
 
 ## Integrity and limitations
 
-- SHA256SUMS (300 files at publication) fixes the archive's content as of 2026-07-17. To
+- SHA256SUMS (300 files at publication; refreshed to 727 files the same day
+  after the round-3/4 waves — every original entry retained, new cluster
+  workspaces and transcripts added) fixes the archive's content as of 2026-07-17. To
   timestamp-anchor it, commit this directory (or just SHA256SUMS) to a git
   repository and/or push to a remote — the commit chain provides an ordered,
   hard-to-backdate record. OpenTimestamps is a stronger option if wanted.

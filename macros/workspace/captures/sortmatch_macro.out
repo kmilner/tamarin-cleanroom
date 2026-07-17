@@ -1,0 +1,61 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory SortMatch] Theory loaded
+[Theory SortMatch] Theory translated
+[Theory SortMatch] Derivation checks started
+[Theory SortMatch] Derivation checks ended
+[Theory SortMatch] Theory closed
+theory SortMatch
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+macros: m( x ) =  ~x,
+        n( x ) =  x
+
+rule (modulo E) R:
+   [ In( a ), Fr( ~b ) ] --[ M( m(a) ), N( n(~b) ) ]-> [ ]
+
+  /*
+  rule (modulo AC) R:
+     [ In( a ), Fr( ~b ) ] --[ M( ~x ), N( ~b ) ]-> [ ]
+  */
+
+/*
+WARNING: the following wellformedness checks failed!
+
+Unbound variables
+=================
+
+  rule `R' has unbound variables: 
+    ~x
+
+Message Derivation Checks
+=========================
+
+  The variables of the following rule(s) are not derivable from their premises, you may be performing unintended pattern matching.
+
+Rule R: 
+Failed to derive Variable(s): ~x
+*/
+
+/*
+Generated from:
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: /home/kamilner/tamarin-cleanroom/macros/workspace/fixtures/sortmatch_macro.spthy
+
+  
+  WARNING: 2 wellformedness check failed!
+
+==============================================================================

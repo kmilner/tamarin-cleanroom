@@ -1,0 +1,8 @@
+theory RN
+begin
+builtins: diffie-hellman
+rule Bad:
+   [ In(a), In(b) ]
+  --[ ]->
+   [ Out(a*b) ]
+end

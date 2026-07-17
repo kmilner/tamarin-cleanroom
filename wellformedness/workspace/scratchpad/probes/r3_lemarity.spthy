@@ -1,0 +1,10 @@
+theory LemArity
+begin
+rule R1:
+   [ Fr(~x) ]
+  --[ Act(~x) ]->
+   [ Out(~x) ]
+lemma L1:
+  all-traces
+  "All x y #i. Act(x, y) @ #i ==> x = y"
+end

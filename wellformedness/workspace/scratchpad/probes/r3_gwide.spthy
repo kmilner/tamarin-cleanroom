@@ -1,0 +1,10 @@
+theory GWide
+begin
+rule R1:
+   [ Fr(~x) ]
+  --[ Action(~x) ]->
+   [ Out(~x) ]
+lemma L1:
+  all-traces
+  "All xalpha xbeta xgamma #i #j #k. (Action(xalpha) @ #i & Action(xbeta) @ #j) ==> (xalpha = xbeta & xbeta = xgamma & #i = #j & #j = #k)"
+end

@@ -137,3 +137,78 @@
       capture skew (main/proof captured at v1, overview/proof at v16) -> diffs are
       only link indices + proof-state constraint html (prover fragments), never a
       template byte. Rule holds wherever the two captures share a version.
+
+## Round 3 (source A) — handler-semantics census (state machine)
+[029] Distinct autoprove/next/prev route templates over all 81 manifest KEYS |
+      autoprove=idfs/N/False/proof/L (392); next=prev=normal/proof/L (392) only.
+      => crawled census exercises one autoprove form; variants live in body links.
+[030] Autoprove variants embedded ANYWHERE in manifests (bodies+keys) | strategy in
+      {idfs(32726),characterize(30194)}; bound in {0,5}; flag in {True,False}.
+      Forms: idfs/0/False, idfs/5/False, idfs/0/True, characterize/{0,5}/False.
+      Full shape: autoprove/{strategy}/{bound}/{allSol}/proof/{lemma}[/path...].
+[031] Keyboard-help table (main/help body, manifest 2b3b) | a/A=autoprove focused
+      step (a stop@first, A all-solutions); b/B=bounded-depth version; s/S=all
+      lemmas. => a/b/all/characterization = (bound 0 vs 5) x (allSol False vs True)
+      x (idfs vs characterize). "all" = the True (all-solutions) flag.
+[032] main/method route shape (keys + body links) | crawled keys only L/N; body
+      links carry L/N/PATH (67988) -> method = main/method/{lemma}/{n}[/path...],
+      number BEFORE the case-name path. proof = main/proof/{lemma}[/path...].
+[033] Full handler + main-sub census over 48824 keys | handlers main/i-g-def/intdot/
+      overview/next/prev/autoprove/source/message; main-subs proof,method,add,lemma,
+      edit,delete,cases,tactic,rules,message,help. Emitted-only POST/GET targets:
+      reload, download/{file}, get_and_append/{file}, edit/{edit|add|delete}/{name}.
+[034] Proof-path segment charset | ALL segments in main/proof/*/PATH keys are
+      [A-Za-z0-9_]; root marker '_'; no '%'/percent-encoding anywhere (case names are
+      prover identifiers). Longest seen ~112 chars (Secrecy_..._end). => path = raw
+      '/'-join of case-name segments; no encoding.
+[035] Autoprove-timeout bodies (status 0, the 6 corpus entries) | body =
+      "REQUEST_ERROR: TimeoutError('timed out')" for all 6. This is the CRAWLER's
+      own error string (client gave up), NOT server output. => status-0 is a capture
+      artifact, not a web-layer response family (corrects BEHAVIOR §1 note).
+
+## Round 3 live probing (source B) — sanctioned oracle, ports 3137-3139, Tutorial.spthy
+[L7] Start oracle interactive on Tutorial.spthy :3137 (wl_server.sh, --port= form) |
+      4 lemmas (Client_auth, Client_auth_injective, Client_session_key_honest_setup,
+      Client_session_key_secrecy), version 1.13.0. index=1 "Original".
+[L8] Method application response | GET main/method/Client_session_key_secrecy/1 (v1)
+      -> 200 JSON {"redirect":"/thy/trace/2/overview/proof/Client_session_key_secrecy/_"}.
+      Version bumped 1->2 (NEW index). Applying method 1 at path _ (v2) ->
+      {"redirect":".../3/overview/proof/.../_/Client_1"} (focus = prover-next-goal,
+      appends a case segment). Index page then lists 1,2,3.
+[L9] Autoprove variants response (v1, lemma Client_session_key_honest_setup) | each
+      of idfs/0/False, idfs/5/False, idfs/0/True, characterize/0/False,
+      characterize/5/False -> 200 JSON {"redirect":"/thy/trace/{N}/overview/proof/
+      {lemma}/_/Client_1/Serv_1/Client_1"}; each allocated a fresh version (4,5,6,7,8).
+      => every proof op allocates new index = (global max)+1, all remain resolvable.
+[L10] next/prev semantics | next/normal/proof/L, prev/normal/proof/L -> 200 text/plain
+      BARE URL, SAME version (no bump). Targets: last-lemma next -> itself; first-lemma
+      prev -> main/cases/refined/0/0; between lemmas -> adjacent lemma's main/proof.
+      'smart' and even bogus modes accepted (200) -> mode passed opaquely to prover.
+[L11] Version retention / index cap | all created versions stay resolvable (v2,v3,v4
+      -> 200 even after index page drops them). Index table shows Original + a capped
+      window of most-recent Modified rows (origin "Modified"); == manifest "capped".
+[L12] Structural edits mutate IN PLACE (no new version) | POST edit/delete/Client_auth
+      (v1) -> 303 See Other, Location /thy/trace/1/overview/help, empty body; v1 then
+      has 3 lemmas (Client_auth gone), NO new index created (v2..=404). POST edit/add
+      (valid) -> 303 Location /thy/trace/1/overview/add/{pos}; POST edit/edit (valid)
+      -> 303 Location /thy/trace/1/overview/edit/{name}; all in place at same index.
+[L13] Edit failure path | POST edit/edit/{name} with unparseable lemma-text -> 200 OK,
+      body = full-page Edit-Lemma form (<title>Edit Lemma: NAME</title>) re-rendered;
+      no redirect, no version change. => success=303 redirect, failure=200 form page.
+[L14] edit-form textarea rows= formula (blocker b) | GET main/edit/{lemma} for 4
+      lemmas: newlines 9/11/7/10 -> rows 11/13/9/12. rows = (#'\n' in lemma text)+2,
+      4/4 consistent. (Corrects the round-1 hardcoded rows="8".) add-form textarea has
+      NO rows attribute (fixed placeholder "Enter your new Lemma").
+[L15] Non-local page shell (blocker a) | oracle default binds 127.0.0.1; restarted with
+      --interface=*4 (= form; space form hits the workdir-positional bug) -> 0.0.0.0.
+      Fetched every route via non-loopback 212.100.173.110 (server LOG confirms peer
+      212.100.173.110) AND via 127.0.0.1: overview/help, overview/proof, main/help,
+      main/edit, main/add, intdot, source, 404, index / -> BYTE-IDENTICAL (md5) both
+      ways. Mutating GET/POST (method, edit/delete, reload) also succeed & match from
+      the non-loopback IP. Host header {127.0.0.1,localhost,212.x,evil.com,::1} and
+      X-Forwarded-For/X-Real-IP/X-Forwarded-Host all leave bytes unchanged. IPv6 ::1
+      untestable (build bound IPv4 only). => in oracle 1.13.0 the shell is
+      origin-INDEPENDENT; all local-interface origins (loopback + own 212.x) classify
+      as local, so a foreign peer cannot be synthesized on one host. Documented gap.
+[L16] Captured Round-3 fixtures | edit/add/delete form JSON envelopes, method redirect
+      JSON, next/prev text, raw lemma texts -> tests/fixtures/r3_*. Stopped all servers.

@@ -1,0 +1,11 @@
+theory FactCap
+begin
+rule R1:
+   [ Fr(~x) ]
+  --[ ]->
+   [ Send(~x) ]
+rule R2:
+   [ SEND(~y) ]
+  --[ ]->
+   [ Out(~y) ]
+end

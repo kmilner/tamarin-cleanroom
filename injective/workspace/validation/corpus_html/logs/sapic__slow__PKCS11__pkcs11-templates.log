@@ -1,0 +1,11 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+GraphViz tool: 'dot'
+ checking version: dot - graphviz version 15.1.0 (20260618.0150). OK.
+ checking PNG support: OK.
+[Theory PKCS11TemplatePolicy] Theory loaded
+[Theory PKCS11TemplatePolicy] Theory translated
+[Theory PKCS11TemplatePolicy] Derivation checks started
+[Theory PKCS11TemplatePolicy] Derivation checks ended
+[Theory PKCS11TemplatePolicy] Theory closed

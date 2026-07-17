@@ -1,0 +1,19 @@
+theory Shapes
+begin
+functions: h/1, g/2
+equations: h(x) = x, g(x,y) = x
+
+rule R1:
+   [ Fr(~x) ]
+  --[ Act(~x) ]->
+   [ Out(~x) ]
+
+lemma L1:
+  all-traces
+  "All x #i. Act(x) @ #i ==> (x = h('constA') & x = g(x, <x, x>))"
+
+lemma L2:
+  all-traces
+  "All x #i. Act(x) @ #i ==> (x = y & x = y & x = h(x))"
+
+end

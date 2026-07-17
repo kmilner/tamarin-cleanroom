@@ -1,0 +1,68 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory MultLhs] Theory loaded
+[Theory MultLhs] Theory translated
+[Theory MultLhs] Derivation checks started
+[Theory MultLhs] Derivation checks ended
+[Theory MultLhs] Theory closed
+theory MultLhs
+
+begin
+
+// Function signature and definition of the equational theory E
+
+builtins: diffie-hellman
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) Bad:
+   [ Fr( ~x ), In( (a*b) ) ] --> [ Out( <~x, (a*b)> ) ]
+
+  /* has exactly the trivial AC variant */
+
+/*
+WARNING: the following wellformedness checks failed!
+
+Multiplication restriction of rules
+===================================
+
+  The following rule is not multiplication restricted:
+    rule (modulo E) Bad:
+       [ Fr( ~x ), In( (a*b) ) ] --> [ Out( <~x, (a*b)> ) ]
+  
+  After replacing reducible function symbols in lhs with variables:
+    rule (modulo E) Bad:
+       [ Fr( ~x ), In( (a*b) ) ] --> [ Out( <~x, (a*b)> ) ]
+  
+    Terms with multiplication:  (a*b)
+
+Message Derivation Checks
+=========================
+
+  The variables of the following rule(s) are not derivable from their premises, you may be performing unintended pattern matching.
+
+Rule Bad: 
+Failed to derive Variable(s): a, b
+*/
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: /home/kamilner/tamarin-cleanroom/console/oracle/examples/round2/multiplication_in_rule_lhs.spthy
+
+  processing time: 0.12s
+  
+  WARNING: 2 wellformedness check failed!
+
+==============================================================================

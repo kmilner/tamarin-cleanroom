@@ -1,0 +1,15 @@
+[package]
+name = "injfacts-clean"
+version = "0.1.0"
+edition = "2021"
+description = "Clean-room implementation of injective-fact-instance detection over the parsed-theory data model."
+
+[lib]
+name = "injfacts_clean"
+path = "src/lib.rs"
+
+[[bin]]
+name = "injfacts"
+path = "src/bin/injfacts.rs"
+
+[dependencies]

@@ -1,0 +1,20 @@
+variants [COMMAND] ... [OPTIONS]
+  Compute the variants of the intruder rules for DH-exponentiation.
+
+Commands:
+  interactive  Start a web-server to construct proofs interactively.
+  variants     Compute the variants of the intruder rules for DH-exponentiation.
+  test         Self-test the tamarin-prover installation.
+
+Flags:
+  -O --Output[=DIR]  Output directory
+About:
+  -? --help          Display help message
+
+------------------------------------------------------------------------------
+To show help for different commands, type tamarin-prover [Command] --help.
+------------------------------------------------------------------------------
+See 'https://github.com/tamarin-prover/tamarin-prover/blob/master/README.md'
+for usage instructions and pointers to examples.
+------------------------------------------------------------------------------
+

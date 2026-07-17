@@ -1,0 +1,14 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+GraphViz tool: 'dot'
+ checking version: dot - graphviz version 15.1.0 (20260618.0150). OK.
+ checking PNG support: OK.
+diffLemma
+[Theory DiffLR] Theory loaded
+[Theory DiffLR] Theory translated
+[Theory DiffLR] Derivation checks started
+[Saturating Sources] Step 1 (Max 5)
+[Saturating Sources] Done
+[Theory DiffLR] Derivation checks ended
+[Theory DiffLR] Theory closed

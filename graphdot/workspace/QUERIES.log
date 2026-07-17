@@ -78,3 +78,115 @@ to a new theory index), then GET interactive-graph-def/proof/<lemma>/_ .
   prefix rule (lo->LO, h->H) re-confirmed live.
 - Servers stopped after probing. Note: pure-numeric constant got empty prefix =>
   bare-number name ('12345678' -> "2"); empty-prefix start index not pinned.
+
+## Session 3 — GENERATION (SPEC_ROUND3): rendering, shapes, id allocation, content, levels
+
+### Corpus reads (captured OUTPUT: oracle/dot_corpus/ 12022 payloads, captured_responses/)
+- Shape census over all 12022 dot + all 81 manifests: shapes = record(160409),
+  ellipse(188270), plain(11564). NO trapezium/invtrapezium anywhere in the crawl.
+- Node-id/PORT allocation (mine_ids.py): verified over ALL 12022 graphs that ids
+  are one global counter in emission order (== file order), a record consuming one
+  id per cell (premises->info->conclusions) THEN one node id; other kinds one id.
+  12022/12022 byte-consistent. (Re-verified in Rust: tests/alloc_corpus.rs,
+  12022/12022 via the crate's own NodeIdAllocator.)
+- Record group structure (mine_groups.py): 100% of 160409 records carry an info
+  cell (#t : Rule); groups = present-of [premises,info,conclusions], EMPTY premise
+  or conclusion group dropped. dist: 3grp 153854 (prem|info|concl), 2grp info@0
+  2147 (info|concl, e.g. Fresh), 2grp info@1 4406 (prem|info), 1grp 2.
+- Record-cell WRAP mining (mine_wrap.py/mine_indent.py/mine_width.py): 188192
+  wrapped cells. Continuation indent = &nbsp; run equal to the column of the
+  broken group's FIRST element (after "( " for a fact, after "<" for a tuple,
+  after "[" for an action list) — verified on many cells. Segments joined by \l,
+  trailing \l after the last line. Break-point chars: , ) space > ] . First-line
+  length ranges 5..87 (NOT a flat width) => the break DECISION is the pretty-
+  printer's width/group internal (GAP); the FORMAT+indent are exact.
+- Fact-vs-function spacing: facts pad `Name( a, b )` / `Name( )`; functions do
+  not `f(a, b)`; tuples `<a, b>`; info cell `#t : Rule[acts]` or bare `#t : Rule`.
+- Content vocabulary census (mine_content.py): edge attr signatures = 11 fixed
+  styles (red-dashed !KU deduction; bold w10 [+gray50] structural; gray30 message;
+  blue3-dashed / black-dashed temporal; orangered2; invis; purple/green/darkorange
+  goal edges). Ellipse colors: none / gray (!KU) / darkblue (action). Ellipse
+  kinds: !KU(m)@#t, Action(..)@#t, compressed `#t : rule[..]`.
+- Query-param census: grep of manifests found the UI menu "Graph simplification
+  off/L1/L2/L3" (lvl0..lvl3 toggles). Captured graph URLs carry NO query params.
+
+### Live server probes (corrected wrapper: scratchpad/serve.sh, same black-box
+### binary as oracle/hs_server.sh but --port= form; ports 3200-3201)
+- Read /static/js/tamarin-prover-ui.js (served BY the black-box): the graph URL
+  query params are cookie-driven — `simplification=N` (default 2, always sent);
+  at level 0 additionally `uncompact=` + `uncompress=`; `unabbreviate=` when the
+  abbreviate cookie is off; `no-auto-sources=`; `clustering=true`. This is the
+  census SPEC item 5 refers to.
+- NAXOS_eCK on :3200; NSLPK3 on :3201. Discovered theory index via GET /; probed
+  case graphs GET interactive-graph-def/cases/{raw,refined}/i/j (available without
+  solving).
+- Simplification-level diffs on NAXOS refined/1/2 and largest NSLPK3 case:
+  default == simplification=1 == 2 == 3 (byte-identical on every probed graph;
+  L1/L2/L3 distinction UNobserved => GAP). Level-0 (uncompact+uncompress) EXPANDS
+  the graph: Fresh sources + intruder rules become full records; !KU ellipses and
+  isend/coerce ellipses re-expand. unabbreviate inlines terms and drops the legend
+  sink-block. Isolated uncompact vs uncompress each partially expand.
+- SHAPE hunt: invtrapezium `(#i, N)` observed live (a `(#nodevar, premiseIndex)`
+  placeholder for an unresolved node referenced by an open premise; fed by the
+  conclusion that must satisfy it) — in default AND uncompressed case graphs of
+  BOTH NAXOS and NSLPK3. Plain `trapezium` NOT observed in any probe (all case
+  graphs, compressed+uncompressed, 2 theories) nor the corpus — recorded as
+  unobserved-but-spec-named. Walked eCK_key_secrecy proof steps (method/1) — small
+  ellipse-only states, no new shapes.
+- Saved fixtures: nsl_invtrap.dot, invtrap_compressed.dot (=NAXOS default),
+  invtrap_raw.dot (=level-0 raw). Servers stopped after probing.
+
+## Session 4 — close L1/L2/L3 gap + re-attempt wrap DECISION (session-state lens)
+
+### Channel investigation (served JS + response headers, all HTTP-observed OUTPUT)
+- Fetched /static/js/tamarin-prover-ui.js from the black-box binary. The graph
+  URL params are built from CLIENT-SIDE cookies (jquery-cookie): handleJson (lines
+  78–100) appends `simplification=<cookie>` always, plus `uncompact=`+`uncompress=`
+  ONLY when the cookie==0, plus `unabbreviate=`/`no-auto-sources=` per their
+  cookies. Level-button loop is `for i<4` (off/L1/L2/L3), default cookie=2. No
+  AJAX/POST sets a graph preference server-side; the POSTs are lemma editing only.
+- `curl -i` on root, case-graph, main/cases json, and a proof-method request:
+  **no Set-Cookie on ANY response** ⇒ no server-side session state; the URL query
+  param is the sole channel. (This is what the follow-up's "session-state lens"
+  warned to check; the channel is verified to be the URL param, not a cookie.)
+
+### Live level probes (serve.sh wrapper, --port= form; ports 3200–3203)
+- NSLPK3 :3200, richest source-case graph `refined/6/5` (17 nodes, 5 668 B). Matrix
+  over `simplification` ∈ {0,1,2,3} × {URL param, cookie `-b`, both}: ALL byte-
+  identical to baseline (one md5). Adding `uncompact=&uncompress=` (the real level-0
+  flags) DID change it (7 792 B) and was identical with/without a cookie ⇒ URL param
+  honored, change verified before diffing. Level number ∈ {0,1,2,3,4,5,10,99}
+  crossed with 8 flag combos: within every combo, L1/L2/L3 collapse to 1 md5;
+  `flags_L0`…`flags_L99` all one md5. Individual flag effects distinct (uncompact
+  6 496, uncompress 6 326, unabbreviate 4 695, clustering 6 388 B).
+- NAXOS_eCK :3201 case `refined/4/1` (2 912 B): L0=L1=L2=L3 identical, L0+flags
+  differs. Reproduces the negative on a 2nd theory.
+- eurosp19-eccDAA analysed :3203 (DH/bilinear, deep). Big proof-state graph
+  `proof/functional_correctness/_` = **39 nodes, 27 361 B**. All level probes
+  (url/cookie/both, {0,1,2,3,4,10}) → 1 md5; no Set-Cookie. Flag effects measured:
+  uncompact 30 880 B (records richer, still 39), uncompress **74 nodes** 31 407 B,
+  unabbreviate 38 nodes/36 690 B/0 legend rows, uncompact+uncompress==level0 (74
+  nodes). ⇒ CONCLUSION: no L1/L2/L3 distinction; the level number is inert; "off"
+  (L0) = the UI adding two flags. GAP closed (rigorous negative + mechanism).
+
+### Wrap-DECISION probes (crafted single-node theories; autoprove + graph fetch)
+- Route discovery: autoprove via GET /thy/trace/1/autoprove/idfs/0/False/proof/<L>
+  (returns redirect to a new theory index); proof-state graph at
+  interactive-graph-def/proof/<L>/_ . Confirmed the served JS appends graph params
+  at line 922 (dotsrc + "?" + query_string) with no width/wrap parameter; layout
+  east-size/west-size cookies are client-only (never sent) ⇒ wrap has NO channel;
+  it is a fixed server-side pretty-printer, re-attacked by input control.
+- Two sweeps solved live (ports 3220–3236, driver.py/gen_sweep.py):
+  (a) `Out(<'a01',…,'aN'>)` N=1..29 — pure fill of 5-col elements;
+  (b) `Out(<'aa…a'(P), 'y'>)` P=60..95 — one-column flat-width sweep.
+  Findings: single-line iff flat width ≤ **87**; 88 breaks. First line packs 11
+  elements + trailing ", " (ends col 83); continuation packs 12 (fsep lookahead).
+  Closing `)` peels to col 0; tuple `>` peels to the `<` column; long unbreakable
+  atoms overflow verbatim.
+- Functor-length invariance: `Ba`/`Out`/`Fact12`/`Factabcdef` (len 2/3/6/10) — the
+  flat-fit boundary is ALWAYS flat width 87 fits / 88 breaks ⇒ W=87 is ABSOLUTE
+  from column 0, functor name included. Corpus cross-check: 99.2 % of 190 044
+  physical lines have fact-content ≤ 87 (residual = unbreakable atoms > 87).
+- Captured raw fixtures (fixtures/wrap_fixtures.json) for the crate tests. Servers
+  stopped after probing. Implemented FILL_WIDTH=87 / fits_one_line / paragraph_fill
+  in graph-clean/src/render.rs with tests reproducing these probes.

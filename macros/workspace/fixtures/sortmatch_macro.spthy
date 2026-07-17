@@ -1,0 +1,5 @@
+theory SortMatch
+begin
+macros: m(x) = ~x, n(x) = x
+rule R: [ In(a), Fr(~b) ] --[ M(m(a)), N(n(~b)) ]-> [ ]
+end

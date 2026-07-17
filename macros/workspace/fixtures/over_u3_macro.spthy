@@ -1,0 +1,5 @@
+theory OverU3
+begin
+macros: m(x) = <x,x>
+rule R: [ In(a), In(b), In(c) ] --[ Act(m(a,b,c)) ]-> [ ]
+end

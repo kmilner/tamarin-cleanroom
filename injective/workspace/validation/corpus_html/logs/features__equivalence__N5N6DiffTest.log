@@ -1,0 +1,14 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+GraphViz tool: 'dot'
+ checking version: dot - graphviz version 15.1.0 (20260618.0150). OK.
+ checking PNG support: OK.
+diffLemma
+[Theory N5N6DiffTest] Theory loaded
+[Theory N5N6DiffTest] Theory translated
+[Theory N5N6DiffTest] Derivation checks started
+[Saturating Sources] Step 1 (Max 5)
+[Saturating Sources] Done
+[Theory N5N6DiffTest] Derivation checks ended
+[Theory N5N6DiffTest] Theory closed

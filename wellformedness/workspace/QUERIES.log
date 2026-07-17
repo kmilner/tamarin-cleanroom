@@ -110,3 +110,36 @@ rp_decode :: persistent arity-2 -> (ProtoFact Persistent "Name" 2,2,Persistent)
 rp_long/rp_med/rp_w47 :: header fill WIDTH = 69 (break when col+1+word > 69)
 reserved_prefix (no --diff) :: SUCCESS -> Reserved prefixes is diff-mode only
 # Round 2 converged: 5 topics closed (6 incl. Right rule); byte-parity fixtures added.
+
+# --- ROUND 3 (Unit C) ---
+# Item 1: Formula terms FULL coverage (reducible fns; de Bruijn Bound N)
+r3_reducible :: reducible h/1 in lemma term h(x) -> `h(Bound 1)' (x bound, innermost-0 de Bruijn)
+r3_debruijn/r3_debruijn2 :: All x y #i, term h(x,y)->h(Bound 2,Bound 1); h(y,x)->h(Bound 1,Bound 2); index=0 at innermost binder
+r3_debruijn3 :: nested All x #i.(Ex y #j. h(x)) -> h(Bound 3); every quantified var (incl temporals) pushes a binder
+r3_nonred :: non-reducible f/1 (no equations) in term -> SUCCESS (reducibility gates the check)
+r3_redfree :: reducible h(y) y free -> `h(Free y)' (free var inside reducible term keeps Free)
+r3_nested :: f(h(x)) f non-red h red -> `f(h(Bound 1))' (whole top-level term reported)
+r3_freenest :: f(y) f non-red y FREE -> `f(Free y)' (free var anywhere makes the WHOLE term wrong)
+r3_both/r3_shapes :: terms NOT deduped, source order; pub const 'c'->'c'; pair<a,b>->pair(a,b) NO space after comma
+r3_actarg/r3_order/r3_actord :: term positions=atom arg terms; Action reports TEMPORAL first then fact args; free temporal j->`Free #j'
+r3_guard :: reducible term in guard (premise action) IS checked
+r3_toppair/r3_pair3 :: <x,y>->pair(Bound1,Free y); <x,x,y>->pair(Bound1,pair(Bound1,Free y)) right-nested
+r3_wrap/r3_w2 :: term list is fillSep; break when col+1+tokenwidth(incl comma) > 69; continuation indent 4; header can push all terms to line 2
+r3_longname/r3_overflow :: long lemma name pushes first term to line 2; single overlong term also wraps to line 2; continuation indent fixed 4
+r3_2lem :: two lemmas w/ formula-terms -> entries joined "\n  \n" (NOT "\n"); each entry ends with the fixed help block
+# Item 3: Fact capitalization issues topic
+r3_factcap/r3_capclean :: Send vs SEND across rules -> "Fact capitalization issues" (before Fact arity); same render shape as arity but item="Rule `R', capitalization \"Send\"" and NO dedup (every occurrence listed)
+r3_capord :: Send twice in R1 -> two items; lowercase-first fact name -> PARSE ERROR (facts must start uppercase); order = capitalization then arity then lhs-not-rhs
+# Item 4: close AST-derivable gaps
+r3_pnmulti :: two public-name groups -> numbered items joined "\n  \n" (current code already correct; now fixtured)
+r3_freshwrap :: 8 fresh literals in a rule -> fresh-const list is fillSep at width 69, continuation indent 4 (same as formula-terms)
+r3_lemarity :: rule Act/1 vs lemma action Act/2 -> Fact arity issue; lemma fact = raw Haskell `Fact {factTag = ProtoFact Linear "Act" 2, factAnnotations = fromList [], factTerms = [Bound 2,Bound 1]}`, label "Lemma" not "Rule"
+r3_lemmult :: multiplicity ALSO gathers lemma action facts (item labelled Lemma, raw Haskell render); gather shared arity+mult
+r3_restrarity :: restriction action Act/2 vs rule Act/1 -> SUCCESS (restrictions do NOT contribute to arity/mult fact gather)
+# Item 2: guardedness multi-line rendering + second failure mode
+r3_gwide/r3_gw/r3_qm :: formula printer wraps: quantifier breaks after "." (body hangs at base+2=col 8); implication/binary op breaks after operator, right operand hangs at the connective's start column; page width ~72 (one-line total fits 72, breaks 74)
+r3_and :: universal quantifier with a conjunction body -> "universal quantifier without toplevel implication"; left-nested AND breaks with each right operand on a new line at its enclosing "(" column
+r3_nestsub/r3_notsub :: reported subformula = the failing quantifier subtree (not the whole formula); `not(All ...)` gives sub=inner All, whole=the negation
+r3_gc :: guardedness decision map: ForAll body MUST be a top-level implication (conj/disj/neg/atom body -> "without toplevel implication"); antecedent-only actions guard the vars (consequent doesn't); Exists takes a conjunctive guard (Ex x #i. A(x)@#i is fine)
+# Item 4b (rule-printer wide fact-list wrap) - RESIDUAL GAP, documented:
+r3_rulewrap :: wide rule wraps: header "rule (modulo E) N:" then a broken fact list ("[" own line indent 7, facts fillSep indent 7, "]" own line), arrow "-->" own line indent 6, then conclusions; entangled with the out-of-scope Maude Message-Derivation reprint; single-line rule printer stays byte-exact for short rules (r3_rulenarrow)

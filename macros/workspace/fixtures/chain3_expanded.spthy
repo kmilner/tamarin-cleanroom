@@ -1,0 +1,4 @@
+theory Chain3
+begin
+rule R: [ In(x) ] --[ Act(<x,x>) ]-> [ ]
+end

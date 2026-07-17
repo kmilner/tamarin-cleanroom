@@ -1,0 +1,14 @@
+theory LemMult
+begin
+rule R1:
+   [ !Act(~x) ]
+  --[ ]->
+   [ Out(~x) ]
+rule R2:
+   [ Fr(~x) ]
+  --[ ]->
+   [ Act(~x) ]
+lemma L1:
+  all-traces
+  "All x #i. Act(x) @ #i ==> x = x"
+end

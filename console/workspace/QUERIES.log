@@ -1,0 +1,48 @@
+# QUERIES.log — every oracle interaction, with purpose.
+# Oracle: oracle/hs_oracle.sh <arg1> [extra args...] -> runs black-box tamarin-prover binary, stderr merged to stdout.
+# Note: hs_oracle.sh consumes arg1 as first positional; remaining args appended.
+2026-07-17T13:25:35Z | hs_oracle.sh --help | capture global --help text; enumerate modes
+2026-07-17T13:25:35Z | hs_oracle.sh --version | capture --version text
+2026-07-17T13:25:35Z | hs_oracle.sh '' (empty) | behavior with no real positional/flags
+2026-07-17T13:26:07Z | hs_oracle.sh interactive --help | capture per-mode help for 'interactive'
+2026-07-17T13:26:07Z | hs_oracle.sh variants --help | capture per-mode help for 'variants'
+2026-07-17T13:26:07Z | hs_oracle.sh test --help | capture per-mode help for 'test'
+2026-07-17T13:26:07Z | hs_oracle.sh --foobar | unknown flag error
+2026-07-17T13:26:07Z | hs_oracle.sh /nonexistent/xyz.spthy | missing file error
+2026-07-17T13:26:48Z | hs_oracle.sh classic/NSLPK3.spthy | batch-mode framing (default analyze, no prove)
+2026-07-17T13:26:48Z | hs_oracle.sh classic/NSLPK3.spthy --parse-only | batch framing with --parse-only (opaque payload)
+2026-07-17T13:27:35Z | hs_oracle.sh classic/NSLPK3.spthy --prove=nonce_secrecy | batch framing with --prove: verified/falsified summary text
+2026-07-17T13:28:01Z | hs_oracle.sh round2/multiplication_in_rule_lhs.spthy | warnings/error framing placement
+2026-07-17T13:28:01Z | hs_oracle.sh round2/fresh_public_constant.spthy | warnings/error framing placement
+2026-07-17T13:28:01Z | hs_oracle.sh round2/diff_reserved_prefix.spthy | warnings/error framing placement
+2026-07-17T13:28:45Z | hs_oracle.sh --stop-on-trace=XYZ | err_stopontrace_bad
+2026-07-17T13:28:45Z | hs_oracle.sh /home/kamilner/tamarin-cleanroom/console/oracle/examples/classic/NSLPK3.spthy --bound=abc | err_bound_nonint
+2026-07-17T13:28:45Z | hs_oracle.sh -Z | err_unknown_short
+2026-07-17T13:28:45Z | hs_oracle.sh interactive test | err_two_modes
+2026-07-17T13:28:45Z | hs_oracle.sh int --help | mode_prefix_int
+2026-07-17T13:28:45Z | hs_oracle.sh v --help | mode_prefix_v
+2026-07-17T13:28:46Z | hs_oracle.sh t --help | mode_prefix_t
+2026-07-17T13:28:46Z | hs_oracle.sh foo | token_notfile
+2026-07-17T13:28:46Z | hs_oracle.sh /home/kamilner/tamarin-cleanroom/console/oracle/examples/classic/NSLPK3.spthy --output-module=bogus | err_output_module_bad
+2026-07-17T13:28:46Z | hs_oracle.sh --help=foo | help_eq
+2026-07-17T13:28:46Z | hs_oracle.sh -h | short_help
+2026-07-17T13:29:25Z | hs_oracle.sh --diff -> exit=1 | err_noinput_diff
+2026-07-17T13:29:25Z | hs_oracle.sh -V -> exit=0 | short_version
+2026-07-17T13:29:25Z | hs_oracle.sh --prove -> exit=1 | err_noinput_prove
+2026-07-17T13:29:25Z | hs_oracle.sh /home/kamilner/tamarin-cleanroom/console/oracle/examples/classic/NSLPK3.spthy --bound --parse-only -> exit=0 | bound_novalue
+2026-07-17T13:29:25Z | hs_oracle.sh /home/kamilner/tamarin-cleanroom/console/oracle/examples/classic/NSLPK3.spthy --heuristic --parse-only -> exit=0 | heuristic_novalue
+2026-07-17T13:30:08Z | hs_oracle.sh <chmod000 file> | unreadable/permission-denied file error
+2026-07-17T13:30:08Z | hs_oracle.sh <a directory> | directory-as-input-file error
+2026-07-17T13:30:34Z | hs_oracle.sh variants | variants mode run framing
+2026-07-17T13:31:33Z | hs_oracle.sh /home/kamilner/tamarin-cleanroom/console/oracle/examples/classic/NSLPK3.spthy --oj --parse-only -> exit=0 | oj_alias_noval
+2026-07-17T13:31:33Z | hs_oracle.sh /home/kamilner/tamarin-cleanroom/console/oracle/examples/classic/NSLPK3.spthy --output-json --parse-only -> exit=0 | outputjson_noval
+2026-07-17T13:31:34Z | hs_oracle.sh -v interactive -> exit=1 | flag_before_mode
+2026-07-17T13:31:34Z | hs_oracle.sh interactive aa bb -> exit=1 | interactive_two_pos
+2026-07-17T13:31:34Z | hs_oracle.sh variants --version -> exit=1 | version_from_mode
+2026-07-17T13:35:55Z | hs_oracle.sh /home/kamilner/tamarin-cleanroom/console/oracle/examples/classic/NSLPK3.spthy -babc -> exit=1 | short_attached_bound
+2026-07-17T13:35:55Z | hs_oracle.sh /home/kamilner/tamarin-cleanroom/console/oracle/examples/classic/NSLPK3.spthy --bound 5 --parse-only -> exit=1 | space_value_bound
+2026-07-17T13:42:38Z | hs_oracle.sh --help (live cross-check vs clean binary) | --help
+2026-07-17T13:42:38Z | hs_oracle.sh interactive --help (live cross-check vs clean binary) | interactive --help
+2026-07-17T13:42:38Z | hs_oracle.sh --foobar (live cross-check vs clean binary) | --foobar
+2026-07-17T13:42:38Z | hs_oracle.sh --diff (live cross-check vs clean binary) | --diff (no file)
+2026-07-17T13:42:38Z | hs_oracle.sh --version (live cross-check vs clean binary) | --version

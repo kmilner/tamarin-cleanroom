@@ -1,0 +1,4 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+tamarin-prover: /tmp/claude-1000/-home-kamilner-tamarin-rs/57f8e1bc-d495-4b36-93c0-033347d5034a/scratchpad/noperm.spthy: openFile: permission denied (Permission denied)

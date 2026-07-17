@@ -1,0 +1,4 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+tamarin-prover: /home/kamilner/tamarin-cleanroom/console/oracle/examples/classic: openFile: inappropriate type (is a directory)

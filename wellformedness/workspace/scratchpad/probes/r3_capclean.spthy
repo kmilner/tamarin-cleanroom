@@ -1,0 +1,11 @@
+theory CapClean
+begin
+rule R1:
+   [ Fr(~x) ]
+  --[ ]->
+   [ Send(~x) ]
+rule R2:
+   [ Fr(~y) ]
+  --[ ]->
+   [ SEND(~y) ]
+end

@@ -1,0 +1,10 @@
+theory ExpMacro
+
+begin
+
+builtins: diffie-hellman
+
+rule A:
+  [ Fr(~x) ] --> [ Out('g'^~x) ]
+
+end

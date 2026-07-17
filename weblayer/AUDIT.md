@@ -234,3 +234,117 @@ Haskell originals consulted for this round: `src/Web/{Theory,Hamlet,Types,Handle
 None. Every round-2 resemblance reduces to served output, wire-format URL tokens,
 or reuse of already-cleared round-1 shell/render functions. Findings that survive
 filtration: 0. No redo instructions issued. VERDICT: PASS.
+
+---
+
+## Round 3 incremental audit
+
+Scope (the round-3 delta per SPEC_ROUND3 / REPORT3): the UI **state machine** in
+`src/dispatch.rs` (the `Server<ProverOps>` version-map + route dispatch), the
+`src/route.rs` grammar extensions (`Autoprove`/`Nav`/`OverviewView`/`EditVerb`
+parsers), and the `src/forms.rs` textarea-`rows` rule that replaced the round-1
+hardcoded `rows="8"`. Haskell originals consulted (both sides — auditor privilege):
+`src/Web/{Handler,Theory,Dispatch,Settings,Types}.hs`. Method: abstraction–
+filtration–comparison, with the version-map / envelope / route semantics treated as
+BEHAVIOR (live-probed, QUERIES.log [L7]–[L16]) — I flagged only expression-level
+mirroring of the Haskell handler internals.
+
+### dispatch.rs (`Server<ProverOps>`) vs Handler.hs `putTheory`/`modifyTheory`/`postTheoryEditR`/`getTheoryPathMR`
+
+- **Version allocation.** Clean `commit_new_version` (dispatch.rs:330–335) hands out
+  a stored monotonic counter (`next_index`, seeded to 2 with base at 1 in
+  `Server::new` dispatch.rs:179–183). Haskell `putTheory` (Handler.hs:351–352)
+  recomputes `idx = if M.null then 1 else fst (M.findMax theories) + 1` on every
+  insert. Different EXPRESSION (a retained counter vs a re-derived `findMax+1`); they
+  coincide only because nothing is ever removed from the version map, which is the
+  observed invariant "new index = (global max)+1, all remain resolvable" ([L9],[L11]).
+  Behavior-derived, not mirrored — and the divergent expression is mild independence
+  evidence.
+- **Proof op → `{redirect}` + new version.** Clean `get_method`/`proof_op_autoprove`
+  (dispatch.rs:318–328) allocate a version then answer `render_redirect` to
+  `/thy/trace/{i}/overview/proof/{lemma}[/focus…]`. Haskell `modifyTheory`
+  (Handler.hs:736–744) does `putTheory` then `JsonRedirect (InteractiveOverviewR
+  newThyIdx (fpath thy))`; `getTheoryPathMR`'s `TheoryMethod` arm (Handler.hs:1013–
+  1016) and the autoprover `getProverR` (1065–1068) route through it. The `{redirect}`
+  envelope, the `overview/proof/{lemma}/{focus}` URL, and the version bump are all
+  observed output ([L8],[L9], envelope census [010]). Compatibility content.
+- **`main/method` interception.** Clean `dispatch` (dispatch.rs:213–216) branches
+  `main/method` to a proof op before the read-only `main/*` views; Haskell
+  `getTheoryPathMR.go` (1013–1022) likewise special-cases `TheoryMethod` ahead of the
+  generic render arm. This split is FORCED by observed behavior — `main/method`
+  returns `{redirect}`+version-bump ([L8]) while every other `main/*` returns
+  `{html,title}` ([002],[010]); any implementation must branch on it. Behavioral, not
+  an expression mirror.
+- **Structural edits mutate in place.** Clean `post_edit` (dispatch.rs:338–374)
+  re-inserts at the SAME `index` and answers `303 See Other` with a `Location`
+  (`overview/help` for delete, `overview/edit|add/{name}` for edit/add), re-rendering
+  the full-page form with `200` on failure. Haskell `postTheoryEditR`
+  (Handler.hs:845–880) reaches `replaceTheory … idx` (307–318, `M.insert idx`) — same
+  index — and `redirect (InteractiveOverviewR i …)`; failure falls through to
+  `overviewTpl` (200). Every one of these is a live-probed behavior
+  ([L12] in-place + 303 Location targets; [L13] failure=200 form). Notably the clean
+  `ProverOps` exposes SEPARATE `edit_lemma`/`add_lemma`/`delete_lemma` callbacks,
+  whereas Haskell `editLemma` for `TheoryEdit` is internally a delete-then-add
+  (Handler.hs:273–282). The clean side did NOT mirror that internal decomposition —
+  independence evidence.
+- **Architecture.** The whole `ProverOps` trait seam (dispatch.rs:131–165) is the
+  clean side's own integration boundary (SPEC_ROUND3 asked for it); Haskell has no
+  such callback abstraction and calls the prover inline (`applyMethodAtPath`,
+  `modifyLemma`, `removeLemma`, `runProver`). Route dispatch is a hand-written
+  `match (method, Route)` over the clean side's own `Route` enum, versus Yesod's
+  TH-generated `mkYesodDispatch` typed-route table (Dispatch.hs:52, Types.hs:583–610).
+  No shared internal names, no mirrored control flow.
+
+### route.rs extensions vs Types.hs route table / `parseTheoryPath`
+
+- `Autoprove::parse` (route.rs:186–199) reads `{strategy}/{bound}/{flag}/proof/{lemma}
+  [/path…]`; `Nav::parse` (219–229) reads `{mode}/proof/{lemma}`; `EditVerb`/
+  `OverviewView` mirror the observed `edit/{verb}/{name}` and `overview/{help|proof|
+  edit|add}` tails. Every token is the wire URL grammar present in served hrefs / probe
+  paths: the autoprove shape and its `idfs`/`characterize` × `{0,5}` × `True/False`
+  matrix come from the corpus census [Q030]/[Q031]; `next|prev/normal/proof/L` and the
+  `overview/*` tails from [Q021]/[L10]/[L12]. This matches the Yesod resource lines
+  (Types.hs:583–610) and the `SolutionExtractor` tokens (Types.hs:627–634) only at the
+  URL surface — compatibility content, already the disposition of the round-1 route.rs
+  analysis.
+- POSITIVE SIGNAL (continues from round 1): the clean parsers treat `_` as a LITERAL
+  path segment (route.rs test `path: vec!["_","B_2"]`), with no analog of Haskell's
+  `prefixWithUnderscore`/`unprefixUnderscore` empty/`_`-segment encoding
+  (Types.hs:400–414). A materially different parsing model derived from the raw
+  observed URLs.
+
+### forms.rs `edit_rows` — CLOSE CALL (considered, CLEARED)
+
+- Clean `edit_rows` (forms.rs:20–22): `text.matches('\n').count() + 2`, used at
+  forms.rs:29.
+- Haskell `textHeight` (Theory.hs:1066): `2 + length (filter (=='\n') lPlaintext)`.
+- These are expression-identical ("2 + count of `'\n'` characters"). I examined this
+  hard because the two are textually the same algorithm.
+- FILTRATION — output-forced behavior: the formula was DERIVED from a live probe
+  ([L14]) that measured 4 lemmas — newline counts 9/11/7/10 → rows 11/13/9/12. Those
+  points pin `rows = newlines + 2` uniquely as a function of newline count (slope
+  exactly 1 row per newline from the successive differences, intercept exactly 2);
+  `count('\n') + 2` is the minimal arithmetic transcription of that observed relation,
+  and there is no materially different implementation of *that function of the newline
+  count*. This is the same disposition as the graphdot prefix-derivation close call:
+  "identical behavior at the idea level" / "structure forced by the observed output,"
+  not protectable expression.
+- DECISIVE independence context: in round 1 the clean side HARDCODED `rows="8"` (a
+  wrong constant that diverges for every other lemma size) — the round-1 audit logged
+  that as a positive non-access signal. The correct `newlines+2` rule appears ONLY in
+  round 3, obtained by documented live probing with its four data points in QUERIES.log.
+  Had Theory.hs:1066 been read, the formula would have been present in round 1 rather
+  than a placeholder constant. The provenance therefore affirmatively shows derivation
+  from observation, not from source. CLEARED — no redo instruction issued.
+- (Everything else in forms.rs — the edit/delete/add form bodies — is unchanged served
+  output already cleared in the round-1 forms.rs analysis.)
+
+### VIOLATIONS (Round 3)
+None. The version-map/state-machine semantics reduce to live-probed behavior
+([L7]–[L16]) reproduced through an independent architecture (a `ProverOps` trait, a
+hand-rolled `Route` match, and a stored monotonic counter — none matching the Yesod
+handler internals), the route.rs extensions are observed wire-grammar tokens, and the
+one expression-identical point (the `edit_rows` newline formula) is an output-forced
+arithmetic fit whose round-1→round-3 provenance proves observation-derivation. One
+close call considered and cleared; findings that survive filtration: 0. No redo
+instructions issued. VERDICT: PASS.

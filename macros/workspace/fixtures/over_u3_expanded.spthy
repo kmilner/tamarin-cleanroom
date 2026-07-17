@@ -1,0 +1,4 @@
+theory OverU3
+begin
+rule R: [ In(a), In(b), In(c) ] --[ Act(<<a,b,c>,<a,b,c>>) ]-> [ ]
+end

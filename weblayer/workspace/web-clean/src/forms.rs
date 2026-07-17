@@ -12,14 +12,24 @@
 
 use crate::escape::html_escape;
 
+/// The textarea `rows` attribute for an edit form holding `text`.
+///
+/// Observed formula (live probe [L14], 4 lemmas: 9/11/7/10 newlines → 11/13/9/12
+/// rows): `rows = (number of '\n' characters in the raw lemma text) + 2`. HTML
+/// escaping does not change newline count, so this is computed on the raw text.
+pub fn edit_rows(text: &str) -> usize {
+    text.matches('\n').count() + 2
+}
+
 /// Body of the edit-lemma form for lemma `name` whose current text is `text`.
 /// Title used by the caller: `"Edit Lemma: {name}"`.
 pub fn edit_form(name: &str, text: &str) -> String {
     let action = html_escape(name);
     let body = html_escape(text);
+    let rows = edit_rows(text);
     format!(
         r#"<form method="post" action="../../edit/edit/{action}"><div contenteditable="true"><label for="lemmaTextArea"> Edit Lemma {name}</label>
-<textarea name="lemma-text" id="lemmaTextArea" rows="8">{body}</textarea>
+<textarea name="lemma-text" id="lemmaTextArea" rows="{rows}">{body}</textarea>
 </div>
 <button type="submit">Submit</button>
 <p></p>

@@ -1,0 +1,13 @@
+features/auto-sources/tamarin-repo/csf18-alethea/alethea_votingphase_RF-without-SL.spthy
+features/equivalence/N5N6DiffTest.spthy
+features/noise/anonymity_Responder_peer_revealed_psk_revealed_passive_trusted_pki_NX.spthy
+round2/diff_left_right_mismatch.spthy
+round2/diff_reserved_prefix.spthy
+round2/diff_right_rule_mismatch.spthy
+round2/jcs19-xor/diff-models/CH07-UK2.spthy
+round2/jcs19-xor/diff-models/CH07-UK3.spthy
+round2/jcs19-xor/diff-models/KCL07-UK1_attack-manual.spthy
+round2/jcs19-xor/diff-models/KCL07-UK1.spthy
+round2/jcs19-xor/diff-models/LAK06-UK1.spthy
+round2/jcs19-xor/diff-models/OTYT06_UK1_proof.spthy
+thesis-LaraSchmid-evoting/chapter4_DisputeResolution/aletheaDR_ShHh_RF.spthy

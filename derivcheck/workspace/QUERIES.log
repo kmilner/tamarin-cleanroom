@@ -1,0 +1,60 @@
+# QUERIES.log — Unit G (message derivation checks) clean-room oracle interactions
+# Oracle: oracle/hs_oracle.sh (wraps black-box HS tamarin-prover binary; accepts extra CLI flags)
+# Each entry: purpose => observation. No forbidden path (/home/kamilner/tamarin-rs/) was read;
+# only oracle scripts were EXECUTED and their captured stdout observed.
+
+2026-07-17 | Probe --help for derivcheck flags
+  `hs_oracle.sh --help | grep deriv` => `-d --derivcheck-timeout[=INT]` "Set timeout for
+  message derivation checks in sec (default 5). 0 deactivates check."
+
+2026-07-17 | Capture default-run output for all 8 oracle/examples/*.spthy
+  => cav13/DH_example: "All wellformedness checks were successful." (no deriv topic).
+  => 7 POIDC theories: emit topic "Message Derivation Checks" (reSign fails: m,r2,sk2;
+     POIDC_CMB additionally RP_gets_idToken: pkA).
+
+2026-07-17 | Determine report ORDER + exact block bytes (cat -A on POIDC_CMB / OIDC_CodeFlow)
+  => topic order: [LHS-not-RHS facts], [Subterm Convergence Warning], [Message Derivation
+     Checks] — deriv topic is LAST. Underline = 25 '=' (== len("Message Derivation Checks")).
+     Per-rule header "Rule <name>: " has a TRAILING SPACE. Uniform blank-line separation.
+     Count "WARNING: N wellformedness check failed!" = number of distinct failing TOPICS.
+
+2026-07-17 | Probe theories p1..p6 (authored minimal .spthy inputs) to find the trigger
+  p1 In(x)->Out(x): NO warning (bare var derivable).
+  p2a In(h(<zz,aa,mm>)) / p2b In(h(zz)),In(h(aa)),In(h(mm)): warn vars "aa, mm, zz"
+     -> reported ALPHABETICALLY, not source order.
+  p3 Fr(~x)->Out(~x): NO warning (fresh bound by Fr is derivable).
+  p4 In(<a,b>)->Out(<a,b>): NO warning (pair invertible via fst/snd).
+  p6 In(skf(x)), skf private: warn "x".
+
+2026-07-17 | Probes o1..o4 (sort semantics, rule order, no_derivcheck)
+  o1 In(h(<v10,v2,v1>)): "v1, v10, v2" -> name compared LEXICOGRAPHICALLY (string).
+  o2 In(h(x)),In(h($p)),In(h(~n)): "~n, x" -> $p (public) EXCLUDED; ~n before x.
+  o3 rule Zebra; rule Apple: reported "Rule Zebra" then "Rule Apple" -> THEORY(source) order.
+  o4 rule R [no_derivcheck] In(h(x)): NO warning -> attribute suppresses the rule.
+
+2026-07-17 | Probes s1..s4 (sort key disambiguation, index, candidate scope, mixed)
+  s1 In(h(aaa)),In(h(~zzz)): "~zzz, aaa" -> SORT-TAG dominates name (Fresh < Msg);
+     name-first would give aaa first, so key is (sort, name, idx).
+  s2 In(h(<x.1,x.10,x.2>)): "x.1, x.2, x.10" -> index compared NUMERICALLY.
+  s3 rule Use [St(x),In(h(y))]: only "y" -> state-fact var x is derivable (not flagged);
+     only intruder-supplied (In) content matters.
+  s4 rule Good In(x)->Out(x); rule Bad In(h(w)): only "Rule Bad: w" -> derivable rules omitted.
+
+2026-07-17 | dedup + diff-mode
+  d1 In(h(w)),In(h(w)): "w" once -> variables de-duplicated.
+  d2 --diff In(h(w)): topic still "Message Derivation Checks" (diff unchanged); phase-log
+     shows saturation lines between started/ended. "Derivation Checks" (no "Message") in SPEC
+     = the driver PHASE-LOG line "[Theory X] Derivation checks started/ended", not a wf topic.
+
+2026-07-17 | Timeout / activation via --derivcheck-timeout=N (MUST use '='; `-d 1` mis-parses
+  '1' as a filename => "openFile: does not exist")
+  =0 on POIDC_H: NO "Message Derivation Checks" topic; Subterm still fires (count 2->1);
+     phase-log lines still print. => timeout 0 fully deactivates the check.
+  =1 / =5 on POIDC_H: reSign reported normally (check is fast).
+
+2026-07-17 | Attempt to force a REAL per-rule timeout (xor AC-heavy rules)
+  slow_xor 8-var In(h(a1 XOR..a8)): "Derivation checks ended" prints FAST; the hang is LATER
+     precomputation, not the deriv check. slow5 with --saturation=1 --open-chains=1 completes
+     and deriv check finds nothing. => The derivation check is robustly FAST; a real
+     per-rule timeout cannot be practically triggered with sane inputs. Per-rule timeout OUTPUT
+     text is therefore UNOBSERVED (documented residual; conservative fail-open default chosen).

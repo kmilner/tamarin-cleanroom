@@ -1,0 +1,54 @@
+>>> launch trace port=3700 accountability/csf21-acc-unbounded/mixnets/message-tracing/dmn-message-tracing-all-4.spthy
+>>> launch trace port=3701 ake/bilinear/RYY_PFS.spthy
+>>> launch trace port=3702 asiaccs20-eccDAA/CERTIFY/TPM_DAA_JoinCertify_with_fix_BSN.spthy
+>>> launch trace port=3703 asiaccs20-POIDC/OIDC_CodeFlow_with_ClientSecret.spthy
+>>> launch trace port=3704 ccs18-5G/5G-AKA-bindingChannel/proofs/5G_aka_attack_weakagreement_ue_seaf_keyConf_noAsyKeyRev_noSupiRev_noSqnRev_noKeyRev.spthy
+>>> launch trace port=3705 ccs18-5G/5G-AKA-nonBindingChannel/proofs/5G_aka_attack_secrecy_seaf_kseaf_noKeyRev_noSupiRev_noSqnRev_noAsyKeyRev.spthy
+>>> launch trace port=3706 classic/NSLPK3.spthy
+>>> launch trace port=3707 csf12/NAXOS_eCK.spthy
+>>> launch trace port=3708 csf18-xor/KCL07.spthy
+>>> launch trace port=3709 csf20-disputeResolution/PR3_ShHh.spthy
+>>> launch trace port=3710 eurosp19-eccDAA/analysed/ISOIEC_20008_2013_2_ECC_DAA_FIXED.analysed.spthy
+>>> launch trace port=3711 experiments/RF_dist_bound.spthy
+>>> launch trace port=3712 features/auto-sources/spore/WooLam_Pi_f.spthy
+>>> launch diff port=3713 features/auto-sources/tamarin-repo/csf18-alethea/alethea_votingphase_RF-without-SL.spthy
+>>> launch trace port=3714 features/derivation-checks/revealingSignatureDerivationTest.spthy
+>>> launch diff port=3715 features/equivalence/N5N6DiffTest.spthy
+>>> launch diff port=3716 features/noise/anonymity_Responder_peer_revealed_psk_revealed_passive_trusted_pki_NX.spthy
+>>> launch trace port=3717 features/xor/CRxor.spthy
+>>> launch trace port=3718 fm24-cardpayments/offlineAndOnlineAuthorized/models-n-proofs/C8_LocalAuth_NoCopyIAD_NoCVM_High.spthy
+>>> launch trace port=3719 fm24-cardpayments/onlineAuthorized/models-n-proofs/C8_LocalAuth_CopyIAD_OnlinePIN_High.spthy
+>>> launch trace port=3720 idbased/BP_IBS_0.spthy
+>>> launch trace port=3721 jcs19-xor/LAK06.spthy
+>>> launch trace port=3722 loops/Typing_and_Destructors.spthy
+>>> launch trace port=3723 regression/trace/issue532.spthy
+>>> launch trace port=3724 related_work/TPM_DKRS_CSF11/TPM_Exclusive_Secrets.spthy
+>>> launch diff port=3725 round2/diff_left_right_mismatch.spthy
+>>> launch diff port=3726 round2/diff_reserved_prefix.spthy
+>>> launch diff port=3727 round2/diff_right_rule_mismatch.spthy
+>>> launch trace port=3728 round2/exists_trace_reuse.spthy
+>>> launch trace port=3729 round2/fresh_public_constant.spthy
+>>> launch diff port=3730 round2/jcs19-xor/diff-models/CH07-UK2.spthy
+>>> launch diff port=3731 round2/jcs19-xor/diff-models/CH07-UK3.spthy
+>>> launch diff port=3732 round2/jcs19-xor/diff-models/KCL07-UK1_attack-manual.spthy
+>>> launch diff port=3733 round2/jcs19-xor/diff-models/KCL07-UK1.spthy
+>>> launch diff port=3734 round2/jcs19-xor/diff-models/LAK06-UK1.spthy
+>>> launch diff port=3735 round2/jcs19-xor/diff-models/OTYT06_UK1_proof.spthy
+>>> launch trace port=3736 round2/multiplication_in_rule_lhs.spthy
+>>> launch trace port=3737 sapic/deprecated/csf21-acc-unbounded/mixvote/mixvote_SmHh-multi-session-5-fixed.spthy
+>>> launch trace port=3738 sapic/fast/basic/boundonce.spthy
+>>> launch trace port=3739 sapic/fast/basic/operator-precedence-5.spthy
+>>> launch trace port=3740 sapic/fast/feature-predicates/decwrap-destr-manual.spthy
+>>> launch trace port=3741 sapic/fast/MoedersheimWebService/set-abstr.spthy
+>>> launch trace port=3742 sapic/manual-proofs/Yubikey/complete_proof.spthy
+>>> launch trace port=3743 sapic/slow/PKCS11/pkcs11-templates.spthy
+>>> launch trace port=3744 thesis-benedikt/running-examples/UM_one_pass_private.spthy
+>>> launch diff port=3745 thesis-LaraSchmid-evoting/chapter4_DisputeResolution/aletheaDR_ShHh_RF.spthy
+>>> launch trace port=3746 thesis-LaraSchmid-evoting/chapter4_DisputeResolution/PR7_ShHm.spthy
+>>> launch trace port=3747 thesis-SvenHammann-POIDC/Pairwise_POIDC_H.spthy
+>>> launch trace port=3748 Tutorial.spthy
+=== all scrapes finished ===
+      2 FAIL:no-index
+      1 FAIL:notclosed
+     13 OK:equiv:1-idx
+     33 OK:trace:1-idx

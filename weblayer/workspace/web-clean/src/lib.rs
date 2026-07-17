@@ -12,6 +12,8 @@
 //!
 //! Module map:
 //! * [`route`] — parse a request path into a structured route (the grammar).
+//! * [`dispatch`] — the UI state machine: route dispatch, theory-version
+//!   management, and response-envelope assembly, over a `ProverOps` trait.
 //! * [`envelope`] — the two JSON response shapes (`{html,title}`, `{redirect}`).
 //! * [`escape`] — HTML entity escaping.
 //! * [`page`] — the full theory-view HTML shell (the `overview/*` pages).
@@ -21,6 +23,7 @@
 //! * [`text`] — the plain-text bodies (`source`/`message`, `next`/`prev`).
 //! * [`errors`] — the 404 Not Found page.
 
+pub mod dispatch;
 pub mod envelope;
 pub mod errors;
 pub mod escape;

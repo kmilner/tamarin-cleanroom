@@ -1,0 +1,10 @@
+theory NotSub
+begin
+rule R1:
+   [ Fr(~x) ]
+  --[ B(~x) ]->
+   [ Out(~x) ]
+lemma L1:
+  all-traces
+  "not (All y #i #j. B(y) @ #i ==> #i = #j)"
+end

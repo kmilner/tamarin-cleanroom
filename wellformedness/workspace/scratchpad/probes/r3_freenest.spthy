@@ -1,0 +1,15 @@
+theory FreeNest
+begin
+
+functions: f/1
+
+rule R1:
+   [ Fr(~x) ]
+  --[ Act(~x) ]->
+   [ Out(f(~x)) ]
+
+lemma L1:
+  all-traces
+  "All x #i. Act(x) @ #i ==> x = f(y)"
+
+end

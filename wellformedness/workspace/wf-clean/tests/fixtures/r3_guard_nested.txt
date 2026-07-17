@@ -1,0 +1,11 @@
+WARNING: the following wellformedness checks failed!
+
+ Formula guardedness
+====================
+
+  Lemma `L1' cannot be converted to a guarded formula:
+    unguarded variable(s) '#j' in the subformula
+      "∀ y #i #j. (B( y ) @ #i) ⇒ (#i = #j)"
+    in the formula
+      "¬(∀ y #i #j. (B( y ) @ #i) ⇒ (#i = #j))"
+*/
