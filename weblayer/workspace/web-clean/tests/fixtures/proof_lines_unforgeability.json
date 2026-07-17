@@ -1,0 +1,229 @@
+{
+ "lemma": "unforgeability",
+ "decl_status": "hl_good",
+ "lines": [
+  {
+   "kind": "step",
+   "depth": 0,
+   "status": "hl_good",
+   "by": false,
+   "method_html": "<span class=\"hl_keyword\">simplify</span>",
+   "annotation": "",
+   "path": []
+  },
+  {
+   "kind": "step",
+   "depth": 0,
+   "status": "hl_good",
+   "by": false,
+   "method_html": "<span class=\"hl_keyword\">solve(</span> Private_Ch( x ) ▶₀ #j <span class=\"hl_keyword\">)</span>",
+   "annotation": "",
+   "path": [
+    "_"
+   ]
+  },
+  {
+   "kind": "case",
+   "depth": 1,
+   "status": "hl_good",
+   "name": "B_2"
+  },
+  {
+   "kind": "step",
+   "depth": 1,
+   "status": "hl_good",
+   "by": false,
+   "method_html": "<span class=\"hl_keyword\">solve(</span> St_S_1( $B, x ) ▶₁ #j <span class=\"hl_keyword\">)</span>",
+   "annotation": "",
+   "path": [
+    "_",
+    "B_2"
+   ]
+  },
+  {
+   "kind": "case",
+   "depth": 2,
+   "status": "hl_good",
+   "name": "S_1"
+  },
+  {
+   "kind": "step",
+   "depth": 2,
+   "status": "hl_good",
+   "by": false,
+   "method_html": "<span class=\"hl_keyword\">solve(</span> !KU( sign(~x, ~ltkB) ) <span class=\"hl_operator\">@</span> #vk.3 <span class=\"hl_keyword\">)</span>",
+   "annotation": "",
+   "path": [
+    "_",
+    "B_2",
+    "S_1"
+   ]
+  },
+  {
+   "kind": "case",
+   "depth": 3,
+   "status": "hl_good",
+   "name": "B_1"
+  },
+  {
+   "kind": "step",
+   "depth": 3,
+   "status": "hl_good",
+   "by": false,
+   "method_html": "<span class=\"hl_keyword\">solve(</span> (#l <span class=\"hl_operator\">&lt;</span> #j)<span class=\"hl_operator\">  ∥</span> (#j <span class=\"hl_operator\">&lt;</span> #l) <span class=\"hl_keyword\">)</span>",
+   "annotation": "",
+   "path": [
+    "_",
+    "B_2",
+    "S_1",
+    "B_1"
+   ]
+  },
+  {
+   "kind": "case",
+   "depth": 4,
+   "status": "hl_good",
+   "name": "case_1"
+  },
+  {
+   "kind": "step",
+   "depth": 4,
+   "status": "hl_good",
+   "by": false,
+   "method_html": "<span class=\"hl_keyword\">solve(</span> Private_Ch( ~x ) ▶₀ #l <span class=\"hl_keyword\">)</span>",
+   "annotation": "",
+   "path": [
+    "_",
+    "B_2",
+    "S_1",
+    "B_1",
+    "case_1"
+   ]
+  },
+  {
+   "kind": "case",
+   "depth": 5,
+   "status": "hl_good",
+   "name": "B_2"
+  },
+  {
+   "kind": "step",
+   "depth": 5,
+   "status": "hl_good",
+   "by": true,
+   "method_html": "<span class=\"hl_keyword\">contradiction</span> <span class=\"hl_comment\">/* cyclic */</span>",
+   "annotation": "",
+   "path": [
+    "_",
+    "B_2",
+    "S_1",
+    "B_1",
+    "case_1",
+    "B_2"
+   ]
+  },
+  {
+   "kind": "qed",
+   "depth": 4,
+   "status": "hl_good"
+  },
+  {
+   "kind": "next",
+   "depth": 3,
+   "status": "hl_good"
+  },
+  {
+   "kind": "case",
+   "depth": 4,
+   "status": "hl_good",
+   "name": "case_2"
+  },
+  {
+   "kind": "step",
+   "depth": 4,
+   "status": "hl_good",
+   "by": false,
+   "method_html": "<span class=\"hl_keyword\">solve(</span> Private_Ch( ~x ) ▶₀ #l <span class=\"hl_keyword\">)</span>",
+   "annotation": "",
+   "path": [
+    "_",
+    "B_2",
+    "S_1",
+    "B_1",
+    "case_2"
+   ]
+  },
+  {
+   "kind": "case",
+   "depth": 5,
+   "status": "hl_good",
+   "name": "B_2"
+  },
+  {
+   "kind": "step",
+   "depth": 5,
+   "status": "hl_good",
+   "by": true,
+   "method_html": "<span class=\"hl_keyword\">contradiction</span> <span class=\"hl_comment\">/* cyclic */</span>",
+   "annotation": "",
+   "path": [
+    "_",
+    "B_2",
+    "S_1",
+    "B_1",
+    "case_2",
+    "B_2"
+   ]
+  },
+  {
+   "kind": "qed",
+   "depth": 4,
+   "status": "hl_good"
+  },
+  {
+   "kind": "qed",
+   "depth": 3,
+   "status": "hl_good"
+  },
+  {
+   "kind": "next",
+   "depth": 2,
+   "status": "hl_good"
+  },
+  {
+   "kind": "case",
+   "depth": 3,
+   "status": "hl_good",
+   "name": "c_sign"
+  },
+  {
+   "kind": "step",
+   "depth": 3,
+   "status": "hl_good",
+   "by": true,
+   "method_html": "<span class=\"hl_keyword\">solve(</span> !KU( ~ltkB ) <span class=\"hl_operator\">@</span> #vk.5 <span class=\"hl_keyword\">)</span>",
+   "annotation": "",
+   "path": [
+    "_",
+    "B_2",
+    "S_1",
+    "c_sign"
+   ]
+  },
+  {
+   "kind": "qed",
+   "depth": 2,
+   "status": "hl_good"
+  },
+  {
+   "kind": "qed",
+   "depth": 1,
+   "status": "hl_good"
+  },
+  {
+   "kind": "qed",
+   "depth": 0,
+   "status": "hl_good"
+  }
+ ]
+}

@@ -1,0 +1,147 @@
+{
+  "summary": "Three isolated clean-room agents reimplement wellformedness, graph/dot, and web layer from black-box oracles only",
+  "agentCount": 3,
+  "logs": [
+    "parallel[2] failed: agent({schema}): StructuredOutput retry cap (5) exceeded — 5 failed calls with no valid output"
+  ],
+  "result": {
+    "wf": {
+      "behavior_spec_summary": "The oracle emits wellformedness results inside the pretty-printed theory, wrapped in a block comment: `/* All wellformedness checks were successful. */` on success, or `/*\\nWARNING: the following wellformedness checks failed!\\n\\n<blocks>\\n*/` on failure. Each block = topic header + a `=`-underline exactly as long as the topic (counting significant leading/trailing spaces) + blank line + body; blocks joined by blank lines. I enumerated 13 distinct warning topics in a fixed canonical order: (1) Unbound variables, (2) Public constants with mismatching capitalization, (3) Variable with mismatching sorts or capitalization, (4) Reserved names, (5) Fr facts must only use a fresh- or a msg-variable, (6) Special facts, (7) Fact arity issues, (8) Fact multiplicity issues, (9) Facts occur in the left-hand-side but not in any right-hand-side (trailing space), (10) Formula terms, (11) Formula guardedness (leading space), (12) Nat Sorts, (13) Subterm Convergence Warning — plus (14) Message Derivation / Derivation Checks which the binary appends via Maude and are not AST-derivable. The public-names report (#2) is generated separately and inserted before the first present anchor topic (#3..#13); after_public_names_topics()/insert_wf_before expose that. I reverse-engineered exact byte templates for every topic (trailing-space quirks, `\\n  \\n` 2-space separators, the nested `  Fact `name':` arity/multiplicity layout, the `factName `X' arity: N multiplicity: Linear` LHS/RHS format with a nearest-neighbour suggestion gated at edit-distance <=3), the term pretty-printer (`~x`/`$p`/`x.1`, `<a, b>`, `a^b`, `(a*b)`, `(a++b)`, `(a(+)b)`, `(a%+b)`, `Name( args )` facts), and a single-line unicode formula printer. Key position-dependent finding: reserved facts are {K,KU,KD} on LHS/RHS but {K,KU,KD,In,Out,Fr} in actions; In/Out/Fr misplaced on LHS/RHS are Special facts. Unguarded restrictions and SAPIC unbound process vars are fatal errors, not warnings.",
+      "components_done": [
+        "Core report API: WfError/WfError::new, WfReport, topics(), underline_topic(), render_report() byte-identical comment + success line, insert_wf_before(), after_public_names_topics()",
+        "check_theory() orchestrating all checks in canonical order with public-names anchor insertion",
+        "Check 1 Unbound variables (msg/fresh/nat vars not bound by premises; pub excluded; base-name sorted)",
+        "Check 2 Public constants with mismatching capitalization + public_names_report + public_names_report_from_pairs",
+        "Check 3 Variable with mismatching sorts or capitalization",
+        "Check 4 Reserved names (position-dependent set: {K,KU,KD} on LHS/RHS, +{In,Out,Fr} in actions)",
+        "Check 5 Fr facts must only use a fresh- or a msg-variable",
+        "Check 6 Special facts (Out banned on LHS; In/Fr banned on RHS)",
+        "Checks 7 & 8 Fact arity / multiplicity issues (nested per-fact/per-usage layout, alpha-sorted names)",
+        "Check 9 fact_lhs_occur_no_rhs (LHS-only identities + nearest-RHS suggestion at edit-distance <=3)",
+        "Check 10 Formula terms (free-variable case + fixed help text)",
+        "Check 11 Formula guardedness (lemma-only; over-approx detection + single-line unicode formula printer)",
+        "Check 12 Nat Sorts (non-nat variable in a %+ term)",
+        "Check 13 Subterm Convergence Warning (structural r-subterm-of-l decision + equation rendering)",
+        "pretty.rs term/fact printer and formula.rs single-line formula printer",
+        "check_if_lemmas_in_theory (set-difference logic; render string flagged unverified)",
+        "29 tests incl. 15 oracle-captured byte-parity fixtures; std-only zero-dep crate; warning-free build"
+      ],
+      "loc": 1269,
+      "tests_written": 29,
+      "tests_passing": 29,
+      "oracle_queries": 105,
+      "gaps": [
+        "Message Derivation Checks and Derivation Checks (topic #14) require Maude message deduction / the solver and are not derivable from the AST; check_theory does not produce them (out of scope).",
+        "Fact arity/multiplicity scan protocol rules only; conflicts involving a LEMMA fact (oracle renders these as raw Haskell `Fact {factTag = ProtoFact ...}` de Bruijn, per probe p24) are not detected or rendered.",
+        "Formula terms: only the free-variable case is implemented. Reducible-function/complex wrong-terms rendered with de Bruijn `Bound N` (Typing_and_Destructors capture) are not reproduced; inline-vs-next-line width wrapping is approximated.",
+        "Formula guardedness uses a single-line formula printer; formulas the oracle wraps across indented lines will not be byte-identical. Detection is a permissive over-approximation (guarded = var appears in some Action/Pred atom), favouring safe false-negatives; nested subformula selection is approximate.",
+        "Subterm Convergence uses the structural 'rhs is a subterm of lhs' test, does not model the finite-variant property, and does not reproduce multi-line wrapped equation rendering (eccDAA); a `convergent` flag suppresses it.",
+        "Nat Sorts fires on any non-Nat-sorted variable inside a %+ term and relies on parser-assigned sorts; full nat sort inference is not modeled.",
+        "AC operator argument ordering: xor operands are string-sorted (matches probe t_xor) but multiset/mult/nat keep source order; exact parity needs tamarin's term ordering.",
+        "fsep line-wrapping of fact lists in Reserved/Special facts (~column 80, probe t_terms) is not implemented; only single-line joins, so very wide fact lists will not match.",
+        "public_names_report collects constants from rule facts only (not lemma/restriction formulas); multi-group item separator and group order inferred from single-group observations.",
+        "check_if_lemmas_in_theory: missing-lemma set-difference logic is implemented and tested, but the exact render string is unobservable through the file-only oracle (no CLI --prove path), so its message is an unverified placeholder.",
+        "Some Term variants (FreshLit, NatLit, Number, NumberOne, DhNeutral, AlgApp, Diff, PatMatch) are rendered best-effort without direct oracle confirmation (DH exponent probes truncated)."
+      ],
+      "notes": "Crate at /home/kamilner/tamarin-cleanroom/wellformedness/workspace/wf-clean (lib wf_clean, std-only, no deps). Source I authored: src/pretty.rs(125) + src/report.rs(76) + src/checks.rs(947) + src/formula.rs(42) + src/lib.rs(79) = 1269 LOC; src/ast.rs is the provided interface header (copied, not authored). Tests: tests/checks_tests.rs + tests/api_surface.rs (~460 lines) with 15 oracle-captured fixtures in tests/fixtures/. cargo test => 29/29 pass; cargo build warning-free. Deliverables: workspace/BEHAVIOR.md (full inferred spec: canonical order, per-check templates, term printer, gaps) and workspace/QUERIES.log (~80 logged oracle interactions). Method: enumerated checks by mutating minimal .spthy inputs and mining oracle/captures until new topics stopped appearing (converged at 13; captures held only 6). Byte-parity spot-verified by capturing the oracle's exact WARNING block per probe via wf_oracle.sh, storing it as a fixture, hand-building the matching AST, and asserting render_report(check_theory(&thy)) equals it. Every behavior claim traces to an oracle observation, capture, or SPEC; no tamarin-prover source/docs/internals were read — only oracle/wf_oracle.sh was executed and files under oracle/ were read. oracle_queries=105 is approximate. Required API surface (required_api.md) verified by tests/api_surface.rs binding each signature as a typed fn pointer."
+    },
+    "graph": {
+      "components_done": [
+        "BEHAVIOR.md: precise observed spec (URL families, two DOT headers + byte-level block/whitespace rule, record/ellipse/plain node syntax, edge syntax and style vocabulary, role-based clustering trigger, abbreviation naming/legend/selection), each claim tagged to an observation or marked [GAP]",
+        "graph-clean crate (std-only) data model in src/model.rs plus Graph::infer_header applying the observed cluster trigger",
+        "src/dot.rs: byte-exact DOT serializer (both headers, record/ellipse/plain nodes, ported edges, cluster subgraphs, legend sink-block, blank-line-before-close rule)",
+        "src/term.rs: independent term model with tamarin-surface rendering and root-symbol-name for prefixing",
+        "src/abbrev.rs: prefix_for_symbol, Abbreviator (per-prefix numbering, dedup, bottom-up nesting), byte-exact legend_html (65-space hang indent + HTML escaping), documented best-effort select()",
+        "Test suite: 10 abbreviation/clustering tests + 6 fixture round-trips + 1 env-gated bulk round-trip + 1 doctest, plus a test-only parser for the captured DOT dialect proving byte-parity",
+        "QUERIES.log and 6 extracted DOT fixtures"
+      ],
+      "loc": 1376,
+      "tests_written": 18,
+      "tests_passing": 18,
+      "oracle_queries": 41,
+      "behavior_spec_summary": "The graph payload is graphviz DOT served at /thy/trace/N/interactive-graph-def/proof/... (intdot is a fixed HTML shell embedding <dot-graph-viz dotsrc=...>; a --with-json backend exists but is unavailable and absent from the corpus, so JSON graph format is unobserved). DOT uses SIMPLE header for pure multiset-rewriting graphs and COMPACT/clustered header (packmode=cluster, compound=true, subgraph cluster_<Role>_Session_<k>). Trigger byte-verified over all 14705 graphs, zero violations: compact iff a node has role != Undefined. Three node shapes: record (rule instances, label {{prem}|{info}|{concl}} with <nK> ports, per-rule fillcolor, role), ellipse (knowledge/action/temporal, optional color), plain (legend HTML TABLE). Edges nS[:port] -> nD[:port][attrs] with observed style vocabulary (red/dashed KU, bold weight-10 structural, blue3/dashed temporal, invis legend). Abbreviation NAME=PREFIX+counter, PREFIX = first two alphabetic chars uppercased of the root symbol name (function; unquoted constant; undecorated variable; or operator function name: ^=exp=EX, *=mult=MU, ++=union=UN, xor=XO); nests bottom-up (EX1='g'^MU1). Legend rows NAME = EXPANSION, continuation rows hang-indented 65 spaces (= TABLE tag width), expansions HTML-escaped. No exposed simplification level (URL query params inert; no CLI flag). Validated end-to-end: parser ingests every captured payload into the crate model and re-serialization reproduces 14705/14705 byte-exact.",
+      "gaps": [
+        "JSON graph backend format unobserved: --with-json needs an external rendering tool not installed here, and no interactive-graph-def body in the corpus is JSON (corpus is 100% DOT).",
+        "Abbreviation SELECTION set is not fully determinable black-box: neither pure size nor pure occurrence threshold (sign(...) at 3 occ abbreviated while KDF(z) at 4 occ not; structurally identical 'g'^~lkR vs 'g'^~lkR.1 differ). Crate ships a documented tunable select() heuristic; byte-parity of the selection set is NOT claimed. Naming, numbering-over-a-given-order, nesting, and legend rendering ARE byte-exact.",
+        "Per-prefix numbering tie-break follows tamarin canonical term order (numbers are not by first appearance); exact total order needs the solver, so numbering matches only where the order is unambiguous.",
+        "Term line-wrapping in record labels and full term pretty-printing depend on graphviz layout / solver renderer; the model treats cell text as pre-rendered.",
+        "Node fill colors and 8-hex ARGB cluster colors are deterministic hashes of rule/role/cluster; hash not reverse-engineered, so colors are carried explicitly in the model.",
+        "The constraint-system to graph compression CONTENT (which nodes/edges exist for a proof state) requires the GPL solver and is out of scope for a rendering crate."
+      ],
+      "notes": "Protocol adherence: read only PROTOCOL.md/SPEC.md, oracle/captured_responses/ (captured OUTPUT via the sanctioned oracle symlink), and the cleanroom-side hs_server.sh; ran the black-box HS binary as the oracle. No file under /home/kamilner/tamarin-rs/ was read and no tamarin-prover source/docs fetched. The provided hs_server.sh is buggy (space-separated --port parsed as a positional WORKDIR); I ran the SAME binary via a corrected --port= wrapper in scratchpad (black-box execution only, logged). Deliverables in /home/kamilner/tamarin-cleanroom/graphdot/workspace/: BEHAVIOR.md, QUERIES.log, and graph-clean/ (src 787 LOC, tests 589 LOC, std-only, zero build warnings). Headline: payload-format spec + DOT serializer reproduce ALL 14705 captured DOT payloads byte-exact via model round-trip. Priorities: (1) payload-format fully validated; (2) abbreviation naming+legend byte-exact, selection a documented gap; (3) simplification characterized as the role-based clustering trigger (byte-verified 0/14705 violations) since no simplification-level control exists."
+    },
+    "web": null
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "CleanRoom"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "cleanroom:wellformedness",
+      "phaseIndex": 1,
+      "phaseTitle": "CleanRoom",
+      "agentId": "a9addc4f0d5b97ed0",
+      "model": "claude-opus-4-8[1m]",
+      "state": "done",
+      "startedAt": 1784283740705,
+      "queuedAt": 1784283740689,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "The oracle emits wellformedness results inside the pretty-p…",
+      "promptPreview": "You are a CLEAN-ROOM implementer. Your work will be legally relied upon as an\nindependent creation, and your complete tool-call transcript is retained as evidence. STRICT RULES:\n1. Work ONLY inside your cluster directory. First action: read PROTOCOL.md at\n   /home/kamilner/tamarin-cleanroom/PROTOCOL.md, then your SPEC.md and interface/ files.\n2. NEVER read any file under /home/kamilner/tamarin-rs/…",
+      "lastProgressAt": 1784286547683,
+      "tokens": 243347,
+      "toolCalls": 84,
+      "durationMs": 2806977,
+      "resultPreview": "{\"behavior_spec_summary\":\"The oracle emits wellformedness results inside the pretty-printed theory, wrapped in a block comment: `/* All wellformedness checks were successful. */` on success, or `/*\\\\nWARNING: the following wellformedness checks failed!\\\\n\\\\n<blocks>\\\\n*/` on failure. Each block = topic header + a `=`-underline exactly as long as the topic (counting significant leading/trailing spa…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "cleanroom:graphdot",
+      "phaseIndex": 1,
+      "phaseTitle": "CleanRoom",
+      "agentId": "a29d812038b601a9c",
+      "model": "claude-opus-4-8[1m]",
+      "state": "done",
+      "startedAt": 1784283740707,
+      "queuedAt": 1784283740689,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "The graph payload is graphviz DOT served at /thy/trace/N/in…",
+      "promptPreview": "You are a CLEAN-ROOM implementer. Your work will be legally relied upon as an\nindependent creation, and your complete tool-call transcript is retained as evidence. STRICT RULES:\n1. Work ONLY inside your cluster directory. First action: read PROTOCOL.md at\n   /home/kamilner/tamarin-cleanroom/PROTOCOL.md, then your SPEC.md and interface/ files.\n2. NEVER read any file under /home/kamilner/tamarin-rs/…",
+      "lastProgressAt": 1784285888966,
+      "tokens": 206596,
+      "toolCalls": 88,
+      "durationMs": 2148259,
+      "resultPreview": "{\"components_done\":[\"BEHAVIOR.md: precise observed spec (URL families, two DOT headers + byte-level block/whitespace rule, record/ellipse/plain node syntax, edge syntax and style vocabulary, role-based clustering trigger, abbreviation naming/legend/selection), each claim tagged to an observation or marked [GAP]\",\"graph-clean crate (std-only) data model in src/model.rs plus Graph::infer_header appl…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 3,
+      "label": "cleanroom:weblayer",
+      "phaseIndex": 1,
+      "phaseTitle": "CleanRoom",
+      "agentId": "a169c9fd75138f333",
+      "model": "claude-opus-4-8[1m]",
+      "state": "error",
+      "startedAt": 1784283740707,
+      "queuedAt": 1784283740689,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "All dynamic routes are /thy/<kind=trace>/<index>/<handler>/…",
+      "promptPreview": "You are a CLEAN-ROOM implementer. Your work will be legally relied upon as an\nindependent creation, and your complete tool-call transcript is retained as evidence. STRICT RULES:\n1. Work ONLY inside your cluster directory. First action: read PROTOCOL.md at\n   /home/kamilner/tamarin-cleanroom/PROTOCOL.md, then your SPEC.md and interface/ files.\n2. NEVER read any file under /home/kamilner/tamarin-rs/…",
+      "lastProgressAt": 1784285919192,
+      "error": "agent({schema}): StructuredOutput retry cap (5) exceeded — 5 failed calls with no valid output",
+      "tokens": 219283,
+      "toolCalls": 92,
+      "durationMs": 2178485
+    }
+  ],
+  "totalTokens": 669226,
+  "totalToolCalls": 264
+}

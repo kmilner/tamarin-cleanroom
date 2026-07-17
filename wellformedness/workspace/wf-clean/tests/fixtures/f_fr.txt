@@ -1,0 +1,11 @@
+WARNING: the following wellformedness checks failed!
+
+Fr facts must only use a fresh- or a msg-variable
+=================================================
+
+  rule `R1' fact: Fr( $a )
+  
+  rule `R1' fact: Fr( $b )
+  
+  rule `R2' fact: Fr( $c )
+*/

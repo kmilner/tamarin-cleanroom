@@ -1,0 +1,157 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory Typing_and_Destructors] Theory loaded
+[Theory Typing_and_Destructors] Theory translated
+[Theory Typing_and_Destructors] Derivation checks started
+[Theory Typing_and_Destructors] Derivation checks ended
+[Theory Typing_and_Destructors] Theory closed
+theory Typing_and_Destructors
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, h/1, pair/2, sdec/2, senc/2, snd/1
+equations:
+    fst(<x.1, x.2>) = x.1,
+    sdec(senc(x.1, x.2), x.2) = x.1,
+    snd(<x.1, x.2>) = x.2
+
+rule (modulo E) Setup_Key:
+   [ Fr( ~k ) ] --[ IsKey( ~k ) ]-> [ !Key( ~k ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Reveal_Key:
+   [ !Key( k ) ] --[ Rev( k ) ]-> [ Out( k ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Initiator:
+   [ !Key( k ), Fr( ~sec ), Fr( ~pub ) ]
+  --[ Out_Initiator( senc(<~sec, ~pub>, k) ), Public( ~pub ) ]->
+   [ Out( senc(<~sec, ~pub>, k) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Responder:
+   [ !Key( key ), In( msg ) ]
+  --[
+  In_Responder( msg, snd(sdec(msg, key)) ),
+  Secret( fst(sdec(msg, key)), key ), NoFailureTerm( snd(sdec(msg, key)) )
+  ]->
+   [ Out( snd(sdec(msg, key)) ) ]
+
+  /*
+  rule (modulo AC) Responder:
+     [ !Key( key ), In( msg ) ]
+    --[ In_Responder( msg, z ), Secret( z.1, key ), NoFailureTerm( z ) ]->
+     [ Out( z ) ]
+    variants (modulo AC)
+    1. key   = key.5
+       msg   = msg.5
+       z     = snd(sdec(msg.5, key.5))
+       z.1   = fst(sdec(msg.5, key.5))
+    
+    2. key   = x.5
+       msg   = senc(x.6, x.5)
+       z     = snd(x.6)
+       z.1   = fst(x.6)
+    
+    3. key   = x.5
+       msg   = senc(<x.6, x.7>, x.5)
+       z     = x.7
+       z.1   = x.6
+  */
+
+lemma type_assertion [sources]:
+  all-traces
+  "∀ m pub #i.
+    (In_Responder( m, pub ) @ #i) ⇒
+    ((((∃ #j. (!KU( pub ) @ #j) ∧ (#j < #i)) ∨
+       (∃ #j. Out_Initiator( m ) @ #j)) ∨
+      (∃ body #j. ((!KU( body ) @ #j) ∧ (pub = snd(body))) ∧ (#j < #i))) ∨
+     (∃ body key #j #k.
+       (((IsKey( key ) @ #k) ∧ (!KU( body ) @ #j)) ∧
+        (pub = snd(sdec(body, key)))) ∧
+       (#j < #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ m pub #i.
+  (In_Responder( m, pub ) @ #i)
+ ∧
+  (∀ #j. (!KU( pub ) @ #j) ⇒ ¬(#j < #i)) ∧
+  (∀ #j. (Out_Initiator( m ) @ #j) ⇒ ⊥) ∧
+  (∀ body #j. (!KU( body ) @ #j) ∧ (pub = snd(body)) ⇒ ¬(#j < #i)) ∧
+  (∀ body key #j #k.
+    (IsKey( key ) @ #k) ∧ (!KU( body ) @ #j) ∧ (pub = snd(sdec(body, key)))
+   ⇒
+    ¬(#j < #i))"
+*/
+by sorry
+
+lemma Responder_secrecy:
+  all-traces
+  "∀ sec key #i #j.
+    ((Secret( sec, key ) @ #i) ∧ (K( sec ) @ #j)) ⇒ (∃ #r. Rev( key ) @ #r)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ sec key #i #j.
+  (Secret( sec, key ) @ #i) ∧ (K( sec ) @ #j)
+ ∧
+  ∀ #r. (Rev( key ) @ #r) ⇒ ⊥"
+*/
+by sorry
+
+lemma Public_part_public:
+  exists-trace
+  "(¬(∃ k #i. Rev( k ) @ #i)) ∧
+   (∃ pub #i #j. (Public( pub ) @ #i) ∧ (K( pub ) @ #j))"
+/*
+guarded formula characterizing all satisfying traces:
+"(∀ k #i. (Rev( k ) @ #i) ⇒ ⊥) ∧
+ (∃ pub #i #j. (Public( pub ) @ #i) ∧ (K( pub ) @ #j))"
+*/
+by sorry
+
+/*
+WARNING: the following wellformedness checks failed!
+
+Formula terms
+=============
+
+  Lemma `type_assertion' uses terms of the wrong form:
+    `snd(Bound 1)', `snd(sdec(Bound 3,Bound 2))'
+  
+  The only allowed terms are public constants and bound node and
+  message variables. If you encounter free message variables, then
+  you might have forgotten a #-prefix. Sort prefixes can only be
+  dropped where this is unambiguous. Moreover, reducible function
+  symbols are disallowed.
+*/
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: examples/loops/Typing_and_Destructors.spthy
+
+  processing time: 0.13s
+  
+  WARNING: 1 wellformedness check failed!
+  
+  type_assertion (all-traces): analysis incomplete (1 steps)
+  Responder_secrecy (all-traces): analysis incomplete (1 steps)
+  Public_part_public (exists-trace): analysis incomplete (1 steps)
+
+==============================================================================

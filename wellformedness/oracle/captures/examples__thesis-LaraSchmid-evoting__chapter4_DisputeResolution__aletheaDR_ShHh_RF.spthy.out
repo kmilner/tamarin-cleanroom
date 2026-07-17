@@ -1,0 +1,7 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+"examples/thesis-LaraSchmid-evoting/chapter4_DisputeResolution/aletheaDR_ShHh_RF.spthy" (line 401, column 40):
+unexpected ")"
+expecting term
+diff operator found, but flag diff not set

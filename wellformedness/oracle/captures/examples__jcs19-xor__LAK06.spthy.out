@@ -1,0 +1,265 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory LAK06] Theory loaded
+[Theory LAK06] Theory translated
+[Theory LAK06] Derivation checks started
+[Theory LAK06] Derivation checks ended
+[Theory LAK06] Theory closed
+theory LAK06
+
+begin
+
+// Function signature and definition of the equational theory E
+
+builtins: xor
+functions: fst/1, h/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) setup:
+   [ Fr( ~k ) ]
+  --[ OnlyOnce( 'setup' ), Create( ~k ) ]->
+   [ !Reader( ~k ), !Tag( ~k ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) initiatereader:
+   [ !Reader( ~k ), Fr( ~r0 ) ]
+  --[ OnlyOnce( 'initiareader' ) ]->
+   [ ReaderState1( ~k, ~r0 ), Out( ~r0 ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) tag1:
+   [ !Tag( ~k ), Fr( ~r1 ), In( r0 ) ]
+  --[ Running( <'R', 'T', ~k, r0, ~r1> ) ]->
+   [ TagState1( ~k, ~r1, r0 ), Out( <~r1, h((~k⊕~r1⊕r0))> ) ]
+
+  /*
+  rule (modulo AC) tag1:
+     [ !Tag( ~k ), Fr( ~r1 ), In( r0 ) ]
+    --[ Running( <'R', 'T', ~k, r0, ~r1> ) ]->
+     [ TagState1( ~k, ~r1, r0 ), Out( <~r1, h(z)> ) ]
+    variants (modulo AC)
+    1. ~k    = ~k.7
+       ~r1   = ~r1.8
+       r0    = ~k.7
+       z     = ~r1.8
+    
+    2. ~k    = ~k.7
+       ~r1   = ~r1.8
+       r0    = zero
+       z     = (~k.7⊕~r1.8)
+    
+    3. ~k    = ~k.8
+       ~r1   = ~r1.9
+       r0    = r0.10
+       z     = (~k.8⊕~r1.9⊕r0.10)
+    
+    4. ~k    = ~k.14
+       ~r1   = ~r1.15
+       r0    = (~k.14⊕x.26)
+       z     = (~r1.15⊕x.26)
+  */
+
+rule (modulo E) acceptreader:
+   [ ReaderState1( ~k, ~r0 ), In( <r1, h((~k⊕~r0⊕r1))> ) ]
+  --[ Commit( <'R', 'T', ~k, ~r0, r1> ), Running( <'T', 'R', ~k, ~r0, r1> )
+  ]->
+   [ Out( h((~k⊕~r0⊕h((~k⊕~r0⊕r1)))) ) ]
+
+  /*
+  rule (modulo AC) acceptreader:
+     [ ReaderState1( ~k, ~r0 ), In( <r1, h(z)> ) ]
+    --[ Commit( <'R', 'T', ~k, ~r0, r1> ), Running( <'T', 'R', ~k, ~r0, r1> )
+    ]->
+     [ Out( h(z.1) ) ]
+    variants (modulo AC)
+    1. ~k    = ~k.8
+       ~r0   = ~r0.9
+       r1    = ~k.8
+       z     = ~r0.9
+       z.1   = (~k.8⊕~r0.9⊕h(~r0.9))
+    
+    2. ~k    = ~k.8
+       ~r0   = ~r0.9
+       r1    = ~r0.9
+       z     = ~k.8
+       z.1   = (~k.8⊕~r0.9⊕h(~k.8))
+    
+    3. ~k    = ~k.8
+       ~r0   = ~r0.9
+       r1    = zero
+       z     = (~k.8⊕~r0.9)
+       z.1   = (~k.8⊕~r0.9⊕h((~k.8⊕~r0.9)))
+    
+    4. ~k    = ~k.8
+       ~r0   = ~r0.9
+       r1    = (~k.8⊕~r0.9)
+       z     = zero
+       z.1   = (~k.8⊕~r0.9⊕h(zero))
+    
+    5. ~k    = ~k.9
+       ~r0   = ~k.9
+       r1    = r1.11
+       z     = r1.11
+       z.1   = h(r1.11)
+    
+    6. ~k    = ~k.9
+       ~r0   = ~r0.10
+       r1    = r1.11
+       z     = (~k.9⊕~r0.10⊕r1.11)
+       z.1   = (~k.9⊕~r0.10⊕h((~k.9⊕~r0.10⊕r1.11)))
+    
+    7. ~k    = ~k.10
+       ~r0   = ~r0.11
+       r1    = (~k.10⊕~r0.11⊕z.13)
+       z     = z.13
+       z.1   = (~k.10⊕~r0.11⊕h(z.13))
+    
+    8. ~k    = ~k.15
+       ~r0   = ~r0.16
+       r1    = (~r0.16⊕x.28)
+       z     = (~k.15⊕x.28)
+       z.1   = (~k.15⊕~r0.16⊕h((~k.15⊕x.28)))
+    
+    9. ~k    = ~k.16
+       ~r0   = ~r0.17
+       r1    = (~k.16⊕x.30)
+       z     = (~r0.17⊕x.30)
+       z.1   = (~k.16⊕~r0.17⊕h((~r0.17⊕x.30)))
+  */
+
+rule (modulo E) accepttag:
+   [ TagState1( ~k, ~r1, r0 ), In( h((~k⊕r0⊕h((~k⊕~r1⊕r0)))) ) ]
+  --[ Commit( <'T', 'R', ~k, r0, ~r1> ), FinTag( ) ]->
+   [ ]
+
+  /*
+  rule (modulo AC) accepttag:
+     [ TagState1( ~k, ~r1, r0 ), In( h(z) ) ]
+    --[ Commit( <'T', 'R', ~k, r0, ~r1> ), FinTag( ) ]->
+     [ ]
+    variants (modulo AC)
+     1. ~k    = ~k.6
+        ~r1   = ~k.6
+        r0    = zero
+        z     = (~k.6⊕h(zero))
+    
+     2. ~k    = ~k.7
+        ~r1   = ~r1.8
+        r0    = ~k.7
+        z     = h(~r1.8)
+    
+     3. ~k    = ~k.7
+        ~r1   = ~r1.8
+        r0    = ~r1.8
+        z     = (~k.7⊕~r1.8⊕h(~k.7))
+    
+     4. ~k    = ~k.7
+        ~r1   = ~r1.8
+        r0    = zero
+        z     = (~k.7⊕h((~k.7⊕~r1.8)))
+    
+     5. ~k    = ~k.7
+        ~r1   = ~r1.8
+        r0    = (~k.7⊕~r1.8)
+        z     = (~r1.8⊕h(zero))
+    
+     6. ~k    = ~k.8
+        ~r1   = ~k.8
+        r0    = r0.10
+        z     = (~k.8⊕r0.10⊕h(r0.10))
+    
+     7. ~k    = ~k.8
+        ~r1   = ~r1.9
+        r0    = r0.10
+        z     = (~k.8⊕r0.10⊕h((~k.8⊕~r1.9⊕r0.10)))
+    
+     8. ~k    = ~k.13
+        ~r1   = ~r1.14
+        r0    = (~r1.14⊕x.24)
+        z     = (~k.13⊕~r1.14⊕x.24⊕h((~k.13⊕x.24)))
+    
+     9. ~k    = ~k.14
+        ~r1   = ~r1.15
+        r0    = (~k.14⊕~r1.15⊕x.26)
+        z     = (~r1.15⊕x.26⊕h(x.26))
+    
+    10. ~k    = ~k.14
+        ~r1   = ~r1.15
+        r0    = (~k.14⊕x.26)
+        z     = (x.26⊕h((~r1.15⊕x.26)))
+  */
+
+lemma executable:
+  exists-trace
+  "(∃ #i. FinTag( ) @ #i) ∧
+   (∀ x #i1 #i2.
+     ((OnlyOnce( x ) @ #i1) ∧ (OnlyOnce( x ) @ #i2)) ⇒ (#i1 = #i2))"
+/*
+guarded formula characterizing all satisfying traces:
+"(∃ #i. (FinTag( ) @ #i)) ∧
+ (∀ x #i1 #i2. (OnlyOnce( x ) @ #i1) ∧ (OnlyOnce( x ) @ #i2) ⇒ #i1 = #i2)"
+*/
+by sorry
+
+lemma helpingSecrecy [reuse]:
+  all-traces "∀ k #i. (Create( k ) @ #i) ⇒ (¬(∃ #j. K( k ) @ #j))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ k #i. (Create( k ) @ #i) ∧ ∃ #j. (K( k ) @ #j)"
+*/
+by sorry
+
+lemma noninjectiveagreementTAG [use_induction]:
+  all-traces
+  "∀ t #i.
+    (Commit( <'T', 'R', t> ) @ #i) ⇒ (∃ #j. Running( <'T', 'R', t> ) @ #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ t #i.
+  (Commit( <'T', 'R', t> ) @ #i)
+ ∧
+  ∀ #j. (Running( <'T', 'R', t> ) @ #j) ⇒ ⊥"
+*/
+by sorry
+
+lemma noninjectiveagreementREADER [use_induction]:
+  all-traces
+  "∀ t #i.
+    (Commit( <'R', 'T', t> ) @ #i) ⇒ (∃ #j. Running( <'R', 'T', t> ) @ #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ t #i.
+  (Commit( <'R', 'T', t> ) @ #i)
+ ∧
+  ∀ #j. (Running( <'R', 'T', t> ) @ #j) ⇒ ⊥"
+*/
+by sorry
+
+/* All wellformedness checks were successful. */
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: examples/jcs19-xor/LAK06.spthy
+
+  processing time: 0.31s
+  
+  executable (exists-trace): analysis incomplete (1 steps)
+  helpingSecrecy (all-traces): analysis incomplete (1 steps)
+  noninjectiveagreementTAG (all-traces): analysis incomplete (1 steps)
+  noninjectiveagreementREADER (all-traces): analysis incomplete (1 steps)
+
+==============================================================================

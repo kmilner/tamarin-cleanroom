@@ -1,0 +1,12 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n5[shape="record",label="{{<n0> St_I( ~id, ~ltkA, pkB, 'm1', commitmsg, c2 )|<n1> Fr( ~ni )}|{<n2> #t1 : I_1[Begin( 'I', \<pk(~ltkA), pkB\>, ~ni, c2 ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Gen( ~ni ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Invariant_I( ~id, ~ltkA, pkB )]\l}|{<n3> St_I( ~id, ~ltkA, pkB,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<'m2', ~ni\>, commitmsg, c2\l)\l|<n4> Out( \<\<'1', pk(~ltkA), pkB, ~ni, c2\>, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sign(\<'1', pk(~ltkA), pkB, ~ni, c2\>, ~ltkA)\>\l)\l}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+n6[label="Session( 'I', <pk(~ltkA), pkB>, data2 ) @ #t0",shape="ellipse",color="darkblue"];
+n7[label="Session( 'I', <pk(~ltkA), pkB>, <~ni, c2, data> ) @ #t2",shape="ellipse",color="darkblue"];
+n6 -> n7[color="black",style="dashed"];
+n5:n2 -> n7[color="black",style="dashed"];
+
+}

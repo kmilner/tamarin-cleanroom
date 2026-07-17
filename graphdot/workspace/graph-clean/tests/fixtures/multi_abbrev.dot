@@ -1,0 +1,58 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n8[shape="record",label="{{<n0> In( EX2 )|<n1> Fr( ~ekR.1 )|<n2> !Ltk( $R, ~lkR )|<n3> !Pk( $I, 'g'^~x.1 )}|{<n4> #i1 : Resp_1[SidR_1( ~ekR.1, $I, $R, EX2, EX3, H1 )]}|{<n5> Out( EX3 )|<n6> !Ephk( ~ekR.1 )|<n7> !Sessk( ~ekR.1, H1 )}}",fillcolor="#b6db99",style="filled",fontcolor="black",role="Undefined"];
+n9[label="#i2 : isend[K( H1 )]",shape="ellipse"];
+n10[label="#vf : isend",shape="ellipse"];
+n11[label="#vk : c_h[!KU( H1 )]",shape="ellipse"];
+n17[shape="record",label="{{<n12> Fr( ~lkR )}|{<n13> #vr : generate_ltk}|{<n14> !Ltk( $R, ~lkR )|<n15> !Pk( $R, 'g'^~lkR )|<n16> Out( 'g'^~lkR )}}",fillcolor="#a6dd9a",style="filled",fontcolor="black",role="Undefined"];
+n18[label="#vk.1 : coerce[!KU( EX1 )]",shape="ellipse"];
+n24[shape="record",label="{{<n19> Fr( ~x.1 )}|{<n20> #vr.1 : generate_ltk}|{<n21> !Ltk( $I, ~x.1 )|<n22> !Pk( $I, 'g'^~x.1 )|<n23> Out( 'g'^~x.1 )}}",fillcolor="#a6dd9a",style="filled",fontcolor="black",role="Undefined"];
+n33[shape="record",label="{{<n25> In( X )|<n26> Fr( ~ekR )|<n27> !Ltk( $R.1, ~lkR.1 )|<n28> !Pk( $I.1, 'g'^~x.2 )}|{<n29> #vr.2 : Resp_1[SidR_1( ~ekR, $I.1, $R.1, X, 'g'^~ekR, H2 )]}|{<n30> Out( 'g'^~ekR )|<n31> !Ephk( ~ekR )|<n32> !Sessk( ~ekR, H2 )}}",fillcolor="#b6db99",style="filled",fontcolor="black",role="Undefined"];
+n34[label="#vr.3 : d_exp",shape="ellipse"];
+n35[label="#vf.4 : isend",shape="ellipse"];
+n41[shape="record",label="{{<n36> Fr( ~lkR.1 )}|{<n37> #vr.4 : generate_ltk}|{<n38> !Ltk( $R.1, ~lkR.1 )|<n39> !Pk( $R.1, EX4 )|<n40> Out( EX4 )}}",fillcolor="#a6dd9a",style="filled",fontcolor="black",role="Undefined"];
+n47[shape="record",label="{{<n42> Fr( ~x.2 )}|{<n43> #vr.5 : generate_ltk}|{<n44> !Ltk( $I.1, ~x.2 )|<n45> !Pk( $I.1, 'g'^~x.2 )|<n46> Out( 'g'^~x.2 )}}",fillcolor="#a6dd9a",style="filled",fontcolor="black",role="Undefined"];
+n48[label="!KU( EX2 ) @ #vk.2",shape="ellipse",color="gray"];
+n49[label="!KU( EX3 ) @ #vk.9",shape="ellipse",color="gray"];
+n50[label="!KU( 'g'^(~lkR*~x.1) ) @ #vk.11",shape="ellipse",color="gray"];
+n51[label="!KU( X ) @ #vk.12",shape="ellipse",color="gray"];
+n52[label="!KU( MU2 ) @ #vk.13",shape="ellipse",color="gray"];
+n53[label="!KU( ~ekR.1 ) @ #vk.14",shape="ellipse",color="gray"];
+n54[label="!KU( x ) @ #vk.15",shape="ellipse",color="gray"];
+n10 -> n8:n0[color="gray30"];
+n17:n14 -> n8:n2[style="bold",weight="10.0",color="gray50"];
+n24:n22 -> n8:n3[style="bold",weight="10.0",color="gray50"];
+n33:n30 -> n34[color="orangered2"];
+n34 -> n18[color="orangered2"];
+n35 -> n33:n25[color="gray30"];
+n41:n38 -> n33:n27[style="bold",weight="10.0",color="gray50"];
+n47:n45 -> n33:n28[style="bold",weight="10.0",color="gray50"];
+n11 -> n9[color="red",style="dashed"];
+n18 -> n11[color="red",style="dashed"];
+n48 -> n10[color="red",style="dashed"];
+n48 -> n11[color="red",style="dashed"];
+n49 -> n11[color="red",style="dashed"];
+n50 -> n11[color="red",style="dashed"];
+n51 -> n35[color="red",style="dashed"];
+n52 -> n34[color="red",style="dashed"];
+n53 -> n52[color="red",style="dashed"];
+n54 -> n52[color="red",style="dashed"];
+{
+rank="sink";
+n55[shape="plain",label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="3" CELLPADDING="1"><TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">EX2</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">'g'^(~ekR*x)</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">EX3</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">'g'^~ekR.1</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">EX4</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">'g'^~lkR.1</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">H2</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">h(&lt;$I.1, $R.1, X, 'g'^~ekR, z, 'g'^(~lkR.1*~x.2)&gt;)</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">MU1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">(~ekR*x*~ekR.1)</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">EX1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">'g'^MU1</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">H1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">h(&lt;$I, $R, EX2, EX3, EX1, 'g'^(~lkR*~x.1)&gt;)</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">MU2</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">(x*~ekR.1)</TD></TR></TABLE>>];
+
+}
+n8:n4 -> n55[style="invis"];
+n9 -> n55[style="invis"];
+
+}

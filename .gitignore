@@ -1,0 +1,23 @@
+# build artifacts
+target/
+# local-only oracle data (regenerable; raw tree shipped as dot_corpus.tar.gz)
+graphdot/oracle/dot_corpus/
+# material withheld from the public mirror (privacy: de-pseudonymization of
+# contributors, internal strategy). Hash-anchored in evidence/SHA256SUMS.
+evidence/main-session-dirty-room.jsonl
+evidence/workflows/wf_53f48d60-3ef/
+evidence/workflows/wf_8b8fd87b-72e/
+evidence/workflows/wf_5ec90b24-b26/
+evidence/standalone-agents/agent-a9c7edd67d24711cc.jsonl
+evidence/launch-scripts/intruder-variants-licensing-*.js
+evidence/launch-scripts/permission-scope-verify-*.js
+evidence/launch-scripts/tail-reduction-scope-*.js
+evidence/task-results/wayvzgnay.output
+evidence/task-results/wp10palys.output
+evidence/task-results/wpnm6llds.output
+evidence/task-results/wxmq27ygm.output
+evidence/task-results/wjq7adupl.output
+evidence/task-results/a9c7edd67d24711cc.output
+evidence/task-results/b*.output
+TAIL_ELIMINATION_SCOPE.md
+weblayer/workspace/scratch/

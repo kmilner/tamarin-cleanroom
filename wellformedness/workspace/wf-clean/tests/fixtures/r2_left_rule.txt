@@ -1,0 +1,14 @@
+WARNING: the following wellformedness checks failed!
+
+Left rule
+=========
+
+  Inconsistent left rule
+    rule (modulo E) Send:
+       [ Fr( ~k ), In( extra ) ] --> [ Out( ~k ) ]
+  
+  w.r.t.
+  
+    rule (modulo E) Send:
+       [ Fr( ~k ) ] --> [ Out( diff(~k, ~k) ) ]
+*/

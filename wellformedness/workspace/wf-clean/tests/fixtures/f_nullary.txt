@@ -1,0 +1,8 @@
+WARNING: the following wellformedness checks failed!
+
+Reserved names
+==============
+
+  Rule `R1' contains facts with reserved names on the middle:
+    K( )
+*/

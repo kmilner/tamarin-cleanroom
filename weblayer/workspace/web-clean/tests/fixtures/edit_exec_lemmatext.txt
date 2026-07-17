@@ -1,0 +1,6 @@
+lemma exec:
+  exists-trace
+  " Ex x #i. Spend( x )@i "
+
+
+

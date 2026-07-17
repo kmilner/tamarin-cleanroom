@@ -1,0 +1,74 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory issue532] Theory loaded
+[Theory issue532] Theory translated
+[Theory issue532] Derivation checks started
+[Theory issue532] Derivation checks ended
+[Theory issue532] Theory closed
+theory issue532
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) r1:
+   [ LongFactNameExt( ) ] --> [ LongFactNameExact( ), LongFactNameExac( ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) r2:
+   [ OnResultingIn( 'second' ), LongFactNameExkt( ) ]
+  -->
+   [ ResultingIn( 'second' ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) r3:
+   [ LongFactNameExact( ) ] --> [ OneResultingIn( 'second' ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) r4:
+   [ NotInAnyRHS( ) ] --> [ TwoResultingIn( 'second' ) ]
+
+  /* has exactly the trivial AC variant */
+
+/*
+WARNING: the following wellformedness checks failed!
+
+Facts occur in the left-hand-side but not in any right-hand-side 
+=================================================================
+
+  1. in rule "r1":  factName `LongFactNameExt' arity: 0 multiplicity: Linear. Perhaps you want to use the fact in rule "r1":  factName `LongFactNameExact' arity: 0 multiplicity: Linear
+  
+  2. in rule "r2":  factName `OnResultingIn' arity: 1 multiplicity: Linear. Perhaps you want to use the fact in rule "r3":  factName `OneResultingIn' arity: 1 multiplicity: Linear
+  
+  3. in rule "r2":  factName `LongFactNameExkt' arity: 0 multiplicity: Linear. Perhaps you want to use the fact in rule "r1":  factName `LongFactNameExact' arity: 0 multiplicity: Linear
+  
+  4. in rule "r4":  factName `NotInAnyRHS' arity: 0 multiplicity: Linear
+*/
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: examples/regression/trace/issue532.spthy
+
+  processing time: 0.07s
+  
+  WARNING: 1 wellformedness check failed!
+
+==============================================================================

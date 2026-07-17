@@ -1,0 +1,38 @@
+{
+  "summary": "Dirty-room integration: swap tamarin-server onto the audited graph-clean and web-clean crates",
+  "agentCount": 1,
+  "logs": [],
+  "result": {
+    "out": "All tasks complete and validated. The final state is green (workspace build + all server/parser suites + graph fixtures), and the report is written to `/home/kamilner/tamarin-cleanroom/INTEGRATION_REPORT.md`.\n\nVendored graph-clean (837 LOC) and web-clean (1005 LOC) into crates/tamarin-server/src/{graph_clean,web_clean}/ as headerless in-crate modules; only mechanical crate::->super:: fix (+ one doctest fence in mod.rs). Wired both into lib.rs.\nVendored copies verified byte-identical to originals modulo the path fix; clean crates' own suites pass (graph-clean 24 tests, web-clean parity) and the 19 vendored web_clean inline tests pass inside tamarin-server.\nWEB rewired (byte-safe): intdot handler -> web_clean::intdot; overview_page local-origin shell -> web_clean::page with opaque west/center panes; add/delete forms -> web_clean::forms. Deleted ported add_lemma_html + delete_lemma_html + intdot template (~58 GPL LOC).\nWEB kept+reported: overview non-local branch (clean shell bakes in local-only header actions), edit_lemma_html (clean edit_form hard-codes rows=\"8\" vs HS dynamic textHeight), and proof_state + main-view bodies remain as the opaque prover-content suppliers — so theory_html.rs is not deleted.\nWEB not-forced: json_resp envelopes + 404 page are byte-compatible with web_clean, but rewiring is pure return-type/plumbing churn (axum Json across ~40 sites, extra {alert} variant, no request path in scope) with no structural-gate win.\nGRAPH: graph_clean vendored + validated, but the DOT-pipeline rewire is BLOCKED and reported, not forced; handlers/dot.rs and graph/abbreviation.rs kept intact (headers untouched, abbreviation.rs NOT deleted) per the protocol's leave-old-path-and-report clause.\nBlocker 1: term-rendering + abbreviation are one coupled behavior graph_clean omits (record-cell text is a documented GAP; its abbrev works on an independent Term model and cannot substitute names into the ported LNTerm balanced-wrap renderer).\nBlocker 2: graph_clean has no shape for HS trapezium/invtrapezium missing-nodes (Ellipse emits shape=\"ellipse\" only); adding one would be patching clean code.\nBlocker 3: graph_clean takes ids/ports verbatim and does not model HS's graph-global <n0..> port/node-id allocation, which lives in the ported serializer being deleted (transplanting it is forbidden).\nA byte-faithful graph rewire would GROW dot.rs (adapter over a still-live serializer), not thin it; recommended graph_clean round-2: add shape= support, an id/port allocator, and an LNTerm bridge or accepted term GAP.\nValidation all green: cargo build --workspace 0 errors; cargo test -p tamarin-server all suites (lib 80 incl. 19 web_clean, integration 53, doctest ignored); cargo test -p tamarin-parser green; graph fixture tests green; captured-HS parity fixtures stay green.\nReport at /home/kamilner/tamarin-cleanroom/INTEGRATION_REPORT.md. LOC: +1842 vendored (headerless) and ~35 adapter glue; -58 GPL render logic; tracked-file diff +82/-70 across theory.rs, theory_html.rs, lib.rs."
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Integrate"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "integrate:graph+web",
+      "phaseIndex": 1,
+      "phaseTitle": "Integrate",
+      "agentId": "a8d6c5cac71cea5d0",
+      "model": "claude-opus-4-8[1m]",
+      "state": "done",
+      "startedAt": 1784291926123,
+      "queuedAt": 1784291926122,
+      "attempt": 1,
+      "lastToolName": "Write",
+      "lastToolSummary": "/home/kamilner/tamarin-cleanroom/INTEGRATION_REPORT.md",
+      "promptPreview": "You are the DIRTY-ROOM INTEGRATOR in a clean-room relicensing process (read\n/home/kamilner/tamarin-cleanroom/PROTOCOL.md). You may read everything, but you must NOT transplant\nlogic from the files being replaced — you write ADAPTERS (type conversion, data plumbing) that route\nexisting entry points through the audited clean-room crates. Where the clean crate lacks a behavior,\nyou leave the old path…",
+      "lastProgressAt": 1784293329667,
+      "tokens": 231248,
+      "toolCalls": 79,
+      "durationMs": 1403544,
+      "resultPreview": "All tasks complete and validated. The final state is green (workspace build + all server/parser suites + graph fixtures), and the report is written to `/home/kamilner/tamarin-cleanroom/INTEGRATION_REPORT.md`.\n\nVendored graph-clean (837 LOC) and web-clean (1005 LOC) into crates/tamarin-server/src/{graph_clean,web_clean}/ as headerless in-crate modules; only mechanical crate::->super:: fix (+ one do…"
+    }
+  ],
+  "totalTokens": 231248,
+  "totalToolCalls": 79
+}

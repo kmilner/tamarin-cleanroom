@@ -1,0 +1,185 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory NSLPK3] Theory loaded
+[Theory NSLPK3] Theory translated
+[Theory NSLPK3] Derivation checks started
+[Theory NSLPK3] Derivation checks ended
+[Theory NSLPK3] Theory closed
+theory NSLPK3
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: adec/2, aenc/2, fst/1, pair/2, pk/1, snd/1
+equations:
+    adec(aenc(x.1, pk(x.2)), x.2) = x.1,
+    fst(<x.1, x.2>) = x.1,
+    snd(<x.1, x.2>) = x.2
+
+rule (modulo E) Register_pk:
+   [ Fr( ~ltkA ) ]
+  -->
+   [ !Ltk( $A, ~ltkA ), !Pk( $A, pk(~ltkA) ), Out( pk(~ltkA) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Reveal_ltk:
+   [ !Ltk( A, ltkA ) ] --[ RevLtk( A ) ]-> [ Out( ltkA ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) I_1:
+   [ Fr( ~ni ), !Pk( $R, pkR ) ]
+  --[ OUT_I_1( aenc(<'1', ~ni, $I>, pkR) ) ]->
+   [ Out( aenc(<'1', ~ni, $I>, pkR) ), St_I_1( $I, $R, ~ni ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) R_1:
+   [
+   !Ltk( $R, ltkR ), In( aenc(<'1', ni, I>, pk(ltkR)) ), !Pk( I, pkI ),
+   Fr( ~nr )
+   ]
+  --[
+  IN_R_1_ni( ni, aenc(<'1', ni, I>, pk(ltkR)) ),
+  OUT_R_1( aenc(<'2', ni, ~nr, $R>, pkI) ),
+  Running( I, $R, <'init', ni, ~nr> )
+  ]->
+   [ Out( aenc(<'2', ni, ~nr, $R>, pkI) ), St_R_1( $R, I, ni, ~nr ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) I_2:
+   [
+   St_I_1( I, R, ni ), !Ltk( I, ltkI ),
+   In( aenc(<'2', ni, nr, R>, pk(ltkI)) ), !Pk( R, pkR )
+   ]
+  --[
+  IN_I_2_nr( nr, aenc(<'2', ni, nr, R>, pk(ltkI)) ),
+  Commit( I, R, <'init', ni, nr> ), Running( R, I, <'resp', ni, nr> )
+  ]->
+   [ Out( aenc(<'3', nr>, pkR) ), Secret( I, R, nr ), Secret( I, R, ni ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) R_2:
+   [
+   St_R_1( R, I, ni, nr ), !Ltk( R, ltkR ), In( aenc(<'3', nr>, pk(ltkR)) )
+   ]
+  --[ Commit( R, I, <'resp', ni, nr> ) ]->
+   [ Secret( R, I, nr ), Secret( R, I, ni ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Secrecy_claim:
+   [ Secret( A, B, m ) ] --[ Secret( A, B, m ) ]-> [ ]
+
+  /* has exactly the trivial AC variant */
+
+lemma types [sources]:
+  all-traces
+  "(∀ ni m1 #i.
+     (IN_R_1_ni( ni, m1 ) @ #i) ⇒
+     ((∃ #j. (!KU( ni ) @ #j) ∧ (#j < #i)) ∨ (∃ #j. OUT_I_1( m1 ) @ #j))) ∧
+   (∀ nr m2 #i.
+     (IN_I_2_nr( nr, m2 ) @ #i) ⇒
+     ((∃ #j. (!KU( nr ) @ #j) ∧ (#j < #i)) ∨ (∃ #j. OUT_R_1( m2 ) @ #j)))"
+/*
+guarded formula characterizing all counter-examples:
+"((∃ ni m1 #i.
+    (IN_R_1_ni( ni, m1 ) @ #i)
+   ∧
+    (∀ #j. (!KU( ni ) @ #j) ⇒ ¬(#j < #i)) ∧
+    (∀ #j. (OUT_I_1( m1 ) @ #j) ⇒ ⊥)) ∨
+  (∃ nr m2 #i.
+    (IN_I_2_nr( nr, m2 ) @ #i)
+   ∧
+    (∀ #j. (!KU( nr ) @ #j) ⇒ ¬(#j < #i)) ∧
+    (∀ #j. (OUT_R_1( m2 ) @ #j) ⇒ ⊥)))"
+*/
+by sorry
+
+lemma nonce_secrecy:
+  all-traces
+  "¬(∃ A B s #i.
+      (((Secret( A, B, s ) @ #i) ∧ (∃ #j. K( s ) @ #j)) ∧
+       (¬(∃ #r. RevLtk( A ) @ #r))) ∧
+      (¬(∃ #r. RevLtk( B ) @ #r)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ A B s #i.
+  (Secret( A, B, s ) @ #i)
+ ∧
+  (∃ #j. (K( s ) @ #j)) ∧
+  (∀ #r. (RevLtk( A ) @ #r) ⇒ ⊥) ∧
+  (∀ #r. (RevLtk( B ) @ #r) ⇒ ⊥)"
+*/
+by sorry
+
+lemma injective_agree:
+  all-traces
+  "∀ actor peer params #i.
+    (Commit( actor, peer, params ) @ #i) ⇒
+    (((∃ #j.
+        ((Running( actor, peer, params ) @ #j) ∧ (#j < #i)) ∧
+        (¬(∃ actor2 peer2 #i2.
+            (Commit( actor2, peer2, params ) @ #i2) ∧ (¬(#i = #i2))))) ∨
+      (∃ #r. RevLtk( actor ) @ #r)) ∨
+     (∃ #r. RevLtk( peer ) @ #r))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ actor peer params #i.
+  (Commit( actor, peer, params ) @ #i)
+ ∧
+  (∀ #j.
+    (Running( actor, peer, params ) @ #j)
+   ⇒
+    ((¬(#j < #i)) ∨
+     (∃ actor2 peer2 #i2.
+       (Commit( actor2, peer2, params ) @ #i2) ∧ ¬(#i = #i2)))) ∧
+  (∀ #r. (RevLtk( actor ) @ #r) ⇒ ⊥) ∧
+  (∀ #r. (RevLtk( peer ) @ #r) ⇒ ⊥)"
+*/
+by sorry
+
+lemma session_key_setup_possible:
+  exists-trace
+  "∃ A B s #i.
+    ((Secret( A, B, s ) @ #i) ∧ (¬(∃ #r. RevLtk( A ) @ #r))) ∧
+    (¬(∃ #r. RevLtk( B ) @ #r))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ A B s #i.
+  (Secret( A, B, s ) @ #i)
+ ∧
+  (∀ #r. (RevLtk( A ) @ #r) ⇒ ⊥) ∧ (∀ #r. (RevLtk( B ) @ #r) ⇒ ⊥)"
+*/
+by sorry
+
+/* All wellformedness checks were successful. */
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: examples/classic/NSLPK3.spthy
+
+  processing time: 0.39s
+  
+  types (all-traces): analysis incomplete (1 steps)
+  nonce_secrecy (all-traces): analysis incomplete (1 steps)
+  injective_agree (all-traces): analysis incomplete (1 steps)
+  session_key_setup_possible (exists-trace): analysis incomplete (1 steps)
+
+==============================================================================

@@ -1,0 +1,48 @@
+digraph "G" {
+nodesep="0.8";
+ranksep="0.8";
+sep="4";
+splines="true";
+overlap="false";
+pack="true";
+packmode="cluster";
+concentrate="true";
+compound="true";
+remincross="true";
+mclimit="10";
+nslimit="20";
+nslimit1="20";
+ordering="out";
+rankdir="TB";
+showboxes="false";
+clusterrank="local";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2",margin="0.05,0.05",shape="ellipse"];
+edge[fontsize="8",fontname="Helvetica",penwidth="1.5",arrowsize="0.5",color="black",style="solid",weight="8"];
+subgraph "cluster_Initiator_Session_1" {
+nodesep="0.6";
+ranksep="0.6";
+label="Initiator_Session_1";
+style="filled";
+color="#4936D84C";
+penwidth="2";
+fillcolor="#4936D84C";
+overlap="false";
+sep="4";
+n3[shape="record",label="{{<n0> State_111111111( ~k, ~na, m, nb )}|{<n1> #i : eventAlivenak[Alive( ~na, ~k )]}|{<n2> State_1111111111( ~k, ~na, m, nb )}}",fillcolor="#80404f",style="filled",fontcolor="white",role="Initiator"];
+
+}
+subgraph "cluster_Responder_Session_1" {
+nodesep="0.6";
+ranksep="0.6";
+label="Responder_Session_1";
+style="filled";
+color="#C8D8364C";
+penwidth="2";
+fillcolor="#C8D8364C";
+overlap="false";
+sep="4";
+n7[shape="record",label="{{<n4> State_11211121( ~k, ~nb.1, na.1 )}|{<n5> #j : eventResponsek[Response( ~k )]}|{<n6> State_112111211( ~k, ~nb.1, na.1 )}}",fillcolor="#805d40",style="filled",fontcolor="white",role="Responder"];
+
+}
+
+}

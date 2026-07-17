@@ -1,0 +1,8 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory C8_LocalAuth_CopyIAD_OnlinePIN_High] Theory loaded
+[Theory C8_LocalAuth_CopyIAD_OnlinePIN_High] Theory translated
+[Theory C8_LocalAuth_CopyIAD_OnlinePIN_High] Derivation checks started
+[Theory C8_LocalAuth_CopyIAD_OnlinePIN_High] Derivation checks ended
+[Theory C8_LocalAuth_CopyIAD_OnlinePIN_High] Theory closed

@@ -1,0 +1,139 @@
+# QUERIES.log — every oracle interaction, with purpose
+#
+# Oracle sources used (all permitted by PROTOCOL.md):
+#   A) oracle/captured_responses/*.hs.json  — 81 pre-captured crawl manifests
+#      (captured program OUTPUT). Accessed only through the cluster path
+#      /home/kamilner/tamarin-cleanroom/weblayer/oracle/captured_responses/.
+#   B) oracle/hs_server.sh + the sanctioned compiled prover binary — live probing.
+#   C) ../wellformedness/oracle/examples/  — GPL .spthy files used ONLY as
+#      observation INPUTS to the live server.
+# No file under /home/kamilner/tamarin-rs/ was READ. The only tamarin-rs touch
+# was EXECUTING the sanctioned oracle binary for live probing (see [L1]-[L2]).
+
+## Manifest exploration (source A)
+[001] Learn manifest JSON schema | jq smallest manifest (2b3b…): top keys
+      {base,capped,lemmas,log,manifest}; manifest = {url: {kind,status,body}}.
+[002] Inspect a manifest entry | jq first entry of 2b3b…: /thy/trace/#/main/cases/raw/0/0
+      -> kind=json,status=200, body = JSON envelope {html,title}.
+[003] Read base/capped/lemmas/log | jq on 2b3b…: base=server URL, capped=bool,
+      lemmas=[] here, log=array of note strings.
+[004] Enumerate ALL routes across all 81 manifests | jq to_entries over each ->
+      48830 route entries; kinds: json 17995, html 15178, dot 14705, text 952;
+      statuses: 200 (48824), 0 (6 = autoprove timeouts).
+[005] Abstract route grammar (python templating) | all paths are
+      /thy/<kind=trace>/<index=#>/<handler>/<args…>. Handlers x kind:
+      main=json, interactive-graph-def=dot, intdot=html, overview=html,
+      next/prev=text, autoprove=json(+6 text timeouts), source=text, message=text.
+[006] main/* sub-handlers | help,message,rules,tactic,cases/{raw|refined}/N/N,
+      lemma/NAME, add/POS, edit/NAME, delete/NAME, method/LEMMA/N, proof/LEMMA/PATH…
+[007] Survey 20 smallest manifests | recorded base/capped/lemma-count/route-count;
+      picked issue515 (2b3b…, 0 lemmas) and Chaum_Unforgeability (5c78…, 2 lemmas).
+[008] Dump issue515 bodies | message(text)=theory source; main/message(json)=
+      signature+construction+deconstruction rules HTML; main/tactic(json);
+      main/help(json)=theory header+wf-warnings+help; overview/help(html)=FULL PAGE.
+[009] Dump Chaum bodies | main/lemma(json), main/proof(json)=proof-methods+
+      constraint-system, main/method(json)={redirect}, main/edit|delete|add(json)=
+      form HTML, next|prev(text)=a URL path, intdot(html)=<dot-graph-viz> mini page,
+      interactive-graph-def(dot)=empty-graph skeleton, autoprove(json)={redirect}.
+[010] Determine JSON envelope shapes | across 4 manifests: exactly two shapes,
+      {html,title} (184) and {redirect} (66). Compact, key order fixed.
+[011] Determine escaping | JSON strings: literal UTF-8 (no \u), '<>&/' NOT escaped
+      (only "\ + control per JSON). HTML entity set in html content:
+      & < > " '  ->  &amp; &lt; &gt; &quot; &#39;  (each witnessed in captures).
+[012] Exact trailing bytes (jq -j, no added newline) | json bodies: no trailing
+      newline; source(text): ends "…end" no newline; next(text): no newline;
+      overview(html): ends "</html>" no newline; dot: ends "}\n"; intdot: no newline.
+[013] source vs message text | byte-identical (both = theory source).
+[014] Full-page shell decomposition | overview/help of two theories: after
+      normalizing the numeric index and theory name, the head+north+pane
+      scaffolding is byte-identical. Slots: NAME, IDX, VERSION, FILENAME, west, center.
+[015] Proof-script (west) structure | line model: each line emitted as
+      TEXT+"<br/>\n", blank lines are empty TEXT, one trailing space. Element order
+      = header, items(each blank-separated), add/<first>, per-lemma(blank, body,
+      blank, add/NAME), blank, end; zero lemmas => two blanks before end.
+[016] Proof-tree line grammar | proof-step/case/next/qed/by markup + &nbsp; indent
+      (2 per depth), status class hl_good / sorry-step, remove-step anchor.
+[017] Witness &amp; | literal '&' inside a lemma formula -> &amp; (manifest c3f6…).
+[018] add/<first> encoding | URL segment %3Cfirst%3E; form action escapes to
+      ../../edit/add/&lt;first&gt;.
+[019] Build envelope corpus | dedup json bodies (<=7KB) across all 81 manifests ->
+      2450 distinct bodies (1583 content, 867 redirect) for the generalization test.
+
+## Live probing (source B) — hs_server.sh + sanctioned oracle binary
+[L0] hs_server.sh start NSLPK3 3099 | FAILED: script passes `interactive <dir>
+     --port <port>`; this tamarin build treats WORKDIR as the LAST positional and
+     `--port <n>` (space form) leaves <n> as the workdir -> "directory '3099' does
+     not exist." Recorded as a tooling bug in the provided oracle wrapper.
+[L1] Start sanctioned binary with corrected args | same binary the script names,
+     invoked as `interactive --port=3099 <tmpdir>` on NSLPK3.spthy. Server launched.
+[L2] Probe routes not in captures |
+       GET /                       -> 200 text/html "Welcome to the Tamarin prover"
+                                      index page (theory table + upload form).
+       GET /thy/trace/1/overview/help -> 200 text/html (matches page model).
+       GET /thy/trace/%23/main/tactic -> 404 (literal '#' required; %23 rejected)
+                                      => manifest key '#' is the capture tool's
+                                      "current index" placeholder; real URLs use
+                                      numeric indices.
+       GET /thy/trace/1/main/nope   -> 404 full HTML page, echoes request path.
+       GET /thy/trace/99/main/help  -> 404 (unknown theory index).
+       GET /nonsense/path           -> 404.
+[L3] Capture exact 404 body | saved as fixture notfound_nope.html (1272 bytes);
+     templatized to NOT_FOUND with §PATH§ slot.
+[L4] Save root index page for documentation | non-deterministic parts: theory-row
+     load-time and origin temp path; static credits block otherwise fixed. Stopped server.
+
+## Continuation session (source A + B) — proof-tree coverage
+[020] Authoritative route enumeration | python over all 81 manifests, 48824 routes:
+      handler freq main=17609, interactive-graph-def=14705, intdot=14705, overview=473,
+      next=392, prev=392, autoprove=392, source=81, message=81. Kinds fixed per handler.
+[021] main/* sub-route shapes (deduped) | help/message/rules/tactic (81 each);
+      cases/{raw,refined}/N/N; lemma/X; add/{<first>,X}; edit/X; delete/X; method/X/N;
+      proof/LEMMA (392) + proof/LEMMA/PATH… (14313). Aux: autoprove/idfs/N/False/proof/LEMMA,
+      next|prev/normal/proof/LEMMA, overview/{help,proof/LEMMA}. Fed BEHAVIOR §1.
+[022] Locate a solved proof tree | grep proof-step-hl_good + qed markers over manifests;
+      Chaum manifest 5c78… has log final_idx_after_autoprove=3 -> overview/proof/{exec,
+      unforgeability} carry the SOLVED west pane at version 3.
+[023] Extract + model the solved west panes | from 5c78… overview/proof/exec: saved
+      west_chaum_proved.html, center_proof_exec.html, page_overview_proof_exec.html;
+      parsed the exec (14) and unforgeability (26) proof lines into proof_lines_*.json
+      (my observation model). Observed: a proven lemma wraps decl+edit/delete in
+      <span class="hl_good">…</span>; steps/case/next/qed grammar as in §6; by-prefixed
+      final steps; hrefs = /thy/trace/3/main/proof/LEMMA[/seg…]. No UNKNOWN lines.
+
+## Live probing (source B) — continuation, own wrapper (--port=<n> bug fix)
+[L5] Start sanctioned binary via own wrapper | scratchpad/wl_server.sh invokes the
+     oracle binary named by hs_server.sh as `interactive <tmpdir> --port=3399` on
+     classic/NSLPK3.spthy (black-box execution only; .spthy passed as input, not read).
+[L6] Corroborate route/envelope model on a FRESH theory |
+       GET /                            -> 200 "Welcome to the Tamarin prover"
+       GET /thy/trace/1/overview/help   -> 200 "Theory: NSLPK3", version 1.13.0
+       next/normal/proof/types (text)   -> "/thy/trace/1/main/proof/nonce_secrecy"
+       prev/normal/proof/types (text)   -> "/thy/trace/1/main/cases/refined/0/0"
+       autoprove/idfs/0/False/proof/types -> json {"redirect":"/thy/trace/2/overview/
+                                            proof/nonce_secrecy"} (index bumped 1->2)
+       main/proof/types (json)          -> {"html":"<h3>Applicable Proof Methods…&#39;smart&#39;…
+       interactive-graph-def empty dot  -> BYTE-IDENTICAL to fixture igd_exec.dot (cmp)
+       redirect json ends `…"}` (no trailing newline); GET %23 index -> 404. Stopped server.
+
+## Continuation session 2 (source A only) — whole-corpus html generality
+[024] Extract EVERY kind=html body across all 81 manifests | jq loop (~33s over
+      1.8GB) -> html_corpus.ndjson, 15178 lines = census exactly (14705 intdot +
+      473 overview). Per-manifest name/ver/file pulled once from that manifest's
+      overview/help title/header/download-link. Version=1.13.0 in all 81.
+[025] intdot transform, corpus-wide | for every intdot entry BODYTAIL==KEYTAIL
+      (byte-exact passthrough) and body-title-name==sibling overview name;
+      dotsrc index varies per node (manifest d381 emits BOTH 1 and 16 -> nodes
+      crawled before/after autoprove). => index is the request param the capture
+      erased (keys normalised to '#'); everything else is fixed template.
+[026] Bulk harness render+compare (examples/corpus_html.rs, my crate) |
+      intdot 14705/14705, overview/help 81/81, overview/proof 392/392 =
+      15178/15178 = 100.00% byte-identical. Guards: 0 name-fails, 0 tail-fails.
+      No unexpected handlers; no overview/other subfamily => html surface is
+      exactly two families, both closed.
+[027] Overview CENTER == sibling main/* html + trailing space | center_linkage.py
+      over all manifests: help 81/81 (masking non-det Loaded-at HH:MM:SS);
+      proof 309/392 exact. Center ends in ' ' for 473/473.
+[028] Explain the 83 proof residuals | proof_mismatch.py: they are cross-version
+      capture skew (main/proof captured at v1, overview/proof at v16) -> diffs are
+      only link indices + proof-state constraint html (prover fragments), never a
+      template byte. Rule holds wherever the two captures share a version.

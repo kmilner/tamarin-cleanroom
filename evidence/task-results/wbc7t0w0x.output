@@ -1,0 +1,111 @@
+{
+  "summary": "Both-sides similarity audit of the three clean-room crates against the GPL Haskell originals",
+  "agentCount": 3,
+  "logs": [],
+  "result": {
+    "wf": {
+      "verdict": "pass",
+      "findings_count": 0,
+      "top_findings": [
+        "No clean-side authorship violations survive filtration; verdict PASS, no redo instructions.",
+        "All clean/wf.rs name+signature matches (WfError, insert_wf_before, after_public_names_topics, public_names_report_from_pairs, topics, underline_topic, render_report) are explicitly listed in interface/required_api.md -> filtered as API-given.",
+        "All 'suspicious' exact strings (`Free y', guardedness body, 'Possible reasons', arity/mult intros, formula-terms help, DH_neutral, 'must be of sort nat') are documented as live-oracle-observed in QUERIES.log/BEHAVIOR.md or present in captures -> filtered as observed output.",
+        "Clean code diverges from wf.rs at every API-unconstrained point (opposite (name,rule) tuple order, first-seen vs sorted grouping, NumberOne->'1' vs 'one', Xor-only vs all-AC sort, no trailing newline, no index padding, own sort_rank) -> independent-derivation evidence, no unexplained wf.rs structural leak.",
+        "No Haskell-internal identifiers or .hs source citations appear in the clean sources (grep-confirmed empty); check-function names are derived from observable topic strings, not Haskell internals.",
+        "PROCESS CAVEAT (not a clean-side violation, no redo): interface/required_api.md transmits port-specific seams (insert_wf_before, after_public_names_topics, public_names_report_from_pairs split) that have no oracle-observable justification; recommend future interoperability headers convey behavior/ordering rather than port-internal decomposition."
+      ],
+      "audit_file": "/home/kamilner/tamarin-cleanroom/wellformedness/AUDIT.md"
+    },
+    "graph": {
+      "verdict": "pass",
+      "findings_count": 0,
+      "top_findings": [
+        "No violations. Clean side is an independent reimplementation; every similarity traces to observable DOT/HTML output or output-forced behavior.",
+        "CLEARED closest call: prefix_for_symbol (abbrev.rs:33-39) filter-alpha/take-2/uppercase pipeline matches getTermPrefix (Abbreviation.hs:107), but the output examples (F_status->FS, h2->H, AMF_UE_NGAP_ID->AM) force exactly this semantics and even pin the operation order; behavior forced by output, not expression.",
+        "CLEARED: Simple/Compact header attribute lists (dot.rs:38-69) equal setDefaultAttributes/IfCluster (Dot.hs:130-161) in content+order, but these bytes and their order are emitted to output (verified in captures); Haskell's per-attribute comments are NOT reproduced.",
+        "CLEARED: legend HTML incl. 65-space hang indent (abbrev.rs:135-151) matches captured output bytes; indent measured from output, no such constant exists in Haskell source.",
+        "POSITIVE SIGNAL: source-only, non-observable machinery is absent from the clean side - roleColor/simpleHash color-hash constants, judgeTerm weight formula, allNames collision avoidance, soft-limit, topoSortAbbrevs ordering, and all Simplification.hs/clustering algorithms.",
+        "No Haskell internal identifiers, mirrored helper decomposition, or echoed comments found in the clean side."
+      ],
+      "audit_file": "/home/kamilner/tamarin-cleanroom/graphdot/AUDIT.md"
+    },
+    "web": {
+      "verdict": "pass",
+      "findings_count": 0,
+      "top_findings": [],
+      "audit_file": "/home/kamilner/tamarin-cleanroom/weblayer/AUDIT.md"
+    }
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Audit"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "audit:wf",
+      "phaseIndex": 1,
+      "phaseTitle": "Audit",
+      "agentId": "a28505fea12e210cb",
+      "model": "claude-opus-4-8[1m]",
+      "state": "done",
+      "startedAt": 1784287939859,
+      "queuedAt": 1784287939828,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "pass",
+      "promptPreview": "You are the SIMILARITY AUDITOR in a clean-room process (see /home/kamilner/tamarin-cleanroom/PROTOCOL.md).\nYou MAY read both sides — that is your function. A clean-room agent implemented a crate purely from\nblack-box oracles; you now compare it against the GPL Haskell originals to catch expression that could\nnot plausibly have come from observation, including inadvertent reproduction from model tr…",
+      "lastProgressAt": 1784288476650,
+      "tokens": 152409,
+      "toolCalls": 21,
+      "durationMs": 536791,
+      "resultPreview": "{\"verdict\":\"pass\",\"findings_count\":0,\"top_findings\":[\"No clean-side authorship violations survive filtration; verdict PASS, no redo instructions.\",\"All clean/wf.rs name+signature matches (WfError, insert_wf_before, after_public_names_topics, public_names_report_from_pairs, topics, underline_topic, render_report) are explicitly listed in interface/required_api.md -> filtered as API-given.\",\"All 'su…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "audit:graph",
+      "phaseIndex": 1,
+      "phaseTitle": "Audit",
+      "agentId": "a92d5fb4f3f983911",
+      "model": "claude-opus-4-8[1m]",
+      "state": "done",
+      "startedAt": 1784287939861,
+      "queuedAt": 1784287939829,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "pass",
+      "promptPreview": "You are the SIMILARITY AUDITOR in a clean-room process (see /home/kamilner/tamarin-cleanroom/PROTOCOL.md).\nYou MAY read both sides — that is your function. A clean-room agent implemented a crate purely from\nblack-box oracles; you now compare it against the GPL Haskell originals to catch expression that could\nnot plausibly have come from observation, including inadvertent reproduction from model tr…",
+      "lastProgressAt": 1784288265373,
+      "tokens": 83617,
+      "toolCalls": 23,
+      "durationMs": 325512,
+      "resultPreview": "{\"verdict\":\"pass\",\"findings_count\":0,\"top_findings\":[\"No violations. Clean side is an independent reimplementation; every similarity traces to observable DOT/HTML output or output-forced behavior.\",\"CLEARED closest call: prefix_for_symbol (abbrev.rs:33-39) filter-alpha/take-2/uppercase pipeline matches getTermPrefix (Abbreviation.hs:107), but the output examples (F_status->FS, h2->H, AMF_UE_NGAP_I…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 3,
+      "label": "audit:web",
+      "phaseIndex": 1,
+      "phaseTitle": "Audit",
+      "agentId": "af2d2bfba59ada5b2",
+      "model": "claude-opus-4-8[1m]",
+      "state": "done",
+      "startedAt": 1784287939861,
+      "queuedAt": 1784287939829,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "pass",
+      "promptPreview": "You are the SIMILARITY AUDITOR in a clean-room process (see /home/kamilner/tamarin-cleanroom/PROTOCOL.md).\nYou MAY read both sides — that is your function. A clean-room agent implemented a crate purely from\nblack-box oracles; you now compare it against the GPL Haskell originals to catch expression that could\nnot plausibly have come from observation, including inadvertent reproduction from model tr…",
+      "lastProgressAt": 1784288338333,
+      "tokens": 108858,
+      "toolCalls": 28,
+      "durationMs": 398472,
+      "resultPreview": "{\"verdict\":\"pass\",\"findings_count\":0,\"top_findings\":[],\"audit_file\":\"/home/kamilner/tamarin-cleanroom/weblayer/AUDIT.md\"}"
+    }
+  ],
+  "totalTokens": 344884,
+  "totalToolCalls": 72
+}

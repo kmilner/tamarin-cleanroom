@@ -1,0 +1,7 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+"examples/features/auto-sources/tamarin-repo/csf18-alethea/alethea_votingphase_RF-without-SL.spthy" (line 124, column 44):
+unexpected ")"
+expecting term
+diff operator found, but flag diff not set

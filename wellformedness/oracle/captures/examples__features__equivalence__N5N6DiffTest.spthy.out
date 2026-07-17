@@ -1,0 +1,7 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+"examples/features/equivalence/N5N6DiffTest.spthy" (line 20, column 23):
+unexpected ")"
+expecting term
+diff operator found, but flag diff not set

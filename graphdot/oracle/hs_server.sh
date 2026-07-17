@@ -1,0 +1,1 @@
+/home/kamilner/tamarin-cleanroom/weblayer/oracle/hs_server.sh

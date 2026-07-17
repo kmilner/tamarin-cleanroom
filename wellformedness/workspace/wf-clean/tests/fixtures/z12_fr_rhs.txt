@@ -1,0 +1,8 @@
+WARNING: the following wellformedness checks failed!
+
+Special facts
+=============
+
+  rule `R1' uses disallowed facts on right-hand-side:
+    Fr( ~x )
+*/

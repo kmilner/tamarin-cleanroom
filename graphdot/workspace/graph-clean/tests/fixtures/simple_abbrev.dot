@@ -1,0 +1,24 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n5[shape="record",label="{{<n0> !Pk( $I, pk(~ltkI) )|<n1> Resp_1( $I, $R, ~ltkR, ~ekR, hki\l)\l|<n2> In( \<$I, $R, SI1, mac(z, SI1)\> )}|{<n3> #i1 : Resp_2[AcceptedR( ~ekR, $I, $R, hki, 'g'^~ekR, KDF(z) )]}|{<n4> !SessionKey( ~ekR, $I, $R, KDF(z) )}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+n6[label="#k : isend[K( KDF(z) )]",shape="ellipse"];
+n7[label="#vf : isend",shape="ellipse"];
+n8[label="!KU( SI1 ) @ #vk.5",shape="ellipse",color="gray"];
+n9[label="!KU( mac(z, SI1) ) @ #vk.6",shape="ellipse",color="gray"];
+n10[label="!KU( KDF(z) ) @ #vk.7",shape="ellipse",color="gray"];
+n7 -> n5:n2[color="gray30"];
+n8 -> n7[color="red",style="dashed"];
+n9 -> n7[color="red",style="dashed"];
+n10 -> n6[color="red",style="dashed"];
+{
+rank="sink";
+n11[shape="plain",label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="3" CELLPADDING="1"><TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">SI1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">sign(&lt;'2', $I, $R, hki, 'g'^~ekR&gt;, ~ltkI)</TD></TR></TABLE>>];
+
+}
+n5:n3 -> n11[style="invis"];
+n6 -> n11[style="invis"];
+
+}

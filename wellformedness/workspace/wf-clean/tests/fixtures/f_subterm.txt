@@ -1,0 +1,22 @@
+WARNING: the following wellformedness checks failed!
+
+Formula terms
+=============
+
+  Lemma `L1' uses terms of the wrong form: `Free z'
+  
+  The only allowed terms are public constants and bound node and
+  message variables. If you encounter free message variables, then
+  you might have forgotten a #-prefix. Sort prefixes can only be
+  dropped where this is unambiguous. Moreover, reducible function
+  symbols are disallowed.
+
+Subterm Convergence Warning
+===========================
+
+  User-defined equations must be convergent and have the finite variant property. The following equations are not subterm convergent. If you are sure that the set of equations is nevertheless convergent and has the finite variant property, you can ignore this warning and continue 
+
+    h(f(x), y) = g(y)
+   
+ For more information, please refer to the manual : https://tamarin-prover.com/manual/master/book/010_modeling-issues.html 
+*/

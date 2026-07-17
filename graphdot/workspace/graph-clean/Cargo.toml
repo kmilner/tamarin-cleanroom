@@ -1,0 +1,9 @@
+[package]
+name = "graph-clean"
+version = "0.1.0"
+edition = "2021"
+description = "Clean-room reimplementation of the tamarin web-UI constraint-system graph (DOT) payload: data model, DOT serializer, node abbreviation, and role clustering. Derived from black-box observation only."
+
+# std-only (the SPEC permits serde/serde_json; none is needed by the model or
+# the DOT serializer, so no external dependency is pulled in).
+[dependencies]

@@ -1,0 +1,7 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory DMNMessageTracingAll4] Theory loaded
+[Theory DMNMessageTracingAll4] Theory translated
+[Theory DMNMessageTracingAll4] Derivation checks started
+tamarin-prover: examples/accountability/csf21-acc-unbounded/mixnets/message-tracing/oracle-dmn-message-tracing: readCreateProcess: posix_spawnp: does not exist (No such file or directory)

@@ -1,0 +1,11 @@
+WARNING: the following wellformedness checks failed!
+
+Reserved prefixes
+=================
+
+  The Rule `Bad' contains facts with reserved prefixes ('DiffIntr',
+  'DiffProto') inside names:
+  
+    DiffIntrPriv( ~x )
+    (ProtoFact Linear "DiffIntrPriv" 1,1,Linear)
+*/

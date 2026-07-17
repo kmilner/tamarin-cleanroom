@@ -1,0 +1,80 @@
+# QUERIES.log — every oracle interaction, with purpose
+
+## Corpus reads (oracle/captured_responses/, captured OUTPUT)
+- Enumerated 81 manifest files; each is {base,lemmas,log,capped,manifest}.
+  manifest = {url -> {kind,status,body}}. Purpose: discover payload families.
+- Surveyed URL patterns: found graph families
+  `/thy/trace/#/interactive-graph-def/proof/...` (kind=dot, THE graph payload)
+  and `/thy/trace/#/intdot/proof/...` (kind=html wrapper embedding <dot-graph-viz>).
+- Dumped small DOT payloads (sessions_injective case_1; can_run_v/_) to learn
+  node/edge/cluster/abbreviation syntax.
+- Per-file survey: simple vs compact(cluster) header; abbreviation-table presence.
+
+## Live server probes (hs_server.sh)
+(logged below as executed)
+
+## Live server probes (executed)
+- Started black-box HS binary via corrected wrapper (scratchpad serve.sh: same
+  binary as hs_server.sh, but `--port=` form; provided script used space-separated
+  `--port N` which this binary parses as a positional WORKDIR -> "directory '3099'
+  does not exist"). Served csf12/NAXOS_eCK.spthy on :3099.
+  Purpose: discover graph endpoints, option toggles, DOT-vs-JSON backend.
+- GET / , /thy/trace/1/overview/help : found theory index number replaces `#`;
+  route families confirmed (main/*, interactive-graph-def, intdot).
+- GET /thy/trace/1/interactive-graph-def/proof/<lemma>[/steps] : returns kind=dot
+  (text/plain). Root state => empty digraph. Purpose: confirm live == corpus format.
+- GET /thy/trace/1/interactive-graph-def/cases/raw/1/1 : non-empty case graph with
+  abbreviation (EX1/EX2/H2). Purpose: get a live abbreviated graph.
+- Probed query params (?simplification=,?abbreviate=,?level=,?compress=,?simplify=,
+  ?s=, ...) on the graph endpoint: ALL byte-identical to no-param. => graph options
+  are NOT URL-controlled; no per-request simplification-level knob is exposed.
+- `tamarin-prover interactive --help`: graph-relevant flags = --image-format[PNG|SVG],
+  --with-dot[=FILE], --with-json[=FILE]. => JSON graph payload is a SEPARATE backend
+  (--with-json rendering tool); the captured corpus is the DOT backend. No CLI
+  simplification-LEVEL flag exists.
+
+## Corpus validation (reads of captured OUTPUT only)
+- Extracted 6 representative DOT payloads into graph-clean/tests/fixtures/
+  (empty; simple+ports; simple+abbrev; compact+2clusters; compact+abbrev;
+  multi-row abbrev legend). Purpose: byte-parity fixtures.
+- Bulk round-trip: parsed every captured DOT payload into the crate model and
+  re-serialized. Samples run: 1823 (random across all 81 theories), 1845 (all
+  1559 clustered + 400 largest), and finally ALL 14705 payloads.
+  Result: 14705/14705 byte-exact. Purpose: prove the payload-format spec +
+  serializer are general, not fixture-overfit.
+
+## Session 2 — abbreviation SELECTION rule (§5c), captured-output mining + live probes
+
+### Corpus reads (captured OUTPUT: oracle/dot_corpus/, oracle/captured_responses/)
+- Enumerated manifest URL families: main/proof (json, 14705) pairs 1:1 with
+  interactive-graph-def (dot, 14705); the main/proof json html carries the full
+  UNABBREVIATED sequent (Constraint system: formulas/goals/solved+unsolved
+  constraints), while the dot carries abbreviated terms + legend. Mined these
+  pairs at scale for a labeled abbreviate/not dataset.
+- Parsed all 97 538 legend expansions across 11 564 graphs: min fully-expanded
+  rendered length = 10 (0 below); 0 legend entry is a top-level tuple.
+- Built AST parser for tamarin printed terms (fact-arg extraction, name
+  expansion, structural subterm occurrence). Ran per-graph labeled evaluation
+  over up to 5 725 graphs / 156 602 candidates. Findings: len>=10 & occ>=2 &
+  not-tuple is necessary with 0 counterexamples among drawn->=2 terms; all
+  "missed" abbreviations have graph-occ 1 (recovered from the sequent);
+  sufficiency exceptions are 93% AC/DH-operator graphs (occurrence over the
+  normalised term), rest are expand-before-count artifacts.
+- Confirmed abbreviation universe > drawn nodes: SI3='sign(~y, k)' is a legend
+  entry drawn NOWHERE in its graph (only in the sequent).
+
+### Live server probes (hs_server binary, --port= form; crafted theories)
+Served four one-rule theories whose single graph node carries controlled terms;
+solved the exists-trace lemma via GET /main/method/<lemma>/1 (returns a redirect
+to a new theory index), then GET interactive-graph-def/proof/<lemma>/_ .
+- LenTest: Keep(~x,'12345678','12345678','1234567','1234567') ->
+  '12345678'(10 chars,x2) abbreviated as `2`; '1234567'(9,x2) inline.
+  => length threshold is exactly 10.
+- OccTest: 'ABCDEFGH'(10,x1) & 'onceonly12'(12,x1) inline; 'twicelong1'(12,x2)
+  => TW1. LongOnce: a 42-char constant (x1) inline; 'shared1234'(x2) => SH1.
+  => occ>=2 is a hard gate independent of length.
+- TupTest: <'aa','bb','cc'>(18,x2) inline; h('longarg123')(x2) => H1, with
+  LO1='longarg123', H1='h(LO1)'. => tuples never abbreviated; bottom-up nesting;
+  prefix rule (lo->LO, h->H) re-confirmed live.
+- Servers stopped after probing. Note: pure-numeric constant got empty prefix =>
+  bare-number name ('12345678' -> "2"); empty-prefix start index not pinned.

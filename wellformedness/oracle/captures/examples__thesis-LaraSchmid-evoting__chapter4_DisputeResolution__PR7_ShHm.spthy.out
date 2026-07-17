@@ -1,0 +1,204 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory PR7_ShHm] Theory loaded
+[Theory PR7_ShHm] Theory translated
+[Theory PR7_ShHm] Derivation checks started
+[Theory PR7_ShHm] Derivation checks ended
+[Theory PR7_ShHm] Theory closed
+theory PR7_ShHm
+
+begin
+
+// Function signature and definition of the equational theory E
+
+builtins: multiset
+functions: fst/1, pair/2, pk/1, sg/2, sign/2, snd/1, true/0, ver/2,
+           verify/3
+equations:
+    fst(<x.1, x.2>) = x.1,
+    snd(<x.1, x.2>) = x.2,
+    ver(sg(m, sk), pk(sk)) = m,
+    verify(sign(x.1, x.2), x.1, pk(x.2)) = true
+
+rule (modulo E) ChanOut_A:
+   [ Out_A( $A, x ) ]
+  --[ ChanOut_A( $A, x ) ]->
+   [ !Auth( $A, x ), Out( <$A, x> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanIn_A:
+   [ !Auth( $A, x ) ] --[ ChanIn_A( $A, x ) ]-> [ In_A( $A, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanOut_IR_HS:
+   [ Out_IR_HS( $A, $B, m ) ]
+  --[ ChanOut_IR_HS( $A, $B, m ) ]->
+   [ Out( <$A, $B, m> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanIn_IR_HS:
+   [ In( <$A, $B, m> ) ]
+  --[ ChanIn_IR_HS( $A, $B, m ) ]->
+   [ In_IR_HS( $A, $B, m ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanOut_IR_SH:
+   [ Out_IR_SH( $A, $B, m ) ]
+  --[ ChanOut_IR_SH( $A, $B, m ) ]->
+   [ Out( <$A, $B, m> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanIn_IR_SH:
+   [ In( <$A, $B, m> ) ]
+  --[ ChanIn_IR_SH( $A, $B, m ) ]->
+   [ In_IR_SH( $A, $B, m ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) fakeEvidence:
+   [ In( <ballot, evidence> ) ] --[ Evidence( ballot, evidence ) ]-> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) publickeyinfrastructure:
+   [ Fr( ~skX ) ]
+  --[ LongtermKey( $X, ~skX ) ]->
+   [ !Ltk( $X, ~skX ), !Pk( $X, pk(~skX) ), Out( pk(~skX) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Setup:
+   [ !Ltk( 'S', ~skS ) ]
+  --[
+  Setup( ), Voter( 'H' ), Server( 'S' ), Honest( 'S' ),
+  BBpkS( 'BB', <'pkS', pk(~skS)> )
+  ]->
+   [
+   Out( <'H', 'BB', $v, 'S'> ), AgSt_BB0( 'BB', 'S' ), AgSt_S0( 'S', ~skS ),
+   Out_A( 'BB', <'pkS', pk(~skS)> )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) S_1:
+   [ AgSt_S0( $S, ~skS ), In_IR_HS( $H, $S, <$v, $H> ) ]
+  --[
+  Receive_R_HS( $H, $S, <$v, $H> ),
+  Send_R_SH( $S, $H, sg(<$v, $H>, ~skS) ), S1( )
+  ]->
+   [
+   Out_IR_SH( $S, $H, sg(<$v, $H>, ~skS) ), Out_A( $S, <'bs', $v, $H> ),
+   Out_A( $S, <'vs', $v> )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) BB:
+   [ AgSt_BB0( $BB, $S ), In_A( $S, <'bs', bs> ), In_A( $S, <'vs', vs> ) ]
+  --[ BB_recorded( $BB, <'bs', bs> ), BB_tallied( $BB, <'vs', vs> ), End( )
+  ]->
+   [ Out_A( $BB, <'bs', bs> ), Out_A( $BB, <'vs', vs> ) ]
+
+  // loop breakers: [1,2]
+  /* has exactly the trivial AC variant */
+
+restriction OneSetup:
+  "∀ #i #j. ((Setup( ) @ #i) ∧ (Setup( ) @ #j)) ⇒ (#i = #j)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ #i #j. ((Setup( ) @ #i) ∧ (Setup( ) @ #j)) ⇒ (#i = #j)"
+  */
+
+lemma onlyonce3 [reuse]:
+  all-traces "∀ #i #j. ((S1( ) @ #i) ∧ (S1( ) @ #j)) ⇒ (#i = #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ #i #j. (S1( ) @ #i) ∧ (S1( ) @ #j) ∧ ¬(#i = #j)"
+*/
+by sorry
+
+lemma onlyonce5 [reuse]:
+  all-traces "∀ #i #j. ((End( ) @ #i) ∧ (End( ) @ #j)) ⇒ (#i = #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ #i #j. (End( ) @ #i) ∧ (End( ) @ #j) ∧ ¬(#i = #j)"
+*/
+by sorry
+
+lemma functional:
+  exists-trace
+  "∃ #i BB.
+    (BB_recorded( BB, <'bs', 'v', 'H'> ) @ #i) ∧
+    (BB_tallied( BB, <'vs', 'v'> ) @ #i)"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ #i BB.
+  (BB_recorded( BB, <'bs', 'v', 'H'> ) @ #i) ∧
+  (BB_tallied( BB, <'vs', 'v'> ) @ #i)"
+*/
+by sorry
+
+lemma DRauth:
+  all-traces
+  "∀ S #i.
+    (Honest( S ) @ #i) ⇒
+    (¬(∃ b BB b1 skS #k #l #m.
+        (((BB_recorded( BB, <'bs', b1> ) @ #k) ∧ (¬(b1 = b))) ∧
+         (Evidence( b, sg(b, skS) ) @ #l)) ∧
+        (BBpkS( BB, <'pkS', pk(skS)> ) @ #m)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ S #i.
+  (Honest( S ) @ #i)
+ ∧
+  ∃ b BB b1 skS #k #l #m.
+   (BB_recorded( BB, <'bs', b1> ) @ #k) ∧
+   (Evidence( b, sg(b, skS) ) @ #l) ∧
+   (BBpkS( BB, <'pkS', pk(skS)> ) @ #m)
+  ∧
+   ¬(b1 = b)"
+*/
+by sorry
+
+/*
+WARNING: the following wellformedness checks failed!
+
+Facts occur in the left-hand-side but not in any right-hand-side 
+=================================================================
+
+  1. in rule "ChanOut_IR_HS":  factName `Out_IR_HS' arity: 3 multiplicity: Linear. Perhaps you want to use the fact in rule "S_1":  factName `Out_IR_SH' arity: 3 multiplicity: Linear
+*/
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: examples/thesis-LaraSchmid-evoting/chapter4_DisputeResolution/PR7_ShHm.spthy
+
+  processing time: 0.21s
+  
+  WARNING: 1 wellformedness check failed!
+  
+  onlyonce3 (all-traces): analysis incomplete (1 steps)
+  onlyonce5 (all-traces): analysis incomplete (1 steps)
+  functional (exists-trace): analysis incomplete (1 steps)
+  DRauth (all-traces): analysis incomplete (1 steps)
+
+==============================================================================

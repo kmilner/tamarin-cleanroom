@@ -1,0 +1,33 @@
+<h3>Applicable Proof Methods: <span class="hl_comment">Goals sorted according to the &#39;smart&#39; heuristic (loop breakers delayed)</span></h3><br/>
+<div class="preformatted methods">1. <a class="internal-link proof-method" href="/thy/trace/3/main/method/exec/1"><span class="hl_keyword">simplify</span></a><br/>
+<br/>
+2. <a class="internal-link proof-method" href="/thy/trace/3/main/method/exec/2"><span class="hl_keyword">induction</span></a></div><br/>
+a. <a class="internal-link autoprove" href="/thy/trace/3/autoprove/idfs/0/False/proof/exec"><span class="hl_keyword">autoprove</span></a> (A. <a class="internal-link characterization" href="/thy/trace/3/autoprove/characterize/0/False/proof/exec"><span class="hl_keyword">for all solutions</span></a>)<br/>
+b. <a class="internal-link bounded-autoprove" href="/thy/trace/3/autoprove/idfs/5/False/proof/exec"><span class="hl_keyword">autoprove</span></a> (B. <a class="internal-link bounded-characterization" href="/thy/trace/3/autoprove/characterize/5/False/proof/exec"><span class="hl_keyword">for all solutions</span></a>)  with proof-depth bound 5<br/>
+s. <a class="internal-link autoprove-all" href="/thy/trace/3/autoproveAll/idfs/0/proof/exec"><span class="hl_keyword">autoprove</span></a> (S. <a class="internal-link characterization-all" href="/thy/trace/3/autoproveAll/characterize/0/proof/exec"><span class="hl_keyword">for all solutions</span></a>)  for all lemmas <br/>
+<br/>
+<h3>Constraint system</h3><br/>
+<div class="preformatted sequent"><span class="hl_keyword">last</span>: none<br/>
+<br/>
+<span class="hl_keyword">formulas</span>: <span class="hl_operator">∃</span> x #i<span class="hl_operator">.</span> <span class="hl_operator">(</span>Spend( x ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span><br/>
+<br/>
+<span class="hl_keyword">subterms</span>:<br/>
+<br/>
+<span class="hl_keyword">equations</span>:<br/>
+&nbsp;&nbsp;<span class="hl_keyword">subst</span>:<br/>
+&nbsp;&nbsp;<span class="hl_keyword">conj</span>:<br/>
+<br/>
+<span class="hl_keyword">lemmas</span>:<br/>
+&nbsp;&nbsp;<span class="hl_operator">∀</span> x #j #k<span class="hl_operator">.</span> <span class="hl_operator">(</span>Deposited( x ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator"> ∧</span> <span class="hl_operator">(</span>Deposited( x ) <span class="hl_operator">@</span> #k<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> #j <span class="hl_operator">=</span> #k<br/>
+<br/>
+<span class="hl_keyword">allowed cases</span>: refined<br/>
+<br/>
+<span class="hl_keyword">solved formulas</span>:<br/>
+<br/>
+<span class="hl_keyword">unsolved constraints</span>:<br/>
+<br/>
+<span class="hl_keyword">solved constraints</span>:</div><br/>
+<h3>1 sub-case(s)</h3><br/>
+<h4>Case </h4><br/>
+<static-graph graphSrc="/thy/trace/3/intdot/proof/exec/_"></static-graph><br/>
+ 

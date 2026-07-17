@@ -1,0 +1,186 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory WooLamPi_f] Theory loaded
+[Theory WooLamPi_f] Theory translated
+[Theory WooLamPi_f] Derivation checks started
+[Theory WooLamPi_f] Derivation checks ended
+[Theory WooLamPi_f] Theory closed
+theory WooLamPi_f
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, sdec/2, senc/2, snd/1
+equations:
+    fst(<x.1, x.2>) = x.1,
+    sdec(senc(x.1, x.2), x.2) = x.1,
+    snd(<x.1, x.2>) = x.2
+
+rule (modulo E) Init:
+   [ Fr( ~kxs ) ] --[ KeyGen( $X ) ]-> [ !Ltk( ~kxs, $X ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Reveal_Longterm_Key:
+   [ !Ltk( ~sk, $A ) ] --[ Reveal( $A ) ]-> [ Out( ~sk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) A_to_B_1:
+   [ !Ltk( ~kas, $A ) ] --> [ Out( $A ), StateA1( $A, $B, ~kas ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) B_to_A:
+   [ In( a ), Fr( ~nb ), !Ltk( ~kbs, $B ) ]
+  --[ Running_B( a, $B, <'A', 'B', ~nb> ) ]->
+   [ Out( ~nb ), StateB1( a, $B, ~kbs, ~nb ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) A_to_B_2:
+   [ In( nb ), StateA1( $A, $B, ~kas ), !Ltk( ~kas, $A ) ]
+  --[ Running_A( $A, $B, <'A', 'B', nb> ), Secret( $A, $B, ~kas ) ]->
+   [ Out( senc(<'1', $A, $B, nb>, ~kas) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) B_to_S:
+   [ In( msg ), StateB1( a, $B, ~kbs, ~nb ), !Ltk( ~kbs, $B ) ]
+  --[ Secret( a, $B, ~kbs ) ]->
+   [
+   Out( senc(<'2', a, $B, ~nb, msg>, ~kbs) ),
+   StateB2( a, $B, ~kbs, ~nb, msg )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) S_to_B:
+   [
+   In( senc(<'2', a, b, nb, senc(<'1', a, b, nb>, ~kas)>, ~kbs) ),
+   !Ltk( ~kas, a ), !Ltk( ~kbs, b )
+   ]
+  -->
+   [ Out( senc(<'3', a, b, nb>, ~kbs) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) B_from_S:
+   [
+   In( senc(<'3', a, $B, ~nb>, ~kbs) ), StateB2( a, $B, ~kbs, ~nb, msg ),
+   !Ltk( ~kbs, $B )
+   ]
+  --[ Commit_B( a, $B, <'A', 'B', ~nb> ) ]->
+   [ ]
+
+  /* has exactly the trivial AC variant */
+
+lemma executability:
+  exists-trace
+  "∃ A B t #i #j #k.
+    ((((((Commit_B( A, B, t ) @ #i) ∧ (Running_A( A, B, t ) @ #j)) ∧
+        (#j < #i)) ∧
+       (Running_B( A, B, t ) @ #k)) ∧
+      (#k < #j)) ∧
+     (¬(∃ #r1. Reveal( A ) @ #r1))) ∧
+    (¬(∃ #r2. Reveal( B ) @ #r2))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ A B t #i #j #k.
+  (Commit_B( A, B, t ) @ #i) ∧
+  (Running_A( A, B, t ) @ #j) ∧
+  (Running_B( A, B, t ) @ #k)
+ ∧
+  (#j < #i) ∧
+  (#k < #j) ∧
+  (∀ #r1. (Reveal( A ) @ #r1) ⇒ ⊥) ∧
+  (∀ #r2. (Reveal( B ) @ #r2) ⇒ ⊥)"
+*/
+by sorry
+
+lemma Secrecy:
+  all-traces
+  "¬(∃ A B m #i.
+      (((Secret( A, B, m ) @ #i) ∧ (∃ #r. K( m ) @ #r)) ∧
+       (¬(∃ #r. Reveal( B ) @ #r))) ∧
+      (¬(∃ #r. Reveal( A ) @ #r)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ A B m #i.
+  (Secret( A, B, m ) @ #i)
+ ∧
+  (∃ #r. (K( m ) @ #r)) ∧
+  (∀ #r. (Reveal( B ) @ #r) ⇒ ⊥) ∧
+  (∀ #r. (Reveal( A ) @ #r) ⇒ ⊥)"
+*/
+by sorry
+
+lemma injectiveagreement_B:
+  all-traces
+  "∀ A B t #i.
+    (Commit_B( A, B, t ) @ #i) ⇒
+    (((∃ #j.
+        ((Running_A( A, B, t ) @ #j) ∧ (#j < #i)) ∧
+        (¬(∃ A2 B2 #i2. (Commit_B( A2, B2, t ) @ #i2) ∧ (¬(#i2 = #i))))) ∨
+      (∃ #r. Reveal( A ) @ #r)) ∨
+     (∃ #r. Reveal( B ) @ #r))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ A B t #i.
+  (Commit_B( A, B, t ) @ #i)
+ ∧
+  (∀ #j.
+    (Running_A( A, B, t ) @ #j)
+   ⇒
+    ((¬(#j < #i)) ∨
+     (∃ A2 B2 #i2. (Commit_B( A2, B2, t ) @ #i2) ∧ ¬(#i2 = #i)))) ∧
+  (∀ #r. (Reveal( A ) @ #r) ⇒ ⊥) ∧
+  (∀ #r. (Reveal( B ) @ #r) ⇒ ⊥)"
+*/
+by sorry
+
+lemma agreement_B:
+  all-traces
+  "∀ A B t #i.
+    (Commit_B( A, B, t ) @ #i) ⇒
+    (((∃ #j. (Running_A( A, B, t ) @ #j) ∧ (#j < #i)) ∨
+      (∃ #r. Reveal( A ) @ #r)) ∨
+     (∃ #r. Reveal( B ) @ #r))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ A B t #i.
+  (Commit_B( A, B, t ) @ #i)
+ ∧
+  (∀ #j. (Running_A( A, B, t ) @ #j) ⇒ ¬(#j < #i)) ∧
+  (∀ #r. (Reveal( A ) @ #r) ⇒ ⊥) ∧
+  (∀ #r. (Reveal( B ) @ #r) ⇒ ⊥)"
+*/
+by sorry
+
+/* All wellformedness checks were successful. */
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: examples/features/auto-sources/spore/WooLam_Pi_f.spthy
+
+  processing time: 0.42s
+  
+  executability (exists-trace): analysis incomplete (1 steps)
+  Secrecy (all-traces): analysis incomplete (1 steps)
+  injectiveagreement_B (all-traces): analysis incomplete (1 steps)
+  agreement_B (all-traces): analysis incomplete (1 steps)
+
+==============================================================================

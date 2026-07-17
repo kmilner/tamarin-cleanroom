@@ -1,0 +1,112 @@
+# Oracle query log (one line per oracle interaction / batch)
+# Format: <probe> :: <purpose>
+
+empty.spthy :: confirm oracle runs; observe success line and overall output shape
+captures/*.out (read) :: mine pre-captured outputs; extract topic headers via '=' underline detection -> 6 topics in real corpus
+examples/regression/trace/issue532.spthy (read) :: learn syntax + facts-LHS-not-RHS example
+examples/classic/NSLPK3.spthy (read) :: learn rule/let/lemma .spthy syntax
+
+p01_unbound_rule :: unbound var in rule -> topic "Unbound variables"
+p02_arity :: same fact name diff arity -> "Fact arity issues"
+p03_mult :: same fact linear vs persistent -> "Fact multiplicity issues"
+p04_fr :: Fr arity 2 -> PARSE ERROR
+p05_lemma_free :: free var in lemma -> "Formula terms" (`Free y')
+p06_lemma_guard :: simple existential lemma -> SUCCESS
+p07_reserved_K :: K fact in action -> "Reserved names" (on the middle)
+p08_out_arity :: Out arity 2 -> PARSE ERROR
+p09_fun_reserved :: redeclare builtin fst -> PARSE ERROR
+p10_hide_lemma :: hide_lemma=NoSuchLemma -> SUCCESS
+p11_sort :: same action across fresh/pub rules -> SUCCESS
+p12_binary_op :: multiset + in action -> SUCCESS
+p13_reserved_prem :: KU prem / KD concl -> "Reserved names" lhs & rhs variants
+p14_fr_pub :: Fr(\$x) -> "Fr facts must only use a fresh- or a msg-variable"
+p15_inout :: Out in prem, In in concl -> "Special facts"
+p16_mset :: '+' w/o multiset -> PARSE ERROR
+p17_dup_rule / p18_dup_lemma :: duplicates -> PARSE ERROR
+p19_lemma_action_missing :: lemma action absent from rules -> SUCCESS
+p20_inconsistent_sort :: ~x and \$x in one rule -> "Variable with mismatching sorts or capitalization"
+p21_temporal_term :: unguarded temporal -> " Formula guardedness" (leading space)
+p22_diff :: diff() w/o flag -> PARSE ERROR
+p23_pubconst :: many public consts -> SUCCESS
+p24_lemma_arity :: action arity mismatch rule vs lemma -> "Fact arity issues"; lemma fact rendered raw Haskell Fact{...}
+p25_restr_unbound :: free var in restriction -> "Formula terms" (Restriction ..)
+p26_reuse_nonexist / p27_bnames / p28_process / p29_pub :: SUCCESS baselines
+p31_pubfun :: nullary fn == pub const name -> SUCCESS
+p32_simpub :: 'Alice' & 'alice' same rule -> "Public constants with mismatching capitalization"
+p33_eq :: subterm-convergent eq -> SUCCESS
+p34_dh :: DH exp basic -> SUCCESS
+p35_macro :: macros syntax guess -> PARSE ERROR
+p36_pred :: predicates block -> SUCCESS
+p37_proc_unbound :: process out(x) unbound -> FATAL (not wf warning)
+p38_pub2 :: 'Server'/'server' cross-rule -> cross-rule grouping format
+p39_lemma_badsort :: temporal missing '#' -> "Formula terms"(Free #i) + guardedness
+p40_embedded / p41_exists :: SUCCESS
+p42_bad_builtin :: unknown builtin -> PARSE ERROR
+ks1 :: kitchen-sink -> canonical topic ORDER
+p32/ks1 (cat -A) :: exact byte formatting incl trailing spaces / blank joins / /* */ wrapper
+f_arity3 :: multi-fact multi-item arity format + alpha sort of fact names
+f_pub3 :: 3 public names one rule -> ASCII sort
+f_nullary :: nullary reserved fact -> "K( )"
+f_fr :: multiple Fr misuse -> separator format
+f_subterm :: non-subterm eq -> "Subterm Convergence Warning" after Formula terms
+f_reducible :: reducible fn in lemma -> "Formula terms" next-line + de Bruijn "Bound N"
+f_subterm_ok :: subterm-convergent eq -> SUCCESS
+t_terms :: echo term shapes via K() -> term pretty printer table; fsep wrap
+t_xor :: xor -> (a(+)b) unicode AC-sorted; nullary 'zero'
+t_nat :: %+ / %1 -> topic "Nat Sorts"; nat term rendering
+t_dh / t_dh2 :: DH exponent shapes -> truncated/edge; deferred
+ks3 :: full ordering probe -> Nat Sorts before Subterm Convergence, both after guardedness
+
+# --- final enumeration sweep (convergence check) ---
+sf_pos :: In/Out/Fr in each rule position -> Special facts: LHS bans Out, RHS bans Fr,In
+sf_k :: K in prem/concl -> Reserved names (not special)
+sf_reserved :: KU,KD,K,DED,Coerce in actions -> only K/KU/KD reserved; DED,Coerce normal
+ub_pub :: pub vars only-in-conclusion -> excluded from Unbound (only msg/fresh reported)
+ar_dup :: same fact arity1 in 2 rules + arity2 -> arity items listed per (rule,arity)
+ms2 :: mismatching sorts in 2 rules -> rule entries joined by "\n  \n"
+th2/thN :: facts-LHS-not-RHS suggestion threshold -> edit distance <= 3 suggests, >=4 omits
+z1_restr_guard :: unguarded RESTRICTION -> FATAL error (not a warning); guardedness is lemma-only
+z2_eq_varlhs :: equation with variable LHS -> PARSE ERROR
+z3_sources :: exists-trace [sources] -> SUCCESS
+z4_diff :: diff without flag -> PARSE ERROR
+z5_macro :: macro body unbound var -> expands into rule -> Unbound variables (no new topic)
+z6_mset :: multiset + balanced -> SUCCESS
+z7_lemma_k :: K action fact inside a lemma formula -> SUCCESS (no reserved check on lemma facts)
+z8_priv :: private function output -> SUCCESS
+z9_freshfact :: Fr as an ACTION fact -> Reserved names on the middle
+z10_opts :: lemma [heuristic=S] -> SUCCESS
+z11_io_action :: In/Out/K in actions -> all Reserved names on the middle
+z12_fr_rhs :: Fr on RHS -> Special facts (right-hand-side), confirming position-dependent classification
+# Enumeration converged: no new warning topics beyond the 13 (11 AST-derivable + 2 Maude-derivation).
+
+# --- ROUND 2: five integration-reported topics (diff arg via `wf_oracle.sh <f> --diff`) ---
+round2/exists_trace_reuse :: [reuse] exists-trace lemma -> "Lemma annotations"; NO Formula terms/guardedness (fixes false positive)
+round2/fresh_public_constant :: ~'foo' literal in rule -> "Fresh public constants"
+round2/multiplication_in_rule_lhs :: `*` in rule -> "Multiplication restriction of rules" (+ Maude Message Derivation)
+round2/diff_left_right_mismatch --diff :: explicit left has extra premise -> "Left rule" (Inconsistent left rule + w.r.t. parent)
+round2/diff_right_rule_mismatch --diff :: explicit right has extra premise -> "Right rule"
+round2/diff_reserved_prefix --diff :: DiffIntrPriv fact -> "Reserved prefixes" (ProtoFact Show + width-69 fill header)
+fpc_positions :: fresh lits in prem/act/concl -> collection order = premises, conclusions, actions; list word-wraps
+fpc_multi :: two fresh lits one rule + across rules -> ", " join; rule entries "\n  \n"
+la_alltraces :: [reuse] all-traces -> SUCCESS (reuse-on-exists-trace is the trigger, not reuse alone)
+la_multi :: two exists-trace reuse lemmas -> two entries "\n  \n"
+comb1 :: order probe -> Unbound, Fresh public constants, Public names, mismatching sorts, Reserved
+comb2/ord1 :: Lemma annotations right after Formula terms (no guardedness present)
+ord_tail :: Formula terms, Formula guardedness, Lemma annotations, Nat Sorts, Subterm
+mega_tail :: full tail -> ...guardedness, Lemma annotations, Multiplication restriction, Nat Sorts, Subterm
+mul_act/mul_concl/mul_multi :: `*` in action=no, conclusion=YES, premise-only=no -> trigger is `*` in conclusions
+mul_pc :: `*` in prem AND concl -> only the concl term listed
+mul_terms :: two `*` in concl -> ", " joined; long rule wraps (arrow on own line)
+mul_exp :: `g^c` reducible in lhs -> rule2 shows `x.1`, "Variables that occur only in rhs" mode (GAP)
+mul_2rules :: two bad rules -> entries joined "\n  \n"
+mul_ord/mul_ord2 :: Multiplication after Formula terms, before Subterm
+diff_comb/diff_ord/diff_ord2/diff_mega :: diff order -> Reserved prefixes after Reserved names; Left/Right after lhs-not-rhs
+diff_place :: Special facts, Fact usage(diff-merged arity/mult), lhs-not-rhs, Left rule
+diff_both :: both left+right inconsistent (1 rule) -> ONLY Left rule (right not reported)
+diff_consistent :: explicit left/right == projection -> SUCCESS
+re_arity/re_mult :: non-diff still emits "Fact arity issues"/"Fact multiplicity issues" (unchanged)
+rp_multi :: fact order prem,act,concl; each fact -> pp + (ProtoFact ...) line
+rp_decode :: persistent arity-2 -> (ProtoFact Persistent "Name" 2,2,Persistent)
+rp_long/rp_med/rp_w47 :: header fill WIDTH = 69 (break when col+1+word > 69)
+reserved_prefix (no --diff) :: SUCCESS -> Reserved prefixes is diff-mode only
+# Round 2 converged: 5 topics closed (6 incl. Right rule); byte-parity fixtures added.

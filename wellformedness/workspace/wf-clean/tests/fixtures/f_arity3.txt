@@ -1,0 +1,38 @@
+WARNING: the following wellformedness checks failed!
+
+Fact arity issues
+=================
+
+Same fact is used with different arities, i.e., Fact('A','B') is different from Fact('A'). 
+Check the arguments of your facts.
+  
+
+  Fact `bar':
+
+    1. Rule `R4', arity 1
+         Bar( x )
+    
+    2. Rule `R5', arity 2
+         Bar( x, x )
+  
+  Fact `foo':
+
+    1. Rule `R1', arity 1
+         Foo( x )
+    
+    2. Rule `R2', arity 2
+         Foo( x, y )
+    
+    3. Rule `R3', arity 3
+         Foo( x, x, x )
+  
+
+Facts occur in the left-hand-side but not in any right-hand-side 
+=================================================================
+
+  1. in rule "R1":  factName `Foo' arity: 1 multiplicity: Linear. Perhaps you want to use the fact in rule "R3":  factName `Foo' arity: 3 multiplicity: Linear
+  
+  2. in rule "R2":  factName `Foo' arity: 2 multiplicity: Linear. Perhaps you want to use the fact in rule "R3":  factName `Foo' arity: 3 multiplicity: Linear
+  
+  3. in rule "R4":  factName `Bar' arity: 1 multiplicity: Linear. Perhaps you want to use the fact in rule "R5":  factName `Bar' arity: 2 multiplicity: Linear
+*/

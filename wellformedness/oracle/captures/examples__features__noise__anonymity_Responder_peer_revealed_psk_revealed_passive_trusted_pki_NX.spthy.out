@@ -1,0 +1,7 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+"examples/features/noise/anonymity_Responder_peer_revealed_psk_revealed_passive_trusted_pki_NX.spthy" (line 223, column 23):
+unexpected ","
+expecting term
+diff operator found, but flag diff not set

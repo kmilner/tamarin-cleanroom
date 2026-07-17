@@ -1,0 +1,7 @@
+WARNING: the following wellformedness checks failed!
+
+Fresh public constants
+======================
+
+  rule `Bad': fresh public constants are not allowed: ~'foo'
+*/

@@ -1,0 +1,15 @@
+WARNING: the following wellformedness checks failed!
+
+Reserved names
+==============
+
+  Rule `R1' contains facts with reserved names on the middle:
+    K( (y%+z) ), K( %1 )
+
+Nat Sorts
+=========
+
+  y in term (y%+z) must be of sort nat
+  
+  z in term (y%+z) must be of sort nat
+*/

@@ -1,0 +1,7 @@
+workflows/wf_d28aad0e-98c/agent-a169c9fd75138f333.jsonl: tool_calls=92 web=0 VIOLATIONS=0
+workflows/wf_d28aad0e-98c/agent-a29d812038b601a9c.jsonl: tool_calls=88 web=0 VIOLATIONS=0
+workflows/wf_d28aad0e-98c/agent-a4b479b960c441512.jsonl: tool_calls=58 web=0 VIOLATIONS=0
+workflows/wf_d28aad0e-98c/agent-a9addc4f0d5b97ed0.jsonl: tool_calls=84 web=0 VIOLATIONS=0
+workflows/wf_6e112628-91d/agent-ae38332cc1eb5f790.jsonl: tool_calls=63 web=0 VIOLATIONS=0
+workflows/wf_db8cc474-1b6/agent-aa7e30d4b753e4fb7.jsonl: tool_calls=93 web=0 VIOLATIONS=0
+workflows/wf_db8cc474-1b6/agent-acd8fb9a8d13fc15f.jsonl: tool_calls=59 web=0 VIOLATIONS=0

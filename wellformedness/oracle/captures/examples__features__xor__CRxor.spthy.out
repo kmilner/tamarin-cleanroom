@@ -1,0 +1,211 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory CRXOR] Theory loaded
+[Theory CRXOR] Theory translated
+[Theory CRXOR] Derivation checks started
+[Theory CRXOR] Derivation checks ended
+[Theory CRXOR] Theory closed
+theory CRXOR
+
+begin
+
+// Function signature and definition of the equational theory E
+
+builtins: xor
+functions: fst/1, h/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) Setup:
+   [ Fr( ~k ) ] --[ OnlyOnce( ) ]-> [ !InitLTK( ~k ), !RespLTK( ~k ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) initiator:
+   [ Fr( ~na ) ] --[ Challenge( ~na ) ]-> [ Out( ~na ), Initiated( ~na ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) responder:
+   [ In( na ), Fr( ~nb ), !RespLTK( ~k ) ]
+  --[ Response( ~k ), Neq( na, zero ), NeqForExec( na, zero ) ]->
+   [ Out( <h((~k⊕~nb⊕na)), ~nb> ) ]
+
+  /*
+  rule (modulo AC) responder:
+     [ In( na ), Fr( ~nb ), !RespLTK( ~k ) ]
+    --[ Response( ~k ), Neq( na, zero ), NeqForExec( na, zero ) ]->
+     [ Out( <h(z), ~nb> ) ]
+    variants (modulo AC)
+    1. ~k    = ~k.5
+       ~nb   = ~nb.5
+       na    = na.5
+       z     = (~k.5⊕~nb.5⊕na.5)
+    
+    2. ~k    = ~k.5
+       ~nb   = ~nb.5
+       na    = zero
+       z     = (~k.5⊕~nb.5)
+    
+    3. ~k    = ~x.5
+       ~nb   = ~nb.6
+       na    = ~x.5
+       z     = ~nb.6
+    
+    4. ~k    = ~x.5
+       ~nb   = ~nb.8
+       na    = (~x.5⊕x.7)
+       z     = (x.7⊕~nb.8)
+  */
+
+rule (modulo E) initiator2:
+   [ Initiated( ~na ), !InitLTK( ~k ), In( <m, nb> ) ]
+  --[ Alive( ~na, ~k ), Eq( h((~k⊕~na⊕nb)), m ) ]->
+   [ ]
+
+  /*
+  rule (modulo AC) initiator2:
+     [ Initiated( ~na ), !InitLTK( ~k ), In( <m, nb> ) ]
+    --[ Alive( ~na, ~k ), Eq( h(z), m ) ]->
+     [ ]
+    variants (modulo AC)
+    1. ~k    = ~k.6
+       ~na   = ~na.6
+       nb    = nb.6
+       z     = (~k.6⊕~na.6⊕nb.6)
+    
+    2. ~k    = ~k.6
+       ~na   = ~na.6
+       nb    = zero
+       z     = (~k.6⊕~na.6)
+    
+    3. ~k    = ~x.6
+       ~na   = ~x.6
+       nb    = nb.7
+       z     = nb.7
+    
+    4. ~k    = ~x.6
+       ~na   = ~na.7
+       nb    = ~x.6
+       z     = ~na.7
+    
+    5. ~k    = ~x.6
+       ~na   = ~x.7
+       nb    = (~x.6⊕~x.7)
+       z     = zero
+    
+    6. ~k    = ~x.6
+       ~na   = ~x.7
+       nb    = (~x.6⊕~x.7⊕x.9)
+       z     = x.9
+    
+    7. ~k    = ~x.6
+       ~na   = ~na.10
+       nb    = (~x.6⊕x.9)
+       z     = (x.9⊕~na.10)
+    
+    8. ~k    = ~k.7
+       ~na   = ~x.6
+       nb    = ~x.6
+       z     = ~k.7
+    
+    9. ~k    = ~k.9
+       ~na   = ~x.6
+       nb    = (~x.6⊕x.8)
+       z     = (x.8⊕~k.9)
+  */
+
+restriction equality:
+  "∀ x y #i. (Eq( x, y ) @ #i) ⇒ (x = y)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x y #i. (Eq( x, y ) @ #i) ⇒ (x = y)"
+  */
+
+restriction unique:
+  "∀ #i #j. ((OnlyOnce( ) @ #i) ∧ (OnlyOnce( ) @ #j)) ⇒ (#i = #j)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ #i #j. ((OnlyOnce( ) @ #i) ∧ (OnlyOnce( ) @ #j)) ⇒ (#i = #j)"
+  */
+
+restriction inequality:
+  "¬(∃ x #i. Neq( x, x ) @ #i)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "¬(∃ x #i. Neq( x, x ) @ #i)"
+  */
+
+lemma alive:
+  all-traces "∀ x y #i. (Alive( x, y ) @ #i) ⇒ (∃ #j. Response( y ) @ #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x y #i. (Alive( x, y ) @ #i) ∧ ∀ #j. (Response( y ) @ #j) ⇒ ⊥"
+*/
+by sorry
+
+lemma recentalive_tag:
+  all-traces
+  "∀ x y #i.
+    (Alive( x, y ) @ #i) ⇒
+    (∃ #j #k.
+      (((Challenge( x ) @ #k) ∧ (Response( y ) @ #j)) ∧ (#k < #j)) ∧
+      (#j < #i))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x y #i.
+  (Alive( x, y ) @ #i)
+ ∧
+  ∀ #j #k.
+   (Challenge( x ) @ #k) ∧ (Response( y ) @ #j)
+  ⇒
+   ((¬(#k < #j)) ∨ (¬(#j < #i)))"
+*/
+by sorry
+
+lemma executable:
+  exists-trace
+  "∃ x y #i #j.
+    (((Alive( x, y ) @ #i) ∧ (Response( y ) @ #j)) ∧
+     (¬(∃ #k. (Response( y ) @ #k) ∧ (¬(#j = #k))))) ∧
+    (¬(∃ #l. NeqForExec( x, x ) @ #l))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ x y #i #j.
+  (Alive( x, y ) @ #i) ∧ (Response( y ) @ #j)
+ ∧
+  (∀ #k. (Response( y ) @ #k) ⇒ #j = #k) ∧
+  (∀ #l. (NeqForExec( x, x ) @ #l) ⇒ ⊥)"
+*/
+by sorry
+
+/* All wellformedness checks were successful. */
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: examples/features/xor/CRxor.spthy
+
+  processing time: 0.16s
+  
+  alive (all-traces): analysis incomplete (1 steps)
+  recentalive_tag (all-traces): analysis incomplete (1 steps)
+  executable (exists-trace): analysis incomplete (1 steps)
+
+==============================================================================
