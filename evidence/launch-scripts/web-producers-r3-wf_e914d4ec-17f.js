@@ -1,0 +1,32 @@
+export const meta = {
+  name: 'web-producers-r3',
+  description: 'Sealed producers round 3: R3 proof-tree + method HTML and R4 index/housekeeping (Fable), completing the R1-R5 producer decomposition; both-sides audit',
+  phases: [
+    { title: 'Implement', detail: 'sealed R3 (proof-tree HTML) + R4 (index page) — Fable', model: 'fable' },
+    { title: 'Audit', detail: 'both-sides similarity audit of the round-3 delta' },
+  ],
+}
+
+const IMPL = `You are a SEALED implementer under the barrier protocol at /home/kamilner/tamarin-cleanroom/PROTOCOL.md — read it first and comply strictly.
+ACCESS RULES: You must NOT read any file under /home/kamilner/tamarin-rs/crates/, and NOT read any Haskell source of tamarin-prover anywhere on disk (notably /home/kamilner/tamarin-rs/tamarin-prover/{lib,src}/ and /home/kamilner/tamarin-rs/tamarin-prover-testing/{lib,src}/). Do NOT read /home/kamilner/tamarin-cleanroom/INTEGRATION_REPORT.md or TAIL_ELIMINATION_SCOPE.md, and do NOT read any AUDIT.md anywhere in the cleanroom. No web access (the local HS oracle server is not web access). You MAY read .spthy example files under /home/kamilner/tamarin-rs/tamarin-prover/examples/, run the sanctioned oracle harnesses, and read the captured corpus /home/kamilner/tamarin-rs/scripts/.web_hs_cache. No git commits.
+DISCIPLINE: log every oracle interaction in workspace QUERIES.log; record behavioral facts in BEHAVIOR.md with probe provenance; comments describe current behavior only. Oracle scripts carry OOM guards — preserve them; live HS servers only on ports 3100-3199; STOP every server you start before returning. Return a PLAIN-TEXT summary.
+
+Workspace: /home/kamilner/tamarin-cleanroom/weblayer/ (read/write freely inside it, EXCEPT AUDIT.md). The producers cluster is at weblayer/producers/ — READ FIRST: SPEC.md, README.md, interface/{fragment_inputs.rs,required_api.md}, then your predecessors' sealed state: producers/workspace/BEHAVIOR.md + QUERIES.log and the crate producers-clean. DONE so far: R1 (shared HTML skin: escape/postprocess/envelopes + center sections, 324/324 sweep), R5 (theory-path grammar, 40,037-tail round-trip), R2 (west proof-script pane, 478/478 pane sweep — proof LINES were held opaque there). Reuse all of it.
+
+THE TASK — round 3 = sub-targets R3 then R4, completing the producer surface.
+
+R3 — proof-tree + proof-method HTML: render a pre-computed proof tree (tree SHAPE + per-node method TEXT are opaque inputs per the interface) as the nested HTML that fills the proof display: per-node proof-step links and remove-step links (hrefs through your R5 grammar) carrying the method text, the case/next/qed line grammar, indentation, and the status span classes (hl_good/hl_bad wrapping you observed from outside in R2). Corpus: the proof trees inside the 396 proved overview panes (R2's sweep treated their lines as opaque — now you produce them); extract per-tree fixtures with your existing tools. Live: drive autoprove on own-authored theories (R2's PathProbe-v2 recipe) to force never-captured tree shapes — multi-case branching, partial/incomplete proofs (is an un-finished subtree rendered differently?), removed steps, deep nesting, solved-with-different-methods nodes. Pin indentation, link placement, class attachment, and line composition byte-exactly.
+
+R4 — the welcome/index page + housekeeping: the root page frame, the loaded-theories table rows (per-row name/time/origin opaque), the upload banner, plus the small housekeeping bodies (robots, cancel-ack, invalid-args and whatever else the capture corpus + live probes expose). Check what the capture corpus holds for the root page; anything unexposed there must be live-probed (upload several theories, observe row rendering/ordering; probe the housekeeping routes directly).
+
+HOUSEKEEPING (from the round-2 review, behavioral, your own artifacts): two stale comments in src/proofscript.rs — the pane-count "473" should read 478, and a "§11" reference should point at §12. Fix both.
+
+Acceptance: (a) R3: a corpus sweep re-rendering EVERY proof tree in all proved overview panes byte-identically (now with proof lines produced, not opaque — i.e. the R2 sweep upgraded so only formula/method text stays opaque), plus live replays on at least two fresh autoproven theories, plus a mutation check; (b) R4: byte tests against captured/live root-page and housekeeping bodies, live replay after uploads; (c) all cargo tests green, zero warnings, std-only. If any rendering cannot be forced through an observable channel, record it UNOBSERVABLE with the failed probes. Do NOT edit anything outside /home/kamilner/tamarin-cleanroom/weblayer/.`
+
+const AUDIT = `You are a BOTH-SIDES similarity auditor for the tamarin-rs sealed relicensing campaign (exempt from barrier access rules; you may read everything). Audit ONLY this round's delta: /home/kamilner/tamarin-cleanroom is a git repo whose HEAD (0359dd2) contains producers rounds 1-2 — git -C /home/kamilner/tamarin-cleanroom status/diff restricted to weblayer/ shows the round-3 delta (R3 proof-tree/method HTML + R4 index/housekeeping).
+Audit against the upstream Haskell in /home/kamilner/tamarin-rs/tamarin-prover/src/Web/ — Theory.hs (the proof-tree/subproof snippet producers and their helpers) and Hamlet.hs/Handler.hs (root page, housekeeping). Byte-parity-forced HTML (tag skeleton, link shapes, class vocabulary, case/next/qed grammar) is merger/compatibility; flag copied protectable EXPRESSION: identifier constellations, helper decomposition not forced by the boundary, non-observable constants, comment lineage. Cross-check BEHAVIOR.md/QUERIES.log provenance for the hardest-to-guess behaviors (indent law, incomplete-subtree rendering, row ordering). Also confirm no sealed-readable file gained an upstream citation this round.
+Append a producers round-3 section to /home/kamilner/tamarin-cleanroom/weblayer/AUDIT.md. Violations get BEHAVIORAL redo instructions (never a patch). End with exactly one line: VERDICT: pass  — or —  VERDICT: fail`
+
+const impl = await agent(IMPL, { label: 'seal:producers-r3', phase: 'Implement', model: 'fable' })
+const audit = await agent(AUDIT, { label: 'audit:producers-r3', phase: 'Audit', model: 'opus' })
+return { impl: (impl || '').slice(0, 3000), audit: (audit || '').slice(0, 2500), passed: /VERDICT:\s*pass/i.test(audit || '') }

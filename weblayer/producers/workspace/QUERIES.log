@@ -234,3 +234,105 @@ Mutation checks (each observed to FAIL, then reverted, suite re-green):
 (2) width limit 69->68 breaks corpus sweep; 69->70 breaks ONLY the live
     WProbe replay — the live bisection pins the boundary the corpus cannot;
 (3) R5 encode uppercase %XX -> lowercase breaks add/%3Cfirst%3E byte tests.
+
+## Round 3 (R3 proof-tree lines, then R4 welcome/housekeeping) — this session
+[S19] tools/analyze_prooftree.py + targeted greps (corpus-only, r2_panes) |
+      proof-display line grammar over all 478 panes: step anchor class
+      vocabulary EXACTLY {proof-step hl_good x431122, hl_bad x1461,
+      sorry-step x690}; remove-step always same-href, directly after the
+      step; sorry METHOD steps (595) are the ONLY anchored steps without
+      remove-step (95 sorry-step-classed interiors HAVE it); `by ` prefix
+      appears exactly on case-less steps with method heads contradiction /
+      zero-case solve / sorry — never on SOLVED (612) / simplify / induction
+      / cased solve; case at parent-indent+2, subtree at case indent, next
+      and qed at PARENT indent. Status spans: case line == CHILD's status
+      (426612/426612), next/qed == PARENT step's status (refuted
+      prev-case x117 / following-case x99 alternatives); status-less nodes
+      render keywords BARE (no wrapper span). Tree status sets per lemma:
+      all-good x3248, all-bad x146, None+good mixes (incomplete).
+[S20] d381650e pane dissection (corpus-only) | the hl_superfluous mode: a
+      replayed proof-script leftover subtree renders with NO proof-step
+      anchor — method wrapped in <span class="hl_superfluous"> (multi-line
+      spans OK) — but KEEPS the remove-step anchor (all 1668 span-steps
+      carry one, full canonical hrefs through the leftover, `_` segments
+      included); by/case/next/qed wrapped in hl_superfluous like any status;
+      the leftover hangs as the unnamed `_` child of a live
+      `sorry /* invalid proof step encountered */` node (sorry-step class,
+      no by — it has a child, no remove-step).
+[S21] corpus | hl_ class census over ALL captured bodies: hl_operator,
+      hl_keyword, hl_good, hl_comment, hl_superfluous (only d381650e),
+      hl_bad. NO hl_medium anywhere; no equiv-kind hrefs in any pane; no
+      MIRRORED/UNFINISHABLE method text; no literal `case _` display line
+      (unnamed continuations are only ever inline, segment `_`).
+[L16] wrote OWN theory TreeProbe (probes/TreeProbe.spthy: Start/Fork1/Fork2/
+      HopOn/End rules; lemmas reach exists-trace, origin all-traces true,
+      false_secret all-traces false); hs_server.sh start 3134 |
+      autoprove/idfs/0/False per lemma (versions 2-4), autoproveAll/idfs/0/
+      proof/reach (v5: ALL proved — good case/qed + two-case next tree + bad
+      SOLVED tree), autoprove/idfs/0/True/proof/reach (v8: all-solutions —
+      BOTH HopOn cases SOLVED, same grammar). bare autoproveAll/idfs/0
+      404s (needs the proof/... focus tail). v5 pane captured ->
+      r3_live/treeprobe_v5_proved.pane; v5 theory downloaded via
+      download/TreeProbe.spthy (oracle OUTPUT with embedded proof scripts).
+[L17] probe 3134 autoprove/idfs/1/False/proof/origin (v6) | BOUNDED
+      autoprove: header UNWRAPPED; root simplify anchor class sorry-step
+      WITH remove-step; leaf line `by ` BARE + sorry-step anchor, method
+      `sorry /* bound 1 hit */`, NO remove-step ->
+      r3_live/treeprobe_v6_bounded.pane. No hl_medium in the partial state.
+[L18] wrote OWN ScriptProbe.spthy (the v5 download with origin's solve goal
+      doctored to Missing(x), theory renamed) served 3134; OWN TreeProbe2
+      (Fork1 carries extra Tag1 action; false `mixed` lemma) served 3135 |
+      ScriptProbe replay: invalid step -> live `sorry /* invalid proof step
+      encountered */` node (sorry-step anchor, no by — it has a child, no
+      remove-step) whose unnamed `_` child is the SUPERFLUOUS leftover:
+      span-wrapped steps WITH remove-step links (paths continue through the
+      leftover), superfluous by/case/next/qed wraps — the d381650e mode
+      reproduced 1:1 -> r3_live/scriptprobe_v1_superfluous.pane. TreeProbe2
+      autoprove/characterize/0/False/proof/mixed (v2): MIXED tree — hl_bad
+      parent solve, case Fork1 bad (SOLVED) then `next` wrapped hl_bad
+      (PARENT status, following case is good — the corpus-unreachable
+      discriminator), case Fork2 hl_good with `by`-prefixed zero-case solve,
+      qed hl_bad; header hl_bad; NO hl_medium ->
+      r3_live/treeprobe2_v2_mixed.pane. idfs on the same lemma shows only
+      the attack branch.
+[L19] probes 3134/3135 non-/thy routes | GET / index page captured (1-row +
+      3-version tables) -> r4_live/index_*.html; robots.txt = `User-agent: *`
+      (13B, no NL); /kill?path=... = `Canceled request!` (17B, no NL);
+      /kill (no path) = 400 full Invalid Arguments page, body
+      `<h1>Invalid Arguments</h1>\n<ul><li>No path to kill specified!</li>\n
+      </ul>\n` in the error shell -> kill_no_path.html; /favicon.ico = 303
+      empty body (dispatch-side); missing /static file = `File not found`.
+      Index rows: <tr><td><a href=/thy/trace/IDX/overview/help>NAME</a></td>
+      <td>HH:MM:SS</td><td>Original|<em>Modified (UNCLOSED em)</td>
+      <td>ORIGIN</td></tr>, index ascending; disk-load origin = the tmp
+      path, no flash on GET; no trailing newline; version slot `Running
+      <a href=/>..Tamarin..</a> 1.13.0` in the north header.
+[L20] POST / uploads on 3134 | multipart field `uploadedTheory`: success ->
+      index page with flash `<p class="message">Loaded new theory!</p>` as
+      the FIRST child of <body> + a new `<em>Modified` row whose origin is
+      the bare uploaded FILENAME; parse failure -> flash `Theory loading
+      failed:\n&quot;garbage.spthy&quot; (line 1, column 1):\nunexpected
+      &quot;t&quot;\nexpecting &quot;theory&quot;` (escaped, raw newlines),
+      NO new row; POST with no file -> flash `Post request failed.` ->
+      r4_live/index_post_{success,failure,nofile}.html.
+[L21] POST / upload from metachar filename `up&<x>'probe.spthy` (own theory
+      text) on 3134 | row origin cell renders
+      `up&amp;&lt;x&gt;&#39;probe.spthy` — the R1 escape set applied to
+      row name/time/origin by the producer -> index_post_metachar.html.
+      Servers 3134 + 3135 STOPPED after capture; 3100-3199 scan clean.
+
+## Validation status (round 3 close: R3 + R4)
+cargo test: 35 green (R1 14 + R5 6 + R2 4 + R3 6 + R4 5), cargo clippy
+--all-targets: zero warnings, std-only. R3: the R2 corpus sweep UPGRADED —
+every proof display in all 478 panes parsed to a structured ProofTree
+(indent/case/next/qed framing, status classes, step+remove links, canonical
+R5 hrefs all asserted; ONLY method text opaque) and re-rendered
+byte-identically; live replays 4/4 (r3_live); fixtures pin each line form.
+R4: live index-page replays 6/6 (2 GET + 3 POST + metachar) byte-identical
+via strict slot inversion; housekeeping bodies + Invalid-Arguments page
+byte-exact. Mutation checks (each observed to FAIL, then reverted, suite
+re-green): (1) next parent-status -> following-case-status breaks the corpus
+sweep + mixed live replay; (2) dropping the terminal-marker by-exception
+breaks fixtures + live replays (SOLVED gains a bogus `by `); (3) closing the
+row `<em>` breaks all index replays. Housekeeping fix: proofscript.rs stale
+comments (473 -> 478 pane count, BEHAVIOR §11 -> §12 pointer) corrected.

@@ -139,16 +139,10 @@ pub struct LemmaEntry {
 pub enum ProofDisplay {
     /// Unproven: a single trailing `by sorry` step (no status wrapper).
     Unproven,
-    /// A proof carried as pre-rendered display lines (each already a complete
-    /// HTML logical line), plus the status class the lemma HEADER wrapper span
-    /// carries (`None` for an incomplete proof — no wrapper). This is the
-    /// R2-level opaque form; R3 structures the tree ([`ProofTree`]) and will
-    /// render into exactly these lines.
-    Rendered {
-        header_status: Option<String>,
-        lines: Vec<String>,
-    },
-    /// A structured proof tree (R3 — not yet rendered by this crate).
+    /// A structured proof tree, laid out by the R3 renderer
+    /// ([`crate::prooftree`]). The lemma HEADER wrapper span is derived from
+    /// the ROOT node's status (a status-less root — an incomplete proof —
+    /// leaves the header unwrapped) [S16][S19].
     Tree(ProofTree),
 }
 
@@ -159,15 +153,21 @@ pub enum ProofDisplay {
 /// A proof tree: a method-labelled node with named child cases. Pre-computed;
 /// the producer only lays it out as nested HTML (indent, keywords, links).
 pub struct ProofTree {
-    /// Pre-rendered proof-method text for this node (opaque prover value).
+    /// Pre-rendered proof-method text for this node (opaque prover value;
+    /// may span several lines, continuation indent baked in).
     pub method_text: String,
-    /// Highlight status this node's structural keywords carry.
+    /// Highlight status this node's step and structural keywords carry.
     pub status: Highlight,
-    /// Whether this node was reached by real proof search (vs replayed) — gates
-    /// whether a remove-step affordance is emitted.
+    /// Whether this node is part of the real proof (linked step + remove
+    /// affordance) vs a replayed proof-script leftover rendered without links
+    /// [S20].
     pub live: bool,
+    /// A terminal MARKER line (the `SOLVED`-style pre-rendered terminal
+    /// state), which never takes the `by ` prefix a case-less method step
+    /// carries [S19].
+    pub terminal_marker: bool,
     /// Named child cases, in order; the empty name means a single unnamed
-    /// continuation (no `case` label).
+    /// continuation (no `case` label, URL segment `_`).
     pub cases: Vec<(String, ProofTree)>,
 }
 

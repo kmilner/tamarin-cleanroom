@@ -1327,3 +1327,164 @@ render-side `prefixWithUnderscore` omission; speculative `-`/`~` in the encode s
 copied protectable expression and none requires redo. Findings that survive filtration: 0.
 
 VERDICT: pass
+
+# PRODUCERS cluster — Round 3 — both-sides similarity audit (R3 proof-tree/method HTML + R4 index/housekeeping)
+
+Delta audited: the working-tree change on `weblayer/producers/` since `0359dd2` (HEAD `5f6ff68`
+is a graphdot-only commit; the producers R3/R4 work is uncommitted). Sealed side: `prooftree.rs`
+(new `render_tree`/`render_tree_lines`/`render_node`/`status_class`/`wrap_status`/`keyword`),
+`welcome.rs` (new `render_welcome`/`render_invalid_args` + `ROBOTS_BODY`/`CANCEL_ACK_BODY`/
+`FILE_NOT_FOUND_BODY` + six `include_str!` frame fragments), the `proofscript.rs`/`model.rs`/
+`lib.rs` wiring, BEHAVIOR §16–§20, QUERIES [S19]–[S21]/[L16]–[L21], tests `r3_proof_tree.rs`/
+`r4_welcome.rs`/`common/mod.rs` + the r2 sweep upgrade. Upstream compared: `Web/Theory.hs`
+(`proofIndex` = `ppStep`/`ppCase`/`stepLink`/`superfluousStep`/`removeStep`/`invalidatedStep`;
+`markStatus`; `linkToPath`), `Theory/Proof.hs` (`prettyProofWith`/`ppCases`/`ppCase`, the
+by/case/next/qed traversal), `Web/Hamlet.hs` (`rootTpl`/`introTpl`/`theoriesTpl`/`theoryTpl`),
+`Web/Handler.hs` (root POST flash, `robots`, `kill`, `invalidArgs`, static-miss).
+
+## Abstraction — what each side does
+
+R3 maps a pre-computed tree (SHAPE + opaque per-node method text + per-node status) to the
+west-pane logical lines: per node a step line (optional `by ` prefix, an anchored `proof-step`
+link OR a bare `hl_superfluous` span, optional `remove-step` anchor), then case framing (a
+single unnamed continuation at the same indent; ≥1 named case at `d+2` with a `case NAME`
+header, `next` between siblings, `qed` to close), with status→`<span class>` wrapping.
+Upstream splits this across `Theory/Proof.hs::prettyProofWith`/`ppCases` (owns the by/case/
+next/qed traversal, library-side) and `Web/Theory.hs::proofIndex` (`ppStep` colour case +
+`ppCase = markStatus`). R4 emits the `/` page as a fixed frame around a flash slot, a version
+slot and index-ascending theory rows, plus fixed housekeeping bodies; upstream builds the
+same via whamlet widgets + `setMessage` + plain handlers.
+
+## Provenance cross-check — the three hardest-to-guess behaviours trace to probes, not source
+
+- **Indent law** (case at parent+2, subtree at case indent, `next`/`qed` at parent indent;
+  unnamed continuation at same indent, segment `_`): BEHAVIOR §16 + QUERIES [S19] (corpus
+  census over 478 panes) + the `fixture_two_case_good_tree` byte pin. Upstream expresses it as
+  `nest 2`; the sealed re-derives the observable arithmetic. Logged, not source-lifted.
+- **`next`/`qed` carry the PARENT status, the case line the CHILD status** (the non-obvious
+  one — one would naïvely bind `next` to the following case): [S19] pins it corpus-wide
+  (426612/426612 case==child) and explicitly refutes the prev-case (×117) and following-case
+  (×99) alternatives; [L18] then FORCES the corpus-unreachable discriminator live with a mixed
+  TreeProbe2 (bad parent, good following case → `next`/`qed` render `hl_bad`). Upstream
+  `prettyCase ps kwNext`/`prettyCase (root prf)` matches, but the sealed reached it by a
+  discriminating own-theory probe. Strong provenance.
+- **Incomplete-subtree / replayed-leftover rendering** (a live `sorry /* invalid proof step
+  encountered */` node — `sorry-step`, no `by` because it has a child, no remove-step — whose
+  unnamed `_` child is the `hl_superfluous` leftover: span-not-anchor, keeps remove-step,
+  paths continue through it): §17 matrix + [S20] (the single corpus instance, `d381650e`,
+  dissected) + [L18] (reproduced 1:1 by doctoring an own theory's embedded proof script). The
+  corpus had exactly one instance, so it was forced live — exactly the protocol posture.
+- **Row ordering (R4)**: §19 + [L19] (index-ascending, 1-row and 3-version captures) + [L20]
+  (upload appends an `<em>Modified` row). Upstream's `processMap`/`ntail 4` grouping+cap and
+  the `Interactive -> "(interactively created)"` origin are correctly attributed to the ADAPTER
+  (row SELECTION) and NOT reproduced in the producer — the right boundary, affirmatively drawn.
+
+## Filtration — every shared element is byte-forced output (merger / compatibility)
+
+- Class vocabulary `internal-link`/`proof-step`/`remove-step`/`sorry-step`/`hl_good`/`hl_bad`/
+  `hl_medium`/`hl_superfluous`/`hl_keyword` and the keyword grammar `by`/`case`/`next`/`qed`:
+  the served wire bytes, CSS-coupled — compatibility, and below even the SEMANTIC acceptance
+  gate (which canonicalizes `hl_*` away), reproduced only for byte-fidelity to the reference.
+- `by`-except-`SOLVED`: observable (612 `SOLVED` lines carry no `by` [S19]); the sealed models
+  it as a `terminal_marker` bool the interface header lacks, DERIVED by the adapter from the
+  step kind — no `Finished Solved` internal constructor is referenced.
+- remove-step present iff the method is not `Sorry`: observable (595 sorry-METHOD steps lack
+  it; 95 sorry-CLASS interiors keep it [S19]); modelled as `live`, not as `psMethod`.
+- href path composition (`proof/{lemma}` + case segments, `_` for unnamed continuations):
+  observable from hrefs, re-rendered through the round-1 escape + R5 encoder.
+- R4 frame bytes (the doubled `</script></script>` closers, the UNCLOSED row `<em>`, the
+  core-team block, licence text, logo path, contextMenu): captured OUTPUT of `rootTpl`/
+  `introTpl`, byte-forced served page — reproducing served bytes is not copying template
+  source. The doubled closer and unclosed tag are rendering artifacts a source-reader need not
+  reproduce; that they are pinned byte-exact ([L19], `include_str!` fragments) is affirmative
+  black-box evidence.
+- Flash strings `Loaded new theory!` / `Post request failed.` and bodies `User-agent: *` /
+  `Canceled request!` / `File not found` / `No path to kill specified!`: all observable via
+  live routes ([L19]–[L21]); the load-error text is held opaque (`Banner::Custom`), and the
+  kill message is a caller argument — none is a non-observable source constant.
+
+## Comparison — affirmative evidence of independent, observation-only construction
+
+- **Control structure differs.** The sealed `render_node` emits the step FIRST (with the by/
+  terminal guard `cases.is_empty() && !terminal_marker` inline) then a 3-arm `match
+  node.cases.as_slice()` (`[]` / `[(name,child)] if name.is_empty()` / `cases`). Upstream
+  `ppCases` is a 4-clause pattern match (`Finished Solved`+`[]` / `[]` / `[("",prf)]` /
+  `cases`) with step emission interleaved per clause, plus a separate 5-way colour `case` in
+  `ppStep`. No clause-for-clause correspondence; the SOLVED/by split lives in different places.
+- **Model differs.** The sealed collapses upstream's `(Maybe System, ProofStepColor)` pair into
+  one 5-variant `Highlight` (`None`/`Good`/`Bad`/`Medium`/`Replayed`) and adds explicit `live`
+  and `terminal_marker` fields the header interface does not carry (adapter-derived). Helper
+  boundaries and names share nothing with upstream (`render_node`/`status_class`/`wrap_status`/
+  `keyword` vs `ppCases`/`ppStep`/`markStatus`/`stepLink`/`superfluousStep`/`removeStep`).
+- **Divergences that only an observer would ship.** The sealed does NOT reproduce upstream's
+  `invalidatedStep` (the `Invalidated`→`hl_medium` step + the "verify it" `TheoryVerifyR` link)
+  and honestly records `hl_medium` as an ASSUMED, never-observed class name (§18); the entire
+  diff-proof path (`diffProofIndex`/`markStatusDiff`, equiv-kind hrefs) is absent (unobservable,
+  §18); the R4 producer omits `processMap`/`ntail 4` and `"(interactively created)"` and does
+  not reproduce upstream's `"Loaded new theory!" ++ warningMsg` concatenation (warnings routed
+  through `Custom`). A copier carries these; an observer, lacking captures for them, does not.
+- **Comment lineage: none.** Every doc comment cites the sealed side's own `[S..]`/`[L..]`/
+  BEHAVIOR §-refs; no upstream file, function, or type name appears anywhere in the delta.
+
+## Tests are live byte gates, not vacuous
+
+`common/mod.rs::TreeInv` STRICTLY inverts each proof display into a `ProofTree`, asserting on
+the way every frame byte, canonical step/remove href, `by`-wrapper==step-status, case==child /
+next==qed==parent status, and the removability matrix — then `render_proof_script` re-renders
+and byte-compares. The R2 sweep is upgraded to run this over all 478 panes; `r3_proof_tree.rs`
+adds 4 own-theory live-pane replays (`r3_live/` present: proved/bounded/superfluous/mixed) + 5
+constructed-input byte fixtures pinning each line form; `r4_welcome.rs` strictly inverts and
+byte-replays 6 live index pages (`r4_live/` present, incl. metachar-escaping and multi-line
+`Custom` flash) + housekeeping/Invalid-Arguments bytes. QUERIES records mutation checks
+(`next`→following-case status; dropping the marker by-exception; closing the row `<em>`) each
+observed to FAIL then reverted — the gate is not vacuous. Provenance artifacts (`probes/*.spthy`,
+`r3_live/*.pane`, `r4_live/*`, `tools/analyze_prooftree.py`) all present on disk.
+
+## Barrier hygiene — no sealed-readable file gained an upstream citation
+
+A scan of the entire round-3 delta (`src/`, `tests/`, the six `*.html` frame fragments,
+BEHAVIOR.md, QUERIES.log, `tools/analyze_prooftree.py`) for `src/Web`, `Theory.hs`/`Hamlet.hs`/
+`Handler.hs`, `Text/PrettyPrint`, `whamlet`/`Yesod`/`Blaze`, and the Haskell identifier set
+(`prettyProofWith`/`ppCases`/`ppStep`/`markStatus`/`psInfo`/`psMethod`/`ProofStepColor`/
+`Finished Solved`/`Invalidated`/`kwBy`/`Unmarked`/`introTpl`/`theoriesTpl`/`theoryTpl`) returns
+**zero**; the clean crate carries no copyright/SPDX/upstream citation. Additionally, the two
+stale refs flagged non-blocking in Producers-R2 note #1 (`proofscript.rs` "473"→478 count and
+"§11"→§12 pointer) were **corrected this round** (QUERIES "Housekeeping fix").
+
+## Non-blocking notes (NOT similarity findings; no redo; do not bear on the verdict)
+
+1. **Shipped-comment provenance narration continues.** `prooftree.rs`/`welcome.rs`/`model.rs`
+   doc comments carry inline `[S..]`/`[L..]`/`§`-refs — the clean-room's own provenance, the
+   *opposite* of copied expression, so no verdict effect; it continues the standing
+   Round-6/7/Producers-R1/R2 hygiene note against the "comments describe current state only"
+   standard. (The two stale numeric refs from R2 are now fixed; no new stale refs introduced.)
+2. **`hl_medium` / `invalidatedStep` / diff-proof are latent fidelity edges, not copies.** An
+   `Invalidated` proof step renders, upstream, as an `hl_medium` link plus a "verify it"
+   affordance; the sealed emits a plain `hl_medium` link (assumed name) and no "verify it", and
+   renders equiv-kind hrefs with the `trace` kind only. All three states are unobserved in
+   corpus + probes (§18) and their omission is affirmative non-copying — but if an interactive
+   `Invalidated`/`Unfinishable`/diff state ever reaches the producer, byte/behaviour parity
+   would differ. If those states matter at integration, probe them and extend the renderer.
+
+## VIOLATIONS (Producers Round 3)
+
+**Similarity: 0.** Every R3/R4 resemblance to `Theory.hs`/`Proof.hs`/`Hamlet.hs`/`Handler.hs`
+reduces to observable wire output — the proof-line grammar (indent, by/case/next/qed, status
+spans, step+remove links, canonical hrefs; pinned by the 478/478 sweep, [S19]–[S21], and the
+[L16]–[L18] live probes) and the index/housekeeping bytes (byte-forced served page, pinned by
+6/6 live replays + [L19]–[L21]) — while the EXPRESSION is materially divergent: a step-first
+3-arm traversal vs the 4-clause `ppCases`+5-way `ppStep`, a collapsed 5-variant `Highlight`
+with adapter-derived `live`/`terminal_marker` vs the `(Maybe System, ProofStepColor)` pair, no
+shared helper boundary or name, and pointed omission of `invalidatedStep`/"verify it"/`hl_medium`
+/diff-proof/`processMap`+`ntail 4`/`"(interactively created)"`. Identifier-constellation
+overlap: none. Comment lineage: none.
+
+**Barrier hygiene: 0.** The full round-3-delta scan finds zero upstream source-file paths or
+Haskell identifiers; the two Producers-R2 stale refs were corrected. No sealed-readable file
+gained an upstream citation this round.
+
+Two non-blocking notes recorded (continued own-provenance comment narration; latent
+`hl_medium`/`invalidatedStep`/diff-proof fidelity edges) — neither is copied protectable
+expression and neither requires redo. Findings that survive filtration: 0.
+
+VERDICT: pass

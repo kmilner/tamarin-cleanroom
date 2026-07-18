@@ -1,0 +1,34 @@
+// Own-authored observation-input theory (sealed room, this session).
+// Designed to force never-captured proof-tree shapes through autoprove:
+// multi-case branching (Fork1/Fork2), deeper chains (Hop), an attack tree
+// (false_secret; ~x is published), and bounded/partial proofs.
+theory TreeProbe
+begin
+
+builtins: hashing
+
+rule Start:
+  [ Fr(~x) ] --[ Begin(~x) ]-> [ St(~x), Out(~x) ]
+
+rule Fork1:
+  [ St(x) ] --[ Mid(x) ]-> [ Hop(x) ]
+
+rule Fork2:
+  [ St(x) ] --[ Mid(x) ]-> [ Hop(x) ]
+
+rule HopOn:
+  [ Hop(x) ] --[ Step(x) ]-> [ Fin(x) ]
+
+rule End:
+  [ Fin(x) ] --[ Done(x) ]-> []
+
+lemma reach:
+  exists-trace "Ex x #i. Done(x) @ #i"
+
+lemma origin:
+  all-traces "All x #i. Done(x) @ #i ==> Ex #j. Begin(x) @ #j"
+
+lemma false_secret:
+  all-traces "All x #i. Begin(x) @ #i ==> not(Ex #k. K(x) @ #k)"
+
+end

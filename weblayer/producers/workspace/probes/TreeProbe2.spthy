@@ -1,0 +1,23 @@
+// Own-authored observation-input theory #2 (sealed room, this session).
+// The mixed lemma: under characterize the Tag1 solve splits into an
+// attack branch (via Fork1) and a contradicting branch (via Fork2) —
+// forcing a proof tree whose subtrees carry DIFFERENT statuses.
+theory TreeProbe2
+begin
+
+rule Start:
+  [ Fr(~x) ] --[ Begin(~x) ]-> [ St(~x), Out(~x) ]
+
+rule Fork1:
+  [ St(x) ] --[ Mid(x), Tag1(x) ]-> [ Hop(x) ]
+
+rule Fork2:
+  [ St(x) ] --[ Mid(x) ]-> [ Hop(x) ]
+
+rule HopOn:
+  [ Hop(x) ] --[ Step(x) ]-> [ Fin(x) ]
+
+lemma mixed:
+  all-traces "All x #i. Step(x) @ #i ==> not(Ex #j. Tag1(x) @ #j)"
+
+end

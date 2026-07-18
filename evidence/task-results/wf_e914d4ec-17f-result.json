@@ -1,0 +1,60 @@
+{
+  "summary": "Sealed producers round 3: R3 proof-tree + method HTML and R4 index/housekeeping (Fable), completing the R1-R5 producer decomposition; both-sides audit",
+  "agentCount": 2,
+  "logs": [],
+  "result": {
+    "impl": "ROUND 3 COMPLETE — R3 (proof-tree HTML) + R4 (welcome/housekeeping) implemented, gated, and documented. All work inside /home/kamilner/tamarin-cleanroom/weblayer/producers/.\n\nR3 — proof-tree lines (src/prooftree.rs, consumed by proofscript.rs for every ProofDisplay::Tree):\n- Grammar derived corpus-first (tools/analyze_prooftree.py over the 478 r2_panes), then live-forced: per node, `by ` prefix iff case-less and not a terminal marker (SOLVED never takes it); proof-step anchor classed hl_good/hl_bad/sorry-step (Replayed nodes get NO anchor — method wrapped in an hl_superfluous span); remove-step on every step except sorry slots (replayed leftovers KEEP it, with canonical paths through the leftover); unnamed `_` continuation inline at same indent; named cases at indent+2 with case line carrying the CHILD's status and next/qed at parent indent carrying the PARENT's (both alternatives refuted corpus-wide and by a live discriminator); lemma header wrapper = root status.\n- Acceptance: the R2 sweep UPGRADED (tests/r2_west_pane.rs + shared tests/common/mod.rs) — all 478 panes now parse every proof display into a structured ProofTree with every frame byte, status placement, and href asserted (only formula/method text opaque) and re-render byte-identically. Live replays 4/4 on own-authored theories (tests/r3_proof_tree.rs, workspace/r3_live/): autoproveAll-proved TreeProbe (case/qed, next-separated two-case, bad SOLVED tree), bound-1 partial (unwrapped header, sorry-step interior with remove, bare-by sorry leaf without), ScriptProbe with a doctored invalid script step (reproduced the d381650e hl_superfluous leftover mode 1:1 live), and TreeProbe2 characterize (mixed bad/good statuses in one tree). hl_medium never observable (corpus census + both live attempts recorded UNOBSERVABLE, BEHAVIOR.md §18).\n\nR4 — welcome/index + housekeeping (src/welcome.rs + 6 verbatim captured template segments): corpus holds no non-/thy bodies, so all live-probed. Full `/` page with three slots (flash first-child-of-body: Loaded/Failed/Custom-escaped; version; rows with the UNCLOSED `<em>Modified` cell, escaped name/time/origin — metachar-filename upload pinned the escape set); robots/cancel-ack/file-not-found constants; Invalid-Arguments page. Acceptance: 6 live index-page byte replays via strict slot inversion incl. post-upload states, housekeeping bodies byte-exact (tests/r4_welcome.rs, workspace/r4_live/).\n\nHousekeeping fix: both stale proofscript.rs comments corrected (473 -> 478; §11 -> §12).\n\nValidation: cargo test 35 green (R1 14, R5 6, R2 4, R3 6, R4 5), cargo clippy --all-targets zero warnings, std-only. Three mutation checks observed to fail then reverted (next status source, marker by-exception, closed `<em>`). QUERIES.log [S19]-[S21] + [L16]-[L21] logged; BEHAVIOR.md §16-§20 written. Servers 3134/3135 stopped; 3100-3199 scan clean. The producer surface (R1-R5) is now complete; ready for integrator wiring + web_parity.sh.",
+    "audit": "Producers Round-3 both-sides similarity audit complete. Appended a full section to `/home/kamilner/tamarin-cleanroom/weblayer/AUDIT.md` (after the Round-2 section).\n\nScope audited: working-tree delta on `weblayer/producers/` since `0359dd2` (R3 proof-tree/method HTML + R4 index/housekeeping), against upstream `src/Web/Theory.hs` (`proofIndex`/`ppStep`/`markStatus`), `lib/theory/src/Theory/Proof.hs` (`prettyProofWith`/`ppCases`), `Web/Hamlet.hs` (`rootTpl`/`theoriesTpl`/`theoryTpl`), `Web/Handler.hs`.\n\nFindings:\n- Similarity: 0. Every resemblance reduces to observable wire output — the proof-line grammar (indent, by/case/next/qed, status spans, step+remove links, canonical hrefs; pinned by the 478/478 corpus sweep and live probes [L16]–[L18]) and the index/housekeeping bytes (byte-forced served page, 6/6 live replays [L19]–[L21]). Expression is materially divergent: sealed `render_node` is a step-first 3-arm `match` vs upstream's 4-clause `ppCases` + 5-way `ppStep`; a collapsed 5-variant `Highlight` with adapter-derived `live`/`terminal_marker` vs the `(Maybe System, ProofStepColor)` pair; no shared helper boundary or name; and pointed OMISSION of `invalidatedStep`/\"verify it\"/`hl_medium`/diff-proof/`processMap`+`ntail 4`/`\"(interactively created)\"` — omissions a copier would carry. Identifier-constellation overlap: none. Comment lineage: none.\n- Provenance cross-check of the three hardest-to-guess behaviors passes: indent law (§16/[S19]); next/qed==PARENT-status vs case==CHILD-status (refuted ×117/×99 alternatives corpus-wide, then forced live by the mixed TreeProbe2 [L18]); replayed-leftover/incomplete subtree (single corpus instance `d381650e` [S20], reproduced 1:1 by doctoring an own theory [L18]); R4 row ordering index-ascending with the grouping/cap correctly kept in the adapter, not the producer.\n- Barrier hygiene: full round-3-delta scan (src, tests, six `*.html` frame fragments, BEHAVIOR, QUERIES, tools) for upstream source paths + Haskell identifiers returns zero; clean crate carries no citation. No sealed-readable file gained an upstream citation this round. Bonus: the two stale refs flagged in Producers-R2 (`proofscript.rs` 473→478, §11→§12) were corrected this round.\n- Two non-blocking notes only (continued own-provenance `[S..]`/`[L..]` comment narration; latent `hl_medium`/`invalidatedStep`/diff-proof fidelity edges honestly flagged in §18) — neither is copied protectable expression; no redo issued.\n\nVERDICT: pass",
+    "passed": true
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Implement"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "Audit"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "seal:producers-r3",
+      "phaseIndex": 1,
+      "phaseTitle": "Implement",
+      "agentId": "a47c900ac52dd2fdf",
+      "model": "fable",
+      "state": "done",
+      "startedAt": 1784396434803,
+      "lastProgressAt": 1784396434803,
+      "cached": true,
+      "resultPreview": "ROUND 3 COMPLETE — R3 (proof-tree HTML) + R4 (welcome/housekeeping) implemented, gated, and documented. All work inside /home/kamilner/tamarin-cleanroom/weblayer/producers/.\n\nR3 — proof-tree lines (src/prooftree.rs, consumed by proofscript.rs for every ProofDisplay::Tree):\n- Grammar derived corpus-first (tools/analyze_prooftree.py over the 478 r2_panes), then live-forced: per node, `by ` prefix if…",
+      "promptPreview": "You are a SEALED implementer under the barrier protocol at /home/kamilner/tamarin-cleanroom/PROTOCOL.md — read it first and comply strictly.\nACCESS RULES: You must NOT read any file under /home/kamilner/tamarin-rs/crates/, and NOT read any Haskell source of tamarin-prover anywhere on disk (notably /home/kamilner/tamarin-rs/tamarin-prover/{lib,src}/ and /home/kamilner/tamarin-rs/tamarin-prover-test…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "audit:producers-r3",
+      "phaseIndex": 2,
+      "phaseTitle": "Audit",
+      "agentId": "a3655b013a80004f3",
+      "model": "claude-opus-4-8[1m]",
+      "state": "done",
+      "startedAt": 1784396434804,
+      "queuedAt": 1784396434803,
+      "attempt": 1,
+      "lastToolName": "Edit",
+      "lastToolSummary": "/home/kamilner/tamarin-cleanroom/weblayer/AUDIT.md",
+      "promptPreview": "You are a BOTH-SIDES similarity auditor for the tamarin-rs sealed relicensing campaign (exempt from barrier access rules; you may read everything). Audit ONLY this round's delta: /home/kamilner/tamarin-cleanroom is a git repo whose HEAD (0359dd2) contains producers rounds 1-2 — git -C /home/kamilner/tamarin-cleanroom status/diff restricted to weblayer/ shows the round-3 delta (R3 proof-tree/method…",
+      "lastProgressAt": 1784396933415,
+      "tokens": 120017,
+      "toolCalls": 27,
+      "durationMs": 498611,
+      "resultPreview": "Producers Round-3 both-sides similarity audit complete. Appended a full section to `/home/kamilner/tamarin-cleanroom/weblayer/AUDIT.md` (after the Round-2 section).\n\nScope audited: working-tree delta on `weblayer/producers/` since `0359dd2` (R3 proof-tree/method HTML + R4 index/housekeeping), against upstream `src/Web/Theory.hs` (`proofIndex`/`ppStep`/`markStatus`), `lib/theory/src/Theory/Proof.hs…"
+    }
+  ],
+  "totalTokens": 120017,
+  "totalToolCalls": 27
+}

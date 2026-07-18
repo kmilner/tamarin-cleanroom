@@ -1,0 +1,34 @@
+<span class="hl_keyword">theory</span> <a class="internal-link help" href="/thy/trace/2/main/help">TreeProbe2</a> <span class="hl_keyword">begin</span><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/2/main/message"><strong>Message theory</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/2/main/rules"><strong>Multiset rewriting rules</strong> (6)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/2/main/tactic"><strong>Tactic(s)</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/2/main/cases/raw/0/0"><strong>Raw sources</strong> (6 cases, deconstructions complete)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/2/main/cases/refined/0/0"><strong>Refined sources </strong> (6 cases, deconstructions complete)</a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/2/main/add/%3Cfirst%3E">add lemma</a><br/>
+<br/>
+<span class="hl_bad"><span class="hl_keyword">lemma</span> mixed:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>x #i<span class="hl_operator">.</span> <span class="hl_operator">(</span>Step( x ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span><span class="hl_operator">∃ </span>#j<span class="hl_operator">.</span> Tag1( x ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/2/main/edit/mixed">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/2/main/delete/mixed">delete lemma</a></span><br/>
+<a class="internal-link proof-step hl_bad" href="/thy/trace/2/main/proof/mixed"><span class="hl_keyword">simplify</span></a><a class="internal-link remove-step" href="/thy/trace/2/main/proof/mixed"></a><br/>
+<a class="internal-link proof-step hl_bad" href="/thy/trace/2/main/proof/mixed/_"><span class="hl_keyword">solve(</span> Hop( x ) ▶₀ #i <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/2/main/proof/mixed/_"></a><br/>
+&nbsp;&nbsp;<span class="hl_bad"><span class="hl_keyword">case</span> Fork1</span><br/>
+&nbsp;&nbsp;<a class="internal-link proof-step hl_bad" href="/thy/trace/2/main/proof/mixed/_/Fork1"><span class="hl_keyword">solve(</span> St( ~x ) ▶₀ #j <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/2/main/proof/mixed/_/Fork1"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_bad"><span class="hl_keyword">case</span> Start</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="internal-link proof-step hl_bad" href="/thy/trace/2/main/proof/mixed/_/Fork1/Start"><span class="hl_keyword">SOLVED</span> <span class="hl_comment">// trace found</span></a><a class="internal-link remove-step" href="/thy/trace/2/main/proof/mixed/_/Fork1/Start"></a><br/>
+&nbsp;&nbsp;<span class="hl_bad"><span class="hl_keyword">qed</span></span><br/>
+<span class="hl_bad"><span class="hl_keyword">next</span></span><br/>
+&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">case</span> Fork2</span><br/>
+&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">by</span> </span><a class="internal-link proof-step hl_good" href="/thy/trace/2/main/proof/mixed/_/Fork2"><span class="hl_keyword">solve(</span> St( ~x ) ▶₀ #j <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/2/main/proof/mixed/_/Fork2"></a><br/>
+<span class="hl_bad"><span class="hl_keyword">qed</span></span><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/2/main/add/mixed">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">end</span><br/>
+ 

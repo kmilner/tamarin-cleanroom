@@ -2,15 +2,15 @@
 //!
 //! The pane is a flat document of logical lines put through the R1 per-line
 //! postprocess (each line + `<br/>\n`, leading spaces → `&nbsp;`) with ONE
-//! trailing space after the last break (all 473 corpus panes end `<br/>\n `
-//! [S16]). Element order (BEHAVIOR.md §11, [S16]):
+//! trailing space after the last break (all 478 corpus panes end `<br/>\n `
+//! [S16]). Element order (BEHAVIOR.md §12, [S16]):
 //!
 //!   1. `theory NAME begin` header (NAME links to `main/help`);
 //!   2. per nav item: a blank line, then the item link line;
 //!   3. blank + the `add lemma` link for position `<first>`;
 //!   4. per lemma: blank, declaration line(s), the edit-or-delete link line,
-//!      the proof display (a `by sorry` step or the pre-rendered proof lines),
-//!      blank, that lemma's `add lemma` link;
+//!      the proof display (a `by sorry` step or the R3-rendered proof-tree
+//!      lines, [`crate::prooftree`]), blank, that lemma's `add lemma` link;
 //!   5. blank + `end` — with zero lemmas the pane shows TWO blanks here
 //!      (steps 3→5 with an empty step 4, observed in the 2 lemma-less panes).
 //!
@@ -29,8 +29,9 @@
 //! proof leaves the header unwrapped [S16].
 
 use crate::html::{escape_text, postprocess_lines};
-use crate::model::{LemmaEntry, ProofDisplay, ProofScriptPane, ThyPath};
+use crate::model::{Highlight, LemmaEntry, ProofDisplay, ProofScriptPane, ThyPath};
 use crate::path;
+use crate::prooftree;
 
 /// The inline-layout width limit: a quantifier+formula line inlines iff its
 /// escaped width is ≤ this. Bisected live to exactly 69/70 on all four probe
@@ -77,11 +78,18 @@ fn push_lemma(elems: &mut Vec<String>, idx: u64, lemma: &LemmaEntry) {
         href(idx, &ThyPath::Edit(lemma.name.clone())),
         href(idx, &ThyPath::Delete(lemma.name.clone()))
     );
-    // Header wrapper: one status span around declaration + edit/delete line
-    // for a complete proof; none for `sorry` or an incomplete proof.
+    // Header wrapper: one status span around declaration + edit/delete line,
+    // carrying the proof ROOT's status class; none for `sorry` or an
+    // incomplete (status-less root) proof [S16][S19].
     let header_status = match &lemma.proof {
-        ProofDisplay::Rendered { header_status, .. } => header_status.as_deref(),
-        _ => None,
+        ProofDisplay::Tree(root) => match &root.status {
+            Highlight::None => None,
+            Highlight::Good => Some("hl_good"),
+            Highlight::Bad => Some("hl_bad"),
+            Highlight::Medium => Some("hl_medium"),
+            Highlight::Replayed => Some("hl_superfluous"),
+        },
+        ProofDisplay::Unproven => None,
     };
     match header_status {
         Some(status) => {
@@ -118,8 +126,9 @@ fn push_lemma(elems: &mut Vec<String>, idx: u64, lemma: &LemmaEntry) {
             href(idx, &ThyPath::Proof { lemma: lemma.name.clone(), sub: vec![] }),
             keyword("sorry")
         )),
-        ProofDisplay::Rendered { lines, .. } => elems.extend(lines.iter().cloned()),
-        ProofDisplay::Tree(_) => unimplemented!("R3: structured proof-tree rendering"),
+        ProofDisplay::Tree(root) => {
+            elems.extend(prooftree::render_tree_lines(idx, &lemma.name, root))
+        }
     }
 }
 

@@ -1,0 +1,8 @@
+HTTP/1.1 400 Bad Request
+Date: Sat, 18 Jul 2026 16:14:22 GMT
+Server: Warp/3.3.31
+Content-Length: 1304
+Content-Type: text/html; charset=utf-8
+Vary: Accept-Encoding, Accept, Accept-Language
+X-XSS-Protection: 1; mode=block
+

@@ -1,0 +1,54 @@
+<span class="hl_keyword">theory</span> <a class="internal-link help" href="/thy/trace/5/main/help">TreeProbe</a> <span class="hl_keyword">begin</span><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/5/main/message"><strong>Message theory</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/5/main/rules"><strong>Multiset rewriting rules</strong> (7)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/5/main/tactic"><strong>Tactic(s)</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/5/main/cases/raw/0/0"><strong>Raw sources</strong> (7 cases, deconstructions complete)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/5/main/cases/refined/0/0"><strong>Refined sources </strong> (7 cases, deconstructions complete)</a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/5/main/add/%3Cfirst%3E">add lemma</a><br/>
+<br/>
+<span class="hl_good"><span class="hl_keyword">lemma</span> reach:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∃ </span>x #i<span class="hl_operator">.</span> Done( x ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/5/main/edit/reach">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/5/main/delete/reach">delete lemma</a></span><br/>
+<a class="internal-link proof-step hl_good" href="/thy/trace/5/main/proof/reach"><span class="hl_keyword">simplify</span></a><a class="internal-link remove-step" href="/thy/trace/5/main/proof/reach"></a><br/>
+<a class="internal-link proof-step hl_good" href="/thy/trace/5/main/proof/reach/_"><span class="hl_keyword">solve(</span> Fin( x ) ▶₀ #i <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/5/main/proof/reach/_"></a><br/>
+&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">case</span> HopOn_case_1</span><br/>
+&nbsp;&nbsp;<a class="internal-link proof-step hl_good" href="/thy/trace/5/main/proof/reach/_/HopOn_case_1"><span class="hl_keyword">SOLVED</span> <span class="hl_comment">// trace found</span></a><a class="internal-link remove-step" href="/thy/trace/5/main/proof/reach/_/HopOn_case_1"></a><br/>
+<span class="hl_good"><span class="hl_keyword">qed</span></span><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/5/main/add/reach">add lemma</a><br/>
+<br/>
+<span class="hl_good"><span class="hl_keyword">lemma</span> origin:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>x #i<span class="hl_operator">.</span> <span class="hl_operator">(</span>Done( x ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span><span class="hl_operator">∃ </span>#j<span class="hl_operator">.</span> Begin( x ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/5/main/edit/origin">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/5/main/delete/origin">delete lemma</a></span><br/>
+<a class="internal-link proof-step hl_good" href="/thy/trace/5/main/proof/origin"><span class="hl_keyword">simplify</span></a><a class="internal-link remove-step" href="/thy/trace/5/main/proof/origin"></a><br/>
+<a class="internal-link proof-step hl_good" href="/thy/trace/5/main/proof/origin/_"><span class="hl_keyword">solve(</span> Fin( x ) ▶₀ #i <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/5/main/proof/origin/_"></a><br/>
+&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">case</span> HopOn_case_1</span><br/>
+&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">by</span> </span><a class="internal-link proof-step hl_good" href="/thy/trace/5/main/proof/origin/_/HopOn_case_1"><span class="hl_keyword">contradiction</span> <span class="hl_comment">/* from formulas */</span></a><a class="internal-link remove-step" href="/thy/trace/5/main/proof/origin/_/HopOn_case_1"></a><br/>
+<span class="hl_good"><span class="hl_keyword">next</span></span><br/>
+&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">case</span> HopOn_case_2</span><br/>
+&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">by</span> </span><a class="internal-link proof-step hl_good" href="/thy/trace/5/main/proof/origin/_/HopOn_case_2"><span class="hl_keyword">contradiction</span> <span class="hl_comment">/* from formulas */</span></a><a class="internal-link remove-step" href="/thy/trace/5/main/proof/origin/_/HopOn_case_2"></a><br/>
+<span class="hl_good"><span class="hl_keyword">qed</span></span><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/5/main/add/origin">add lemma</a><br/>
+<br/>
+<span class="hl_bad"><span class="hl_keyword">lemma</span> false_secret:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>x #i<span class="hl_operator">.</span> <span class="hl_operator">(</span>Begin( x ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span><span class="hl_operator">∃ </span>#k<span class="hl_operator">.</span> K( x ) <span class="hl_operator">@</span> #k<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/5/main/edit/false_secret">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/5/main/delete/false_secret">delete lemma</a></span><br/>
+<a class="internal-link proof-step hl_bad" href="/thy/trace/5/main/proof/false_secret"><span class="hl_keyword">simplify</span></a><a class="internal-link remove-step" href="/thy/trace/5/main/proof/false_secret"></a><br/>
+<a class="internal-link proof-step hl_bad" href="/thy/trace/5/main/proof/false_secret/_"><span class="hl_keyword">solve(</span> !KU( ~x ) <span class="hl_operator">@</span> #vk <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/5/main/proof/false_secret/_"></a><br/>
+&nbsp;&nbsp;<span class="hl_bad"><span class="hl_keyword">case</span> Start</span><br/>
+&nbsp;&nbsp;<a class="internal-link proof-step hl_bad" href="/thy/trace/5/main/proof/false_secret/_/Start"><span class="hl_keyword">SOLVED</span> <span class="hl_comment">// trace found</span></a><a class="internal-link remove-step" href="/thy/trace/5/main/proof/false_secret/_/Start"></a><br/>
+<span class="hl_bad"><span class="hl_keyword">qed</span></span><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/5/main/add/false_secret">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">end</span><br/>
+ 

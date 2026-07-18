@@ -1,0 +1,84 @@
+theory ScriptProbe
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, h/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) Start:
+   [ Fr( ~x ) ] --[ Begin( ~x ) ]-> [ St( ~x ), Out( ~x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Fork1:
+   [ St( x ) ] --[ Mid( x ) ]-> [ Hop( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Fork2:
+   [ St( x ) ] --[ Mid( x ) ]-> [ Hop( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) HopOn:
+   [ Hop( x ) ] --[ Step( x ) ]-> [ Fin( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) End:
+   [ Fin( x ) ] --[ Done( x ) ]-> [ ]
+
+  /* has exactly the trivial AC variant */
+
+lemma reach:
+  exists-trace "∃ x #i. Done( x ) @ #i"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ x #i. (Done( x ) @ #i)"
+*/
+simplify
+solve( Missing( x ) ▶₀ #i )
+  case HopOn_case_1
+  SOLVED // trace found
+qed
+
+lemma origin:
+  all-traces "∀ x #i. (Done( x ) @ #i) ⇒ (∃ #j. Begin( x ) @ #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i. (Done( x ) @ #i) ∧ ∀ #j. (Begin( x ) @ #j) ⇒ ⊥"
+*/
+simplify
+solve( Missing( x ) ▶₀ #i )
+  case HopOn_case_1
+  by contradiction /* from formulas */
+next
+  case HopOn_case_2
+  by contradiction /* from formulas */
+qed
+
+lemma false_secret:
+  all-traces "∀ x #i. (Begin( x ) @ #i) ⇒ (¬(∃ #k. K( x ) @ #k))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i. (Begin( x ) @ #i) ∧ ∃ #k. (K( x ) @ #k)"
+*/
+simplify
+solve( !KU( ~x ) @ #vk )
+  case Start
+  SOLVED // trace found
+qed
+
+/* All wellformedness checks were successful. */
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end

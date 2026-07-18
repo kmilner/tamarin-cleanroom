@@ -290,9 +290,10 @@ proof-step sorry-step" href="…/main/proof/NAME">sorry</a>` (keyword spans), no
 header wrapper. Proved/disproved: the lemma HEADER (declaration through the
 delete anchor) is wrapped in ONE status span — `hl_good` ×3192 / `hl_bad` ×146
 — opening before the declaration and closing right after the delete anchor;
-the proof lines follow UNWRAPPED and are opaque R2 input (R3 will structure
-them). An INCOMPLETE proof (root step `sorry-step`, e.g. a half-done
-induction) leaves the header unwrapped like sorry [S16]. Every href is
+the proof lines follow UNWRAPPED, structured by the §16 tree grammar (the
+wrapper class is the tree ROOT's status). An INCOMPLETE proof (root step
+`sorry-step`, e.g. a half-done induction) leaves the header unwrapped like
+sorry [S16]. Every href is
 `/thy/trace/{idx}/main/` + an R5-rendered path.
 
 ## 13. R2 — lemma declaration + formula layout
@@ -335,7 +336,7 @@ links via R5), validated by:
   corpus cannot); uppercase→lowercase `%XX` breaks the R5 byte tests.
 - `cargo test`: 24 green; `cargo clippy --all-targets`: zero warnings.
 
-## 15. Open questions (R3–R4) + round-2 unobservables
+## 15. Round-2 unobservables
 
 - UNOBSERVABLE (documented choices): href %-encoding beyond `%3C/%3E` (§11);
   which cases index is source vs case (§11); escaping of nav-item
@@ -343,7 +344,143 @@ links via R5), validated by:
   passed through opaque; lemma/theory NAMES escaped uniformly like R1);
   formula layout for a single-line formula at widths the corpus/live probes
   cannot reach is fixed by the ≤69 rule [L14].
-- Proof-tree structure: indentation + by/case/next/qed grammar, per-node
-  proof-step/remove-step links, status classes (R3 — R2 carries the lines
-  opaque; the prior sealed dispatch round documented the line grammar).
-- Index-page frame + row shape + banners (R4).
+
+---
+
+## 16. R3 — the proof-tree line grammar (`src/prooftree.rs`)
+
+A lemma's proof display is a TREE of method-labelled nodes rendered as
+logical lines in the west pane (then §3-postprocessed with everything else).
+Pinned from the 478-pane corpus [S19]–[S21] plus live forcing on own
+theories [L16]–[L18]. Per node at indent `d`, URL path `P` = `proof/{lemma}`
++ one segment per case on the root-to-node walk (`_` for an unnamed
+continuation; case display names == href segments 1:1, all `[A-Za-z0-9_]+`
+in observation — names rendered via the R1 escape + R5 segment encoding):
+
+```
+step : {d spaces}[BY]{STEP}[REMOVE]
+BY     = wrap(S, '<span class="hl_keyword">by</span> ')   — iff the node has
+         NO cases and is not a terminal MARKER (SOLVED-style lines never
+         carry `by`; contradiction / zero-case solve / sorry always do)
+STEP   = <a class="internal-link proof-step CLS" href="/thy/trace/{idx}/main/P">METHOD</a>
+         (CLS = hl_good | hl_bad | sorry-step-for-status-less)
+       | wrap(S, METHOD)                                   — Replayed nodes:
+         no proof-step link, the method sits in the status span
+REMOVE = <a class="internal-link remove-step" href="…same…"></a> — on every
+         step EXCEPT the sorry slots (status-less nodes whose only
+         continuation, if any, is replayed); replayed leftovers KEEP it
+```
+
+- a single unnamed case continues at the SAME indent (segment `_`), no
+  case/next/qed framing;
+- named cases (1 or more): per case `{d+2}wrap(S_child, 'case NAME')`, the
+  child subtree at `d+2`; siblings separated by `{d}wrap(S_parent, 'next')`;
+  the block closes `{d}wrap(S_parent, 'qed')`. `next`/`qed` carry the
+  PARENT's status — pinned against prev-case (x117) / following-case (x99)
+  alternatives corpus-wide [S19] and by the live mixed tree where the case
+  after a bad-parent `next` is GOOD [L18]; the case line carries the
+  CHILD's status (426612/426612 [S19]).
+- `wrap(S, x)` = `<span class="CLS">x</span>` for a statused node, bare `x`
+  for a status-less one. Status→class: Good→hl_good, Bad→hl_bad,
+  Replayed→hl_superfluous [S20]; Medium→hl_medium is an ASSUMED name (§18).
+- METHOD text is opaque pre-rendered input (keyword/operator/comment spans,
+  possibly MULTI-LINE with continuation indents baked in — the anchor and
+  the superfluous span both straddle physical lines).
+- The lemma HEADER wrapper (§12) is the ROOT's status class; a status-less
+  root (incomplete proof) leaves it unwrapped [S16][L17].
+- The R2 `by sorry` line (§12) is exactly this grammar on a status-less
+  sorry leaf; `ProofDisplay::Unproven` remains as the convenience form.
+
+## 17. R3 — statuses and link modes (observed matrix)
+
+| node | anchor class | by-wrap | remove-step |
+|------|--------------|---------|-------------|
+| proven step (leaf or interior) | `proof-step hl_good` | `hl_good` | yes |
+| attack-path step | `proof-step hl_bad` | `hl_bad` | yes |
+| incomplete interior (real children) | `proof-step sorry-step` | — | yes [L17] |
+| sorry leaf (incl. `/* bound N hit */`, `/* invalid proof step encountered */`) | `proof-step sorry-step` | bare | NO |
+| invalid-step sorry carrying a replayed leftover | `proof-step sorry-step` | none (has a child) | NO [S20][L18] |
+| replayed leftover step | no anchor; method in `hl_superfluous` span | `hl_superfluous` | yes [S20][L18] |
+
+Crate model: `ProofTree { method_text, status, live, terminal_marker,
+cases }` — `live` gates the remove-step (false exactly on the sorry slots),
+`terminal_marker` marks the SOLVED-style terminal lines (never `by`; the
+interface header carries no such field — the adapter derives it from the
+step kind, as it derives `live` from sorry-ness). `ProofDisplay::Rendered`
+(round-2 opaque lines) is REPLACED by `ProofDisplay::Tree`.
+
+## 18. R3 unobservables (recorded per protocol)
+
+- `hl_medium` NEVER occurs (corpus census [S21]; live attempts: bounded
+  autoprove [L17], characterize mixed tree [L18] — both render without it).
+  The Medium→`hl_medium` class name is an assumed pattern extension.
+- A live (anchored) Replayed node, a non-live Good/Bad node, and a
+  status-less NON-live interior are unobserved; the renderer keys the
+  span-vs-anchor choice on Replayed status and the remove-step on `live`.
+- Equiv-kind (`/thy/equiv/`) panes: no equiv theory in the corpus and the
+  oracle wrapper cannot pass `--diff` — proof-step hrefs are rendered with
+  the observed `trace` kind only.
+- A case literally NAMED `_`, an empty case name among named siblings, and
+  multiple unnamed siblings never occur (`_` segments are only ever inline
+  continuations [S14][S21]).
+- The superfluous replay drops solver comments from method text (live
+  `contradiction` leftover lost `/* from formulas */` [L18]) — method text
+  is input; nothing for the renderer.
+
+## 19. R4 — the welcome/index page + housekeeping (`src/welcome.rs`)
+
+No non-`/thy` body exists in the capture corpus — all pinned live
+[L19]–[L21]. The `/` page is a fixed frame (verbatim captured segments,
+including the doubled `</script></script>` closers; NO trailing newline)
+with three slots:
+
+1. FLASH — first child of `<body>`: absent on GET;
+   `<p class="message">Loaded new theory!</p>` after a successful upload;
+   `<p class="message">Post request failed.</p>` for a POST without a
+   usable file; the entity-escaped multi-line load-error text otherwise
+   (raw newlines kept) [L20].
+2. VERSION — `Running <a href=/><span class="tamarin">Tamarin</span></a> `
+   + the version text in the north header [L19].
+3. ROWS — between the fixed `<thead>` and `</table>`, one per version,
+   index ascending:
+   `<tr><td><a href="/thy/trace/IDX/overview/help">NAME</a></td><td>TIME
+   </td><td>Original|<em>Modified</td><td>ORIGIN</td></tr>` — the Modified
+   cell's `<em>` is UNCLOSED (reproduced byte-exactly); NAME/TIME/ORIGIN
+   opaque, entity-escaped by the producer (metachar-filename upload [L21]);
+   ORIGIN = load path for a disk theory, bare uploaded filename for an
+   upload; initial load = Original, every derived/uploaded version =
+   Modified [L19][L20].
+
+Housekeeping bodies [L19]: `robots.txt` → `User-agent: *`; `/kill?path=…`
+→ `Canceled request!`; missing `/static` file → `File not found` (all
+plain text, no trailing NL); `/kill` without a path → the 400
+Invalid-Arguments page: the standard error shell around
+`<h1>Invalid Arguments</h1>\n<ul>` + `<li>MSG</li>\n` per message +
+`</ul>\n` (single observed instance: `No path to kill specified!`).
+`/favicon.ico` is an empty-body 303 (dispatch-side, no producer body).
+
+R4 unobservables: multi-item Invalid-Arguments lists (only the one-item
+kill instance is reachable); equiv-kind row hrefs (no `--diff` oracle);
+the index-page display cap on many versions is row SELECTION (adapter
+state), not rendering.
+
+## 20. Round-3 validation status
+
+R3 is `prooftree.rs` (render_tree_lines / render_tree, consumed by
+`proofscript` for every ProofDisplay::Tree), R4 is `welcome.rs`
+(render_welcome + render_invalid_args + the plain-text body constants),
+validated by:
+- tests/r2_west_pane.rs — the corpus sweep UPGRADED: every proof display in
+  all 478 panes parsed to a structured tree (frame bytes, status placement,
+  canonical hrefs asserted; only method text opaque) and re-rendered
+  byte-identically; the 3 round-2 live panes replay unchanged.
+- tests/r3_proof_tree.rs — 4 live-probe pane replays (proved TreeProbe,
+  bounded TreeProbe, doctored ScriptProbe with a superfluous leftover,
+  mixed-status TreeProbe2 characterize) + fixtures pinning every line form.
+- tests/r4_welcome.rs — 6 live index-page byte replays (strict slot
+  inversion) + housekeeping/Invalid-Arguments byte tests.
+- cargo test: 35 green; cargo clippy --all-targets: zero warnings; std-only.
+- Mutation checks (observed to fail, reverted): next→following-case status
+  breaks the corpus sweep + mixed replay; dropping the marker by-exception
+  breaks SOLVED lines everywhere; closing the row `<em>` breaks all index
+  replays.

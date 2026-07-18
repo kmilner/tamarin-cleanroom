@@ -7,16 +7,20 @@
 //! workspace/BEHAVIOR.md for the behavioral spec you build up as you probe.
 //!
 //! Status: R1 (center section fragments + the shared HTML skin), R5 (the
-//! theory-path grammar) and R2 (the proof-script west pane assembly)
-//! IMPLEMENTED — `html` (escape / postprocess / envelopes), `section`
-//! (`render_pane`, `render_help_pane`), `path` (`parse` / `render`), and
-//! `proofscript` (`render_index`, consuming R5 for every link). Gated by
+//! theory-path grammar), R2 (the proof-script west pane assembly), R3 (the
+//! structured proof-tree lines the pane embeds) and R4 (the welcome/index
+//! page + housekeeping bodies) IMPLEMENTED — `html` (escape / postprocess /
+//! envelopes), `section` (`render_pane`, `render_help_pane`), `path`
+//! (`parse` / `render`), `proofscript` (`render_index`, consuming R5 for
+//! every link and R3 for every proof display), `prooftree` (`render_tree`),
+//! and `welcome` (`render_welcome` + housekeeping bodies). Gated by
 //! tests/round1_center_fragments.rs + tests/corpus_sweep.rs (R1: 324-fragment
 //! byte parity), tests/r5_path_grammar.rs (R5: live-probe acceptance replay +
-//! 40037-tail corpus byte round-trip), and tests/r2_west_pane.rs (R2: all 478
-//! overview west panes sliced and re-rendered byte-identically + live-probe
-//! replays). R3 (structured proof-tree rendering; R2 currently takes the
-//! proof display as pre-rendered lines) and R4 remain UNIMPLEMENTED stubs.
+//! 40037-tail corpus byte round-trip), tests/r2_west_pane.rs (R2+R3: all 478
+//! overview west panes sliced to opaque formula/method text and re-rendered
+//! byte-identically + live-probe replays), tests/r3_proof_tree.rs (R3
+//! fixtures + live autoprove replays), and tests/r4_welcome.rs (R4 live-probe
+//! byte replays).
 //!
 //! In scope: pure-render producers — given pre-computed prover values, emit the
 //! fragment bytes (tags, links, headings, escaping, line breaks, envelope).
@@ -68,4 +72,17 @@ pub fn render_path(p: &model::ThyPath) -> Vec<String> {
 /// [`proofscript::render_index`].
 pub fn render_proof_script(pane: &model::ProofScriptPane) -> String {
     proofscript::render_index(pane)
+}
+
+/// Round-3 entry point: render a lemma's proof tree as the pre-postprocess
+/// document fragment the west pane embeds (logical lines joined with
+/// newlines). Delegates to [`prooftree::render_tree`].
+pub fn render_proof_tree(index: u64, lemma: &str, tree: &model::ProofTree) -> String {
+    prooftree::render_tree(index, lemma, tree)
+}
+
+/// Round-3 entry point: render the welcome / index (`/`) page body.
+/// Delegates to [`welcome::render_welcome`].
+pub fn render_welcome(w: &model::Welcome) -> String {
+    welcome::render_welcome(w)
 }
