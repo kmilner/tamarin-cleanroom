@@ -1,0 +1,29 @@
+# Round-3 byte targets — sub-target R3 (restriction / lemma formula rendering).
+# Curated corpus files spanning the formula-surface variety: nested ∀/∃,
+# deep left/right ∧∨ chains, subterm ⊏ and nat %+ atoms, one-line vs broken
+# statements, restriction safety comments, axiom→restriction, accountability
+# generated lemmas (indexed .n vars), sapic/predicate-expanded formulas,
+# lemma attribute fills (heuristic={..}, hide_lemma), embedded-proof lemmas
+# (prefix-checked only). Format: <feature tags><TAB><relpath under examples/>
+nested all/ex, sources lemma, exists-trace, deep imp/or	classic/NSLPK3.spthy
+one-line statements, reuse/use_induction, T/F	loops/Minimal_Loop_Example.spthy
+subterm ⊏, nat %+/%1, nat binders	features/multiset/NumberSubtermTests.spthy
+8 restrictions, safety comments, DH_neutral in atoms	esorics23-bluetooth/models/mesh.spthy
+top-level ¬∃ restriction, embedded-proof lemmas (prefix)	related_work/YubiSecure_KS_STM12/Yubikey.spthy
+accountability-generated lemmas, indexed vars, set_in/notin	accountability/masters-thesis-morio/CentralizedMonitor.spthy
+acc mixnets, S(S('0')) terms, exists-trace batch	accountability/csf21-acc-unbounded/mixnets/basic/dmn-basic.spthy
+heuristic={..} attrs, big formulas, sapic	csf18-alethea/alethea_votingphase_malS.spthy
+sapic predicates over timepoints, #time binders	sapic/fast/feature-predicates/timepoints.spthy
+attr fill-wraps, hide_lemma, dummy ⊤ lemma	ccs18-5G/5G-AKA-bindingChannel/5G_AKA.spthy
+axiom→restriction, deep left ∧ chain, ⊥ conclusions	thesis-LaraSchmid-evoting/chapter5_HumanErrors/AuthenticationProtocols/Cronto_EA.spthy
+classic wide tuples in formulas	post17/needham_schroeder_symmetric_cbc.spthy
+lifted _restrict restriction, #NOW temporal	features/predicates/minimal.spthy
+xor/dh theory lemmas, tuple-arg facts	csf18-xor/CH07.spthy
+# Validation extension (same acceptance bar): more restriction/lemma-heavy
+# files to widen safety-classifier and formula coverage.
+12 restrictions, bluetooth	esorics23-bluetooth/models/ble.spthy
+10 restrictions, sapic OIDC	thesis-SvenHammann-POIDC/OIDC_Implicit.spthy
+7 restrictions, human errors	thesis-LaraSchmid-evoting/chapter5_HumanErrors/HPagree.spthy
+12 restrictions, deprecated sapic accountability	sapic/deprecated/accountability-old/OCSPS.spthy
+9 restrictions, alethea human errors	thesis-LaraSchmid-evoting/chapter5_HumanErrors/aletheaD_vot_HE_SmHh.spthy
+predicates + restrictions, GJM contract	sapic/fast/GJM-contract/contract.spthy

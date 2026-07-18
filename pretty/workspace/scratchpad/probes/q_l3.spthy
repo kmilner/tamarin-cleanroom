@@ -1,0 +1,13 @@
+theory ql3 begin
+
+rule R1: [ In(x) ] --[ A(x), LongActionFactName(x,x,x,x), B(x,x) ]-> [ Out(x) ]
+
+lemma fw1:
+  "All zlongvariablename01 zlongvariablename02 zlongvariablename03 zlongvariablename04 #i.
+     LongActionFactName(zlongvariablename01, zlongvariablename02, zlongvariablename03, zlongvariablename04)@i ==> T"
+
+lemma fw2:
+  "All z01 z02 #i.
+     LongActionFactName(z01, z02, <z01, z02, z01, z02, z01, z02, z01, z02, z01, z02, z01, z02, z01>, z01)@i ==> T"
+
+end

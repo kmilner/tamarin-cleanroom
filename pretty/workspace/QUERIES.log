@@ -60,3 +60,29 @@ probes/p_lbvar.spthy -- AC rule's own loop-breaker line renders INSIDE the varia
 probes/c_ch07.out (csf18-xor/CH07.spthy) -- 2-digit variant numbering right-aligned (" 9."/"12."); timing check for curation
 probes/p_arr1.spthy -- bracket-group boundary: actions stay beside "--[" while "]->" drops (arrow = same nested-sep as [ ] groups); conclusion/premise one-line kept at exactly 73
 round2/fetch_hs_targets.sh (12 curated files, families in round2/families.tsv) -- materialize the round-2 rule-parity byte targets (72 rule blocks)
+# ── R3 (restriction / lemma / formula rendering) probes ──
+probes/q_w1.spthy -- wrappers: restriction block shape (formula, conditional "// safety formula", blank, expanded-formula comment), lemma header/kw line, ⊤/⊥ glyphs, guarded comment header text for all-traces vs exists-trace, by sorry tail
+probes/q_at1.spthy -- atoms: A( x ) @ #i spacing, #i < #j, x = y, last(#i), x ⊏ <x, x>; source | parses left-assoc; operand-paren law on atoms
+probes/q_p1.spthy -- FAILED (restriction outside guarded fragment is a fatal error: "universal quantifier without toplevel implication")
+probes/q_b1.spthy -- binder lists render sigils (~n $p #i) in source order, no sort erasure
+probes/q_p2.spthy -- connective pairings within the guarded fragment: every ∧/∨/⇒ operand and ¬-argument parenthesized, quantifier bodies bare, chains keep source association (left/right distinct); one-line statement kept at exactly 73 content cols
+probes/q_r1.spthy -- lemma outside guarded fragment does NOT crash: comment variant "conversion to guarded formula failed:" + error text indented 2
+probes/q_r2.spthy -- iff renders ⇔ with parenthesized operands
+probes/q_pred1.spthy -- predicates are expanded UPSTREAM of both the restriction statement and the expanded-formula comment (Pred atom unobservable); predicate: block echo noted for R4
+probes/q_la1.spthy -- lemma attrs: source order preserved (NOT canonicalized), duplicates kept, spellings sources/reuse/use_induction/hide_lemma=NAME, space before [
+probes/q_ax1.spthy -- axiom keyword echoes as restriction with identical wrapper
+probes/q_l2.spthy -- binder-list wrap: continuation aligns after "∀ " (origin+2); quantifier body at origin+1 (nest 1); ⊤ conclusion renders (⊤)
+probes/q_l3.spthy -- facts in formulas use the R2 fact construction (args fill after "Name( ", ")" drops to fact column); "@ #i" attaches beside the fact's last line
+probes/q_l4.spthy -- =/⊏ atoms: sep [lhs <+> glyph, rhs] — glyph attached to lhs line end, rhs drops to atom origin; AC/pair terms wrap by R1 laws inside atoms
+probes/q_s1.spthy -- safety-formula classification: eq/less/noteq/or-eq/nested-∀/¬∃/temporal-eq conclusions ⇒ safety; ∃ (msg or temporal, positive polarity) ⇒ not safety
+probes/q_la2.spthy -- [heuristic=S] echoes verbatim
+probes/q_l5.spthy -- action atom is hsep [fact, @, time]: at 74 cols the fact breaks internally (") @ #i" line) rather than dropping "@"/time; 73-incl-closing-quote fits ribbon
+probes/q_s2.spthy -- safety refinement: ∀-conclusion/⊤/⊏/last conclusions safety; ¬∃ in ANTECEDENT (positive ∃ in NNF) not safety — pins "safety ⇔ no existential in NNF"
+probes/q_la3.spthy -- [heuristic={mytac}] braces preserved verbatim; tactic block echo noted (out of R3 scope)
+scratchpad/yubi_probe.out (corpus Yubikey) -- embedded-proof lemmas: tail after guarded */ is the re-rendered proof script (ported surface); restriction top-level ¬∃ classified safety
+scratchpad/acc_cm.echo, dmn.echo (corpus accountability) -- acc lemmas echo as plain generated lemmas with .1/.2 indexed vars; 73-col ribbon edge line byte-checked
+scratchpad/sapic_tp.echo, predmin.echo (corpus) -- sapic/predicate lemmas expanded upstream; #NOW/#time temporal binders render normally
+scratchpad/5g.echo (corpus 5G_AKA) -- lemma attr list = fill after "lemma NAME [", "]:" attached to last attr; first attr stays beside "[" even past width; heuristic={name} corpus witness
+scratchpad/alethea.echo, cronto.echo, ns.echo, gdh.echo, c8 (corpus) -- curation survey; C8 exceeds 60s oracle timeout (dropped); GDH lemmas behind -Dsecure (never echoed bare); axiom files echo restriction
+round3/fetch_hs_targets.sh (14 curated files, families in round3/families.tsv) -- materialize the round-3 formula-parity byte targets
+round3/fetch_hs_targets.sh (validation extension: ble, OIDC_Implicit, HPagree, OCSPS, aletheaD_vot_HE_SmHh, contract) -- widen round-3 parity to 84 restriction / 139 lemma blocks; timing pre-checked (all <6s)

@@ -1,0 +1,37 @@
+theory TestPredicate
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) ActionRule:
+   [ ] --[ Action( 'hi' ) ]-> [ ]
+
+  /* has exactly the trivial AC variant */
+
+predicate: Exists( #time )<=>∃ val. Action( val ) @ #time
+
+predicate: ExistsVal( val )<=>∃ #time. Action( val ) @ #time
+
+lemma hi:
+  exists-trace "∃ #t val. Action( val ) @ #t"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ #t val. (Action( val ) @ #t)"
+*/
+by sorry
+
+lemma ho:
+  exists-trace "∃ a #time. Action( a ) @ #time"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ a #time. (Action( a ) @ #time)"
+*/
+by sorry
+
+
+
+end

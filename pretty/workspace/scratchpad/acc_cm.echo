@@ -1,0 +1,1869 @@
+theory CentralizedMonitor
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: NormalReq/0, SpecialReq/0, extract/1, fst/1, pair/2, pk/1,
+           sig/2, sk/1[private,constructor], snd/1, true/0, verify/3
+equations:
+    extract(sig(m, sk(i))) = m,
+    fst(<x.1, x.2>) = x.1,
+    snd(<x.1, x.2>) = x.2,
+    verify(sig(m, sk(i)), m, pk(sk(i))) = true
+
+heuristic: p
+
+predicate: IsSpecial( a )<=>a = SpecialReq
+
+predicate: IsNormal( a )<=>a = NormalReq
+
+predicate: IsValid( a )<=>(a = SpecialReq) ∨ (a = NormalReq)
+
+predicate: IsInvalid( a )<=>¬((a = SpecialReq) ∨ (a = NormalReq))
+
+predicate: IsPair( m )<=>∃ a b. m = <a, b>
+
+restriction one_role:
+  "∀ x r_1 r_2 #i #j.
+    ((Insert( <'roles', x, r_1>, true ) @ #i) ∧
+     (Insert( <'roles', x, r_2>, true ) @ #j)) ⇒
+    ((#i = #j) ∧ (r_1 = r_2))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x r_1 r_2 #i #j.
+    ((Insert( <'roles', x, r_1>, true ) @ #i) ∧
+     (Insert( <'roles', x, r_2>, true ) @ #j)) ⇒
+    ((#i = #j) ∧ (r_1 = r_2))"
+  */
+
+rule (modulo E) Init[color=#ffffff, process="!", issapicrule,
+                     role='Process']:
+   [ ] --[ Init( ) ]-> [ State_( ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) p_0_[color=#ffffff, process="!", issapicrule,
+                     role='Process']:
+   [ State_( ) ] --> [ !Semistate_1( ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) p_1_[color=#ffffff, process="!", issapicrule,
+                     role='Process']:
+   [ !Semistate_1( ) ] --> [ State_1( ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) P_0_1[color=#ffffff, process="P();", issapicrule,
+                      role='Process']:
+   [ State_1( ) ] --> [ State_11( ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) p_0_11[color=#6c8040, process="|", issapicrule,
+                       role='P']:
+   [ State_11( ) ] --> [ State_111( ), State_112( ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) p_0_111[color=#6c8040, process="|", issapicrule,
+                        role='P']:
+   [ State_111( ) ] --> [ State_1111( ), State_1112( ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) p_0_1111[color=#6c8040, process="|", issapicrule,
+                         role='P']:
+   [ State_1111( ) ] --> [ State_11111( ), State_11112( ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) inx_0_11111[color=#6c8040, process="in($x.1);",
+                            issapicrule, role='P']:
+   [ State_11111( ), In( $x.1 ) ] --> [ State_111111( $x.1 ) ]
+
+  /*
+  rule (modulo AC) inx_0_11111[color=#6c8040, process="in($x.1);",
+                               issapicrule, role='P']:
+     [ State_11111( ), In( $x ) ] --> [ State_111111( $x ) ]
+  */
+
+rule (modulo E) D_0_111111[color=#6c8040, process="D();", issapicrule,
+                           role='P']:
+   [ State_111111( $x.1 ) ] --> [ State_1111111( $x.1 ) ]
+
+  /*
+  rule (modulo AC) D_0_111111[color=#6c8040, process="D();", issapicrule,
+                              role='P']:
+     [ State_111111( $x ) ] --> [ State_1111111( $x ) ]
+  */
+
+rule (modulo E) insertrolesxDtrue_0_1111111[color=#408048,
+                                            process="insert <'roles', $x.1, 'D'>,true;", issapicrule,
+                                            role='P_D']:
+   [ State_1111111( $x.1 ) ]
+  --[ Insert( <'roles', $x.1, 'D'>, true ) ]->
+   [ State_11111111( $x.1 ) ]
+
+  /*
+  rule (modulo AC) insertrolesxDtrue_0_1111111[color=#408048,
+                                               process="insert <'roles', $x.1, 'D'>,true;", issapicrule,
+                                               role='P_D']:
+     [ State_1111111( $x ) ]
+    --[ Insert( <'roles', $x, 'D'>, true ) ]->
+     [ State_11111111( $x ) ]
+  */
+
+rule (modulo E) outpkskx_0_11111111[color=#408048,
+                                    process="out(pk(sk($x.1)));", issapicrule, role='P_D']:
+   [ State_11111111( $x.1 ) ]
+  -->
+   [ State_111111111( $x.1 ), Out( pk(sk($x.1)) ) ]
+
+  /*
+  rule (modulo AC) outpkskx_0_11111111[color=#408048,
+                                       process="out(pk(sk($x.1)));", issapicrule, role='P_D']:
+     [ State_11111111( $x ) ] --> [ State_111111111( $x ), Out( pk(sk($x)) ) ]
+  */
+
+rule (modulo E) ina_0_111111111[color=#408048, process="in(a.1);",
+                                issapicrule, role='P_D']:
+   [ State_111111111( $x.1 ), In( a.1 ) ]
+  -->
+   [ State_1111111111( $x.1, a.1 ) ]
+
+  /*
+  rule (modulo AC) ina_0_111111111[color=#408048, process="in(a.1);",
+                                   issapicrule, role='P_D']:
+     [ State_111111111( $x ), In( a ) ] --> [ State_1111111111( $x, a ) ]
+  */
+
+restriction Restr_ifIsNormala_0_1111111111_1:
+  "∀ x #NOW.
+    (Restr_ifIsNormala_0_1111111111_1( x ) @ #NOW) ⇒ (x = NormalReq)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #NOW.
+    (Restr_ifIsNormala_0_1111111111_1( x ) @ #NOW) ⇒ (x = NormalReq)"
+  */
+
+rule (modulo E) ifIsNormala_0_1111111111[color=#408048,
+                                         process="if IsNormal( a.1 )", issapicrule, role='P_D']:
+   [ State_1111111111( $x.1, a.1 ) ]
+  --[ Restr_ifIsNormala_0_1111111111_1( a.1 ) ]->
+   [ State_11111111111( $x.1, a.1 ) ]
+
+  /*
+  rule (modulo AC) ifIsNormala_0_1111111111[color=#408048,
+                                            process="if IsNormal( a.1 )", issapicrule, role='P_D']:
+     [ State_1111111111( $x, a ) ]
+    --[ Restr_ifIsNormala_0_1111111111_1( a ) ]->
+     [ State_11111111111( $x, a ) ]
+  */
+
+restriction Restr_ifIsNormala_1_1111111111_1:
+  "∀ x #NOW.
+    (Restr_ifIsNormala_1_1111111111_1( x ) @ #NOW) ⇒ (¬(x = NormalReq))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #NOW.
+    (Restr_ifIsNormala_1_1111111111_1( x ) @ #NOW) ⇒ (¬(x = NormalReq))"
+  */
+
+rule (modulo E) ifIsNormala_1_1111111111[color=#408048,
+                                         process="if IsNormal( a.1 )", issapicrule, role='P_D']:
+   [ State_1111111111( $x.1, a.1 ) ]
+  --[ Restr_ifIsNormala_1_1111111111_1( a.1 ) ]->
+   [ State_11111111112( $x.1, a.1 ) ]
+
+  /*
+  rule (modulo AC) ifIsNormala_1_1111111111[color=#408048,
+                                            process="if IsNormal( a.1 )", issapicrule, role='P_D']:
+     [ State_1111111111( $x, a ) ]
+    --[ Restr_ifIsNormala_1_1111111111_1( a ) ]->
+     [ State_11111111112( $x, a ) ]
+  */
+
+rule (modulo E) outDoasigDoaskx_0_11111111111[color=#408048,
+                                              process="out(<<'Do', a.1>, sig(<'Do', a.1>, sk($x.1))>);",
+                                              issapicrule, role='P_D']:
+   [ State_11111111111( $x.1, a.1 ) ]
+  -->
+   [
+   State_111111111111( $x.1, a.1 ),
+   Out( <<'Do', a.1>, sig(<'Do', a.1>, sk($x.1))> )
+   ]
+
+  /*
+  rule (modulo AC) outDoasigDoaskx_0_11111111111[color=#408048,
+                                                 process="out(<<'Do', a.1>, sig(<'Do', a.1>, sk($x.1))>);",
+                                                 issapicrule, role='P_D']:
+     [ State_11111111111( $x, a ) ]
+    -->
+     [ State_111111111111( $x, a ), Out( <<'Do', a>, sig(<'Do', a>, sk($x))> )
+     ]
+  */
+
+rule (modulo E) p_0_111111111111[color=#408048, process="0", issapicrule,
+                                 role='P_D']:
+   [ State_111111111111( $x.1, a.1 ) ] --> [ ]
+
+  /*
+  rule (modulo AC) p_0_111111111111[color=#408048, process="0",
+                                    issapicrule, role='P_D']:
+     [ State_111111111111( $x, a ) ] --> [ ]
+  */
+
+restriction Restr_ifIsSpeciala_0_11111111112_1:
+  "∀ x #NOW.
+    (Restr_ifIsSpeciala_0_11111111112_1( x ) @ #NOW) ⇒ (x = SpecialReq)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #NOW.
+    (Restr_ifIsSpeciala_0_11111111112_1( x ) @ #NOW) ⇒ (x = SpecialReq)"
+  */
+
+rule (modulo E) ifIsSpeciala_0_11111111112[color=#408048,
+                                           process="if IsSpecial( a.1 )", issapicrule, role='P_D']:
+   [ State_11111111112( $x.1, a.1 ) ]
+  --[ Restr_ifIsSpeciala_0_11111111112_1( a.1 ) ]->
+   [ State_111111111121( $x.1, a.1 ) ]
+
+  /*
+  rule (modulo AC) ifIsSpeciala_0_11111111112[color=#408048,
+                                              process="if IsSpecial( a.1 )", issapicrule, role='P_D']:
+     [ State_11111111112( $x, a ) ]
+    --[ Restr_ifIsSpeciala_0_11111111112_1( a ) ]->
+     [ State_111111111121( $x, a ) ]
+  */
+
+restriction Restr_ifIsSpeciala_1_11111111112_1:
+  "∀ x #NOW.
+    (Restr_ifIsSpeciala_1_11111111112_1( x ) @ #NOW) ⇒ (¬(x = SpecialReq))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #NOW.
+    (Restr_ifIsSpeciala_1_11111111112_1( x ) @ #NOW) ⇒ (¬(x = SpecialReq))"
+  */
+
+rule (modulo E) ifIsSpeciala_1_11111111112[color=#408048,
+                                           process="if IsSpecial( a.1 )", issapicrule, role='P_D']:
+   [ State_11111111112( $x.1, a.1 ) ]
+  --[ Restr_ifIsSpeciala_1_11111111112_1( a.1 ) ]->
+   [ State_111111111122( $x.1, a.1 ) ]
+
+  /*
+  rule (modulo AC) ifIsSpeciala_1_11111111112[color=#408048,
+                                              process="if IsSpecial( a.1 )", issapicrule, role='P_D']:
+     [ State_11111111112( $x, a ) ]
+    --[ Restr_ifIsSpeciala_1_11111111112_1( a ) ]->
+     [ State_111111111122( $x, a ) ]
+  */
+
+rule (modulo E) outPermitasigPermitaskx_0_111111111121[color=#408048,
+                                                       process="out(<<'Permit', a.1>, sig(<'Permit', a.1>, sk($x.1))>);",
+                                                       issapicrule, role='P_D']:
+   [ State_111111111121( $x.1, a.1 ) ]
+  -->
+   [
+   State_1111111111211( $x.1, a.1 ),
+   Out( <<'Permit', a.1>, sig(<'Permit', a.1>, sk($x.1))> )
+   ]
+
+  /*
+  rule (modulo AC) outPermitasigPermitaskx_0_111111111121[color=#408048,
+                                                          process="out(<<'Permit', a.1>, sig(<'Permit', a.1>, sk($x.1))>);",
+                                                          issapicrule, role='P_D']:
+     [ State_111111111121( $x, a ) ]
+    -->
+     [
+     State_1111111111211( $x, a ),
+     Out( <<'Permit', a>, sig(<'Permit', a>, sk($x))> )
+     ]
+  */
+
+rule (modulo E) p_0_1111111111211[color=#408048, process="0",
+                                  issapicrule, role='P_D']:
+   [ State_1111111111211( $x.1, a.1 ) ] --> [ ]
+
+  /*
+  rule (modulo AC) p_0_1111111111211[color=#408048, process="0",
+                                     issapicrule, role='P_D']:
+     [ State_1111111111211( $x, a ) ] --> [ ]
+  */
+
+rule (modulo E) p_0_111111111122[color=#408048, process="0", issapicrule,
+                                 role='P_D']:
+   [ State_111111111122( $x.1, a.1 ) ] --> [ ]
+
+  /*
+  rule (modulo AC) p_0_111111111122[color=#408048, process="0",
+                                    issapicrule, role='P_D']:
+     [ State_111111111122( $x, a ) ] --> [ ]
+  */
+
+rule (modulo E) iny_0_11112[color=#6c8040, process="in($y.1);",
+                            issapicrule, role='P']:
+   [ State_11112( ), In( $y.1 ) ] --> [ State_111121( $y.1 ) ]
+
+  /*
+  rule (modulo AC) iny_0_11112[color=#6c8040, process="in($y.1);",
+                               issapicrule, role='P']:
+     [ State_11112( ), In( $y ) ] --> [ State_111121( $y ) ]
+  */
+
+rule (modulo E) C_0_111121[color=#6c8040, process="C();", issapicrule,
+                           role='P']:
+   [ State_111121( $y.1 ) ] --> [ State_1111211( $y.1 ) ]
+
+  /*
+  rule (modulo AC) C_0_111121[color=#6c8040, process="C();", issapicrule,
+                              role='P']:
+     [ State_111121( $y ) ] --> [ State_1111211( $y ) ]
+  */
+
+rule (modulo E) insertrolesyCtrue_0_1111211[color=#405780,
+                                            process="insert <'roles', $y.1, 'C'>,true;", issapicrule,
+                                            role='P_C']:
+   [ State_1111211( $y.1 ) ]
+  --[ Insert( <'roles', $y.1, 'C'>, true ) ]->
+   [ State_11112111( $y.1 ) ]
+
+  /*
+  rule (modulo AC) insertrolesyCtrue_0_1111211[color=#405780,
+                                               process="insert <'roles', $y.1, 'C'>,true;", issapicrule,
+                                               role='P_C']:
+     [ State_1111211( $y ) ]
+    --[ Insert( <'roles', $y, 'C'>, true ) ]->
+     [ State_11112111( $y ) ]
+  */
+
+rule (modulo E) outpksky_0_11112111[color=#405780,
+                                    process="out(pk(sk($y.1)));", issapicrule, role='P_C']:
+   [ State_11112111( $y.1 ) ]
+  -->
+   [ State_111121111( $y.1 ), Out( pk(sk($y.1)) ) ]
+
+  /*
+  rule (modulo AC) outpksky_0_11112111[color=#405780,
+                                       process="out(pk(sk($y.1)));", issapicrule, role='P_C']:
+     [ State_11112111( $y ) ] --> [ State_111121111( $y ), Out( pk(sk($y)) ) ]
+  */
+
+rule (modulo E) inx_0_111121111[color=#405780, process="in($x.2);",
+                                issapicrule, role='P_C']:
+   [ State_111121111( $y.1 ), In( $x.2 ) ]
+  -->
+   [ State_1111211111( $y.1, $x.2 ) ]
+
+  /*
+  rule (modulo AC) inx_0_111121111[color=#405780, process="in($x.2);",
+                                   issapicrule, role='P_C']:
+     [ State_111121111( $y ), In( $x ) ] --> [ State_1111211111( $y, $x ) ]
+  */
+
+rule (modulo E) inPermitasigm_0_1111211111[color=#405780,
+                                           process="in(<<'Permit', a.2>, sig_m_2.1>);", issapicrule,
+                                           role='P_C']:
+   [ State_1111211111( $y.1, $x.2 ), In( <<'Permit', a.2>, sig_m_2.1> ) ]
+  -->
+   [ State_11112111111( $y.1, sig_m_2.1, $x.2, a.2 ) ]
+
+  /*
+  rule (modulo AC) inPermitasigm_0_1111211111[color=#405780,
+                                              process="in(<<'Permit', a.2>, sig_m_2.1>);", issapicrule,
+                                              role='P_C']:
+     [ State_1111211111( $y, $x ), In( <<'Permit', a>, sig_m_2> ) ]
+    -->
+     [ State_11112111111( $y, sig_m_2, $x, a ) ]
+  */
+
+rule (modulo E) lookuprolesxDasisd_0_11112111111[color=#405780,
+                                                 process="lookup <'roles', $x.2, 'D'> as is_d.1",
+                                                 no_derivcheck, issapicrule, role='P_C']:
+   [ State_11112111111( $y.1, sig_m_2.1, $x.2, a.2 ) ]
+  --[ IsIn( <'roles', $x.2, 'D'>, is_d.1 ) ]->
+   [ State_111121111111( $y.1, is_d.1, sig_m_2.1, $x.2, a.2 ) ]
+
+  /*
+  rule (modulo AC) lookuprolesxDasisd_0_11112111111[color=#405780,
+                                                    process="lookup <'roles', $x.2, 'D'> as is_d.1",
+                                                    no_derivcheck, issapicrule, role='P_C']:
+     [ State_11112111111( $y, sig_m_2, $x, a ) ]
+    --[ IsIn( <'roles', $x, 'D'>, is_d ) ]->
+     [ State_111121111111( $y, is_d, sig_m_2, $x, a ) ]
+  */
+
+rule (modulo E) lookuprolesxDasisd_1_11112111111[color=#405780,
+                                                 process="lookup <'roles', $x.2, 'D'> as is_d.1",
+                                                 no_derivcheck, issapicrule, role='P_C']:
+   [ State_11112111111( $y.1, sig_m_2.1, $x.2, a.2 ) ]
+  --[ IsNotSet( <'roles', $x.2, 'D'> ) ]->
+   [ State_111121111112( $y.1, sig_m_2.1, $x.2, a.2 ) ]
+
+  /*
+  rule (modulo AC) lookuprolesxDasisd_1_11112111111[color=#405780,
+                                                    process="lookup <'roles', $x.2, 'D'> as is_d.1",
+                                                    no_derivcheck, issapicrule, role='P_C']:
+     [ State_11112111111( $y, sig_m_2, $x, a ) ]
+    --[ IsNotSet( <'roles', $x, 'D'> ) ]->
+     [ State_111121111112( $y, sig_m_2, $x, a ) ]
+  */
+
+rule (modulo E) ifverifysigmPermitapkskxtrue_0_111121111111[color=#405780,
+                                                            process="if verify(sig_m_2.1, <'Permit', a.2>, pk(sk($x.2)))=true",
+                                                            issapicrule, role='P_C']:
+   [ State_111121111111( $y.1, is_d.1, sig_m_2.1, $x.2, a.2 ) ]
+  --[ Pred_Eq( verify(sig_m_2.1, <'Permit', a.2>, pk(sk($x.2))), true ) ]->
+   [ State_1111211111111( $y.1, is_d.1, sig_m_2.1, $x.2, a.2 ) ]
+
+  /*
+  rule (modulo AC) ifverifysigmPermitapkskxtrue_0_111121111111[color=#405780,
+                                                               process="if verify(sig_m_2.1, <'Permit', a.2>, pk(sk($x.2)))=true",
+                                                               issapicrule, role='P_C']:
+     [ State_111121111111( $y, is_d, sig_m_2, $x, a ) ]
+    --[ Pred_Eq( z, true ) ]->
+     [ State_1111211111111( $y, is_d, sig_m_2, $x, a ) ]
+    variants (modulo AC)
+    1. $x    = $x.10
+       a     = a.10
+       sig_m_2
+             = sig_m_2.9
+       z     = verify(sig_m_2.9, <'Permit', a.10>, pk(sk($x.10)))
+    
+    2. $x    = $x.10
+       a     = x.9
+       sig_m_2
+             = sig(<'Permit', x.9>, sk($x.10))
+       z     = true
+  */
+
+rule (modulo E) ifverifysigmPermitapkskxtrue_1_111121111111[color=#405780,
+                                                            process="if verify(sig_m_2.1, <'Permit', a.2>, pk(sk($x.2)))=true",
+                                                            issapicrule, role='P_C']:
+   [ State_111121111111( $y.1, is_d.1, sig_m_2.1, $x.2, a.2 ) ]
+  --[ Pred_Not_Eq( verify(sig_m_2.1, <'Permit', a.2>, pk(sk($x.2))), true )
+  ]->
+   [ State_1111211111112( $y.1, is_d.1, sig_m_2.1, $x.2, a.2 ) ]
+
+  /*
+  rule (modulo AC) ifverifysigmPermitapkskxtrue_1_111121111111[color=#405780,
+                                                               process="if verify(sig_m_2.1, <'Permit', a.2>, pk(sk($x.2)))=true",
+                                                               issapicrule, role='P_C']:
+     [ State_111121111111( $y, is_d, sig_m_2, $x, a ) ]
+    --[ Pred_Not_Eq( z, true ) ]->
+     [ State_1111211111112( $y, is_d, sig_m_2, $x, a ) ]
+    variants (modulo AC)
+    1. $x    = $x.10
+       a     = a.10
+       sig_m_2
+             = sig_m_2.9
+       z     = verify(sig_m_2.9, <'Permit', a.10>, pk(sk($x.10)))
+    
+    2. $x    = $x.10
+       a     = x.9
+       sig_m_2
+             = sig(<'Permit', x.9>, sk($x.10))
+       z     = true
+  */
+
+restriction Restr_ifIsSpeciala_0_1111211111111_1:
+  "∀ x #NOW.
+    (Restr_ifIsSpeciala_0_1111211111111_1( x ) @ #NOW) ⇒ (x = SpecialReq)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #NOW.
+    (Restr_ifIsSpeciala_0_1111211111111_1( x ) @ #NOW) ⇒ (x = SpecialReq)"
+  */
+
+rule (modulo E) ifIsSpeciala_0_1111211111111[color=#405780,
+                                             process="if IsSpecial( a.2 )", issapicrule, role='P_C']:
+   [ State_1111211111111( $y.1, is_d.1, sig_m_2.1, $x.2, a.2 ) ]
+  --[ Restr_ifIsSpeciala_0_1111211111111_1( a.2 ) ]->
+   [ State_11112111111111( $y.1, is_d.1, sig_m_2.1, $x.2, a.2 ) ]
+
+  /*
+  rule (modulo AC) ifIsSpeciala_0_1111211111111[color=#405780,
+                                                process="if IsSpecial( a.2 )", issapicrule, role='P_C']:
+     [ State_1111211111111( $y, is_d, sig_m_2, $x, a ) ]
+    --[ Restr_ifIsSpeciala_0_1111211111111_1( a ) ]->
+     [ State_11112111111111( $y, is_d, sig_m_2, $x, a ) ]
+  */
+
+restriction Restr_ifIsSpeciala_1_1111211111111_1:
+  "∀ x #NOW.
+    (Restr_ifIsSpeciala_1_1111211111111_1( x ) @ #NOW) ⇒ (¬(x = SpecialReq))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #NOW.
+    (Restr_ifIsSpeciala_1_1111211111111_1( x ) @ #NOW) ⇒ (¬(x = SpecialReq))"
+  */
+
+rule (modulo E) ifIsSpeciala_1_1111211111111[color=#405780,
+                                             process="if IsSpecial( a.2 )", issapicrule, role='P_C']:
+   [ State_1111211111111( $y.1, is_d.1, sig_m_2.1, $x.2, a.2 ) ]
+  --[ Restr_ifIsSpeciala_1_1111211111111_1( a.2 ) ]->
+   [ State_11112111111112( $y.1, is_d.1, sig_m_2.1, $x.2, a.2 ) ]
+
+  /*
+  rule (modulo AC) ifIsSpeciala_1_1111211111111[color=#405780,
+                                                process="if IsSpecial( a.2 )", issapicrule, role='P_C']:
+     [ State_1111211111111( $y, is_d, sig_m_2, $x, a ) ]
+    --[ Restr_ifIsSpeciala_1_1111211111111_1( a ) ]->
+     [ State_11112111111112( $y, is_d, sig_m_2, $x, a ) ]
+  */
+
+rule (modulo E) outPermitasigmsigPermitasigmsky_0_11112111111111[color=#405780,
+                                                                 process="out(<<<'Permit', a.2>, sig_m_2.1>, 
+ sig(<<'Permit', a.2>, sig_m_2.1>, sk($y.1))>);",
+                                                                 issapicrule, role='P_C']:
+   [ State_11112111111111( $y.1, is_d.1, sig_m_2.1, $x.2, a.2 ) ]
+  -->
+   [
+   State_111121111111111( $y.1, is_d.1, sig_m_2.1, $x.2, a.2 ),
+   Out( <<<'Permit', a.2>, sig_m_2.1>, 
+         sig(<<'Permit', a.2>, sig_m_2.1>, sk($y.1))>
+   )
+   ]
+
+  /*
+  rule (modulo AC) outPermitasigmsigPermitasigmsky_0_11112111111111[color=#405780,
+                                                                    process="out(<<<'Permit', a.2>, sig_m_2.1>, 
+ sig(<<'Permit', a.2>, sig_m_2.1>, sk($y.1))>);",
+                                                                    issapicrule, role='P_C']:
+     [ State_11112111111111( $y, is_d, sig_m_2, $x, a ) ]
+    -->
+     [
+     State_111121111111111( $y, is_d, sig_m_2, $x, a ),
+     Out( <<<'Permit', a>, sig_m_2>, sig(<<'Permit', a>, sig_m_2>, sk($y))> )
+     ]
+  */
+
+rule (modulo E) p_0_111121111111111[color=#405780, process="0",
+                                    issapicrule, role='P_C']:
+   [ State_111121111111111( $y.1, is_d.1, sig_m_2.1, $x.2, a.2 ) ] --> [ ]
+
+  /*
+  rule (modulo AC) p_0_111121111111111[color=#405780, process="0",
+                                       issapicrule, role='P_C']:
+     [ State_111121111111111( $y, is_d, sig_m_2, $x, a ) ] --> [ ]
+  */
+
+rule (modulo E) p_0_11112111111112[color=#405780, process="0",
+                                   issapicrule, role='P_C']:
+   [ State_11112111111112( $y.1, is_d.1, sig_m_2.1, $x.2, a.2 ) ] --> [ ]
+
+  /*
+  rule (modulo AC) p_0_11112111111112[color=#405780, process="0",
+                                      issapicrule, role='P_C']:
+     [ State_11112111111112( $y, is_d, sig_m_2, $x, a ) ] --> [ ]
+  */
+
+rule (modulo E) p_0_1111211111112[color=#405780, process="0",
+                                  issapicrule, role='P_C']:
+   [ State_1111211111112( $y.1, is_d.1, sig_m_2.1, $x.2, a.2 ) ] --> [ ]
+
+  /*
+  rule (modulo AC) p_0_1111211111112[color=#405780, process="0",
+                                     issapicrule, role='P_C']:
+     [ State_1111211111112( $y, is_d, sig_m_2, $x, a ) ] --> [ ]
+  */
+
+rule (modulo E) p_0_111121111112[color=#405780, process="0", issapicrule,
+                                 role='P_C']:
+   [ State_111121111112( $y.1, sig_m_2.1, $x.2, a.2 ) ] --> [ ]
+
+  /*
+  rule (modulo AC) p_0_111121111112[color=#405780, process="0",
+                                    issapicrule, role='P_C']:
+     [ State_111121111112( $y, sig_m_2, $x, a ) ] --> [ ]
+  */
+
+rule (modulo E) inxy_0_1112[color=#6c8040, process="in(<$x.3, $y.2>);",
+                            issapicrule, role='P']:
+   [ State_1112( ), In( <$x.3, $y.2> ) ] --> [ State_11121( $y.2, $x.3 ) ]
+
+  /*
+  rule (modulo AC) inxy_0_1112[color=#6c8040, process="in(<$x.3, $y.2>);",
+                               issapicrule, role='P']:
+     [ State_1112( ), In( <$x, $y> ) ] --> [ State_11121( $y, $x ) ]
+  */
+
+rule (modulo E) M_0_11121[color=#6c8040, process="M();", issapicrule,
+                          role='P']:
+   [ State_11121( $y.2, $x.3 ) ] --> [ State_111211( $y.2, $x.3 ) ]
+
+  /*
+  rule (modulo AC) M_0_11121[color=#6c8040, process="M();", issapicrule,
+                             role='P']:
+     [ State_11121( $y, $x ) ] --> [ State_111211( $y, $x ) ]
+  */
+
+rule (modulo E) inDoasigm_0_1112111[color=#804054,
+                                    process="in(<<'Do', a.3>, sig_m_1.1>);", issapicrule, role='P_M']:
+   [ State_111211( $y.2, $x.3 ), In( <<'Do', a.3>, sig_m_1.1> ) ]
+  -->
+   [ State_11121111( sig_m_1.1, $y.2, $x.3, a.3 ) ]
+
+  /*
+  rule (modulo AC) inDoasigm_0_1112111[color=#804054,
+                                       process="in(<<'Do', a.3>, sig_m_1.1>);", issapicrule, role='P_M']:
+     [ State_111211( $y, $x ), In( <<'Do', a>, sig_m_1> ) ]
+    -->
+     [ State_11121111( sig_m_1, $y, $x, a ) ]
+  */
+
+rule (modulo E) ifverifysigmDoapkskxtrue_0_11121111[color=#804054,
+                                                    process="if verify(sig_m_1.1, <'Do', a.3>, pk(sk($x.3)))=true",
+                                                    issapicrule, role='P_M']:
+   [ State_11121111( sig_m_1.1, $y.2, $x.3, a.3 ) ]
+  --[ Pred_Eq( verify(sig_m_1.1, <'Do', a.3>, pk(sk($x.3))), true ) ]->
+   [ State_111211111( sig_m_1.1, $y.2, $x.3, a.3 ) ]
+
+  /*
+  rule (modulo AC) ifverifysigmDoapkskxtrue_0_11121111[color=#804054,
+                                                       process="if verify(sig_m_1.1, <'Do', a.3>, pk(sk($x.3)))=true",
+                                                       issapicrule, role='P_M']:
+     [ State_11121111( sig_m_1, $y, $x, a ) ]
+    --[ Pred_Eq( z, true ) ]->
+     [ State_111211111( sig_m_1, $y, $x, a ) ]
+    variants (modulo AC)
+    1. $x    = $x.11
+       a     = a.11
+       sig_m_1
+             = sig_m_1.9
+       z     = verify(sig_m_1.9, <'Do', a.11>, pk(sk($x.11)))
+    
+    2. $x    = $x.10
+       a     = x.9
+       sig_m_1
+             = sig(<'Do', x.9>, sk($x.10))
+       z     = true
+  */
+
+rule (modulo E) ifverifysigmDoapkskxtrue_1_11121111[color=#804054,
+                                                    process="if verify(sig_m_1.1, <'Do', a.3>, pk(sk($x.3)))=true",
+                                                    issapicrule, role='P_M']:
+   [ State_11121111( sig_m_1.1, $y.2, $x.3, a.3 ) ]
+  --[ Pred_Not_Eq( verify(sig_m_1.1, <'Do', a.3>, pk(sk($x.3))), true ) ]->
+   [ State_111211112( sig_m_1.1, $y.2, $x.3, a.3 ) ]
+
+  /*
+  rule (modulo AC) ifverifysigmDoapkskxtrue_1_11121111[color=#804054,
+                                                       process="if verify(sig_m_1.1, <'Do', a.3>, pk(sk($x.3)))=true",
+                                                       issapicrule, role='P_M']:
+     [ State_11121111( sig_m_1, $y, $x, a ) ]
+    --[ Pred_Not_Eq( z, true ) ]->
+     [ State_111211112( sig_m_1, $y, $x, a ) ]
+    variants (modulo AC)
+    1. $x    = $x.11
+       a     = a.11
+       sig_m_1
+             = sig_m_1.9
+       z     = verify(sig_m_1.9, <'Do', a.11>, pk(sk($x.11)))
+    
+    2. $x    = $x.10
+       a     = x.9
+       sig_m_1
+             = sig(<'Do', x.9>, sk($x.10))
+       z     = true
+  */
+
+rule (modulo E) lookuprolesxDasisd_0_111211111[color=#804054,
+                                               process="lookup <'roles', $x.3, 'D'> as is_d.2", no_derivcheck,
+                                               issapicrule, role='P_M']:
+   [ State_111211111( sig_m_1.1, $y.2, $x.3, a.3 ) ]
+  --[ IsIn( <'roles', $x.3, 'D'>, is_d.2 ) ]->
+   [ State_1112111111( sig_m_1.1, $y.2, is_d.2, $x.3, a.3 ) ]
+
+  /*
+  rule (modulo AC) lookuprolesxDasisd_0_111211111[color=#804054,
+                                                  process="lookup <'roles', $x.3, 'D'> as is_d.2",
+                                                  no_derivcheck, issapicrule, role='P_M']:
+     [ State_111211111( sig_m_1, $y, $x, a ) ]
+    --[ IsIn( <'roles', $x, 'D'>, is_d ) ]->
+     [ State_1112111111( sig_m_1, $y, is_d, $x, a ) ]
+  */
+
+rule (modulo E) lookuprolesxDasisd_1_111211111[color=#804054,
+                                               process="lookup <'roles', $x.3, 'D'> as is_d.2", no_derivcheck,
+                                               issapicrule, role='P_M']:
+   [ State_111211111( sig_m_1.1, $y.2, $x.3, a.3 ) ]
+  --[ IsNotSet( <'roles', $x.3, 'D'> ) ]->
+   [ State_1112111112( sig_m_1.1, $y.2, $x.3, a.3 ) ]
+
+  /*
+  rule (modulo AC) lookuprolesxDasisd_1_111211111[color=#804054,
+                                                  process="lookup <'roles', $x.3, 'D'> as is_d.2",
+                                                  no_derivcheck, issapicrule, role='P_M']:
+     [ State_111211111( sig_m_1, $y, $x, a ) ]
+    --[ IsNotSet( <'roles', $x, 'D'> ) ]->
+     [ State_1112111112( sig_m_1, $y, $x, a ) ]
+  */
+
+rule (modulo E) newid_0_1112111111[color=#804054, process="new id.1;",
+                                   issapicrule, role='P_M']:
+   [ State_1112111111( sig_m_1.1, $y.2, is_d.2, $x.3, a.3 ), Fr( id.1 ) ]
+  -->
+   [ State_11121111111( id.1, sig_m_1.1, $y.2, is_d.2, $x.3, a.3 ) ]
+
+  /*
+  rule (modulo AC) newid_0_1112111111[color=#804054, process="new id.1;",
+                                      issapicrule, role='P_M']:
+     [ State_1112111111( sig_m_1, $y, is_d, $x, a ), Fr( id ) ]
+    -->
+     [ State_11121111111( id, sig_m_1, $y, is_d, $x, a ) ]
+  */
+
+rule (modulo E) eventLogxaid_0_11121111111[color=#804054,
+                                           process="event Log( $x.3, a.3, id.1 );", issapicrule, role='P_M']:
+   [ State_11121111111( id.1, sig_m_1.1, $y.2, is_d.2, $x.3, a.3 ) ]
+  --[ Log( $x.3, a.3, id.1 ) ]->
+   [ State_111211111111( id.1, sig_m_1.1, $y.2, is_d.2, $x.3, a.3 ) ]
+
+  /*
+  rule (modulo AC) eventLogxaid_0_11121111111[color=#804054,
+                                              process="event Log( $x.3, a.3, id.1 );", issapicrule,
+                                              role='P_M']:
+     [ State_11121111111( id, sig_m_1, $y, is_d, $x, a ) ]
+    --[ Log( $x, a, id ) ]->
+     [ State_111211111111( id, sig_m_1, $y, is_d, $x, a ) ]
+  */
+
+rule (modulo E) eventExecuteaid_0_111211111111[color=#804054,
+                                               process="event Execute( a.3, id.1 );", issapicrule,
+                                               role='P_M']:
+   [ State_111211111111( id.1, sig_m_1.1, $y.2, is_d.2, $x.3, a.3 ) ]
+  --[ Execute( a.3, id.1 ) ]->
+   [ State_1112111111111( id.1, sig_m_1.1, $y.2, is_d.2, $x.3, a.3 ) ]
+
+  /*
+  rule (modulo AC) eventExecuteaid_0_111211111111[color=#804054,
+                                                  process="event Execute( a.3, id.1 );", issapicrule,
+                                                  role='P_M']:
+     [ State_111211111111( id, sig_m_1, $y, is_d, $x, a ) ]
+    --[ Execute( a, id ) ]->
+     [ State_1112111111111( id, sig_m_1, $y, is_d, $x, a ) ]
+  */
+
+rule (modulo E) p_0_1112111111111[color=#804054, process="0",
+                                  issapicrule, role='P_M']:
+   [ State_1112111111111( id.1, sig_m_1.1, $y.2, is_d.2, $x.3, a.3 ) ]
+  -->
+   [ ]
+
+  /*
+  rule (modulo AC) p_0_1112111111111[color=#804054, process="0",
+                                     issapicrule, role='P_M']:
+     [ State_1112111111111( id, sig_m_1, $y, is_d, $x, a ) ] --> [ ]
+  */
+
+rule (modulo E) p_0_1112111112[color=#804054, process="0", issapicrule,
+                               role='P_M']:
+   [ State_1112111112( sig_m_1.1, $y.2, $x.3, a.3 ) ] --> [ ]
+
+  /*
+  rule (modulo AC) p_0_1112111112[color=#804054, process="0", issapicrule,
+                                  role='P_M']:
+     [ State_1112111112( sig_m_1, $y, $x, a ) ] --> [ ]
+  */
+
+rule (modulo E) p_0_111211112[color=#804054, process="0", issapicrule,
+                              role='P_M']:
+   [ State_111211112( sig_m_1.1, $y.2, $x.3, a.3 ) ] --> [ ]
+
+  /*
+  rule (modulo AC) p_0_111211112[color=#804054, process="0", issapicrule,
+                                 role='P_M']:
+     [ State_111211112( sig_m_1, $y, $x, a ) ] --> [ ]
+  */
+
+rule (modulo E) inPermitasigmsigm_0_1112112[color=#804054,
+                                            process="in(<<<'Permit', a.4>, sig_m_2.2>, sig_m_3.1>);",
+                                            issapicrule, role='P_M']:
+   [
+   State_111211( $y.2, $x.3 ),
+   In( <<<'Permit', a.4>, sig_m_2.2>, sig_m_3.1> )
+   ]
+  -->
+   [ State_11121121( sig_m_3.1, $y.2, sig_m_2.2, $x.3, a.4 ) ]
+
+  /*
+  rule (modulo AC) inPermitasigmsigm_0_1112112[color=#804054,
+                                               process="in(<<<'Permit', a.4>, sig_m_2.2>, sig_m_3.1>);",
+                                               issapicrule, role='P_M']:
+     [ State_111211( $y, $x ), In( <<<'Permit', a>, sig_m_2>, sig_m_3> ) ]
+    -->
+     [ State_11121121( sig_m_3, $y, sig_m_2, $x, a ) ]
+  */
+
+rule (modulo E) ifverifysigmPermitasigmpkskytrue_0_11121121[color=#804054,
+                                                            process="if verify(sig_m_3.1, <<'Permit', a.4>, sig_m_2.2>, pk(sk($y.2)))=true",
+                                                            issapicrule, role='P_M']:
+   [ State_11121121( sig_m_3.1, $y.2, sig_m_2.2, $x.3, a.4 ) ]
+  --[
+  Pred_Eq( verify(sig_m_3.1, <<'Permit', a.4>, sig_m_2.2>, pk(sk($y.2))),
+           true
+  )
+  ]->
+   [ State_111211211( sig_m_3.1, $y.2, sig_m_2.2, $x.3, a.4 ) ]
+
+  /*
+  rule (modulo AC) ifverifysigmPermitasigmpkskytrue_0_11121121[color=#804054,
+                                                               process="if verify(sig_m_3.1, <<'Permit', a.4>, sig_m_2.2>, pk(sk($y.2)))=true",
+                                                               issapicrule, role='P_M']:
+     [ State_11121121( sig_m_3, $y, sig_m_2, $x, a ) ]
+    --[ Pred_Eq( z, true ) ]->
+     [ State_111211211( sig_m_3, $y, sig_m_2, $x, a ) ]
+    variants (modulo AC)
+    1. $y    = $y.12
+       a     = a.14
+       sig_m_2
+             = sig_m_2.12
+       sig_m_3
+             = sig_m_3.11
+       z     = verify(sig_m_3.11, <<'Permit', a.14>, sig_m_2.12>, pk(sk($y.12)))
+    
+    2. $y    = $x.13
+       a     = x.11
+       sig_m_2
+             = x.12
+       sig_m_3
+             = sig(<<'Permit', x.11>, x.12>, sk($x.13))
+       z     = true
+  */
+
+rule (modulo E) ifverifysigmPermitasigmpkskytrue_1_11121121[color=#804054,
+                                                            process="if verify(sig_m_3.1, <<'Permit', a.4>, sig_m_2.2>, pk(sk($y.2)))=true",
+                                                            issapicrule, role='P_M']:
+   [ State_11121121( sig_m_3.1, $y.2, sig_m_2.2, $x.3, a.4 ) ]
+  --[
+  Pred_Not_Eq( verify(sig_m_3.1, <<'Permit', a.4>, sig_m_2.2>,
+                      pk(sk($y.2))),
+               true
+  )
+  ]->
+   [ State_111211212( sig_m_3.1, $y.2, sig_m_2.2, $x.3, a.4 ) ]
+
+  /*
+  rule (modulo AC) ifverifysigmPermitasigmpkskytrue_1_11121121[color=#804054,
+                                                               process="if verify(sig_m_3.1, <<'Permit', a.4>, sig_m_2.2>, pk(sk($y.2)))=true",
+                                                               issapicrule, role='P_M']:
+     [ State_11121121( sig_m_3, $y, sig_m_2, $x, a ) ]
+    --[ Pred_Not_Eq( z, true ) ]->
+     [ State_111211212( sig_m_3, $y, sig_m_2, $x, a ) ]
+    variants (modulo AC)
+    1. $y    = $y.12
+       a     = a.14
+       sig_m_2
+             = sig_m_2.12
+       sig_m_3
+             = sig_m_3.11
+       z     = verify(sig_m_3.11, <<'Permit', a.14>, sig_m_2.12>, pk(sk($y.12)))
+    
+    2. $y    = $x.13
+       a     = x.11
+       sig_m_2
+             = x.12
+       sig_m_3
+             = sig(<<'Permit', x.11>, x.12>, sk($x.13))
+       z     = true
+  */
+
+rule (modulo E) ifverifysigmPermitapkskxtrue_0_111211211[color=#804054,
+                                                         process="if verify(sig_m_2.2, <'Permit', a.4>, pk(sk($x.3)))=true",
+                                                         issapicrule, role='P_M']:
+   [ State_111211211( sig_m_3.1, $y.2, sig_m_2.2, $x.3, a.4 ) ]
+  --[ Pred_Eq( verify(sig_m_2.2, <'Permit', a.4>, pk(sk($x.3))), true ) ]->
+   [ State_1112112111( sig_m_3.1, $y.2, sig_m_2.2, $x.3, a.4 ) ]
+
+  /*
+  rule (modulo AC) ifverifysigmPermitapkskxtrue_0_111211211[color=#804054,
+                                                            process="if verify(sig_m_2.2, <'Permit', a.4>, pk(sk($x.3)))=true",
+                                                            issapicrule, role='P_M']:
+     [ State_111211211( sig_m_3, $y, sig_m_2, $x, a ) ]
+    --[ Pred_Eq( z, true ) ]->
+     [ State_1112112111( sig_m_3, $y, sig_m_2, $x, a ) ]
+    variants (modulo AC)
+    1. $x    = $x.13
+       a     = a.14
+       sig_m_2
+             = sig_m_2.12
+       z     = verify(sig_m_2.12, <'Permit', a.14>, pk(sk($x.13)))
+    
+    2. $x    = $x.12
+       a     = x.11
+       sig_m_2
+             = sig(<'Permit', x.11>, sk($x.12))
+       z     = true
+  */
+
+rule (modulo E) ifverifysigmPermitapkskxtrue_1_111211211[color=#804054,
+                                                         process="if verify(sig_m_2.2, <'Permit', a.4>, pk(sk($x.3)))=true",
+                                                         issapicrule, role='P_M']:
+   [ State_111211211( sig_m_3.1, $y.2, sig_m_2.2, $x.3, a.4 ) ]
+  --[ Pred_Not_Eq( verify(sig_m_2.2, <'Permit', a.4>, pk(sk($x.3))), true )
+  ]->
+   [ State_1112112112( sig_m_3.1, $y.2, sig_m_2.2, $x.3, a.4 ) ]
+
+  /*
+  rule (modulo AC) ifverifysigmPermitapkskxtrue_1_111211211[color=#804054,
+                                                            process="if verify(sig_m_2.2, <'Permit', a.4>, pk(sk($x.3)))=true",
+                                                            issapicrule, role='P_M']:
+     [ State_111211211( sig_m_3, $y, sig_m_2, $x, a ) ]
+    --[ Pred_Not_Eq( z, true ) ]->
+     [ State_1112112112( sig_m_3, $y, sig_m_2, $x, a ) ]
+    variants (modulo AC)
+    1. $x    = $x.13
+       a     = a.14
+       sig_m_2
+             = sig_m_2.12
+       z     = verify(sig_m_2.12, <'Permit', a.14>, pk(sk($x.13)))
+    
+    2. $x    = $x.12
+       a     = x.11
+       sig_m_2
+             = sig(<'Permit', x.11>, sk($x.12))
+       z     = true
+  */
+
+rule (modulo E) lookuprolesyCasisc_0_1112112111[color=#804054,
+                                                process="lookup <'roles', $y.2, 'C'> as is_c.1",
+                                                no_derivcheck, issapicrule, role='P_M']:
+   [ State_1112112111( sig_m_3.1, $y.2, sig_m_2.2, $x.3, a.4 ) ]
+  --[ IsIn( <'roles', $y.2, 'C'>, is_c.1 ) ]->
+   [ State_11121121111( is_c.1, sig_m_3.1, $y.2, sig_m_2.2, $x.3, a.4 ) ]
+
+  /*
+  rule (modulo AC) lookuprolesyCasisc_0_1112112111[color=#804054,
+                                                   process="lookup <'roles', $y.2, 'C'> as is_c.1",
+                                                   no_derivcheck, issapicrule, role='P_M']:
+     [ State_1112112111( sig_m_3, $y, sig_m_2, $x, a ) ]
+    --[ IsIn( <'roles', $y, 'C'>, is_c ) ]->
+     [ State_11121121111( is_c, sig_m_3, $y, sig_m_2, $x, a ) ]
+  */
+
+rule (modulo E) lookuprolesyCasisc_1_1112112111[color=#804054,
+                                                process="lookup <'roles', $y.2, 'C'> as is_c.1",
+                                                no_derivcheck, issapicrule, role='P_M']:
+   [ State_1112112111( sig_m_3.1, $y.2, sig_m_2.2, $x.3, a.4 ) ]
+  --[ IsNotSet( <'roles', $y.2, 'C'> ) ]->
+   [ State_11121121112( sig_m_3.1, $y.2, sig_m_2.2, $x.3, a.4 ) ]
+
+  /*
+  rule (modulo AC) lookuprolesyCasisc_1_1112112111[color=#804054,
+                                                   process="lookup <'roles', $y.2, 'C'> as is_c.1",
+                                                   no_derivcheck, issapicrule, role='P_M']:
+     [ State_1112112111( sig_m_3, $y, sig_m_2, $x, a ) ]
+    --[ IsNotSet( <'roles', $y, 'C'> ) ]->
+     [ State_11121121112( sig_m_3, $y, sig_m_2, $x, a ) ]
+  */
+
+rule (modulo E) lookuprolesxDasisd_0_11121121111[color=#804054,
+                                                 process="lookup <'roles', $x.3, 'D'> as is_d.3",
+                                                 no_derivcheck, issapicrule, role='P_M']:
+   [ State_11121121111( is_c.1, sig_m_3.1, $y.2, sig_m_2.2, $x.3, a.4 ) ]
+  --[ IsIn( <'roles', $x.3, 'D'>, is_d.3 ) ]->
+   [
+   State_111211211111( is_c.1, sig_m_3.1, $y.2, sig_m_2.2, $x.3, is_d.3, a.4
+   )
+   ]
+
+  /*
+  rule (modulo AC) lookuprolesxDasisd_0_11121121111[color=#804054,
+                                                    process="lookup <'roles', $x.3, 'D'> as is_d.3",
+                                                    no_derivcheck, issapicrule, role='P_M']:
+     [ State_11121121111( is_c, sig_m_3, $y, sig_m_2, $x, a ) ]
+    --[ IsIn( <'roles', $x, 'D'>, is_d ) ]->
+     [ State_111211211111( is_c, sig_m_3, $y, sig_m_2, $x, is_d, a ) ]
+  */
+
+rule (modulo E) lookuprolesxDasisd_1_11121121111[color=#804054,
+                                                 process="lookup <'roles', $x.3, 'D'> as is_d.3",
+                                                 no_derivcheck, issapicrule, role='P_M']:
+   [ State_11121121111( is_c.1, sig_m_3.1, $y.2, sig_m_2.2, $x.3, a.4 ) ]
+  --[ IsNotSet( <'roles', $x.3, 'D'> ) ]->
+   [ State_111211211112( is_c.1, sig_m_3.1, $y.2, sig_m_2.2, $x.3, a.4 ) ]
+
+  /*
+  rule (modulo AC) lookuprolesxDasisd_1_11121121111[color=#804054,
+                                                    process="lookup <'roles', $x.3, 'D'> as is_d.3",
+                                                    no_derivcheck, issapicrule, role='P_M']:
+     [ State_11121121111( is_c, sig_m_3, $y, sig_m_2, $x, a ) ]
+    --[ IsNotSet( <'roles', $x, 'D'> ) ]->
+     [ State_111211211112( is_c, sig_m_3, $y, sig_m_2, $x, a ) ]
+  */
+
+rule (modulo E) newid_0_111211211111[color=#804054, process="new id.2;",
+                                     issapicrule, role='P_M']:
+   [
+   State_111211211111( is_c.1, sig_m_3.1, $y.2, sig_m_2.2, $x.3, is_d.3, a.4
+   ),
+   Fr( id.2 )
+   ]
+  -->
+   [
+   State_1112112111111( is_c.1, sig_m_3.1, $y.2, id.2, sig_m_2.2, $x.3,
+                        is_d.3, a.4
+   )
+   ]
+
+  /*
+  rule (modulo AC) newid_0_111211211111[color=#804054, process="new id.2;",
+                                        issapicrule, role='P_M']:
+     [ State_111211211111( is_c, sig_m_3, $y, sig_m_2, $x, is_d, a ), Fr( id )
+     ]
+    -->
+     [ State_1112112111111( is_c, sig_m_3, $y, id, sig_m_2, $x, is_d, a ) ]
+  */
+
+rule (modulo E) eventLogxyaid_0_1112112111111[color=#804054,
+                                              process="event Log( <$x.3, $y.2>, a.4, id.2 );", issapicrule,
+                                              role='P_M']:
+   [
+   State_1112112111111( is_c.1, sig_m_3.1, $y.2, id.2, sig_m_2.2, $x.3,
+                        is_d.3, a.4
+   )
+   ]
+  --[ Log( <$x.3, $y.2>, a.4, id.2 ) ]->
+   [
+   State_11121121111111( is_c.1, sig_m_3.1, $y.2, id.2, sig_m_2.2, $x.3,
+                         is_d.3, a.4
+   )
+   ]
+
+  /*
+  rule (modulo AC) eventLogxyaid_0_1112112111111[color=#804054,
+                                                 process="event Log( <$x.3, $y.2>, a.4, id.2 );", issapicrule,
+                                                 role='P_M']:
+     [ State_1112112111111( is_c, sig_m_3, $y, id, sig_m_2, $x, is_d, a ) ]
+    --[ Log( <$x, $y>, a, id ) ]->
+     [ State_11121121111111( is_c, sig_m_3, $y, id, sig_m_2, $x, is_d, a ) ]
+  */
+
+rule (modulo E) eventExecuteaid_0_11121121111111[color=#804054,
+                                                 process="event Execute( a.4, id.2 );", issapicrule,
+                                                 role='P_M']:
+   [
+   State_11121121111111( is_c.1, sig_m_3.1, $y.2, id.2, sig_m_2.2, $x.3,
+                         is_d.3, a.4
+   )
+   ]
+  --[ Execute( a.4, id.2 ) ]->
+   [
+   State_111211211111111( is_c.1, sig_m_3.1, $y.2, id.2, sig_m_2.2, $x.3,
+                          is_d.3, a.4
+   )
+   ]
+
+  /*
+  rule (modulo AC) eventExecuteaid_0_11121121111111[color=#804054,
+                                                    process="event Execute( a.4, id.2 );", issapicrule,
+                                                    role='P_M']:
+     [ State_11121121111111( is_c, sig_m_3, $y, id, sig_m_2, $x, is_d, a ) ]
+    --[ Execute( a, id ) ]->
+     [ State_111211211111111( is_c, sig_m_3, $y, id, sig_m_2, $x, is_d, a ) ]
+  */
+
+rule (modulo E) p_0_111211211111111[color=#804054, process="0",
+                                    issapicrule, role='P_M']:
+   [
+   State_111211211111111( is_c.1, sig_m_3.1, $y.2, id.2, sig_m_2.2, $x.3,
+                          is_d.3, a.4
+   )
+   ]
+  -->
+   [ ]
+
+  /*
+  rule (modulo AC) p_0_111211211111111[color=#804054, process="0",
+                                       issapicrule, role='P_M']:
+     [ State_111211211111111( is_c, sig_m_3, $y, id, sig_m_2, $x, is_d, a ) ]
+    -->
+     [ ]
+  */
+
+rule (modulo E) p_0_111211211112[color=#804054, process="0", issapicrule,
+                                 role='P_M']:
+   [ State_111211211112( is_c.1, sig_m_3.1, $y.2, sig_m_2.2, $x.3, a.4 ) ]
+  -->
+   [ ]
+
+  /*
+  rule (modulo AC) p_0_111211211112[color=#804054, process="0",
+                                    issapicrule, role='P_M']:
+     [ State_111211211112( is_c, sig_m_3, $y, sig_m_2, $x, a ) ] --> [ ]
+  */
+
+rule (modulo E) p_0_11121121112[color=#804054, process="0", issapicrule,
+                                role='P_M']:
+   [ State_11121121112( sig_m_3.1, $y.2, sig_m_2.2, $x.3, a.4 ) ] --> [ ]
+
+  /*
+  rule (modulo AC) p_0_11121121112[color=#804054, process="0", issapicrule,
+                                   role='P_M']:
+     [ State_11121121112( sig_m_3, $y, sig_m_2, $x, a ) ] --> [ ]
+  */
+
+rule (modulo E) p_0_1112112112[color=#804054, process="0", issapicrule,
+                               role='P_M']:
+   [ State_1112112112( sig_m_3.1, $y.2, sig_m_2.2, $x.3, a.4 ) ] --> [ ]
+
+  /*
+  rule (modulo AC) p_0_1112112112[color=#804054, process="0", issapicrule,
+                                  role='P_M']:
+     [ State_1112112112( sig_m_3, $y, sig_m_2, $x, a ) ] --> [ ]
+  */
+
+rule (modulo E) p_0_111211212[color=#804054, process="0", issapicrule,
+                              role='P_M']:
+   [ State_111211212( sig_m_3.1, $y.2, sig_m_2.2, $x.3, a.4 ) ] --> [ ]
+
+  /*
+  rule (modulo AC) p_0_111211212[color=#804054, process="0", issapicrule,
+                                 role='P_M']:
+     [ State_111211212( sig_m_3, $y, sig_m_2, $x, a ) ] --> [ ]
+  */
+
+rule (modulo E) p_0_112[color=#6c8040, process="!", issapicrule,
+                        role='P']:
+   [ State_112( ) ] --> [ !Semistate_1121( ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) p_1_112[color=#6c8040, process="!", issapicrule,
+                        role='P']:
+   [ !Semistate_1121( ) ] --> [ State_1121( ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Adv_0_1121[color=#6c8040, process="Adv();", issapicrule,
+                           role='P']:
+   [ State_1121( ) ] --> [ State_11211( ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) inccorruptx_0_11211[color=#768040,
+                                    process="in('c',<'corrupt', $x.4>);", issapicrule, role='P_Adv']:
+   [ State_11211( ), Message( 'c', x ) ]
+  -->
+   [ Let_112111( x ), Ack( 'c', x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) inccorruptx_1_11211[color=#768040,
+                                    process="in('c',<'corrupt', $x.4>);", issapicrule, role='P_Adv']:
+   [ Let_112111( <'corrupt', $x.4> ) ] --> [ State_112111( $x.4 ) ]
+
+  /*
+  rule (modulo AC) inccorruptx_1_11211[color=#768040,
+                                       process="in('c',<'corrupt', $x.4>);", issapicrule, role='P_Adv']:
+     [ Let_112111( <'corrupt', $x> ) ] --> [ State_112111( $x ) ]
+  */
+
+rule (modulo E) inccorruptx_2_11211[color=#768040,
+                                    process="in('c',<'corrupt', $x.4>);", issapicrule, role='P_Adv']:
+   [ State_11211( ), In( <'c', x> ) ] --> [ Let_112111( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) inccorruptx_3_11211[color=#768040,
+                                    process="in('c',<'corrupt', $x.4>);", issapicrule, role='P_Adv']:
+   [ Let_112111( <'corrupt', $x.4> ) ] --> [ State_112111( $x.4 ) ]
+
+  /*
+  rule (modulo AC) inccorruptx_3_11211[color=#768040,
+                                       process="in('c',<'corrupt', $x.4>);", issapicrule, role='P_Adv']:
+     [ Let_112111( <'corrupt', $x> ) ] --> [ State_112111( $x ) ]
+  */
+
+rule (modulo E) eventCorruptedx_0_112111[color=#768040,
+                                         process="event Corrupted( $x.4 );", issapicrule, role='P_Adv']:
+   [ State_112111( $x.4 ) ]
+  --[ Corrupted( $x.4 ) ]->
+   [ State_1121111( $x.4 ) ]
+
+  // loop breaker: [0]
+  /*
+  rule (modulo AC) eventCorruptedx_0_112111[color=#768040,
+                                            process="event Corrupted( $x.4 );", issapicrule, role='P_Adv']:
+     [ State_112111( $x ) ] --[ Corrupted( $x ) ]-> [ State_1121111( $x ) ]
+    // loop breaker: [0]
+  */
+
+rule (modulo E) outcskx_0_1121111[color=#768040,
+                                  process="out('c',sk($x.4));", issapicrule, role='P_Adv']:
+   [ State_1121111( $x.4 ), In( 'c' ) ]
+  -->
+   [ Out( sk($x.4) ), State_11211111( $x.4 ) ]
+
+  /*
+  rule (modulo AC) outcskx_0_1121111[color=#768040,
+                                     process="out('c',sk($x.4));", issapicrule, role='P_Adv']:
+     [ State_1121111( $x ), In( 'c' ) ]
+    -->
+     [ Out( sk($x) ), State_11211111( $x ) ]
+  */
+
+rule (modulo E) outcskx_1_1121111[color=#768040,
+                                  process="out('c',sk($x.4));", issapicrule, role='P_Adv']:
+   [ State_1121111( $x.4 ) ]
+  -->
+   [ Message( 'c', sk($x.4) ), Semistate_11211111( $x.4 ) ]
+
+  /*
+  rule (modulo AC) outcskx_1_1121111[color=#768040,
+                                     process="out('c',sk($x.4));", issapicrule, role='P_Adv']:
+     [ State_1121111( $x ) ]
+    -->
+     [ Message( 'c', sk($x) ), Semistate_11211111( $x ) ]
+  */
+
+rule (modulo E) outcskx_2_1121111[color=#768040,
+                                  process="out('c',sk($x.4));", issapicrule, role='P_Adv']:
+   [ Semistate_11211111( $x.4 ), Ack( 'c', sk($x.4) ) ]
+  -->
+   [ State_11211111( $x.4 ) ]
+
+  /*
+  rule (modulo AC) outcskx_2_1121111[color=#768040,
+                                     process="out('c',sk($x.4));", issapicrule, role='P_Adv']:
+     [ Semistate_11211111( $x ), Ack( 'c', sk($x) ) ]
+    -->
+     [ State_11211111( $x ) ]
+  */
+
+rule (modulo E) p_0_11211111[color=#768040, process="0", issapicrule,
+                             role='P_Adv']:
+   [ State_11211111( $x.4 ) ] --> [ ]
+
+  /*
+  rule (modulo AC) p_0_11211111[color=#768040, process="0", issapicrule,
+                                role='P_Adv']:
+     [ State_11211111( $x ) ] --> [ ]
+  */
+
+restriction set_in:
+  "∀ x y #t3.
+    (IsIn( x, y ) @ #t3) ⇒
+    (∃ #t2.
+      ((Insert( x, y ) @ #t2) ∧ (#t2 < #t3)) ∧
+      (∀ #t1 yp.
+        (Insert( x, yp ) @ #t1) ⇒ (((#t1 < #t2) ∨ (#t1 = #t2)) ∨ (#t3 < #t1))))"
+
+  /*
+  expanded formula:
+  "∀ x y #t3.
+    (IsIn( x, y ) @ #t3) ⇒
+    (∃ #t2.
+      ((Insert( x, y ) @ #t2) ∧ (#t2 < #t3)) ∧
+      (∀ #t1 yp.
+        (Insert( x, yp ) @ #t1) ⇒ (((#t1 < #t2) ∨ (#t1 = #t2)) ∨ (#t3 < #t1))))"
+  */
+
+restriction set_notin:
+  "∀ x #t3.
+    (IsNotSet( x ) @ #t3) ⇒ (∀ #t1 y. (Insert( x, y ) @ #t1) ⇒ (#t3 < #t1))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #t3.
+    (IsNotSet( x ) @ #t3) ⇒ (∀ #t1 y. (Insert( x, y ) @ #t1) ⇒ (#t3 < #t1))"
+  */
+
+restriction predicate_eq:
+  "∀ #i a b. (Pred_Eq( a, b ) @ #i) ⇒ (a = b)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ #i a b. (Pred_Eq( a, b ) @ #i) ⇒ (a = b)"
+  */
+
+restriction predicate_not_eq:
+  "∀ #i a b. (Pred_Not_Eq( a, b ) @ #i) ⇒ (¬(a = b))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ #i a b. (Pred_Not_Eq( a, b ) @ #i) ⇒ (¬(a = b))"
+  */
+
+restriction single_session:
+  "∀ #i #j. ((Init( ) @ #i) ∧ (Init( ) @ #j)) ⇒ (#i = #j)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ #i #j. ((Init( ) @ #i) ∧ (Init( ) @ #j)) ⇒ (#i = #j)"
+  */
+
+lemma acc_invalidReqD_suff:
+  exists-trace
+  "∃ x a id #i #j.
+    (((((Log( x, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)) ∧
+       (¬((a = SpecialReq) ∨ (a = NormalReq)))) ∧
+      (¬(∃ a.1 b. x = <a.1, b>))) ∧
+     (∀ x.1 a.1 id.1 #i.1 #j.1.
+       ((((Log( x.1, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)) ∧
+         (¬((a.1 = SpecialReq) ∨ (a.1 = NormalReq)))) ∧
+        (¬(∃ a.2 b. x.1 = <a.2, b>))) ⇒
+       (x.1 = x))) ∧
+    ((∀ a.1 #i.1. (Corrupted( a.1 ) @ #i.1) ⇒ (a.1 = x)) ∧
+     (¬(∃ x.1 y a.1 id.1 #i.1 #j.1.
+         ((((Log( <x.1, y>, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)) ∧
+           (¬(x.1 = y))) ∧
+          (¬((a.1 = SpecialReq) ∨ (a.1 = NormalReq)))) ∧
+         (¬(∃ z a.2 id.2 #i.2 #j.2.
+             ((((Log( z, a.2, id.2 ) @ #i.2) ∧ (Execute( a.2, id.2 ) @ #j.2)) ∧
+               (¬((a.2 = SpecialReq) ∨ (a.2 = NormalReq)))) ∧
+              (¬(∃ a.3 b. x.1 = <a.3, b>))) ∧
+             ((z = x.1) ∨ (z = y)))))))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ x a id #i #j.
+  (Log( x, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)
+ ∧
+  (¬(a = SpecialReq)) ∧
+  (¬(a = NormalReq)) ∧
+  (∀ a.1 b. (x = <a.1, b>) ⇒ ⊥) ∧
+  (∀ x.1 a.1 id.1 #i.1 #j.1.
+    (Log( x.1, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)
+   ⇒
+    ((a.1 = SpecialReq) ∨
+     (a.1 = NormalReq) ∨
+     (∃ a.2 b. (x.1 = <a.2, b>)) ∨
+     (x.1 = x))) ∧
+  (∀ a.1 #i.1. (Corrupted( a.1 ) @ #i.1) ⇒ a.1 = x) ∧
+  (∀ x.1 y a.1 id.1 #i.1 #j.1.
+    (Log( <x.1, y>, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)
+   ⇒
+    ((x.1 = y) ∨
+     (a.1 = SpecialReq) ∨
+     (a.1 = NormalReq) ∨
+     (∃ z a.2 id.2 #i.2 #j.2.
+       (Log( z, a.2, id.2 ) @ #i.2) ∧ (Execute( a.2, id.2 ) @ #j.2)
+      ∧
+       (¬(a.2 = SpecialReq)) ∧
+       (¬(a.2 = NormalReq)) ∧
+       (∀ a.3 b. (x.1 = <a.3, b>) ⇒ ⊥) ∧
+       (((z = x.1) ∨ (z = y))))))"
+*/
+by sorry
+
+lemma acc_invalidReqDC_suff:
+  exists-trace
+  "∃ x y a id #i #j.
+    ((((((Log( <x, y>, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)) ∧
+        (¬(x = y))) ∧
+       (¬((a = SpecialReq) ∨ (a = NormalReq)))) ∧
+      (¬(∃ z a.1 id.1 #i.1 #j.1.
+          ((((Log( z, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)) ∧
+            (¬((a.1 = SpecialReq) ∨ (a.1 = NormalReq)))) ∧
+           (¬(∃ a.2 b. x = <a.2, b>))) ∧
+          ((z = x) ∨ (z = y))))) ∧
+     (∀ x.1 y.1 a.1 id.1 #i.1 #j.1.
+       (((((Log( <x.1, y.1>, a.1, id.1 ) @ #i.1) ∧
+           (Execute( a.1, id.1 ) @ #j.1)) ∧
+          (¬(x.1 = y.1))) ∧
+         (¬((a.1 = SpecialReq) ∨ (a.1 = NormalReq)))) ∧
+        (¬(∃ z a.2 id.2 #i.2 #j.2.
+            ((((Log( z, a.2, id.2 ) @ #i.2) ∧ (Execute( a.2, id.2 ) @ #j.2)) ∧
+              (¬((a.2 = SpecialReq) ∨ (a.2 = NormalReq)))) ∧
+             (¬(∃ a.3 b. x.1 = <a.3, b>))) ∧
+            ((z = x.1) ∨ (z = y.1))))) ⇒
+       (<x.1, y.1> = <x, y>))) ∧
+    ((∀ a.1 #i.1. (Corrupted( a.1 ) @ #i.1) ⇒ ((a.1 = x) ∨ (a.1 = y))) ∧
+     (¬(∃ x.1 a.1 id.1 #i.1 #j.1.
+         (((Log( x.1, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)) ∧
+          (¬((a.1 = SpecialReq) ∨ (a.1 = NormalReq)))) ∧
+         (¬(∃ a.2 b. x.1 = <a.2, b>)))))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ x y a id #i #j.
+  (Log( <x, y>, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)
+ ∧
+  (¬(x = y)) ∧
+  (¬(a = SpecialReq)) ∧
+  (¬(a = NormalReq)) ∧
+  (∀ z a.1 id.1 #i.1 #j.1.
+    (Log( z, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)
+   ⇒
+    ((a.1 = SpecialReq) ∨
+     (a.1 = NormalReq) ∨
+     (∃ a.2 b. (x = <a.2, b>)) ∨
+     ((¬(z = x)) ∧ (¬(z = y))))) ∧
+  (∀ x.1 y.1 a.1 id.1 #i.1 #j.1.
+    (Log( <x.1, y.1>, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)
+   ⇒
+    ((x.1 = y.1) ∨
+     (a.1 = SpecialReq) ∨
+     (a.1 = NormalReq) ∨
+     (∃ z a.2 id.2 #i.2 #j.2.
+       (Log( z, a.2, id.2 ) @ #i.2) ∧ (Execute( a.2, id.2 ) @ #j.2)
+      ∧
+       (¬(a.2 = SpecialReq)) ∧
+       (¬(a.2 = NormalReq)) ∧
+       (∀ a.3 b. (x.1 = <a.3, b>) ⇒ ⊥) ∧
+       (((z = x.1) ∨ (z = y.1)))) ∨
+     (<x.1, y.1> = <x, y>))) ∧
+  (∀ a.1 #i.1. (Corrupted( a.1 ) @ #i.1) ⇒ ((a.1 = x) ∨ (a.1 = y))) ∧
+  (∀ x.1 a.1 id.1 #i.1 #j.1.
+    (Log( x.1, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)
+   ⇒
+    ((a.1 = SpecialReq) ∨ (a.1 = NormalReq) ∨ (∃ a.2 b. (x.1 = <a.2, b>))))"
+*/
+by sorry
+
+lemma acc_verif_empty:
+  all-traces
+  "(¬((∃ x a id #i #j.
+        (((Log( x, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)) ∧
+         (¬((a = SpecialReq) ∨ (a = NormalReq)))) ∧
+        (¬(∃ a.1 b. x = <a.1, b>))) ∨
+      (∃ x y a id #i #j.
+        ((((Log( <x, y>, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)) ∧ (¬(x = y))) ∧
+         (¬((a = SpecialReq) ∨ (a = NormalReq)))) ∧
+        (¬(∃ z a.1 id.1 #i.1 #j.1.
+            ((((Log( z, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)) ∧
+              (¬((a.1 = SpecialReq) ∨ (a.1 = NormalReq)))) ∧
+             (¬(∃ a.2 b. x = <a.2, b>))) ∧
+            ((z = x) ∨ (z = y))))))) ⇒
+   (∀ a id #i.
+     (Execute( a, id ) @ #i) ⇒ ((a = SpecialReq) ∨ (a = NormalReq)))"
+/*
+guarded formula characterizing all counter-examples:
+"(∀ x a id #i #j.
+   (Log( x, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)
+  ⇒
+   ((a = SpecialReq) ∨ (a = NormalReq) ∨ (∃ a.1 b. (x = <a.1, b>)))) ∧
+ (∀ x y a id #i #j.
+   (Log( <x, y>, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)
+  ⇒
+   ((x = y) ∨
+    (a = SpecialReq) ∨
+    (a = NormalReq) ∨
+    (∃ z a.1 id.1 #i.1 #j.1.
+      (Log( z, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)
+     ∧
+      (¬(a.1 = SpecialReq)) ∧
+      (¬(a.1 = NormalReq)) ∧
+      (∀ a.2 b. (x = <a.2, b>) ⇒ ⊥) ∧
+      (((z = x) ∨ (z = y)))))) ∧
+ (∃ a id #i.
+   (Execute( a, id ) @ #i) ∧ (¬(a = SpecialReq)) ∧ (¬(a = NormalReq)))"
+*/
+by sorry
+
+lemma acc_invalidReqD_verif_nonempty:
+  all-traces
+  "∀ x a id #i #j.
+    ((((Log( x, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)) ∧
+      (¬((a = SpecialReq) ∨ (a = NormalReq)))) ∧
+     (¬(∃ a.1 b. x = <a.1, b>))) ⇒
+    (¬(∀ a.1 id.1 #i.1.
+        (Execute( a.1, id.1 ) @ #i.1) ⇒
+        ((a.1 = SpecialReq) ∨ (a.1 = NormalReq))))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x a id #i #j.
+  (Log( x, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)
+ ∧
+  (¬(a = SpecialReq)) ∧
+  (¬(a = NormalReq)) ∧
+  (∀ a.1 b. (x = <a.1, b>) ⇒ ⊥) ∧
+  (∀ a.1 id.1 #i.1.
+    (Execute( a.1, id.1 ) @ #i.1)
+   ⇒
+    ((a.1 = SpecialReq) ∨ (a.1 = NormalReq)))"
+*/
+by sorry
+
+lemma acc_invalidReqDC_verif_nonempty:
+  all-traces
+  "∀ x y a id #i #j.
+    (((((Log( <x, y>, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)) ∧
+       (¬(x = y))) ∧
+      (¬((a = SpecialReq) ∨ (a = NormalReq)))) ∧
+     (¬(∃ z a.1 id.1 #i.1 #j.1.
+         ((((Log( z, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)) ∧
+           (¬((a.1 = SpecialReq) ∨ (a.1 = NormalReq)))) ∧
+          (¬(∃ a.2 b. x = <a.2, b>))) ∧
+         ((z = x) ∨ (z = y))))) ⇒
+    (¬(∀ a.1 id.1 #i.1.
+        (Execute( a.1, id.1 ) @ #i.1) ⇒
+        ((a.1 = SpecialReq) ∨ (a.1 = NormalReq))))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x y a id #i #j.
+  (Log( <x, y>, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)
+ ∧
+  (¬(x = y)) ∧
+  (¬(a = SpecialReq)) ∧
+  (¬(a = NormalReq)) ∧
+  (∀ z a.1 id.1 #i.1 #j.1.
+    (Log( z, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)
+   ⇒
+    ((a.1 = SpecialReq) ∨
+     (a.1 = NormalReq) ∨
+     (∃ a.2 b. (x = <a.2, b>)) ∨
+     ((¬(z = x)) ∧ (¬(z = y))))) ∧
+  (∀ a.1 id.1 #i.1.
+    (Execute( a.1, id.1 ) @ #i.1)
+   ⇒
+    ((a.1 = SpecialReq) ∨ (a.1 = NormalReq)))"
+*/
+by sorry
+
+lemma acc_invalidReqD_min:
+  all-traces
+  "∀ x a id #i #j.
+    ((((Log( x, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)) ∧
+      (¬((a = SpecialReq) ∨ (a = NormalReq)))) ∧
+     (¬(∃ a.1 b. x = <a.1, b>))) ⇒
+    ((¬(∃ x.1 a.1 id.1 #i.1 #j.1.
+         ((((Log( x.1, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)) ∧
+           (¬((a.1 = SpecialReq) ∨ (a.1 = NormalReq)))) ∧
+          (¬(∃ a.2 b. x.1 = <a.2, b>))) ∧
+         ((x.1 = x) ∧ (¬(x = x.1))))) ∧
+     (¬(∃ x.1 y a.1 id.1 #i.1 #j.1.
+         (((((Log( <x.1, y>, a.1, id.1 ) @ #i.1) ∧
+             (Execute( a.1, id.1 ) @ #j.1)) ∧
+            (¬(x.1 = y))) ∧
+           (¬((a.1 = SpecialReq) ∨ (a.1 = NormalReq)))) ∧
+          (¬(∃ z a.2 id.2 #i.2 #j.2.
+              ((((Log( z, a.2, id.2 ) @ #i.2) ∧ (Execute( a.2, id.2 ) @ #j.2)) ∧
+                (¬((a.2 = SpecialReq) ∨ (a.2 = NormalReq)))) ∧
+               (¬(∃ a.3 b. x.1 = <a.3, b>))) ∧
+              ((z = x.1) ∨ (z = y))))) ∧
+         (((x.1 = x) ∧ (y = x)) ∧ ((¬(x = x.1)) ∧ (¬(x = y)))))))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x a id #i #j.
+  (Log( x, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)
+ ∧
+  (¬(a = SpecialReq)) ∧
+  (¬(a = NormalReq)) ∧
+  (∀ a.1 b. (x = <a.1, b>) ⇒ ⊥) ∧
+  (((∃ x.1 a.1 id.1 #i.1 #j.1.
+      (Log( x.1, a.1, id.1 ) @ #i.1) ∧
+      (Execute( a.1, id.1 ) @ #j.1) ∧
+      (x.1 = x)
+     ∧
+      (¬(a.1 = SpecialReq)) ∧
+      (¬(a.1 = NormalReq)) ∧
+      (∀ a.2 b. (x.1 = <a.2, b>) ⇒ ⊥) ∧
+      (¬(x = x.1))) ∨
+    (∃ x.1 y a.1 id.1 #i.1 #j.1.
+      (Log( <x.1, y>, a.1, id.1 ) @ #i.1) ∧
+      (Execute( a.1, id.1 ) @ #j.1) ∧
+      (x.1 = x) ∧
+      (y = x)
+     ∧
+      (¬(x.1 = y)) ∧
+      (¬(a.1 = SpecialReq)) ∧
+      (¬(a.1 = NormalReq)) ∧
+      (∀ z a.2 id.2 #i.2 #j.2.
+        (Log( z, a.2, id.2 ) @ #i.2) ∧ (Execute( a.2, id.2 ) @ #j.2)
+       ⇒
+        ((a.2 = SpecialReq) ∨
+         (a.2 = NormalReq) ∨
+         (∃ a.3 b. (x.1 = <a.3, b>)) ∨
+         ((¬(z = x.1)) ∧ (¬(z = y))))) ∧
+      (¬(x = x.1)) ∧
+      (¬(x = y)))))"
+*/
+by sorry
+
+lemma acc_invalidReqDC_min:
+  all-traces
+  "∀ x y a id #i #j.
+    (((((Log( <x, y>, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)) ∧
+       (¬(x = y))) ∧
+      (¬((a = SpecialReq) ∨ (a = NormalReq)))) ∧
+     (¬(∃ z a.1 id.1 #i.1 #j.1.
+         ((((Log( z, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)) ∧
+           (¬((a.1 = SpecialReq) ∨ (a.1 = NormalReq)))) ∧
+          (¬(∃ a.2 b. x = <a.2, b>))) ∧
+         ((z = x) ∨ (z = y))))) ⇒
+    ((¬(∃ x.1 a.1 id.1 #i.1 #j.1.
+         ((((Log( x.1, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)) ∧
+           (¬((a.1 = SpecialReq) ∨ (a.1 = NormalReq)))) ∧
+          (¬(∃ a.2 b. x.1 = <a.2, b>))) ∧
+         (((x.1 = x) ∨ (x.1 = y)) ∧ ((¬(x = x.1)) ∨ (¬(y = x.1)))))) ∧
+     (¬(∃ x.1 y.1 a.1 id.1 #i.1 #j.1.
+         (((((Log( <x.1, y.1>, a.1, id.1 ) @ #i.1) ∧
+             (Execute( a.1, id.1 ) @ #j.1)) ∧
+            (¬(x.1 = y.1))) ∧
+           (¬((a.1 = SpecialReq) ∨ (a.1 = NormalReq)))) ∧
+          (¬(∃ z a.2 id.2 #i.2 #j.2.
+              ((((Log( z, a.2, id.2 ) @ #i.2) ∧ (Execute( a.2, id.2 ) @ #j.2)) ∧
+                (¬((a.2 = SpecialReq) ∨ (a.2 = NormalReq)))) ∧
+               (¬(∃ a.3 b. x.1 = <a.3, b>))) ∧
+              ((z = x.1) ∨ (z = y.1))))) ∧
+         ((((x.1 = x) ∨ (x.1 = y)) ∧ ((y.1 = x) ∨ (y.1 = y))) ∧
+          (((¬(x = x.1)) ∧ (¬(x = y.1))) ∨ ((¬(y = x.1)) ∧ (¬(y = y.1))))))))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x y a id #i #j.
+  (Log( <x, y>, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)
+ ∧
+  (¬(x = y)) ∧
+  (¬(a = SpecialReq)) ∧
+  (¬(a = NormalReq)) ∧
+  (∀ z a.1 id.1 #i.1 #j.1.
+    (Log( z, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)
+   ⇒
+    ((a.1 = SpecialReq) ∨
+     (a.1 = NormalReq) ∨
+     (∃ a.2 b. (x = <a.2, b>)) ∨
+     ((¬(z = x)) ∧ (¬(z = y))))) ∧
+  (((∃ x.1 a.1 id.1 #i.1 #j.1.
+      (Log( x.1, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)
+     ∧
+      (¬(a.1 = SpecialReq)) ∧
+      (¬(a.1 = NormalReq)) ∧
+      (∀ a.2 b. (x.1 = <a.2, b>) ⇒ ⊥) ∧
+      (((x.1 = x) ∨ (x.1 = y))) ∧
+      (((¬(x = x.1)) ∨ (¬(y = x.1))))) ∨
+    (∃ x.1 y.1 a.1 id.1 #i.1 #j.1.
+      (Log( <x.1, y.1>, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)
+     ∧
+      (¬(x.1 = y.1)) ∧
+      (¬(a.1 = SpecialReq)) ∧
+      (¬(a.1 = NormalReq)) ∧
+      (∀ z a.2 id.2 #i.2 #j.2.
+        (Log( z, a.2, id.2 ) @ #i.2) ∧ (Execute( a.2, id.2 ) @ #j.2)
+       ⇒
+        ((a.2 = SpecialReq) ∨
+         (a.2 = NormalReq) ∨
+         (∃ a.3 b. (x.1 = <a.3, b>)) ∨
+         ((¬(z = x.1)) ∧ (¬(z = y.1))))) ∧
+      (((x.1 = x) ∨ (x.1 = y))) ∧
+      (((y.1 = x) ∨ (y.1 = y))) ∧
+      ((((¬(x = x.1)) ∧ (¬(x = y.1))) ∨ ((¬(y = x.1)) ∧ (¬(y = y.1))))))))"
+*/
+by sorry
+
+lemma acc_invalidReqD_uniq:
+  all-traces
+  "∀ x a id #i #j.
+    ((((Log( x, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)) ∧
+      (¬((a = SpecialReq) ∨ (a = NormalReq)))) ∧
+     (¬(∃ a.1 b. x = <a.1, b>))) ⇒
+    (∃ #i.1. Corrupted( x ) @ #i.1)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x a id #i #j.
+  (Log( x, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)
+ ∧
+  (¬(a = SpecialReq)) ∧
+  (¬(a = NormalReq)) ∧
+  (∀ a.1 b. (x = <a.1, b>) ⇒ ⊥) ∧
+  (∀ #i.1. (Corrupted( x ) @ #i.1) ⇒ ⊥)"
+*/
+by sorry
+
+lemma acc_invalidReqDC_uniq:
+  all-traces
+  "∀ x y a id #i #j.
+    (((((Log( <x, y>, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)) ∧
+       (¬(x = y))) ∧
+      (¬((a = SpecialReq) ∨ (a = NormalReq)))) ∧
+     (¬(∃ z a.1 id.1 #i.1 #j.1.
+         ((((Log( z, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)) ∧
+           (¬((a.1 = SpecialReq) ∨ (a.1 = NormalReq)))) ∧
+          (¬(∃ a.2 b. x = <a.2, b>))) ∧
+         ((z = x) ∨ (z = y))))) ⇒
+    ((∃ #i.1. Corrupted( x ) @ #i.1) ∧ (∃ #i.1. Corrupted( y ) @ #i.1))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x y a id #i #j.
+  (Log( <x, y>, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)
+ ∧
+  (¬(x = y)) ∧
+  (¬(a = SpecialReq)) ∧
+  (¬(a = NormalReq)) ∧
+  (∀ z a.1 id.1 #i.1 #j.1.
+    (Log( z, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)
+   ⇒
+    ((a.1 = SpecialReq) ∨
+     (a.1 = NormalReq) ∨
+     (∃ a.2 b. (x = <a.2, b>)) ∨
+     ((¬(z = x)) ∧ (¬(z = y))))) ∧
+  (((∀ #i.1. (Corrupted( x ) @ #i.1) ⇒ ⊥) ∨
+    (∀ #i.1. (Corrupted( y ) @ #i.1) ⇒ ⊥)))"
+*/
+by sorry
+
+lemma acc_invalidReqD_inj:
+  all-traces "⊤"
+/*
+guarded formula characterizing all counter-examples:
+"⊥"
+*/
+by sorry
+
+lemma acc_invalidReqDC_inj:
+  all-traces
+  "∀ x y a id #i #j.
+    (((((Log( <x, y>, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)) ∧
+       (¬(x = y))) ∧
+      (¬((a = SpecialReq) ∨ (a = NormalReq)))) ∧
+     (¬(∃ z a.1 id.1 #i.1 #j.1.
+         ((((Log( z, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)) ∧
+           (¬((a.1 = SpecialReq) ∨ (a.1 = NormalReq)))) ∧
+          (¬(∃ a.2 b. x = <a.2, b>))) ∧
+         ((z = x) ∨ (z = y))))) ⇒
+    ((¬(x = y)) ∧ (¬(y = x)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x y a id #i #j.
+  (Log( <x, y>, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)
+ ∧
+  (¬(x = y)) ∧
+  (¬(a = SpecialReq)) ∧
+  (¬(a = NormalReq)) ∧
+  (∀ z a.1 id.1 #i.1 #j.1.
+    (Log( z, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)
+   ⇒
+    ((a.1 = SpecialReq) ∨
+     (a.1 = NormalReq) ∨
+     (∃ a.2 b. (x = <a.2, b>)) ∨
+     ((¬(z = x)) ∧ (¬(z = y))))) ∧
+  (((x = y) ∨ (y = x)))"
+*/
+by sorry
+
+lemma acc_invalidReqD_single:
+  exists-trace
+  "∃ x a id #i #j.
+    (((((Log( x, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)) ∧
+       (¬((a = SpecialReq) ∨ (a = NormalReq)))) ∧
+      (¬(∃ a.1 b. x = <a.1, b>))) ∧
+     (∀ x.1 a.1 id.1 #i.1 #j.1.
+       ((((Log( x.1, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)) ∧
+         (¬((a.1 = SpecialReq) ∨ (a.1 = NormalReq)))) ∧
+        (¬(∃ a.2 b. x.1 = <a.2, b>))) ⇒
+       (x.1 = x))) ∧
+    (¬(∃ x.1 y a.1 id.1 #i.1 #j.1.
+        ((((Log( <x.1, y>, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)) ∧
+          (¬(x.1 = y))) ∧
+         (¬((a.1 = SpecialReq) ∨ (a.1 = NormalReq)))) ∧
+        (¬(∃ z a.2 id.2 #i.2 #j.2.
+            ((((Log( z, a.2, id.2 ) @ #i.2) ∧ (Execute( a.2, id.2 ) @ #j.2)) ∧
+              (¬((a.2 = SpecialReq) ∨ (a.2 = NormalReq)))) ∧
+             (¬(∃ a.3 b. x.1 = <a.3, b>))) ∧
+            ((z = x.1) ∨ (z = y))))))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ x a id #i #j.
+  (Log( x, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)
+ ∧
+  (¬(a = SpecialReq)) ∧
+  (¬(a = NormalReq)) ∧
+  (∀ a.1 b. (x = <a.1, b>) ⇒ ⊥) ∧
+  (∀ x.1 a.1 id.1 #i.1 #j.1.
+    (Log( x.1, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)
+   ⇒
+    ((a.1 = SpecialReq) ∨
+     (a.1 = NormalReq) ∨
+     (∃ a.2 b. (x.1 = <a.2, b>)) ∨
+     (x.1 = x))) ∧
+  (∀ x.1 y a.1 id.1 #i.1 #j.1.
+    (Log( <x.1, y>, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)
+   ⇒
+    ((x.1 = y) ∨
+     (a.1 = SpecialReq) ∨
+     (a.1 = NormalReq) ∨
+     (∃ z a.2 id.2 #i.2 #j.2.
+       (Log( z, a.2, id.2 ) @ #i.2) ∧ (Execute( a.2, id.2 ) @ #j.2)
+      ∧
+       (¬(a.2 = SpecialReq)) ∧
+       (¬(a.2 = NormalReq)) ∧
+       (∀ a.3 b. (x.1 = <a.3, b>) ⇒ ⊥) ∧
+       (((z = x.1) ∨ (z = y))))))"
+*/
+by sorry
+
+lemma acc_invalidReqDC_single:
+  exists-trace
+  "∃ x y a id #i #j.
+    ((((((Log( <x, y>, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)) ∧
+        (¬(x = y))) ∧
+       (¬((a = SpecialReq) ∨ (a = NormalReq)))) ∧
+      (¬(∃ z a.1 id.1 #i.1 #j.1.
+          ((((Log( z, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)) ∧
+            (¬((a.1 = SpecialReq) ∨ (a.1 = NormalReq)))) ∧
+           (¬(∃ a.2 b. x = <a.2, b>))) ∧
+          ((z = x) ∨ (z = y))))) ∧
+     (∀ x.1 y.1 a.1 id.1 #i.1 #j.1.
+       (((((Log( <x.1, y.1>, a.1, id.1 ) @ #i.1) ∧
+           (Execute( a.1, id.1 ) @ #j.1)) ∧
+          (¬(x.1 = y.1))) ∧
+         (¬((a.1 = SpecialReq) ∨ (a.1 = NormalReq)))) ∧
+        (¬(∃ z a.2 id.2 #i.2 #j.2.
+            ((((Log( z, a.2, id.2 ) @ #i.2) ∧ (Execute( a.2, id.2 ) @ #j.2)) ∧
+              (¬((a.2 = SpecialReq) ∨ (a.2 = NormalReq)))) ∧
+             (¬(∃ a.3 b. x.1 = <a.3, b>))) ∧
+            ((z = x.1) ∨ (z = y.1))))) ⇒
+       (<x.1, y.1> = <x, y>))) ∧
+    (¬(∃ x.1 a.1 id.1 #i.1 #j.1.
+        (((Log( x.1, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)) ∧
+         (¬((a.1 = SpecialReq) ∨ (a.1 = NormalReq)))) ∧
+        (¬(∃ a.2 b. x.1 = <a.2, b>))))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ x y a id #i #j.
+  (Log( <x, y>, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)
+ ∧
+  (¬(x = y)) ∧
+  (¬(a = SpecialReq)) ∧
+  (¬(a = NormalReq)) ∧
+  (∀ z a.1 id.1 #i.1 #j.1.
+    (Log( z, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)
+   ⇒
+    ((a.1 = SpecialReq) ∨
+     (a.1 = NormalReq) ∨
+     (∃ a.2 b. (x = <a.2, b>)) ∨
+     ((¬(z = x)) ∧ (¬(z = y))))) ∧
+  (∀ x.1 y.1 a.1 id.1 #i.1 #j.1.
+    (Log( <x.1, y.1>, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)
+   ⇒
+    ((x.1 = y.1) ∨
+     (a.1 = SpecialReq) ∨
+     (a.1 = NormalReq) ∨
+     (∃ z a.2 id.2 #i.2 #j.2.
+       (Log( z, a.2, id.2 ) @ #i.2) ∧ (Execute( a.2, id.2 ) @ #j.2)
+      ∧
+       (¬(a.2 = SpecialReq)) ∧
+       (¬(a.2 = NormalReq)) ∧
+       (∀ a.3 b. (x.1 = <a.3, b>) ⇒ ⊥) ∧
+       (((z = x.1) ∨ (z = y.1)))) ∨
+     (<x.1, y.1> = <x, y>))) ∧
+  (∀ x.1 a.1 id.1 #i.1 #j.1.
+    (Log( x.1, a.1, id.1 ) @ #i.1) ∧ (Execute( a.1, id.1 ) @ #j.1)
+   ⇒
+    ((a.1 = SpecialReq) ∨ (a.1 = NormalReq) ∨ (∃ a.2 b. (x.1 = <a.2, b>))))"
+*/
+by sorry
+
+
+
+end

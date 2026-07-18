@@ -1,0 +1,26 @@
+theory qw1 begin
+
+rule R1: [ In(x) ] --[ A(x), B(x,x), C() ]-> [ Out(x) ]
+
+restriction r_alltr:
+  "All x #i. A(x)@i ==> Ex #j. B(x,x)@j"
+
+restriction r_exists:
+  "Ex x #i. A(x)@i"
+
+restriction r_eq:
+  "All x y #i. B(x,y)@i ==> x = y"
+
+lemma l_top: "T"
+
+lemma l_bot: exists-trace "F"
+
+lemma l_short: "All x #i. A(x)@i ==> T"
+
+lemma l_attrs [use_induction,reuse]:
+  "All x #i. A(x)@i ==> Ex #j. B(x,x)@j"
+
+lemma l_extr: exists-trace
+  "Ex x #i. A(x)@i & (Ex #j. C()@j)"
+
+end

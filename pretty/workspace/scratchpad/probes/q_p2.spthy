@@ -1,0 +1,32 @@
+theory qp2 begin
+
+rule R1: [ In(x), Fr(~n) ] --[ A(x), B(x,x), C(), M(~n, $p, x) ]-> [ Out(x) ]
+
+lemma s1_and_or: "All x #i. A(x)@i ==> ((x = x & x = 'c') | x = 'd')"
+
+lemma s2_or_and: "All x #i. A(x)@i ==> (x = x & (x = 'c' | x = 'd'))"
+
+lemma s3_or_lchain: "All x #i. A(x)@i ==> ((x = 'b' | x = 'c') | x = 'd')"
+
+lemma s4_or_rchain: "All x #i. A(x)@i ==> (x = 'b' | (x = 'c' | x = 'd'))"
+
+lemma s5_and_lchain: "All x #i. A(x)@i ==> ((x = 'b' & x = 'c') & x = 'd')"
+
+lemma s6_and_rchain: "All x #i. A(x)@i ==> (x = 'b' & (x = 'c' & x = 'd'))"
+
+lemma s7_imp_in_imp: "All x #i. A(x)@i ==> (x = 'b' ==> x = 'c')"
+
+lemma s8_not_and_notnot: "All x #i. A(x)@i ==> not(x = 'b' & not(not(x = 'c')))"
+
+lemma s9_q_under_or: "All x #i. A(x)@i ==> ((Ex #j. B(x,x)@j) | (Ex #j. C()@j))"
+
+lemma s10_q_under_imp: "All x #i. A(x)@i ==> ((Ex #j. B(x,x)@j) ==> x = 'd')"
+
+lemma s11_all_under_imp: "All x #i. A(x)@i ==> (All y #j. B(x,y)@j ==> x = y)"
+
+lemma s12_not_q: "All x #i. A(x)@i ==> not(Ex #j. C()@j)"
+
+lemma s13_deep: exists-trace
+  "Ex x #i. A(x)@i & (not(Ex #j. C()@j) & (x = 'c' | not(x = 'd')))"
+
+end

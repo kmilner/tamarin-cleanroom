@@ -184,7 +184,8 @@ fn bracket_group(open: &str, facts: &[Fact], close: &str) -> Doc {
 /// drops to the fact's own column when the args are multi-line
 /// (probe:t_wide); `Name( )` when nullary (target:mesh); `!` prefix for
 /// persistent facts; annotation suffix attached directly after the paren.
-fn fact_doc(f: &Fact) -> Doc {
+/// Formula action atoms reuse this construction unchanged (probe:q_l3).
+pub(crate) fn fact_doc(f: &Fact) -> Doc {
     let head = format!("{}{}(", if f.persistent { "!" } else { "" }, f.name);
     let core = if f.args.is_empty() {
         sep(vec![text(&head), char(')')])

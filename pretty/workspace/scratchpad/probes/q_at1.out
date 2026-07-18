@@ -1,0 +1,65 @@
+theory qat1
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) R1:
+   [ In( x ), Fr( ~n ) ]
+  --[ A( x ), B( x, x ), N( ~n ), D( x ) ]->
+   [ Out( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+lemma at_less:
+  all-traces
+  "∀ x #i #j.
+    ((A( x ) @ #i) ∧ (B( x, x ) @ #j)) ⇒
+    (((#i < #j) ∨ (#j < #i)) ∨ (#i = #j))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i #j.
+  (A( x ) @ #i) ∧ (B( x, x ) @ #j)
+ ∧
+  (¬(#i < #j)) ∧ (¬(#j < #i)) ∧ (¬(#i = #j))"
+*/
+by sorry
+
+lemma at_eqmsg:
+  all-traces "∀ x y #i. (B( x, y ) @ #i) ⇒ (x = y)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x y #i. (B( x, y ) @ #i) ∧ ¬(x = y)"
+*/
+by sorry
+
+lemma at_last [use_induction]:
+  all-traces "∀ x #i. (A( x ) @ #i) ⇒ (last(#i))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i. (A( x ) @ #i) ∧ ¬(last(#i))"
+*/
+by sorry
+
+lemma at_sub:
+  all-traces "∀ x #i. (A( x ) @ #i) ⇒ (x ⊏ <x, x>)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i. (A( x ) @ #i) ∧ ¬(x ⊏ <x, x>)"
+*/
+by sorry
+
+lemma at_fr:
+  all-traces "∀ n #i. (N( n ) @ #i) ⇒ (∃ #j. D( n ) @ #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ n #i. (N( n ) @ #i) ∧ ∀ #j. (D( n ) @ #j) ⇒ ⊥"
+*/
+by sorry
+
+
+
+end

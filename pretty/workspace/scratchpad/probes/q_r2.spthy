@@ -1,0 +1,7 @@
+theory qr2 begin
+
+rule R1: [ In(x) ] --[ A(x) ]-> [ Out(x) ]
+
+lemma r2_iff: "All x #i. A(x)@i ==> (x = 'b' <=> x = 'c')"
+
+end

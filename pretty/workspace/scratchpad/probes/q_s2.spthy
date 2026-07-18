@@ -1,0 +1,15 @@
+theory qs2 begin
+
+rule R1: [ In(x), Fr(~n) ] --[ A(x), B(x,x) ]-> [ Out(x) ]
+
+restriction u1_allconc: "All x #i. A(x)@i ==> (All #j. B(x,x)@j ==> #j < #i)"
+
+restriction u2_top: "All x #i. A(x)@i ==> T"
+
+restriction u3_sub: "All x #i. A(x)@i ==> x << <x, x>"
+
+restriction u4_exguard_neg: "All x #i. A(x)@i & not(Ex #j. B(x,x)@j & #j < #i) ==> x = 'c'"
+
+restriction u5_last: "All x #i. A(x)@i ==> last(#i)"
+
+end

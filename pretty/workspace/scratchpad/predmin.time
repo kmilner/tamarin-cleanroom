@@ -1,0 +1,1 @@
+"$O" $EX/features/predicates/minimal.spthy > predmin.echo 2>&1  0.04s user 0.07s system 64% cpu 0.171 total

@@ -1,0 +1,7 @@
+theory qax1 begin
+
+rule R1: [ In(x) ] --[ A(x), B(x,x) ]-> [ Out(x) ]
+
+axiom ax_old: "All x y #i. B(x,y)@i ==> x = y"
+
+end

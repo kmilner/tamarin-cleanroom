@@ -1,0 +1,729 @@
+theory DMNBasic
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: S/1, adec/2, adec_suc/2, aenc/3, fst/1, pair/2, pk/1,
+           sk/1[private,constructor], snd/1, true/0
+equations:
+    adec(sk(x), aenc(pk(x), r, m)) = m,
+    adec_suc(sk(x), aenc(pk(x), r, m)) = true,
+    fst(<x.1, x.2>) = x.1,
+    snd(<x.1, x.2>) = x.2
+
+heuristic: o "./oracle-dmn-basic"
+
+restriction Restr_Init_1:
+  "∀ x #NOW x.1. (Restr_Init_1( x, x.1 ) @ #NOW) ⇒ (¬(x = x.1))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #NOW x.1. (Restr_Init_1( x, x.1 ) @ #NOW) ⇒ (¬(x = x.1))"
+  */
+
+restriction Restr_Init_2:
+  "∀ x #NOW x.1. (Restr_Init_2( x, x.1 ) @ #NOW) ⇒ (¬(x = x.1))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #NOW x.1. (Restr_Init_2( x, x.1 ) @ #NOW) ⇒ (¬(x = x.1))"
+  */
+
+restriction Restr_Init_3:
+  "∀ x #NOW x.1. (Restr_Init_3( x, x.1 ) @ #NOW) ⇒ (¬(x = x.1))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #NOW x.1. (Restr_Init_3( x, x.1 ) @ #NOW) ⇒ (¬(x = x.1))"
+  */
+
+restriction Restr_Init_4:
+  "∀ x #NOW x.1. (Restr_Init_4( x, x.1 ) @ #NOW) ⇒ (¬(x = x.1))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #NOW x.1. (Restr_Init_4( x, x.1 ) @ #NOW) ⇒ (¬(x = x.1))"
+  */
+
+rule (modulo E) Init:
+   [ Fr( ~sid ) ]
+  --[
+  Init( ~sid ), Restr_Init_1( $s1, $s2 ), Restr_Init_2( $m1, $m2 ),
+  Restr_Init_3( $m1, $m3 ), Restr_Init_4( $m2, $m3 )
+  ]->
+   [
+   !Sender( <~sid, $s1> ), !Sender( <~sid, $s2> ),
+   !Mixer( S(S(S('0'))), <~sid, $m1> ), !Mixer( S(S('0')), <~sid, $m2> ),
+   !Mixer( S('0'), <~sid, $m3> ), Out( pk(<~sid, $m1>) ),
+   Out( pk(<~sid, $m2>) ), Out( pk(<~sid, $m3>) )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) HonestSender:
+   [
+   !Sender( <~sid, $s> ), !Mixer( S(S(S('0'))), <~sid, $m1> ),
+   !Mixer( S(S('0')), <~sid, $m2> ), !Mixer( S('0'), <~sid, $m3> ),
+   Fr( ~m ), Fr( ~r1 ), Fr( ~r2 ), Fr( ~r3 )
+   ]
+  --[
+  HonestSender( <~sid, $s> ), AtMostOnce( <'sender', ~sid, $s> ),
+  Send( ~sid, ~m ),
+  Post( <~sid, $s>, S(S(S('0'))),
+        aenc(pk(<~sid, $m1>), ~r1,
+             aenc(pk(<~sid, $m2>), ~r2, aenc(pk(<~sid, $m3>), ~r3, ~m)))
+  )
+  ]->
+   [
+   !BB( ~sid, S(S(S('0'))),
+        aenc(pk(<~sid, $m1>), ~r1,
+             aenc(pk(<~sid, $m2>), ~r2, aenc(pk(<~sid, $m3>), ~r3, ~m)))
+   ),
+   BBPost( ~sid, S(S(S('0'))),
+           aenc(pk(<~sid, $m1>), ~r1,
+                aenc(pk(<~sid, $m2>), ~r2, aenc(pk(<~sid, $m3>), ~r3, ~m)))
+   )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) CorruptedSender:
+   [ !Sender( <~sid, $s> ), !BB( ~sid, S(S(S('0'))), c ) ]
+  --[
+  CorruptedSender( <~sid, $s> ), AtMostOnce( <'sender', ~sid, $s> ),
+  Corrupted( <~sid, $s> ), Post( <~sid, $s>, S(S(S('0'))), c )
+  ]->
+   [ !BB( ~sid, S(S(S('0'))), c ), BBPost( ~sid, S(S(S('0'))), c ) ]
+
+  // loop breaker: [1]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) HonestMixer:
+   [ !Mixer( S(n), <~sid, $m> ), BBPost( ~sid, S(n), c ) ]
+  --[
+  HonestMixer( <~sid, $m> ), AtMostTwice( <'mixer', ~sid, $m> ),
+  IsTrue( adec_suc(sk(<~sid, $m>), c) ),
+  Post( <~sid, $m>, n, adec(sk(<~sid, $m>), c) )
+  ]->
+   [
+   !BB( ~sid, n, adec(sk(<~sid, $m>), c) ),
+   BBPost( ~sid, n, adec(sk(<~sid, $m>), c) )
+   ]
+
+  // loop breaker: [1]
+  /*
+  rule (modulo AC) HonestMixer:
+     [ !Mixer( S(n), <~sid, $m> ), BBPost( ~sid, S(n), c ) ]
+    --[
+    HonestMixer( <~sid, $m> ), AtMostTwice( <'mixer', ~sid, $m> ),
+    IsTrue( z.1 ), Post( <~sid, $m>, n, z )
+    ]->
+     [ !BB( ~sid, n, z ), BBPost( ~sid, n, z ) ]
+    variants (modulo AC)
+    1. $m    = $m.9
+       ~sid  = ~sid.10
+       c     = c.11
+       z     = adec(sk(<~sid.10, $m.9>), c.11)
+       z.1   = adec_suc(sk(<~sid.10, $m.9>), c.11)
+    
+    2. $m    = $m.12
+       ~sid  = ~sid.13
+       c     = aenc(pk(<~sid.13, $m.12>), x.21, z.16)
+       z     = z.16
+       z.1   = true
+    // loop breaker: [1]
+  */
+
+rule (modulo E) CorruptedMixer:
+   [ !Mixer( S(n), <~sid, $m> ), !BB( ~sid, S(n), c ) ]
+  --[
+  CorruptedMixer( <~sid, $m> ), AtMostTwice( <'mixer', ~sid, $m> ),
+  IsTrue( adec_suc(sk(<~sid, $m>), c) ), Corrupted( <~sid, $m> ),
+  Post( <~sid, $m>, n, adec(sk(<~sid, $m>), c) )
+  ]->
+   [
+   !BB( ~sid, n, adec(sk(<~sid, $m>), c) ),
+   BBPost( ~sid, n, adec(sk(<~sid, $m>), c) )
+   ]
+
+  // loop breaker: [1]
+  /*
+  rule (modulo AC) CorruptedMixer:
+     [ !Mixer( S(n), <~sid, $m> ), !BB( ~sid, S(n), c ) ]
+    --[
+    CorruptedMixer( <~sid, $m> ), AtMostTwice( <'mixer', ~sid, $m> ),
+    IsTrue( z.1 ), Corrupted( <~sid, $m> ), Post( <~sid, $m>, n, z )
+    ]->
+     [ !BB( ~sid, n, z ), BBPost( ~sid, n, z ) ]
+    variants (modulo AC)
+    1. $m    = $m.9
+       ~sid  = ~sid.10
+       c     = c.11
+       z     = adec(sk(<~sid.10, $m.9>), c.11)
+       z.1   = adec_suc(sk(<~sid.10, $m.9>), c.11)
+    
+    2. $m    = $m.12
+       ~sid  = ~sid.13
+       c     = aenc(pk(<~sid.13, $m.12>), x.21, z.16)
+       z     = z.16
+       z.1   = true
+    // loop breaker: [1]
+  */
+
+lemma sanity_submit:
+  exists-trace "∃ sid s c #i. Post( <sid, s>, S(S(S('0'))), c ) @ #i"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ sid s c #i. (Post( <sid, s>, S(S(S('0'))), c ) @ #i)"
+*/
+by sorry
+
+lemma sanity_mix:
+  exists-trace
+  "∃ sid m n c #i. (Post( <sid, m>, n, c ) @ #i) ∧ (¬(n = S(S(S('0')))))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ sid m n c #i. (Post( <sid, m>, n, c ) @ #i) ∧ ¬(n = S(S(S('0'))))"
+*/
+by sorry
+
+lemma sanity_receive:
+  exists-trace "∃ sid c m #i. Post( <sid, m>, '0', c ) @ #i"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ sid c m #i. (Post( <sid, m>, '0', c ) @ #i)"
+*/
+by sorry
+
+lemma correctness:
+  all-traces
+  "∀ sid s m #i.
+    (Post( <sid, s>, '0', m ) @ #i) ⇒ (∃ #j. Send( sid, m ) @ #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ sid s m #i.
+  (Post( <sid, s>, '0', m ) @ #i) ∧ ∀ #j. (Send( sid, m ) @ #j) ⇒ ⊥"
+*/
+by sorry
+
+restriction mixer_stays_corrupted:
+  "∀ sid m #i.
+    (CorruptedMixer( <sid, m> ) @ #i) ⇒
+    (¬(∃ #j. (HonestMixer( <sid, m> ) @ #j) ∧ (#i < #j)))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ sid m #i.
+    (CorruptedMixer( <sid, m> ) @ #i) ⇒
+    (¬(∃ #j. (HonestMixer( <sid, m> ) @ #j) ∧ (#i < #j)))"
+  */
+
+restriction at_most_once:
+  "∀ x #i #j.
+    ((AtMostOnce( x ) @ #i) ∧ (AtMostOnce( x ) @ #j)) ⇒ (#i = #j)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #i #j.
+    ((AtMostOnce( x ) @ #i) ∧ (AtMostOnce( x ) @ #j)) ⇒ (#i = #j)"
+  */
+
+restriction at_most_twice:
+  "∀ x #i #j #k.
+    (((AtMostTwice( x ) @ #i) ∧ (AtMostTwice( x ) @ #j)) ∧
+     (AtMostTwice( x ) @ #k)) ⇒
+    (((#i = #j) ∨ (#i = #k)) ∨ (#j = #k))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #i #j #k.
+    (((AtMostTwice( x ) @ #i) ∧ (AtMostTwice( x ) @ #j)) ∧
+     (AtMostTwice( x ) @ #k)) ⇒
+    (((#i = #j) ∨ (#i = #k)) ∨ (#j = #k))"
+  */
+
+restriction is_true:
+  "∀ m #i. (IsTrue( m ) @ #i) ⇒ (m = true)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ m #i. (IsTrue( m ) @ #i) ⇒ (m = true)"
+  */
+
+restriction stop_after_sender_duplicate:
+  "∀ sid s1 s2 c #i #j.
+    ((((Post( <sid, s1>, S(S(S('0'))), c ) @ #i) ∧
+       (Post( <sid, s2>, S(S(S('0'))), c ) @ #j)) ∧
+      (#i < #j)) ∧
+     (¬(s1 = s2))) ⇒
+    (¬(∃ p n m #k. (Post( <sid, p>, n, m ) @ #k) ∧ (#j < #k)))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ sid s1 s2 c #i #j.
+    ((((Post( <sid, s1>, S(S(S('0'))), c ) @ #i) ∧
+       (Post( <sid, s2>, S(S(S('0'))), c ) @ #j)) ∧
+      (#i < #j)) ∧
+     (¬(s1 = s2))) ⇒
+    (¬(∃ p n m #k. (Post( <sid, p>, n, m ) @ #k) ∧ (#j < #k)))"
+  */
+
+restriction stop_after_mixer_duplicate:
+  "∀ sid m n c #i #j.
+    ((((Post( <sid, m>, n, c ) @ #i) ∧ (Post( <sid, m>, n, c ) @ #j)) ∧
+      (¬(n = S(S(S('0')))))) ∧
+     (¬(#i = #j))) ⇒
+    (¬(∃ p n.1 m.1 #k.
+        ((Post( <sid, p>, n.1, m.1 ) @ #k) ∧ (#i < #k)) ∧ (#j < #k)))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ sid m n c #i #j.
+    ((((Post( <sid, m>, n, c ) @ #i) ∧ (Post( <sid, m>, n, c ) @ #j)) ∧
+      (¬(n = S(S(S('0')))))) ∧
+     (¬(#i = #j))) ⇒
+    (¬(∃ p n.1 m.1 #k.
+        ((Post( <sid, p>, n.1, m.1 ) @ #k) ∧ (#i < #k)) ∧ (#j < #k)))"
+  */
+
+lemma duplicates_sender_duplicate_suff:
+  exists-trace
+  "∃ sa2 sid s1 s2 c #i #j.
+    ((((((sa2 = <sid, s2>) ∧ (Post( <sid, s1>, S(S(S('0'))), c ) @ #i)) ∧
+        (Post( <sid, s2>, S(S(S('0'))), c ) @ #j)) ∧
+       (#i < #j)) ∧
+      (¬(s1 = s2))) ∧
+     (∀ sa2.1 sid.1 s1.1 s2.1 c.1 #i.1 #j.1.
+       (((((sa2.1 = <sid.1, s2.1>) ∧
+           (Post( <sid.1, s1.1>, S(S(S('0'))), c.1 ) @ #i.1)) ∧
+          (Post( <sid.1, s2.1>, S(S(S('0'))), c.1 ) @ #j.1)) ∧
+         (#i.1 < #j.1)) ∧
+        (¬(s1.1 = s2.1))) ⇒
+       (sa2.1 = sa2))) ∧
+    ((∀ a #i.1. (Corrupted( a ) @ #i.1) ⇒ (a = sa2)) ∧
+     (¬(∃ ma sid.1 m n c.1 #i.1 #j.1.
+         ((((ma = <sid.1, m>) ∧ (Post( <sid.1, m>, n, c.1 ) @ #i.1)) ∧
+           (Post( <sid.1, m>, n, c.1 ) @ #j.1)) ∧
+          (¬(n = S(S(S('0')))))) ∧
+         (¬(#i.1 = #j.1)))))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ sa2 sid s1 s2 c #i #j.
+  (sa2 = <sid, s2>) ∧
+  (Post( <sid, s1>, S(S(S('0'))), c ) @ #i) ∧
+  (Post( <sid, s2>, S(S(S('0'))), c ) @ #j)
+ ∧
+  (#i < #j) ∧
+  (¬(s1 = s2)) ∧
+  (∀ sa2.1 sid.1 s1.1 s2.1 c.1 #i.1 #j.1.
+    (sa2.1 = <sid.1, s2.1>) ∧
+    (Post( <sid.1, s1.1>, S(S(S('0'))), c.1 ) @ #i.1) ∧
+    (Post( <sid.1, s2.1>, S(S(S('0'))), c.1 ) @ #j.1)
+   ⇒
+    ((¬(#i.1 < #j.1)) ∨ (s1.1 = s2.1) ∨ (sa2.1 = sa2))) ∧
+  (∀ a #i.1. (Corrupted( a ) @ #i.1) ⇒ a = sa2) ∧
+  (∀ ma sid.1 m n c.1 #i.1 #j.1.
+    (ma = <sid.1, m>) ∧
+    (Post( <sid.1, m>, n, c.1 ) @ #i.1) ∧
+    (Post( <sid.1, m>, n, c.1 ) @ #j.1)
+   ⇒
+    ((n = S(S(S('0')))) ∨ (#i.1 = #j.1)))"
+*/
+by sorry
+
+lemma duplicates_mixer_duplicate_suff:
+  exists-trace
+  "∃ ma sid m n c #i #j.
+    ((((((ma = <sid, m>) ∧ (Post( <sid, m>, n, c ) @ #i)) ∧
+        (Post( <sid, m>, n, c ) @ #j)) ∧
+       (¬(n = S(S(S('0')))))) ∧
+      (¬(#i = #j))) ∧
+     (∀ ma.1 sid.1 m.1 n.1 c.1 #i.1 #j.1.
+       (((((ma.1 = <sid.1, m.1>) ∧ (Post( <sid.1, m.1>, n.1, c.1 ) @ #i.1)) ∧
+          (Post( <sid.1, m.1>, n.1, c.1 ) @ #j.1)) ∧
+         (¬(n.1 = S(S(S('0')))))) ∧
+        (¬(#i.1 = #j.1))) ⇒
+       (ma.1 = ma))) ∧
+    ((∀ a #i.1. (Corrupted( a ) @ #i.1) ⇒ (a = ma)) ∧
+     (¬(∃ sa2 sid.1 s1 s2 c.1 #i.1 #j.1.
+         ((((sa2 = <sid.1, s2>) ∧
+            (Post( <sid.1, s1>, S(S(S('0'))), c.1 ) @ #i.1)) ∧
+           (Post( <sid.1, s2>, S(S(S('0'))), c.1 ) @ #j.1)) ∧
+          (#i.1 < #j.1)) ∧
+         (¬(s1 = s2)))))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ ma sid m n c #i #j.
+  (ma = <sid, m>) ∧
+  (Post( <sid, m>, n, c ) @ #i) ∧
+  (Post( <sid, m>, n, c ) @ #j)
+ ∧
+  (¬(n = S(S(S('0'))))) ∧
+  (¬(#i = #j)) ∧
+  (∀ ma.1 sid.1 m.1 n.1 c.1 #i.1 #j.1.
+    (ma.1 = <sid.1, m.1>) ∧
+    (Post( <sid.1, m.1>, n.1, c.1 ) @ #i.1) ∧
+    (Post( <sid.1, m.1>, n.1, c.1 ) @ #j.1)
+   ⇒
+    ((n.1 = S(S(S('0')))) ∨ (#i.1 = #j.1) ∨ (ma.1 = ma))) ∧
+  (∀ a #i.1. (Corrupted( a ) @ #i.1) ⇒ a = ma) ∧
+  (∀ sa2 sid.1 s1 s2 c.1 #i.1 #j.1.
+    (sa2 = <sid.1, s2>) ∧
+    (Post( <sid.1, s1>, S(S(S('0'))), c.1 ) @ #i.1) ∧
+    (Post( <sid.1, s2>, S(S(S('0'))), c.1 ) @ #j.1)
+   ⇒
+    ((¬(#i.1 < #j.1)) ∨ (s1 = s2)))"
+*/
+by sorry
+
+lemma duplicates_verif_empty:
+  all-traces
+  "(¬((∃ sa2 sid s1 s2 c #i #j.
+        ((((sa2 = <sid, s2>) ∧ (Post( <sid, s1>, S(S(S('0'))), c ) @ #i)) ∧
+          (Post( <sid, s2>, S(S(S('0'))), c ) @ #j)) ∧
+         (#i < #j)) ∧
+        (¬(s1 = s2))) ∨
+      (∃ ma sid m n c #i #j.
+        ((((ma = <sid, m>) ∧ (Post( <sid, m>, n, c ) @ #i)) ∧
+          (Post( <sid, m>, n, c ) @ #j)) ∧
+         (¬(n = S(S(S('0')))))) ∧
+        (¬(#i = #j))))) ⇒
+   (∀ sid p1 p2 n m #i #j.
+     ((Post( <sid, p1>, n, m ) @ #i) ∧ (Post( <sid, p2>, n, m ) @ #j)) ⇒
+     (#i = #j))"
+/*
+guarded formula characterizing all counter-examples:
+"(∀ sa2 sid s1 s2 c #i #j.
+   (sa2 = <sid, s2>) ∧
+   (Post( <sid, s1>, S(S(S('0'))), c ) @ #i) ∧
+   (Post( <sid, s2>, S(S(S('0'))), c ) @ #j)
+  ⇒
+   ((¬(#i < #j)) ∨ (s1 = s2))) ∧
+ (∀ ma sid m n c #i #j.
+   (ma = <sid, m>) ∧
+   (Post( <sid, m>, n, c ) @ #i) ∧
+   (Post( <sid, m>, n, c ) @ #j)
+  ⇒
+   ((n = S(S(S('0')))) ∨ (#i = #j))) ∧
+ (∃ sid p1 p2 n m #i #j.
+   (Post( <sid, p1>, n, m ) @ #i) ∧ (Post( <sid, p2>, n, m ) @ #j)
+  ∧
+   ¬(#i = #j))"
+*/
+by sorry
+
+lemma duplicates_sender_duplicate_verif_nonempty:
+  all-traces
+  "∀ sa2 sid s1 s2 c #i #j.
+    (((((sa2 = <sid, s2>) ∧ (Post( <sid, s1>, S(S(S('0'))), c ) @ #i)) ∧
+       (Post( <sid, s2>, S(S(S('0'))), c ) @ #j)) ∧
+      (#i < #j)) ∧
+     (¬(s1 = s2))) ⇒
+    (¬(∀ sid.1 p1 p2 n m #i.1 #j.1.
+        ((Post( <sid.1, p1>, n, m ) @ #i.1) ∧
+         (Post( <sid.1, p2>, n, m ) @ #j.1)) ⇒
+        (#i.1 = #j.1)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ sa2 sid s1 s2 c #i #j.
+  (sa2 = <sid, s2>) ∧
+  (Post( <sid, s1>, S(S(S('0'))), c ) @ #i) ∧
+  (Post( <sid, s2>, S(S(S('0'))), c ) @ #j)
+ ∧
+  (#i < #j) ∧
+  (¬(s1 = s2)) ∧
+  (∀ sid.1 p1 p2 n m #i.1 #j.1.
+    (Post( <sid.1, p1>, n, m ) @ #i.1) ∧ (Post( <sid.1, p2>, n, m ) @ #j.1)
+   ⇒
+    #i.1 = #j.1)"
+*/
+by sorry
+
+lemma duplicates_mixer_duplicate_verif_nonempty:
+  all-traces
+  "∀ ma sid m n c #i #j.
+    (((((ma = <sid, m>) ∧ (Post( <sid, m>, n, c ) @ #i)) ∧
+       (Post( <sid, m>, n, c ) @ #j)) ∧
+      (¬(n = S(S(S('0')))))) ∧
+     (¬(#i = #j))) ⇒
+    (¬(∀ sid.1 p1 p2 n.1 m.1 #i.1 #j.1.
+        ((Post( <sid.1, p1>, n.1, m.1 ) @ #i.1) ∧
+         (Post( <sid.1, p2>, n.1, m.1 ) @ #j.1)) ⇒
+        (#i.1 = #j.1)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ ma sid m n c #i #j.
+  (ma = <sid, m>) ∧
+  (Post( <sid, m>, n, c ) @ #i) ∧
+  (Post( <sid, m>, n, c ) @ #j)
+ ∧
+  (¬(n = S(S(S('0'))))) ∧
+  (¬(#i = #j)) ∧
+  (∀ sid.1 p1 p2 n.1 m.1 #i.1 #j.1.
+    (Post( <sid.1, p1>, n.1, m.1 ) @ #i.1) ∧
+    (Post( <sid.1, p2>, n.1, m.1 ) @ #j.1)
+   ⇒
+    #i.1 = #j.1)"
+*/
+by sorry
+
+lemma duplicates_sender_duplicate_min:
+  all-traces
+  "∀ sa2 sid s1 s2 c #i #j.
+    (((((sa2 = <sid, s2>) ∧ (Post( <sid, s1>, S(S(S('0'))), c ) @ #i)) ∧
+       (Post( <sid, s2>, S(S(S('0'))), c ) @ #j)) ∧
+      (#i < #j)) ∧
+     (¬(s1 = s2))) ⇒
+    ((¬(∃ sa2.1 sid.1 s1.1 s2.1 c.1 #i.1 #j.1.
+         (((((sa2.1 = <sid.1, s2.1>) ∧
+             (Post( <sid.1, s1.1>, S(S(S('0'))), c.1 ) @ #i.1)) ∧
+            (Post( <sid.1, s2.1>, S(S(S('0'))), c.1 ) @ #j.1)) ∧
+           (#i.1 < #j.1)) ∧
+          (¬(s1.1 = s2.1))) ∧
+         ((sa2.1 = sa2) ∧ (¬(sa2 = sa2.1))))) ∧
+     (¬(∃ ma sid.1 m n c.1 #i.1 #j.1.
+         (((((ma = <sid.1, m>) ∧ (Post( <sid.1, m>, n, c.1 ) @ #i.1)) ∧
+            (Post( <sid.1, m>, n, c.1 ) @ #j.1)) ∧
+           (¬(n = S(S(S('0')))))) ∧
+          (¬(#i.1 = #j.1))) ∧
+         ((ma = sa2) ∧ (¬(sa2 = ma))))))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ sa2 sid s1 s2 c #i #j.
+  (sa2 = <sid, s2>) ∧
+  (Post( <sid, s1>, S(S(S('0'))), c ) @ #i) ∧
+  (Post( <sid, s2>, S(S(S('0'))), c ) @ #j)
+ ∧
+  (#i < #j) ∧
+  (¬(s1 = s2)) ∧
+  (((∃ sa2.1 sid.1 s1.1 s2.1 c.1 #i.1 #j.1.
+      (sa2.1 = <sid.1, s2.1>) ∧
+      (Post( <sid.1, s1.1>, S(S(S('0'))), c.1 ) @ #i.1) ∧
+      (Post( <sid.1, s2.1>, S(S(S('0'))), c.1 ) @ #j.1) ∧
+      (sa2.1 = sa2)
+     ∧
+      (#i.1 < #j.1) ∧ (¬(s1.1 = s2.1)) ∧ (¬(sa2 = sa2.1))) ∨
+    (∃ ma sid.1 m n c.1 #i.1 #j.1.
+      (ma = <sid.1, m>) ∧
+      (Post( <sid.1, m>, n, c.1 ) @ #i.1) ∧
+      (Post( <sid.1, m>, n, c.1 ) @ #j.1) ∧
+      (ma = sa2)
+     ∧
+      (¬(n = S(S(S('0'))))) ∧ (¬(#i.1 = #j.1)) ∧ (¬(sa2 = ma)))))"
+*/
+by sorry
+
+lemma duplicates_mixer_duplicate_min:
+  all-traces
+  "∀ ma sid m n c #i #j.
+    (((((ma = <sid, m>) ∧ (Post( <sid, m>, n, c ) @ #i)) ∧
+       (Post( <sid, m>, n, c ) @ #j)) ∧
+      (¬(n = S(S(S('0')))))) ∧
+     (¬(#i = #j))) ⇒
+    ((¬(∃ sa2 sid.1 s1 s2 c.1 #i.1 #j.1.
+         (((((sa2 = <sid.1, s2>) ∧
+             (Post( <sid.1, s1>, S(S(S('0'))), c.1 ) @ #i.1)) ∧
+            (Post( <sid.1, s2>, S(S(S('0'))), c.1 ) @ #j.1)) ∧
+           (#i.1 < #j.1)) ∧
+          (¬(s1 = s2))) ∧
+         ((sa2 = ma) ∧ (¬(ma = sa2))))) ∧
+     (¬(∃ ma.1 sid.1 m.1 n.1 c.1 #i.1 #j.1.
+         (((((ma.1 = <sid.1, m.1>) ∧ (Post( <sid.1, m.1>, n.1, c.1 ) @ #i.1)) ∧
+            (Post( <sid.1, m.1>, n.1, c.1 ) @ #j.1)) ∧
+           (¬(n.1 = S(S(S('0')))))) ∧
+          (¬(#i.1 = #j.1))) ∧
+         ((ma.1 = ma) ∧ (¬(ma = ma.1))))))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ ma sid m n c #i #j.
+  (ma = <sid, m>) ∧
+  (Post( <sid, m>, n, c ) @ #i) ∧
+  (Post( <sid, m>, n, c ) @ #j)
+ ∧
+  (¬(n = S(S(S('0'))))) ∧
+  (¬(#i = #j)) ∧
+  (((∃ sa2 sid.1 s1 s2 c.1 #i.1 #j.1.
+      (sa2 = <sid.1, s2>) ∧
+      (Post( <sid.1, s1>, S(S(S('0'))), c.1 ) @ #i.1) ∧
+      (Post( <sid.1, s2>, S(S(S('0'))), c.1 ) @ #j.1) ∧
+      (sa2 = ma)
+     ∧
+      (#i.1 < #j.1) ∧ (¬(s1 = s2)) ∧ (¬(ma = sa2))) ∨
+    (∃ ma.1 sid.1 m.1 n.1 c.1 #i.1 #j.1.
+      (ma.1 = <sid.1, m.1>) ∧
+      (Post( <sid.1, m.1>, n.1, c.1 ) @ #i.1) ∧
+      (Post( <sid.1, m.1>, n.1, c.1 ) @ #j.1) ∧
+      (ma.1 = ma)
+     ∧
+      (¬(n.1 = S(S(S('0'))))) ∧ (¬(#i.1 = #j.1)) ∧ (¬(ma = ma.1)))))"
+*/
+by sorry
+
+lemma duplicates_sender_duplicate_uniq:
+  all-traces
+  "∀ sa2 sid s1 s2 c #i #j.
+    (((((sa2 = <sid, s2>) ∧ (Post( <sid, s1>, S(S(S('0'))), c ) @ #i)) ∧
+       (Post( <sid, s2>, S(S(S('0'))), c ) @ #j)) ∧
+      (#i < #j)) ∧
+     (¬(s1 = s2))) ⇒
+    (∃ #i.1. Corrupted( sa2 ) @ #i.1)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ sa2 sid s1 s2 c #i #j.
+  (sa2 = <sid, s2>) ∧
+  (Post( <sid, s1>, S(S(S('0'))), c ) @ #i) ∧
+  (Post( <sid, s2>, S(S(S('0'))), c ) @ #j)
+ ∧
+  (#i < #j) ∧ (¬(s1 = s2)) ∧ (∀ #i.1. (Corrupted( sa2 ) @ #i.1) ⇒ ⊥)"
+*/
+by sorry
+
+lemma duplicates_mixer_duplicate_uniq:
+  all-traces
+  "∀ ma sid m n c #i #j.
+    (((((ma = <sid, m>) ∧ (Post( <sid, m>, n, c ) @ #i)) ∧
+       (Post( <sid, m>, n, c ) @ #j)) ∧
+      (¬(n = S(S(S('0')))))) ∧
+     (¬(#i = #j))) ⇒
+    (∃ #i.1. Corrupted( ma ) @ #i.1)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ ma sid m n c #i #j.
+  (ma = <sid, m>) ∧
+  (Post( <sid, m>, n, c ) @ #i) ∧
+  (Post( <sid, m>, n, c ) @ #j)
+ ∧
+  (¬(n = S(S(S('0'))))) ∧
+  (¬(#i = #j)) ∧
+  (∀ #i.1. (Corrupted( ma ) @ #i.1) ⇒ ⊥)"
+*/
+by sorry
+
+lemma duplicates_sender_duplicate_inj:
+  all-traces "⊤"
+/*
+guarded formula characterizing all counter-examples:
+"⊥"
+*/
+by sorry
+
+lemma duplicates_mixer_duplicate_inj:
+  all-traces "⊤"
+/*
+guarded formula characterizing all counter-examples:
+"⊥"
+*/
+by sorry
+
+lemma duplicates_sender_duplicate_single:
+  exists-trace
+  "∃ sa2 sid s1 s2 c #i #j.
+    ((((((sa2 = <sid, s2>) ∧ (Post( <sid, s1>, S(S(S('0'))), c ) @ #i)) ∧
+        (Post( <sid, s2>, S(S(S('0'))), c ) @ #j)) ∧
+       (#i < #j)) ∧
+      (¬(s1 = s2))) ∧
+     (∀ sa2.1 sid.1 s1.1 s2.1 c.1 #i.1 #j.1.
+       (((((sa2.1 = <sid.1, s2.1>) ∧
+           (Post( <sid.1, s1.1>, S(S(S('0'))), c.1 ) @ #i.1)) ∧
+          (Post( <sid.1, s2.1>, S(S(S('0'))), c.1 ) @ #j.1)) ∧
+         (#i.1 < #j.1)) ∧
+        (¬(s1.1 = s2.1))) ⇒
+       (sa2.1 = sa2))) ∧
+    (¬(∃ ma sid.1 m n c.1 #i.1 #j.1.
+        ((((ma = <sid.1, m>) ∧ (Post( <sid.1, m>, n, c.1 ) @ #i.1)) ∧
+          (Post( <sid.1, m>, n, c.1 ) @ #j.1)) ∧
+         (¬(n = S(S(S('0')))))) ∧
+        (¬(#i.1 = #j.1))))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ sa2 sid s1 s2 c #i #j.
+  (sa2 = <sid, s2>) ∧
+  (Post( <sid, s1>, S(S(S('0'))), c ) @ #i) ∧
+  (Post( <sid, s2>, S(S(S('0'))), c ) @ #j)
+ ∧
+  (#i < #j) ∧
+  (¬(s1 = s2)) ∧
+  (∀ sa2.1 sid.1 s1.1 s2.1 c.1 #i.1 #j.1.
+    (sa2.1 = <sid.1, s2.1>) ∧
+    (Post( <sid.1, s1.1>, S(S(S('0'))), c.1 ) @ #i.1) ∧
+    (Post( <sid.1, s2.1>, S(S(S('0'))), c.1 ) @ #j.1)
+   ⇒
+    ((¬(#i.1 < #j.1)) ∨ (s1.1 = s2.1) ∨ (sa2.1 = sa2))) ∧
+  (∀ ma sid.1 m n c.1 #i.1 #j.1.
+    (ma = <sid.1, m>) ∧
+    (Post( <sid.1, m>, n, c.1 ) @ #i.1) ∧
+    (Post( <sid.1, m>, n, c.1 ) @ #j.1)
+   ⇒
+    ((n = S(S(S('0')))) ∨ (#i.1 = #j.1)))"
+*/
+by sorry
+
+lemma duplicates_mixer_duplicate_single:
+  exists-trace
+  "∃ ma sid m n c #i #j.
+    ((((((ma = <sid, m>) ∧ (Post( <sid, m>, n, c ) @ #i)) ∧
+        (Post( <sid, m>, n, c ) @ #j)) ∧
+       (¬(n = S(S(S('0')))))) ∧
+      (¬(#i = #j))) ∧
+     (∀ ma.1 sid.1 m.1 n.1 c.1 #i.1 #j.1.
+       (((((ma.1 = <sid.1, m.1>) ∧ (Post( <sid.1, m.1>, n.1, c.1 ) @ #i.1)) ∧
+          (Post( <sid.1, m.1>, n.1, c.1 ) @ #j.1)) ∧
+         (¬(n.1 = S(S(S('0')))))) ∧
+        (¬(#i.1 = #j.1))) ⇒
+       (ma.1 = ma))) ∧
+    (¬(∃ sa2 sid.1 s1 s2 c.1 #i.1 #j.1.
+        ((((sa2 = <sid.1, s2>) ∧
+           (Post( <sid.1, s1>, S(S(S('0'))), c.1 ) @ #i.1)) ∧
+          (Post( <sid.1, s2>, S(S(S('0'))), c.1 ) @ #j.1)) ∧
+         (#i.1 < #j.1)) ∧
+        (¬(s1 = s2))))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ ma sid m n c #i #j.
+  (ma = <sid, m>) ∧
+  (Post( <sid, m>, n, c ) @ #i) ∧
+  (Post( <sid, m>, n, c ) @ #j)
+ ∧
+  (¬(n = S(S(S('0'))))) ∧
+  (¬(#i = #j)) ∧
+  (∀ ma.1 sid.1 m.1 n.1 c.1 #i.1 #j.1.
+    (ma.1 = <sid.1, m.1>) ∧
+    (Post( <sid.1, m.1>, n.1, c.1 ) @ #i.1) ∧
+    (Post( <sid.1, m.1>, n.1, c.1 ) @ #j.1)
+   ⇒
+    ((n.1 = S(S(S('0')))) ∨ (#i.1 = #j.1) ∨ (ma.1 = ma))) ∧
+  (∀ sa2 sid.1 s1 s2 c.1 #i.1 #j.1.
+    (sa2 = <sid.1, s2>) ∧
+    (Post( <sid.1, s1>, S(S(S('0'))), c.1 ) @ #i.1) ∧
+    (Post( <sid.1, s2>, S(S(S('0'))), c.1 ) @ #j.1)
+   ⇒
+    ((¬(#i.1 < #j.1)) ∨ (s1 = s2)))"
+*/
+by sorry
+
+predicate: Sender_duplicate( sa2 )<=>∃ sid s1 s2 c #i #j.
+ ((((sa2 = <sid, s2>) ∧ (Post( <sid, s1>, S(S(S('0'))), c ) @ #i)) ∧
+   (Post( <sid, s2>, S(S(S('0'))), c ) @ #j)) ∧
+  (#i < #j)) ∧
+ (¬(s1 = s2))
+
+predicate: Mixer_duplicate( ma )<=>∃ sid m n c #i #j.
+ ((((ma = <sid, m>) ∧ (Post( <sid, m>, n, c ) @ #i)) ∧
+   (Post( <sid, m>, n, c ) @ #j)) ∧
+  (¬(n = S(S(S('0')))))) ∧
+ (¬(#i = #j))
+
+
+
+end

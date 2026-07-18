@@ -1,0 +1,7 @@
+theory qr1 begin
+
+rule R1: [ In(x) ] --[ A(x) ]-> [ Out(x) ]
+
+lemma r1_forall_and: "All x #i. A(x)@i & A(x)@i"
+
+end

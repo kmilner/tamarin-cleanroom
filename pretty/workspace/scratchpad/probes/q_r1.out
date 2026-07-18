@@ -1,0 +1,28 @@
+theory qr1
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) R1:
+   [ In( x ) ] --[ A( x ) ]-> [ Out( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+lemma r1_forall_and:
+  all-traces "∀ x #i. (A( x ) @ #i) ∧ (A( x ) @ #i)"
+/*
+conversion to guarded formula failed:
+  universal quantifier without toplevel implication
+    "∀ x #i. (A( x ) @ #i) ∧ (A( x ) @ #i)"
+  in the formula
+    "∀ x #i. (A( x ) @ #i) ∧ (A( x ) @ #i)"
+*/
+by sorry
+
+
+
+end

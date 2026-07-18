@@ -1,0 +1,96 @@
+theory qs1
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) R1:
+   [ In( x ), Fr( ~n ) ] --[ A( x ), B( x, x ) ]-> [ Out( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+restriction s1_eq:
+  "∀ x #i. (A( x ) @ #i) ⇒ (x = 'c')"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #i. (A( x ) @ #i) ⇒ (x = 'c')"
+  */
+
+restriction s2_less:
+  "∀ x #i #j. ((A( x ) @ #i) ∧ (B( x, x ) @ #j)) ⇒ (#i < #j)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #i #j. ((A( x ) @ #i) ∧ (B( x, x ) @ #j)) ⇒ (#i < #j)"
+  */
+
+restriction s3_noteq:
+  "∀ x #i. (A( x ) @ #i) ⇒ (¬(x = 'c'))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #i. (A( x ) @ #i) ⇒ (¬(x = 'c'))"
+  */
+
+restriction s4_oreq:
+  "∀ x #i. (A( x ) @ #i) ⇒ ((x = 'c') ∨ (x = 'd'))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #i. (A( x ) @ #i) ⇒ ((x = 'c') ∨ (x = 'd'))"
+  */
+
+restriction s5_exmsg:
+  "∀ x #i. (A( x ) @ #i) ⇒ (∃ y. x = <y, y>)"
+
+  /*
+  expanded formula:
+  "∀ x #i. (A( x ) @ #i) ⇒ (∃ y. x = <y, y>)"
+  */
+
+restriction s6_nestall:
+  "∀ x #i. (A( x ) @ #i) ⇒ (∀ y #j. (B( x, y ) @ #j) ⇒ (x = y))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #i. (A( x ) @ #i) ⇒ (∀ y #j. (B( x, y ) @ #j) ⇒ (x = y))"
+  */
+
+restriction s7_expast:
+  "∀ x #i. (A( x ) @ #i) ⇒ (∃ #j. (B( x, x ) @ #j) ∧ (#j < #i))"
+
+  /*
+  expanded formula:
+  "∀ x #i. (A( x ) @ #i) ⇒ (∃ #j. (B( x, x ) @ #j) ∧ (#j < #i))"
+  */
+
+restriction s8_notex:
+  "∀ x #i. (A( x ) @ #i) ⇒ (¬(∃ #j. B( x, x ) @ #j))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #i. (A( x ) @ #i) ⇒ (¬(∃ #j. B( x, x ) @ #j))"
+  */
+
+restriction s9_teq:
+  "∀ x #i #j. ((A( x ) @ #i) ∧ (A( x ) @ #j)) ⇒ (#i = #j)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #i #j. ((A( x ) @ #i) ∧ (A( x ) @ #j)) ⇒ (#i = #j)"
+  */
+
+
+
+end

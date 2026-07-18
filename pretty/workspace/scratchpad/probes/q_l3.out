@@ -1,0 +1,46 @@
+theory ql3
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) R1:
+   [ In( x ) ]
+  --[ A( x ), LongActionFactName( x, x, x, x ), B( x, x ) ]->
+   [ Out( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+lemma fw1:
+  all-traces
+  "∀ zlongvariablename01 zlongvariablename02 zlongvariablename03
+     zlongvariablename04 #i.
+    (LongActionFactName( zlongvariablename01, zlongvariablename02,
+                         zlongvariablename03, zlongvariablename04
+     ) @ #i) ⇒
+    (⊤)"
+/*
+guarded formula characterizing all counter-examples:
+"⊥"
+*/
+by sorry
+
+lemma fw2:
+  all-traces
+  "∀ z01 z02 #i.
+    (LongActionFactName( z01, z02,
+                         <z01, z02, z01, z02, z01, z02, z01, z02, z01, z02, z01, z02, z01>, z01
+     ) @ #i) ⇒
+    (⊤)"
+/*
+guarded formula characterizing all counter-examples:
+"⊥"
+*/
+by sorry
+
+
+
+end

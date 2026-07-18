@@ -1,0 +1,14 @@
+theory qla1 begin
+
+rule R1: [ In(x) ] --[ A(x), B(x,x) ]-> [ Out(x) ]
+
+lemma la1 [sources]: "All x #i. A(x)@i ==> Ex #j. B(x,x)@j"
+
+lemma la2 [hide_lemma=la1]: "All x #i. A(x)@i ==> Ex #j. B(x,x)@j"
+
+lemma la3 [reuse, sources]: "All x #i. A(x)@i ==> Ex #j. B(x,x)@j"
+
+lemma la4 [hide_lemma=la1, use_induction, hide_lemma=la3, reuse]:
+  "All x #i. A(x)@i ==> Ex #j. B(x,x)@j"
+
+end

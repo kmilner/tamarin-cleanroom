@@ -1,4 +1,4 @@
-# BEHAVIOR.md — inferred behavioral spec of the theory echo (R1: term core + signature block; R2: rule blocks)
+# BEHAVIOR.md — inferred behavioral spec of the theory echo (R1: term core + signature block; R2: rule blocks; R3: restriction/lemma formulas)
 
 Every claim traces to a logged oracle probe (QUERIES.log) or a pre-materialized
 round-1 capture (`round1/targets/*.hs.txt` — itself oracle output). Notation:
@@ -214,10 +214,18 @@ Composite shapes:
   the AC rule variants normalize (g^x)^y to `'g'^(~x*~y)`).
   The parens are intrinsic: they appear in every context (function argument
   `inv((~x.7*x.11))` — target:cav13 variants; fact argument `Out( (~x⊕~y) )`).
-  Layout on overflow: `"(" <> fcat (punctuate op elems) <> ")"` — break
-  between elements with the operator attached to the preceding element and no
-  fill space (probe:t_uniwide: line ends `…aaaaaaaaaaaaaaaaa3++`,
-  continuation aligned after the `(`).
+  Layout on overflow: the SAME single-fill construction as tuples, with the
+  delimiters as fill items —
+  `fcat ('(' : map (nest 1) (punctuate op elems) ++ [')'])`:
+  break between elements with the operator attached to the preceding element
+  and no fill space, continuation at (column of `(`) + 1 (probe:t_uniwide:
+  line ends `…aaaaaaaaaaaaaaaaa3++`), and the `)` drops to its OWN line at
+  the column of `(` when it does not fit beside the last element
+  (round-3 target:alethea Universal_VerProofV_v1 — the union keeps both wide
+  tuple elements on one 71-column fill line and only `)))"` drops). The
+  earlier R1 law (`"(" <> fcat … <> ")"`, `)` always attached) agreed with
+  the true construction on every R1-observed shape but was falsified by the
+  alethea witness.
 * diff: `diff(x, y)` — application form (probe:t_diff, run with --diff).
 * mult inside exp exponent: `x.10^(x.11*inv(x.12))` (target:cav13) — normal
   AC-paren rule, no extra exp parens.
@@ -334,6 +342,139 @@ rule (modulo E) Name[attrs]:
   by the round-2 curated set; a later round must pin them before diff-file
   parity is claimed.
 
+## Formula rendering (R3)
+
+Curated byte targets: round3/targets/*.hs.txt (20 corpus files; 84
+restriction + 139 lemma blocks, every block byte-verified by
+tests/round3_formulas.rs round-trip parity).
+
+### Glyphs and atoms
+
+| construct | rendered | provenance |
+|---|---|---|
+| true / false | `⊤` / `⊥` | probe:q_w1 |
+| conjunction / disjunction | `∧` / `∨` | probe:q_at1, q_p2 |
+| implication / iff | `⇒` / `⇔` | probe:q_p2, q_r2 |
+| negation | `¬(…)` — argument ALWAYS parenthesized | probe:q_p2 s8 |
+| quantifiers | `∀` / `∃` | everywhere |
+| action atom | `Fact( … ) @ tp` — spaces around `@` | probe:q_at1 |
+| temporal/nat order | `t1 < t2` | probe:q_at1 |
+| equality | `t1 = t2` | probe:q_at1 |
+| subterm | `t1 ⊏ t2` (source `<<` and `⊏` both echo `⊏`) | probe:q_at1, target:NumberSubtermTests |
+| last | `last(tp)` — NO interior spaces (unlike facts) | probe:q_at1 |
+
+Terms inside atoms render through the R1 term core unchanged (probe:q_l4 —
+pair trailing-`", "` wrap, AC self-parens); action facts through the R2 fact
+construction unchanged, `!` prefix included (target:NSLPK3 `!KU( ni ) @ #j`,
+probe:q_l3).
+
+### Parenthesization
+
+* EVERY operand of a binary connective (∧ ∨ ⇒ ⇔) is wrapped in `(…)`,
+  whatever it is — atom, ⊤/⊥, ¬, quantifier, another connective
+  (probe:q_p2 s1–s13; targets NSLPK3/Cronto/acc).
+* `¬`'s argument is always wrapped (double wrap when ¬ is itself an
+  operand: `(¬(x = 'd'))`).
+* Quantifier BODIES and the top level are bare (probe:q_p2, q_w1).
+* Chains render their source association faithfully — `a | b | c` parses
+  left-nested upstream and echoes `((a) ∨ (b)) ∨ (c)`; no flattening,
+  no re-association (probe:q_at1, probe:q_p2 s3–s6).
+
+### Layout
+
+* Binary connective = `sep [lhs-operand <+> glyph, rhs-operand]`: one line
+  `(A) ∧ (B)` when it fits; otherwise the glyph stays on the lhs' LAST line
+  and the rhs drops to the group origin (targets NSLPK3 types /
+  Yubikey slightly_weaker_invariant / Cronto notSameRole deep left chain).
+* Quantifier = `sep [glyph<>" "<>fsep binders<>".", nest 1 body]`:
+  - binders are space-separated in source order with their R1 sigils and
+    `.idx` suffixes (`∀ x.1 a.1 #i.1.` — probe:q_b1, target:acc lemmas);
+  - the binder fill wraps aligned after `"∀ "` (origin+2 — probe:q_l2 bw1);
+  - the `.` attaches to the last binder;
+  - the body sits beside after one space, or drops to (quantifier origin+1)
+    — the nest 1 (probe:q_l2 bw1/bw2; paren-nested `(((∃ #j.` → body at
+    paren col + 2 confirms the same nest at depth).
+* Relation atoms (`=` `<` `⊏`) = `sep [lhs-term <+> glyph, rhs-term]`: glyph
+  attached to the lhs line, rhs drops to the atom origin (probe:q_l4 tw1–3).
+* Action atom = `hsep [fact, "@", timepoint]`: `@ tp` NEVER drops alone —
+  at overflow the FACT breaks internally (its `)` drops to the fact column,
+  `@ tp` beside it: `) @ #i` — probe:q_l5 m63/m64 pins hsep over the
+  sep-alternative, which would have kept `fact ) @` on one line).
+* One-line fits follow the engine at 110/73 with the ribbon measured from
+  the nest; the closing quote/parens attached after a formula count against
+  its last line's fit (probe:q_l5 — 73-content + `"` broke).
+
+## Restriction blocks (R3)
+
+```
+restriction Name:
+  "formula"                (nest 2; quotes attach directly around the doc)
+  // safety formula        (col 2 — iff the formula classifies safety)
+<blank>
+  /*                       (comment at nest 2)
+  expanded formula:
+  "formula"
+  */
+```
+
+* The `axiom` keyword echoes as `restriction` with the identical wrapper
+  (probe:q_ax1, target:Cronto_EA).
+* The expanded-formula comment content is byte-identical to the statement in
+  every observation: predicate expansion happens UPSTREAM of both renderings
+  (probe:q_pred1 — an MSR restriction through a predicate shows the
+  expansion in BOTH spots; sapic corpus files agree). Rendered as the same
+  formula twice.
+* Safety classification (pinned by probes q_s1/q_s2 + q_w1 + 84-block corpus
+  parity): a formula is safety iff its negation-normal form contains NO
+  existential quantifier, msg-sort and temporal alike. Every ⇒-antecedent
+  flips polarity; `¬∃` in a conclusion (∀ in NNF) keeps safety, `¬∃` in an
+  antecedent (∃ in NNF) defeats it; a non-temporal `∃ y.` conclusion defeats
+  it; top-level `¬(∃ …)` restrictions are safety (target:Yubikey).
+* Sort-order of the comment lines: statement, safety line, blank, comment —
+  the safety line sits BETWEEN the formula and the blank (probe:q_w1 r_eq).
+
+## Lemma blocks (R3)
+
+```
+lemma Name [attr1, attr2]:
+  all-traces|exists-trace "formula"    (sep at nest 2 — one line iff it fits)
+/*                                     (comment at col 0)
+guarded formula characterizing all counter-examples:      (| all satisfying traces:)
+"<guarded block>"                      (opaque input, verbatim lines)
+*/
+by sorry                               (| the embedded proof, verbatim)
+```
+
+* Header: `lemma Name:`; with attributes `lemma Name [` + fill + `]:` — a
+  SPACE before `[` (unlike rule attributes), items comma+space separated,
+  fill-wrapped aligned after the `[` with `]:` attached to the last item;
+  the first item stays beside the `[` even past the width (target:5G_AKA
+  weakagreement_… at 120 display columns).
+* Attributes render in SOURCE order, duplicates kept — NO canonicalization
+  (probe:q_la1 `[hide_lemma=la1, use_induction, hide_lemma=la3, reuse]`).
+  Spellings: `sources`, `reuse`, `use_induction`, `hide_lemma=<name>`,
+  `heuristic=<value>` with the goal-ranking value verbatim (`S`, `{mytac}` —
+  probes q_la2/q_la3; corpus `{sqn}` etc.).
+* The trace-quantifier keyword is ALWAYS on the statement line, never the
+  header line, even for `"⊤"` (probe:q_w1 l_top).
+* Guarded comment at col 0, directly after the statement (no blank line):
+  header `guarded formula characterizing all counter-examples:` for
+  all-traces, `… all satisfying traces:` for exists-trace (probe:q_w1). The
+  quoted content is OPAQUE pre-computed input (the ported guarded transform's
+  rendering — note its style differs from the statement printer: n-ary ∧
+  rows, lone `∧`/`⇒` lines, parenthesized ∃-body atoms; never produced by
+  this crate).
+* Failed conversion variant (probe:q_r1): header
+  `conversion to guarded formula failed:` followed by the transform's error
+  text with every line indented +2 (the raw error spelling, observed
+  unindented in the fatal-restriction case, gains exactly 2 columns here).
+* Tail: `by sorry` at col 0 when the source had no proof; a source-embedded
+  proof re-renders after the `*/` instead (target:Yubikey `induction … qed`)
+  — that proof text is PORTED-renderer output, carried verbatim as input.
+* Restrictions outside the guarded fragment are a FATAL load error
+  (probe:q_p1 raw), so the restriction renderer never sees them; lemmas
+  outside it load fine and take the failed-conversion comment (probe:q_r1).
+
 ## UNOBSERVABLE (recorded per protocol, not guessed as pinned behavior)
 
 * PatMatch (`=x` pattern-match marker, sapic): cannot be forced through the
@@ -344,13 +485,42 @@ rule (modulo E) Name[attrs]:
   equivalent sigil.
 * exp/mult element-level break choice: wide mult probes exceed the
   variant-computation budget (probe:t_mult timed out; 4-way
-  probe:t_xorwide too). Union (probe:t_uniwide) and Xor (probe:t_xorwide3,
-  3-way with long names: break after `⊕` attached to the preceding element,
-  continuation after the `(`) pin the fcat construction directly;
-  Mult/NatPlus/exp-chains use the same construction by structural analogy —
-  flagged, to be confirmed by the full-corpus gate at integration.
+  probe:t_xorwide too). Union (probe:t_uniwide, round-3 target:alethea `)`
+  drop) and Xor (probe:t_xorwide3, 3-way with long names: break after `⊕`
+  attached to the preceding element, continuation after the `(`) pin the
+  fill construction directly; Mult/NatPlus/exp-chains use the same
+  construction by structural analogy — flagged, to be confirmed by the
+  full-corpus gate at integration.
 * reliable-channel builtin: requires a sapic top-level process (tool refuses
   otherwise — probe:b_reliable-channel raw); its signature contribution is
   unpinned in R1.
 * Adapter contract notes: `NatLit`/`Number` carry DIGITS (renderer prefixes
   `%`); `NumberOne` is the DH `one`; `NatOne` is `%1`.
+* Atom::LessMset (multiset smaller): no corpus witness and no reachable
+  source spelling found (`(<)` absent from the whole corpus); rendered like
+  `Less` as a flagged placeholder — must be pinned before any claim.
+* Atom::Pred (predicate fact atoms): predicates are expanded upstream of the
+  echo in BOTH the restriction statement and the expanded-formula comment
+  (probe:q_pred1) and in sapic lemmas (corpus timepoints.spthy), so a Pred
+  atom never reaches the no-prove renderer; rendered as a bare fact,
+  flagged.
+* Diff-mode surfaces (`--diff`): diffLemma items, lemma/restriction
+  `left`/`right` attributes, `diff_reuse`. The parity corpus EXCLUDES all
+  --diff files (RS cannot load them), so these never reach the gate; not
+  modeled in the crate AST. A later round must pin them before any
+  diff-file parity is claimed.
+* Lemma modulo annotation (`lemma (modulo E) …`): never appears in any
+  round-3 capture (grep across all 20); not modeled.
+* Lemma attributes beyond the observed five (`output=…`, `Hint`, prover
+  internals): no corpus/probe witness under the no-prove echo; not modeled.
+* Fact annotations (`[+]`/`[-]`/`[no_precomp]`) on ACTION atoms inside
+  formulas: never observed in any formula echo; the test parser rejects
+  them loudly if they ever appear.
+* ⇔ inside a safety-relevant restriction: no witness (⇔ restrictions are
+  rare-to-absent in the corpus); the classifier treats each ⇔ side as
+  occurring in both polarities (the NNF-consistent reading), flagged.
+* Guarded-formula content and embedded proof scripts are PORTED-renderer
+  output consumed verbatim as input — their interior layout is not a claim
+  of this crate (only the comment frame and headers are).
+* Restrictions whose formula falls outside the guarded fragment: fatal
+  upstream error (probe:q_p1), unreachable for the renderer.

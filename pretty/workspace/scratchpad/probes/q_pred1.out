@@ -1,0 +1,36 @@
+theory qpred1
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+predicate: Pdouble( x, y )<=>x = y
+
+rule (modulo E) R1:
+   [ In( x ) ] --[ A( x ), B( x, x ) ]-> [ Out( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+restriction pr1:
+  "∀ x y #i. (B( x, y ) @ #i) ⇒ (x = y)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x y #i. (B( x, y ) @ #i) ⇒ (x = y)"
+  */
+
+lemma pl1:
+  all-traces "∀ x y #i. (B( x, y ) @ #i) ⇒ (x = y)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x y #i. (B( x, y ) @ #i) ∧ ¬(x = y)"
+*/
+by sorry
+
+
+
+end

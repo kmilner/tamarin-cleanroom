@@ -1,0 +1,15 @@
+theory qat1 begin
+
+rule R1: [ In(x), Fr(~n) ] --[ A(x), B(x,x), N(~n), D(x) ]-> [ Out(x) ]
+
+lemma at_less: "All x #i #j. A(x)@i & B(x,x)@j ==> #i < #j | #j < #i | #i = #j"
+
+lemma at_eqmsg: "All x y #i. B(x,y)@i ==> x = y"
+
+lemma at_last [use_induction]: "All x #i. A(x)@i ==> last(#i)"
+
+lemma at_sub: "All x #i. A(x)@i ==> x << <x, x>"
+
+lemma at_fr: "All n #i. N(n)@i ==> Ex #j. D(n)@j"
+
+end

@@ -4,13 +4,10 @@
 //! the R1–R4 sub-target decomposition, and workspace/BEHAVIOR.md for the
 //! inferred behavioral spec you build up as you probe the oracle.
 //!
-//! SCAFFOLD ONLY. Every render entry point below is an UNIMPLEMENTED stub so
-//! the crate compiles and the test harness runs (and fails meaningfully) from
-//! day one. Fill in bodies one sub-target at a time, gating each against
-//! `scripts/pretty_gate.sh` with an ALLOWLIST (see round1/).
-//!
-//! Recommended order: R1 (term + signature) → R2 (rules) → R3 (formula /
-//! lemma / restriction) → R4 (macros / predicates).
+//! Implemented sub-targets: R1 (term core + signature block), R2 (rule
+//! blocks + macros surface), R3 (restriction / lemma / formula blocks).
+//! Still stubs: R4 predicates block and the top-level theory assembly
+//! (`theory::render`).
 
 pub mod ast;
 pub mod doc; // BSD HughesPJ Doc engine — reuse graphdot's clean-room port.
@@ -54,4 +51,21 @@ pub fn render_rule(r: &ast::Rule, variants: Option<&ast::AcVariants>) -> String 
 /// R2: one fact (`!Name( a, b )[+]`). See `rule::render_fact`.
 pub fn render_fact(f: &ast::Fact) -> String {
     rule::render_fact(f)
+}
+
+/// R3: one trace formula in top-level (bare) position. See `formula::render`.
+pub fn render_formula(f: &ast::Formula) -> String {
+    formula::render(f)
+}
+
+/// R3: one whole restriction block (statement, conditional safety comment,
+/// expanded-formula comment). See `lemma::render_restriction`.
+pub fn render_restriction(r: &ast::Restriction) -> String {
+    lemma::render_restriction(r)
+}
+
+/// R3: one whole lemma block (header, statement, guarded-formula comment,
+/// proof tail). See `lemma::render_lemma`.
+pub fn render_lemma(l: &ast::Lemma, guarded: Option<&ast::Guarded>) -> String {
+    lemma::render_lemma(l, guarded)
 }

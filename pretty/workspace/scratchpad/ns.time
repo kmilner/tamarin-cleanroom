@@ -1,0 +1,1 @@
+"$O" $EX/post17/needham_schroeder_symmetric_cbc.spthy > ns.echo 2>&1  2.60s user 0.39s system 394% cpu 0.758 total

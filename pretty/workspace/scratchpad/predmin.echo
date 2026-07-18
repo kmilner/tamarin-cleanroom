@@ -1,0 +1,31 @@
+theory function_application
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: eq/2, fst/1, pair/2, snd/1, true/0
+equations: eq(x, x) = x, fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+predicate: True( x )<=>x = true
+
+restriction Restr_A_1:
+  "∀ x #NOW. (Restr_A_1( x ) @ #NOW) ⇒ (x = true)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #NOW. (Restr_A_1( x ) @ #NOW) ⇒ (x = true)"
+  */
+
+rule (modulo E) A:
+   [ In( x ) ] --[ Restr_A_1( eq(x, x) ) ]-> [ ]
+
+  /*
+  rule (modulo AC) A:
+     [ In( x ) ] --[ Restr_A_1( x ) ]-> [ ]
+  */
+
+
+
+end

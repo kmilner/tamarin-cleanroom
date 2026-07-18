@@ -1,0 +1,23 @@
+theory qs1 begin
+
+rule R1: [ In(x), Fr(~n) ] --[ A(x), B(x,x) ]-> [ Out(x) ]
+
+restriction s1_eq: "All x #i. A(x)@i ==> x = 'c'"
+
+restriction s2_less: "All x #i #j. A(x)@i & B(x,x)@j ==> #i < #j"
+
+restriction s3_noteq: "All x #i. A(x)@i ==> not(x = 'c')"
+
+restriction s4_oreq: "All x #i. A(x)@i ==> (x = 'c' | x = 'd')"
+
+restriction s5_exmsg: "All x #i. A(x)@i ==> (Ex y. x = <y, y>)"
+
+restriction s6_nestall: "All x #i. A(x)@i ==> (All y #j. B(x,y)@j ==> x = y)"
+
+restriction s7_expast: "All x #i. A(x)@i ==> (Ex #j. B(x,x)@j & #j < #i)"
+
+restriction s8_notex: "All x #i. A(x)@i ==> not(Ex #j. B(x,x)@j)"
+
+restriction s9_teq: "All x #i #j. A(x)@i & A(x)@j ==> #i = #j"
+
+end

@@ -1,0 +1,213 @@
+theory HPagree
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: adec/2, aenc/2, decp/2, encp/3, fst/1, h/1, pair/2, pk/1,
+           sg/2, snd/1, ver/2, verzkp/4, zkp/3
+equations:
+    adec(aenc(x.1, pk(x.2)), x.2) = x.1,
+    decp(encp(x, r, pk(sk)), sk) = x,
+    fst(<x.1, x.2>) = x.1,
+    snd(<x.1, x.2>) = x.2,
+    ver(sg(m, sk), pk(sk)) = m
+
+rule (modulo E) H_Fresh:
+   [ Fr( ~x ) ]
+  --[ Fresh( $H, $t, ~x ), HK_event( $H, $t, ~x ), Untrained( $H ) ]->
+   [ !HK( $H, $t, ~x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_Send_I:
+   [ !HK( $H, $t, x ) ]
+  --[ Send( $H, $A, <$t, x> ), Untrained( $H ) ]->
+   [ Out( <$t, x> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_Receive_I:
+   [ In( <$t, x> ) ]
+  --[ Receive( $A, $H, <$t, x> ), HK_event( $H, $t, x ), Untrained( $H )
+  ]->
+   [ !HK( $H, $t, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_Send_S:
+   [ !HK( $H, $t, x ) ]
+  --[ Send( $H, $A, <$t, x> ), To( $A ), Untrained( $H ) ]->
+   [ Out_S( $H, $A, <$t, x> ) ]
+
+  // loop breaker: [0]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_Receive_S:
+   [ In_S( $A, $H, <$t, x> ) ]
+  --[
+  Receive( $A, $H, <$t, x> ), From( $A ), HK_event( $H, $t, x ),
+  Untrained( $H )
+  ]->
+   [ !HK( $H, $t, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_Receive_A:
+   [ In_A( $A, <$t, x> ) ]
+  --[
+  Receive( $A, $H, <$t, x> ), From( $A ), HK_event( $H, $t, x ),
+  Untrained( $H )
+  ]->
+   [ !HK( $H, $t, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_Claim:
+   [ ] --[ Claim( $H, $goal ), Untrained( $H ) ]-> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanOut_S:
+   [ Out_S( $A, $B, x ) ]
+  --[ ChanOut_S( $A, $B, x ) ]->
+   [ !Sec( $A, $B, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanIn_S:
+   [ !Sec( $A, $B, x ) ] --[ ChanIn_S( $A, $B, x ) ]-> [ In_S( $A, $B, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanOut_A:
+   [ Out_A( $A, x ) ]
+  --[ ChanOut_A( $A, x ) ]->
+   [ !Auth( $A, x ), Out( <$A, x> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanIn_A:
+   [ !Auth( $A, x ) ] --[ ChanIn_A( $A, x ) ]-> [ In_A( $A, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) publickeyinfrastructure:
+   [ Fr( ~skX ) ]
+  --[ LongtermKey( $X, ~skX ) ]->
+   [ !Ltk( $X, ~skX ), !Pk( $X, pk(~skX) ), Out( pk(~skX) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Setup:
+   [ Fr( ~m ) ]
+  --[
+  Setup( ), Human( $H ), Goal( $H, 'running', <<'P', 'm'>, $P, ~m> ),
+  HK_event( $H, 'P', $P ), HK_event( $H, 'm', ~m ), InitK( $H, 'P', $P ),
+  InitK( $H, 'm', ~m ), NoOverwrite( $H, 'm' ),
+  DoClaimBeforeSend( $H, 'm' )
+  ]->
+   [
+   AgSt_H0( $H, <$P, ~m> ), AgSt_P( $P, $H ), !HK( $H, 'P', $P ),
+   !HK( $H, 'm', ~m )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_1:
+   [ AgSt_H0( $H, <$P, ~m> ) ]
+  --[
+  Infallible( $H ), Send( $H, $P, <'m', ~m> ), To( $P ),
+  Claim( $H, 'running' )
+  ]->
+   [ Out_S( $H, $P, <'m', ~m> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) P_1:
+   [ AgSt_P( $P, $H ), In_S( $H, $P, <'m', m> ) ]
+  --[ Commit( $P, $H, m ) ]->
+   [ ]
+
+  /* has exactly the trivial AC variant */
+
+restriction UntrainedOnlyHuman:
+  "∀ H #i. (Untrained( H ) @ #i) ⇒ (∃ #j. (Human( H ) @ #j) ∧ (#j < #i))"
+
+  /*
+  expanded formula:
+  "∀ H #i. (Untrained( H ) @ #i) ⇒ (∃ #j. (Human( H ) @ #j) ∧ (#j < #i))"
+  */
+
+restriction NoSecureChannelHumanToHuman:
+  "∀ H1 H2 x #i #j1 #j2.
+    (((ChanOut_S( H1, H2, x ) @ #i) ∧ (Untrained( H1 ) @ #j1)) ∧
+     (Untrained( H2 ) @ #j2)) ⇒
+    (⊥)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ H1 H2 x #i #j1 #j2.
+    (((ChanOut_S( H1, H2, x ) @ #i) ∧ (Untrained( H1 ) @ #j1)) ∧
+     (Untrained( H2 ) @ #j2)) ⇒
+    (⊥)"
+  */
+
+lemma functional:
+  exists-trace
+  "∃ P m #i #j #k #l.
+    ((((Goal( 'H1', 'running', <<'P', 'm'>, P, m> ) @ #i) ∧
+       (Send( 'H1', P, <'m', m> ) @ #j)) ∧
+      (To( P ) @ #j)) ∧
+     (Commit( P, 'H1', m ) @ #k)) ∧
+    (Claim( 'H1', 'running' ) @ #l)"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ P m #i #j #k #l.
+  (Goal( 'H1', 'running', <<'P', 'm'>, P, m> ) @ #i) ∧
+  (Send( 'H1', P, <'m', m> ) @ #j) ∧
+  (To( P ) @ #j) ∧
+  (Commit( P, 'H1', m ) @ #k) ∧
+  (Claim( 'H1', 'running' ) @ #l)"
+*/
+by sorry
+
+lemma agree_HE:
+  all-traces
+  "∀ P m #i.
+    (Commit( P, 'H1', m ) @ #i) ⇒
+    (∃ #s #j.
+      ((Goal( 'H1', 'running', <<'P', 'm'>, P, m> ) @ #s) ∧
+       (Claim( 'H1', 'running' ) @ #j)) ∧
+      (#j < #i))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ P m #i.
+  (Commit( P, 'H1', m ) @ #i)
+ ∧
+  ∀ #s #j.
+   (Goal( 'H1', 'running', <<'P', 'm'>, P, m> ) @ #s) ∧
+   (Claim( 'H1', 'running' ) @ #j)
+  ⇒
+   ¬(#j < #i)"
+*/
+by sorry
+
+lemma agree_HE2:
+  all-traces
+  "∀ P m #i.
+    (Commit( P, 'H1', m ) @ #i) ⇒
+    (∃ #s. Goal( 'H1', 'running', <<'P', 'm'>, P, m> ) @ #s)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ P m #i.
+  (Commit( P, 'H1', m ) @ #i)
+ ∧
+  ∀ #s. (Goal( 'H1', 'running', <<'P', 'm'>, P, m> ) @ #s) ⇒ ⊥"
+*/
+by sorry
+
+
+
+end

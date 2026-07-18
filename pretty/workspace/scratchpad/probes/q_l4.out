@@ -1,0 +1,70 @@
+theory ql4
+
+begin
+
+// Function signature and definition of the equational theory E
+
+builtins: multiset
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) R1:
+   [ In( x ) ] --[ A( x ), E( x, x, x, x ), B( x, x ) ]-> [ Out( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+lemma tw1:
+  all-traces
+  "∀ a b c #i.
+    (E( a, b, c, c ) @ #i) ⇒
+    (a =
+     <b, c, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', b, 
+      c, b, c>)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a b c #i.
+  (E( a, b, c, c ) @ #i)
+ ∧
+  ¬(a =
+    <b, c, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', b, 
+     c, b, c>)"
+*/
+by sorry
+
+lemma tw2:
+  all-traces
+  "∀ a b c #i.
+    (E( a, b, c, c ) @ #i) ⇒
+    (<a, b, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'> ⊏
+     <b, c, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', b, c
+     >)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a b c #i.
+  (E( a, b, c, c ) @ #i)
+ ∧
+  ¬(<a, b, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'> ⊏
+    <b, c, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', b, c
+    >)"
+*/
+by sorry
+
+lemma tw3:
+  all-traces
+  "∀ a b c #i.
+    (E( a, b, c, c ) @ #i) ⇒
+    (('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'++a++b) =
+     ('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'++b++c))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a b c #i.
+  (E( a, b, c, c ) @ #i)
+ ∧
+  ¬(('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'++a++b) =
+    ('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'++b++c))"
+*/
+by sorry
+
+
+
+end

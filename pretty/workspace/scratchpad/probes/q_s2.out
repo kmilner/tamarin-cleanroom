@@ -1,0 +1,63 @@
+theory qs2
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) R1:
+   [ In( x ), Fr( ~n ) ] --[ A( x ), B( x, x ) ]-> [ Out( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+restriction u1_allconc:
+  "∀ x #i. (A( x ) @ #i) ⇒ (∀ #j. (B( x, x ) @ #j) ⇒ (#j < #i))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #i. (A( x ) @ #i) ⇒ (∀ #j. (B( x, x ) @ #j) ⇒ (#j < #i))"
+  */
+
+restriction u2_top:
+  "∀ x #i. (A( x ) @ #i) ⇒ (⊤)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #i. (A( x ) @ #i) ⇒ (⊤)"
+  */
+
+restriction u3_sub:
+  "∀ x #i. (A( x ) @ #i) ⇒ (x ⊏ <x, x>)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #i. (A( x ) @ #i) ⇒ (x ⊏ <x, x>)"
+  */
+
+restriction u4_exguard_neg:
+  "∀ x #i.
+    ((A( x ) @ #i) ∧ (¬(∃ #j. (B( x, x ) @ #j) ∧ (#j < #i)))) ⇒ (x = 'c')"
+
+  /*
+  expanded formula:
+  "∀ x #i.
+    ((A( x ) @ #i) ∧ (¬(∃ #j. (B( x, x ) @ #j) ∧ (#j < #i)))) ⇒ (x = 'c')"
+  */
+
+restriction u5_last:
+  "∀ x #i. (A( x ) @ #i) ⇒ (last(#i))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #i. (A( x ) @ #i) ⇒ (last(#i))"
+  */
+
+
+
+end

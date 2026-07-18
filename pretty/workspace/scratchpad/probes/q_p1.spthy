@@ -1,0 +1,35 @@
+theory qp1 begin
+
+rule R1: [ In(x) ] --[ A(x), B(x,x), C() ]-> [ Out(x) ]
+
+restriction c1_and_rchain: "All x #i #j #k. A(x)@i & (B(x,x)@j & C()@k)"
+
+restriction c2_and_lchain: "All x #i #j #k. (A(x)@i & B(x,x)@j) & C()@k"
+
+restriction c3_or_of_and: "All x #i #j #k. (A(x)@i & B(x,x)@j) | C()@k"
+
+restriction c4_and_of_or: "All x #i #j #k. A(x)@i & (B(x,x)@j | C()@k)"
+
+restriction c5_imp_rchain: "All x #i #j #k. A(x)@i ==> (B(x,x)@j ==> C()@k)"
+
+restriction c6_imp_lchain: "All x #i #j #k. (A(x)@i ==> B(x,x)@j) ==> C()@k"
+
+restriction c7_notnot: "All x #i. not(not(A(x)@i))"
+
+restriction c8_not_and: "All x #i #j. not(A(x)@i & B(x,x)@j)"
+
+restriction c9_and_not: "All x #i #j. A(x)@i & not(B(x,x)@j)"
+
+restriction c10_top_and: "All x #i. A(x)@i & T"
+
+restriction c11_bot_or: "All x #i. A(x)@i | F"
+
+restriction c12_not_top: "All x #i. A(x)@i & not(T)"
+
+restriction c13_q_in_and: "All x #i. (Ex #j. B(x,x)@j) & A(x)@i"
+
+restriction c14_q_nested: "All x #i. All y #j. B(x,y)@j ==> A(x)@i"
+
+restriction c15_q_body_q: "All x #i. Ex #j. Ex #k. B(x,x)@j & C()@k & A(x)@i"
+
+end

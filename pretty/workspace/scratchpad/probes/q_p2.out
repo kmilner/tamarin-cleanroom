@@ -1,0 +1,132 @@
+theory qp2
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) R1:
+   [ In( x ), Fr( ~n ) ]
+  --[ A( x ), B( x, x ), C( ), M( ~n, $p, x ) ]->
+   [ Out( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+lemma s1_and_or:
+  all-traces "∀ x #i. (A( x ) @ #i) ⇒ (((x = x) ∧ (x = 'c')) ∨ (x = 'd'))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i. (A( x ) @ #i) ∧ (((¬(x = x)) ∨ (¬(x = 'c')))) ∧ (¬(x = 'd'))"
+*/
+by sorry
+
+lemma s2_or_and:
+  all-traces "∀ x #i. (A( x ) @ #i) ⇒ ((x = x) ∧ ((x = 'c') ∨ (x = 'd')))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i. (A( x ) @ #i) ∧ ((¬(x = x)) ∨ ((¬(x = 'c')) ∧ (¬(x = 'd'))))"
+*/
+by sorry
+
+lemma s3_or_lchain:
+  all-traces
+  "∀ x #i. (A( x ) @ #i) ⇒ (((x = 'b') ∨ (x = 'c')) ∨ (x = 'd'))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i. (A( x ) @ #i) ∧ (¬(x = 'b')) ∧ (¬(x = 'c')) ∧ (¬(x = 'd'))"
+*/
+by sorry
+
+lemma s4_or_rchain:
+  all-traces
+  "∀ x #i. (A( x ) @ #i) ⇒ ((x = 'b') ∨ ((x = 'c') ∨ (x = 'd')))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i. (A( x ) @ #i) ∧ (¬(x = 'b')) ∧ (¬(x = 'c')) ∧ (¬(x = 'd'))"
+*/
+by sorry
+
+lemma s5_and_lchain:
+  all-traces
+  "∀ x #i. (A( x ) @ #i) ⇒ (((x = 'b') ∧ (x = 'c')) ∧ (x = 'd'))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i. (A( x ) @ #i) ∧ ((¬(x = 'b')) ∨ (¬(x = 'c')) ∨ (¬(x = 'd')))"
+*/
+by sorry
+
+lemma s6_and_rchain:
+  all-traces
+  "∀ x #i. (A( x ) @ #i) ⇒ ((x = 'b') ∧ ((x = 'c') ∧ (x = 'd')))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i. (A( x ) @ #i) ∧ ((¬(x = 'b')) ∨ (¬(x = 'c')) ∨ (¬(x = 'd')))"
+*/
+by sorry
+
+lemma s7_imp_in_imp:
+  all-traces "∀ x #i. (A( x ) @ #i) ⇒ ((x = 'b') ⇒ (x = 'c'))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i. (A( x ) @ #i) ∧ (x = 'b') ∧ (¬(x = 'c'))"
+*/
+by sorry
+
+lemma s8_not_and_notnot:
+  all-traces "∀ x #i. (A( x ) @ #i) ⇒ (¬((x = 'b') ∧ (¬(¬(x = 'c')))))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i. (A( x ) @ #i) ∧ (x = 'b') ∧ (x = 'c')"
+*/
+by sorry
+
+lemma s9_q_under_or:
+  all-traces
+  "∀ x #i. (A( x ) @ #i) ⇒ ((∃ #j. B( x, x ) @ #j) ∨ (∃ #j. C( ) @ #j))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i.
+  (A( x ) @ #i) ∧ (∀ #j. (B( x, x ) @ #j) ⇒ ⊥) ∧ (∀ #j. (C( ) @ #j) ⇒ ⊥)"
+*/
+by sorry
+
+lemma s10_q_under_imp:
+  all-traces "∀ x #i. (A( x ) @ #i) ⇒ ((∃ #j. B( x, x ) @ #j) ⇒ (x = 'd'))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i. (A( x ) @ #i) ∧ (∃ #j. (B( x, x ) @ #j)) ∧ (¬(x = 'd'))"
+*/
+by sorry
+
+lemma s11_all_under_imp:
+  all-traces "∀ x #i. (A( x ) @ #i) ⇒ (∀ y #j. (B( x, y ) @ #j) ⇒ (x = y))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i. (A( x ) @ #i) ∧ ∃ y #j. (B( x, y ) @ #j) ∧ ¬(x = y)"
+*/
+by sorry
+
+lemma s12_not_q:
+  all-traces "∀ x #i. (A( x ) @ #i) ⇒ (¬(∃ #j. C( ) @ #j))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i. (A( x ) @ #i) ∧ ∃ #j. (C( ) @ #j)"
+*/
+by sorry
+
+lemma s13_deep:
+  exists-trace
+  "∃ x #i.
+    (A( x ) @ #i) ∧ ((¬(∃ #j. C( ) @ #j)) ∧ ((x = 'c') ∨ (¬(x = 'd'))))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ x #i.
+  (A( x ) @ #i) ∧ (∀ #j. (C( ) @ #j) ⇒ ⊥) ∧ (((x = 'c') ∨ (¬(x = 'd'))))"
+*/
+by sorry
+
+
+
+end

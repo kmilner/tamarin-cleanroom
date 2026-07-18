@@ -1,0 +1,1715 @@
+theory 5G_aka
+
+begin
+
+// Function signature and definition of the equational theory E
+
+builtins: multiset, xor
+functions: KDF/2, SHA256/2, adec/2, aenc/2, f1/2, f1_star/2, f2/2, f3/2,
+           f4/2, f5/2, f5_star/2, fst/1, pair/2, pk/1, snd/1
+equations:
+    adec(aenc(x.1, pk(x.2)), x.2) = x.1,
+    fst(<x.1, x.2>) = x.1,
+    snd(<x.1, x.2>) = x.2
+
+tactic: sqn
+presort: C
+prio: {id}
+  regex"St_1_UE\(" | regex"St_1_HSS\("
+prio: {id}
+  regex"Sqn_UE\(" | regex"Sqn_HSS\("
+tactic: sqn_ue_nodecrease
+presort: C
+prio: {id}
+  regex"\(last\(#j"
+prio: {id}
+  regex"Sqn_UE_Change\("
+prio: {id}
+  regex"\(#vr<#i\)"
+prio: {id}
+  regex"Sqn_UE\(.*count.1"
+tactic: injectiveagreement_ue_seaf_kseaf_keyConf_noKeyRev_noChanRev
+presort: C
+prio: {id}
+  regex"!KU\(~k"
+prio: {id}
+  regex"Sqn_HSS\(.*~sqn_root,~sqn_root" | regex"Sqn_HSS\(.*,.*,.*,.*,.*~.*"
+prio: {id}
+  regex"!HSS\("
+prio: {id}
+  regex"!KU\(f3\(~k,"
+  regex"RcvS\(~k,.*'air'"
+prio: {id}
+  regex"St_2_UE\("
+  regex"CommitConf\("
+prio: {id}
+  regex"!KU\(f5\(" | regex"!KU\(f5_star\("
+prio: {id}
+  regex"!KU\(~sqn_root"
+prio: {id}
+  regex"!KU\(KDF\(<f3\(" | regex"!KU\(KDF\(KDF\(<f3\(" | regex"!KU\(f1\(KDF\(KDF\(<f3\(~k" | regex"!KU\(f3\(~k,"
+prio: {id}
+  regex"RcvS\(.*'ac'"
+prio: {id}
+  regex"RcvS\(.*'aia'"
+tactic: weakagreement_ue_seaf_keyConf_noAsyKeyRev_noSupiRev_noSqnRev_noKeyRev
+presort: C
+prio: {id}
+  regex"!KU\(~k"
+prio: {id}
+  regex"Sqn_HSS\(.*~sqn_root,~sqn_root"
+  regex"Sqn_HSS\(.*,.*,.*,.*,.*~.*"
+prio: {id}
+  regex"!HSS\("
+prio: {id}
+  regex"!KU\(f5\(" | regex"!KU\(f5_star\("
+prio: {id}
+  regex"!KU\(~sqn_root"
+prio: {id}
+  regex"St_2_UE\("
+  regex"Sqn_UE\("
+prio: {id}
+  regex"!KU\(KDF\(<f3\(" | regex"!KU\(KDF\(KDF\(<f3\(" | regex"!KU\(f1\(KDF\(KDF\(<f3\(~k" | regex"!KU\(f3\(~k*"
+prio: {id}
+  regex"St_1_UE\(" | regex"St_1_SEAF\(" | regex"St_3_SEAF\("
+prio: {id}
+  regex"~~>"
+prio: {id}
+  regex"Sec\("
+prio: {id}
+  regex"RcvS\(~idSN"
+prio: {id}
+  regex"RcvS\("
+prio: {id}
+  regex"!KU\(f1\("
+prio: {id}
+  regex"Sqn_HSS\("
+prio: {id}
+  regex"!KU\(\(f5\(" | regex"!KD\(\(f5\("
+prio: {id}
+  regex"!Ltk_Sym\("
+prio: {id}
+  regex"!KU\(f4\("
+prio: {id}
+  regex"St_2_SEAF\(" | regex"St_1_HSS\("
+prio: {id}
+  regex"!KU\(KDF\("
+prio: {id}
+  regex"!KU\(~RAN"
+prio: {id}
+  regex"!KU\(~sup"
+prio: {id}
+  regex"!KU\(f1\("
+prio: {id}
+  regex"Sqn_HSS\("
+prio: {id}
+  regex"!KU\(aenc\("
+prio: {id}
+  regex"!KU\(~sup"
+prio: {id}
+  regex"!KU\(~sk"
+tactic: weakagreement_ue_seaf_keyConf
+presort: C
+prio: {id}
+  regex"!KU\(~k"
+prio: {id}
+  regex"Sqn_HSS\(.*~sqn_root,~sqn_root"
+  regex"Sqn_HSS\(.*,.*,.*,.*,.*~.*"
+prio: {id}
+  regex"!HSS\("
+prio: {id}
+  regex"!KU\(f5\(" | regex"!KU\(f5_star\("
+prio: {id}
+  regex"!KU\(~sqn_root"
+prio: {id}
+  regex"St_2_UE\("
+  regex"Sqn_UE\("
+prio: {id}
+  regex"!KU\(KDF\(<f3\(" | regex"!KU\(KDF\(KDF\(<f3\(" | regex"!KU\(f1\(KDF\(KDF\(<f3\(~k" | regex"!KU\(f3\(~k*"
+prio: {id}
+  regex"St_1_UE\(" | regex"St_1_SEAF\(" | regex"St_3_SEAF\("
+prio: {id}
+  regex"~~>"
+prio: {id}
+  regex"Sec\("
+prio: {id}
+  regex"RcvS\(~idSN"
+prio: {id}
+  regex"RcvS\("
+prio: {id}
+  regex"!KU\(\(f5\(" | regex"!KD\(\(f5\("
+prio: {id}
+  regex"!Ltk_Sym\("
+prio: {id}
+  regex"!KU\(f4\("
+prio: {id}
+  regex"St_2_SEAF\(" | regex"St_1_HSS\("
+prio: {id}
+  regex"!KU\(KDF\("
+prio: {id}
+  regex"!KU\(~RAN"
+prio: {id}
+  regex"!KU\(~sup"
+prio: {id}
+  regex"!KU\(f1\("
+prio: {id}
+  regex"Sqn_HSS\("
+prio: {id}
+  regex"!KU\(aenc\("
+prio: {id}
+  regex"!KU\(~sup"
+prio: {id}
+  regex"!KU\(~sk"
+tactic: weakagreement_ue_seaf_noRev
+presort: C
+prio: {id}
+  regex"!KU\(~k"
+prio: {id}
+  regex"Sqn_HSS\(.*~sqn_root,~sqn_root"
+  regex"Sqn_HSS\(.*,.*,.*,.*,.*~.*"
+prio: {id}
+  regex"!HSS\("
+prio: {id}
+  regex"!KU\(f5\(" | regex"!KU\(f5_star\("
+prio: {id}
+  regex"!KU\(~sqn_root"
+prio: {id}
+  regex"St_1_UE\(" | regex"St_2_UE\(" | regex"St_3_SEAF\(" | regex"Sqn_UE\("
+prio: {id}
+  regex"~~>"
+prio: {id}
+  regex"RcvS\(~idSN"
+prio: {id}
+  regex"RcvS\("
+prio: {id}
+  regex"!KU\(\(f5\(" | regex"!KD\(\(f5\("
+prio: {id}
+  regex"!Ltk_Sym\("
+prio: {id}
+  regex"!KU\(f4\("
+prio: {id}
+  regex"St_2_SEAF\(" | regex"St_1_HSS\("
+prio: {id}
+  regex"!KU\(KDF\("
+prio: {id}
+  regex"!KU\(~RAN"
+prio: {id}
+  regex"!KU\(~sup"
+prio: {id}
+  regex"!KU\(f1\("
+prio: {id}
+  regex"!KU\(aenc\("
+prio: {id}
+  regex"!KU\(~sup"
+prio: {id}
+  regex"!KU\(~sk"
+tactic: injectiveagreement
+presort: C
+prio: {id}
+  regex"!KU\(~k"
+prio: {id}
+  regex"!KU\(~sk_HN"
+  regex"Sqn_HSS\(.*~sqn_root,~sqn_root"
+  regex"Sqn_HSS\(.*,.*,.*,.*,.*~."
+prio: {id}
+  regex"!HSS\("
+prio: {id}
+  regex"!KU\(f3\(~k,"
+  regex"RcvS\(~k,.*'air'"
+  regex"RcvS\(~sqn_root"
+  regex"RcvS\(~sk_HN"
+  regex"RcvS\(~supi"
+prio: {id}
+  regex"Commit\("
+  regex"CommitConf\("
+prio: {id}
+  regex"St_3_SEAF\("
+  regex"St_4_SEAF\("
+prio: {id}
+  regex"!KU\(KDF\(<f3\("
+  regex"!KU\(KDF\(KDF\(<"
+  regex"!KU\(f3\("
+prio: {id}
+  regex"RcvS\(.*<'aia'.*SHA"
+prio: {id}
+  regex"RcvS\(.*<'aca'"
+prio: {id}
+  regex"RcvS\(.*<'ac'"
+prio: {id}
+  regex"RcvS\(.*<'aia'"
+prio: {id}
+  regex"!KU\(f1\("
+tactic: many
+presort: C
+prio: {id}
+  regex"!KU\(~k"
+prio: {id}
+  regex"!KU\(~sk_HN"
+  regex"Sqn_HSS\(.*~sqn_root,~sqn_root"
+  regex"Sqn_HSS\(.*,.*,.*,.*,.*~.*"
+prio: {id}
+  regex"!HSS\("
+prio: {id}
+  regex"!KU\(f3\(~k,"
+  regex"RcvS\(~k,"
+  regex"RcvS\(~sqn_root"
+  regex"RcvS\(~sk_HN"
+  regex"RcvS\(~supi"
+prio: {id}
+  regex"!KU\(f5\(" | regex"!KU\(f5_star\("
+prio: {id}
+  regex"!KU\(~sqn_root"
+prio: {id}
+  regex"~~"
+  regex"=.*=.*=."
+prio: {id}
+  regex"Commit\("
+  regex"St_3_SEAF\("
+  regex"St_4_SEAF\("
+prio: {id}
+  regex"RcvS\(.*<'aca'"
+prio: {id}
+  regex"RcvS\(.*<'ac'"
+prio: {id}
+  regex"!KU\(KDF\(<f3\("
+  regex"!KU\(KDF\(KDF\(<"
+prio: {id}
+  regex"!KU\(f3\("
+prio: {id}
+  regex"RcvS\(.*<'aia'"
+prio: {id}
+  regex"RcvS\(.*<'air'"
+prio: {id}
+  regex"!KU\(\(f5\(~k"
+  regex"!KD\(\(f5\(~k"
+prio: {id}
+  regex"Sqn_HSS\("
+  regex"Sqn_UE\("
+prio: {id}
+  regex"!KU\(aenc\("
+prio: {id}
+  regex"!KU\(pk\("
+prio: {id}
+  regex"!KU\(~supi"
+prio: {id}
+  regex"!KU\(f1\(~"
+prio: {id}
+  regex"!KU\(f1\(K"
+tactic: executability_honest
+presort: C
+prio: {id}
+  regex"!KU\(~k"
+prio: {id}
+  regex"St_2_SEAF\("
+  regex"St_3_SEAF\("
+prio: {id}
+  regex"RcvS\("
+prio: {id}
+  regex"Sqn_HSS\("
+  regex"Sqn_UE\("
+prio: {id}
+  regex"!KU\(f5_star\("
+prio: {id}
+  regex"!KU\(f1\("
+prio: {id}
+  regex"!KU\(f3\("
+prio: {id}
+  regex"!KU\(f5\(~k"
+prio: {id}
+  regex"!KU\(~sqn_root"
+prio: {id}
+  regex"!KU\(KDF\("
+prio: {id}
+  regex"!KU\(\(f5\("
+  regex"!KD\(\(f5\("
+tactic: executability_sync
+presort: C
+prio: {id}
+  regex"!KU\(~k"
+prio: {id}
+  regex"!HSS\("
+prio: {id}
+  regex"=.*="
+prio: {id}
+  regex"<.*="
+prio: {id}
+  regex"HSS_Resync_End\("
+prio: {id}
+  regex"!KU\(f5\("
+  regex".*!KU\(f5_star\("
+  regex"!KU\(~sqn_root"
+prio: {id}
+  regex"St_1_UE\("
+  regex"St_1_HSS\("
+  regex"St_2_SEAF\("
+  regex"St_3_SEAF\("
+prio: {id}
+  regex"Sqn_UE\("
+  regex"Sqn_HSS\("
+prio: {id}
+  regex"~~>"
+prio: {id}
+  regex"!Ltk_Sym\("
+prio: {id}
+  regex"RcvS\("
+prio: {id}
+  regex"!KU\(KDF\("
+prio: {id}
+  regex"!KU\(f3\("
+prio: {id}
+  regex"!KU\(f1_star\("
+prio: {id}
+  regex"!KU\(f1\("
+prio: {id}
+  regex"!KU\(\(f5\("
+  regex"!KD\(\(f5\("
+  regex"!KU\(\(f5_star\("
+  regex"!KD\(\(f5_star\("
+
+/* looping facts with injective instances: Sqn_HSS/5, Sqn_UE/5 */
+
+rule (modulo E) send_secure:
+   [ SndS( ~cid, A, B, m ) ] --> [ Sec( ~cid, A, B, m ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) receive_secure:
+   [ Sec( ~cid, A, B, m ) ] --> [ RcvS( ~cid, A, B, m ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) secureChannel_compromised_in:
+   [ In( <~cid, A, B, x> ) ]
+  --[ Rev( A, 'secureChannel' ), Injected( x ) ]->
+   [ Sec( ~cid, A, B, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) secureChannel_compromised_out:
+   [ Sec( ~cid, A, B, m ) ]
+  --[ Rev( B, 'secureChannel' ) ]->
+   [ Out( <~cid, m> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) init_servNet:
+   [ Fr( ~idSN ) ]
+  --[ ServNet( ~idSN ) ]->
+   [ !SEAF( ~idSN, <'5G', ~idSN> ), Out( <'5G', ~idSN> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) init_homeNet:
+   [ Fr( ~sk_HN ), Fr( ~idHN ) ]
+  --[ HomeNet( ~idHN ) ]->
+   [
+   !HSS( ~idHN, ~sk_HN ), !Pk( ~idHN, pk(~sk_HN) ),
+   Out( <~idHN, pk(~sk_HN)> )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) add_subscription:
+   [ Fr( ~supi ), Fr( ~k ), Fr( ~sqn_root ), !HSS( ~idHN, ~sk_HN ) ]
+  --[
+  Subscribe( ~supi, ~idHN ), Sqn_Create( ~supi, ~idHN, ~sqn_root ),
+  CreateUser( ~supi, ~k, ~idHN )
+  ]->
+   [
+   !Ltk_Sym( ~supi, ~idHN, ~k, ~sqn_root ),
+   Sqn_UE( ~supi, ~idHN, ('1'++~sqn_root), ~sqn_root, '1' ),
+   Sqn_HSS( ~supi, ~idHN, ('1'++~sqn_root), ~sqn_root, '1' )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) reveal_Ltk_Sym:
+   [ !Ltk_Sym( ~supi, ~idHN, ~k, ~sqn_root ) ]
+  --[ Rev( ~supi, <'k', ~k> ), Rev( ~idHN, <'k', ~k> ) ]->
+   [ Out( ~k ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) reveal_Ltk_Sqn:
+   [ !Ltk_Sym( ~supi, ~idHN, ~k, ~sqn_root ) ]
+  --[ Rev( ~supi, <'sqn', ~sqn_root> ), Rev( ~idHN, <'sqn', ~sqn_root> )
+  ]->
+   [ Out( ~sqn_root ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) reveal_Ltk_supi:
+   [ !Ltk_Sym( ~supi, ~idHN, ~k, ~sqn_root ) ]
+  --[ Rev( ~supi, <'supi', ~supi> ), Rev( ~idHN, <'supi', ~supi> ) ]->
+   [ Out( ~supi ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) reveal_sk_HN:
+   [ !HSS( ~idHN, ~sk_HN ) ]
+  --[ Rev( ~idHN, <'skHN', ~sk_HN> ) ]->
+   [ Out( ~sk_HN ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ue_sqn_increase:
+   [ Sqn_UE( ~supi, ~idHN, Sqn, ~sqn_root, count ), In( m ) ]
+  --[
+  Sqn_UE_Invariance( ~supi, ~idHN, (Sqn++m), ~sqn_root, (count++m) ),
+  Sqn_UE_Change( ~supi, ~idHN, (Sqn++m) ), Sqn_UE_Desync( )
+  ]->
+   [ Sqn_UE( ~supi, ~idHN, (Sqn++m), ~sqn_root, (count++m) ) ]
+
+  // loop breaker: [0]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ue_send_attachReq:
+   [
+   !Ltk_Sym( ~supi, ~idHN, ~k, ~sqn_root ), !Pk( ~idHN, pk_HN ), Fr( ~R ),
+   Fr( ~tid )
+   ]
+  --[ Start_UE_Session( ~supi ) ]->
+   [
+   St_1_UE( ~tid, ~supi, ~idHN, ~k, ~sqn_root ),
+   Out( <aenc(<~supi, ~R>, pk_HN), ~idHN> )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) seaf_receive_attachReq_send_air:
+   [ !SEAF( ~idSN, SNID ), Fr( ~tid ), Fr( ~cid ), In( <conc_supi, idHN> ) ]
+  --[ Start_SEAF_Session( ~idSN ) ]->
+   [
+   St_1_SEAF( ~tid, ~idSN, SNID, conc_supi, idHN, ~cid ),
+   SndS( ~cid, ~idSN, idHN, <'air', <conc_supi, idHN>, SNID> )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) hss_receive_air_send_aia:
+   [
+   !HSS( ~idHN, ~sk_HN ),
+   RcvS( ~cid, idSN, ~idHN,
+         <'air', <aenc(<~supi, ~R>, pk(~sk_HN)), ~idHN>, '5G', idSN>
+   ),
+   !Ltk_Sym( ~supi, ~idHN, ~k, ~sqn_root ),
+   Sqn_HSS( ~supi, ~idHN, SqnHSS, ~sqn_root, count ), Fr( ~RAND ),
+   Fr( ~tid ), In( count )
+   ]
+  --[
+  Sqn_HSS_Invariance( ~idHN, ~supi, ('1'++SqnHSS), ~sqn_root, ('1'++count)
+  ),
+  Src( ~RAND,
+       <(f5(~k, ~RAND)⊕('1'++SqnHSS)), f1(~k, <('1'++SqnHSS), ~RAND>)>
+  ),
+  KSEAF( KDF(KDF(<f3(~k, ~RAND), f4(~k, ~RAND)>,
+                 <<'5G', idSN>, (f5(~k, ~RAND)⊕('1'++SqnHSS))>),
+             <'5G', idSN>)
+  ),
+  Start_HSS_Session( ~idHN ), HSS_Send_Aia( ),
+  Running( ~idHN, idSN,
+           <'SEAF', 'HSS', 'K_seaf', 
+            KDF(KDF(<f3(~k, ~RAND), f4(~k, ~RAND)>,
+                    <<'5G', idSN>, (f5(~k, ~RAND)⊕('1'++SqnHSS))>),
+                <'5G', idSN>)
+           >
+  ),
+  Running( ~idHN, idSN, <'SEAF', 'HSS', 'supi', ~supi> ),
+  Running( ~idHN, idSN,
+           <'SEAF', 'HSS', 'RES_star', 
+            KDF(<f3(~k, ~RAND), f4(~k, ~RAND)>, <<'5G', idSN>, f2(~k, ~RAND), ~RAND>)
+           >
+  ),
+  Running( ~idHN, ~supi,
+           <'UE', 'HSS', 'K_seaf', 
+            KDF(KDF(<f3(~k, ~RAND), f4(~k, ~RAND)>,
+                    <<'5G', idSN>, (f5(~k, ~RAND)⊕('1'++SqnHSS))>),
+                <'5G', idSN>)
+           >
+  ),
+  Running( ~idHN, ~supi, <'UE', 'HSS', 'supi', ~supi> ),
+  Running( ~idHN, ~supi,
+           <'UE', 'HSS', 'AUTN', (f5(~k, ~RAND)⊕('1'++SqnHSS)), 
+            f1(~k, <('1'++SqnHSS), ~RAND>)>
+  ),
+  Honest( ~supi ), Honest( ~idHN ), Honest( idSN )
+  ]->
+   [
+   St_1_HSS( ~tid, ~idHN, ~supi, <aenc(<~supi, ~R>, pk(~sk_HN)), ~idHN>,
+             idSN, <'5G', idSN>, ~k, ('1'++SqnHSS),
+             KDF(<f3(~k, ~RAND), f4(~k, ~RAND)>,
+                 <<'5G', idSN>, f2(~k, ~RAND), ~RAND>),
+             ~RAND, ~sqn_root, ~sk_HN, ~cid
+   ),
+   Sqn_HSS( ~supi, ~idHN, ('1'++SqnHSS), ~sqn_root, ('1'++count) ),
+   SndS( ~cid, ~idHN, idSN,
+         <'aia', ~RAND, 
+          SHA256(KDF(<f3(~k, ~RAND), f4(~k, ~RAND)>,
+                     <<'5G', idSN>, f2(~k, ~RAND), ~RAND>),
+                 ~RAND), 
+          KDF(KDF(<f3(~k, ~RAND), f4(~k, ~RAND)>,
+                  <<'5G', idSN>, (f5(~k, ~RAND)⊕('1'++SqnHSS))>),
+              <'5G', idSN>), 
+          (f5(~k, ~RAND)⊕('1'++SqnHSS)), f1(~k, <('1'++SqnHSS), ~RAND>)>
+   )
+   ]
+
+  // loop breakers: [1,3]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) seaf_receive_aia_send_authReq:
+   [
+   St_1_SEAF( ~tid, ~idSN, SNID, conc_supi, idHN, ~cid ),
+   RcvS( ~cid, idHN, ~idSN, <'aia', RAND, HXRES_star, K_seaf, AUTN> )
+   ]
+  --[
+  Out_Src( RAND, AUTN ),
+  Running( ~idSN, idHN, <'HSS', 'SEAF', 'K_seaf', K_seaf> )
+  ]->
+   [
+   St_2_SEAF( ~tid, ~idSN, SNID, conc_supi, idHN, RAND, HXRES_star, K_seaf,
+              ~cid
+   ),
+   Out( <RAND, AUTN, SNID> )
+   ]
+
+  // loop breaker: [1]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ue_receive_authReq_freshness_success_send_authResp:
+   [
+   St_1_UE( ~tid, ~supi, ~idHN, ~k, ~sqn_root ),
+   Sqn_UE( ~supi, ~idHN, SqnUE, ~sqn_root, count ),
+   In( <RAND, <(f5(~k, RAND)⊕(SqnUE++dif)), f1(~k, <(SqnUE++dif), RAND>)>, 
+        '5G', idSN>
+   )
+   ]
+  --[
+  Sqn_UE_Invariance( ~supi, ~idHN, (SqnUE++dif), ~sqn_root, (count++dif) ),
+  Sqn_UE_Change( ~supi, ~idHN, (SqnUE++dif) ),
+  Sqn_UE_Use( ~supi, ~idHN, (SqnUE++dif) ),
+  KSEAF( KDF(KDF(<f3(~k, RAND), f4(~k, RAND)>,
+                 <<'5G', idSN>, (f5(~k, RAND)⊕(SqnUE++dif))>),
+             <'5G', idSN>)
+  ),
+  Running( ~supi, idSN,
+           <'SEAF', 'UE', 'RES_star', 
+            KDF(<f3(~k, RAND), f4(~k, RAND)>, <<'5G', idSN>, f2(~k, RAND), RAND>)>
+  ),
+  Running( ~supi, idSN,
+           <'SEAF', 'UE', 'K_seaf', 
+            KDF(KDF(<f3(~k, RAND), f4(~k, RAND)>,
+                    <<'5G', idSN>, (f5(~k, RAND)⊕(SqnUE++dif))>),
+                <'5G', idSN>)
+           >
+  ),
+  Running( ~supi, idSN, <'SEAF', 'UE', 'supi', ~supi> ),
+  Running( ~supi, ~idHN,
+           <'HSS', 'UE', 'K_seaf', 
+            KDF(KDF(<f3(~k, RAND), f4(~k, RAND)>,
+                    <<'5G', idSN>, (f5(~k, RAND)⊕(SqnUE++dif))>),
+                <'5G', idSN>)
+           >
+  ),
+  Running( ~supi, ~idHN, <'HSS', 'UE', 'RAND', RAND> ),
+  Secret( <'UE', ~supi>, 'key',
+          KDF(KDF(<f3(~k, RAND), f4(~k, RAND)>,
+                  <<'5G', idSN>, (f5(~k, RAND)⊕(SqnUE++dif))>),
+              <'5G', idSN>)
+  ),
+  Secret( <'UE', ~supi>, 'supi', ~supi ),
+  Commit( ~supi, ~idHN,
+          <'UE', 'HSS', 'AUTN', (f5(~k, RAND)⊕(SqnUE++dif)), 
+           f1(~k, <(SqnUE++dif), RAND>)>
+  ),
+  Commit( ~supi, ~idHN, <'UE', 'HSS', 'supi', ~supi> ),
+  Commit( ~supi, ~idHN,
+          <'UE', 'HSS', 'K_seaf', 
+           KDF(KDF(<f3(~k, RAND), f4(~k, RAND)>,
+                   <<'5G', idSN>, (f5(~k, RAND)⊕(SqnUE++dif))>),
+               <'5G', idSN>)
+          >
+  ),
+  Commit( ~supi, idSN,
+          <'UE', 'SEAF', 'K_seaf', 
+           KDF(KDF(<f3(~k, RAND), f4(~k, RAND)>,
+                   <<'5G', idSN>, (f5(~k, RAND)⊕(SqnUE++dif))>),
+               <'5G', idSN>)
+          >
+  ),
+  Commit( ~supi, idSN, <'UE', 'SEAF', 'RAND', RAND> ), Honest( ~supi ),
+  Honest( ~idHN ), Honest( idSN )
+  ]->
+   [
+   St_2_UE( ~tid, ~supi, ~idHN, ~k, ~sqn_root, idSN,
+            KDF(KDF(<f3(~k, RAND), f4(~k, RAND)>,
+                    <<'5G', idSN>, (f5(~k, RAND)⊕(SqnUE++dif))>),
+                <'5G', idSN>)
+   ),
+   Out( KDF(<f3(~k, RAND), f4(~k, RAND)>,
+            <<'5G', idSN>, f2(~k, RAND), RAND>)
+   ),
+   Sqn_UE( ~supi, ~idHN, (SqnUE++dif), ~sqn_root, (count++dif) )
+   ]
+
+  // loop breaker: [1]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ue_receive_authReq_fail_freshness_send_sync_failure:
+   [
+   St_1_UE( ~tid, ~supi, ~idHN, ~k, ~sqn_root ),
+   Sqn_UE( ~supi, ~idHN, SqnUE, ~sqn_root, count ),
+   In( <RAND, <(SqnHSS⊕f5(~k, RAND)), f1(~k, <SqnHSS, RAND>)>, '5G', idSN>
+   ),
+   In( count )
+   ]
+  --[
+  Greater_Or_Equal_Than( SqnUE, SqnHSS ),
+  Sqn_UE_Invariance( ~supi, ~idHN, SqnUE, ~sqn_root, count ),
+  Sqn_UE_Nochange( ~supi, ~idHN, SqnUE )
+  ]->
+   [
+   Out( <(SqnUE⊕f5_star(~k, RAND)), f1_star(~k, <SqnUE, RAND>)> ),
+   Sqn_UE( ~supi, ~idHN, SqnUE, ~sqn_root, count )
+   ]
+
+  // loop breaker: [1]
+  /*
+  rule (modulo AC) ue_receive_authReq_fail_freshness_send_sync_failure:
+     [
+     St_1_UE( ~tid, ~supi, ~idHN, ~k, ~sqn_root ),
+     Sqn_UE( ~supi, ~idHN, SqnUE, ~sqn_root, count ),
+     In( <RAND, <z, f1(~k, <SqnHSS, RAND>)>, '5G', idSN> ), In( count )
+     ]
+    --[
+    Greater_Or_Equal_Than( SqnUE, SqnHSS ),
+    Sqn_UE_Invariance( ~supi, ~idHN, SqnUE, ~sqn_root, count ),
+    Sqn_UE_Nochange( ~supi, ~idHN, SqnUE )
+    ]->
+     [
+     Out( <z.1, f1_star(~k, <SqnUE, RAND>)> ),
+     Sqn_UE( ~supi, ~idHN, SqnUE, ~sqn_root, count )
+     ]
+    variants (modulo AC)
+     1. ~k    = ~k.15
+        RAND  = RAND.19
+        SqnHSS
+              = SqnHSS.20
+        SqnUE = SqnUE.21
+        z     = (SqnHSS.20⊕f5(~k.15, RAND.19))
+        z.1   = (SqnUE.21⊕f5_star(~k.15, RAND.19))
+    
+     2. ~k    = ~k.15
+        RAND  = RAND.19
+        SqnHSS
+              = SqnHSS.20
+        SqnUE = zero
+        z     = (SqnHSS.20⊕f5(~k.15, RAND.19))
+        z.1   = f5_star(~k.15, RAND.19)
+    
+     3. ~k    = ~k.15
+        RAND  = RAND.19
+        SqnHSS
+              = zero
+        SqnUE = SqnUE.21
+        z     = f5(~k.15, RAND.19)
+        z.1   = (SqnUE.21⊕f5_star(~k.15, RAND.19))
+    
+     4. ~k    = ~k.15
+        RAND  = RAND.19
+        SqnHSS
+              = zero
+        SqnUE = zero
+        z     = f5(~k.15, RAND.19)
+        z.1   = f5_star(~k.15, RAND.19)
+    
+     5. ~k    = ~k.19
+        RAND  = RAND.23
+        SqnHSS
+              = f5(~k.19, RAND.23)
+        SqnUE = f5_star(~k.19, RAND.23)
+        z     = zero
+        z.1   = zero
+    
+     6. ~k    = ~k.19
+        RAND  = RAND.23
+        SqnHSS
+              = f5(~k.19, RAND.23)
+        SqnUE = zero
+        z     = zero
+        z.1   = f5_star(~k.19, RAND.23)
+    
+     7. ~k    = ~k.19
+        RAND  = RAND.23
+        SqnHSS
+              = zero
+        SqnUE = f5_star(~k.19, RAND.23)
+        z     = f5(~k.19, RAND.23)
+        z.1   = zero
+    
+     8. ~k    = ~k.20
+        RAND  = RAND.24
+        SqnHSS
+              = SqnHSS.25
+        SqnUE = f5_star(~k.20, RAND.24)
+        z     = (SqnHSS.25⊕f5(~k.20, RAND.24))
+        z.1   = zero
+    
+     9. ~k    = ~k.20
+        RAND  = RAND.24
+        SqnHSS
+              = f5(~k.20, RAND.24)
+        SqnUE = SqnUE.26
+        z     = zero
+        z.1   = (SqnUE.26⊕f5_star(~k.20, RAND.24))
+    
+    10. ~k    = ~k.20
+        RAND  = RAND.24
+        SqnHSS
+              = f5(~k.20, RAND.24)
+        SqnUE = (z.31⊕f5_star(~k.20, RAND.24))
+        z     = zero
+        z.1   = z.31
+    
+    11. ~k    = ~k.20
+        RAND  = RAND.24
+        SqnHSS
+              = zero
+        SqnUE = (z.31⊕f5_star(~k.20, RAND.24))
+        z     = f5(~k.20, RAND.24)
+        z.1   = z.31
+    
+    12. ~k    = ~k.20
+        RAND  = RAND.24
+        SqnHSS
+              = (z.29⊕f5(~k.20, RAND.24))
+        SqnUE = f5_star(~k.20, RAND.24)
+        z     = z.29
+        z.1   = zero
+    
+    13. ~k    = ~k.20
+        RAND  = RAND.24
+        SqnHSS
+              = (z.29⊕f5(~k.20, RAND.24))
+        SqnUE = zero
+        z     = z.29
+        z.1   = f5_star(~k.20, RAND.24)
+    
+    14. ~k    = ~k.21
+        RAND  = RAND.25
+        SqnHSS
+              = (z.30⊕f5(~k.21, RAND.25))
+        SqnUE = SqnUE.27
+        z     = z.30
+        z.1   = (SqnUE.27⊕f5_star(~k.21, RAND.25))
+    
+    15. ~k    = ~k.21
+        RAND  = RAND.25
+        SqnHSS
+              = (z.30⊕f5(~k.21, RAND.25))
+        SqnUE = (z.32⊕f5_star(~k.21, RAND.25))
+        z     = z.30
+        z.1   = z.32
+    
+    16. ~k    = ~k.22
+        RAND  = RAND.26
+        SqnHSS
+              = SqnHSS.27
+        SqnUE = (z.33⊕f5_star(~k.22, RAND.26))
+        z     = (SqnHSS.27⊕f5(~k.22, RAND.26))
+        z.1   = z.33
+    // loop breaker: [1]
+  */
+
+rule (modulo E) seaf_receive_authResp_send_ac:
+   [
+   St_2_SEAF( ~tid, ~idSN, SNID, conc_supi, idHN, RAND,
+              SHA256(RES_star, RAND), K_seaf, ~cid
+   ),
+   In( RES_star )
+   ]
+  --[ Running( ~idSN, idHN, <'HSS', 'SEAF', 'RES_star', RES_star> ) ]->
+   [
+   St_3_SEAF( ~tid, ~idSN, SNID, conc_supi, idHN, RAND, RES_star, K_seaf,
+              ~cid
+   ),
+   SndS( ~cid, ~idSN, idHN, <'ac', RES_star, <conc_supi, idHN>, SNID> )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) seaf_receive_syncFailure_send_authSync:
+   [
+   St_2_SEAF( ~tid, ~idSN, SNID, conc_supi, idHN, RAND, HXRES_star, K_seaf,
+              ~cid
+   ),
+   In( <SqnUEXorAKS, MACS> )
+   ]
+  -->
+   [ SndS( ~cid, ~idSN, idHN, <'resync', RAND, SqnUEXorAKS, MACS> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) hss_receive_ac_send_aca:
+   [
+   St_1_HSS( ~tid, ~idHN, ~supi, suci, idSN, <'5G', idSN>, ~k, Sqn,
+             XRES_star, ~RAND, ~sqn_root, ~sk_HN, ~cid
+   ),
+   RcvS( ~cid, idSN, ~idHN, <'ac', XRES_star, suci, '5G', idSN> )
+   ]
+  --[
+  HSS_End( ),
+  Secret( <'HSS', ~idHN>, 'key',
+          KDF(KDF(<f3(~k, ~RAND), f4(~k, ~RAND)>,
+                  <<'5G', idSN>, (Sqn⊕f5(~k, ~RAND))>),
+              <'5G', idSN>)
+  ),
+  Commit( ~idHN, idSN,
+          <'HSS', 'SEAF', 'K_seaf', 
+           KDF(KDF(<f3(~k, ~RAND), f4(~k, ~RAND)>,
+                   <<'5G', idSN>, (Sqn⊕f5(~k, ~RAND))>),
+               <'5G', idSN>)
+          >
+  ),
+  Commit( ~idHN, idSN, <'HSS', 'SEAF', 'RES_star', XRES_star> ),
+  Commit( ~idHN, ~supi,
+          <'HSS', 'UE', 'K_seaf', 
+           KDF(KDF(<f3(~k, ~RAND), f4(~k, ~RAND)>,
+                   <<'5G', idSN>, (Sqn⊕f5(~k, ~RAND))>),
+               <'5G', idSN>)
+          >
+  ),
+  Commit( ~idHN, ~supi, <'HSS', 'UE', 'RAND', ~RAND> ), Honest( ~idHN ),
+  Honest( ~supi ), Honest( idSN )
+  ]->
+   [ SndS( ~cid, ~idHN, idSN, <'aca', 'confirm', ~supi> ) ]
+
+  // loop breaker: [1]
+  /*
+  rule (modulo AC) hss_receive_ac_send_aca:
+     [
+     St_1_HSS( ~tid, ~idHN, ~supi, suci, idSN, <'5G', idSN>, ~k, Sqn,
+               XRES_star, ~RAND, ~sqn_root, ~sk_HN, ~cid
+     ),
+     RcvS( ~cid, idSN, ~idHN, <'ac', XRES_star, suci, '5G', idSN> )
+     ]
+    --[
+    HSS_End( ),
+    Secret( <'HSS', ~idHN>, 'key',
+            KDF(KDF(<f3(~k, ~RAND), f4(~k, ~RAND)>, <<'5G', idSN>, z>), <'5G', idSN>)
+    ),
+    Commit( ~idHN, idSN,
+            <'HSS', 'SEAF', 'K_seaf', 
+             KDF(KDF(<f3(~k, ~RAND), f4(~k, ~RAND)>, <<'5G', idSN>, z>), <'5G', idSN>)
+            >
+    ),
+    Commit( ~idHN, idSN, <'HSS', 'SEAF', 'RES_star', XRES_star> ),
+    Commit( ~idHN, ~supi,
+            <'HSS', 'UE', 'K_seaf', 
+             KDF(KDF(<f3(~k, ~RAND), f4(~k, ~RAND)>, <<'5G', idSN>, z>), <'5G', idSN>)
+            >
+    ),
+    Commit( ~idHN, ~supi, <'HSS', 'UE', 'RAND', ~RAND> ), Honest( ~idHN ),
+    Honest( ~supi ), Honest( idSN )
+    ]->
+     [ SndS( ~cid, ~idHN, idSN, <'aca', 'confirm', ~supi> ) ]
+    variants (modulo AC)
+    1. ~RAND = ~RAND.24
+       ~k    = ~k.27
+       Sqn   = f5(~k.27, ~RAND.24)
+       z     = zero
+    
+    2. ~RAND = ~RAND.24
+       ~k    = ~k.27
+       Sqn   = zero
+       z     = f5(~k.27, ~RAND.24)
+    
+    3. ~RAND = ~RAND.29
+       ~k    = ~k.32
+       Sqn   = Sqn.37
+       z     = (Sqn.37⊕f5(~k.32, ~RAND.29))
+    
+    4. ~RAND = ~RAND.39
+       ~k    = ~k.42
+       Sqn   = (z.57⊕f5(~k.42, ~RAND.39))
+       z     = z.57
+    // loop breaker: [1]
+  */
+
+rule (modulo E) seaf_receive_aca:
+   [
+   St_3_SEAF( ~tid, ~idSN, <'5G', ~idSN>, conc_supi, idHN, ~RAND, RES_star,
+              K_seaf, ~cid
+   ),
+   RcvS( ~cid, idHN, ~idSN, <'aca', 'confirm', supi> )
+   ]
+  --[
+  SEAF_End( ), Running( ~idSN, supi, <'UE', 'SEAF', 'K_seaf', K_seaf> ),
+  Running( ~idSN, supi, <'UE', 'SEAF', 'supi', supi> ),
+  Running( ~idSN, supi, <'UE', 'SEAF', 'snname', ~idSN> ),
+  Secret( <'SEAF', ~idSN>, 'key', K_seaf ),
+  Commit( ~idSN, idHN, <'SEAF', 'HSS', 'K_seaf', K_seaf> ),
+  Commit( ~idSN, idHN, <'SEAF', 'HSS', 'supi', supi> ),
+  Commit( ~idSN, idHN, <'SEAF', 'HSS', 'RES_star', RES_star> ),
+  Commit( ~idSN, supi, <'SEAF', 'UE', 'K_seaf', K_seaf> ),
+  Commit( ~idSN, supi, <'SEAF', 'UE', 'supi', supi> ),
+  Commit( ~idSN, supi, <'SEAF', 'UE', 'RES_star', RES_star> ),
+  Honest( supi ), Honest( idHN ), Honest( ~idSN )
+  ]->
+   [
+   St_4_SEAF( ~tid, ~idSN, <'5G', ~idSN>, conc_supi, idHN, ~RAND, RES_star,
+              K_seaf, supi, ~cid
+   ),
+   Out( f1(K_seaf, 'SEAF') )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) hss_receive_authSync:
+   [
+   St_1_HSS( ~tid, ~idHN, ~supi, suci, idSN, SNID, ~k, SqnHSS, XRES_star,
+             ~RAND, ~sqn_root, ~sk_HN, ~cid
+   ),
+   Sqn_HSS( ~supi, ~idHN, SqnHSS, ~sqn_root, count ),
+   RcvS( ~cid, idSN, ~idHN,
+         <'resync', ~RAND, (f5_star(~k, ~RAND)⊕(SqnHSS++dif)), 
+          f1_star(~k, <(SqnHSS++dif), ~RAND>)>
+   ),
+   In( (count++dif) )
+   ]
+  --[
+  Sqn_HSS_Invariance( ~idHN, ~supi, (SqnHSS++dif), ~sqn_root, (count++dif)
+  ),
+  HSS_Resync_End( (count++dif) )
+  ]->
+   [ Sqn_HSS( ~supi, ~idHN, (SqnHSS++dif), ~sqn_root, (count++dif) ) ]
+
+  // loop breaker: [1]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ue_key_confirmation:
+   [
+   St_2_UE( ~tid, ~supi, ~idHN, ~k, ~sqn_root, idSN, K_seaf ),
+   In( f1(K_seaf, 'SEAF') )
+   ]
+  --[
+  CommitConf( ~supi, ~idHN, <'UE', 'HSS', 'K_seaf', K_seaf> ),
+  CommitConf( ~supi, ~idHN, <'UE', 'HSS', 'supi', ~supi> ),
+  CommitConf( ~supi, idSN, <'UE', 'SEAF', 'K_seaf', K_seaf> ),
+  CommitConf( ~supi, idSN, <'UE', 'SEAF', 'supi', ~supi> ),
+  CommitConf( ~supi, idSN, <'UE', 'SEAF', 'snname', idSN> ),
+  Honest( ~supi ), Honest( ~idHN ), Honest( idSN )
+  ]->
+   [ Out( f1(K_seaf, 'UE') ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) seaf_key_confirmation_check:
+   [
+   St_4_SEAF( ~tid, ~idSN, SNID, conc_supi, idHN, ~RAND, RES_star, K_seaf,
+              supi, ~cid
+   ),
+   In( f1(K_seaf, 'UE') )
+   ]
+  --[
+  CommitConf( ~idSN, idHN, <'SEAF', 'HSS', 'K_seaf', K_seaf> ),
+  CommitConf( ~idSN, idHN, <'SEAF', 'HSS', 'supi', supi> ),
+  CommitConf( ~idSN, supi, <'SEAF', 'UE', 'K_seaf', K_seaf> ),
+  CommitConf( ~idSN, supi, <'SEAF', 'UE', 'supi', supi> ), Honest( supi ),
+  Honest( idHN ), Honest( ~idSN ), SEAF_EndConf( )
+  ]->
+   [ ]
+
+  /* has exactly the trivial AC variant */
+
+restriction subscribe_once:
+  "∀ HN1 HN2 supi #i #j.
+    ((Subscribe( supi, HN1 ) @ #i) ∧ (Subscribe( supi, HN2 ) @ #j)) ⇒
+    ((#i = #j) ∧ (HN1 = HN2))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ HN1 HN2 supi #i #j.
+    ((Subscribe( supi, HN1 ) @ #i) ∧ (Subscribe( supi, HN2 ) @ #j)) ⇒
+    ((#i = #j) ∧ (HN1 = HN2))"
+  */
+
+restriction greater_or_equal_than:
+  "∀ x y #i. (Greater_Or_Equal_Than( x, y ) @ #i) ⇒ (¬(∃ z. (x++z) = y))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x y #i. (Greater_Or_Equal_Than( x, y ) @ #i) ⇒ (¬(∃ z. (x++z) = y))"
+  */
+
+lemma dummy:
+  all-traces "¬(⊥)"
+/*
+guarded formula characterizing all counter-examples:
+"⊥"
+*/
+by sorry
+
+lemma rand_autn_src [sources]:
+  all-traces
+  "∀ RAND AUTN #i.
+    (Out_Src( RAND, AUTN ) @ #i) ⇒
+    ((∃ #j. (Src( RAND, AUTN ) @ #j) ∧ (#j < #i)) ∨
+     (∃ #j x1 x2.
+       (Injected( <'aia', RAND, x1, x2, AUTN> ) @ #j) ∧ (#j < #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ RAND AUTN #i.
+  (Out_Src( RAND, AUTN ) @ #i)
+ ∧
+  (∀ #j. (Src( RAND, AUTN ) @ #j) ⇒ ¬(#j < #i)) ∧
+  (∀ #j x1 x2.
+    (Injected( <'aia', RAND, x1, x2, AUTN> ) @ #j) ⇒ ¬(#j < #i))"
+*/
+by sorry
+
+lemma sqn_ue_invariance [use_induction, sources, heuristic={sqn}]:
+  all-traces
+  "∀ supi HN Sqn sqn_root count #i.
+    (Sqn_UE_Invariance( supi, HN, Sqn, sqn_root, count ) @ #i) ⇒
+    ((count++sqn_root) = Sqn)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ supi HN Sqn sqn_root count #i.
+  (Sqn_UE_Invariance( supi, HN, Sqn, sqn_root, count ) @ #i)
+ ∧
+  ¬((count++sqn_root) = Sqn)"
+*/
+by sorry
+
+lemma sqn_hss_invariance [heuristic={sqn}, use_induction, sources]:
+  all-traces
+  "∀ HN supi Sqn sqn_root count #i.
+    (Sqn_HSS_Invariance( HN, supi, Sqn, sqn_root, count ) @ #i) ⇒
+    ((count++sqn_root) = Sqn)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ HN supi Sqn sqn_root count #i.
+  (Sqn_HSS_Invariance( HN, supi, Sqn, sqn_root, count ) @ #i)
+ ∧
+  ¬((count++sqn_root) = Sqn)"
+*/
+by sorry
+
+lemma sqn_ue_src [heuristic={sqn}, use_induction, reuse]:
+  all-traces
+  "∀ supi HN Sqn sqn_root count #i.
+    (Sqn_UE_Invariance( supi, HN, Sqn, sqn_root, count ) @ #i) ⇒
+    (∃ #j. (Sqn_Create( supi, HN, sqn_root ) @ #j) ∧ (#j < #i))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ supi HN Sqn sqn_root count #i.
+  (Sqn_UE_Invariance( supi, HN, Sqn, sqn_root, count ) @ #i)
+ ∧
+  ∀ #j. (Sqn_Create( supi, HN, sqn_root ) @ #j) ⇒ ¬(#j < #i)"
+*/
+by sorry
+
+lemma sqn_hss_src [heuristic={sqn}, reuse]:
+  all-traces
+  "∀ HN supi Sqn sqn_root count #i.
+    (Sqn_HSS_Invariance( HN, supi, Sqn, sqn_root, count ) @ #i) ⇒
+    (∃ #j. (Sqn_Create( supi, HN, sqn_root ) @ #j) ∧ (#j < #i))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ HN supi Sqn sqn_root count #i.
+  (Sqn_HSS_Invariance( HN, supi, Sqn, sqn_root, count ) @ #i)
+ ∧
+  ∀ #j. (Sqn_Create( supi, HN, sqn_root ) @ #j) ⇒ ¬(#j < #i)"
+*/
+by sorry
+
+lemma sqn_ue_nodecrease [use_induction, reuse,
+                         heuristic={sqn_ue_nodecrease}]:
+  all-traces
+  "(((∀ supi HN Sqni Sqnj #i #j.
+       (((Sqn_UE_Change( supi, HN, Sqnj ) @ #j) ∧
+         (Sqn_UE_Change( supi, HN, Sqni ) @ #i)) ∧
+        (#i < #j)) ⇒
+       (∃ dif. Sqnj = (Sqni++dif))) ∧
+     (∀ supi HN Sqni Sqnj #i #j.
+       (((Sqn_UE_Change( supi, HN, Sqnj ) @ #j) ∧
+         (Sqn_UE_Nochange( supi, HN, Sqni ) @ #i)) ∧
+        (#i < #j)) ⇒
+       (∃ dif. Sqnj = (Sqni++dif)))) ∧
+    (∀ supi HN Sqni Sqnj #i #j.
+      (((Sqn_UE_Nochange( supi, HN, Sqnj ) @ #j) ∧
+        (Sqn_UE_Change( supi, HN, Sqni ) @ #i)) ∧
+       (#i < #j)) ⇒
+      ((Sqnj = Sqni) ∨ (∃ dif. Sqnj = (Sqni++dif))))) ∧
+   (∀ supi HN Sqni Sqnj #i #j.
+     (((Sqn_UE_Nochange( supi, HN, Sqnj ) @ #j) ∧
+       (Sqn_UE_Nochange( supi, HN, Sqni ) @ #i)) ∧
+      (#i < #j)) ⇒
+     ((Sqnj = Sqni) ∨ (∃ dif. Sqnj = (Sqni++dif))))"
+/*
+guarded formula characterizing all counter-examples:
+"((∃ supi HN Sqni Sqnj #i #j.
+    (Sqn_UE_Change( supi, HN, Sqnj ) @ #j) ∧
+    (Sqn_UE_Change( supi, HN, Sqni ) @ #i)
+   ∧
+    (#i < #j) ∧ (∀ dif. (Sqnj = (Sqni++dif)) ⇒ ⊥)) ∨
+  (∃ supi HN Sqni Sqnj #i #j.
+    (Sqn_UE_Change( supi, HN, Sqnj ) @ #j) ∧
+    (Sqn_UE_Nochange( supi, HN, Sqni ) @ #i)
+   ∧
+    (#i < #j) ∧ (∀ dif. (Sqnj = (Sqni++dif)) ⇒ ⊥)) ∨
+  (∃ supi HN Sqni Sqnj #i #j.
+    (Sqn_UE_Nochange( supi, HN, Sqnj ) @ #j) ∧
+    (Sqn_UE_Change( supi, HN, Sqni ) @ #i)
+   ∧
+    (#i < #j) ∧ (¬(Sqnj = Sqni)) ∧ (∀ dif. (Sqnj = (Sqni++dif)) ⇒ ⊥)) ∨
+  (∃ supi HN Sqni Sqnj #i #j.
+    (Sqn_UE_Nochange( supi, HN, Sqnj ) @ #j) ∧
+    (Sqn_UE_Nochange( supi, HN, Sqni ) @ #i)
+   ∧
+    (#i < #j) ∧ (¬(Sqnj = Sqni)) ∧ (∀ dif. (Sqnj = (Sqni++dif)) ⇒ ⊥)))"
+*/
+by sorry
+
+lemma sqn_ue_unique [reuse, hide_lemma=sqn_ue_src,
+                     hide_lemma=sqn_hss_src]:
+  all-traces
+  "∀ supi HN Sqn #i #j.
+    ((Sqn_UE_Use( supi, HN, Sqn ) @ #i) ∧
+     (Sqn_UE_Use( supi, HN, Sqn ) @ #j)) ⇒
+    (#i = #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ supi HN Sqn #i #j.
+  (Sqn_UE_Use( supi, HN, Sqn ) @ #i) ∧ (Sqn_UE_Use( supi, HN, Sqn ) @ #j)
+ ∧
+  ¬(#i = #j)"
+*/
+by sorry
+
+lemma executability_honest [heuristic={executability_honest}]:
+  exists-trace
+  "∃ #i.
+    (((((((SEAF_End( ) @ #i) ∧ (¬(∃ X data #r. Rev( X, data ) @ #r))) ∧
+         (∀ supi HN sqn_root #i.1.
+           (Sqn_Create( supi, HN, sqn_root ) @ #i.1) ⇒
+           (¬(∃ #j. K( sqn_root ) @ #j)))) ∧
+        (∀ HN1 HN2 #j #k.
+          ((HomeNet( HN1 ) @ #j) ∧ (HomeNet( HN2 ) @ #k)) ⇒ (#j = #k))) ∧
+       (∀ S1 S2 HN1 HN2 #j #k.
+         ((Subscribe( S1, HN1 ) @ #j) ∧ (Subscribe( S2, HN2 ) @ #k)) ⇒
+         (#j = #k))) ∧
+      (∀ SNID1 SNID2 #j #k.
+        ((Start_SEAF_Session( SNID1 ) @ #j) ∧
+         (Start_SEAF_Session( SNID2 ) @ #k)) ⇒
+        (#j = #k))) ∧
+     (∀ UE1 UE2 #j #k.
+       ((Start_UE_Session( UE1 ) @ #j) ∧ (Start_UE_Session( UE2 ) @ #k)) ⇒
+       (#j = #k))) ∧
+    (∀ HN1 HN2 #j #k.
+      ((Start_HSS_Session( HN1 ) @ #j) ∧ (Start_HSS_Session( HN2 ) @ #k)) ⇒
+      (#j = #k))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ #i.
+  (SEAF_End( ) @ #i)
+ ∧
+  (∀ X data #r. (Rev( X, data ) @ #r) ⇒ ⊥) ∧
+  (∀ supi HN sqn_root #i.1.
+    (Sqn_Create( supi, HN, sqn_root ) @ #i.1)
+   ⇒
+    ∀ #j. (K( sqn_root ) @ #j) ⇒ ⊥) ∧
+  (∀ HN1 HN2 #j #k.
+    (HomeNet( HN1 ) @ #j) ∧ (HomeNet( HN2 ) @ #k) ⇒ #j = #k) ∧
+  (∀ S1 S2 HN1 HN2 #j #k.
+    (Subscribe( S1, HN1 ) @ #j) ∧ (Subscribe( S2, HN2 ) @ #k) ⇒ #j = #k) ∧
+  (∀ SNID1 SNID2 #j #k.
+    (Start_SEAF_Session( SNID1 ) @ #j) ∧ (Start_SEAF_Session( SNID2 ) @ #k)
+   ⇒
+    #j = #k) ∧
+  (∀ UE1 UE2 #j #k.
+    (Start_UE_Session( UE1 ) @ #j) ∧ (Start_UE_Session( UE2 ) @ #k)
+   ⇒
+    #j = #k) ∧
+  (∀ HN1 HN2 #j #k.
+    (Start_HSS_Session( HN1 ) @ #j) ∧ (Start_HSS_Session( HN2 ) @ #k)
+   ⇒
+    #j = #k)"
+*/
+by sorry
+
+lemma executability_keyConf_honest:
+  exists-trace
+  "∃ #i.
+    (((((((SEAF_EndConf( ) @ #i) ∧ (¬(∃ X data #r. Rev( X, data ) @ #r))) ∧
+         (∀ supi HN sqn_root #i.1.
+           (Sqn_Create( supi, HN, sqn_root ) @ #i.1) ⇒
+           (¬(∃ #j. K( sqn_root ) @ #j)))) ∧
+        (∀ HN1 HN2 #j #k.
+          ((HomeNet( HN1 ) @ #j) ∧ (HomeNet( HN2 ) @ #k)) ⇒ (#j = #k))) ∧
+       (∀ S1 S2 HN1 HN2 #j #k.
+         ((Subscribe( S1, HN1 ) @ #j) ∧ (Subscribe( S2, HN2 ) @ #k)) ⇒
+         (#j = #k))) ∧
+      (∀ SNID1 SNID2 #j #k.
+        ((Start_SEAF_Session( SNID1 ) @ #j) ∧
+         (Start_SEAF_Session( SNID2 ) @ #k)) ⇒
+        (#j = #k))) ∧
+     (∀ UE1 UE2 #j #k.
+       ((Start_UE_Session( UE1 ) @ #j) ∧ (Start_UE_Session( UE2 ) @ #k)) ⇒
+       (#j = #k))) ∧
+    (∀ HN1 HN2 #j #k.
+      ((Start_HSS_Session( HN1 ) @ #j) ∧ (Start_HSS_Session( HN2 ) @ #k)) ⇒
+      (#j = #k))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ #i.
+  (SEAF_EndConf( ) @ #i)
+ ∧
+  (∀ X data #r. (Rev( X, data ) @ #r) ⇒ ⊥) ∧
+  (∀ supi HN sqn_root #i.1.
+    (Sqn_Create( supi, HN, sqn_root ) @ #i.1)
+   ⇒
+    ∀ #j. (K( sqn_root ) @ #j) ⇒ ⊥) ∧
+  (∀ HN1 HN2 #j #k.
+    (HomeNet( HN1 ) @ #j) ∧ (HomeNet( HN2 ) @ #k) ⇒ #j = #k) ∧
+  (∀ S1 S2 HN1 HN2 #j #k.
+    (Subscribe( S1, HN1 ) @ #j) ∧ (Subscribe( S2, HN2 ) @ #k) ⇒ #j = #k) ∧
+  (∀ SNID1 SNID2 #j #k.
+    (Start_SEAF_Session( SNID1 ) @ #j) ∧ (Start_SEAF_Session( SNID2 ) @ #k)
+   ⇒
+    #j = #k) ∧
+  (∀ UE1 UE2 #j #k.
+    (Start_UE_Session( UE1 ) @ #j) ∧ (Start_UE_Session( UE2 ) @ #k)
+   ⇒
+    #j = #k) ∧
+  (∀ HN1 HN2 #j #k.
+    (Start_HSS_Session( HN1 ) @ #j) ∧ (Start_HSS_Session( HN2 ) @ #k)
+   ⇒
+    #j = #k)"
+*/
+by sorry
+
+lemma executability_desync [heuristic={executability_sync}]:
+  exists-trace
+  "∃ dif #i.
+    ((((((((HSS_Resync_End( dif ) @ #i) ∧
+           (¬(∃ X data #r. Rev( X, data ) @ #r))) ∧
+          (∀ supi HN sqn_root #i.1.
+            (Sqn_Create( supi, HN, sqn_root ) @ #i.1) ⇒
+            (¬(∃ #j. K( sqn_root ) @ #j)))) ∧
+         (∀ HN1 HN2 #j #k.
+           ((HomeNet( HN1 ) @ #j) ∧ (HomeNet( HN2 ) @ #k)) ⇒ (#j = #k))) ∧
+        (∀ S1 S2 HN1 HN2 #j #k.
+          ((Subscribe( S1, HN1 ) @ #j) ∧ (Subscribe( S2, HN2 ) @ #k)) ⇒
+          (#j = #k))) ∧
+       (∀ SNID1 SNID2 #j #k.
+         ((Start_SEAF_Session( SNID1 ) @ #j) ∧
+          (Start_SEAF_Session( SNID2 ) @ #k)) ⇒
+         (#j = #k))) ∧
+      (∀ UE1 UE2 #j #k.
+        ((Start_UE_Session( UE1 ) @ #j) ∧ (Start_UE_Session( UE2 ) @ #k)) ⇒
+        (#j = #k))) ∧
+     (∀ #j #k.
+       ((Sqn_UE_Desync( ) @ #j) ∧ (Sqn_UE_Desync( ) @ #k)) ⇒ (#j = #k))) ∧
+    (∀ HN1 HN2 #j #k.
+      ((Start_HSS_Session( HN1 ) @ #j) ∧ (Start_HSS_Session( HN2 ) @ #k)) ⇒
+      (#j = #k))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ dif #i.
+  (HSS_Resync_End( dif ) @ #i)
+ ∧
+  (∀ X data #r. (Rev( X, data ) @ #r) ⇒ ⊥) ∧
+  (∀ supi HN sqn_root #i.1.
+    (Sqn_Create( supi, HN, sqn_root ) @ #i.1)
+   ⇒
+    ∀ #j. (K( sqn_root ) @ #j) ⇒ ⊥) ∧
+  (∀ HN1 HN2 #j #k.
+    (HomeNet( HN1 ) @ #j) ∧ (HomeNet( HN2 ) @ #k) ⇒ #j = #k) ∧
+  (∀ S1 S2 HN1 HN2 #j #k.
+    (Subscribe( S1, HN1 ) @ #j) ∧ (Subscribe( S2, HN2 ) @ #k) ⇒ #j = #k) ∧
+  (∀ SNID1 SNID2 #j #k.
+    (Start_SEAF_Session( SNID1 ) @ #j) ∧ (Start_SEAF_Session( SNID2 ) @ #k)
+   ⇒
+    #j = #k) ∧
+  (∀ UE1 UE2 #j #k.
+    (Start_UE_Session( UE1 ) @ #j) ∧ (Start_UE_Session( UE2 ) @ #k)
+   ⇒
+    #j = #k) ∧
+  (∀ #j #k. (Sqn_UE_Desync( ) @ #j) ∧ (Sqn_UE_Desync( ) @ #k) ⇒ #j = #k) ∧
+  (∀ HN1 HN2 #j #k.
+    (Start_HSS_Session( HN1 ) @ #j) ∧ (Start_HSS_Session( HN2 ) @ #k)
+   ⇒
+    #j = #k)"
+*/
+by sorry
+
+lemma executability_resync [heuristic={executability_sync}]:
+  exists-trace
+  "∃ #i1 #i2 #i3 #i4 X.
+    ((((((((((((((((((Start_HSS_Session( X ) @ #i1) ∧
+                     (HSS_Resync_End( ('1'++'1'++'1'++'1') ) @ #i2)) ∧
+                    (Start_HSS_Session( X ) @ #i3)) ∧
+                   (HSS_End( ) @ #i4)) ∧
+                  (#i1 < #i2)) ∧
+                 (#i2 < #i3)) ∧
+                (#i3 < #i4)) ∧
+               (¬(∃ X.1 data #r. Rev( X.1, data ) @ #r))) ∧
+              (∀ #j #k.
+                ((Sqn_UE_Desync( ) @ #j) ∧ (Sqn_UE_Desync( ) @ #k)) ⇒ (#j = #k))) ∧
+             (∀ a b #j #k.
+               ((HSS_Resync_End( a ) @ #j) ∧ (HSS_Resync_End( b ) @ #k)) ⇒ (#j = #k))) ∧
+            (∀ #j #k #l.
+              ((((HSS_Send_Aia( ) @ #j) ∧ (HSS_Send_Aia( ) @ #k)) ∧
+                (HSS_Send_Aia( ) @ #l)) ∧
+               (¬(#j = #k))) ⇒
+              ((#j = #l) ∨ (#k = #l)))) ∧
+           (∀ #j #k. ((HSS_End( ) @ #j) ∧ (HSS_End( ) @ #k)) ⇒ (#j = #k))) ∧
+          (∀ supi HN sqn_root #i.
+            (Sqn_Create( supi, HN, sqn_root ) @ #i) ⇒
+            (¬(∃ #j. !KU( sqn_root ) @ #j)))) ∧
+         (∀ HN1 HN2 #j #k.
+           ((HomeNet( HN1 ) @ #j) ∧ (HomeNet( HN2 ) @ #k)) ⇒ (#j = #k))) ∧
+        (∀ SN1 SN2 #j #k.
+          ((ServNet( SN1 ) @ #j) ∧ (ServNet( SN2 ) @ #k)) ⇒ (#j = #k))) ∧
+       (∀ S1 S2 H1 H2 sqn_root1 sqn_root2 #k #j.
+         ((Sqn_Create( S1, H1, sqn_root1 ) @ #j) ∧
+          (Sqn_Create( S2, H2, sqn_root2 ) @ #k)) ⇒
+         (#j = #k))) ∧
+      (∀ UE1 UE2 UE3 #j #k #l.
+        ((((Start_UE_Session( UE1 ) @ #j) ∧ (Start_UE_Session( UE2 ) @ #k)) ∧
+          (Start_UE_Session( UE3 ) @ #l)) ∧
+         (¬(#j = #k))) ⇒
+        ((#j = #l) ∨ (#k = #l)))) ∧
+     (∀ HN1 HN2 HN3 #j #k #l.
+       ((((Start_HSS_Session( HN1 ) @ #j) ∧ (Start_HSS_Session( HN2 ) @ #k)) ∧
+         (Start_HSS_Session( HN3 ) @ #l)) ∧
+        (¬(#j = #k))) ⇒
+       ((#j = #l) ∨ (#k = #l)))) ∧
+    (∀ SNID1 SNID2 SNID3 #j #k #l.
+      ((((Start_SEAF_Session( SNID1 ) @ #j) ∧
+         (Start_SEAF_Session( SNID2 ) @ #k)) ∧
+        (Start_SEAF_Session( SNID3 ) @ #l)) ∧
+       (¬(#j = #k))) ⇒
+      ((#j = #l) ∨ (#k = #l)))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ #i1 #i2 #i3 #i4 X.
+  (Start_HSS_Session( X ) @ #i1) ∧
+  (HSS_Resync_End( ('1'++'1'++'1'++'1') ) @ #i2) ∧
+  (Start_HSS_Session( X ) @ #i3) ∧
+  (HSS_End( ) @ #i4)
+ ∧
+  (#i1 < #i2) ∧
+  (#i2 < #i3) ∧
+  (#i3 < #i4) ∧
+  (∀ X.1 data #r. (Rev( X.1, data ) @ #r) ⇒ ⊥) ∧
+  (∀ #j #k. (Sqn_UE_Desync( ) @ #j) ∧ (Sqn_UE_Desync( ) @ #k) ⇒ #j = #k) ∧
+  (∀ a b #j #k.
+    (HSS_Resync_End( a ) @ #j) ∧ (HSS_Resync_End( b ) @ #k) ⇒ #j = #k) ∧
+  (∀ #j #k #l.
+    (HSS_Send_Aia( ) @ #j) ∧ (HSS_Send_Aia( ) @ #k) ∧ (HSS_Send_Aia( ) @ #l)
+   ⇒
+    ((#j = #k) ∨ (#j = #l) ∨ (#k = #l))) ∧
+  (∀ #j #k. (HSS_End( ) @ #j) ∧ (HSS_End( ) @ #k) ⇒ #j = #k) ∧
+  (∀ supi HN sqn_root #i.
+    (Sqn_Create( supi, HN, sqn_root ) @ #i)
+   ⇒
+    ∀ #j. (!KU( sqn_root ) @ #j) ⇒ ⊥) ∧
+  (∀ HN1 HN2 #j #k.
+    (HomeNet( HN1 ) @ #j) ∧ (HomeNet( HN2 ) @ #k) ⇒ #j = #k) ∧
+  (∀ SN1 SN2 #j #k.
+    (ServNet( SN1 ) @ #j) ∧ (ServNet( SN2 ) @ #k) ⇒ #j = #k) ∧
+  (∀ S1 S2 H1 H2 sqn_root1 sqn_root2 #k #j.
+    (Sqn_Create( S1, H1, sqn_root1 ) @ #j) ∧
+    (Sqn_Create( S2, H2, sqn_root2 ) @ #k)
+   ⇒
+    #j = #k) ∧
+  (∀ UE1 UE2 UE3 #j #k #l.
+    (Start_UE_Session( UE1 ) @ #j) ∧
+    (Start_UE_Session( UE2 ) @ #k) ∧
+    (Start_UE_Session( UE3 ) @ #l)
+   ⇒
+    ((#j = #k) ∨ (#j = #l) ∨ (#k = #l))) ∧
+  (∀ HN1 HN2 HN3 #j #k #l.
+    (Start_HSS_Session( HN1 ) @ #j) ∧
+    (Start_HSS_Session( HN2 ) @ #k) ∧
+    (Start_HSS_Session( HN3 ) @ #l)
+   ⇒
+    ((#j = #k) ∨ (#j = #l) ∨ (#k = #l))) ∧
+  (∀ SNID1 SNID2 SNID3 #j #k #l.
+    (Start_SEAF_Session( SNID1 ) @ #j) ∧
+    (Start_SEAF_Session( SNID2 ) @ #k) ∧
+    (Start_SEAF_Session( SNID3 ) @ #l)
+   ⇒
+    ((#j = #k) ∨ (#j = #l) ∨ (#k = #l)))"
+*/
+by sorry
+
+lemma weakagreement_ue_seaf_noRev [heuristic={weakagreement_ue_seaf_noRev},
+                                   hide_lemma=sqn_ue_nodecrease, hide_lemma=sqn_ue_src,
+                                   hide_lemma=sqn_hss_src]:
+  all-traces
+  "∀ a b t #i.
+    (Commit( a, b, <'UE', 'SEAF', t> ) @ #i) ⇒
+    ((∃ t2 #j. Running( b, a, t2 ) @ #j) ∨
+     (∃ X data #r. (Rev( X, data ) @ #r) ∧ (Honest( X ) @ #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a b t #i.
+  (Commit( a, b, <'UE', 'SEAF', t> ) @ #i)
+ ∧
+  (∀ t2 #j. (Running( b, a, t2 ) @ #j) ⇒ ⊥) ∧
+  (∀ X data #r. (Rev( X, data ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥)"
+*/
+by sorry
+
+lemma weakagreement_ue_seaf_keyConf_noAsyKeyRev_noSupiRev_noSqnRev_noChanRev [heuristic={weakagreement_ue_seaf_keyConf},
+                                                                              hide_lemma=sqn_ue_nodecrease,
+                                                                              hide_lemma=sqn_ue_src,
+                                                                              hide_lemma=sqn_hss_src]:
+  all-traces
+  "∀ a b t #i.
+    (CommitConf( a, b, <'UE', 'SEAF', t> ) @ #i) ⇒
+    (((((∃ t2 #j. Running( b, a, t2 ) @ #j) ∨
+        (∃ X #r. (Rev( X, 'secureChannel' ) @ #r) ∧ (Honest( X ) @ #i))) ∨
+       (∃ X k #r. (Rev( X, <'skHN', k> ) @ #r) ∧ (Honest( X ) @ #i))) ∨
+      (∃ X s #r. (Rev( X, <'sqn', s> ) @ #r) ∧ (Honest( X ) @ #i))) ∨
+     (∃ X s #r. (Rev( X, <'supi', s> ) @ #r) ∧ (Honest( X ) @ #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a b t #i.
+  (CommitConf( a, b, <'UE', 'SEAF', t> ) @ #i)
+ ∧
+  (∀ t2 #j. (Running( b, a, t2 ) @ #j) ⇒ ⊥) ∧
+  (∀ X #r. (Rev( X, 'secureChannel' ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥) ∧
+  (∀ X k #r. (Rev( X, <'skHN', k> ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥) ∧
+  (∀ X s #r. (Rev( X, <'sqn', s> ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥) ∧
+  (∀ X s #r. (Rev( X, <'supi', s> ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥)"
+*/
+by sorry
+
+lemma weakagreement_ue_seaf_keyConf_noAsyKeyRev_noSupiRev_noSqnRev_noKeyRev [heuristic={weakagreement_ue_seaf_keyConf_noAsyKeyRev_noSupiRev_noSqnRev_noKeyRev},
+                                                                             hide_lemma=sqn_ue_nodecrease,
+                                                                             hide_lemma=sqn_ue_src,
+                                                                             hide_lemma=sqn_hss_src]:
+  all-traces
+  "∀ a b t #i.
+    (CommitConf( a, b, <'UE', 'SEAF', t> ) @ #i) ⇒
+    (((((∃ t2 #j. Running( b, a, t2 ) @ #j) ∨
+        (∃ X key #r. (Rev( X, <'k', key> ) @ #r) ∧ (Honest( X ) @ #i))) ∨
+       (∃ X k #r. (Rev( X, <'skHN', k> ) @ #r) ∧ (Honest( X ) @ #i))) ∨
+      (∃ X s #r. (Rev( X, <'sqn', s> ) @ #r) ∧ (Honest( X ) @ #i))) ∨
+     (∃ X s #r. (Rev( X, <'supi', s> ) @ #r) ∧ (Honest( X ) @ #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a b t #i.
+  (CommitConf( a, b, <'UE', 'SEAF', t> ) @ #i)
+ ∧
+  (∀ t2 #j. (Running( b, a, t2 ) @ #j) ⇒ ⊥) ∧
+  (∀ X key #r. (Rev( X, <'k', key> ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥) ∧
+  (∀ X k #r. (Rev( X, <'skHN', k> ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥) ∧
+  (∀ X s #r. (Rev( X, <'sqn', s> ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥) ∧
+  (∀ X s #r. (Rev( X, <'supi', s> ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥)"
+*/
+by sorry
+
+lemma injectiveagreement_ue_seaf_kseaf_keyConf_noKeyRev_noChanRev [heuristic={injectiveagreement_ue_seaf_kseaf_keyConf_noKeyRev_noChanRev},
+                                                                   hide_lemma=sqn_ue_src,
+                                                                   hide_lemma=sqn_hss_src,
+                                                                   hide_lemma=sqn_ue_nodecrease]:
+  all-traces
+  "∀ a b t #i.
+    (CommitConf( a, b, <'UE', 'SEAF', 'K_seaf', t> ) @ #i) ⇒
+    (((∃ #j.
+        ((Running( b, a, <'UE', 'SEAF', 'K_seaf', t> ) @ #j) ∧ (#j < #i)) ∧
+        (¬(∃ a2 b2 #i2.
+            (CommitConf( a2, b2, <'UE', 'SEAF', 'K_seaf', t> ) @ #i2) ∧
+            (¬(#i2 = #i))))) ∨
+      (∃ X key #r. (Rev( X, <'k', key> ) @ #r) ∧ (Honest( X ) @ #i))) ∨
+     (∃ X #r. (Rev( X, 'secureChannel' ) @ #r) ∧ (Honest( X ) @ #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a b t #i.
+  (CommitConf( a, b, <'UE', 'SEAF', 'K_seaf', t> ) @ #i)
+ ∧
+  (∀ #j.
+    (Running( b, a, <'UE', 'SEAF', 'K_seaf', t> ) @ #j)
+   ⇒
+    ((¬(#j < #i)) ∨
+     (∃ a2 b2 #i2.
+       (CommitConf( a2, b2, <'UE', 'SEAF', 'K_seaf', t> ) @ #i2)
+      ∧
+       ¬(#i2 = #i)))) ∧
+  (∀ X key #r. (Rev( X, <'k', key> ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥) ∧
+  (∀ X #r. (Rev( X, 'secureChannel' ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥)"
+*/
+by sorry
+
+lemma weakagreement_seaf_ue_noKeyRev_noAsyKeyRev_noSupiRev_noSqnRev [heuristic={many},
+                                                                     hide_lemma=sqn_ue_src,
+                                                                     hide_lemma=sqn_hss_src,
+                                                                     hide_lemma=sqn_ue_nodecrease]:
+  all-traces
+  "∀ a b t #i.
+    (Commit( a, b, <'SEAF', 'UE', t> ) @ #i) ⇒
+    (((((∃ t2 #j. Running( b, a, t2 ) @ #j) ∨
+        (∃ X key #r. (Rev( X, <'k', key> ) @ #r) ∧ (Honest( X ) @ #i))) ∨
+       (∃ X k #r. (Rev( X, <'skHN', k> ) @ #r) ∧ (Honest( X ) @ #i))) ∨
+      (∃ X s #r. (Rev( X, <'sqn', s> ) @ #r) ∧ (Honest( X ) @ #i))) ∨
+     (∃ X s #r. (Rev( X, <'supi', s> ) @ #r) ∧ (Honest( X ) @ #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a b t #i.
+  (Commit( a, b, <'SEAF', 'UE', t> ) @ #i)
+ ∧
+  (∀ t2 #j. (Running( b, a, t2 ) @ #j) ⇒ ⊥) ∧
+  (∀ X key #r. (Rev( X, <'k', key> ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥) ∧
+  (∀ X k #r. (Rev( X, <'skHN', k> ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥) ∧
+  (∀ X s #r. (Rev( X, <'sqn', s> ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥) ∧
+  (∀ X s #r. (Rev( X, <'supi', s> ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥)"
+*/
+by sorry
+
+lemma weakagreement_seaf_ue_noAsyKeyRev_noSupiRev_noSqnRev_noChanRev [heuristic={many},
+                                                                      hide_lemma=sqn_ue_src,
+                                                                      hide_lemma=sqn_hss_src,
+                                                                      hide_lemma=sqn_ue_nodecrease]:
+  all-traces
+  "∀ a b t #i.
+    (Commit( a, b, <'SEAF', 'UE', t> ) @ #i) ⇒
+    (((((∃ t2 #j. Running( b, a, t2 ) @ #j) ∨
+        (∃ X #r. (Rev( X, 'secureChannel' ) @ #r) ∧ (Honest( X ) @ #i))) ∨
+       (∃ X k #r. (Rev( X, <'skHN', k> ) @ #r) ∧ (Honest( X ) @ #i))) ∨
+      (∃ X s #r. (Rev( X, <'sqn', s> ) @ #r) ∧ (Honest( X ) @ #i))) ∨
+     (∃ X s #r. (Rev( X, <'supi', s> ) @ #r) ∧ (Honest( X ) @ #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a b t #i.
+  (Commit( a, b, <'SEAF', 'UE', t> ) @ #i)
+ ∧
+  (∀ t2 #j. (Running( b, a, t2 ) @ #j) ⇒ ⊥) ∧
+  (∀ X #r. (Rev( X, 'secureChannel' ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥) ∧
+  (∀ X k #r. (Rev( X, <'skHN', k> ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥) ∧
+  (∀ X s #r. (Rev( X, <'sqn', s> ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥) ∧
+  (∀ X s #r. (Rev( X, <'supi', s> ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥)"
+*/
+by sorry
+
+lemma injectiveagreement_seaf_ue_kseaf_noKeyRev_noChanRev [heuristic={injectiveagreement},
+                                                           hide_lemma=sqn_ue_src, hide_lemma=sqn_hss_src,
+                                                           hide_lemma=sqn_ue_nodecrease]:
+  all-traces
+  "∀ a b t #i.
+    (Commit( a, b, <'SEAF', 'UE', 'K_seaf', t> ) @ #i) ⇒
+    (((∃ #j.
+        ((Running( b, a, <'SEAF', 'UE', 'K_seaf', t> ) @ #j) ∧ (#j < #i)) ∧
+        (¬(∃ a2 b2 #i2.
+            (Commit( a2, b2, <'SEAF', 'UE', 'K_seaf', t> ) @ #i2) ∧
+            (¬(#i2 = #i))))) ∨
+      (∃ X key #r. (Rev( X, <'k', key> ) @ #r) ∧ (Honest( X ) @ #i))) ∨
+     (∃ X #r. (Rev( X, 'secureChannel' ) @ #r) ∧ (Honest( X ) @ #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a b t #i.
+  (Commit( a, b, <'SEAF', 'UE', 'K_seaf', t> ) @ #i)
+ ∧
+  (∀ #j.
+    (Running( b, a, <'SEAF', 'UE', 'K_seaf', t> ) @ #j)
+   ⇒
+    ((¬(#j < #i)) ∨
+     (∃ a2 b2 #i2.
+       (Commit( a2, b2, <'SEAF', 'UE', 'K_seaf', t> ) @ #i2) ∧ ¬(#i2 = #i)))) ∧
+  (∀ X key #r. (Rev( X, <'k', key> ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥) ∧
+  (∀ X #r. (Rev( X, 'secureChannel' ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥)"
+*/
+by sorry
+
+lemma weakagreement_seaf_ue_KeyConf_noKeyRev_noAsyKeyRev_noSupiRev_noSqnRev [heuristic={many},
+                                                                             hide_lemma=sqn_ue_src,
+                                                                             hide_lemma=sqn_hss_src,
+                                                                             hide_lemma=sqn_ue_nodecrease]:
+  all-traces
+  "∀ a b t #i.
+    (CommitConf( a, b, <'SEAF', 'UE', t> ) @ #i) ⇒
+    (((((∃ t2 #j. Running( b, a, t2 ) @ #j) ∨
+        (∃ X key #r. (Rev( X, <'k', key> ) @ #r) ∧ (Honest( X ) @ #i))) ∨
+       (∃ X k #r. (Rev( X, <'skHN', k> ) @ #r) ∧ (Honest( X ) @ #i))) ∨
+      (∃ X s #r. (Rev( X, <'sqn', s> ) @ #r) ∧ (Honest( X ) @ #i))) ∨
+     (∃ X s #r. (Rev( X, <'supi', s> ) @ #r) ∧ (Honest( X ) @ #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a b t #i.
+  (CommitConf( a, b, <'SEAF', 'UE', t> ) @ #i)
+ ∧
+  (∀ t2 #j. (Running( b, a, t2 ) @ #j) ⇒ ⊥) ∧
+  (∀ X key #r. (Rev( X, <'k', key> ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥) ∧
+  (∀ X k #r. (Rev( X, <'skHN', k> ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥) ∧
+  (∀ X s #r. (Rev( X, <'sqn', s> ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥) ∧
+  (∀ X s #r. (Rev( X, <'supi', s> ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥)"
+*/
+by sorry
+
+lemma weakagreement_seaf_ue_KeyConf_noChanRev_noAsyKeyRev_noSupiRev_noSqnRev [heuristic={many},
+                                                                              hide_lemma=sqn_ue_src,
+                                                                              hide_lemma=sqn_hss_src,
+                                                                              hide_lemma=sqn_ue_nodecrease]:
+  all-traces
+  "∀ a b t #i.
+    (CommitConf( a, b, <'SEAF', 'UE', t> ) @ #i) ⇒
+    (((((∃ t2 #j. Running( b, a, t2 ) @ #j) ∨
+        (∃ X #r. (Rev( X, 'secureChannel' ) @ #r) ∧ (Honest( X ) @ #i))) ∨
+       (∃ X k #r. (Rev( X, <'skHN', k> ) @ #r) ∧ (Honest( X ) @ #i))) ∨
+      (∃ X s #r. (Rev( X, <'sqn', s> ) @ #r) ∧ (Honest( X ) @ #i))) ∨
+     (∃ X s #r. (Rev( X, <'supi', s> ) @ #r) ∧ (Honest( X ) @ #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a b t #i.
+  (CommitConf( a, b, <'SEAF', 'UE', t> ) @ #i)
+ ∧
+  (∀ t2 #j. (Running( b, a, t2 ) @ #j) ⇒ ⊥) ∧
+  (∀ X #r. (Rev( X, 'secureChannel' ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥) ∧
+  (∀ X k #r. (Rev( X, <'skHN', k> ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥) ∧
+  (∀ X s #r. (Rev( X, <'sqn', s> ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥) ∧
+  (∀ X s #r. (Rev( X, <'supi', s> ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥)"
+*/
+by sorry
+
+lemma injectiveagreement_seaf_ue_kseaf_keyConf_noKeyRev_noChanRev [heuristic={injectiveagreement},
+                                                                   hide_lemma=sqn_ue_src,
+                                                                   hide_lemma=sqn_hss_src,
+                                                                   hide_lemma=sqn_ue_nodecrease]:
+  all-traces
+  "∀ a b t #i.
+    (CommitConf( a, b, <'SEAF', 'UE', 'K_seaf', t> ) @ #i) ⇒
+    (((∃ #j.
+        ((Running( b, a, <'SEAF', 'UE', 'K_seaf', t> ) @ #j) ∧ (#j < #i)) ∧
+        (¬(∃ a2 b2 #i2.
+            (CommitConf( a2, b2, <'SEAF', 'UE', 'K_seaf', t> ) @ #i2) ∧
+            (¬(#i2 = #i))))) ∨
+      (∃ X key #r. (Rev( X, <'k', key> ) @ #r) ∧ (Honest( X ) @ #i))) ∨
+     (∃ X #r. (Rev( X, 'secureChannel' ) @ #r) ∧ (Honest( X ) @ #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a b t #i.
+  (CommitConf( a, b, <'SEAF', 'UE', 'K_seaf', t> ) @ #i)
+ ∧
+  (∀ #j.
+    (Running( b, a, <'SEAF', 'UE', 'K_seaf', t> ) @ #j)
+   ⇒
+    ((¬(#j < #i)) ∨
+     (∃ a2 b2 #i2.
+       (CommitConf( a2, b2, <'SEAF', 'UE', 'K_seaf', t> ) @ #i2)
+      ∧
+       ¬(#i2 = #i)))) ∧
+  (∀ X key #r. (Rev( X, <'k', key> ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥) ∧
+  (∀ X #r. (Rev( X, 'secureChannel' ) @ #r) ∧ (Honest( X ) @ #i) ⇒ ⊥)"
+*/
+by sorry
+
+
+
+end

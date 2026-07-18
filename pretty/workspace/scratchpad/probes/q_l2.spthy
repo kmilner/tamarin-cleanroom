@@ -1,0 +1,14 @@
+theory ql2 begin
+
+rule R1: [ In(x) ] --[ A(x), E(x,x,x,x), B(x,x) ]-> [ Out(x) ]
+
+lemma bw1:
+  "All xlongvariablename01 xlongvariablename02 xlongvariablename03 xlongvariablename04 #i.
+     E(xlongvariablename01, xlongvariablename02, xlongvariablename03, xlongvariablename04)@i ==> T"
+
+lemma bw2:
+  "All x #i. A(x)@i ==>
+     (Ex ylongvariablename01 ylongvariablename02 ylongvariablename03 ylongvariablename04 #j.
+        E(ylongvariablename01, ylongvariablename02, ylongvariablename03, ylongvariablename04)@j)"
+
+end

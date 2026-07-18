@@ -1,0 +1,889 @@
+theory BluetoothMeshProvisioning
+
+begin
+
+// Function signature and definition of the equational theory E
+
+builtins: diffie-hellman
+functions: aes_ccm_dec/3, aes_ccm_enc/3, aes_ccm_verify/4, aes_cmac/2,
+           app_key/0[private,constructor], e/3, extract_e/1, fst/1, get_b1/3,
+           get_b2/3, id6/0, id7/0, k1/3, k2/2, k3/1, k4/1, nb_one/0, nb_three/0,
+           nb_two/0, net_key/0[private,constructor], null/0, pair/2,
+           prov_capabilities/0, prov_complete/0, prov_invite/0, prov_start/0, s1/1,
+           sdec/2, senc/2, smk2/0, smk3/0, smk4/0, snd/1,
+           static_oob/0[private,constructor], true_val/0
+equations:
+    aes_ccm_dec(k, n, aes_ccm_enc(k, n, m)) = m,
+    aes_ccm_enc(k, n, aes_ccm_dec(k, n, m)) = m,
+    aes_ccm_verify(aes_ccm_enc(k, n, m), k, n, m) = true_val,
+    aes_cmac(k, <b1, get_b2(c, k, b1)>) = c,
+    aes_cmac(k, <get_b1(c, k, b2), b2>) = c,
+    extract_e(e(t, s, n)) = n,
+    fst(<x.1, x.2>) = x.1,
+    get_b1(cnf, k, get_b2(cnf, dh, b1)) = b1,
+    get_b1(aes_cmac(k, <b1, b2>), k, b2) = b1,
+    get_b2(cnf, k, get_b1(cnf, dh, b2)) = b2,
+    get_b2(aes_cmac(k, <b1, b2>), k, b1) = b2,
+    k1(n, salt, p) = aes_cmac(aes_cmac(salt, n), p),
+    k2(n, p)
+  = <aes_cmac(aes_cmac(s1(smk2), n), <p, nb_one>), 
+     aes_cmac(aes_cmac(s1(smk2), n),
+              <aes_cmac(aes_cmac(s1(smk2), n), <p, nb_one>), p, nb_two>), 
+     aes_cmac(aes_cmac(s1(smk2), n),
+              <
+               aes_cmac(aes_cmac(s1(smk2), n),
+                        <aes_cmac(aes_cmac(s1(smk2), n), <p, nb_one>), p, nb_two>), 
+               p, nb_three>)
+    >,
+    k3(n) = aes_cmac(aes_cmac(s1(smk3), n), id7),
+    k4(n) = aes_cmac(aes_cmac(s1(smk4), n), id6),
+    s1(m) = aes_cmac(null, m),
+    sdec(senc(x.1, x.2), x.2) = x.1,
+    snd(<x.1, x.2>) = x.2
+
+rule (modulo E) ProvisionerSendProvInvite:
+   [ ProvisionerStartProvisioning( ) ]
+  -->
+   [ ProvisionerReadyToStart( ), Out( prov_invite ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) DeviceSendProvCapabilities:
+   [ DeviceStartProvisioning( ), In( prov_invite ) ]
+  -->
+   [ DeviceReadyToStart( ), Out( prov_capabilities ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ProvisionerSendStart:
+   [ ProvisionerReadyToStart( ), In( prov_capabilities ) ]
+  -->
+   [ ProvisionerReadyECDH( ), Out( prov_start ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) DeviceRecvStart:
+   [ DeviceReadyToStart( ), In( prov_start ) ] --> [ DeviceReadyECDH( ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ProvisionerWaitingUser:
+   [
+   ProvisionerWaitingUserInteraction( pkP, pkD, dh ),
+   ProvisionerAuthProceed( auth )
+   ]
+  -->
+   [ ProvisionerCanStartAuth( pkP, pkD, dh, auth ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) DeviceWaitingUser:
+   [ DeviceWaitingUserInteraction( pkD, pkP, dh ), DeviceAuthProceed( auth )
+   ]
+  -->
+   [ DeviceCanStartAuth( pkD, pkP, dh, auth ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ProvisionerSendConfirm:
+   [ ProvisionerCanStartAuth( pkP, pkD, dh, auth ), Fr( ~Np ) ]
+  --[
+  ProvisionerSendConfirm( pkP, pkD, dh,
+                          k1(dh, s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>),
+                             'prck'),
+                          ~Np, auth
+  )
+  ]->
+   [
+   ProvisionerSendConfirm( pkP, pkD, dh,
+                           k1(dh, s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>),
+                              'prck'),
+                           ~Np, auth
+   ),
+   Out( aes_cmac(k1(dh,
+                    s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), 'prck'),
+                 <~Np, auth>)
+   )
+   ]
+
+  /*
+  rule (modulo AC) ProvisionerSendConfirm:
+     [ ProvisionerCanStartAuth( pkP, pkD, dh, auth ), Fr( ~Np ) ]
+    --[
+    ProvisionerSendConfirm( pkP, pkD, dh, aes_cmac(x, 'prck'), ~Np, auth )
+    ]->
+     [
+     ProvisionerSendConfirm( pkP, pkD, dh, aes_cmac(x, 'prck'), ~Np, auth ),
+     Out( aes_cmac(aes_cmac(x, 'prck'), <~Np, auth>) )
+     ]
+    variants (modulo AC)
+    1. dh    = dh.21
+       pkD   = pkD.22
+       pkP   = pkP.23
+       x     = aes_cmac(aes_cmac(null,
+                                 <prov_invite, prov_capabilities, prov_start, pkP.23, pkD.22>),
+                        dh.21)
+    
+    2. dh    = <x.253, 
+                get_b2(x.134,
+                       aes_cmac(null,
+                                <prov_invite, prov_capabilities, prov_start, pkP.131, pkD.130>),
+                       x.253)
+               >
+       pkD   = pkD.130
+       pkP   = pkP.131
+       x     = x.134
+    
+    3. dh    = <
+                get_b1(x.137,
+                       aes_cmac(null,
+                                <prov_invite, prov_capabilities, prov_start, pkP.134, pkD.133>),
+                       x.259), 
+                x.259>
+       pkD   = pkD.133
+       pkP   = pkP.134
+       x     = x.137
+  */
+
+rule (modulo E) DeviceSendConfirm:
+   [ DeviceCanStartAuth( pkD, pkP, dh, auth ), Fr( ~Nd ), In( Cp ) ]
+  --[
+  DeviceSendConfirm( pkD, pkP, dh,
+                     k1(dh, s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>),
+                        'prck'),
+                     ~Nd, Cp, auth
+  )
+  ]->
+   [
+   DeviceSendConfirm( pkD, pkP, dh,
+                      k1(dh, s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>),
+                         'prck'),
+                      ~Nd, Cp, auth
+   ),
+   Out( aes_cmac(k1(dh,
+                    s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), 'prck'),
+                 <~Nd, auth>)
+   )
+   ]
+
+  /*
+  rule (modulo AC) DeviceSendConfirm:
+     [ DeviceCanStartAuth( pkD, pkP, dh, auth ), Fr( ~Nd ), In( Cp ) ]
+    --[ DeviceSendConfirm( pkD, pkP, dh, aes_cmac(x, 'prck'), ~Nd, Cp, auth )
+    ]->
+     [
+     DeviceSendConfirm( pkD, pkP, dh, aes_cmac(x, 'prck'), ~Nd, Cp, auth ),
+     Out( aes_cmac(aes_cmac(x, 'prck'), <~Nd, auth>) )
+     ]
+    variants (modulo AC)
+    1. dh    = dh.22
+       pkD   = pkD.23
+       pkP   = pkP.24
+       x     = aes_cmac(aes_cmac(null,
+                                 <prov_invite, prov_capabilities, prov_start, pkP.24, pkD.23>),
+                        dh.22)
+    
+    2. dh    = <x.270, 
+                get_b2(x.143,
+                       aes_cmac(null,
+                                <prov_invite, prov_capabilities, prov_start, pkP.140, pkD.139>),
+                       x.270)
+               >
+       pkD   = pkD.139
+       pkP   = pkP.140
+       x     = x.143
+    
+    3. dh    = <
+                get_b1(x.146,
+                       aes_cmac(null,
+                                <prov_invite, prov_capabilities, prov_start, pkP.143, pkD.142>),
+                       x.276), 
+                x.276>
+       pkD   = pkD.142
+       pkP   = pkP.143
+       x     = x.146
+  */
+
+rule (modulo E) ProvisionerSendRandom:
+   [ ProvisionerSendConfirm( pkP, pkD, dh, ck, ~Np, auth ), In( Cd ) ]
+  --[ ProvisionerSendRandom( pkP, pkD, dh, ck, ~Np, Cd, auth ) ]->
+   [ ProvisionerSendRandom( pkP, pkD, dh, ck, ~Np, Cd, auth ), Out( ~Np ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) DeviceSendRandom:
+   [
+   DeviceSendConfirm( pkD, pkP, dh, ck, ~Nd, aes_cmac(ck, <Np, auth>), auth
+   ),
+   In( Np )
+   ]
+  --[ DeviceSendRandom( pkD, pkP, dh, ck, ~Nd, Np, auth ) ]->
+   [ DeviceSendRandom( pkD, pkP, dh, ck, ~Nd, Np, auth ), Out( ~Nd ) ]
+
+  /*
+  rule (modulo AC) DeviceSendRandom:
+     [ DeviceSendConfirm( pkD, pkP, dh, ck, ~Nd, z, auth ), In( Np ) ]
+    --[ DeviceSendRandom( pkD, pkP, dh, ck, ~Nd, Np, auth ) ]->
+     [ DeviceSendRandom( pkD, pkP, dh, ck, ~Nd, Np, auth ), Out( ~Nd ) ]
+    variants (modulo AC)
+    1. Np    = Np.9
+       auth  = auth.9
+       ck    = ck.9
+       z     = aes_cmac(ck.9, <Np.9, auth.9>)
+    
+    2. Np    = x.9
+       auth  = get_b2(x.10, x.11, x.9)
+       ck    = x.11
+       z     = x.10
+    
+    3. Np    = get_b1(x.9, x.10, x.11)
+       auth  = x.11
+       ck    = x.10
+       z     = x.9
+  */
+
+rule (modulo E) ProvisionerRecvRandom:
+   [
+   ProvisionerSendRandom( pkP, pkD, dh, ck, ~Np, aes_cmac(ck, <Nd, auth>),
+                          auth
+   ),
+   In( Nd )
+   ]
+  --[ ProvisionerRecvRandom( pkP, pkD, dh, ck, ~Np, Nd, auth ) ]->
+   [ ProvisionerRecvRandom( pkP, pkD, dh, ck, ~Np, Nd, auth ) ]
+
+  /*
+  rule (modulo AC) ProvisionerRecvRandom:
+     [ ProvisionerSendRandom( pkP, pkD, dh, ck, ~Np, z, auth ), In( Nd ) ]
+    --[ ProvisionerRecvRandom( pkP, pkD, dh, ck, ~Np, Nd, auth ) ]->
+     [ ProvisionerRecvRandom( pkP, pkD, dh, ck, ~Np, Nd, auth ) ]
+    variants (modulo AC)
+    1. Nd    = Nd.9
+       auth  = auth.9
+       ck    = ck.9
+       z     = aes_cmac(ck.9, <Nd.9, auth.9>)
+    
+    2. Nd    = x.9
+       auth  = get_b2(x.10, x.11, x.9)
+       ck    = x.11
+       z     = x.10
+    
+    3. Nd    = get_b1(x.9, x.10, x.11)
+       auth  = x.11
+       ck    = x.10
+       z     = x.9
+  */
+
+rule (modulo E) ProvisionerSendNetKey:
+   [ ProvisionerRecvRandom( pkP, pkD, dh, ck, ~Np, Nd, auth ) ]
+  --[
+  ProvisionerSendNetKey( pkP, pkD, dh, ck, ~Np, Nd,
+                         k1(dh,
+                            s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), ~Np, Nd
+                               >),
+                            'prsk'),
+                         net_key,
+                         k1(dh,
+                            s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), ~Np, Nd
+                               >),
+                            'prdk')
+  )
+  ]->
+   [
+   ProvisionerSendNetKey( pkP, pkD, dh, ck, ~Np, Nd,
+                          k1(dh,
+                             s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), ~Np, Nd
+                                >),
+                             'prsk'),
+                          net_key,
+                          k1(dh,
+                             s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), ~Np, Nd
+                                >),
+                             'prdk')
+   ),
+   Out( aes_ccm_enc(k1(dh,
+                       s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), ~Np, Nd
+                          >),
+                       'prsk'),
+                    k1(dh,
+                       s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), ~Np, Nd
+                          >),
+                       'prsn'),
+                    net_key)
+   )
+   ]
+
+  /*
+  rule (modulo AC) ProvisionerSendNetKey:
+     [ ProvisionerRecvRandom( pkP, pkD, dh, ck, ~Np, Nd, auth ) ]
+    --[
+    ProvisionerSendNetKey( pkP, pkD, dh, ck, ~Np, Nd, aes_cmac(x, 'prsk'),
+                           net_key, aes_cmac(x, 'prdk')
+    )
+    ]->
+     [
+     ProvisionerSendNetKey( pkP, pkD, dh, ck, ~Np, Nd, aes_cmac(x, 'prsk'),
+                            net_key, aes_cmac(x, 'prdk')
+     ),
+     Out( aes_ccm_enc(aes_cmac(x, 'prsk'), aes_cmac(x, 'prsn'), net_key) )
+     ]
+    variants (modulo AC)
+    1. ~Np   = ~Np.19
+       Nd    = Nd.20
+       dh    = dh.23
+       pkD   = pkD.24
+       pkP   = pkP.25
+       x     = aes_cmac(aes_cmac(null,
+                                 <
+                                  aes_cmac(null,
+                                           <prov_invite, prov_capabilities, prov_start, pkP.25, pkD.24>), 
+                                  ~Np.19, Nd.20>),
+                        dh.23)
+    
+    2. ~Np   = ~Np.213
+       Nd    = Nd.214
+       dh    = <x.424, 
+                get_b2(x.223,
+                       aes_cmac(null,
+                                <
+                                 aes_cmac(null,
+                                          <prov_invite, prov_capabilities, prov_start, pkP.219, pkD.218>), 
+                                 ~Np.213, Nd.214>),
+                       x.424)
+               >
+       pkD   = pkD.218
+       pkP   = pkP.219
+       x     = x.223
+    
+    3. ~Np   = ~Np.216
+       Nd    = Nd.217
+       dh    = <
+                get_b1(x.226,
+                       aes_cmac(null,
+                                <
+                                 aes_cmac(null,
+                                          <prov_invite, prov_capabilities, prov_start, pkP.222, pkD.221>), 
+                                 ~Np.216, Nd.217>),
+                       x.430), 
+                x.430>
+       pkD   = pkD.221
+       pkP   = pkP.222
+       x     = x.226
+  */
+
+rule (modulo E) DeviceRecvNetKey:
+   [ DeviceSendRandom( pkD, pkP, dh, ck, ~Nd, Np, auth ), In( prov_data ) ]
+  --[
+  IsTrue( aes_ccm_verify(prov_data,
+                         k1(dh,
+                            s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), Np, ~Nd
+                               >),
+                            'prsk'),
+                         k1(dh,
+                            s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), Np, ~Nd
+                               >),
+                            'prsn'),
+                         aes_ccm_dec(k1(dh,
+                                        s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), Np, 
+                                            ~Nd>),
+                                        'prsk'),
+                                     k1(dh,
+                                        s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), Np, 
+                                            ~Nd>),
+                                        'prsn'),
+                                     prov_data))
+  ),
+  DeviceRecvNetKey( pkD, pkP, dh, ck, ~Nd, Np,
+                    k1(dh,
+                       s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), Np, ~Nd
+                          >),
+                       'prsk'),
+                    aes_ccm_dec(k1(dh,
+                                   s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), Np, ~Nd
+                                      >),
+                                   'prsk'),
+                                k1(dh,
+                                   s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), Np, ~Nd
+                                      >),
+                                   'prsn'),
+                                prov_data),
+                    k1(dh,
+                       s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), Np, ~Nd
+                          >),
+                       'prdk')
+  ),
+  DeviceFinishedProvisioning( pkD, pkP, dh, ck, ~Nd, Np,
+                              k1(dh,
+                                 s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), Np, ~Nd
+                                    >),
+                                 'prsk'),
+                              aes_ccm_dec(k1(dh,
+                                             s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), 
+                                                 Np, ~Nd>),
+                                             'prsk'),
+                                          k1(dh,
+                                             s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), 
+                                                 Np, ~Nd>),
+                                             'prsn'),
+                                          prov_data),
+                              k1(dh,
+                                 s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), Np, ~Nd
+                                    >),
+                                 'prdk')
+  )
+  ]->
+   [
+   DeviceRecvNetKey( pkD, pkP, dh, ck, ~Nd, Np,
+                     k1(dh,
+                        s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), Np, ~Nd
+                           >),
+                        'prsk'),
+                     aes_ccm_dec(k1(dh,
+                                    s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), Np, ~Nd
+                                       >),
+                                    'prsk'),
+                                 k1(dh,
+                                    s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), Np, ~Nd
+                                       >),
+                                    'prsn'),
+                                 prov_data),
+                     k1(dh,
+                        s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), Np, ~Nd
+                           >),
+                        'prdk')
+   ),
+   DeviceFinishedProvisioning( pkD, pkP, dh, ck, ~Nd, Np,
+                               k1(dh,
+                                  s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), Np, ~Nd
+                                     >),
+                                  'prsk'),
+                               aes_ccm_dec(k1(dh,
+                                              s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), 
+                                                  Np, ~Nd>),
+                                              'prsk'),
+                                           k1(dh,
+                                              s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), 
+                                                  Np, ~Nd>),
+                                              'prsn'),
+                                           prov_data),
+                               k1(dh,
+                                  s1(<s1(<prov_invite, prov_capabilities, prov_start, pkP, pkD>), Np, ~Nd
+                                     >),
+                                  'prdk')
+   ),
+   Out( prov_complete )
+   ]
+
+  /*
+  rule (modulo AC) DeviceRecvNetKey:
+     [ DeviceSendRandom( pkD, pkP, dh, ck, ~Nd, Np, auth ), In( prov_data ) ]
+    --[
+    IsTrue( z.1 ),
+    DeviceRecvNetKey( pkD, pkP, dh, ck, ~Nd, Np, aes_cmac(x, 'prsk'), z,
+                      aes_cmac(x, 'prdk')
+    ),
+    DeviceFinishedProvisioning( pkD, pkP, dh, ck, ~Nd, Np,
+                                aes_cmac(x, 'prsk'), z, aes_cmac(x, 'prdk')
+    )
+    ]->
+     [
+     DeviceRecvNetKey( pkD, pkP, dh, ck, ~Nd, Np, aes_cmac(x, 'prsk'), z,
+                       aes_cmac(x, 'prdk')
+     ),
+     DeviceFinishedProvisioning( pkD, pkP, dh, ck, ~Nd, Np,
+                                 aes_cmac(x, 'prsk'), z, aes_cmac(x, 'prdk')
+     ),
+     Out( prov_complete )
+     ]
+    variants (modulo AC)
+    1. ~Nd   = ~Nd.24
+       Np    = Np.25
+       dh    = dh.28
+       pkD   = pkD.29
+       pkP   = pkP.30
+       prov_data
+             = prov_data.31
+       x     = aes_cmac(aes_cmac(null,
+                                 <
+                                  aes_cmac(null,
+                                           <prov_invite, prov_capabilities, prov_start, pkP.30, pkD.29>), 
+                                  Np.25, ~Nd.24>),
+                        dh.28)
+       z     = aes_ccm_dec(aes_cmac(aes_cmac(aes_cmac(null,
+                                                      <
+                                                       aes_cmac(null,
+                                                                <prov_invite, prov_capabilities, prov_start, 
+                                                                 pkP.30, pkD.29>), 
+                                                       Np.25, ~Nd.24>),
+                                             dh.28),
+                                    'prsk'),
+                           aes_cmac(aes_cmac(aes_cmac(null,
+                                                      <
+                                                       aes_cmac(null,
+                                                                <prov_invite, prov_capabilities, prov_start, 
+                                                                 pkP.30, pkD.29>), 
+                                                       Np.25, ~Nd.24>),
+                                             dh.28),
+                                    'prsn'),
+                           prov_data.31)
+       z.1   = aes_ccm_verify(prov_data.31,
+                              aes_cmac(aes_cmac(aes_cmac(null,
+                                                         <
+                                                          aes_cmac(null,
+                                                                   <prov_invite, prov_capabilities, 
+                                                                    prov_start, pkP.30, pkD.29>), 
+                                                          Np.25, ~Nd.24>),
+                                                dh.28),
+                                       'prsk'),
+                              aes_cmac(aes_cmac(aes_cmac(null,
+                                                         <
+                                                          aes_cmac(null,
+                                                                   <prov_invite, prov_capabilities, 
+                                                                    prov_start, pkP.30, pkD.29>), 
+                                                          Np.25, ~Nd.24>),
+                                                dh.28),
+                                       'prsn'),
+                              aes_ccm_dec(aes_cmac(aes_cmac(aes_cmac(null,
+                                                                     <
+                                                                      aes_cmac(null,
+                                                                               <prov_invite, 
+                                                                                prov_capabilities, 
+                                                                                prov_start, pkP.30, pkD.29>), 
+                                                                      Np.25, ~Nd.24>),
+                                                            dh.28),
+                                                   'prsk'),
+                                          aes_cmac(aes_cmac(aes_cmac(null,
+                                                                     <
+                                                                      aes_cmac(null,
+                                                                               <prov_invite, 
+                                                                                prov_capabilities, 
+                                                                                prov_start, pkP.30, pkD.29>), 
+                                                                      Np.25, ~Nd.24>),
+                                                            dh.28),
+                                                   'prsn'),
+                                          prov_data.31))
+    
+    2. ~Nd   = ~Nd.26
+       Np    = Np.27
+       dh    = dh.30
+       pkD   = pkD.31
+       pkP   = pkP.32
+       prov_data
+             = aes_ccm_enc(aes_cmac(aes_cmac(aes_cmac(null,
+                                                      <
+                                                       aes_cmac(null,
+                                                                <prov_invite, prov_capabilities, prov_start, 
+                                                                 pkP.32, pkD.31>), 
+                                                       Np.27, ~Nd.26>),
+                                             dh.30),
+                                    'prsk'),
+                           aes_cmac(aes_cmac(aes_cmac(null,
+                                                      <
+                                                       aes_cmac(null,
+                                                                <prov_invite, prov_capabilities, prov_start, 
+                                                                 pkP.32, pkD.31>), 
+                                                       Np.27, ~Nd.26>),
+                                             dh.30),
+                                    'prsn'),
+                           z.35)
+       x     = aes_cmac(aes_cmac(null,
+                                 <
+                                  aes_cmac(null,
+                                           <prov_invite, prov_capabilities, prov_start, pkP.32, pkD.31>), 
+                                  Np.27, ~Nd.26>),
+                        dh.30)
+       z     = z.35
+       z.1   = true_val
+    
+    3. ~Nd   = ~Nd.79
+       Np    = Np.80
+       dh    = <x.156, 
+                get_b2(x.91,
+                       aes_cmac(null,
+                                <
+                                 aes_cmac(null,
+                                          <prov_invite, prov_capabilities, prov_start, pkP.85, pkD.84>), 
+                                 Np.80, ~Nd.79>),
+                       x.156)
+               >
+       pkD   = pkD.84
+       pkP   = pkP.85
+       prov_data
+             = prov_data.86
+       x     = x.91
+       z     = aes_ccm_dec(aes_cmac(x.91, 'prsk'), aes_cmac(x.91, 'prsn'),
+                           prov_data.86)
+       z.1   = aes_ccm_verify(prov_data.86, aes_cmac(x.91, 'prsk'),
+                              aes_cmac(x.91, 'prsn'),
+                              aes_ccm_dec(aes_cmac(x.91, 'prsk'), aes_cmac(x.91, 'prsn'),
+                                          prov_data.86))
+    
+    4. ~Nd   = ~Nd.79
+       Np    = Np.80
+       dh    = <x.156, 
+                get_b2(x.91,
+                       aes_cmac(null,
+                                <
+                                 aes_cmac(null,
+                                          <prov_invite, prov_capabilities, prov_start, pkP.85, pkD.84>), 
+                                 Np.80, ~Nd.79>),
+                       x.156)
+               >
+       pkD   = pkD.84
+       pkP   = pkP.85
+       prov_data
+             = aes_ccm_enc(aes_cmac(x.91, 'prsk'), aes_cmac(x.91, 'prsn'), z.88)
+       x     = x.91
+       z     = z.88
+       z.1   = true_val
+    
+    5. ~Nd   = ~Nd.82
+       Np    = Np.83
+       dh    = <
+                get_b1(x.94,
+                       aes_cmac(null,
+                                <
+                                 aes_cmac(null,
+                                          <prov_invite, prov_capabilities, prov_start, pkP.88, pkD.87>), 
+                                 Np.83, ~Nd.82>),
+                       x.162), 
+                x.162>
+       pkD   = pkD.87
+       pkP   = pkP.88
+       prov_data
+             = prov_data.89
+       x     = x.94
+       z     = aes_ccm_dec(aes_cmac(x.94, 'prsk'), aes_cmac(x.94, 'prsn'),
+                           prov_data.89)
+       z.1   = aes_ccm_verify(prov_data.89, aes_cmac(x.94, 'prsk'),
+                              aes_cmac(x.94, 'prsn'),
+                              aes_ccm_dec(aes_cmac(x.94, 'prsk'), aes_cmac(x.94, 'prsn'),
+                                          prov_data.89))
+    
+    6. ~Nd   = ~Nd.82
+       Np    = Np.83
+       dh    = <
+                get_b1(x.94,
+                       aes_cmac(null,
+                                <
+                                 aes_cmac(null,
+                                          <prov_invite, prov_capabilities, prov_start, pkP.88, pkD.87>), 
+                                 Np.83, ~Nd.82>),
+                       x.162), 
+                x.162>
+       pkD   = pkD.87
+       pkP   = pkP.88
+       prov_data
+             = aes_ccm_enc(aes_cmac(x.94, 'prsk'), aes_cmac(x.94, 'prsn'), z.91)
+       x     = x.94
+       z     = z.91
+       z.1   = true_val
+  */
+
+rule (modulo E) ProvisionerEndProvisioning:
+   [
+   ProvisionerSendNetKey( pkP, pkD, dh, ck, ~Np, Nd, sk, nk, dev_key ),
+   In( prov_complete )
+   ]
+  --[
+  ProvisionerFinishedProvisioning( pkP, pkD, dh, ck, ~Np, Nd, sk, nk,
+                                   dev_key, app_key
+  )
+  ]->
+   [
+   ProvisionerFinishedProvisioning( pkP, pkD, dh, ck, ~Np, Nd, sk, nk,
+                                    dev_key, app_key
+   ),
+   Out( aes_ccm_enc(dev_key, '0', app_key) )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) DeviceEndKeyDistribution:
+   [ DeviceRecvNetKey( pkD, pkP, dh, ck, ~Nd, Np, sk, nk, dev_key ), In( c )
+   ]
+  --[
+  IsTrue( aes_ccm_verify(c, dev_key, '0', aes_ccm_dec(dev_key, '0', c)) ),
+  DeviceFinishedKeyDistribution( pkD, pkP, dh, ck, ~Nd, Np, sk, nk,
+                                 dev_key, aes_ccm_dec(dev_key, '0', c)
+  )
+  ]->
+   [
+   DeviceFinishedKeyDistribution( pkD, pkP, dh, ck, ~Nd, Np, sk, nk,
+                                  dev_key, aes_ccm_dec(dev_key, '0', c)
+   )
+   ]
+
+  /*
+  rule (modulo AC) DeviceEndKeyDistribution:
+     [ DeviceRecvNetKey( pkD, pkP, dh, ck, ~Nd, Np, sk, nk, dev_key ), In( c )
+     ]
+    --[
+    IsTrue( z.1 ),
+    DeviceFinishedKeyDistribution( pkD, pkP, dh, ck, ~Nd, Np, sk, nk,
+                                   dev_key, z
+    )
+    ]->
+     [
+     DeviceFinishedKeyDistribution( pkD, pkP, dh, ck, ~Nd, Np, sk, nk,
+                                    dev_key, z
+     )
+     ]
+    variants (modulo AC)
+    1. c     = c.13
+       dev_key
+             = dev_key.13
+       z     = aes_ccm_dec(dev_key.13, '0', c.13)
+       z.1   = aes_ccm_verify(c.13, dev_key.13, '0',
+                              aes_ccm_dec(dev_key.13, '0', c.13))
+    
+    2. c     = aes_ccm_enc(x.13, '0', x.14)
+       dev_key
+             = x.13
+       z     = x.14
+       z.1   = true_val
+  */
+
+rule (modulo E) InputOOBAuth:
+   [ ProvisionerOutputAuthData( auth ), DeviceInputAuthData( ) ]
+  -->
+   [ ProvisionerAuthProceed( auth ), DeviceAuthProceed( auth ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) OutputOOBAuth:
+   [ ProvisionerInputAuthData( ), DeviceOutputAuthData( auth ) ]
+  -->
+   [ ProvisionerAuthProceed( auth ), DeviceAuthProceed( auth ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ProvStaticOOBAuth:
+   [ ProvisionerStaticAuthData( ) ]
+  -->
+   [ ProvisionerAuthProceed( static_oob ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) DevStaticOOBAuth:
+   [ DeviceStaticAuthData( ) ] --> [ DeviceAuthProceed( static_oob ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) OracleAuthValue:
+   [
+   LowEntropyAuthValue( auth ), In( aes_cmac(ck, <N, auth>) ), In( N ),
+   In( ck )
+   ]
+  --[ AttackerRetrieveAuthValue( ck, N, auth ) ]->
+   [ Out( auth ) ]
+
+  /*
+  rule (modulo AC) OracleAuthValue:
+     [ LowEntropyAuthValue( auth ), In( z ), In( N ), In( ck ) ]
+    --[ AttackerRetrieveAuthValue( ck, N, auth ) ]->
+     [ Out( auth ) ]
+    variants (modulo AC)
+    1. N     = N.5
+       auth  = auth.5
+       ck    = ck.5
+       z     = aes_cmac(ck.5, <N.5, auth.5>)
+    
+    2. N     = x.5
+       auth  = get_b2(x.6, x.7, x.5)
+       ck    = x.7
+       z     = x.6
+    
+    3. N     = get_b1(x.5, x.6, x.7)
+       auth  = x.7
+       ck    = x.6
+       z     = x.5
+  */
+
+restriction DeviceOnlyOnceProv:
+  "∀ #i #j.
+    ((DeviceOnlyOnceProv( ) @ #i) ∧ (DeviceOnlyOnceProv( ) @ #j)) ⇒
+    (#i = #j)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ #i #j.
+    ((DeviceOnlyOnceProv( ) @ #i) ∧ (DeviceOnlyOnceProv( ) @ #j)) ⇒
+    (#i = #j)"
+  */
+
+restriction ProvisionerOnlyOnceProv:
+  "∀ #i #j.
+    ((ProvisionerOnlyOnceProv( ) @ #i) ∧ (ProvisionerOnlyOnceProv( ) @ #j)) ⇒
+    (#i = #j)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ #i #j.
+    ((ProvisionerOnlyOnceProv( ) @ #i) ∧ (ProvisionerOnlyOnceProv( ) @ #j)) ⇒
+    (#i = #j)"
+  */
+
+restriction IsTrue:
+  "∀ t #i. (IsTrue( t ) @ #i) ⇒ (t = true_val)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ t #i. (IsTrue( t ) @ #i) ⇒ (t = true_val)"
+  */
+
+restriction NotEq:
+  "∀ c #i. (NotEq( c, c ) @ #i) ⇒ (⊥)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ c #i. (NotEq( c, c ) @ #i) ⇒ (⊥)"
+  */
+
+restriction DHConsistency:
+  "∀ t s r1 r2 y #i #j.
+    ((Raised( t, s, r1, y ) @ #i) ∧ (Raised( t, s, r2, y ) @ #j)) ⇒
+    (r1 = r2)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ t s r1 r2 y #i #j.
+    ((Raised( t, s, r1, y ) @ #i) ∧ (Raised( t, s, r2, y ) @ #j)) ⇒
+    (r1 = r2)"
+  */
+
+restriction DHIdentity:
+  "∀ t r y #i. (Raised( t, DH_neutral, r, y ) @ #i) ⇒ (r = DH_neutral)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ t r y #i. (Raised( t, DH_neutral, r, y ) @ #i) ⇒ (r = DH_neutral)"
+  */
+
+restriction ValidPt:
+  "∀ x y #i. (ValidPt( x, y ) @ #i) ⇒ (x = y)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x y #i. (ValidPt( x, y ) @ #i) ⇒ (x = y)"
+  */
+
+restriction InvalidPt:
+  "∀ x #i. (InvalidPt( x, x ) @ #i) ⇒ (⊥)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #i. (InvalidPt( x, x ) @ #i) ⇒ (⊥)"
+  */
+
+
+
+end

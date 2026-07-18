@@ -1,0 +1,22 @@
+theory ql4 begin
+
+builtins: multiset
+
+rule R1: [ In(x) ] --[ A(x), E(x,x,x,x), B(x,x) ]-> [ Out(x) ]
+
+lemma tw1:
+  "All a b c #i.
+     E(a,b,c,c)@i ==>
+     a = <b, c, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', b, c, b, c>"
+
+lemma tw2:
+  "All a b c #i.
+     E(a,b,c,c)@i ==>
+     <a, b, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'> << <b, c, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', b, c>"
+
+lemma tw3:
+  "All a b c #i.
+     E(a,b,c,c)@i ==>
+     (a ++ b ++ 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') = (b ++ c ++ 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')"
+
+end

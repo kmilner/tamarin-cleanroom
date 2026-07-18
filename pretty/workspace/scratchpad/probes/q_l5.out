@@ -1,0 +1,49 @@
+theory ql5
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) R1:
+   [ In( x ) ]
+  --[
+  A( x ),
+  Fwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww( x ),
+  Fwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww( x )
+  ]->
+   [ Out( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+lemma m63:
+  exists-trace
+  "∃ x #i.
+    Fwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww( x
+    ) @ #i"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ x #i.
+  (Fwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww( x
+   ) @ #i)"
+*/
+by sorry
+
+lemma m64:
+  exists-trace
+  "∃ x #i.
+    Fwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww( x
+    ) @ #i"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ x #i.
+  (Fwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww( x
+   ) @ #i)"
+*/
+by sorry
+
+
+
+end

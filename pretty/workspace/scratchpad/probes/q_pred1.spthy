@@ -1,0 +1,11 @@
+theory qpred1 begin
+
+predicates: Pdouble(x,y) <=> x = y
+
+rule R1: [ In(x) ] --[ A(x), B(x,x) ]-> [ Out(x) ]
+
+restriction pr1: "All x y #i. B(x,y)@i ==> Pdouble(x,y)"
+
+lemma pl1: "All x y #i. B(x,y)@i ==> Pdouble(x,y)"
+
+end

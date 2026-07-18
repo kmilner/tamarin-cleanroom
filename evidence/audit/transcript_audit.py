@@ -9,8 +9,13 @@ import json, re, sys, glob
 # .spthy example theories are sanctioned INPUT material (PROTOCOL.md), whether
 # reached via a cluster's oracle/examples symlink or the raw submodule path —
 # rule refined 2026-07-18 after a false positive on raw-path example reads.
+# scripts/file_flags.tsv is the per-file canonical ORACLE-FLAGS map (relpath ->
+# CLI flags), referenced by the sealed fetch scripts since round 5; it carries
+# invocation metadata only, no upstream expression — sanctioned 2026-07-18
+# after a false positive on a direct read by the pretty round-3 implementer.
 ALLOWED = ("tamarin-cleanroom", ".web_hs_cache", "tamarin-prover-testing/.stack-work",
-           "wf_oracle", "hs_server", "tamarin-prover/examples")
+           "wf_oracle", "hs_server", "tamarin-prover/examples",
+           "scripts/file_flags.tsv")
 # Hard override: direct use of a forbidden path is a violation even when an
 # allowed substring co-occurs in the same command (added 2026-07-18; stricter
 # than the original any()-whitelist).

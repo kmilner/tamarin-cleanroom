@@ -66,8 +66,9 @@ pub(crate) fn doc(t: &Term) -> Doc {
     }
 }
 
-/// Sigil + name + `.idx` suffix (suffix only when idx > 0).
-fn var_str(v: &VarSpec) -> String {
+/// Sigil + name + `.idx` suffix (suffix only when idx > 0). Also used for
+/// quantifier binders, which render identically (probe:q_b1).
+pub(crate) fn var_str(v: &VarSpec) -> String {
     let sigil = match v.sort {
         SortHint::Msg | SortHint::Untagged | SortHint::Suffix(SuffixSort::Msg) => "",
         SortHint::Pub | SortHint::Suffix(SuffixSort::Pub) => "$",
@@ -151,7 +152,14 @@ fn collect_exp<'a>(t: &'a Term, out: &mut Vec<&'a Term>) {
 
 /// AC operator: `(a<op>b<op>c)` — self-parenthesized, flattened across both
 /// sides, operator attached to the preceding element, no spaces, fcat break
-/// between elements (probes:t_xor, t_uni, t_nat, t_mult2, t_uniwide).
+/// between elements (probes:t_xor, t_uni, t_nat, t_mult2, t_uniwide). The
+/// SAME single-fill construction as tuples, with `(`/`)` as fill items and
+/// elements under `nest 1`: elements continue at (column of `(`) + 1, and
+/// the `)` drops to its OWN line at the column of `(` when it does not fit
+/// beside the last element (target:alethea Universal_VerProofV_v1 — the
+/// union keeps both wide elements on one fill line and only the `)` drops;
+/// the earlier R1 law with `)` beside-attached agreed on every R1-observed
+/// shape but was falsified there).
 fn ac_doc(op: BinOp, t: &Term) -> Doc {
     let glyph = match op {
         BinOp::Mult => "*",
@@ -162,8 +170,12 @@ fn ac_doc(op: BinOp, t: &Term) -> Doc {
     };
     let mut leaves: Vec<&Term> = Vec::new();
     collect_ac(op, t, &mut leaves);
-    let docs = punctuate(&text(glyph), leaves.into_iter().map(doc).collect());
-    beside_op(beside_op(char('('), fcat(docs)), char(')'))
+    let mut items = vec![char('(')];
+    for d in punctuate(&text(glyph), leaves.into_iter().map(doc).collect()) {
+        items.push(nest(1, &d));
+    }
+    items.push(char(')'));
+    fcat(items)
 }
 
 fn collect_ac<'a>(op: BinOp, t: &'a Term, out: &mut Vec<&'a Term>) {

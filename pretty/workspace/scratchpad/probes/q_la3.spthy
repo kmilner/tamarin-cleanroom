@@ -1,0 +1,11 @@
+theory qla3 begin
+
+tactic: mytac
+prio:
+  regex ".*"
+
+rule R1: [ In(x) ] --[ A(x), B(x,x) ]-> [ Out(x) ]
+
+lemma lb1 [heuristic={mytac}]: "All x #i. A(x)@i ==> Ex #j. B(x,x)@j"
+
+end

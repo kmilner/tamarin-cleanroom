@@ -1,0 +1,49 @@
+theory qla1
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) R1:
+   [ In( x ) ] --[ A( x ), B( x, x ) ]-> [ Out( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+lemma la1 [sources]:
+  all-traces "∀ x #i. (A( x ) @ #i) ⇒ (∃ #j. B( x, x ) @ #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i. (A( x ) @ #i) ∧ ∀ #j. (B( x, x ) @ #j) ⇒ ⊥"
+*/
+by sorry
+
+lemma la2 [hide_lemma=la1]:
+  all-traces "∀ x #i. (A( x ) @ #i) ⇒ (∃ #j. B( x, x ) @ #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i. (A( x ) @ #i) ∧ ∀ #j. (B( x, x ) @ #j) ⇒ ⊥"
+*/
+by sorry
+
+lemma la3 [reuse, sources]:
+  all-traces "∀ x #i. (A( x ) @ #i) ⇒ (∃ #j. B( x, x ) @ #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i. (A( x ) @ #i) ∧ ∀ #j. (B( x, x ) @ #j) ⇒ ⊥"
+*/
+by sorry
+
+lemma la4 [hide_lemma=la1, use_induction, hide_lemma=la3, reuse]:
+  all-traces "∀ x #i. (A( x ) @ #i) ⇒ (∃ #j. B( x, x ) @ #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i. (A( x ) @ #i) ∧ ∀ #j. (B( x, x ) @ #j) ⇒ ⊥"
+*/
+by sorry
+
+
+
+end

@@ -1,0 +1,28 @@
+theory qr2
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) R1:
+   [ In( x ) ] --[ A( x ) ]-> [ Out( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+lemma r2_iff:
+  all-traces "∀ x #i. (A( x ) @ #i) ⇒ ((x = 'b') ⇔ (x = 'c'))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i.
+  (A( x ) @ #i)
+ ∧
+  (((x = 'b') ∧ (¬(x = 'c'))) ∨ ((x = 'c') ∧ (¬(x = 'b'))))"
+*/
+by sorry
+
+
+
+end

@@ -1,0 +1,41 @@
+theory qb1
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) R1:
+   [ In( x ), Fr( ~n ) ] --[ A( x ), M( ~n, $p, x ) ]-> [ Out( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+restriction b1_sigils:
+  "∀ ~n $p x #i. (M( ~n, $p, x ) @ #i) ⇒ (∃ #j. A( x ) @ #j)"
+
+  /*
+  expanded formula:
+  "∀ ~n $p x #i. (M( ~n, $p, x ) @ #i) ⇒ (∃ #j. A( x ) @ #j)"
+  */
+
+restriction b2_order:
+  "∀ #i x ~n $p. (M( ~n, $p, x ) @ #i) ⇒ (∃ #j. A( x ) @ #j)"
+
+  /*
+  expanded formula:
+  "∀ #i x ~n $p. (M( ~n, $p, x ) @ #i) ⇒ (∃ #j. A( x ) @ #j)"
+  */
+
+lemma b3_exists_sigils:
+  exists-trace "∃ ~n $p x #i. M( ~n, $p, x ) @ #i"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ ~n $p x #i. (M( ~n, $p, x ) @ #i)"
+*/
+by sorry
+
+
+
+end

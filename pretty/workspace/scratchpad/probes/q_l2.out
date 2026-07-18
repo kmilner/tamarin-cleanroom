@@ -1,0 +1,55 @@
+theory ql2
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) R1:
+   [ In( x ) ] --[ A( x ), E( x, x, x, x ), B( x, x ) ]-> [ Out( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+lemma bw1:
+  all-traces
+  "∀ xlongvariablename01 xlongvariablename02 xlongvariablename03
+     xlongvariablename04 #i.
+    (E( xlongvariablename01, xlongvariablename02, xlongvariablename03,
+        xlongvariablename04
+     ) @ #i) ⇒
+    (⊤)"
+/*
+guarded formula characterizing all counter-examples:
+"⊥"
+*/
+by sorry
+
+lemma bw2:
+  all-traces
+  "∀ x #i.
+    (A( x ) @ #i) ⇒
+    (∃ ylongvariablename01 ylongvariablename02 ylongvariablename03
+       ylongvariablename04 #j.
+      E( ylongvariablename01, ylongvariablename02, ylongvariablename03,
+         ylongvariablename04
+      ) @ #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i.
+  (A( x ) @ #i)
+ ∧
+  ∀ ylongvariablename01 ylongvariablename02 ylongvariablename03
+    ylongvariablename04 #j.
+   (E( ylongvariablename01, ylongvariablename02, ylongvariablename03,
+       ylongvariablename04
+    ) @ #j)
+  ⇒
+   ⊥"
+*/
+by sorry
+
+
+
+end

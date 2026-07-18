@@ -460,3 +460,278 @@ Non-blocking notes (advisory, do NOT gate this round):
    guessed.
 
 VERDICT: pass
+
+---
+
+## Round 3 — formula rendering + lemma / restriction wrappers
+
+Scope = the working-tree delta over cleanroom HEAD `c29e244` (rounds 1–2)
+restricted to `pretty/`: `src/{ast,formula,lemma,lib}.rs` filled in,
+`src/{rule,term}.rs` touched (`fact_doc`/`var_str` widened to `pub(crate)`;
+`ac_doc` corrected — below), the new `tests/round3_formulas.rs`, the
+provenance additions (`workspace/{BEHAVIOR.md,QUERIES.log}`, the `q_*`
+probes under `workspace/scratchpad/probes/`, the corpus `*.echo`/`*.time`
+scratch captures) and `round3/` (20 curated corpus captures — 84 restriction
++ 139 lemma blocks, `families.tsv`, `fetch_hs_targets.sh`). The BSD doc engine
+(`src/doc.rs`, `Cargo.toml`) is **untouched** this round — verified by diff;
+R1 §2 provenance stands, and every R3 combinator used (`above_op`,
+`above_plus`, `beside_op`, `beside_space`, `sep`, `hsep`, `fsep`, `vcat`,
+`nest`, `punctuate`, `render_with`) is a pre-existing BSD `HughesPJ` export.
+Method as before (AFC; byte-forced output filtered as merger, residue examined
+for protectable expression). Full suite green here: R1 47, R2 9, R3 9, lib 6.
+
+Sealed side (upstream Haskell, `tamarin-rs/tamarin-prover/`):
+* formula printer — `Theory/Model/Formula.hs` `prettyLFormula` (471–511),
+  `prettyLNFormula`/`prettySyntacticLNFormula` (515–522);
+* atoms — `Theory/Model/Atom.hs` `prettyProtoAtom` (212–224), `prettyNAtom`
+  (232), `prettySyntacticNAtom`/`prettyPred` (236–239);
+* operators — `Text/PrettyPrint/Highlight.hs` `operator_` (56), **`opParens`
+  (58–59)**; glyph table `Theory/Text/Pretty.hs` (165–183);
+* comment framing — `Pretty.hs` `multiComment`/`multiComment_` (102–106),
+  `lineComment` (97);
+* lemma wrapper — `Lemma.hs` `prettyLemma`/`ppLNFormulaGuarded` (116–141),
+  `prettyLemmaName`/`prettyLemmaAttribute` (91–107), `prettyTraceQuantifier`
+  (178–181);
+* restriction wrapper — `TheoryObject.hs` `prettyRestriction` (846–858);
+* safety — `Theory/Constraint/System/Guarded.hs` `isSafetyFormula`/
+  `noExistential` (156–164); guarded printer `prettyGuarded` (824–867) —
+  **not ported** (its output is opaque input here).
+
+### 1. Parenthesization / precedence DERIVATION (special scrutiny)
+
+The clean fully parenthesizes: every operand of `∧ ∨ ⇒ ⇔` and every `¬`
+argument is wrapped in `(…)`, quantifier bodies and the top level bare
+(`formula.rs` `doc`/`connective_doc`/`parens`). The audit question is whether
+this was **read off a source precedence table** or **derived black-box**. Two
+findings settle it:
+
+* **There is no precedence table upstream to copy.** `opParens`
+  (Highlight.hs 59) is `operator_ "(" <> d <> operator_ ")"` — an
+  *unconditional* wrap, applied to *both* operands in `pp (Conn op p q) =
+  sep [opParens p' <-> ppOp op, opParens q']` (Formula.hs 490–498) and to the
+  `¬` argument in `pp (Not p) = operator_ "¬" <> opParens p'` (485–488). No
+  operator-priority comparison exists anywhere in the formula printer; a
+  textbook precedence-aware printer would *omit* the redundant parens the
+  oracle in fact emits. Matching the unusual always-parens behavior is
+  therefore observational, not a lift.
+* **The derivation traces to a genuine discriminator, `q_p2` (s1–s13,
+  captured).** It separates full-paren-plus-association from any n-ary
+  flattening: `s3` `(((x='b')∨(x='c'))∨(x='d'))` vs `s4`
+  `((x='b')∨((x='c')∨(x='d')))` echo **distinctly** — left/right chains keep
+  their source association, no re-association, no flattening; `s1` wraps every
+  nested-connective operand; `s8` `¬((x='b')∧(¬(¬(x='c'))))` pins the
+  ¬-arg-always-wrap and double-negation; `s9–s12` wrap quantifiers-under-
+  connectives while `s13`/bodies stay bare. A source reader who had seen
+  `opParens p' … opParens q'` would need none of these; building theories whose
+  echo separates "preserve association + full paren" from "flatten n-ary" is
+  black-box work. Decisively, the guarded-formula block emitted in the *same*
+  `q_p2.out` uses a **different** paren discipline — flat n-ary
+  `… ∧ (¬(x='b')) ∧ (¬(x='c')) ∧ (¬(x='d'))`, bare `¬(x=y)` — which the clean
+  does **not** reproduce (it consumes that block verbatim as opaque input,
+  §3), positive evidence the clean pinned the statement printer's rule
+  specifically rather than echoing one paren rule everywhere.
+
+`connective_doc` = `sep [beside_space(parens(doc l), glyph), parens(doc r)]`
+equals upstream's `sep [opParens p' <-> ppOp op, opParens q']` in Doc *shape*.
+That convergence is **byte-forced merger**: the observable output (full parens
+both operands; glyph on the lhs' last line; rhs dropping to the group origin on
+overflow — targets NSLPK3/Cronto/Yubikey) uniquely determines this minimal Doc,
+the same category as R1 `ppFun` and R2 substitution `$$ nest 6`. The clean
+reaches BSD `sep`/`beside_space` and its own `parens` helper — never the GPL
+`operator_`/`opParens`/`<->` wrappers (`<->` = `<+>`, Class.hs). Pinned q_p2;
+overflow layout corpus-witnessed.
+
+### 2. Binder-allocation approach — DIVERGENT (independent)
+
+Upstream renders a quantifier prefix by **inventing** its variable names:
+`pp fm@(Qua …) = scopeFreshness $ do (vs,qua,fm') <- openFormulaPrefix fm; …
+sep [ppQuant qua <> ppVars vs <> operator_ ".", nest 1 d']`, with
+`ppVars = fsep . map (text . show)`, over the de-Bruijn `ProtoLFormula`, using
+`MonadFresh` + `avoidPrecise` to allocate collision-free names and collapse a
+run of same-quantifiers into one binder list (Formula.hs 500–511, 515–522).
+
+The clean has **no such machinery**: `Formula::Forall(Vec<VarSpec>, body)`
+carries already-named binders (integrator's parser), and `quantifier_doc`
+(`formula.rs`) just `fsep`s them through the R1 `term::var_str` and stacks
+`sep [head, nest 1 body]`. No de-Bruijn, no `MonadFresh`, no
+`scopeFreshness`/`avoidPrecise`, no fresh allocation — a fundamentally
+different binder model. Only the **output** coincides: `fsep binders` matches
+`fsep . map (text . show)` (byte-forced; q_b1 pins sigils/source-order/
+no-sort-erasure), and the head/body layout (`∀ ` glued, binders fill-wrapping
+at origin+2, `.` on the last binder, body at `nest 1` = origin+1) is pinned by
+`q_l2` (bw1 long-binder wrap; bw2 paren-nested body). Divergent approach,
+observable bytes. Clean.
+
+### 3. Helper decomposition — AFC over each construct
+
+* **Relation atoms — DIVERGENT unification.** Upstream *splits*: `EqE` and
+  `Subterm` are `sep [ppT l <-> op, ppT r]` (Atom.hs 219–222) but `Less` is
+  `text (show u) <-> opLess <-> text (show v)` (223) — **no `sep`** (no
+  break point) and **raw `show`**, bypassing the term printer. The clean folds
+  all three into one `relation_doc` = `sep [beside_space(term::doc l, glyph),
+  term::doc r]` routing every side through the R1 term core. The `=`/`⊏` arms
+  are byte-forced merger (q_l4); the `<` arm **diverges** (the clean gives it a
+  breakable `sep` and the term renderer where upstream gives it neither) — a
+  non-observable delta (temporal/nat `<` operands are short, never break, never
+  differ), i.e. the clean's own decomposition, not a transcription.
+* **Action atom — byte-forced merger, own routing.** `hsep [fact_doc, '@',
+  term::doc tp]` = upstream `prettyFact ppT fa <-> opAction <-> text (show v)`
+  (Atom.hs 216–217) in bytes (both are non-breaking `<+>` folds), pinned to
+  `q_l5` (m63/m64: at overflow the *fact* breaks internally to `) @ #i`, `@ tp`
+  never dropping — discriminating `hsep` over a `sep`). The clean reuses its R2
+  `fact_doc` unchanged (probe:q_l3) and its R1 `term::doc` for the timepoint,
+  where upstream uses `prettyFact`/`text (show v)`.
+* **`last` / `¬` / `⊤⊥`** — `last(` glued vs upstream `operator_ "last" <>
+  parens (…)`; `¬ <> (arg)` vs `operator_ "¬" <> opParens p'`; `⊤`/`⊥` vs
+  `operator_ "⊤"/"⊥"`. Same bytes, glyphs byte-forced (q_at1, q_p2 s8, q_w1);
+  the clean's `\u{…}` escapes and glued tokens are its own representation.
+* **Safety classification — DIVERGENT algorithm (the standout).** Upstream
+  computes it via the **whole guarded transform**: `safety = isSafetyFormula
+  (formulaToGuarded_ expandedFormula)` where `isSafetyFormula gf = null
+  (frees [gf]) && noExistential gf` and `noExistential` walks the *already-
+  NNF'd guarded structure* (`GAto`/`GGuarded Ex/All`/`GDisj`/`GConj`) with **no
+  polarity tracking** — the transform did that (Guarded.hs 156–164;
+  TheoryObject.hs 851/858). The clean does **none** of this: `is_safety` =
+  `!has_existential_in_nnf(f, false)`, a direct polarity-tracking scan of the
+  *source* `Formula` (a `negated` flag flipped through `Not`, the `Implies`
+  antecedent, both `Iff` sides, `Forall`-under-negation, `Exists`-in-positive-
+  polarity). It reimplements the transform's NNF-existential detection inline,
+  without ever building a guarded form. Derived black-box from `q_s1` (s5 msg-∃
+  **and** s7 temporal-∃ conclusions both defeat safety; s8 `¬∃` conclusion
+  keeps it) and `q_s2` (u4 `¬∃` in an *antecedent* defeats it — pins the
+  implication-polarity flip). No upstream analogue exists to transcribe; this
+  is affirmative non-transcription evidence.
+* **Comment / block framing — DIVERGENT construction.** The clean **stacks**
+  `/* … */` with explicit `above_op` chains (`guarded_comment_doc`,
+  `restriction_doc`) where upstream uses `multiComment d = comment $ fsep
+  ["/*", d, "*/"]` (a *fill*, Pretty.hs 102–103) — the identical divergence
+  filed at R2 for the variants comment. Between major blocks the clean uses
+  `above_op` (`$$`) / `above_plus` (`$+$`) where upstream uses `$-$` (the GPL
+  alias = `$+$`, Class.hs), again depending only on BSD primitives. The lemma
+  header splits `"lemma NAME ["` + `fsep(punctuate ',' attrs)` + `"]:"` onto
+  text tokens where upstream composes `kwLemma <-> (text name <-> brackets $
+  fsep $ punctuate comma …) <> colon` — the same `[`/`]:`-split-off-the-head
+  fingerprint as R2's macro `)`/`= ` split. All same-bytes, all pinned
+  (q_w1, q_r1, q_la1, targets 5G_AKA).
+
+### 4. Byte-forced surface, filtered (merger; provenance logged)
+
+Observable in every echo, hence compatibility content: the glyph set
+(`⊤ ⊥ ∧ ∨ ⇒ ⇔ ¬ ∀ ∃ ⊏ @ last`), the wrapper string literals (`restriction `,
+`lemma `, `all-traces`/`exists-trace`, `// safety formula`, `expanded
+formula:`, `guarded formula characterizing all counter-examples:` /
+`… all satisfying traces:`, `conversion to guarded formula failed:`,
+`by sorry`), the attribute spellings (`sources`, `reuse`, `use_induction`,
+`hide_lemma=<n>`, `heuristic=<v>` verbatim incl. braces), the always-emitted
+expanded-formula comment (84 restrictions ↔ 84 comments in the corpus,
+verified — the oracle sets `ogFormula` on every load, so the clean's
+unconditional emit is faithful), the conditional safety line (68/84), the
+statement `nest 2` / body `nest 1` / error `+2` indents, and the trace-
+quantifier keyword mapping. Provenance logged (q_w1, q_ax1, q_pred1, q_la1–3,
+q_l2/l4/l5, q_r1, q_s1/s2). The clean's `\u{…}` escapes, glued tokens, and
+`match`-to-`String` attribute table are its own representation; upstream's
+ghost ASCII comments (`-- "T"`, `-- "&"`, `-- "==>"`, …) are **not** reproduced
+(verified).
+
+### 5. `ac_doc` correction (R1 source-file change this round)
+
+`term.rs` `ac_doc` was rewritten from R1's outside-bracket form
+(`'(' <> fcat(punctuate op elems) <> ')'`, `)` beside-attached) to the
+single-fill `fcat('(' : map (nest 1) (punctuate op elems) ++ [')'])` — i.e.
+now structurally upstream's `ppTerms` (Term.hs), the **same** convergence R2
+already made for `pair_doc`, and for the same reason: **byte-forced** by a
+newly-materialised witness (round-3 target `alethea Universal_VerProofV_v1`:
+the union keeps both wide elements on one fill line and only `)))"` drops to
+the `(` column — a shape the R1 `)`-attached law cannot produce). R2 had left
+AC divergent *only* because its wide-wrap probe timed out and honestly flagged
+it; the corpus witness has now closed that gap. Reached by falsifying a logged
+wrong guess (BEHAVIOR.md records the R1 law "agreed on every R1-observed shape
+but was falsified by the alethea witness"), the fingerprint of black-box
+search. Merger, not transcription; same category as R2 §2. R1/R2 suites stay
+green under the change.
+
+### 6. Identifier / constant / comment / test scan
+
+* Leakage grep of `src/` for the R3 upstream surface (`prettyLFormula`,
+  `prettyLNFormula`, `prettyProtoAtom`, `prettyNAtom`, `opParens`,
+  `operator_`, `opLAnd`/`opImp`/`opForall`/…, `ppQuant`, `ppVars`,
+  `openFormulaPrefix`, `scopeFreshness`, `avoidPrecise`, `prettyGuarded`,
+  `noExistential`, `isSafetyFormula`, `formulaToGuarded`, `prettyLemmaName`,
+  `prettyLemmaAttribute`, `prettyRestriction`, `multiComment`, `GGuarded`/
+  `GDisj`/`GConj`, `EqE`, `ProtoAtom`, `SourceLemma`/`InvariantLemma`/…) and
+  the pseudonymous author handles: **no matches**.
+* AST enums DIVERGE from upstream's constructor constellations. `Atom
+  {Eq,Less,LessMset,Subterm,Action,Last,Pred}` vs upstream `ProtoAtom
+  {Action,EqE,Subterm,Less,Last,Syntactic (Pred)}` — the clean **adds**
+  `LessMset`, renames `EqE→Eq` and `Syntactic (Pred)→Pred`. `LemmaAttr
+  {Sources,Reuse,UseInduction,HideLemma,Heuristic}` is a *witnessed subset* of
+  upstream's nine-constructor `LemmaAttribute` with the clean's own names
+  (`Sources`≠`SourceLemma`, `UseInduction`≠`InvariantLemma`). `Guarded
+  {Formula,Failed}` and `TraceQuantifier {AllTraces,ExistsTrace}` are the
+  clean's own two-value carriers (the latter's names are the observable
+  keyword tokens, byte-forced, not a protectable constellation).
+* Non-observable constants (`nest 1` body, `nest 2` statement/comment, `+2`
+  error indent) are each probe-pinned (q_l2, q_w1/corpus, q_r1) — none lifted
+  as a magic number (cf. R2 substitution `nest 6`).
+* Comment lineage: the only "upstream" tokens in `src/` are pipeline-semantic
+  ("expanded *upstream of the echo*", "lowercased upstream") — no source-file
+  narration, no line-number citations, no reproduced ghost comments.
+* `tests/round3_formulas.rs`: probe-pinned unit fixtures (each annotated with
+  its `probe:`/`target:` origin) plus a whole-block corpus parity harness whose
+  echo-parser **discards all inter-token whitespace** (so layout can only
+  originate in the renderer) and carries guarded-comment content / embedded
+  proofs as **verbatim opaque inputs** (correctly isolating the frame from the
+  un-ported guarded transform). 9/9 green; the parity test byte-checks 84
+  restriction + 139 lemma blocks (`checked_r > 40 && checked_l > 100`).
+
+### Findings
+
+No violations. The parenthesization is the round's convergence-risk point, and
+it resolves cleanly: upstream has **no precedence table** (unconditional
+`opParens` on both operands), the clean matched that observable always-parens
+behavior via a genuine discriminator (`q_p2` s3/s4 left/right-chain separation)
+rather than a lift, and the guarded block in the same capture — which uses a
+different paren discipline — is consumed verbatim, not reproduced. The
+`connective_doc`/`=`/`⊏`/action Doc shapes that equal upstream are byte-forced
+merger (each pinned to a discriminating probe), while the binder-allocation
+approach (named-AST vs de-Bruijn+`MonadFresh`+`avoidPrecise`), the safety
+classifier (direct polarity-NNF scan vs guarded-transform+`noExistential`), the
+relation unification (`<` given break+term-printer where upstream gives
+neither), and the comment/header framing (`above_op` stacking + tokenised
+`[`/`]:` vs `multiComment` fill + `brackets`) each diverge structurally while
+reaching the observed bytes. The `ac_doc` correction is the same byte-forced
+`ppTerms` convergence as R2's tuple, reached by falsifying a logged guess.
+Identifier, enum-constellation, constant, comment and test scans clean.
+
+Non-blocking notes (advisory, do NOT gate this round):
+1. *Latent safety-classifier deltas vs source, gate-backstopped.* The clean's
+   `is_safety` omits upstream's `null (frees …)` closedness conjunct (harmless —
+   restriction/lemma formulas are always closed) and reads a safety-relevant
+   `⇔` as occurring in both polarities (the NNF-consistent guess, honestly
+   flagged UNOBSERVABLE — no `⇔` restriction witness in the corpus). Correct
+   for the probed + curated set; the full-corpus signature gate is the backstop
+   before wider parity is claimed. A correctness caveat, not a similarity issue
+   (indeed the divergent algorithm is the non-transcription evidence).
+2. *Unobservable atoms are flagged placeholders, not guessed-as-pinned.*
+   `Atom::LessMset` (no corpus/source witness — rendered like `Less`) and
+   `Atom::Pred` (predicates expanded upstream of the echo — rendered as a bare
+   fact) are both registered UNOBSERVABLE and must be pinned before any claim
+   over them; correct discipline.
+3. *Binder-prefix collapse is the AST-producer's contract, not the renderer's.*
+   Upstream `openFormulaPrefix` collapses a run of same-quantifiers into one
+   binder list; the clean renders whatever `Forall(Vec<VarSpec>, …)` it is
+   handed. The integrator's parser must deliver pre-collapsed prefixes (the
+   corpus captures already are); a nested-same-quantifier AST would render
+   un-collapsed. Interface caveat, not similarity.
+4. *R1/R2 forward-integration caveat still open* (carried from R1 §note 2 /
+   R2 §note 2): the public API renders each sub-target standalone at column 0;
+   whole-theory assembly must compose the crate's `Doc`s and render once so
+   embedded formula/rule blocks nest correctly. The Doc-level helpers remain
+   exposed for this.
+5. *Diff-mode surfaces deferred, not guessed* (BEHAVIOR.md UNOBSERVABLE
+   register): `--diff` lemma/restriction `left`/`right`/`diff_reuse`,
+   `diffLemma`, `output=…`, and `lemma (modulo E) …` are named as unpinned and
+   unmodeled (the parity corpus excludes all `--diff` files), deferred to a
+   later round before diff-file parity is claimed.
+
+VERDICT: pass

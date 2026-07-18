@@ -1,0 +1,72 @@
+theory Minimal_Loop_Example
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+/* looping facts with injective instances: A/1 */
+
+rule (modulo E) Start:
+   [ Fr( x ) ] --[ Start( x ) ]-> [ A( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Loop:
+   [ A( x ) ] --[ Loop( x ) ]-> [ A( x ) ]
+
+  // loop breaker: [0]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Stop:
+   [ A( x ) ] --[ Stop( x ) ]-> [ ]
+
+  /* has exactly the trivial AC variant */
+
+lemma Start_before_Loop [reuse, use_induction]:
+  all-traces
+  "∀ x #j. (Loop( x ) @ #j) ⇒ (∃ #i. (Start( x ) @ #i) ∧ (#i < #j))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #j. (Loop( x ) @ #j) ∧ ∀ #i. (Start( x ) @ #i) ⇒ ¬(#i < #j)"
+*/
+by sorry
+
+lemma Start_before_Stop:
+  all-traces
+  "∀ x #j. (Stop( x ) @ #j) ⇒ (∃ #i. (Start( x ) @ #i) ∧ (#i < #j))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #j. (Stop( x ) @ #j) ∧ ∀ #i. (Start( x ) @ #i) ⇒ ¬(#i < #j)"
+*/
+by sorry
+
+lemma Loop_before_Stop [reuse, use_induction]:
+  all-traces "∀ x #i #j. ((Stop( x ) @ #j) ∧ (Loop( x ) @ #i)) ⇒ (#i < #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i #j. (Stop( x ) @ #j) ∧ (Loop( x ) @ #i) ∧ ¬(#i < #j)"
+*/
+by sorry
+
+lemma Stop_unique [reuse]:
+  all-traces "∀ x #i #j. ((Stop( x ) @ #j) ∧ (Stop( x ) @ #i)) ⇒ (#i = #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i #j. (Stop( x ) @ #j) ∧ (Stop( x ) @ #i) ∧ ¬(#i = #j)"
+*/
+by sorry
+
+lemma Satisfied_by_empty_trace_only [use_induction]:
+  exists-trace "∀ x #j. (Loop( x ) @ #j) ⇒ (⊥)"
+/*
+guarded formula characterizing all satisfying traces:
+"∀ x #j. (Loop( x ) @ #j) ⇒ ⊥"
+*/
+by sorry
+
+
+
+end

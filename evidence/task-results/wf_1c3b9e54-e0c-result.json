@@ -1,0 +1,66 @@
+{
+  "summary": "Sealed pretty round 3: restriction/lemma FORMULA rendering (quantifiers, connectives, binder allocation, guarded-formula comment text) — the linchpin sub-target; both-sides audit",
+  "agentCount": 2,
+  "logs": [],
+  "result": {
+    "impl": "R3 COMPLETE — restriction / lemma FORMULA rendering implemented, byte-parity green over a 20-file curated corpus set.\n\nWHAT LANDED (all inside /home/kamilner/tamarin-cleanroom/pretty/):\n- workspace/pretty-clean/src/formula.rs (new, 134 lines): trace-formula renderer. Glyphs ∀ ∃ ⇒ ∧ ∨ ¬ ⇔ ⊤ ⊥; atoms `Fact( .. ) @ tp` (hsep — @ never drops alone), `t1 < t2`, `t1 = t2`, `t1 ⊏ t2` (all `sep [lhs <+> glyph, rhs]`), `last(tp)` (no interior spaces). Paren law: EVERY binary-connective operand and every ¬-argument parenthesized; quantifier bodies and top level bare; source association preserved. Quantifier = `sep [glyph<>\" \"<>fsep binders<>\".\", nest 1 body]`. Plus the pinned safety classifier: safety iff NNF contains no existential (msg or temporal), polarity-flipping through ⇒-antecedents and ¬.\n- workspace/pretty-clean/src/lemma.rs (new, 172 lines): restriction wrapper (statement at nest 2, conditional `// safety formula`, blank line, `/* expanded formula: */` comment rendering the same formula twice — expansion is upstream) and lemma wrapper (`lemma N [attrs]:` with space-before-[, source-order duplicate-keeping attrs `sources/reuse/use_induction/hide_lemma=/heuristic=`, fill after `[`; `all-traces|exists-trace \"…\"` sep at nest 2; guarded comment frame at col 0 with header keyed to the trace quantifier plus the failed-conversion variant indenting the error +2; tail `by sorry` or verbatim embedded-proof input). ast.rs R3 types fleshed out (Guarded = Formula(String)|Failed(String) opaque inputs); lib.rs exports render_formula/render_restriction/render_lemma.\n- ONE R1 CORRECTION (falsified by round-3 corpus evidence, alethea Universal_VerProofV_v1): AC-operator terms use the SAME single-fill construction as tuples — `fcat ('(' : map (nest 1) (punctuate op elems) ++ [')'])` — so `)` can drop alone to the column of `(`. The old beside-attached law agreed on every R1-observed shape. R1/R2 suites unaffected (all still green).\n- round3/: families.tsv (14 curated + 6 validation-extension files), fetch_hs_targets.sh, targets/ (20 HS reference echoes).\n- tests/round3_formulas.rs (1126 lines): 8 probe-pinned unit tests + whole-block parity via a layout-insensitive echo parser (whitespace discarded; guarded content and proof scripts extracted verbatim as opaque inputs; safety-line presence cross-checked against my classifier per restriction).\n\nACCEPTANCE: cargo test fully green, zero warnings — 6 doc-engine + 47 R1 + 9 R2 + 9 R3; parity = 84 restriction blocks + 139 lemma blocks byte-identical across all 20 captures (incl. accountability-generated lemmas with .idx vars, 5G attr fill-wraps, axiom→restriction, sapic/predicate-expanded files, embedded-proof prefix files).\n\nDISCIPLINE: 18 new q_* probes + 6 corpus survey echoes + 2 target fetches, every oracle interaction logged in workspace/QUERIES.log (88 lines total); BEHAVIOR.md gained \"Formula rendering (R3)\", \"Restriction blocks (R3)\", \"Lemma blocks (R3)\" sections with per-law probe provenance, the corrected R1 A",
+    "audit": "Round-3 similarity audit complete. Appended a full round-3 section to `/home/kamilner/tamarin-cleanroom/pretty/AUDIT.md`.\n\nSummary of what I verified against upstream (`Theory/Model/Formula.hs`, `Atom.hs`, `Highlight.hs` `opParens`, `Lemma.hs`, `TheoryObject.hs`, `Guarded.hs`):\n\n- **Parenthesization derivation (special scrutiny): clean.** Upstream has *no precedence table* — `opParens` (Highlight.hs 59) unconditionally wraps both operands of `pp (Conn …)` and the `¬` argument. The clean matched that observable always-parens behavior via a genuine discriminator, probe `q_p2` (s3/s4 left-vs-right chains echo distinctly ⇒ association preserved + full paren, not table-lifted), and the guarded block in the same capture uses a *different* paren discipline that the clean consumes verbatim rather than reproducing. `connective_doc`'s Doc shape equals upstream's `sep [opParens p' <-> ppOp op, opParens q']` but is byte-forced merger (BSD `sep`/`beside_space`, never GPL `operator_`/`<->`).\n- **Binder allocation: divergent/independent.** Named-AST `Forall(Vec<VarSpec>,…)` + `fsep` vs upstream de-Bruijn + `openFormulaPrefix`/`scopeFreshness`/`avoidPrecise`/`MonadFresh`. Only the output `fsep` coincides (q_b1/q_l2 pinned).\n- **Helper decomposition: divergent.** `relation_doc` unifies `= < ⊏` (upstream splits `Less` off with no `sep` and raw `show`); `is_safety` is a direct polarity-tracking NNF scan (q_s1 msg-∃ + temporal-∃; q_s2 antecedent-flip u4) vs upstream's guarded-transform + `noExistential` — no upstream analogue to transcribe; `/* */` framing stacked via `above_op` vs upstream `multiComment` fill; header `[`/`]:` tokenised vs `brackets`.\n- **Scans clean.** No upstream identifiers/author-handles in `src/`; AST enums diverge from upstream constructor sets (adds `LessMset`, renames `EqE→Eq`/`Syntactic(Pred)→Pred`; `LemmaAttr` a witnessed subset with own names); non-observable constants (`nest 1/2`, `+2`) probe-pinned; no ghost-comment/lineage narration.\n- **Verification.** Full test suite green (R1 47, R2 9, R3 9, lib 6); parity harness byte-checks 84 restriction + 139 lemma blocks with a whitespace-discarding parser and opaque guarded/proof carried verbatim. `ac_doc` correction this round is the same byte-forced `ppTerms` convergence as R2's tuple, forced by the alethea `)`-drop witness. 84 restrictions ↔ 84 expanded-comment emits confirms the unconditional-emit is oracle-faithful.\n\nNo similarity violations; five non-blocking advisory notes recorded (safety-classi",
+    "passed": true
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Implement"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "Audit"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "seal:pretty-r3",
+      "phaseIndex": 1,
+      "phaseTitle": "Implement",
+      "agentId": "a67c8657acbf2eb3a",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1784403605278,
+      "queuedAt": 1784403605275,
+      "attempt": 1,
+      "lastToolName": "Bash",
+      "lastToolSummary": "cd /home/kamilner/tamarin-cleanroom/pretty && wc -l workspa…",
+      "promptPreview": "You are a SEALED implementer under the barrier protocol at /home/kamilner/tamarin-cleanroom/PROTOCOL.md — read it first and comply strictly.\nACCESS RULES: You must NOT read any file under /home/kamilner/tamarin-rs/crates/, and NOT read any Haskell source of tamarin-prover anywhere on disk (notably /home/kamilner/tamarin-rs/tamarin-prover/{lib,src}/ and /home/kamilner/tamarin-rs/tamarin-prover-test…",
+      "lastProgressAt": 1784406654545,
+      "tokens": 330610,
+      "toolCalls": 143,
+      "durationMs": 3049267,
+      "resultPreview": "R3 COMPLETE — restriction / lemma FORMULA rendering implemented, byte-parity green over a 20-file curated corpus set.\n\nWHAT LANDED (all inside /home/kamilner/tamarin-cleanroom/pretty/):\n- workspace/pretty-clean/src/formula.rs (new, 134 lines): trace-formula renderer. Glyphs ∀ ∃ ⇒ ∧ ∨ ¬ ⇔ ⊤ ⊥; atoms `Fact( .. ) @ tp` (hsep — @ never drops alone), `t1 < t2`, `t1 = t2`, `t1 ⊏ t2` (all `sep [lhs <+> g…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "audit:pretty-r3",
+      "phaseIndex": 2,
+      "phaseTitle": "Audit",
+      "agentId": "adf2b133dc2654170",
+      "model": "claude-opus-4-8[1m]",
+      "state": "done",
+      "startedAt": 1784406654547,
+      "queuedAt": 1784406654545,
+      "attempt": 1,
+      "lastToolName": "Edit",
+      "lastToolSummary": "/home/kamilner/tamarin-cleanroom/pretty/AUDIT.md",
+      "promptPreview": "You are a BOTH-SIDES similarity auditor for the tamarin-rs sealed relicensing campaign (exempt from barrier access rules; you may read everything). Audit ONLY this round's delta: /home/kamilner/tamarin-cleanroom HEAD (c29e244) contains pretty rounds 1-2 — git -C /home/kamilner/tamarin-cleanroom status/diff restricted to pretty/ shows the round-3 delta (formula rendering + lemma/restriction wrapper…",
+      "lastProgressAt": 1784407375318,
+      "tokens": 130186,
+      "toolCalls": 44,
+      "durationMs": 720771,
+      "resultPreview": "Round-3 similarity audit complete. Appended a full round-3 section to `/home/kamilner/tamarin-cleanroom/pretty/AUDIT.md`.\n\nSummary of what I verified against upstream (`Theory/Model/Formula.hs`, `Atom.hs`, `Highlight.hs` `opParens`, `Lemma.hs`, `TheoryObject.hs`, `Guarded.hs`):\n\n- **Parenthesization derivation (special scrutiny): clean.** Upstream has *no precedence table* — `opParens` (Highlight.…"
+    }
+  ],
+  "totalTokens": 460796,
+  "totalToolCalls": 187
+}

@@ -1,0 +1,9 @@
+theory ql5 begin
+
+rule R1: [ In(x) ] --[ A(x), Fwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww(x), Fwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww(x) ]-> [ Out(x) ]
+
+lemma m63: exists-trace "Ex x #i. Fwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww(x)@i"
+
+lemma m64: exists-trace "Ex x #i. Fwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww(x)@i"
+
+end
