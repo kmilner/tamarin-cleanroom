@@ -1,0 +1,222 @@
+theory TriggerMarginProbe
+begin
+
+functions: w1/1
+
+// OA: plain pair [45, 43] total 88
+rule OA_45_43:
+  [ In(<$dw, $dx>) ]
+  --[ F0() ]->
+  [ Aaa($q00aaaa, $aa, $ab, $ac, $ad, $ae, $af), Bbb($qx00a, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// OA: plain pair [46, 42] total 88
+rule OA_46_42:
+  [ In(<$dw, $dx>) ]
+  --[ F1() ]->
+  [ Aaa($q01, $aa, $ab, $ac, $ad, $ae, $af, $ag), Bbb($qx01, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// OA: plain pair [44, 44] total 88
+rule OA_44_44:
+  [ In(<$dw, $dx>) ]
+  --[ F2() ]->
+  [ Aaa($q02aaa, $aa, $ab, $ac, $ad, $ae, $af), Bbb($qx02aa, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// OA: plain pair [47, 41] total 88
+rule OA_47_41:
+  [ In(<$dw, $dx>) ]
+  --[ F3() ]->
+  [ Aaa($q03a, $aa, $ab, $ac, $ad, $ae, $af, $ag), Bbb($qx03aaaa, $be, $bf, $bg, $bh, $bi) ]
+
+// OA: plain pair [50, 38] total 88
+rule OA_50_38:
+  [ In(<$dw, $dx>) ]
+  --[ F4() ]->
+  [ Aaa($q04aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag), Bbb($qx04a, $be, $bf, $bg, $bh, $bi) ]
+
+// OA: plain pair [55, 33] total 88
+rule OA_55_33:
+  [ In(<$dw, $dx>) ]
+  --[ F5() ]->
+  [ Aaa($q05aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Bbb($qx05a, $be, $bf, $bg, $bh) ]
+
+// OA: plain pair [60, 28] total 88
+rule OA_60_28:
+  [ In(<$dw, $dx>) ]
+  --[ F6() ]->
+  [ Aaa($q06aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai), Bbb($qx06a, $be, $bf, $bg) ]
+
+// OA: plain pair [65, 23] total 88
+rule OA_65_23:
+  [ In(<$dw, $dx>) ]
+  --[ F7() ]->
+  [ Aaa($q07aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj), Bbb($qx07a, $be, $bf) ]
+
+// OA: plain pair [45, 44] total 89
+rule OA_45_44:
+  [ In(<$dw, $dx>) ]
+  --[ F8() ]->
+  [ Aaa($q08aaaa, $aa, $ab, $ac, $ad, $ae, $af), Bbb($qx08aa, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// OA: plain pair [46, 43] total 89
+rule OA_46_43:
+  [ In(<$dw, $dx>) ]
+  --[ F9() ]->
+  [ Aaa($q09, $aa, $ab, $ac, $ad, $ae, $af, $ag), Bbb($qx09a, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// OA: plain pair [50, 39] total 89
+rule OA_50_39:
+  [ In(<$dw, $dx>) ]
+  --[ F10() ]->
+  [ Aaa($q10aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag), Bbb($qx10aa, $be, $bf, $bg, $bh, $bi) ]
+
+// OB: plain triple (20, 39, 29) total 88
+rule OB_20_39_29:
+  [ In(<$dw, $dx>) ]
+  --[ F11() ]->
+  [ Aaa($q11aaaa, $aa), Bbb($qx11aa, $be, $bf, $bg, $bh, $bi), Ccc($qy11aa, $ci, $cj, $ck) ]
+
+// OB: plain triple (30, 30, 28) total 88
+rule OB_30_30_28:
+  [ In(<$dw, $dx>) ]
+  --[ F12() ]->
+  [ Aaa($q12aaaa, $aa, $ab, $ac), Bbb($qx12aaa, $be, $bf, $bg), Ccc($qy12a, $ci, $cj, $ck) ]
+
+// OB: plain triple (40, 24, 24) total 88
+rule OB_40_24_24:
+  [ In(<$dw, $dx>) ]
+  --[ F13() ]->
+  [ Aaa($q13aaaa, $aa, $ab, $ac, $ad, $ae), Bbb($qx13aa, $be, $bf), Ccc($qy13aa, $ci, $cj) ]
+
+// OB: plain triple (29, 30, 29) total 88
+rule OB_29_30_29:
+  [ In(<$dw, $dx>) ]
+  --[ F14() ]->
+  [ Aaa($q14aaa, $aa, $ab, $ac), Bbb($qx14aaa, $be, $bf, $bg), Ccc($qy14aa, $ci, $cj, $ck) ]
+
+// OC: FW replica [34(3-tup rec4), 21, 25(pair rec3)] — ref keeps 21 flat?
+rule OC_21:
+  [ In(<$dw, $dx>) ]
+  --[ F15() ]->
+  [ Paa(<$q15aaaaaaaaaaa, $aa, $ab>), Tbb($qx15aaaa, $be), Qcc(<$qy15aaaaaa, $ci>) ]
+
+// OC: FW replica [34(3-tup rec4), 22, 25(pair rec3)] — ref keeps 22 flat?
+rule OC_22:
+  [ In(<$dw, $dx>) ]
+  --[ F16() ]->
+  [ Paa(<$q16aaaaaaaaaaa, $aa, $ab>), Tbb($qx16, $be, $bf), Qcc(<$qy16aaaaaa, $ci>) ]
+
+// OC: FW replica [34(3-tup rec4), 23, 25(pair rec3)] — ref keeps 23 flat?
+rule OC_23:
+  [ In(<$dw, $dx>) ]
+  --[ F17() ]->
+  [ Paa(<$q17aaaaaaaaaaa, $aa, $ab>), Tbb($qx17a, $be, $bf), Qcc(<$qy17aaaaaa, $ci>) ]
+
+// OC: FW replica [34(3-tup rec4), 24, 25(pair rec3)] — ref keeps 24 flat?
+rule OC_24:
+  [ In(<$dw, $dx>) ]
+  --[ F18() ]->
+  [ Paa(<$q18aaaaaaaaaaa, $aa, $ab>), Tbb($qx18aa, $be, $bf), Qcc(<$qy18aaaaaa, $ci>) ]
+
+// OD: [41(mid-pair+func rec3), deep-pair 49 (rec8, nfunc1)] — FW witness replica
+rule OD_49:
+  [ In(<$dw, $dx>) ]
+  --[ F19() ]->
+  [ Ann($q19aaaa, $a, <$b, $c>, w1($d), $e), Bnn(<w1(<$qx19aaaaaaaaaaa, $f, $g>), <$h, $i>>) ]
+
+// OD: [41(mid-pair+func rec3), deep-pair 50 (rec8, nfunc1)] — FW witness replica
+rule OD_50:
+  [ In(<$dw, $dx>) ]
+  --[ F20() ]->
+  [ Ann($q20aaaa, $a, <$b, $c>, w1($d), $e), Bnn(<w1(<$qx20aaaaaaaaaaaa, $f, $g>), <$h, $i>>) ]
+
+// OD: [41(mid-pair+func rec3), deep-pair 51 (rec8, nfunc1)] — FW witness replica
+rule OD_51:
+  [ In(<$dw, $dx>) ]
+  --[ F21() ]->
+  [ Ann($q21aaaa, $a, <$b, $c>, w1($d), $e), Bnn(<w1(<$qx21aaaaaaaaaaaaa, $f, $g>), <$h, $i>>) ]
+
+// OD: [41(mid-pair+func rec3), deep-pair 52 (rec8, nfunc1)] — FW witness replica
+rule OD_52:
+  [ In(<$dw, $dx>) ]
+  --[ F22() ]->
+  [ Ann($q22aaaa, $a, <$b, $c>, w1($d), $e), Bnn(<w1(<$qx22aaaaaaaaaaaaaa, $f, $g>), <$h, $i>>) ]
+
+// OD: [41(mid-pair+func rec3), deep-pair 53 (rec8, nfunc1)] — FW witness replica
+rule OD_53:
+  [ In(<$dw, $dx>) ]
+  --[ F23() ]->
+  [ Ann($q23aaaa, $a, <$b, $c>, w1($d), $e), Bnn(<w1(<$qx23aaaaaaaaaaaaaaa, $f, $g>), <$h, $i>>) ]
+
+lemma l_OA_45_43:
+  exists-trace "Ex #i. F0() @ #i"
+
+lemma l_OA_46_42:
+  exists-trace "Ex #i. F1() @ #i"
+
+lemma l_OA_44_44:
+  exists-trace "Ex #i. F2() @ #i"
+
+lemma l_OA_47_41:
+  exists-trace "Ex #i. F3() @ #i"
+
+lemma l_OA_50_38:
+  exists-trace "Ex #i. F4() @ #i"
+
+lemma l_OA_55_33:
+  exists-trace "Ex #i. F5() @ #i"
+
+lemma l_OA_60_28:
+  exists-trace "Ex #i. F6() @ #i"
+
+lemma l_OA_65_23:
+  exists-trace "Ex #i. F7() @ #i"
+
+lemma l_OA_45_44:
+  exists-trace "Ex #i. F8() @ #i"
+
+lemma l_OA_46_43:
+  exists-trace "Ex #i. F9() @ #i"
+
+lemma l_OA_50_39:
+  exists-trace "Ex #i. F10() @ #i"
+
+lemma l_OB_20_39_29:
+  exists-trace "Ex #i. F11() @ #i"
+
+lemma l_OB_30_30_28:
+  exists-trace "Ex #i. F12() @ #i"
+
+lemma l_OB_40_24_24:
+  exists-trace "Ex #i. F13() @ #i"
+
+lemma l_OB_29_30_29:
+  exists-trace "Ex #i. F14() @ #i"
+
+lemma l_OC_21:
+  exists-trace "Ex #i. F15() @ #i"
+
+lemma l_OC_22:
+  exists-trace "Ex #i. F16() @ #i"
+
+lemma l_OC_23:
+  exists-trace "Ex #i. F17() @ #i"
+
+lemma l_OC_24:
+  exists-trace "Ex #i. F18() @ #i"
+
+lemma l_OD_49:
+  exists-trace "Ex #i. F19() @ #i"
+
+lemma l_OD_50:
+  exists-trace "Ex #i. F20() @ #i"
+
+lemma l_OD_51:
+  exists-trace "Ex #i. F21() @ #i"
+
+lemma l_OD_52:
+  exists-trace "Ex #i. F22() @ #i"
+
+lemma l_OD_53:
+  exists-trace "Ex #i. F23() @ #i"
+
+end

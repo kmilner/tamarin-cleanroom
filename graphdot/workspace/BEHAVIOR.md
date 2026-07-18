@@ -506,6 +506,55 @@ renders `{info}|{concl}`).
       (`St_I( …, SI4 )`, e.g. 01e0a9f6bf86b671.dot) is actually a 2-cell row
       `[St_I 77, Fr( ~ni.1 ) 9]` wrapping by `)`-peel at its bonus-free
       budget — a trigger-margin case, not an internal-width one.
+  - **REVISED (Session 12) — the trigger slack is `⌈elems/2⌉ − 1` for a
+    tuple/union arg in ANY position (the round-10/11 last-gated `⌊elems/2⌋+2`
+    bonus is REFUTED — its probe readings were relief artifacts of wrapping
+    45-siblings); occupancy and the fill numerator count FUNCTION NODES
+    INSIDE tuples; the fill numerator does NOT carry top-level `nfunc`; and
+    the relief charge follows the wrapping sibling's UNROUNDED fill quotient.**
+    Round-12 batteries L/M/N/O (111 rules on :3200-3203 — QUERIES.log
+    Session 12):
+    * **Pass-1 slack** (battery L, beside a floor-protected flat-20 sibling,
+      bonus-free budget 67): pair 0 (LA2_68 wraps at budget+1), 3-tuple 1
+      (LA3_68 flat / 69 wraps), 4-tuple 1 — MID-LIST INCLUDED (LD4_68 FLAT at
+      budget+1 / 69 wraps), 6-tuple 2 (LA6_70 wraps at +3), 3-union 1,
+      single-arg 3-tuple 1 (LC3_69 wraps at +2, refuting the single-arg
+      `⌊e/2⌋+2`); law `s = max over top-level tuple/union args of
+      ⌈elems/2⌉ − 1`, capped at 4. WIT re-read: `Fr( ~ni )` is flat 9, so the
+      78/79 flip = slack 1, consistent; the WIT_79 wrap itself is the ΣC=88
+      zone (below).
+    * **Occupancy & fill numerator count funcs-inside-tuples** (`ftup`): the
+      corpus `[41w, 51 single-arg-nested-pair]` false-wrap witness resolves
+      exactly when `C = flat + rec_sur + ftup` (its 3 in-tuple funcs) and the
+      OD replica byte-confirms the charge arithmetic (49 saved / 50 wraps);
+      top-level funcs stay uncharged (round-10 FB pins hold). The fill
+      numerator drops the round-10 `+nfunc` term (corpus dq bias + FB_47
+      in-band under `N = flat + rec_sur7 + ftup`).
+    * **No quote discount** (battery NB): `N` unmodified by quoted constants
+      (−1/−2 per quote predictions fall out of band at NB2_58_43/NB4_58_41);
+      **numerator cap 7 holds at 8 elements** (NC8_62_40); **fill
+      denominators use FULL recursive occupancy** (ND16: a 16-tuple sibling
+      charged `flat + 17` is in-band, capped `+7` is not).
+    * **Relief charge** (batteries M/MC, sibling gaps 3–8): a wrapping
+      sibling charges `min(hd(q + 1/3), C)` where `q` is its UNROUNDED
+      proportional quotient (byte-pinned: q 43.02→43, 43.5→44, 49.45→50,
+      54.03→54, 53.47→54, 57.4→58, 59.48→60); MC pins the charge as q-based,
+      NOT the occupancy C. EXCEPT: a saved cell whose top-level tuple/union
+      arg has ≥ 4 elements drops the bump (TB4 47/48, TB6 48/49, UEV 47/48,
+      UB8 49/50 re-reads — all four boundary pairs byte-consistent only
+      bump-free). No slack enters relief.
+    * **The ΣC = 88 coupled zone is TERMINAL** (battery O): at row totals of
+      exactly 88, `[45,43]` keeps the 43 flat while `[46,42]` wraps the 42
+      (sibling quotients 44.49 vs 45.48 — same frac, opposite outcomes);
+      `[29,30,29]` keeps the 29s flat while `[30,30,28]` wraps all three; the
+      OC replica (`[34 3-tuple, T, 25 pair]`) keeps T flat at budget+2. The
+      required per-row charge roundings are mutually contradictory (mixed
+      up/down for equal fracs), proving NO closed form over cell widths
+      decides these rows — they are the reference's coupled per-row `fits`.
+      Battery-M rows and plain 2/3-cell relief boundaries are DEGENERATE for
+      plain targets (the proportional fill couples the relief boundary onto
+      the pass-1 boundary: `f(W + 87 − f) = 87W` forces `f ∈ {W, 87}`), which
+      is why this zone concentrates all remaining trigger error.
   - **REFUTED (Session 9): the group is NOT one horizontal HughesPJ document**
     (fcat/fsep/cat/sep of cell docs at any (lineLen, ribbon) tried fails almost
     every controlled case — cells that share a line would never wrap
@@ -785,43 +834,50 @@ Reproduced & byte-tested against captured/live payloads:
 - Abbreviation naming, numbering, legend HTML (65-space indent), and the SELECTION
   rule (§5c, REPORT2.md), plus the cluster/compact trigger (§4).
 
-- **Record-cell group WRAP** (§3f, Sessions 8–11): a **faithful HughesPJ port**
+- **Record-cell group WRAP** (§3f, Sessions 8–12): a **faithful HughesPJ port**
   (`pretty.rs`, from the sanctioned BSD `pretty` library, with the Haskell
   laziness mirrored via `Doc::Lazy` thunks + first-line-only `fits` — pure
   evaluation-order change, byte-identical, kills an exponential blowup on
   many-element fills) laid out at **ribbonsPerLine = 1.5** so the paragraph fill
   is RAGGED, plus the **two-PASS allocation** (`generate::group_widths`,
-  Session 11): recursive-occupancy flat-sum TRIGGER (`C = flat + Σ per
-  tuple/union node (elems+1), directly-nested-in-tuple nodes (elems−1)`;
-  bonus `⌊n/2⌋+2` capped at 4 for n ≥ 9, applied only when the LAST arg is
-  the tuple/union), a RELIEF second pass (wrapping sibs charged at their fill
-  when truly broken), and proportional FILL rounded half-DOWN with the
-  internal numerator `flat + rec_sur(cap 7) + nfunc` over sibling
-  occupancies, quoted-atom sibs at 5/6 for tuple-fact receivers. The cell
-  grammar includes **union and function-application documents** (§3f Session
-  10) and the **tuple-opener hang** (§3f Session 11). Corpus census
-  (round 11): all-cells **98.79 %**, wrapping cells **95.60 %** (single-cell
-  **100.00 %**, multi-cell **95.21 %**), false-flat 324 (round 10: 819),
-  false-wrap 1,150 (1,478), fill misses 5,954 (18,764). Probe-battery wrap
-  byte-exactness 822/862 across every battery ever captured (r8 grids
-  78/86, r9 p2 133/133, round-11 G 84/86 / H 55/58 / I 99/101 / K 63/70).
-  Callers may override per-cell widths (`CellWidths` incl. round-11
-  `trigger_width`; INTERFACE.md) — though the J-battery shows the reference
-  itself computes on display text, so the estimates ARE the probed behavior.
+  Session 12): recursive-occupancy flat-sum TRIGGER (`C = flat + Σ per
+  tuple/union node (elems+1), directly-nested-in-tuple nodes (elems−1), + 1
+  per function node INSIDE a tuple/union`; slack `⌈elems/2⌉−1` capped at 4
+  over top-level tuple/union args in ANY position), a RELIEF second pass
+  (wrapping sibs charged `min(hd(q + 1/3), C)` on their UNROUNDED quotient,
+  bump dropped for ≥ 4-element-tuple receivers), and proportional FILL
+  rounded half-DOWN with the internal numerator
+  `flat + rec_sur(cap 7) + ftup` over sibling occupancies, quoted-atom sibs
+  at 5/6 for tuple-fact receivers. The cell grammar includes **union and
+  function-application documents** (§3f Session 10) and the **tuple-opener
+  hang** (§3f Session 11). Corpus census (round 12): all-cells **98.93 %**,
+  wrapping cells **96.45 %** (single-cell **100.00 %**, multi-cell
+  **96.14 %**), false-flat 172 (round 11: 324), false-wrap ~1,477 (1,150 —
+  moved INTO the proven-non-closed-form ΣC=88 zone by the probe-forced
+  tighter slack), fill misses 4,884 (5,954). Probe-battery wrap
+  byte-exactness 979/1,023 across every battery ever captured (old set
+  824/862; round-12 L 28/28, M 33/34, N 60/64, O 34/35). Callers may
+  override per-cell widths (`CellWidths` incl. round-11 `trigger_width`;
+  INTERFACE.md) — though the J-battery shows the reference itself computes
+  on display text, so the estimates ARE the probed behavior.
 
 Documented gaps (need the GPL solver or an unavailable backend):
 - JSON graph backend format (unavailable / not in corpus).
-- **Record-cell wrap residuals** (§3f, Session 11) — the remaining ~4.4 % of
-  wrapping cells (fill 5,954 + false-flat 324 + false-wrap 1,150):
-  (a) the **±1 coupled-`fits` boundary**: relief one column beyond the model
-      (`[45,43]` saved / `[46,42]` not; IA_65_23) and ±1 fill roundings at
-      band edges — the reference's per-row coupled `fits`, no closed form;
+- **Record-cell wrap residuals** (§3f, Session 12) — the remaining ~3.5 % of
+  wrapping cells (fill 4,884 + false-flat 172 + false-wrap ~1,477):
+  (a) the **ΣC = 88 coupled-`fits` zone** (now the DOMINANT residue, and
+      PROVEN non-closed-form by battery O: `[45,43]` vs `[46,42]`,
+      `[29,30,29]` vs `[30,30,28]`, OC budget+2 saves, WIT_79 vs LD4_68 —
+      required charge roundings are mutually contradictory at equal
+      fractional parts): cells at exactly budget±1..2 where the reference's
+      per-row coupled `fits` decides;
   (b) **large-tuple numerators**: the cap-7 law approximates 8–20-element
-      tuple receivers (r8 grids 78/86);
-  (c) a small band-NONE residue (~850 rows, was 8,305): mostly
-      abbreviation-expansion layouts inside deep func chains and multi-run
-      band shapes — NOT explained by internal-width layout (refuted, §3f
-      Session 11); likely further combinator subtleties.
+      tuple receivers (r8 grids 78/86; K3 small-receiver-beside-huge-sib and
+      K6 pair-of-6-tuples fills stay ±1-2 out);
+  (c) a band-NONE residue (~1,640 cells): mostly abbreviation-expansion
+      layouts inside deep func chains and multi-run band shapes — NOT
+      explained by internal-width layout (refuted, §3f Session 11); likely
+      further combinator subtleties.
 - **compress/compact content** (§4, §6): which nodes/edges a raw constraint system
   yields — a solver transform. (The L1/L2/L3 level distinction is no longer a gap:
   it is proven non-existent, §7a.)
@@ -1056,4 +1112,66 @@ internal-width effect). Old probe subset regressed slightly (525/547 →
 losses are all big-tuple fill ±1s.
 
 **Probes logged** in QUERIES.log Session 11 (probeG-K on ports 3200-3204, all
+servers stopped, ports 3200-3299 verified clear). No forbidden paths read.
+
+--------------------------------------------------------------------------------
+## Round 12 report — corpus-residue attack: slack law, relief charge, ftup occupancy (folded here per protocol)
+
+**Task (open-side corpus measurement relayed three families).** Against the
+12,022-payload corpus: FAMILY A (dominant, both-wrap fill breaks one element
+apart), FAMILY B (trigger false-negatives — we flat, reference wraps, often a
+`)`-peel), FAMILY C (residual false-wraps).
+
+**Method.** Baseline gates re-run byte-identical to round-11 finals. Corpus
+miss inventory over bands9 + all archived probe re-dumps (eval12/frac12/dq12/
+variants12*): FM misses band-edge-hug (+1 dominant), needed-Δq correlates with
+nfunc/nq (negative) and rec7=6/sqa-sib (positive); FF cells sit at bonus-free
+margin exactly = their granted bonus; offline law competition narrowed the
+axes; then four live batteries (L/M/N/O, 111 rules, ports 3200-3203, serve
+wrapper OOM-guarded, servers stopped) around the cluster centroids; band_dump
+extended to 22-field cells (`smax`, `ftup`); final grid selection; implement +
+full gates.
+
+**Findings → laws shipped** (each pinned in the §3f Session-12 bullet):
+1. Pass-1 slack `⌈e/2⌉−1` (cap 4) over top-level tuple/union args, ANY
+   position — replaces the last-gated `⌊e/2⌋+2` bonus (battery L; the old
+   probe readings were relief artifacts). This alone dissolves family B's
+   dominant [40w, 50 last-2-tuple] SndS class (bonus-free budget 47 < 50).
+2. Occupancy AND fill numerator count function nodes INSIDE tuples/unions
+   (`ftup`); top-level `nfunc` leaves the numerator (corpus [41w,51] witness
+   + OD replica byte-pair; FB pins hold).
+3. Relief charge = `min(hd(q_sib + 1/3), C_sib)` on the UNROUNDED quotient
+   (battery M, gaps 3–8 byte-pinned; MC: q-based, not C), bump dropped for
+   ≥ 4-element-tuple receivers (TB4/TB6/UEV/UB8 boundary pairs).
+4. No quote discount (NB); numerator cap 7 holds at 8 elems (NC8); fill
+   denominators use FULL recursive occupancy (ND16 refutes capped sibs).
+5. The ΣC=88 budget-margin zone is TERMINAL: battery O proves closed-form
+   impossibility (mutually contradictory roundings at equal fracs).
+
+**Result (acceptance gates).** 82 tests green (2 new battery fixtures; the
+WIT_79 assertion re-scoped to the ΣC=88 residue per LD4_68);
+GRAPHCLEAN_CORPUS roundtrip **12022/12022**; alloc 12022/12022. fill_census
+(615,850 cells, 142,540 wrapping): all cells 98.794 % → **98.933 %**,
+wrapping 95.60 % → **96.45 %**, single-cell 100.00 % held, multi-cell
+95.21 % → **96.14 %**, false-flat 324 → **172**, fill misses 5,954 →
+**4,884**, false-wrap 1,150 → ~**1,477** (moved into the proven-terminal
+zone; net divergent cells 7,428 → 6,533, −12 %). Probe-battery wrap
+byte-exactness **979/1,023** (95.7 %) over every battery ever captured
+(old-set subset 824/862 vs round-11's 822/862; B/C/E now 20/20, 34/34,
+68/68; K 61/70 — K1/K3/K6 pre-existing + TB4f_48 ±1 collateral).
+Absent-override behavior regression-gated (all four override fields).
+
+**Honest residue, per relayed family.** FAMILY A (fill): 5,954 → 4,884
+(−18 %); pinned: half-down + numerator/denominator terms above; still open:
+large-tuple numerator approximation (K3/K6/r8), band-NONE ~1,640
+(abbreviation-expansion deep-func layouts), ±1 band-edge roundings. FAMILY B
+(false-flat): 324 → 172 (−47 %); pinned: the slack law; residue: ΣC=88-zone
+cells whose reference wraps at budget+slack (e.g. [60 rec9, 26] margin-3
+shapes). FAMILY C (false-wrap): 1,150 → ~1,477; the probe-forced tighter
+slack EXPOSES the coupled zone (ref keeps flat at budget+1..+2 in about half
+of the exact-88 rows — battery O proves no width-function decides them); this
+regression is the honest price of probe-exact laws elsewhere and is bounded
+by the zone's row population.
+
+**Probes logged** in QUERIES.log Session 12 (probeL-O on ports 3200-3203, all
 servers stopped, ports 3200-3299 verified clear). No forbidden paths read.

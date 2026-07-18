@@ -672,3 +672,74 @@ across siblings collide -> occ>=2 -> ABBREVIATED, which corrupted the first
   BEHAVIOR.md §3f Session-11 bullet + §8 + round-11 report written; INTERFACE.md
   rewritten (round-11 laws + trigger_width + the J-battery internal-width
   refutation guidance). No forbidden paths read.
+
+## Session 12 (round 12) — corpus-scale residue attack: Family A fill off-by-one, B trigger false-negatives, C residual false-wraps
+- Open-side relay: 11,373 diverging cells in 3 families (A 8,564 both-wrap break one element apart;
+  B 1,659 we-flat/ref-wraps; C 1,150 we-wrap/ref-flat). Witnesses:
+  A !Handover_Session( KD2, <~AMF_ID, ~MME_ID, ~gNB_ID, ~eNB_ID, ~SUPI> ) breaks after ~gNB_ID (ours one earlier);
+  B SndS( ~cid_S1, ~MME_ID, ~eNB_ID, <'ho_cmd', EN1> ) ref )-peels, ours flat;
+  C Resp_1( $I, $R, ~ltkR, ~ekR, 'g'^~ekI ) ref flat, ours wraps.
+- Baseline gates re-run before any change (build + tests + roundtrip + fill_census), below.
+- Baseline confirmed: 80 tests green, roundtrip_corpus_dir 12022/12022 (3.0s), alloc 12022/12022,
+  fill_census: all 608422/615850=98.794%, wrap 136262/142540=95.60%, single 11419/11419=100.00%,
+  multi 124843/131121=95.21%, falseNeg 324, fillErr 5954 — byte-identical to round-11 finals.
+- Corpus mining (captured OUTPUT: bands9.tsv + b9_* probe re-dumps; eval12/frac12/dq12/variants12*):
+  FM in-band-space misses 4,311: 77% at predicted-L = band-top + 1, frac-clustered .5-.8 (half-down
+  rounds UP); no global rounding/L-map fix (ceil-L, floor-b, -1L all WORSE net). dq-by-shape: nfunc>0
+  and nq>0 cells need LOWER q (no pos), rec7=6 receivers + sqa-sibs need HIGHER. FF 324 = bonus-load-
+  bearing cells at bonus-free margin EXACTLY 3 (2-tuple last, multi-arg, e.g. SndS witness [40w,50]);
+  extra-FW-under-no-bonus at margins 1-2 -> multi-arg slack smaller than single-arg. Offline sweep:
+  lastm1(+t3/fp1 relief variants) cut trigger errors 1474->~1250 zone; K2_44 vs PA_46/TB4_47 pin
+  contradictory per-shape relief charges -> live batteries designed.
+- LIVE batteries L/M/N/O (ports 3200-3203, serve.sh OOM-guarded, 111 rules, all dots captured,
+  servers STOPPED, ports verified clear; dots in r12/probe{L,M,N,O}_dots, bands in r12/bands{L,M,N,O}.tsv):
+  * L (bonus gate, beside floor-protected flat-20 sib, budget0 67): slack observed = ceil(e/2)-1 for ANY
+    tuple/union arg incl MID-LIST and SINGLE-ARG: pair 0 (LA2_68 wraps at budget+1), 3-tuple 1 (LA3_68
+    flat), 4-tuple 1 (LD4_68 mid-list FLAT at budget+1!), 6-tuple 2 (LA6_70 wraps at +3), 3-union 1,
+    single-arg 3-tuple 1 (LC3_69 WRAPS at +2 — REFUTES the shipped single-arg floor(e/2)+2 bonus).
+    The r10/r11 "bonus 3..7" readings were relief artifacts (sib 45 wrapped in those grids); WIT re-read:
+    Fr(~ni) flat 10 => flip 78/79 = slack 1 CONSISTENT with ceil(4/2)-1.
+  * M (relief charge, midpair rec-3 targets, sib gaps 3-8): boundary follows the sib's UNROUNDED
+    quotient q: charge ~ hd(q+1/3) (43.02->43, 43.5->44, 49.45->50, 54.03->54, 53.47->54, 57.4->58,
+    59.48->60 all byte-consistent); MC (pair-sib C=W+3): charge is q-based NOT C (targets at 87-charge
+    stay flat where charging C would wrap them).
+  * N: NA non-discriminating (bands too wide); NB REFUTES quote discounts in N (q0 predictions in-band,
+    -1q/-2q out at NB2_58_43/NB4_58_41); NC8_62_40 keeps numerator cap-7 at 8 elems; ND16 REFUTES
+    capped sibling denominators: D=C (full rec, 16-tuple sib) in-band, C7 out (ND16_50_90).
+  * O: OA/OB budget+1 split remains coupled-fits (45/43 flat vs 46/42 wraps; 29,30,29 flat vs 30,30,28
+    wraps — same totals, opposite outcomes; no q-rounding law separates, mixed-rounding contradiction
+    PROVES non-closed-form); OC replica CONFIRMS the corpus FW family ([34tup,22,25pair]: 22 AND 23
+    both flat = budget+2 slack, unexplained — residue); OD replica of [41w,51-deep-pair]: flat<=49/
+    wraps>=50 with charge hd(q+1/3)=38 under N=f7 — and the CORPUS twin (nfunc 3 in-tuple) is explained
+    iff occupancy C counts funcs-INSIDE-tuples (+1 each; top-level funcs stay uncharged per r10 FB).
+- IMPLEMENTED (graph-clean, round 12): (1) cell_shape gains smax (ceil(e/2)-1 max over
+  top-level tuple/union args, any position) + ftup (func nodes inside tuple/union
+  subtrees); band_dump emits 22-field cells; (2) group_widths_with rewritten:
+  C = flat + rec_sur + ftup; pass-1 slack = min(smax, 4) replacing the last-gated
+  bmax bonus; fill N = flat + rec_sur7 + ftup (top-level nfunc dropped); relief
+  charge for wrapping sibs = min(hd(q_unrounded + 1/3), C), bump dropped when the
+  saved cell has a >=4-elem top-level tuple/union arg; flat sibs charge C; no relief
+  slack; (3) tests: WIT_79 assertion re-scoped to the SigmaC=88 residue (LD4_68
+  byte-observation contradicts the old reading), + any_arg_tuple_slack_battery_l
+  + relief_charge_bump_battery_m probe fixtures. Law selection by exhaustive offline
+  grid over bands12.tsv (22-field corpus re-dump) + 18 probe-dir re-dumps
+  (b12_p*.tsv): q13e4 config chosen probe-first (TB4_47/48 + TB6/UEV/UB8 pairs all
+  honored; corpus cost +28 trigger cells vs bump-always). C-floor-10 and C7/rec5
+  denominator caps refuted by score/ND16; s2 relief-slack variants refuted (TB4_48,
+  TB6_49, UEV_48).
+- FINAL GATES (round 12): 82 tests green; GRAPHCLEAN_CORPUS roundtrip 12022/12022;
+  alloc_corpus 12022/12022; fill_census corpus: all 609280/615850 = 98.933% (was
+  98.794%), wrap 137484/142540 = 96.45% (95.60%), single 11419/11419 = 100.00%,
+  multi 126065/131121 = 96.14% (95.21%), falseNeg 172 (324), fillErr 4884 (5954);
+  falseWrap ~1477 (1150) — moved INTO the battery-O-proven non-closed-form
+  SigmaC=88 zone by the probe-forced tighter slack; net divergent cells
+  7428 -> 6533 (-12%). Probe censuses (wrap cells byte-exact): p2 133/133,
+  p3 81/89, p4 7/10, A 43/44, B 20/20, C 34/34, D 11/12, E 68/68, F 50/51,
+  r8 78/86, G 84/86, H 55/58, I 99/101, K 61/70, L 28/28, M 33/34, N 60/64,
+  O 34/35 => 979/1023 (95.7%; old-set subset 824/862 vs r11 822/862; K -2 =
+  K1/K3/K6 pre-existing + TB4f_48 +-1 collateral of the ftup term; O's 10 flat-
+  cell misses are the deliberately-probed terminal zone). Absent-override
+  behavior byte-identical (regression-gated). Servers: 3200-3203 stopped during
+  the session; ports 3200-3299 verified clear (ss scan). BEHAVIOR.md §3f
+  Session-12 bullet + §8 + round-12 report written; INTERFACE.md rewritten
+  (round-12 laws + terminal-residue guidance). No forbidden paths read.

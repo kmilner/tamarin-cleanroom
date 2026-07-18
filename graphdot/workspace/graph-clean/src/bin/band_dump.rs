@@ -431,14 +431,17 @@ fn process_file(path: &std::path::Path, cache: &mut HashMap<(String, String), St
                 // surcharge and the fact's top-level arg count, so offline
                 // fitting uses the exact shipped shape features
                 let cs = graph_clean::generate::cell_shape(&flat_text);
+                // fields 20-21 (round 12): the trigger slack ceil(e/2)-1 and
+                // the funcs-inside-tuples count (occupancy term)
                 cellfields.push(format!(
-                    "{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}",
+                    "{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}",
                     flats[k], status, dtop, drec, nq, sqa, nargs, nfunc, nabbr, ctup, bmax,
                     cs.tup_sur, cs.uni_sur, cs.bmax, cs.rec_sur, cs.nargs,
                     cs.last_tup as i64,
                     graph_clean::generate::rec_surcharge_capped(&flat_text, 5),
                     graph_clean::generate::rec_surcharge_capped(&flat_text, 7),
-                    graph_clean::generate::rec_surcharge_capped(&flat_text, 9)
+                    graph_clean::generate::rec_surcharge_capped(&flat_text, 9),
+                    cs.smax, cs.ftup
                 ));
             }
             out.push(format!(

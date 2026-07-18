@@ -1,0 +1,294 @@
+theory FillTermsProbe
+begin
+
+functions: w1/1
+
+// NA: 2-func target 58 beside 40: f7 fill 51 vs f7n 52
+rule NA2_58_40:
+  [ In(<$dw, $dx>) ]
+  --[ F0() ]->
+  [ Ftt($q00aaaaaaaaaaaaaaaaaaaaaaaaaaaaa, w1($aa), w1($ab)), Sbb($qx00aaa, $be, $bf, $bg, $bh, $bi) ]
+
+// NA: 2-func target 58 beside 41: f7 fill 51 vs f7n 52
+rule NA2_58_41:
+  [ In(<$dw, $dx>) ]
+  --[ F1() ]->
+  [ Ftt($q01aaaaaaaaaaaaaaaaaaaaaaaaaaaaa, w1($aa), w1($ab)), Sbb($qx01aaaa, $be, $bf, $bg, $bh, $bi) ]
+
+// NA: 2-func target 58 beside 42: f7 fill 50 vs f7n 51
+rule NA2_58_42:
+  [ In(<$dw, $dx>) ]
+  --[ F2() ]->
+  [ Ftt($q02aaaaaaaaaaaaaaaaaaaaaaaaaaaaa, w1($aa), w1($ab)), Sbb($qx02, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// NA: 2-func target 58 beside 43: f7 fill 50 vs f7n 51
+rule NA2_58_43:
+  [ In(<$dw, $dx>) ]
+  --[ F3() ]->
+  [ Ftt($q03aaaaaaaaaaaaaaaaaaaaaaaaaaaaa, w1($aa), w1($ab)), Sbb($qx03a, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// NA: 4-func target 58 beside 40: f7 fill 51 vs f7n 53
+rule NA4_58_40:
+  [ In(<$dw, $dx>) ]
+  --[ F4() ]->
+  [ Ftt($q04aaaaaaaaaaa, w1($aa), w1($ab), w1($ac), w1($ad)), Sbb($qx04aaa, $be, $bf, $bg, $bh, $bi) ]
+
+// NA: 4-func target 58 beside 41: f7 fill 51 vs f7n 52
+rule NA4_58_41:
+  [ In(<$dw, $dx>) ]
+  --[ F5() ]->
+  [ Ftt($q05aaaaaaaaaaa, w1($aa), w1($ab), w1($ac), w1($ad)), Sbb($qx05aaaa, $be, $bf, $bg, $bh, $bi) ]
+
+// NA: 4-func target 58 beside 42: f7 fill 50 vs f7n 52
+rule NA4_58_42:
+  [ In(<$dw, $dx>) ]
+  --[ F6() ]->
+  [ Ftt($q06aaaaaaaaaaa, w1($aa), w1($ab), w1($ac), w1($ad)), Sbb($qx06, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// NA: 4-func target 58 beside 43: f7 fill 50 vs f7n 51
+rule NA4_58_43:
+  [ In(<$dw, $dx>) ]
+  --[ F7() ]->
+  [ Ftt($q07aaaaaaaaaaa, w1($aa), w1($ab), w1($ac), w1($ad)), Sbb($qx07a, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// NB: 2-quote target 58 beside 41: fills q0 51 / q-1 50 / q-2 49
+rule NB2_58_41:
+  [ In(<$dw, $dx>) ]
+  --[ F8() ]->
+  [ Qtt($q08aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, 'q0a', 'q1b'), Sbb($qx08aaaa, $be, $bf, $bg, $bh, $bi) ]
+
+// NB: 2-quote target 58 beside 43: fills q0 50 / q-1 49 / q-2 48
+rule NB2_58_43:
+  [ In(<$dw, $dx>) ]
+  --[ F9() ]->
+  [ Qtt($q09aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, 'q0a', 'q1b'), Sbb($qx09a, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// NB: 2-quote target 58 beside 45: fills q0 49 / q-1 48 / q-2 47
+rule NB2_58_45:
+  [ In(<$dw, $dx>) ]
+  --[ F10() ]->
+  [ Qtt($q10aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, 'q0a', 'q1b'), Sbb($qx10aaa, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// NB: 2-quote target 58 beside 46: fills q0 49 / q-1 48 / q-2 47
+rule NB2_58_46:
+  [ In(<$dw, $dx>) ]
+  --[ F11() ]->
+  [ Qtt($q11aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, 'q0a', 'q1b'), Sbb($qx11aaaa, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// NB: 4-quote target 58 beside 40: fills q0 51 / q-1 50 / q-2 48
+rule NB4_58_40:
+  [ In(<$dw, $dx>) ]
+  --[ F12() ]->
+  [ Qtt($q12aaaaaaaaaaaaaaaaaaa, 'q0a', 'q1b', 'q2c', 'q3d'), Sbb($qx12aaa, $be, $bf, $bg, $bh, $bi) ]
+
+// NB: 4-quote target 58 beside 41: fills q0 51 / q-1 49 / q-2 48
+rule NB4_58_41:
+  [ In(<$dw, $dx>) ]
+  --[ F13() ]->
+  [ Qtt($q13aaaaaaaaaaaaaaaaaaa, 'q0a', 'q1b', 'q2c', 'q3d'), Sbb($qx13aaaa, $be, $bf, $bg, $bh, $bi) ]
+
+// NB: 4-quote target 58 beside 42: fills q0 50 / q-1 49 / q-2 47
+rule NB4_58_42:
+  [ In(<$dw, $dx>) ]
+  --[ F14() ]->
+  [ Qtt($q14aaaaaaaaaaaaaaaaaaa, 'q0a', 'q1b', 'q2c', 'q3d'), Sbb($qx14, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// NB: 4-quote target 58 beside 43: fills q0 50 / q-1 48 / q-2 47
+rule NB4_58_43:
+  [ In(<$dw, $dx>) ]
+  --[ F15() ]->
+  [ Qtt($q15aaaaaaaaaaaaaaaaaaa, 'q0a', 'q1b', 'q2c', 'q3d'), Sbb($qx15a, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// NC: 7-tuple receiver 62 beside 48: cap7 fill 51 vs full 52
+rule NC7_62_48:
+  [ In(<$dw, $dx>) ]
+  --[ F16() ]->
+  [ Rtt(<$q16aaaaaaaaaaaaaaaaaaa, $aa, $ab, $ac, $ad, $ae, $af>), Sbb($qx16a, $be, $bf, $bg, $bh, $bi, $bj, $bk) ]
+
+// NC: 7-tuple receiver 62 beside 50: cap7 fill 50 vs full 51
+rule NC7_62_50:
+  [ In(<$dw, $dx>) ]
+  --[ F17() ]->
+  [ Rtt(<$q17aaaaaaaaaaaaaaaaaaa, $aa, $ab, $ac, $ad, $ae, $af>), Sbb($qx17aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk) ]
+
+// NC: 7-tuple receiver 62 beside 53: cap7 fill 49 vs full 50
+rule NC7_62_53:
+  [ In(<$dw, $dx>) ]
+  --[ F18() ]->
+  [ Rtt(<$q18aaaaaaaaaaaaaaaaaaa, $aa, $ab, $ac, $ad, $ae, $af>), Sbb($qx18a, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl) ]
+
+// NC: 7-tuple receiver 62 beside 55: cap7 fill 48 vs full 49
+rule NC7_62_55:
+  [ In(<$dw, $dx>) ]
+  --[ F19() ]->
+  [ Rtt(<$q19aaaaaaaaaaaaaaaaaaa, $aa, $ab, $ac, $ad, $ae, $af>), Sbb($qx19aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl) ]
+
+// NC: 8-tuple receiver 62 beside 40: cap7 fill 55 vs full 56
+rule NC8_62_40:
+  [ In(<$dw, $dx>) ]
+  --[ F20() ]->
+  [ Rtt(<$q20aaaaaaaaaaaaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag>), Sbb($qx20aaa, $be, $bf, $bg, $bh, $bi) ]
+
+// NC: 8-tuple receiver 62 beside 42: cap7 fill 54 vs full 55
+rule NC8_62_42:
+  [ In(<$dw, $dx>) ]
+  --[ F21() ]->
+  [ Rtt(<$q21aaaaaaaaaaaaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag>), Sbb($qx21, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// NC: 8-tuple receiver 62 beside 44: cap7 fill 53 vs full 54
+rule NC8_62_44:
+  [ In(<$dw, $dx>) ]
+  --[ F22() ]->
+  [ Rtt(<$q22aaaaaaaaaaaaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag>), Sbb($qx22aa, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// NC: 8-tuple receiver 62 beside 46: cap7 fill 52 vs full 53
+rule NC8_62_46:
+  [ In(<$dw, $dx>) ]
+  --[ F23() ]->
+  [ Rtt(<$q23aaaaaaaaaaaaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag>), Sbb($qx23aaaa, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// ND: plain 50 beside 10-tuple sib 60: D=C fill 36 vs C7 37
+rule ND10_50_60:
+  [ In(<$dw, $dx>) ]
+  --[ F24() ]->
+  [ Ttt($q24aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag), Gbb(<$qx24a, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm>) ]
+
+// ND: plain 50 beside 10-tuple sib 61: D=C fill 36 vs C7 37
+rule ND10_50_61:
+  [ In(<$dw, $dx>) ]
+  --[ F25() ]->
+  [ Ttt($q25aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag), Gbb(<$qx25aa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm>) ]
+
+// ND: plain 50 beside 10-tuple sib 62: D=C fill 35 vs C7 37
+rule ND10_50_62:
+  [ In(<$dw, $dx>) ]
+  --[ F26() ]->
+  [ Ttt($q26aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag), Gbb(<$qx26aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm>) ]
+
+// ND: plain 50 beside 10-tuple sib 63: D=C fill 35 vs C7 36
+rule ND10_50_63:
+  [ In(<$dw, $dx>) ]
+  --[ F27() ]->
+  [ Ttt($q27aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag), Gbb(<$qx27aaaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm>) ]
+
+// ND: plain 50 beside 16-tuple sib 90: D=C fill 28 vs C7 30
+rule ND16_50_90:
+  [ In(<$dw, $dx>) ]
+  --[ F28() ]->
+  [ Ttt($q28aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag), Gbb(<$qx28a, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs>) ]
+
+// ND: plain 50 beside 16-tuple sib 91: D=C fill 28 vs C7 29
+rule ND16_50_91:
+  [ In(<$dw, $dx>) ]
+  --[ F29() ]->
+  [ Ttt($q29aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag), Gbb(<$qx29aa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs>) ]
+
+// ND: plain 50 beside 16-tuple sib 92: D=C fill 27 vs C7 29
+rule ND16_50_92:
+  [ In(<$dw, $dx>) ]
+  --[ F30() ]->
+  [ Ttt($q30aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag), Gbb(<$qx30aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs>) ]
+
+// ND: plain 50 beside 16-tuple sib 93: D=C fill 27 vs C7 29
+rule ND16_50_93:
+  [ In(<$dw, $dx>) ]
+  --[ F31() ]->
+  [ Ttt($q31aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag), Gbb(<$qx31aaaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs>) ]
+
+lemma l_NA2_58_40:
+  exists-trace "Ex #i. F0() @ #i"
+
+lemma l_NA2_58_41:
+  exists-trace "Ex #i. F1() @ #i"
+
+lemma l_NA2_58_42:
+  exists-trace "Ex #i. F2() @ #i"
+
+lemma l_NA2_58_43:
+  exists-trace "Ex #i. F3() @ #i"
+
+lemma l_NA4_58_40:
+  exists-trace "Ex #i. F4() @ #i"
+
+lemma l_NA4_58_41:
+  exists-trace "Ex #i. F5() @ #i"
+
+lemma l_NA4_58_42:
+  exists-trace "Ex #i. F6() @ #i"
+
+lemma l_NA4_58_43:
+  exists-trace "Ex #i. F7() @ #i"
+
+lemma l_NB2_58_41:
+  exists-trace "Ex #i. F8() @ #i"
+
+lemma l_NB2_58_43:
+  exists-trace "Ex #i. F9() @ #i"
+
+lemma l_NB2_58_45:
+  exists-trace "Ex #i. F10() @ #i"
+
+lemma l_NB2_58_46:
+  exists-trace "Ex #i. F11() @ #i"
+
+lemma l_NB4_58_40:
+  exists-trace "Ex #i. F12() @ #i"
+
+lemma l_NB4_58_41:
+  exists-trace "Ex #i. F13() @ #i"
+
+lemma l_NB4_58_42:
+  exists-trace "Ex #i. F14() @ #i"
+
+lemma l_NB4_58_43:
+  exists-trace "Ex #i. F15() @ #i"
+
+lemma l_NC7_62_48:
+  exists-trace "Ex #i. F16() @ #i"
+
+lemma l_NC7_62_50:
+  exists-trace "Ex #i. F17() @ #i"
+
+lemma l_NC7_62_53:
+  exists-trace "Ex #i. F18() @ #i"
+
+lemma l_NC7_62_55:
+  exists-trace "Ex #i. F19() @ #i"
+
+lemma l_NC8_62_40:
+  exists-trace "Ex #i. F20() @ #i"
+
+lemma l_NC8_62_42:
+  exists-trace "Ex #i. F21() @ #i"
+
+lemma l_NC8_62_44:
+  exists-trace "Ex #i. F22() @ #i"
+
+lemma l_NC8_62_46:
+  exists-trace "Ex #i. F23() @ #i"
+
+lemma l_ND10_50_60:
+  exists-trace "Ex #i. F24() @ #i"
+
+lemma l_ND10_50_61:
+  exists-trace "Ex #i. F25() @ #i"
+
+lemma l_ND10_50_62:
+  exists-trace "Ex #i. F26() @ #i"
+
+lemma l_ND10_50_63:
+  exists-trace "Ex #i. F27() @ #i"
+
+lemma l_ND16_50_90:
+  exists-trace "Ex #i. F28() @ #i"
+
+lemma l_ND16_50_91:
+  exists-trace "Ex #i. F29() @ #i"
+
+lemma l_ND16_50_92:
+  exists-trace "Ex #i. F30() @ #i"
+
+lemma l_ND16_50_93:
+  exists-trace "Ex #i. F31() @ #i"
+
+end

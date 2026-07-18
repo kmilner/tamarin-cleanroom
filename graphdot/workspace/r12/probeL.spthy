@@ -1,0 +1,294 @@
+theory BonusGateProbe
+begin
+
+builtins: multiset
+
+// LA: multi-arg(2 lead) last-2-tuple flat 68 beside flat-20 (budget0 67)
+rule LA2_68:
+  [ In(<$dw, $dx>) ]
+  --[ F0() ]->
+  [ Fzz($q00aaaa, $aa), Mtt($qx00aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $be, <$bo, $bp>) ]
+
+// LA: multi-arg(2 lead) last-2-tuple flat 69 beside flat-20 (budget0 67)
+rule LA2_69:
+  [ In(<$dw, $dx>) ]
+  --[ F1() ]->
+  [ Fzz($q01aaaa, $aa), Mtt($qx01aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $be, <$bo, $bp>) ]
+
+// LA: multi-arg(2 lead) last-2-tuple flat 70 beside flat-20 (budget0 67)
+rule LA2_70:
+  [ In(<$dw, $dx>) ]
+  --[ F2() ]->
+  [ Fzz($q02aaaa, $aa), Mtt($qx02aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $be, <$bo, $bp>) ]
+
+// LA: multi-arg(2 lead) last-2-tuple flat 71 beside flat-20 (budget0 67)
+rule LA2_71:
+  [ In(<$dw, $dx>) ]
+  --[ F3() ]->
+  [ Fzz($q03aaaa, $aa), Mtt($qx03aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $be, <$bo, $bp>) ]
+
+// LA: multi-arg(2 lead) last-3-tuple flat 68 beside flat-20 (budget0 67)
+rule LA3_68:
+  [ In(<$dw, $dx>) ]
+  --[ F4() ]->
+  [ Fzz($q04aaaa, $aa), Mtt($qx04aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $be, <$bo, $bp, $bq>) ]
+
+// LA: multi-arg(2 lead) last-3-tuple flat 69 beside flat-20 (budget0 67)
+rule LA3_69:
+  [ In(<$dw, $dx>) ]
+  --[ F5() ]->
+  [ Fzz($q05aaaa, $aa), Mtt($qx05aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $be, <$bo, $bp, $bq>) ]
+
+// LA: multi-arg(2 lead) last-3-tuple flat 70 beside flat-20 (budget0 67)
+rule LA3_70:
+  [ In(<$dw, $dx>) ]
+  --[ F6() ]->
+  [ Fzz($q06aaaa, $aa), Mtt($qx06aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $be, <$bo, $bp, $bq>) ]
+
+// LA: multi-arg(2 lead) last-3-tuple flat 71 beside flat-20 (budget0 67)
+rule LA3_71:
+  [ In(<$dw, $dx>) ]
+  --[ F7() ]->
+  [ Fzz($q07aaaa, $aa), Mtt($qx07aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $be, <$bo, $bp, $bq>) ]
+
+// LA: multi-arg(2 lead) last-4-tuple flat 69 beside flat-20 (budget0 67)
+rule LA4_69:
+  [ In(<$dw, $dx>) ]
+  --[ F8() ]->
+  [ Fzz($q08aaaa, $aa), Mtt($qx08aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $be, <$bo, $bp, $bq, $br>) ]
+
+// LA: multi-arg(2 lead) last-4-tuple flat 70 beside flat-20 (budget0 67)
+rule LA4_70:
+  [ In(<$dw, $dx>) ]
+  --[ F9() ]->
+  [ Fzz($q09aaaa, $aa), Mtt($qx09aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $be, <$bo, $bp, $bq, $br>) ]
+
+// LA: multi-arg(2 lead) last-4-tuple flat 71 beside flat-20 (budget0 67)
+rule LA4_71:
+  [ In(<$dw, $dx>) ]
+  --[ F10() ]->
+  [ Fzz($q10aaaa, $aa), Mtt($qx10aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $be, <$bo, $bp, $bq, $br>) ]
+
+// LA: multi-arg(2 lead) last-4-tuple flat 72 beside flat-20 (budget0 67)
+rule LA4_72:
+  [ In(<$dw, $dx>) ]
+  --[ F11() ]->
+  [ Fzz($q11aaaa, $aa), Mtt($qx11aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $be, <$bo, $bp, $bq, $br>) ]
+
+// LA: multi-arg(2 lead) last-4-tuple flat 73 beside flat-20 (budget0 67)
+rule LA4_73:
+  [ In(<$dw, $dx>) ]
+  --[ F12() ]->
+  [ Fzz($q12aaaa, $aa), Mtt($qx12aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $be, <$bo, $bp, $bq, $br>) ]
+
+// LA: multi-arg(2 lead) last-6-tuple flat 70 beside flat-20 (budget0 67)
+rule LA6_70:
+  [ In(<$dw, $dx>) ]
+  --[ F13() ]->
+  [ Fzz($q13aaaa, $aa), Mtt($qx13aaaaaaaaaaaaaaaaaaaaa, $be, <$bo, $bp, $bq, $br, $bs, $bt>) ]
+
+// LA: multi-arg(2 lead) last-6-tuple flat 71 beside flat-20 (budget0 67)
+rule LA6_71:
+  [ In(<$dw, $dx>) ]
+  --[ F14() ]->
+  [ Fzz($q14aaaa, $aa), Mtt($qx14aaaaaaaaaaaaaaaaaaaaaa, $be, <$bo, $bp, $bq, $br, $bs, $bt>) ]
+
+// LA: multi-arg(2 lead) last-6-tuple flat 72 beside flat-20 (budget0 67)
+rule LA6_72:
+  [ In(<$dw, $dx>) ]
+  --[ F15() ]->
+  [ Fzz($q15aaaa, $aa), Mtt($qx15aaaaaaaaaaaaaaaaaaaaaaa, $be, <$bo, $bp, $bq, $br, $bs, $bt>) ]
+
+// LA: multi-arg(2 lead) last-6-tuple flat 73 beside flat-20 (budget0 67)
+rule LA6_73:
+  [ In(<$dw, $dx>) ]
+  --[ F16() ]->
+  [ Fzz($q16aaaa, $aa), Mtt($qx16aaaaaaaaaaaaaaaaaaaaaaaa, $be, <$bo, $bp, $bq, $br, $bs, $bt>) ]
+
+// LB: multi-arg(1 lead) last-2-tuple flat 69
+rule LB2_69:
+  [ In(<$dw, $dx>) ]
+  --[ F17() ]->
+  [ Fzz($q17aaaa, $aa), Mtt($qx17aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, <$bo, $bp>) ]
+
+// LB: multi-arg(1 lead) last-2-tuple flat 70
+rule LB2_70:
+  [ In(<$dw, $dx>) ]
+  --[ F18() ]->
+  [ Fzz($q18aaaa, $aa), Mtt($qx18aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, <$bo, $bp>) ]
+
+// LB: multi-arg(1 lead) last-2-tuple flat 71
+rule LB2_71:
+  [ In(<$dw, $dx>) ]
+  --[ F19() ]->
+  [ Fzz($q19aaaa, $aa), Mtt($qx19aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, <$bo, $bp>) ]
+
+// LB: multi-arg(1 lead) last-4-tuple flat 70
+rule LB4_70:
+  [ In(<$dw, $dx>) ]
+  --[ F20() ]->
+  [ Fzz($q20aaaa, $aa), Mtt($qx20aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, <$bo, $bp, $bq, $br>) ]
+
+// LB: multi-arg(1 lead) last-4-tuple flat 71
+rule LB4_71:
+  [ In(<$dw, $dx>) ]
+  --[ F21() ]->
+  [ Fzz($q21aaaa, $aa), Mtt($qx21aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, <$bo, $bp, $bq, $br>) ]
+
+// LB: multi-arg(1 lead) last-4-tuple flat 72
+rule LB4_72:
+  [ In(<$dw, $dx>) ]
+  --[ F22() ]->
+  [ Fzz($q22aaaa, $aa), Mtt($qx22aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, <$bo, $bp, $bq, $br>) ]
+
+// LC: single-arg 3-tuple control flat 69 (expect fits <= 70)
+rule LC3_69:
+  [ In(<$dw, $dx>) ]
+  --[ F23() ]->
+  [ Fzz($q23aaaa, $aa), Stt(<$qx23aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $be, $bf>) ]
+
+// LC: single-arg 3-tuple control flat 70 (expect fits <= 70)
+rule LC3_70:
+  [ In(<$dw, $dx>) ]
+  --[ F24() ]->
+  [ Fzz($q24aaaa, $aa), Stt(<$qx24aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $be, $bf>) ]
+
+// LC: single-arg 3-tuple control flat 71 (expect fits <= 70)
+rule LC3_71:
+  [ In(<$dw, $dx>) ]
+  --[ F25() ]->
+  [ Fzz($q25aaaa, $aa), Stt(<$qx25aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $be, $bf>) ]
+
+// LD: mid-list 4-tuple control flat 67 (expect fits <= 67)
+rule LD4_67:
+  [ In(<$dw, $dx>) ]
+  --[ F26() ]->
+  [ Fzz($q26aaaa, $aa), Dtt($qx26aaaaaaaaaaaaaaaaaaaaaaaaaaaa, <$bo, $bp, $bq, $br>, $be) ]
+
+// LD: mid-list 4-tuple control flat 68 (expect fits <= 67)
+rule LD4_68:
+  [ In(<$dw, $dx>) ]
+  --[ F27() ]->
+  [ Fzz($q27aaaa, $aa), Dtt($qx27aaaaaaaaaaaaaaaaaaaaaaaaaaaaa, <$bo, $bp, $bq, $br>, $be) ]
+
+// LD: mid-list 4-tuple control flat 69 (expect fits <= 67)
+rule LD4_69:
+  [ In(<$dw, $dx>) ]
+  --[ F28() ]->
+  [ Fzz($q28aaaa, $aa), Dtt($qx28aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, <$bo, $bp, $bq, $br>, $be) ]
+
+// LE: multi-arg last-3-union flat 68
+rule LE3_68:
+  [ In(<$dw, $dx>) ]
+  --[ F29() ]->
+  [ Fzz($q29aaaa, $aa), Utt($qx29aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, ($bo++$bp++$bq)) ]
+
+// LE: multi-arg last-3-union flat 69
+rule LE3_69:
+  [ In(<$dw, $dx>) ]
+  --[ F30() ]->
+  [ Fzz($q30aaaa, $aa), Utt($qx30aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, ($bo++$bp++$bq)) ]
+
+// LE: multi-arg last-3-union flat 70
+rule LE3_70:
+  [ In(<$dw, $dx>) ]
+  --[ F31() ]->
+  [ Fzz($q31aaaa, $aa), Utt($qx31aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, ($bo++$bp++$bq)) ]
+
+lemma l_LA2_68:
+  exists-trace "Ex #i. F0() @ #i"
+
+lemma l_LA2_69:
+  exists-trace "Ex #i. F1() @ #i"
+
+lemma l_LA2_70:
+  exists-trace "Ex #i. F2() @ #i"
+
+lemma l_LA2_71:
+  exists-trace "Ex #i. F3() @ #i"
+
+lemma l_LA3_68:
+  exists-trace "Ex #i. F4() @ #i"
+
+lemma l_LA3_69:
+  exists-trace "Ex #i. F5() @ #i"
+
+lemma l_LA3_70:
+  exists-trace "Ex #i. F6() @ #i"
+
+lemma l_LA3_71:
+  exists-trace "Ex #i. F7() @ #i"
+
+lemma l_LA4_69:
+  exists-trace "Ex #i. F8() @ #i"
+
+lemma l_LA4_70:
+  exists-trace "Ex #i. F9() @ #i"
+
+lemma l_LA4_71:
+  exists-trace "Ex #i. F10() @ #i"
+
+lemma l_LA4_72:
+  exists-trace "Ex #i. F11() @ #i"
+
+lemma l_LA4_73:
+  exists-trace "Ex #i. F12() @ #i"
+
+lemma l_LA6_70:
+  exists-trace "Ex #i. F13() @ #i"
+
+lemma l_LA6_71:
+  exists-trace "Ex #i. F14() @ #i"
+
+lemma l_LA6_72:
+  exists-trace "Ex #i. F15() @ #i"
+
+lemma l_LA6_73:
+  exists-trace "Ex #i. F16() @ #i"
+
+lemma l_LB2_69:
+  exists-trace "Ex #i. F17() @ #i"
+
+lemma l_LB2_70:
+  exists-trace "Ex #i. F18() @ #i"
+
+lemma l_LB2_71:
+  exists-trace "Ex #i. F19() @ #i"
+
+lemma l_LB4_70:
+  exists-trace "Ex #i. F20() @ #i"
+
+lemma l_LB4_71:
+  exists-trace "Ex #i. F21() @ #i"
+
+lemma l_LB4_72:
+  exists-trace "Ex #i. F22() @ #i"
+
+lemma l_LC3_69:
+  exists-trace "Ex #i. F23() @ #i"
+
+lemma l_LC3_70:
+  exists-trace "Ex #i. F24() @ #i"
+
+lemma l_LC3_71:
+  exists-trace "Ex #i. F25() @ #i"
+
+lemma l_LD4_67:
+  exists-trace "Ex #i. F26() @ #i"
+
+lemma l_LD4_68:
+  exists-trace "Ex #i. F27() @ #i"
+
+lemma l_LD4_69:
+  exists-trace "Ex #i. F28() @ #i"
+
+lemma l_LE3_68:
+  exists-trace "Ex #i. F29() @ #i"
+
+lemma l_LE3_69:
+  exists-trace "Ex #i. F30() @ #i"
+
+lemma l_LE3_70:
+  exists-trace "Ex #i. F31() @ #i"
+
+end

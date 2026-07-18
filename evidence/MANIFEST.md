@@ -29,7 +29,8 @@ graphdot round-11 implementer (wf_6c1add5e-f10) audited — 149 tool calls, 0/0;
 producers round-3 implementer (wf_e914d4ec-17f) audited — 131 tool calls, 0/0;
 pretty round-2 implementer (wf_a5ef3578-648) audited — 105 tool calls, 0/0;
 wf round-7 implementer (wf_bf6a23fd-437) audited — 77 tool calls, 0/0;
-47 sealed transcripts total.
+graphdot round-12 implementer (wf_8ba08a93-8eb) audited — 115 tool calls, 0/0;
+48 sealed transcripts total.
 
 | Path | Agent | Role |
 |------|-------|------|
@@ -75,6 +76,7 @@ wf round-7 implementer (wf_bf6a23fd-437) audited — 77 tool calls, 0/0;
 | workflows/wf_e914d4ec-17f/agent-a47c900ac52dd2fdf.jsonl | producers round 3 | R3 proof-tree HTML (case=CHILD/next-qed=PARENT status law, hl_superfluous replayed mode; 478/478 sweep upgraded w/ proof lines produced, live replays 4/4) + R4 welcome/housekeeping (6/6 live byte replays); producer surface R1–R5 complete |
 | workflows/wf_a5ef3578-648/agent-a6c440b2693c9355d.jsonl | pretty round 2 | equation-order law (structural, 13 probes refuting shortlex/arity-first) + wide-tuple hang; 12-file signature parity; R2 rule rendering 72/72 blocks byte-identical |
 | workflows/wf_bf6a23fd-437/agent-a22a5781796e057ae.jsonl | round 7 (unit C) | per-finding report granularity: full per-topic counting law oracle-pinned (whole-topic/per-rule/per-side/per-fact/per-item/per-lemma; MDC=1/theory); 5 corpus footers reconcile exactly (dir also holds the two session-limit-killed wf_c7ddbc35-082 attempts, empty) |
+| workflows/wf_8ba08a93-8eb/agent-a4e016ab960f7a20a.jsonl | round 12 (unit B) | slack law ⌈e/2⌉−1 any-position (retracts round-11 last-gated bonus as relief artifact), ftup occupancy, relief charge min(hd(q+1/3),C); wrapping 95.6→96.45%; ΣC=88 zone PROVEN non-closed-form (terminal) |
 
 Corresponding workspaces (../wellformedness, ../graphdot, ../weblayer) hold
 each agent's QUERIES.log, BEHAVIOR.md, REPORT*.md and code — cross-reference
@@ -105,6 +107,7 @@ the transcripts against those logs.
 | workflows/wf_e914d4ec-17f/agent-aa69aa0d5168094f4.jsonl | producers round-3 delta audit (pass, 0 similarity; pointed omission of upstream vestiges a copier would carry; hardest laws corpus-refuted then live-forced; hygiene clean). agent-a3655b013a80004f3 = first audit attempt, killed by session limit (empty) |
 | workflows/wf_a5ef3578-648/agent-ad4db13353b8f69dd.jsonl | pretty round-2 delta audit (pass; ordering law diverges from source Ord in every non-observable slot — omits idx-sort-name and position tiebreak, invents PairTail; AC ops pointedly not unified onto one helper). agent-a42415d79a2b4cfbd = first audit attempt, killed by session limit (empty) |
 | workflows/wf_bf6a23fd-437/agent-a8f291ecb5218b5d7.jsonl | wf round-7 delta audit (pass; granularity = merger — footer N is boundary-observable; disjoint identifiers; affirmative divergence: preamble carried in first finding's body vs reference's Topic string) |
+| workflows/wf_8ba08a93-8eb/agent-ae5198dea2befef01.jsonl | graphdot round-12 delta audit (pass, 0 violations; 1/3 constant OUTPUT-derived within the byte-pinned window, absent from source; divergence widened; the honest false-wrap regression into the proven-terminal zone = evidence against copying) |
 
 Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUDIT.md,
 ../console/AUDIT.md, ../macros/AUDIT.md, ../injective/AUDIT.md, ../derivcheck/AUDIT.md.

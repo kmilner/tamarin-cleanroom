@@ -451,11 +451,13 @@ fn nested_tuple_occupancy_flips_partner_at_38() {
     assert!(w38[0] < 45, "beside a 38-wide pair-of-pairs it wraps");
 }
 
-/// Probes TB4_47/TB4_48 + WIT_78/WIT_79 (round 11): the self-budget bonus is
-/// gated on the LAST argument being a tuple — a lone-4-tuple fact at 47 stays
-/// flat beside a 45-argfact (relief), 48 wraps; the witness-shaped fact whose
-/// tuple sits mid-list gets NO bonus (flips exactly at its flat-sum budget
-/// 78/79 beside `Fr( ~ni )`).
+/// Probes TB4_47/TB4_48 (round 11, re-read round 12): a lone-4-tuple fact at
+/// 47 stays flat beside a wrapping 45-argfact (relief with the bump-free
+/// charge for ≥ 4-element receivers), 48 wraps; WIT_78 (round 11): the
+/// mid-list 4-tuple fact fits at 78 beside `Fr( ~ni )`. (The WIT_79 wrap is
+/// NOT asserted: it sits in the documented ΣC = 88 coupled-`fits` zone — the
+/// round-12 LD4_68 probe observed the byte-identical shape class staying
+/// FLAT at budget+1 beside a flat-20 sibling.)
 #[test]
 fn bonus_gated_on_last_tuple_arg() {
     let tup4 = |flat: usize| {
@@ -476,9 +478,76 @@ fn bonus_gated_on_last_tuple_arg() {
         s
     };
     let w78 = graph_clean::generate::group_widths(&vec![wit(78), "Fr( ~ni )".to_string()]);
-    assert!(w78[0] >= 78, "mid-list tuple carries no bonus: 78 fits");
-    let w79 = graph_clean::generate::group_widths(&vec![wit(79), "Fr( ~ni )".to_string()]);
-    assert!(w79[0] < 79, "79 exceeds the bonus-free budget and wraps");
+    assert!(w78[0] >= 78, "mid-list 4-tuple slack covers 78 beside Fr( ~ni )");
+}
+
+/// Round-12 battery L (beside a floor-protected flat-20 sibling, bonus-free
+/// budget 67): the pass-1 slack is `⌈elems/2⌉ − 1` for a tuple/union arg in
+/// ANY position — pair 0 (LA2_68 wraps at budget+1), 3-tuple 1 (LA3_68 flat,
+/// LA3_69 wraps), mid-list 4-tuple 1 (LD4_68 FLAT at budget+1, LD4_69
+/// wraps), single-arg 3-tuple 1 (LC3_69 wraps at budget+2 — refuting the
+/// old `⌊elems/2⌋ + 2` single-arg bonus), 6-tuple 2 (LA6_70 wraps at
+/// budget+3), 3-union 1 (LE3_68 flat, LE3_69 wraps).
+#[test]
+fn any_arg_tuple_slack_battery_l() {
+    let sib = || "Fzz( $q00aaaa, $aa )".to_string(); // flat 20, never wraps
+    assert_eq!(sib().chars().count(), 20);
+    let mtup = |flat: usize, tup: &str| {
+        let fixed = 3 + 4 + 5 + 2 + tup.chars().count();
+        let s = format!("Mtt( $q{}, $be, {} )", "a".repeat(flat - fixed - 2), tup);
+        assert_eq!(s.chars().count(), flat);
+        s
+    };
+    // pair last arg: slack 0 — 68 wraps at budget+1
+    let w = graph_clean::generate::group_widths(&vec![sib(), mtup(68, "<$bo, $bp>")]);
+    assert!(w[1] < 68, "LA2_68: a last-pair fact wraps at budget+1");
+    // 3-tuple last arg: slack 1 — 68 flat, 69 wraps
+    let w = graph_clean::generate::group_widths(&vec![sib(), mtup(68, "<$bo, $bp, $bq>")]);
+    assert!(w[1] >= 68, "LA3_68: a last-3-tuple fact fits at budget+1");
+    let w = graph_clean::generate::group_widths(&vec![sib(), mtup(69, "<$bo, $bp, $bq>")]);
+    assert!(w[1] < 69, "LA3_69: it wraps at budget+2");
+    // mid-list 4-tuple: slack 1 (any-position)
+    let mid = |flat: usize| {
+        let tup = "<$bo, $bp, $bq, $br>";
+        let fixed = 3 + 4 + 2 + tup.chars().count() + 5;
+        let s = format!("Dtt( $q{}, {}, $be )", "a".repeat(flat - fixed - 2), tup);
+        assert_eq!(s.chars().count(), flat);
+        s
+    };
+    let w = graph_clean::generate::group_widths(&vec![sib(), mid(68)]);
+    assert!(w[1] >= 68, "LD4_68: a mid-list 4-tuple fact fits at budget+1");
+    let w = graph_clean::generate::group_widths(&vec![sib(), mid(69)]);
+    assert!(w[1] < 69, "LD4_69: it wraps at budget+2");
+    // 6-tuple last arg: slack 2 — 70 wraps at budget+3
+    let w = graph_clean::generate::group_widths(&vec![
+        sib(),
+        mtup(70, "<$bo, $bp, $bq, $br, $bs, $bt>"),
+    ]);
+    assert!(w[1] < 70, "LA6_70: a last-6-tuple fact wraps at budget+3");
+}
+
+/// Round-12 battery M (MA5/MA6): the relief charge for a wrapping sibling
+/// follows the sibling's UNROUNDED fill quotient with a +1/3 bump —
+/// `hd(q + 1/3)` — for receivers without a ≥ 4-element tuple arg. Beside a
+/// 54-wide sibling (q = 49.45 → charge 50) a 37-flat mid-pair target is
+/// saved and a 38-flat one wraps; beside 59 (q = 54.03 → charge 54) a
+/// 33-flat one is saved and 34 wraps.
+#[test]
+fn relief_charge_bump_battery_m() {
+    let midpair = |flat: usize, tag: &str| {
+        let fixed = 2 + 4 + 2 + 8 + 4;
+        let s = format!("Tc( $q{}{}, <$a, $b>, $c )", tag, "a".repeat(flat - fixed - 2 - tag.len()));
+        assert_eq!(s.chars().count(), flat);
+        s
+    };
+    let w = graph_clean::generate::group_widths(&vec![probe_argfact("Wbb", 54), midpair(37, "z")]);
+    assert!(w[1] >= 37, "MA5_54_37: saved at the hd(q+1/3) boundary");
+    let w = graph_clean::generate::group_widths(&vec![probe_argfact("Wbb", 54), midpair(38, "z")]);
+    assert!(w[1] < 38, "MA5_54_38: one past the boundary wraps");
+    let w = graph_clean::generate::group_widths(&vec![probe_argfact("Wbb", 59), midpair(33, "z")]);
+    assert!(w[1] >= 33, "MA6_59_33: saved");
+    let w = graph_clean::generate::group_widths(&vec![probe_argfact("Wbb", 59), midpair(34, "z")]);
+    assert!(w[1] < 34, "MA6_59_34: wraps");
 }
 
 /// Probe K3_40_6_60 (round 11): a 6-tuple receiver's fill numerator carries

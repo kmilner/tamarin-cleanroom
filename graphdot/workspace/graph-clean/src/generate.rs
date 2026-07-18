@@ -591,6 +591,16 @@ pub struct CellShape {
     pub last_tup: bool,
     pub sqa: bool,
     pub nfunc: i64,
+    /// Round-12 trigger slack `⌈elems/2⌉ − 1`, max over ALL top-level
+    /// tuple/union args (any position — battery L: mid-list 4-tuple LD4_68
+    /// stays flat at budget+1; single-arg 3-tuple LC3_69 wraps at budget+2,
+    /// refuting the round-10/11 `⌊elems/2⌋ + 2` last-gated bonus).
+    pub smax: i64,
+    /// Function-application nodes strictly INSIDE a tuple/union subtree
+    /// (round-12: the corpus `[41w, 51]` deep-pair witness needs occupancy
+    /// `C = flat + rec_sur + ftup`; top-level func args stay uncharged —
+    /// round-10 FB flips are at the plain flat crossing).
+    pub ftup: i64,
 }
 
 /// Split a term list at top-level `", "`, honoring nesting and quotes.
@@ -683,6 +693,42 @@ pub fn rec_surcharge_capped(flat: &str, cap: i64) -> i64 {
     sur
 }
 
+/// Count function-application nodes strictly inside a tuple/union subtree
+/// (`in_tuple` = an enclosing tuple/union exists). Nested funcs under a
+/// tuple each count (round-12 OD/corpus `[41w, 51]` witness).
+fn ftup_walk(t: &str, in_tuple: bool, n: &mut i64) {
+    let t = t.trim();
+    if t.starts_with('<') && t.ends_with('>') && t.len() >= 2 {
+        for el in split_level(&t[1..t.len() - 1]) {
+            ftup_walk(el, true, n);
+        }
+        return;
+    }
+    if union_elems(t) >= 2 {
+        for part in split_top_unions_str(&t[1..t.len() - 1]) {
+            ftup_walk(&part, true, n);
+        }
+        return;
+    }
+    if let Some(open) = t.find('(') {
+        if open > 0
+            && t.ends_with(')')
+            && t.len() > open + 1
+            && t[..open].chars().all(|c| c.is_alphanumeric() || c == '_' || c == '!')
+        {
+            if in_tuple {
+                *n += 1;
+            }
+            let inner = &t[open + 1..t.len() - 1];
+            let inner = inner.strip_prefix(' ').unwrap_or(inner);
+            let inner = inner.strip_suffix(' ').unwrap_or(inner);
+            for a in split_level(inner) {
+                ftup_walk(a, in_tuple, n);
+            }
+        }
+    }
+}
+
 fn rec_walk_cap(t: &str, in_tuple: bool, cap: i64, sur: &mut i64) {
     let t = t.trim();
     if t.starts_with('<') && t.ends_with('>') && t.len() >= 2 {
@@ -735,6 +781,8 @@ pub fn cell_shape(flat: &str) -> CellShape {
     let mut last_tup = false;
     let mut rec_sur7 = 0i64;
     let mut sqa = false;
+    let mut smax = 0i64;
+    let mut ftup = 0i64;
     if let Some(open) = flat.find("( ") {
         // a padded fact with at least one argument (`Name( )` has none)
         if flat.ends_with(" )")
@@ -758,9 +806,11 @@ pub fn cell_shape(flat: &str) -> CellShape {
                         uni_sur += elems + 1;
                     }
                     bmax = bmax.max(if elems <= 8 { elems / 2 + 2 } else { 4 });
+                    smax = smax.max((elems - 1) / 2);
                 }
                 rec_walk(t, false, &mut rec_sur);
                 rec_walk_cap(t, false, 7, &mut rec_sur7);
+                ftup_walk(t, false, &mut ftup);
                 if elems >= 2 {
                     last_tup = std::ptr::eq(a, args.last().unwrap());
                 }
@@ -786,47 +836,69 @@ pub fn cell_shape(flat: &str) -> CellShape {
             nfunc += 1;
         }
     }
-    CellShape { flat: width, tup_sur, uni_sur, rec_sur, rec_sur7, bmax, nargs, last_tup, sqa, nfunc }
+    CellShape {
+        flat: width,
+        tup_sur,
+        uni_sur,
+        rec_sur,
+        rec_sur7,
+        bmax,
+        nargs,
+        last_tup,
+        sqa,
+        nfunc,
+        smax,
+        ftup,
+    }
 }
 
 /// The per-cell fit **budgets** of one record group (all premises together, or
 /// all conclusions together), from the cells' flat texts. Probe-derived layers
-/// (BEHAVIOR.md §3f, rounds 9–11; every parameter pinned by live probe
-/// batteries — QUERIES.log Sessions 9–11):
+/// (BEHAVIOR.md §3f, rounds 9–12; every parameter pinned by live probe
+/// batteries — QUERIES.log Sessions 9–12):
 ///
 /// **Trigger, pass 1** (flat-sum). Each cell occupies `C_j = flat_j +
-/// rec_sur_j` columns of the row, where `rec_sur` is the RECURSIVE
+/// rec_sur_j + ftup_j` columns of the row, where `rec_sur` is the RECURSIVE
 /// tuple/union surcharge: every tuple/union node contributes `elems + 1`,
 /// except nodes directly inside another tuple/union, which contribute
-/// `elems − 1` (round-11 K1/K2/K6: pair-of-pairs flips at 38, a tuple inside
-/// a func arg counts full). Cell *i*'s pass-1 budget is
-/// `max(87 + bonus_i − Σ_{j≠i} C_j, 20)`, `bonus_i` = the largest
-/// `⌊elems/2⌋ + 2` over its top-level tuple/union args (4 at ≥ 9 elements),
-/// applied ONLY when the fact's LAST argument is such a tuple/union
-/// (round-11 WIT: a mid-list tuple carries no bonus); it wraps iff its flat
-/// width exceeds the budget. A lone cell's budget is 87.
+/// `elems − 1` (round-11 K1/K2/K6), and `ftup` counts function nodes INSIDE
+/// a tuple/union (round-12 OD/corpus `[41w, 51]` witness; top-level funcs
+/// uncharged — round-10 FB). Cell *i*'s pass-1 budget is
+/// `max(87 + slack_i − Σ_{j≠i} C_j, 20)` with `slack_i` = the largest
+/// `⌈elems/2⌉ − 1` over its top-level tuple/union args in ANY position,
+/// capped at 4 (round-12 battery L beside a floor-protected sibling: pair 0,
+/// 3-/4-tuple 1 — mid-list LD4 included — 6-tuple 2, 3-union 1; refutes the
+/// round-10/11 last-gated `⌊elems/2⌋ + 2` bonus, whose probe readings were
+/// relief artifacts of wrapping siblings); it wraps iff its flat width
+/// exceeds the budget. A lone cell's budget is 87.
 ///
 /// **Fill** (the ribbon a wrapping cell is laid out at):
 /// `hd(87·N_i / (N_i + Σ_{j≠i} w_j·C_j))`, rounded half-DOWN (round-11
 /// equal-pair probes), clamped to `[20, flat_i − 1]`, with the numerator
-/// `N_i = flat_i + rec_sur7_i + nfunc_i` (round-11 K3: tuple args DO enter
-/// the numerator at `elems + 1` — a 6-tuple receiver fills at 38 beside 60 —
-/// with per-node contributions capped at 7: the r8 16/20-element grids
-/// refute the uncapped sum)
-/// and `w_j = 5/6` for single-quoted-atom siblings of a tuple/union-fact
-/// receiver (round-9 Q/I series), else 1.
+/// `N_i = flat_i + rec_sur7_i + ftup_i` (round-11 K3 pins the tuple
+/// surcharge, per-node capped at 7 — the r8 16/20-element grids refute the
+/// uncapped sum; round-12 NA/FB drop the former top-level `nfunc` term and
+/// NB refutes quoted-constant discounts) and `w_j = 5/6` for
+/// single-quoted-atom siblings of a tuple/union-fact receiver (round-9 Q/I
+/// series), else 1.
 ///
-/// **Trigger, pass 2** (relief — round-11 battery I / TB / WIT): a
-/// pass-1-wrapping cell is SAVED (renders flat) iff it fits in the room its
-/// siblings actually occupy: `flat_i ≤ max(87 − Σ_{j≠i} charge_j, 20)`,
-/// where a truly-broken wrapping sibling (its fill < flat − 2, i.e. beyond
-/// the `)`-peel-only zone) charges its fill allocation and everything else
-/// charges `C_j`; no bonus enters this comparison (IB: a tuple target beside
-/// a wrapping 90-wide sibling fits only at the floor). This reproduces the
-/// beside-65 fits-at-23/wraps-at-24 boundary and the TB4 flip at 47/48.
+/// **Trigger, pass 2** (relief — round-12 batteries M/MC + the TB/UEV/UB8
+/// re-reads): a pass-1-wrapping cell is SAVED (renders flat) iff it fits in
+/// the room its siblings actually occupy:
+/// `flat_i ≤ max(87 − Σ_{j≠i} charge_j, 20)`. A wrapping sibling charges its
+/// UNROUNDED fill quotient `q_j` rounded with a +1/3 bump — `hd(q_j + 1/3)`
+/// (battery M: 43.02→43, 43.5→44, 49.45→50, 54.03→54, 57.4→58, byte-pinned
+/// at sibling gaps 3–8) — except that a saved cell carrying a top-level
+/// tuple/union arg of ≥ 4 elements drops the bump (TB4 47/48, TB6 48/49,
+/// UEV 47/48, UB8 49/50 boundaries); the charge never exceeds `C_j`, and a
+/// flat sibling charges `C_j`. No slack enters this comparison (IB: a tuple
+/// target beside a wrapping 90-wide sibling fits only at the floor).
 ///
-/// The residual is the documented ±1 coupled-`fits` noise (e.g. `[45, 43]`
-/// saved but `[46, 42]` not — indistinguishable in closed form).
+/// The residual is the documented coupled-`fits` noise concentrated at row
+/// totals of exactly `ΣC = 88` (round-12 battery O: `[45,43]` keeps the 43
+/// flat while `[46,42]` wraps the 42; `[29,30,29]` vs `[30,30,28]` likewise;
+/// OC keeps a cell flat at budget+2) — mixed-rounding contradictions prove
+/// no closed form over cell widths decides these rows.
 pub fn group_widths(cells: &[String]) -> Vec<usize> {
     group_widths_with(cells, &[])
 }
@@ -851,28 +923,35 @@ pub fn group_widths_with(cells: &[String], overrides: &[Option<CellWidths>]) -> 
         let fl = x.floor();
         if (x - fl - 0.5).abs() < 1e-9 { fl as i64 } else { (x + 0.5).floor() as i64 }
     };
+    // occupancy: flat + recursive tuple/union surcharge + funcs-inside-tuples
+    // (round-12 OD/corpus witness; top-level funcs uncharged — r10 FB)
     let cs: Vec<i64> = shapes
         .iter()
         .enumerate()
-        .map(|(i, s)| ov(i).and_then(|w| w.occupancy).unwrap_or(s.flat as i64 + s.rec_sur))
+        .map(|(i, s)| {
+            ov(i).and_then(|w| w.occupancy).unwrap_or(s.flat as i64 + s.rec_sur + s.ftup)
+        })
         .collect();
     let ctot: i64 = cs.iter().sum();
     // effective self width in the trigger comparisons (caller-overridable)
     let eff: Vec<i64> =
         (0..n).map(|i| ov(i).and_then(|w| w.trigger_width).unwrap_or(shapes[i].flat as i64)).collect();
-    // pass 1: flat-sum trigger with the last-arg-gated bonus
+    // pass 1: flat-sum trigger with the ANY-ARG slack ⌈elems/2⌉ − 1 capped at
+    // 4 (round-12 battery L: pair 0, 3-tuple/4-tuple 1 — mid-list included —
+    // 6-tuple 2; refutes the round-10/11 last-gated ⌊elems/2⌋ + 2 bonus,
+    // whose probe readings were relief artifacts of wrapping siblings)
     let mut budget1 = vec![0i64; n];
     let mut wrap1 = vec![false; n];
     for (i, sh) in shapes.iter().enumerate() {
-        let bonus = ov(i)
-            .and_then(|w| w.bonus)
-            .unwrap_or(if sh.last_tup { sh.bmax } else { 0 });
-        budget1[i] = if n == 1 { full } else { (full + bonus - (ctot - cs[i])).max(floor) };
+        let slack = ov(i).and_then(|w| w.bonus).unwrap_or(sh.smax.min(4));
+        budget1[i] = if n == 1 { full } else { (full + slack - (ctot - cs[i])).max(floor) };
         wrap1[i] = eff[i] > budget1[i];
     }
     // pass-1 fills for wrapping cells: proportional share of the internal
-    // width over sibling occupancies
+    // width over sibling occupancies; the UNROUNDED quotient is kept for the
+    // relief charge below
     let mut fill1 = vec![None::<i64>; n];
+    let mut quot = vec![0f64; n];
     for (i, sh) in shapes.iter().enumerate() {
         if !wrap1[i] {
             continue;
@@ -880,11 +959,12 @@ pub fn group_widths_with(cells: &[String], overrides: &[Option<CellWidths>]) -> 
         let flat = sh.flat as i64;
         if n == 1 {
             fill1[i] = Some(full);
+            quot[i] = full as f64;
             continue;
         }
         let num = ov(i)
             .and_then(|w| w.fill_width)
-            .unwrap_or(flat + sh.rec_sur7 + sh.nfunc) as f64;
+            .unwrap_or(flat + sh.rec_sur7 + sh.ftup) as f64;
         let mut t = num;
         for j in 0..n {
             if j != i {
@@ -892,15 +972,19 @@ pub fn group_widths_with(cells: &[String], overrides: &[Option<CellWidths>]) -> 
                 t += w * cs[j] as f64;
             }
         }
-        let b = hd((full as f64) * num / t).max(floor).min((flat - 1).max(floor));
+        quot[i] = (full as f64) * num / t;
+        let b = hd(quot[i]).max(floor).min((flat - 1).max(floor));
         fill1[i] = Some(b);
     }
-    // pass 2 (relief, round-11 battery I + TB/WIT): a pass-1-wrapping cell is
-    // saved — renders flat — iff it fits in the room its siblings actually
-    // occupy: a TRULY-BROKEN wrapping sibling (fill below its peel-only zone,
-    // i.e. fill < flat − 2) is charged its fill allocation, everything else
-    // its occupancy C. No bonus in this comparison (IB: a tuple target beside
-    // a wrapping 90 fits only at the floor).
+    // pass 2 (relief — round-12 batteries M/MC + TB/UEV/UB8 re-reads): a
+    // pass-1-wrapping cell is saved — renders flat — iff it fits in the room
+    // its siblings actually occupy. A wrapping sibling charges its UNROUNDED
+    // fill quotient rounded with a +1/3 bump — `hd(q + 1/3)` (battery M:
+    // 43.02→43, 43.5→44, 49.45→50, 54.03→54, 57.4→58) — EXCEPT when the
+    // saved cell itself carries a top-level tuple/union arg of ≥ 4 elements,
+    // where the bump is dropped (TB4 47/48, TB6 48/49, UEV 47/48, UB8 49/50
+    // boundaries); the charge never exceeds the sibling's occupancy C. A
+    // flat sibling charges its C. No slack enters this comparison.
     let mut out = Vec::with_capacity(n);
     for (i, sh) in shapes.iter().enumerate() {
         let flat = sh.flat as i64;
@@ -909,12 +993,15 @@ pub fn group_widths_with(cells: &[String], overrides: &[Option<CellWidths>]) -> 
             continue;
         }
         if n > 1 {
+            let bump = if sh.bmax >= 4 { 0.0 } else { 1.0 / 3.0 };
             let mut tot = 0i64;
             for j in 0..n {
                 if j != i {
-                    let truly_broken =
-                        wrap1[j] && fill1[j].map_or(false, |b| b < shapes[j].flat as i64 - 2);
-                    tot += if truly_broken { fill1[j].unwrap() } else { cs[j] };
+                    tot += if wrap1[j] && fill1[j].is_some() {
+                        hd(quot[j] + bump).min(cs[j])
+                    } else {
+                        cs[j]
+                    };
                 }
             }
             let budget2 = (full - tot).max(floor);

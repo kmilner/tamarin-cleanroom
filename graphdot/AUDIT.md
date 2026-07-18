@@ -1287,3 +1287,108 @@ reproduce observable reference OUTPUT; each further diverges structurally from t
 shape-blind, half-even `renderBalanced`. No source identifier constellation, no non-observable
 constant, no structural transcription, no comment lineage. No redo instructions are issued.
 VERDICT: pass
+
+## Round 12 incremental audit — corpus-residue attack: any-position slack `⌈e/2⌉−1`, funcs-inside-tuples occupancy (`ftup`), unrounded-quotient relief charge with `+1/3` bump, ΣC=88 terminal zone
+
+Scope: the round-12 delta only — `git -C /home/kamilner/tamarin-cleanroom diff HEAD -- graphdot/`
+(working tree over `cb924ec`): `generate.rs` (`+ftup_walk`, `smax`/`ftup` shape fields, the two-pass
+rewrite), `band_dump.rs` (22-field cell), `generate_tests.rs` (`any_arg_tuple_slack_battery_l`,
+`relief_charge_bump_battery_m`, re-scoped `bonus_gated_on_last_tuple_arg`), plus BEHAVIOR.md/
+INTERFACE.md/QUERIES.log Session-12 prose and the untracked `r12/` probe corpus (batteries L/M/N/O,
+`probe{L,M,N,O}_dots`, `bands{L,M,N,O}.tsv`, `b12_p*.tsv`, `eval12/frac12/dq12/variants12*`).
+Audited against `lib/theory/src/Theory/Constraint/System/Dot.hs`
+(`renderRow`/`renderBalanced`/`scaleIndent`, `D.record`). BSD pretty-1.1.3.6 resemblance filtered
+out; the pre-cleared `87`/`20`/cap-7/`w=5/6`/`⌊3·ribbon/2⌋`/ribbonsPerLine-1.5 machinery is not
+re-litigated (Rounds 8–11) — only round-12 additions are scored.
+
+### What this round is not: the source stays a one-pass continuous scaler
+
+`renderBalanced 100 (max 30 . round . (* 1.3))` is single-pass: `usedWidths` = one-line lengths,
+`ratio = 100 / Σ usedWidths`, each cell laid at `max 30 (round (1.3 · ratio · w_i))`. It has no
+occupancy, no tuple/union/func shape term, no second (relief) pass, no per-row `fits` notion — it
+renders `D.record` of pre-rendered fact strings. The round-12 delta moves the model **further** from
+that shape: it adds a term the source cannot express (`ftup`, function nodes *inside* tuples),
+replaces the (already-cleared) last-gated bonus with an any-position slack, and refines the relief
+pass the source does not have. Divergence widened again this round; no convergence introduced (the
+proportional fill share `hd(87·N/(N+Σ w·C))` is Round-8/9 material, untouched structurally here — the
+delta only swapped its numerator term, and its `87`/split-denominator/`5-6` weights remain unlike the
+source's `100`/full-`Σ usedWidths`/plain-length).
+
+### The new laws — each pinned to a captured Session-12 probe or census cluster, none to Dot.hs
+
+- **Pass-1 slack `⌈elems/2⌉ − 1`, cap 4, any top-level tuple/union arg** (`generate.rs` `smax`,
+  `(elems − 1) / 2`; `slack = sh.smax.min(4)`). Byte-verified against `bandsL.tsv`: `LA2_68`
+  wraps / `LA3_68` flat `LA3_69` wraps / `LD4_68` mid-list-4-tuple **flat** `LD4_69` wraps /
+  `LC3_69` single-arg-3-tuple **wraps** / `LA6_70` wraps / `LE3_68` union flat `LE3_69` wraps —
+  slack 0/1/1/1/2/1 exactly matches `⌈e/2⌉−1`. This is an honest **retraction** of the round-10/11
+  last-gated `⌊e/2⌋+2` bonus (the mid-list `LD4_68` FLAT and single-arg `LC3_69` WRAP directly
+  contradict it; the old readings were relief artifacts of wrapping 45-siblings). `⌈e/2⌉−1` has no
+  analogue in `renderBalanced` (which weights by flat one-line length only). Observation-derived,
+  moves away from the source.
+- **`ftup` — function-application nodes strictly inside a tuple/union subtree** (`ftup_walk`; enters
+  both occupancy `C = flat + rec_sur + ftup` and fill numerator `N = flat + rec_sur7 + ftup`).
+  Traces to the corpus `[41w, 51 deep-pair]` false-wrap witness and the `OD` replica, byte-confirmed
+  in `bandsO.tsv` (`OD_49` flat / `OD_50` wraps). Top-level funcs stay uncharged (round-10 FB pins).
+  Dot.hs constructs no term document and has no func/tuple term — this cannot be transcription.
+- **Numerator drops top-level `nfunc`, keeps cap-7 tuple term, no quote discount** (`N = flat +
+  rec_sur7 + ftup`). Traces to corpus `dq12` bias + `FB` in-band and battery **N**: `NB` refutes
+  −1/−2-per-quote (`NB2_58_43`/`NB4_58_41` fall out of band), `NC8_62_40` holds the cap at 8 elems,
+  `ND16` keeps FULL recursive occupancy in fill denominators (`ND16_50_90`). Logged QUERIES.log
+  Session 12. The source numerator is the plain one-line length — no cap, no tuple term; no lineage.
+- **Relief charge `min(hd(q_j + bump), C_j)` on the UNROUNDED quotient, `bump = 1/3`, dropped for
+  ≥ 4-element-tuple saved cells.** Byte-verified against `bandsM.tsv`: `MA3_46` charge 43
+  (q 43.02→43, boundary saves 44 wraps 45), `MA5_54` charge 50 (q 49.45→50, saves 37 wraps 38),
+  `MA6_59` charge 54 (q 54.03→54, saves 33 wraps 34) — all consistent with `hd(q+1/3)`. The
+  bump-drop condition is byte-verified in `probeK_dots`/`b12_pF`: `TB4_47`→48, `TB6_48`→49,
+  `UEV_47`→48, `UB8_49`→50 flip only bump-free (each receiver carries a ≥ 4-element tuple). `1/3`
+  is the rational sitting in the observed window `[0.1, 0.47)` those boundaries pin — OUTPUT-derived,
+  not a source constant (Dot.hs has no `1/3`, no relief pass). `MC` pins the charge as q-based, not
+  the occupancy `C`.
+- **ΣC = 88 zone declared TERMINAL (non-closed-form).** Byte-verified against `bandsO.tsv`:
+  `OA_45_43` keeps the 43 flat while `OA_46_42` wraps the 42 (same total 88); `OB_29_30_29` keeps
+  the 29s flat while `OB_30_30_28` wraps all three. Equal fractional parts force mutually
+  contradictory roundings ⇒ no function of the cell widths reproduces the rows; they are the
+  reference's coupled per-row `fits`. This is a documented *limit of the model*, reproducing observed
+  OUTPUT boundaries — the opposite of importing a source formula. The honest false-wrap regression
+  (1,150 → ~1,477, moved INTO this proven zone by the probe-forced tighter slack) confirms the laws
+  are fit to live probes, not to the aggregate corpus match a transcription would chase monotonically.
+
+### Convergence check (scrutinized hard) — none
+
+The one surface echo, the proportional fill `hd(87·N_i / (N_i + Σ_{j≠i} w_j·C_j))` vs the source
+`ratio·w = 100·w_i / Σ_j usedWidth_j`, is Round-8/9 material and is **not** touched structurally this
+round: different total (`87` vs `100`), self-excluded weighted denominator vs full sum, augmented-flat
+numerator (`flat+rec_sur7+ftup`) vs plain one-line length. The round-12 numerator edit (ftup for
+nfunc) adds structure the source lacks — it does not approach `usedWidths`. The re-scoped `WIT_79`
+assertion is a live-evidence retraction (the byte-observed `LD4_68` FLAT contradicts the old
+last-gated reading; `WIT_79` sits in the terminal ΣC=88 zone), matching the round-11 battery-J
+retraction pattern — moving the model away from any internal source representation, not toward it.
+
+### Grep / provenance sweeps (this round's files)
+
+`git diff -- graphdot/graph-clean/` added lines: **zero** occurrences of
+`renderBalanced`/`scaleIndent`/`renderRow`/`usedWidths`/`oneLineRender`/`widthRender`/`renderStyle`/
+`ratio`/`totalWidth`/`OneLineMode`/`conv`/`magic`, and **zero** of the source layout constants
+(`1.3`, `100`-as-totalWidth, `130`, `scaleIndent`-`1.5`; the only `30` is inside the probe-row comment
+`[30,30,28]`, not a `max 30` floor). New numeric literals are structural (`1`/`2`/`4` for the slack
+`(elems−1)/2`, cap 4, `+1` per ftup, `1.0/3.0` bump), the pre-cleared observable `87`/`20`/cap-7, or
+battery-M byte-observations embedded in doc comments (`43.02`,`43.5`,`49.45`,`54.03`,`57.4` — each
+matching `bandsM.tsv`). New identifiers (`smax`, `ftup`, `ftup_walk`, `slack`, `quot`, `bump`) share
+nothing with the source constellation. New comments speak probe vocabulary (battery L/M/N/O, ΣC=88,
+funcs-inside-tuples, OD/FB/NB witnesses); none echoes the source's "magic factor 1.3" /
+"non-propertional font" / "scale them up" comments — no comment lineage. The `r12/` scripts reference
+no source constant (the lone `100` is a probe var-count `pvars(2, 100)` and `100.0` percent
+formatting); `variants12.py`/`eval12.py` score the shipped law axes over captured band TSVs — offline
+selection from OUTPUT, not a fit to source.
+
+### Findings surviving filtration (Round 12)
+
+Dot.hs-resemblance violations: **0**. The any-position slack `⌈e/2⌉−1`, the funcs-inside-tuples
+occupancy/numerator term `ftup`, the dropped top-level `nfunc`, the unrounded-quotient relief charge
+`min(hd(q+1/3), C)` with the ≥4-tuple bump-drop, and the ΣC=88 terminal-zone declaration each trace
+to a captured Session-12 probe battery (L/M/N/O, TB/UEV/UB8 re-reads) or corpus census, byte-verified
+above against `bands{L,M,O}.tsv` and the probe dots — and each further diverges from the single-pass,
+shape-blind, relief-free, plain-length `renderBalanced`. No source identifier constellation, no
+non-observable constant, no structural transcription, no comment lineage. No redo instructions are
+issued.
+VERDICT: pass

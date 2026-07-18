@@ -1,0 +1,212 @@
+theory ReliefChargeProbe
+begin
+
+
+// MA: gap-3 sib [W 46 fill~43], midpair T 43 (charge-f boundary T 44)
+rule MA3_46_43:
+  [ In(<$dw, $dx>) ]
+  --[ F0() ]->
+  [ Wbb($q00, $aa, $ab, $ac, $ad, $ae, $af, $ag), Tc($qz0aaaaaaaaaaaaaaaaaaa, <$a, $b>, $c) ]
+
+// MA: gap-3 sib [W 46 fill~43], midpair T 44 (charge-f boundary T 44)
+rule MA3_46_44:
+  [ In(<$dw, $dx>) ]
+  --[ F1() ]->
+  [ Wbb($q01, $aa, $ab, $ac, $ad, $ae, $af, $ag), Tc($qz1aaaaaaaaaaaaaaaaaaaa, <$a, $b>, $c) ]
+
+// MA: gap-3 sib [W 46 fill~43], midpair T 45 (charge-f boundary T 44)
+rule MA3_46_45:
+  [ In(<$dw, $dx>) ]
+  --[ F2() ]->
+  [ Wbb($q02, $aa, $ab, $ac, $ad, $ae, $af, $ag), Tc($qz2aaaaaaaaaaaaaaaaaaaaa, <$a, $b>, $c) ]
+
+// MA: gap-4 sib [W 47 fill~43], midpair T 43 (charge-f boundary T 44)
+rule MA4_47_43:
+  [ In(<$dw, $dx>) ]
+  --[ F3() ]->
+  [ Wbb($q03a, $aa, $ab, $ac, $ad, $ae, $af, $ag), Tc($qz3aaaaaaaaaaaaaaaaaaa, <$a, $b>, $c) ]
+
+// MA: gap-4 sib [W 47 fill~43], midpair T 44 (charge-f boundary T 44)
+rule MA4_47_44:
+  [ In(<$dw, $dx>) ]
+  --[ F4() ]->
+  [ Wbb($q04a, $aa, $ab, $ac, $ad, $ae, $af, $ag), Tc($qz4aaaaaaaaaaaaaaaaaaaa, <$a, $b>, $c) ]
+
+// MA: gap-4 sib [W 47 fill~43], midpair T 45 (charge-f boundary T 44)
+rule MA4_47_45:
+  [ In(<$dw, $dx>) ]
+  --[ F5() ]->
+  [ Wbb($q05a, $aa, $ab, $ac, $ad, $ae, $af, $ag), Tc($qz5aaaaaaaaaaaaaaaaaaaaa, <$a, $b>, $c) ]
+
+// MA: gap-5 sib [W 54 fill~49], midpair T 37 (charge-f boundary T 38)
+rule MA5_54_37:
+  [ In(<$dw, $dx>) ]
+  --[ F6() ]->
+  [ Wbb($q06aaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Tc($qz6aaaaaaaaaaaaa, <$a, $b>, $c) ]
+
+// MA: gap-5 sib [W 54 fill~49], midpair T 38 (charge-f boundary T 38)
+rule MA5_54_38:
+  [ In(<$dw, $dx>) ]
+  --[ F7() ]->
+  [ Wbb($q07aaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Tc($qz7aaaaaaaaaaaaaa, <$a, $b>, $c) ]
+
+// MA: gap-5 sib [W 54 fill~49], midpair T 39 (charge-f boundary T 38)
+rule MA5_54_39:
+  [ In(<$dw, $dx>) ]
+  --[ F8() ]->
+  [ Wbb($q08aaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Tc($qz8aaaaaaaaaaaaaaa, <$a, $b>, $c) ]
+
+// MA: gap-6 sib [W 59 fill~53], midpair T 33 (charge-f boundary T 34)
+rule MA6_59_33:
+  [ In(<$dw, $dx>) ]
+  --[ F9() ]->
+  [ Wbb($q09aaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai), Tc($qz9aaaaaaaaa, <$a, $b>, $c) ]
+
+// MA: gap-6 sib [W 59 fill~53], midpair T 34 (charge-f boundary T 34)
+rule MA6_59_34:
+  [ In(<$dw, $dx>) ]
+  --[ F10() ]->
+  [ Wbb($q10aaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai), Tc($qz10aaaaaaaaa, <$a, $b>, $c) ]
+
+// MA: gap-6 sib [W 59 fill~53], midpair T 35 (charge-f boundary T 34)
+rule MA6_59_35:
+  [ In(<$dw, $dx>) ]
+  --[ F11() ]->
+  [ Wbb($q11aaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai), Tc($qz11aaaaaaaaaa, <$a, $b>, $c) ]
+
+// MA: gap-7 sib [W 64 fill~57], midpair T 29 (charge-f boundary T 30)
+rule MA7_64_29:
+  [ In(<$dw, $dx>) ]
+  --[ F12() ]->
+  [ Wbb($q12aaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj), Tc($qz12aaaa, <$a, $b>, $c) ]
+
+// MA: gap-7 sib [W 64 fill~57], midpair T 30 (charge-f boundary T 30)
+rule MA7_64_30:
+  [ In(<$dw, $dx>) ]
+  --[ F13() ]->
+  [ Wbb($q13aaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj), Tc($qz13aaaaa, <$a, $b>, $c) ]
+
+// MA: gap-7 sib [W 64 fill~57], midpair T 31 (charge-f boundary T 30)
+rule MA7_64_31:
+  [ In(<$dw, $dx>) ]
+  --[ F14() ]->
+  [ Wbb($q14aaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj), Tc($qz14aaaaaa, <$a, $b>, $c) ]
+
+// MA: gap-8 sib [W 67 fill~59], midpair T 28 (charge-f boundary T 28)
+rule MA8_67_28:
+  [ In(<$dw, $dx>) ]
+  --[ F15() ]->
+  [ Wbb($q15a, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak), Tc($qz15aaa, <$a, $b>, $c) ]
+
+// MA: gap-8 sib [W 67 fill~59], midpair T 29 (charge-f boundary T 28)
+rule MA8_67_29:
+  [ In(<$dw, $dx>) ]
+  --[ F16() ]->
+  [ Wbb($q16a, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak), Tc($qz16aaaa, <$a, $b>, $c) ]
+
+// MC: pair-sib [P 52 rec3 fill~51 gap 1], midpair T 35 (f+1 boundary T 35)
+rule MC_52_35:
+  [ In(<$dw, $dx>) ]
+  --[ F17() ]->
+  [ Pbb(<$q17aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $aa>), Tc($qz17aaaaaaaaaa, <$a, $b>, $c) ]
+
+// MC: pair-sib [P 52 rec3 fill~51 gap 1], midpair T 36 (f+1 boundary T 35)
+rule MC_52_36:
+  [ In(<$dw, $dx>) ]
+  --[ F18() ]->
+  [ Pbb(<$q18aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $aa>), Tc($qz18aaaaaaaaaaa, <$a, $b>, $c) ]
+
+// MC: pair-sib [P 56 rec3 fill~55 gap 1], midpair T 31 (f+1 boundary T 31)
+rule MC_56_31:
+  [ In(<$dw, $dx>) ]
+  --[ F19() ]->
+  [ Pbb(<$q19aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $aa>), Tc($qz19aaaaaa, <$a, $b>, $c) ]
+
+// MC: pair-sib [P 56 rec3 fill~55 gap 1], midpair T 32 (f+1 boundary T 31)
+rule MC_56_32:
+  [ In(<$dw, $dx>) ]
+  --[ F20() ]->
+  [ Pbb(<$q20aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $aa>), Tc($qz20aaaaaaa, <$a, $b>, $c) ]
+
+// MC: pair-sib [P 60 rec3 fill~58 gap 2], midpair T 28 (f+1 boundary T 28)
+rule MC_60_28:
+  [ In(<$dw, $dx>) ]
+  --[ F21() ]->
+  [ Pbb(<$q21aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $aa>), Tc($qz21aaa, <$a, $b>, $c) ]
+
+// MC: pair-sib [P 60 rec3 fill~58 gap 2], midpair T 29 (f+1 boundary T 28)
+rule MC_60_29:
+  [ In(<$dw, $dx>) ]
+  --[ F22() ]->
+  [ Pbb(<$q22aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $aa>), Tc($qz22aaaa, <$a, $b>, $c) ]
+
+lemma l_MA3_46_43:
+  exists-trace "Ex #i. F0() @ #i"
+
+lemma l_MA3_46_44:
+  exists-trace "Ex #i. F1() @ #i"
+
+lemma l_MA3_46_45:
+  exists-trace "Ex #i. F2() @ #i"
+
+lemma l_MA4_47_43:
+  exists-trace "Ex #i. F3() @ #i"
+
+lemma l_MA4_47_44:
+  exists-trace "Ex #i. F4() @ #i"
+
+lemma l_MA4_47_45:
+  exists-trace "Ex #i. F5() @ #i"
+
+lemma l_MA5_54_37:
+  exists-trace "Ex #i. F6() @ #i"
+
+lemma l_MA5_54_38:
+  exists-trace "Ex #i. F7() @ #i"
+
+lemma l_MA5_54_39:
+  exists-trace "Ex #i. F8() @ #i"
+
+lemma l_MA6_59_33:
+  exists-trace "Ex #i. F9() @ #i"
+
+lemma l_MA6_59_34:
+  exists-trace "Ex #i. F10() @ #i"
+
+lemma l_MA6_59_35:
+  exists-trace "Ex #i. F11() @ #i"
+
+lemma l_MA7_64_29:
+  exists-trace "Ex #i. F12() @ #i"
+
+lemma l_MA7_64_30:
+  exists-trace "Ex #i. F13() @ #i"
+
+lemma l_MA7_64_31:
+  exists-trace "Ex #i. F14() @ #i"
+
+lemma l_MA8_67_28:
+  exists-trace "Ex #i. F15() @ #i"
+
+lemma l_MA8_67_29:
+  exists-trace "Ex #i. F16() @ #i"
+
+lemma l_MC_52_35:
+  exists-trace "Ex #i. F17() @ #i"
+
+lemma l_MC_52_36:
+  exists-trace "Ex #i. F18() @ #i"
+
+lemma l_MC_56_31:
+  exists-trace "Ex #i. F19() @ #i"
+
+lemma l_MC_56_32:
+  exists-trace "Ex #i. F20() @ #i"
+
+lemma l_MC_60_28:
+  exists-trace "Ex #i. F21() @ #i"
+
+lemma l_MC_60_29:
+  exists-trace "Ex #i. F22() @ #i"
+
+end
