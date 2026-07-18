@@ -363,6 +363,7 @@ e5654896344644a15325db7e417ebec025c36c51c1cccbd4cb8941bf537f9bd8  ./evidence/lau
 eff27b6afc08e1b2fc589d8650ce1543877571a53ab243c3a8497e3791b35fcf  ./evidence/launch-scripts/integrate-graph-web-wf_610d94ab-e29.js
 d39d2de925d219563ef8f2c859426ad8250a8dd88e9478f9b9a7b887bd7ec99a  ./evidence/launch-scripts/intruder-variants-licensing-wf_53f48d60-3ef.js
 b539d85e36918a1ba500731a2a3c07515810ad9a26cc03c04bb0d659b7adf155  ./evidence/launch-scripts/permission-scope-verify-wf_8b8fd87b-72e.js
+50991cc2580239abfd899d33708894e960f796dc9ba6bcd0bd4a66e576fb6d87  ./evidence/launch-scripts/pretty-r2-integration-wf_6384b98e-ff2.js
 537aa32e1b23d99cbc5169e0e1bb9c9f794868635dd01da9fcc7067091f80778  ./evidence/launch-scripts/pretty-r2-wf_a5ef3578-648.js
 3404b3620624208ca7b5e00410559446a9afb80a26fdacf56ac0fbc316037121  ./evidence/launch-scripts/producers-integration-wf_56cc20c9-d78.js
 992bf4227f967b97d6249adbef493a8b595b0dec81ddcd6fe9d2394e19143d14  ./evidence/launch-scripts/similarity-audit-wf_7197ba11-003.js
@@ -373,7 +374,7 @@ d7a219edc2fc91815117a009c5e4e255b654dfe0f0d6493be52ef5387da4bf49  ./evidence/lau
 0c91ee131665ff8e58d3ae0a6d55531d72d82cda734effb2ebce53041dc04d28  ./evidence/launch-scripts/wf-r6-pretty-r1-wf_cdfa493d-262.js
 2f7011be747ca40a7079a9b942e5ee5bcbf31cbe5ae477b007d408612a463828  ./evidence/launch-scripts/wf-sealed-round5-wf_b6a947c0-a82.js
 0cadaa204b3a313ccfdbbb2ee4a8a0e22543e91e30ccbf642d9171a8a1af37dc  ./evidence/main-session-dirty-room.jsonl
-5defd9d21bbf8289e022e053ebc8bd29209375bbfcb6ef739029259c284350d0  ./evidence/MANIFEST.md
+3fb5597cf48b74529690ce80f6b18da86bb87a069dad903c7b2540f451d7a33a  ./evidence/MANIFEST.md
 dd3c7b7bfc898b6b56d30722964710f68cf97067cb0784aa6da2a69a0c0def05  ./evidence/standalone-agents/agent-a9c7edd67d24711cc.jsonl
 311b74b19f571a027a112d582e5809a470aa7e35288868e30ab8287c5ab906dd  ./evidence/standalone-agents/agent-aac7737a5d3b7d6e7.jsonl
 f9680e57bdbe43c763ed1268473e1b50b34ad49d88842b2c2fd238f43202a1dc  ./evidence/standalone-agents/agent-ac1b65c4df499573b.jsonl
@@ -392,6 +393,7 @@ f15b365f27c5b651c5d085994ed96f5c82865c9de92c2d5cba97fd5405bb0c48  ./evidence/tas
 50bcc020d9640d371719ab65b6d27a8da682617a11e6e779379e7d3e46db7e33  ./evidence/task-results/wbc7t0w0x.output
 33d03638226b8cbdfd6cfbddad172fffa8f4412e67e63f238c21c073058cabdd  ./evidence/task-results/wf_56cc20c9-d78-result.json
 e3234307fa774286bb16677559cda132627c80babf26e4c92af8dd6d012d8bf2  ./evidence/task-results/wf_58b2a176-d66-result.json
+eff0d67c207260663dc9b70e54b9a1231a62ed6d8ab1bb2d433f5a674cb5937f  ./evidence/task-results/wf_6384b98e-ff2-result.json
 c69537c9cf578b04cfe4b72f44b234ba84c45395ad591ebb183c37feaf1a36bf  ./evidence/task-results/wf_6c1add5e-f10-result.json
 36cd5117373f1e231174bd37ad9d8ffbfee17c0e33e80cfe2101394b95ee1033  ./evidence/task-results/wf_7081ec9f-f00-result.json
 60d989753a5d83844938ce92ae5b1f72e52fba49e2704823e1d7d4e02d79caed  ./evidence/task-results/wf_8ba08a93-8eb-result.json
@@ -536,6 +538,9 @@ ff4a60334340007f077b598c0b52898694b1dbfe6d73edcfade6902958cf31bf  ./evidence/wor
 3993e0477440e1ba65d579a1582557e90b9f814231b1b1d2cb6bd699bce0d69a  ./evidence/workflows/wf_62e2c0ef-a3e/agent-af3d04b49cd4b056d.jsonl
 6f3875c7f24932f3b1af709e735c778f22edfc6ed650136b8c6d652fdc6d5a81  ./evidence/workflows/wf_62e2c0ef-a3e/agent-af3d04b49cd4b056d.meta.json
 6080edd44d0797ce345eaf2e5eac65b86f9a92153e999d59744656d1face3abe  ./evidence/workflows/wf_62e2c0ef-a3e/journal.jsonl
+82aee653cd356765248d8b2aef4c5e8120e9f19829b6471a0de6a4487d175d6d  ./evidence/workflows/wf_6384b98e-ff2/agent-a92bda75af5ec3a7c.jsonl
+6f3875c7f24932f3b1af709e735c778f22edfc6ed650136b8c6d652fdc6d5a81  ./evidence/workflows/wf_6384b98e-ff2/agent-a92bda75af5ec3a7c.meta.json
+9aef8c44efdff247df1a1d2bea57bc1502a0b000f547dbe5a2d0d8681e2db03b  ./evidence/workflows/wf_6384b98e-ff2/journal.jsonl
 61088999511622dd3ac2e864222fdca4281786867d9e529f900ea6df8dd1b92d  ./evidence/workflows/wf_6b16799d-1c9/agent-a6d5afeb848c42e89.jsonl
 83949d3b7596f06e91d6668a8f3470e0237cd653432db8081448f101f733e95b  ./evidence/workflows/wf_6b16799d-1c9/agent-a6d5afeb848c42e89.meta.json
 644b5c8d3ba1d1d3e877720c5f098da45f69001652287b0e878ed153f2c71865  ./evidence/workflows/wf_6b16799d-1c9/agent-aef2578a65838b522.jsonl
@@ -2423,7 +2428,7 @@ a6f353acf26cb37358117bc9382c6b404ee909d0467441d0af910285b266970b  ./injective/wo
 896c1b0f77c5d250ddc4dfcc32148141cf44ac71b2b2298e52a45f9d4fc6723a  ./injective/workspace/validation/scrape_run.log
 a7756a6bad1d40219fd878e560c59581961dcbe0992f9bdcb9986ef8af6c5c3d  ./injective/workspace/validation/scrape.sh
 1d2eacc0bda35949253b76bc82ae7a11cf7c5a753c8e2d65f181e2a3991a1a8d  ./injective/workspace/validation/trace_files.txt
-ae6577f1e474eb037ad10945f382bcd68e8c8d6ef4c0235899dea15c28261dec  ./INTEGRATION_REPORT.md
+b212b353d46396e162309ff21473656aef006839463a1f7aead25d906d79da51  ./INTEGRATION_REPORT.md
 2472a2838feb49d6096e95314bef57d66198721b810c079934ff3e9b189a2db3  ./macros/AUDIT.md
 f396b73f89931c787b6fd8f099951fd5a7a27ce2b301ce6c4db9da9f4943e993  ./macros/oracle/examples/features/macros/MacroInLemmasAndRestrictions.spthy
 46a130611e88bf4dc7d46e2a93fab998124acc7fde61e037ee33a54a82f51d24  ./macros/oracle/examples/features/macros/MacroTestWithOracleRanking.spthy
@@ -2551,6 +2556,9 @@ f0384d023fbc480e2cafd601a2353602502915b596c0d0eb520542dc2283b05d  ./pretty/round
 a69ba3546671d4b4b45020729bf12f3d3508c459e9b7b912a021fd8dfe170241  ./pretty/round1/targets/Tutorial.spthy.hs.txt
 96c6f4afed2718aa7468b329e0fd422a04ea79e555547ba20b5e0ffc758a03e9  ./pretty/round2/families.tsv
 6da1f44b99d4901086a619a3bad519600b47a8a25ca14da6d4630278ade0349b  ./pretty/round2/fetch_hs_targets.sh
+09736ef8403cd6a74a3f5442e1d0da06efc0e54ea5907eaf558f4e8258bcbd31  ./pretty/round2/r3a_process_attr_79.txt
+e711446f669ee16dcf2607e59efac6d4ab1000f94c85b0a289d7b46c8084223b  ./pretty/round2/r3b_tuple_wrap_5.txt
+ac0f16b08fe9680b5927ce9e2c77c0849e089519e9a5e5fed6e10beef436d73c  ./pretty/round2/r3c_stack_overflow_4.txt
 6de2167392ab10c34d75a3feb97ec24f8e2dd9869d2fe78a59ad8fda426b7820  ./pretty/round2/targets/cav13_DH_example.spthy.hs.txt
 ac5fdba5f6758a8562650efc9a98a199779afa3d145b4b2eec2e037f2354982e  ./pretty/round2/targets/classic_NSLPK3.spthy.hs.txt
 e4499ab2aa0408489ebf9208309724b42914d95b6adeb1460429f10347405b04  ./pretty/round2/targets/csf18-xor_CH07.spthy.hs.txt

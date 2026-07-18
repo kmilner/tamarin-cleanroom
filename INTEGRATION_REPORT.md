@@ -4026,3 +4026,152 @@ three no-clean-home routes stay ported and already-factored (separate
 4. Even with (1)-(3), retiring the pseudonymous/web authors requires deleting
    their citations on the SOLVER/TERM/GRAPH core (P.3) — outside the web mandate;
    the web deletions alone erase no author.
+
+================================================================================
+# Open-side integration report — pretty round-2 (R2: rules; sig swap adopted)
+
+Date: 2026-07-18. Integrator: open side (mechanical re-sync + value adapters
+only; no logic transplanted into the clean crate). Repo:
+`/home/kamilner/tamarin-rs`. Builds on "pretty round-1" above. Sealed round 2
+FIXED both round-1 signature blockers (equation ORDERING is now structural, not
+a byte-sort; the wide-tuple `<`/`>` now hang on their own lines) and added R2
+rule rendering (`rule::render`/`render_fact`, `macros::render_macros`, the R2
+`ast` types). Two outcomes this round: the **signature swap is ADOPTED** (now
+byte-green), and the **rule route was ATTEMPTED and REVERTED** with three
+concrete sealed round-3 targets.
+
+--------------------------------------------------------------------------------
+## 0. Re-sync of the round-2 clean sources — DONE (headerless)
+
+Re-applied the round-1 mechanical recipe (`crate::` -> `super::`; `lib.rs` ->
+`mod.rs`) from `pretty/workspace/pretty-clean/src` into
+`crates/tamarin-theory/src/pretty_clean/`. Reverse-transform byte-identity
+(`sed 's/super::/crate::/g'`) verified for every file; `doc.rs` is byte-identical
+untouched (its pre-existing `use super::*;` test import means it carries no
+`crate::`, so it is copied verbatim — same round-1 exception).
+
+* CHANGED by R2 (re-synced): `ast.rs` (R2 `Fact`/`FactAnnotation`/`Rule`/
+  `RuleAttr`/`AcVariants` fleshed out), `rule.rs` (NEW — 830→11.7 KB, the R2
+  rule renderer), `signature.rs` (round-1 blockers fixed: structural
+  `equation_cmp` term order + tuple wrap), `term.rs` (tuple `<`/`>` own-line
+  break), `macros.rs` (NEW `render_macros`), `mod.rs` (new `render_rule`/
+  `render_fact` entry points).
+* UNCHANGED (already byte-identical to round-1): `doc.rs`, `formula.rs`,
+  `lemma.rs`, `theory.rs`.
+
+No `.hs` citation across the vendored tree except `HughesPJ.hs` in `doc.rs`
+(EXTERNAL skip-set); the header generator adds none. No clean file headered.
+
+SNAPSHOT NOTE: this re-sync captured the round-2 sealed sources as of ~20:15
+(they had been stable since ~17:26). The sealed workspace has SINCE begun R3
+formula work (`ast.rs`/`formula.rs`/`lemma.rs`/`rule.rs`/`term.rs`/`lib.rs`
+edited 21:12-21:30), so a `sed 's/super::/crate::/g'` reverse check against the
+LIVE workspace now diverges on those files — expected, out of this round's
+scope. The vendored copy is a coherent round-2 snapshot (rule.rs carries
+`substitutions_doc`; ast.rs keeps the R3 `placeholders` header with zero R3
+formula docstrings) and gates green; R3 integration is a later round.
+
+--------------------------------------------------------------------------------
+## 1. Adapter — signature path unchanged; R2 fact/attr converters added and
+##     reverted with the rule route
+
+`pretty_clean_adapt.rs` (headerless, workspace-authored, value translation only)
+is UNCHANGED from round-1 in the committed state — `term` / `signature` /
+`signature_section` with the round-1 dest-pairing input normalization retained.
+The R2 rule-route attempt added `fact` / `rule_attr` (1:1 structural, with color
+`#`-strip+lowercase input normalization) and a `lvar_to_parser_term` helper in
+`pretty_theory.rs`; those were reverted together with the rule route (step 3).
+
+--------------------------------------------------------------------------------
+## 2. SIGNATURE SWAP — ADOPTED (byte-green; stays)
+
+Routed the batch-echo signature block through the clean crate: replaced the
+`out.push_str("// Function signature …")` header push + the ported
+`render_signature(&…maude_sig)` call at `pretty_theory.rs` (the theory-echo
+assembly) with a single `pretty_clean_adapt::signature_section(&…maude_sig)`
+(the clean `render_signature_block` emits the header itself and ends with the
+trailing `\n`). The round-1 dest-pairing normalization stays in the adapter.
+
+Gate (`RESULTS_TSV=scripts/pretty_gate_r2.tsv JOBS=6`): **403 MATCH / 16 DIFF /
+0 SKIP** — EXACTLY the target. The 16 DIFFs are precisely the
+`features/auto-sources/spore/*` closure gap (the `--auto-sources` injection
+upstream of the renderer); the DIFF set is `diff`-identical to the round-1
+baseline. Zero new divergence — the two sealed round-1 blockers (equation
+structural order; wide-tuple `<`/`>` own-line break) reproduce `contract.spthy`
+and `mesh.spthy` byte-exactly, as claimed.
+
+Ported `render_signature` NOT deleted: `web_signature_block` (the web
+message-page "Signature" section, `pretty_theory.rs`) still calls it (it strips
+the trailing `\n` for the self-contained web Doc). Reported per step 2, kept
+regardless — the batch swap frees no deletion.
+
+--------------------------------------------------------------------------------
+## 3. RULE ROUTE — ATTEMPTED, REVERTED (three sealed round-3 targets)
+
+Wired the batch-echo rule rendering through `pretty_clean::render_rule`: built
+the clean `Rule` (modulo "E") + `Option<AcVariants>` from the ported
+closure/solver DATA (which stays ported) — desugared + arity1-rewritten +
+AC-canonicalised (`canonicalize_ac_in_pfact`) facts via the adapter, the ported
+`trivial` decision, the abstracted AC rule (`abstracted_rule` else `rule`), the
+residual `variant_substs`, and the `loop_breakers` indices (outer line gated by
+`show_loop_breakers`; the in-comment AC line unconditional) — then returned the
+clean render.
+
+Gate (`RESULTS_TSV=scripts/pretty_gate_rule_route.tsv JOBS=6`): **315 MATCH /
+104 DIFF** — i.e. **88 NEW DIFFs** beyond the 16 auto-sources. "Any new DIFF is a
+blocker" → the rule route was REVERTED (`pretty_theory.rs` + adapter restored to
+the signature-swap-only state; signature swap KEPT). Post-revert re-gate confirms
+back to **403 MATCH / 16 DIFF**.
+
+The 88 new DIFFs partition cleanly into three sealed round-3 targets:
+
+**R3-a — SAPIC `process=` rule attribute DROPPED (79 files).**
+The clean `rule::attr_items` renders only color / no_derivcheck / issapicrule /
+role and DROPS `RuleAttr::Process`, per SPEC. But HS emits `process="…"` on
+SAPIC-translation-generated rules (via `ruleProcess`), between `color=` and
+`no_derivcheck` (`catMaybes [color, process, no_derivcheck, issapicrule, role]`),
+and RS's SAPIC translation synthesises it — so the no-prove echo carries it.
+Witness `accountability/csf21-acc-unbounded/previous/ct.spthy`, HS line 25:
+`rule (modulo E) Init[color=#ffffff, process="|", issapicrule, role='Process']:`
+(wraps to 2 lines) vs clean `rule (modulo E) Init[color=#ffffff, issapicrule,
+role='Process']:`. Fix: the clean attribute renderer must emit
+SAPIC-generated `process="…"` in the canonical slot. (79-file list saved.)
+
+**R3-b — tuple/application closing-bracket WRAP in rule bodies (5 files, ake/dh/*).**
+When a wide tuple `<…>` is the sole argument of an application `f(<…>)` and
+wraps, HS drops the tuple's `>` AND the enclosing `)` each onto its OWN line;
+the clean renderer keeps `>)` together. Witness `ake/dh/UM_three_pass.spthy`,
+HS lines 54-55 emit a lone `>` then a lone `)`, clean emits `>)`. Same on
+`ake/dh/UM_three_pass_combined{,_fixed}.spthy`,
+`ake/dh/DHKEA_NAXOS_C_eCK_PFS{,_keyreg}_partially_matching.spthy` (there `), `
+follows on its own line). This is the `term::app_doc` closing-paren layout when
+its argument is a multi-line pair — the round-2 tuple fix handles the bare tuple
+but not the enclosing application's `)`. (Plausibly the same ribbon-from-outer-
+column interaction the ported AC-variant renderer flagged as CRITICAL.)
+
+**R3-c — clean render STACK OVERFLOW (4 files).**
+`fm24-cardpayments/onlineAuthorized/C8.spthy`, `idbased/BP_IBS_2.spthy`,
+`idbased/BP_IBS_3.spthy`, `idbased/BP_IBS_4.spthy` abort with
+`fatal runtime error: stack overflow` on a rayon worker (RC 134) when rendering
+their rule blocks through the clean crate — deep recursion in the clean `doc`
+engine (or term flattening) on these DH/pairing-heavy bodies exceeds the worker
+stack. A robustness target for the sealed side (the ported `pretty_hpj` path does
+not overflow on the same inputs).
+
+--------------------------------------------------------------------------------
+## 4. Full gates — all green
+
+* `cargo build --release` — 0 errors.
+* `cargo test --workspace` — 32 suites, **1195 passed / 0 failed**.
+* pretty_gate (`scripts/pretty_gate_r2_final.tsv`, post-revert) — **403 MATCH /
+  16 DIFF / 0 SKIP**; the 16 DIFFs are exactly `features/auto-sources/spore/*`.
+* wf_gate (`scripts/wf_gate_after_pretty_r2.tsv`, JOBS=6) — **419 MATCH / 0
+  DIFF**, rows `diff`-identical to `scripts/wf_gate_round7.tsv` (0 regression).
+* web_parity (`scripts/web_parity_r2.tsv`, Tutorial seed) — **158 MATCH / 0
+  DIFF** (web path unchanged — still ported `web_signature_block`).
+* `gen_license_headers.py --check` — **0 stale**; 133 GPL-headered `.rs` files
+  (unchanged); **0 clean files headered** (verified: no header on any
+  `pretty_clean/*` or `pretty_clean_adapt.rs`).
+
+Deleted: none (the signature swap's ported `render_signature` is retained for
+the web path). **Header delta: 0 (133 → 133).**

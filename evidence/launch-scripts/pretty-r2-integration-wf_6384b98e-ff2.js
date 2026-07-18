@@ -1,0 +1,18 @@
+export const meta = {
+  name: 'pretty-r2-integration',
+  description: 'Open-side pretty round-2 integration: re-sync, signature-block swap (expected byte-green), rule-rendering route attempt, full gates',
+  phases: [{ title: 'Integrate', detail: 're-sync + signature swap + rule route attempt (Opus)' }],
+}
+
+const GATE = `You are the OPEN-SIDE integrator for the tamarin-rs sealed relicensing campaign, working in /home/kamilner/tamarin-rs. Read first: the pretty sections of /home/kamilner/tamarin-cleanroom/INTEGRATION_REPORT.md (the round-1 integration: vendored crates/tamarin-theory/src/pretty_clean/ + pretty_clean_adapt.rs; trial signature swap hit 401/403 with two sealed blockers), /home/kamilner/tamarin-cleanroom/pretty/SPEC.md, and PROTOCOL.md ("Full-corpus gates").
+CONTEXT: sealed round 2 FIXED both round-1 blockers — the equation ordering law (structural, no longer byte-sort; reproduces contract.spthy and mesh.spthy byte-exactly) and the wide-tuple wrap (< and > hang on their own lines) — and implemented R2 rule rendering (render_rule/render_fact; 72/72 rule blocks byte-identical across a curated 12-file set; macros surface in src/macros.rs). The signature swap is now expected byte-green.
+RULES: mechanical re-sync only (crate::->super:: recipe from the round-1 report; headerless; reverse-transform byte-identity; a clean file acquiring a GPL header is a provenance violation — stop and report). Adapters translate values only. No git commits. PATH needs /home/linuxbrew/.linuxbrew/bin. Do NOT attempt the term-core route (round-1 finding: the echo renders terms inside the pretty_hpj formula tree — no thin route until R3 formula work lands).
+STEPS:
+1. Re-sync the round-2 pretty-clean sources from /home/kamilner/tamarin-cleanroom/pretty/workspace/pretty-clean/src into crates/tamarin-theory/src/pretty_clean/ (verify reverse-transform byte-identity). Extend pretty_clean_adapt.rs as needed for any new AST fields. Build + full workspace tests green.
+2. SIGNATURE SWAP: route the batch-echo render_signature through the clean crate (the round-1 report documents the call site; keep the dest-pairing input normalization from round 1). Gate: RESULTS_TSV=scripts/pretty_gate_r2.tsv JOBS=6 bash scripts/pretty_gate.sh — expect EXACTLY 403 MATCH / 16 DIFF (the auto-sources family; ANY new DIFF = revert and report the file + first diverging line). If green, the swap STAYS — and delete or dead-code-mark the ported render_signature path if no other caller needs it (report precisely what still calls it).
+3. RULE ROUTE ATTEMPT: route the batch-echo rule rendering (render_rule / the per-rule body + variants block in pretty_theory.rs) through clean render_rule via the adapter. Same gate; expect possible DIFFs beyond the curated 12 files — if ANY appear, revert this route (keep the signature swap) and report the diverging files + first-diverging-line each as sealed round-3 targets. If green corpus-wide, it stays.
+4. Full gates: cargo build --release; cargo test --workspace; JOBS=6 bash scripts/wf_gate.sh (419/0 vs scripts/wf_gate_round7.tsv); bash scripts/web_parity.sh (no new divergences); scripts/gen_license_headers.py --check (0 stale; no clean file headered). Report header delta.
+5. Append a dated pretty round-2 integration section to INTEGRATION_REPORT.md. Return a plain-text summary: what swapped, exact gate numbers, what reverted with witnesses, header delta.`
+
+const gate = await agent(GATE, { label: 'integrate:pretty-r2', phase: 'Integrate', model: 'opus' })
+return { gate: (gate || '').slice(0, 4000) }
