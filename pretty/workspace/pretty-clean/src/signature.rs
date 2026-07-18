@@ -14,7 +14,11 @@
 //!   * functions dedup and sort byte-wise; attributes render
 //!     `[private,constructor]` / `[private,destructor]` / `[destructor]` /
 //!     nothing;
-//!   * equations dedup exactly and sort byte-wise on their rendered text;
+//!   * equations dedup exactly and sort by STRUCTURAL term order on
+//!     (lhs, rhs) — variables below applications, applications by head name
+//!     then arguments, tuples as right-nested `pair` applications (probes
+//!     p_eqA–p_eqI; NOT byte order of the rendered text — refuted by
+//!     target:contract / target:mesh);
 //!   * layout: builtins and functions are `text prefix <> fsep` fill lines;
 //!     the equations block is all-or-nothing — one line when it fits the
 //!     73-column ribbon, otherwise one equation per line at indent 4; an
@@ -25,6 +29,7 @@ use crate::doc::{
     beside_op, char, fsep, nest, punctuate, render_with, sep, text, vcat, Doc,
 };
 use crate::term::{self, RIBBON, WIDTH};
+use std::cmp::Ordering;
 
 /// Header comment above the declarations (byte-exact from every capture).
 const HEADER: &str = "// Function signature and definition of the equational theory E";
@@ -213,14 +218,17 @@ fn equation_doc(eq: &Equation) -> Doc {
     ])
 }
 
-/// One-line text of an equation — the dedup/sort key (probe:e_adedup pins
-/// byte order on this rendered text; probe:e_dup pins exact-dedup).
+/// One-line text of an equation — the exact-dedup key (probe:e_dup pins
+/// exact-dedup; probe:e_adedup pins that alpha-variants are kept).
 fn equation_key(eq: &Equation) -> String {
     render_with(isize::MAX / 2, isize::MAX / 2, &equation_doc(eq))
 }
 
-/// Base + builtin-expansion + user equations, deduped and byte-sorted on
-/// their rendered text.
+/// Base + builtin-expansion + user equations, deduped exactly and sorted by
+/// the structural (lhs, rhs) order — see [`equation_cmp`]. The sort is
+/// independent of declaration order (probes p_eqA/p_eqB, p_eqF/p_eqF2) and is
+/// NOT byte order of the rendered text (target:contract checkpcs pair,
+/// target:mesh get_b1/get_b2 groups, probes p_eqC/p_eqC2).
 fn merged_equations(sig: &Signature) -> Vec<Equation> {
     let mut eqs = base_equations();
     for b in &sig.builtins {
@@ -229,9 +237,130 @@ fn merged_equations(sig: &Signature) -> Vec<Equation> {
     eqs.extend(sig.equations.iter().cloned());
     let mut keyed: Vec<(String, Equation)> =
         eqs.into_iter().map(|e| (equation_key(&e), e)).collect();
-    keyed.sort_by(|a, b| a.0.cmp(&b.0));
+    keyed.sort_by(|a, b| equation_cmp(&a.1, &b.1));
     keyed.dedup_by(|a, b| a.0 == b.0);
     keyed.into_iter().map(|(_, e)| e).collect()
+}
+
+// ── equation ordering (structural term order) ───────────────────────────────
+
+/// Equations compare lexicographically on (lhs, rhs): rhs participates and
+/// breaks lhs ties (probes p_eqF/p_eqF2 — identical lhs, `= x` before `= y`
+/// regardless of declaration order).
+fn equation_cmp(a: &Equation, b: &Equation) -> Ordering {
+    term_cmp(&a.lhs, &b.lhs).then_with(|| term_cmp(&a.rhs, &b.rhs))
+}
+
+/// A term as the comparison model sees it: either a real AST node or the
+/// tail of a tuple (tuples compare as RIGHT-NESTED binary `pair`
+/// applications — probe:p_eqI: `<x, zz>` sorts before `<x, b, c>` because
+/// the binary view compares `zz` (a variable) against `pair(b, c)`; the
+/// flattened elementwise view would order the other way).
+#[derive(Clone, Copy)]
+enum CmpView<'a> {
+    Node(&'a Term),
+    PairTail(&'a [Term]),
+}
+
+/// Structural term order pinned by the equations block (probes p_eqA–p_eqI,
+/// targets contract/mesh):
+///   * variables sort below ALL applications, whatever the names
+///     (p_eqC/p_eqC2: `zzz` before nullary `a0`; contract: `xpk` before
+///     `pk(xsk)`; mesh: `cnf` before `aes_cmac(…)`);
+///   * variable vs variable: name bytes, then index (p_eqD byte order not
+///     shortlex: `azz` < `b`; p_eqH: `x` < `x.1`);
+///   * application vs application: head name bytes FIRST (p_eqG refutes
+///     arity-first: `pair` < `z1` despite arity 2 vs 1), then arguments
+///     left-to-right (contract checkpcs decided at argument 2);
+///   * tuples take the head name `pair` (p_eqE: `g(…)` < `<x, y>`; p_eqG:
+///     `<x, y>` < `z1(…)`) and right-nested binary arguments (p_eqI).
+/// Classes that cannot appear in an equations block (literals, exp/AC
+/// operators, diff, pattern-match) are UNOBSERVABLE here; they are ranked
+/// with the applications under their rendered head spelling (flagged in
+/// BEHAVIOR.md, to be confirmed by the corpus gate if they ever occur).
+fn term_cmp(a: &Term, b: &Term) -> Ordering {
+    view_cmp(CmpView::Node(a), CmpView::Node(b))
+}
+
+fn view_cmp(a: CmpView, b: CmpView) -> Ordering {
+    // Resolve single-element tails and tuple nodes to a common shape.
+    let a = resolve(a);
+    let b = resolve(b);
+    match (var_of(a), var_of(b)) {
+        (Some(va), Some(vb)) => {
+            va.name.cmp(&vb.name).then(va.idx.cmp(&vb.idx))
+        }
+        (Some(_), None) => Ordering::Less,
+        (None, Some(_)) => Ordering::Greater,
+        (None, None) => {
+            let (na, aa) = app_view(a);
+            let (nb, ab) = app_view(b);
+            na.cmp(&nb).then_with(|| args_cmp(&aa, &ab))
+        }
+    }
+}
+
+/// Collapse a one-element pair tail to its element (a tuple `<a, b, c>` is
+/// `pair(a, pair(b, c))` — the final tail is just the last element).
+fn resolve(v: CmpView) -> CmpView {
+    match v {
+        CmpView::PairTail(elems) if elems.len() == 1 => {
+            resolve(CmpView::Node(&elems[0]))
+        }
+        CmpView::Node(Term::Pair(elems)) => resolve(CmpView::PairTail(elems)),
+        other => other,
+    }
+}
+
+fn var_of<'a>(v: CmpView<'a>) -> Option<&'a VarSpec> {
+    match v {
+        CmpView::Node(Term::Var(spec)) => Some(spec),
+        _ => None,
+    }
+}
+
+/// Head spelling + argument views of an application-like term.
+fn app_view(v: CmpView) -> (String, Vec<CmpView>) {
+    match v {
+        CmpView::PairTail(elems) => (
+            "pair".into(),
+            vec![CmpView::Node(&elems[0]), CmpView::PairTail(&elems[1..])],
+        ),
+        CmpView::Node(t) => match t {
+            Term::App(f, args) => {
+                (f.clone(), args.iter().map(CmpView::Node).collect())
+            }
+            Term::AlgApp(f, x, y) => {
+                (f.clone(), vec![CmpView::Node(x), CmpView::Node(y)])
+            }
+            Term::Diff(l, r) => {
+                ("diff".into(), vec![CmpView::Node(l), CmpView::Node(r)])
+            }
+            // UNOBSERVABLE in equations — rendered-spelling rank (BEHAVIOR.md).
+            Term::BinOp(op, x, y) => {
+                let name = match op {
+                    crate::ast::BinOp::Exp => "^",
+                    crate::ast::BinOp::Mult => "*",
+                    crate::ast::BinOp::Union => "++",
+                    crate::ast::BinOp::Xor => "\u{2295}",
+                    crate::ast::BinOp::NatPlus => "%+",
+                };
+                (name.into(), vec![CmpView::Node(x), CmpView::Node(y)])
+            }
+            Term::PatMatch(inner) => ("=".into(), vec![CmpView::Node(inner)]),
+            other => (crate::term::render(other), Vec::new()),
+        },
+    }
+}
+
+fn args_cmp(a: &[CmpView], b: &[CmpView]) -> Ordering {
+    for (x, y) in a.iter().zip(b.iter()) {
+        let ord = view_cmp(*x, *y);
+        if ord != Ordering::Equal {
+            return ord;
+        }
+    }
+    a.len().cmp(&b.len())
 }
 
 /// `x.<i>` — the variable spelling in builtin-induced equations

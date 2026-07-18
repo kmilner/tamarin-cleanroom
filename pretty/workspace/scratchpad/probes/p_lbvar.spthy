@@ -1,0 +1,5 @@
+theory Plbvar begin
+builtins: xor
+rule LV: [ A(x), Fr(~y) ] --> [ A((x XOR ~y)) ]
+rule S: [ Fr(~a) ] --> [ A(~a) ]
+end

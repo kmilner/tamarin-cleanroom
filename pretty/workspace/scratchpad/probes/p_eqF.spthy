@@ -1,0 +1,5 @@
+theory PeqF begin
+functions: f/2, g/1, h/1
+equations [convergent]: f(g(x), h(y)) = y, f(g(x), h(y)) = x
+rule A: [ In(x) ] --> [ Out(x) ]
+end

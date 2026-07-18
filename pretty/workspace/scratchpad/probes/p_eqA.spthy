@@ -1,0 +1,5 @@
+theory PeqA begin
+functions: f/2, g/1, h/1, aa/1
+equations: f(x, g(y)) = x, f(g(x), h(y)) = y, aa(g(x)) = x
+rule A: [ In(x) ] --> [ Out(x) ]
+end

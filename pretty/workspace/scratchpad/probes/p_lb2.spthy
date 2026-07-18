@@ -1,0 +1,4 @@
+theory Plb2 begin
+rule L2: [ A(x), B(y), In(z) ] --> [ A(<x, z>), B(<y, z>) ]
+rule S: [ Fr(~a) ] --> [ A(~a), B(~a) ]
+end

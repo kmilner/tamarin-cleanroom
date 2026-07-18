@@ -1,0 +1,66 @@
+theory seqdfsneeded
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, h/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+lemma slow:
+  exists-trace "∃ #t. End( ) @ #t"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ #t. (End( ) @ #t)"
+*/
+by sorry
+
+rule (modulo E) finish:
+   [ Foo( h(h(h(~x))) ) ] --[ End( ) ]-> [ End( ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) AAA_hash:
+   [ Foo( x ) ] --> [ Foo( h(x) ) ]
+
+  // loop breaker: [0]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) step_2:
+   [ Foo( h(h(h(h(h(h(h(h(h(h(h(h(h(h(h(h(h(h(<~x, ~x>)))))))))))))))))) ) ]
+  -->
+   [ Foo( ~x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) gen:
+   [ In( ~x ) ] --> [ Foo( <~x, ~x> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) decoy:
+   [ Fr( x ), Bar( 'a' )[-, no_precomp] ] --> [ Foo( h(x) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) amplify_decoy_case1:
+   [ Bar( y ), In( 'a' ), In( x ) ] --> [ Bar( x ) ]
+
+  // loop breaker: [0]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) amplify_decoy_case2:
+   [ Bar( y ), In( 'b' ), In( x ) ] --> [ Bar( x ) ]
+
+  // loop breaker: [0]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) amplify_decoy_case3:
+   [ Bar( y ), In( 'c' ), In( x ) ] --> [ Bar( x ) ]
+
+  // loop breaker: [0]
+  /* has exactly the trivial AC variant */
+
+
+
+end

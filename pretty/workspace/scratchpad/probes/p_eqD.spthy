@@ -1,0 +1,5 @@
+theory PeqD begin
+functions: f/2, g/1
+equations: f(b, g(b)) = b, f(azz, g(azz)) = azz
+rule A: [ In(x) ] --> [ Out(x) ]
+end

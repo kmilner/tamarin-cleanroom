@@ -1,0 +1,5 @@
+theory PeqG begin
+functions: h/2, k/1, z1/1
+equations: h(z1(x), k(y)) = y, h(<x, y>, k(z)) = z
+rule A: [ In(x) ] --> [ Out(x) ]
+end

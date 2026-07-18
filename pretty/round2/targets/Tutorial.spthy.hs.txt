@@ -1,0 +1,144 @@
+theory Tutorial
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: adec/2, aenc/2, fst/1, h/1, pair/2, pk/1, snd/1
+equations:
+    adec(aenc(m, pk(k)), k) = m,
+    fst(<x.1, x.2>) = x.1,
+    snd(<x.1, x.2>) = x.2
+
+rule (modulo E) Register_pk:
+   [ Fr( ~ltk ) ] --> [ !Ltk( $A, ~ltk ), !Pk( $A, pk(~ltk) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Get_pk:
+   [ !Pk( A, pk ) ] --> [ Out( pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Reveal_ltk:
+   [ !Ltk( A, ltk ) ] --[ LtkReveal( A ) ]-> [ Out( ltk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Client_1:
+   [ Fr( ~k ), !Pk( $S, pkS ) ]
+  -->
+   [ Client_1( $S, ~k ), Out( aenc(<'1', ~k>, pkS) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Client_2:
+   [ Client_1( S, k ), In( h(k) ) ] --[ SessKeyC( S, k ) ]-> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Serv_1:
+   [ !Ltk( $S, ~ltkS ), In( request ) ]
+  --[
+  Eq( fst(adec(request, ~ltkS)), '1' ),
+  AnswerRequest( $S, snd(adec(request, ~ltkS)) )
+  ]->
+   [ Out( h(snd(adec(request, ~ltkS))) ) ]
+
+  /*
+  rule (modulo AC) Serv_1:
+     [ !Ltk( $S, ~ltkS ), In( request ) ]
+    --[ Eq( z.1, '1' ), AnswerRequest( $S, z ) ]->
+     [ Out( h(z) ) ]
+    variants (modulo AC)
+    1. ~ltkS = ~ltkS.7
+       request
+             = request.8
+       z     = snd(adec(request.8, ~ltkS.7))
+       z.1   = fst(adec(request.8, ~ltkS.7))
+    
+    2. ~ltkS = ~ltkS.8
+       request
+             = aenc(x.13, pk(~ltkS.8))
+       z     = snd(x.13)
+       z.1   = fst(x.13)
+    
+    3. ~ltkS = ~ltkS.9
+       request
+             = aenc(<z.12, z.11>, pk(~ltkS.9))
+       z     = z.11
+       z.1   = z.12
+  */
+
+restriction Equality_Checks_Succeed:
+  "∀ x y #i. (Eq( x, y ) @ #i) ⇒ (x = y)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x y #i. (Eq( x, y ) @ #i) ⇒ (x = y)"
+  */
+
+lemma Client_session_key_secrecy:
+  all-traces
+  "¬(∃ S k #i #j.
+      ((SessKeyC( S, k ) @ #i) ∧ (K( k ) @ #j)) ∧
+      (¬(∃ #r. LtkReveal( S ) @ #r)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ S k #i #j.
+  (SessKeyC( S, k ) @ #i) ∧ (K( k ) @ #j)
+ ∧
+  ∀ #r. (LtkReveal( S ) @ #r) ⇒ ⊥"
+*/
+by sorry
+
+lemma Client_auth:
+  all-traces
+  "∀ S k #i.
+    (SessKeyC( S, k ) @ #i) ⇒
+    ((∃ #a. AnswerRequest( S, k ) @ #a) ∨
+     (∃ #r. (LtkReveal( S ) @ #r) ∧ (#r < #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ S k #i.
+  (SessKeyC( S, k ) @ #i)
+ ∧
+  (∀ #a. (AnswerRequest( S, k ) @ #a) ⇒ ⊥) ∧
+  (∀ #r. (LtkReveal( S ) @ #r) ⇒ ¬(#r < #i))"
+*/
+by sorry
+
+lemma Client_auth_injective:
+  all-traces
+  "∀ S k #i.
+    (SessKeyC( S, k ) @ #i) ⇒
+    ((∃ #a.
+       (AnswerRequest( S, k ) @ #a) ∧
+       (∀ #j. (SessKeyC( S, k ) @ #j) ⇒ (#i = #j))) ∨
+     (∃ #r. (LtkReveal( S ) @ #r) ∧ (#r < #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ S k #i.
+  (SessKeyC( S, k ) @ #i)
+ ∧
+  (∀ #a.
+    (AnswerRequest( S, k ) @ #a)
+   ⇒
+    ∃ #j. (SessKeyC( S, k ) @ #j) ∧ ¬(#i = #j)) ∧
+  (∀ #r. (LtkReveal( S ) @ #r) ⇒ ¬(#r < #i))"
+*/
+by sorry
+
+lemma Client_session_key_honest_setup:
+  exists-trace
+  "∃ S k #i. (SessKeyC( S, k ) @ #i) ∧ (¬(∃ #r. LtkReveal( S ) @ #r))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ S k #i. (SessKeyC( S, k ) @ #i) ∧ ∀ #r. (LtkReveal( S ) @ #r) ⇒ ⊥"
+*/
+by sorry
+
+
+
+end

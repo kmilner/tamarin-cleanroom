@@ -43,3 +43,15 @@ pub fn render_signature_block(sig: &ast::Signature) -> String {
 pub fn render_term(term: &ast::Term) -> String {
     term::render(term)
 }
+
+/// R2: one whole rule block — header, body, blank line, loop-breaker line,
+/// and the AC-variants comment (`None` renders the trivial-variant
+/// one-liner). See `rule::render`.
+pub fn render_rule(r: &ast::Rule, variants: Option<&ast::AcVariants>) -> String {
+    rule::render(r, variants)
+}
+
+/// R2: one fact (`!Name( a, b )[+]`). See `rule::render_fact`.
+pub fn render_fact(f: &ast::Fact) -> String {
+    rule::render_fact(f)
+}

@@ -1,0 +1,5 @@
+theory PeqI begin
+functions: h/2, k/1
+equations: h(<x, b, c>, k(y)) = y, h(<x, zz>, k(w)) = w
+rule A: [ In(x) ] --> [ Out(x) ]
+end

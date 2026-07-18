@@ -19,7 +19,7 @@
 
 use crate::ast::{BinOp, SortHint, SuffixSort, Term, VarSpec};
 use crate::doc::{
-    beside_op, char, fcat, fsep, punctuate, render_with, text, Doc,
+    beside_op, char, fcat, fsep, nest, punctuate, render_with, text, Doc,
 };
 
 /// Theory-echo layout parameters (SPEC; every wrap observation in
@@ -93,15 +93,28 @@ fn app_doc(f: &str, args: &[Term]) -> Doc {
     )
 }
 
-/// `<a, b, c>`: `", "` attaches to each non-last element (fcat — a wrapped
-/// line keeps the trailing space, probe:t_wide W1), `<`/`>` attach outside.
+/// `<a, b, c>`: one fill whose items are `<`, each element (with attached
+/// `", "` — a wrapped line keeps the trailing space, probe:t_wide W1,
+/// probe:p_pw1) under `nest 1`, and `>`. The fill semantics produce every
+/// observed wide-tuple shape (probe:p_pw1 wfa–wfd, target:mesh k2):
+///   * fits → `<a, b>` on one line;
+///   * elements fill-wrap at (column of `<`) + 1 (the nest 1);
+///   * a first element whose one-liner does not fit beside `<` leaves `<`
+///     ALONE on its line;
+///   * `>` sits beside the last element when that element ends a fill line,
+///     but drops to its own line at the column of `<` (no nest) when the
+///     last element is multi-line.
 /// A Pair in LAST position flattens into the enclosing tuple; other positions
 /// keep their own delimiters (probe:t_pair).
 fn pair_doc(elems: &[Term]) -> Doc {
     let mut flat: Vec<&Term> = Vec::new();
     collect_pair(elems, &mut flat);
-    let docs = punctuate(&text(", "), flat.into_iter().map(doc).collect());
-    beside_op(beside_op(char('<'), fcat(docs)), char('>'))
+    let mut items = vec![char('<')];
+    for d in punctuate(&text(", "), flat.into_iter().map(doc).collect()) {
+        items.push(nest(1, &d));
+    }
+    items.push(char('>'));
+    fcat(items)
 }
 
 fn collect_pair<'a>(elems: &'a [Term], out: &mut Vec<&'a Term>) {

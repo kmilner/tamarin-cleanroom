@@ -1,0 +1,4 @@
+theory Pfann begin
+rule F: [ Fa(x)[+], Fb(y)[-], Fc(z)[no_precomp,+], In(w) ] --> [ Out(<x, y, z, w>) ]
+rule G: [ Fr(~a) ] --> [ Fa(~a), Fb(~a), Fc(~a) ]
+end

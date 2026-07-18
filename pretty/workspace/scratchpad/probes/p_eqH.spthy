@@ -1,0 +1,4 @@
+theory PeqH begin
+equations: fst(<x, y>) = x
+rule A: [ In(x) ] --> [ Out(x) ]
+end

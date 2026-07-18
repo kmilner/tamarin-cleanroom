@@ -122,27 +122,70 @@ pub struct Equation {
     pub rhs: Term,
 }
 
-// ── R2: facts & rules (placeholders — flesh out at R2) ──────────────────────
+// ── R2: facts & rules ───────────────────────────────────────────────────────
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Fact {
-    pub persistent: bool, // `!Name`
+    /// Renders a `!` prefix before the name.
+    pub persistent: bool,
     pub name: String,
     pub args: Vec<Term>,
+    /// Renders `[+, -, no_precomp]` attached after the closing paren, in
+    /// that canonical order whatever the source order (probe:p_fann,
+    /// target:seqdfsneeded).
+    pub annotations: Vec<FactAnnotation>,
+}
+
+/// Fact annotations as observed in the echo (probe:p_fann): `+` / `-` /
+/// `no_precomp`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub enum FactAnnotation {
+    SolveFirst, // +
+    SolveLast,  // -
+    NoSources,  // no_precomp
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Rule {
     pub name: String,
+    /// `Some("E")` renders `rule (modulo E) name`; the AC rule inside a
+    /// variants comment carries `Some("AC")`; `None` renders plain
+    /// `rule name`.
+    pub modulo: Option<String>,
+    pub attributes: Vec<RuleAttr>,
     pub premises: Vec<Fact>,
     pub actions: Vec<Fact>,
     pub conclusions: Vec<Fact>,
+    /// 0-based premise indices annotated `// loop breaker(s): [..]`
+    /// (probes c_loop, p_lb2).
+    pub loop_breakers: Vec<usize>,
 }
 
-/// Pre-computed AC-variant substitutions for a rule (from the ported solver);
-/// the `variants (modulo AC)` block text renders from this. Shape TBD at R2.
-#[derive(Debug, Clone, PartialEq, Default)]
-pub struct AcVariants;
+/// Rule attributes. Only color / no_derivcheck / issapicrule / role render,
+/// in that canonical order (probe:p_rattr, target:issue713); `process=…` and
+/// external attributes are dropped from the echo.
+#[derive(Debug, Clone, PartialEq)]
+pub enum RuleAttr {
+    /// Renders `color=#<value>` (value as supplied, lowercased upstream).
+    Color(String),
+    NoDerivCheck,
+    Role(String),
+    IsSapicRule,
+    Process(String),
+    External(String, Option<String>),
+}
+
+/// Pre-computed AC-variant data for a rule (from the ported solver); the
+/// `variants (modulo AC)` comment renders from this. `None` at the render
+/// call site means the trivial-variant comment.
+#[derive(Debug, Clone, PartialEq)]
+pub struct AcVariants {
+    /// The rule normalized modulo AC, re-rendered inside the comment.
+    pub ac_rule: Rule,
+    /// Numbered substitution groups; each entry is (variable, term), both
+    /// rendered by the R1 term core.
+    pub substitutions: Vec<Vec<(Term, Term)>>,
+}
 
 // ── R3: formulas, restrictions, lemmas (placeholders — flesh out at R3) ─────
 

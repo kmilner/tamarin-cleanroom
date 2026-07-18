@@ -1,0 +1,21 @@
+theory PeqG
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, h/2, k/1, pair/2, snd/1, z1/1
+equations:
+    fst(<x.1, x.2>) = x.1,
+    h(<x, y>, k(z)) = z,
+    h(z1(x), k(y)) = y,
+    snd(<x.1, x.2>) = x.2
+
+rule (modulo E) A:
+   [ In( x ) ] --> [ Out( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+
+
+end

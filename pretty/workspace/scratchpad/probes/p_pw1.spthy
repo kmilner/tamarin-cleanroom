@@ -1,0 +1,9 @@
+theory Ppw1 begin
+functions: wfa/4, wfb/2, wfc/2, wrapfnAAAAAAAAAAAAAAAAAA/3, wfd/2, k/1
+equations:
+  wfa(averyverylongname0001, averyverylongname0002, averyverylongname0003, averyverylongname0004) = <averyverylongname0001, averyverylongname0002, averyverylongname0003, averyverylongname0004>,
+  wfb(xlongvariablename1, ylongvariablename2) = <wrapfnAAAAAAAAAAAAAAAAAA(xlongvariablename1, ylongvariablename2, xlongvariablename1), ylongvariablename2>,
+  wfc(xlongvariablename1, ylongvariablename2) = <ylongvariablename2, wrapfnAAAAAAAAAAAAAAAAAA(xlongvariablename1, ylongvariablename2, xlongvariablename1)>,
+  wfd(<averyverylongname0001, averyverylongname0002, averyverylongname0003, averyverylongname0004>, k(x)) = x
+rule A: [ In(x) ] --> [ Out(x) ]
+end

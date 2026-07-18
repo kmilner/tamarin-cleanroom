@@ -1,0 +1,38 @@
+theory Ppw1
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, k/1, pair/2, snd/1, wfa/4, wfb/2, wfc/2, wfd/2,
+           wrapfnAAAAAAAAAAAAAAAAAA/3
+equations:
+    fst(<x.1, x.2>) = x.1,
+    snd(<x.1, x.2>) = x.2,
+    wfa(averyverylongname0001, averyverylongname0002, averyverylongname0003,
+        averyverylongname0004)
+  = <averyverylongname0001, averyverylongname0002, averyverylongname0003, 
+     averyverylongname0004>,
+    wfb(xlongvariablename1, ylongvariablename2)
+  = <
+     wrapfnAAAAAAAAAAAAAAAAAA(xlongvariablename1, ylongvariablename2,
+                              xlongvariablename1), 
+     ylongvariablename2>,
+    wfc(xlongvariablename1, ylongvariablename2)
+  = <ylongvariablename2, 
+     wrapfnAAAAAAAAAAAAAAAAAA(xlongvariablename1, ylongvariablename2,
+                              xlongvariablename1)
+    >,
+    wfd(<averyverylongname0001, averyverylongname0002, 
+         averyverylongname0003, averyverylongname0004>,
+        k(x))
+  = x
+
+rule (modulo E) A:
+   [ In( x ) ] --> [ Out( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+
+
+end

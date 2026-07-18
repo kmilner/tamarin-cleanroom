@@ -1,0 +1,26 @@
+theory Pmac1
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, h/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+macros: m1( x, y ) =  h(<x, y>),
+        m2( ) =  h('c'),
+        mlongernameAAAAAAAAAAAAAAAA( xlongvariablename1,
+                                     ylongvariablename2 ) =  h(<xlongvariablename1, ylongvariablename2, 
+                                                                xlongvariablename1>)
+
+rule (modulo E) A:
+   [ In( x ) ] --> [ Out( m1(x, x) ) ]
+
+  /*
+  rule (modulo AC) A:
+     [ In( x ) ] --> [ Out( h(<x, x>) ) ]
+  */
+
+
+
+end

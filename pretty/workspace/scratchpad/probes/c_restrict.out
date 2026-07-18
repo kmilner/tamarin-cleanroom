@@ -1,0 +1,3624 @@
+theory TPM_DAA_JoinCertify_with_fix_BSN
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: BSN/1, DAAKeyID/1, E/2, E_S/2, F1/1, F2/1, H_6/1, H_SHA256/1,
+           H_k_1/1, H_k_2/2, H_k_4/4, H_k_9/9, H_n_2/2, H_n_8/8, H_p/1, KDF_AES/1,
+           KDF_EK/1, KDF_a/3, L_J/2, MAC/2, Message/1, Nonce/1, PkX/2, PkY/2,
+           PointG1/2, QName/2, QPub/2, Q_K/1, RB/2, RD/2, accept/0, adec/2, aenc/2,
+           calcE/1, calcE_S_cert/4, calcL_J_cert/4, calcRB/1, calcRD/1, certData/2,
+           certify/1, curlyK/1, fst/1, len16/1, minus/2, multp/2, pair/2, pk/1,
+           plus/2, publicData/1, sdec/2, senc/2, snd/1, verifyCre1/4, verifyCre2/5,
+           verifyCre3/4, verifyCre4/5
+equations:
+    adec(aenc(x.1, pk(x.2)), x.2) = x.1,
+    calcE(minus(multp(plus(r_cv,
+                           multp(H_n_2(n_J, H_k_1(H_k_4(P1, Q, E(r_cv, P1), str))), f)),
+                      P1),
+                multp(H_n_2(n_J, H_k_1(H_k_4(P1, Q, E(r_cv, P1), str))), multp(f, P1))))
+  = E(r_cv, P1),
+    calcE_S_cert(plus(r_cv1,
+                      multp(H_n_2(n_C, H_k_2(small_c, H_6(certData(certificationData, Qk_n)))),
+                            f)),
+                 multp(l, multp(y, multp(r, P1))),
+                 H_n_2(n_C, H_k_2(small_c, H_6(certData(certificationData, Qk_n)))),
+                 multp(l, multp(multp(r, y), multp(f, P1))))
+  = E_S(r_cv1, multp(l, multp(y, multp(r, P1)))),
+    calcL_J_cert(plus(r_cv1,
+                      multp(H_n_2(n_C, H_k_2(small_c, H_6(certData(certificationData, Qk_n)))),
+                            f)),
+                 PointG1(H_p(F1(bsn)), F2(bsn)),
+                 H_n_2(n_C, H_k_2(small_c, H_6(certData(certificationData, Qk_n)))),
+                 multp(f, J))
+  = L_J(r_cv1, PointG1(H_p(F1(bsn)), F2(bsn))),
+    calcRB(minus(multp(plus(l,
+                            multp(multp(y, r),
+                                  H_n_8(P1, multp(f, P1), RB(l, P1), RD(l, multp(f, P1)), multp(r, P1),
+                                        multp(y, multp(r, P1)),
+                                        plus(multp(x, multp(r, P1)), multp(multp(multp(r, x), y), Q)),
+                                        multp(multp(r, y), Q)))),
+                       P1),
+                 multp(H_n_8(P1, multp(f, P1), RB(l, P1), RD(l, multp(f, P1)),
+                             multp(r, P1), multp(y, multp(r, P1)),
+                             plus(multp(x, multp(r, P1)), multp(multp(multp(r, x), y), Q)),
+                             multp(multp(r, y), Q)),
+                       multp(y, multp(r, P1)))))
+  = RB(l, P1),
+    calcRD(minus(multp(plus(l,
+                            multp(multp(y, r),
+                                  H_n_8(P1, multp(f, P1), RB(l, P1), RD(l, multp(f, P1)), multp(r, P1),
+                                        multp(y, multp(r, P1)),
+                                        plus(multp(x, multp(r, P1)), multp(multp(multp(r, x), y), Q)),
+                                        multp(multp(r, y), Q)))),
+                       multp(f, P1)),
+                 multp(H_n_8(P1, multp(f, P1), RB(l, P1), RD(l, multp(f, P1)),
+                             multp(r, P1), multp(y, multp(r, P1)),
+                             plus(multp(x, multp(r, P1)), multp(multp(multp(r, x), y), Q)),
+                             multp(multp(r, y), Q)),
+                       multp(multp(r, y), multp(f, P1)))))
+  = RD(l, multp(f, P1)),
+    fst(<x.1, x.2>) = x.1,
+    sdec(senc(x.1, x.2), x.2) = x.1,
+    snd(<x.1, x.2>) = x.2,
+    verifyCre1(multp(r, P1), PkY(y, P2), multp(y, multp(r, P1)), P2)
+  = accept,
+    verifyCre2(multp(r, P1), multp(multp(~r, y), multp(f, P1)), PkX(x, P2),
+               plus(multp(x, multp(r, P1)), multp(multp(multp(r, x), y), multp(f, P1))),
+               P2)
+  = accept,
+    verifyCre3(multp(l, multp(r, P1)), PkY(y, P2),
+               multp(l, multp(y, multp(r, P1))), P2)
+  = accept,
+    verifyCre4(multp(l, multp(r, P1)),
+               multp(l, multp(multp(r, y), multp(f, P1))), PkX(x, P2),
+               multp(l,
+                     plus(multp(x, multp(r, P1)),
+                          multp(multp(multp(r, x), y), multp(f, P1)))),
+               P2)
+  = accept
+
+tactic: oracle_corr
+presort: C
+prio: {id}
+  regex"Host_"
+  regex"!SignatureVerified"
+prio: {id}
+  regex"Issuer_"
+prio: {id}
+  regex"!TPM_" | regex"TPM_tkt" | regex"TPM_CV_E" | regex"TPM_Commit_RCV1"
+prio: {id}
+  regex"createPrimary"
+prio: {id}
+  regex"returnEK'>"
+prio: {id}
+  regex"createDAAKey"
+prio: {id}
+  regex"returnDAAKey'>"
+prio: {id}
+  regex"TPM2_ActivateCredentials'>"
+prio: {id}
+  regex"ret_TPM2_ActivateCredentials'>"
+prio: {id}
+  regex"TPM2_Commit'>"
+prio: {id}
+  regex"retTPM2_commit'>"
+prio: {id}
+  regex"TPM2_Hash'>"
+prio: {id}
+  regex"ret_TPM2_Hash'>"
+prio: {id}
+  regex"'TPM2_Sign'>"
+prio: {id}
+  regex"ret_TPM2_Sign'>"
+prio: {id}
+  regex"'TPM2_ActivateCredentials_2'"
+prio: {id}
+  regex"ret_TPM2_ActivateCredentials_2'>"
+prio: {id}
+  regex"TPM2_Commit_rand'>"
+prio: {id}
+  regex"ret_TPM2_Commit_rand'>"
+prio: {id}
+  regex"TPM2_Hash_2'>"
+prio: {id}
+  regex"ret_TPM2_Hash_2'>"
+prio: {id}
+  regex"'TPM2_Sign_2'>"
+prio: {id}
+  regex"ret_TPM2_Sign_2'>"
+prio: {id}
+  regex"!KU\(pk\(KDF_EK\(~TPM_EK_Seed\)"
+  regex"!KU\(multp\(f.*,'P1'"
+prio: {id}
+  regex"!KU\(.*<'1'"
+prio: {id}
+  regex"!KU\(KDF_EK\(~TPM_EK_Seed\)"
+tactic: oracle_SP3_Unfo
+presort: C
+prio: {id}
+  regex"!Pk\("
+  regex"!TPM_"
+prio: {id}
+  regex"!KU\(~y\)"
+  regex"!KU\(~x\)"
+  regex"!KU\(~r\)"
+  regex"!KU\(~f\)"
+  regex"!KU\(~l\)"
+  regex"!KU\(~r_cv."
+prio: {id}
+  regex"!KU\(plus\(~r_cv"
+prio: {id}
+  regex"!KU\(senc\(.*~r.*~.*~.*~.*~.*~.*~.*.~.*~.*"
+  regex"!KU\(senc\(.*~f.*~.*~.*~.*~.*~.*~.*.~.*~.*"
+prio: {id}
+  regex"!KU\(multp\(~l,"
+prio: {id}
+  regex"!KU\(H_n_2\(Nonce.*certData"
+prio: {id}
+  regex"!KU\(E_S"
+prio: {id}
+  regex"createPrimary"
+prio: {id}
+  regex"returnEK'>"
+prio: {id}
+  regex"createDAAKey"
+prio: {id}
+  regex"returnDAAKey'>"
+prio: {id}
+  regex"!KU\(.*<'1'"
+prio: {id}
+  regex"In_S\(\$AS,"
+  regex"In_S\(\$PS,"
+prio: {id}
+  regex"TPM2_ActivateCredentials'>"
+prio: {id}
+  regex"ret_TPM2_ActivateCredentials'>"
+prio: {id}
+  regex"TPM2_Commit'>"
+prio: {id}
+  regex"TPM2_Hash'>"
+prio: {id}
+  regex"ret_TPM2_Hash'>"
+prio: {id}
+  regex"TPM2_Hash'>"
+prio: {id}
+  regex"ret_TPM2_Hash'>"
+prio: {id}
+  regex"'TPM2_Sign'>"
+prio: {id}
+  regex"ret_TPM2_Sign'>"
+prio: {id}
+  regex"'TPM2_ActivateCredentials_2'"
+prio: {id}
+  regex"ret_TPM2_ActivateCredentials_2'>"
+prio: {id}
+  regex"TPM2_Commit_rand'>"
+prio: {id}
+  regex"ret_TPM2_Commit_rand'>"
+prio: {id}
+  regex"TPM2_Quote'>"
+prio: {id}
+  regex"ret_TPM2_Quote"
+prio: {id}
+  regex"!KU\(plus\(r_cv"
+prio: {id}
+  regex"!KU\(.*H_n_2\(Nonce\(rnd"
+  regex"!KU\(multp\(~y"
+prio: {id}
+  regex"!KU\(multp\(multp\(~r"
+  regex"!KU\(KDF_EK\(~TPM_EK_Seed"
+  regex"!KU\(multp\(multp\(~r"
+prio: {id}
+  regex"!KU\(KDF_AES\(~TPM"
+tactic: oracle_auth_alive
+presort: C
+prio: {id}
+  regex".*Host_.*"
+prio: {id}
+  regex".*Issuer_*"
+prio: {id}
+  regex".*In_S\(.*"
+tactic: oracle_auth_many
+presort: C
+prio: {id}
+  regex"In_S\(\$B,"
+  regex"In_S\(\$A,"
+  regex"In_S\(\$AS,"
+  regex"In_S\(\$PS,"
+  regex"_State_"
+  regex"!Pk\("
+prio: {id}
+  regex"createDAAKey'>"
+  regex"createPrimary'\)"
+  regex"returnEK'>"
+  regex"returnDAAKey'>"
+  regex"!KU\(KDF_EK\(~TPM"
+  regex"!KU\(KDF_AES\(~TPM"
+prio: {id}
+  regex"In_S\(."
+  regex"!KU\(curlyK\(~K_1\)"
+  regex"!KU\(curlyK\(~K_1_1\)"
+  regex"!KU\(multp\(~y,"
+  regex"!KU\(~y\)"
+prio: {id}
+  regex"!KU\(.*curlyK\(~K_1_1\)"
+  regex"!KU\(plus\(r_cv.*multp\(H_n_2.*~f\)"
+  regex"!KU\(plus\(r_cv.*multp\(H_n_2.*~f.1\)"
+  regex"!KU\(plus\(multp\(~x,"
+  regex"!KU\(multp\(~x,"
+  regex"!KU\(multp\(H_n_2.*~f\)"
+  regex"!KU\(multp\(H_n_2.*~f.1\)"
+  regex"!KU\(~f\)"
+  regex"!KU\(~f.1\)"
+  regex"!KU\(~x\)"
+prio: {id}
+  regex"!KU\(.*<'1'.*~.*~.*"
+prio: {id}
+  regex"!KU\(senc.*~.*~.*"
+  regex"!KU\(~TPM_EK"
+prio: {id}
+  not regex"KU\(Nonce\(~n_J\)" & not regex"splitEqs\(0\)"
+prio: {id}
+  regex"splitEqs\(0\)" | regex"KU\(Nonce\(~n_J\)"
+tactic: oracle_auth_secrecy
+presort: C
+prio: {id}
+  regex".*In_S\(\$B,.*"
+  regex".*In_S\(\$A,.*"
+  regex".*In_S\(\$AS,.*"
+  regex".*In_S\(\$PS,.*"
+  regex"_State_"
+  regex"!Pk\("
+prio: {id}
+  regex"createDAAKey'>"
+  regex"createPrimary'\)"
+  regex"returnEK'>"
+  regex"returnDAAKey'>"
+prio: {id}
+  regex"In_S\("
+prio: {id}
+  regex"!KU\(~f\)"
+  regex"!KU\(~f.1\)"
+  regex"!KU\(~x\)"
+  regex"!KU\(~y\)"
+  regex"!KU\(~s_2\)"
+  regex"!KU\(~s\)"
+  regex"!KU\(~TPM_EK"
+prio: {id}
+  regex"!KU\(pk\(KDF_EK\(~TPM_EK"
+  regex"!KU\(KDF_EK\(~TPM_EK"
+prio: {id}
+  regex"!KU\(curlyK\(~K_2\)\)"
+  regex"!KU\(~K_2\)"
+prio: {id}
+  regex"!KU\(curlyK\(~K_1\)\)"
+  regex"!KU\(~K_1\)"
+  regex"!KU\(~K\)"
+  regex"!KU\(multp\(~y,"
+prio: {id}
+  regex"!KU\(multp\(~x,"
+prio: {id}
+  regex"!KU\(plus\(r_cv.*multp\(H_n_2.*~f\)"
+  regex"!KU\(plus\(r_cv.*multp\(H_n_2.*~f.1\)"
+prio: {id}
+  regex"!KU\(plus\(multp\(~x,"
+  regex"!KU\(multp\(H_n_2.*~f\)"
+  regex"!KU\(multp\(H_n_2.*~f.1\)"
+prio: {id}
+  regex"!KU\(senc.*~.*~.*"
+tactic: oracle_SP4_Non
+presort: C
+prio: {id}
+  regex"!SignatureVerified"
+prio: {id}
+  regex"Host_"
+prio: {id}
+  regex"_State_"
+prio: {id}
+  regex"'ret_TPM2_Sign_2'>"
+prio: {id}
+  regex"!KU\(~y\)"
+  regex"!KU\(~x\)"
+  regex"!KU\(~r\)"
+  regex"!KU\(~f\)"
+  regex"!KU\(~l\)"
+  regex"!KU\(~y\)"
+  regex"!KU\(~r_cv"
+prio: {id}
+  regex"!KU\(plus\(~r_cv"
+prio: {id}
+  regex"!KU\(H_n_2\(Nonce.*CredentialData"
+prio: {id}
+  regex"!KU\(H_k_2\(H_k_9.*CredentialData"
+  regex"!KU\(H_k_1\(H_k_9\(.*CredentialData.*~f,"
+  regex"!KU\(H_k_9\(.*CredentialData.*~f,"
+  regex"!KU\(H_6\(.*genP"
+prio: {id}
+  regex"!KU\(senc\(.*~r.*~.*~.*~.*~.*~.*~.*.~.*~.*"
+  regex"!KU\(senc\(.*~f.*~.*~.*~.*~.*~.*~.*.~.*~.*"
+prio: {id}
+  regex"!KU\(multp\(~l,"
+prio: {id}
+  regex"createPrimary"
+prio: {id}
+  regex".*returnEK'>"
+prio: {id}
+  regex"createDAAKey"
+prio: {id}
+  regex"returnDAAKey'>"
+prio: {id}
+  regex"\!KU\(E_S.*"
+  regex"\!KU\(.*<'1'"
+prio: {id}
+  regex"\!KU\(plus\(r_cv"
+  regex"\!KU\(multp\(H_n_2\(Nonce"
+prio: {id}
+  regex".*In_S\(\$AS,.*"
+  regex".*In_S\(\$PS,.*"
+prio: {id}
+  regex"\!KU\(.*genP"
+  regex"TPM2_ActivateCredentials'>"
+prio: {id}
+  regex"ret_TPM2_ActivateCredentials'>"
+prio: {id}
+  regex"TPM2_Commit'>"
+prio: {id}
+  regex"retTPM2_commit'>"
+prio: {id}
+  regex"TPM2_Hash'>"
+prio: {id}
+  regex"ret_TPM2_Hash'>"
+prio: {id}
+  regex"'TPM2_Sign'>"
+prio: {id}
+  regex"ret_TPM2_Sign'>"
+prio: {id}
+  regex"'TPM2_ActivateCredentials_2'"
+prio: {id}
+  regex"ret_TPM2_ActivateCredentials_2'>"
+prio: {id}
+  regex"TPM2_Commit_rand'>"
+prio: {id}
+  regex"ret_TPM2_Commit_rand'>"
+prio: {id}
+  regex"TPM2_Quote'>"
+prio: {id}
+  regex"ret_TPM2_Quote'>"
+prio: {id}
+  regex"\!KU\(.*H_n_2\(Nonce\(rnd"
+  regex"\!KU\(multp\(~y"
+prio: {id}
+  regex"\!KU\(multp\(multp\(~r"
+  regex"\!KU\(KDF_EK\(~TPM_EK_Seed"
+  regex"\!KU\(multp\(multp\(~r"
+prio: {id}
+  regex"\!KU\(KDF_AES\(~TPM"
+
+restriction equality:
+  "∀ #i x y. (Eq( x, y ) @ #i) ⇒ (x = y)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ #i x y. (Eq( x, y ) @ #i) ⇒ (x = y)"
+  */
+
+restriction notlinked:
+  "∀ #i J1 J2 K1 K2.
+    (NotLinked( J1, J2, K1, K2 ) @ #i) ⇒ ((¬(J1 = J2)) ∨ (¬(K1 = K2)))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ #i J1 J2 K1 K2.
+    (NotLinked( J1, J2, K1, K2 ) @ #i) ⇒ ((¬(J1 = J2)) ∨ (¬(K1 = K2)))"
+  */
+
+restriction single_issuer_single_init:
+  "∀ I1 I2 #i #j.
+    ((Issuer_Init( I1 ) @ #i) ∧ (Issuer_Init( I2 ) @ #j)) ⇒ (#i = #j)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ I1 I2 #i #j.
+    ((Issuer_Init( I1 ) @ #i) ∧ (Issuer_Init( I2 ) @ #j)) ⇒ (#i = #j)"
+  */
+
+restriction single_host_init:
+  "∀ Host #i #j.
+    ((Host_Init( Host ) @ #i) ∧ (Host_Init( Host ) @ #j)) ⇒ (#i = #j)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ Host #i #j.
+    ((Host_Init( Host ) @ #i) ∧ (Host_Init( Host ) @ #j)) ⇒ (#i = #j)"
+  */
+
+restriction single_tpm_init:
+  "∀ PS #i #j. ((TPM_Init( PS ) @ #i) ∧ (TPM_Init( PS ) @ #j)) ⇒ (#i = #j)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ PS #i #j. ((TPM_Init( PS ) @ #i) ∧ (TPM_Init( PS ) @ #j)) ⇒ (#i = #j)"
+  */
+
+restriction every_id_must_be_one_of_tpm_host_issuer:
+  "∀ Ent1 Ent2 Ent3 #i #j #k.
+    (((Host_Init( Ent1 ) @ #i) ∧ (TPM_Init( Ent2 ) @ #j)) ∧
+     (Issuer_Init( Ent3 ) @ #k)) ⇒
+    (((¬(Ent1 = Ent2)) ∧ (¬(Ent1 = Ent3))) ∧ (¬(Ent2 = Ent3)))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ Ent1 Ent2 Ent3 #i #j #k.
+    (((Host_Init( Ent1 ) @ #i) ∧ (TPM_Init( Ent2 ) @ #j)) ∧
+     (Issuer_Init( Ent3 ) @ #k)) ⇒
+    (((¬(Ent1 = Ent2)) ∧ (¬(Ent1 = Ent3))) ∧ (¬(Ent2 = Ent3)))"
+  */
+
+rule (modulo E) ChanOut_S[color=#ffffff]:
+   [ Out_S( $A, $B, x ), !F_Paired( $A, $B ) ]
+  --[ ChanOut_S( $A, $B, x ) ]->
+   [ Sec( $A, $B, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanIn_S[color=#ffffff]:
+   [ Sec( $A, $B, x ) ] --[ ChanIn_S( $A, $B, x ) ]-> [ In_S( $A, $B, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Issuer_Init:
+   [ Fr( ~x ), Fr( ~y ) ]
+  --[ Issuer_Init( 'Issuer' ), OnlyOnce( 'Issuer_Init' ) ]->
+   [
+   !Ltk( 'Issuer', ~x, ~y ), !Pk( 'Issuer', PkX(~x, 'P2'), PkY(~y, 'P2') ),
+   Out( <PkX(~x, 'P2'), PkY(~y, 'P2')> ), !Issuer_Initialised( 'Issuer' )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Issuer_KeyReveal:
+   [ !Ltk( I, ~x, ~y ) ]
+  --[ KeyReveal( 'Issuer_KeyReveal', I ) ]->
+   [ Out( <~x, ~y> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) TPM_INIT:
+   [ Fr( ~TPM_AES_Seed ), Fr( ~TPM_EK_Seed ) ]
+  --[ TPM_Init( $PS ), OnlyOnce( 'TPM_INIT' ) ]->
+   [
+   !TPM_AES_Key( $PS, KDF_AES(~TPM_AES_Seed) ),
+   TPM_EK_SEED( $PS, ~TPM_EK_Seed ), TPM_Initialised( $PS )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) TPM_AESReveal:
+   [ !TPM_AES_Key( PS, aes_key ) ]
+  --[ KeyReveal( 'TPM_AESReveal', PS ) ]->
+   [ Out( aes_key ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Host_Init:
+   [ ]
+  --[ Host_Init( $AS ), OnlyOnce( 'Host_Init' ) ]->
+   [ Host_Initialised( $AS ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Platform_Setup:
+   [
+   TPM_Initialised( $PS ), Host_Initialised( $AS ), !Issuer_Initialised( I )
+   ]
+  --[ Bind( $PS, $AS, I ), OnlyOnce( 'Platform_Setup' ) ]->
+   [
+   Out_S( $AS, $PS, 'createPrimary' ), !F_Paired( $AS, $PS ),
+   !F_Paired( $PS, $AS )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) TPM2_CreatePrimary:
+   [ In_S( $AS, $PS, 'createPrimary' ), TPM_EK_SEED( $PS, ~TPM_EK_Seed ) ]
+  --[
+  TPM2_EK_Created( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)) ),
+  OnlyOnce( 'TPM2_CreatePrimary' )
+  ]->
+   [
+   Out_S( $PS, $AS,
+          <<'EK_public_data', pk(KDF_EK(~TPM_EK_Seed))>, 'returnEK'>
+   ),
+   !TPM_ENDORSEMENT_SK( $PS, KDF_EK(~TPM_EK_Seed), pk(KDF_EK(~TPM_EK_Seed))
+   ),
+   !TPM_ENDORSEMENT_PK( $PS, <'EK_public_data', pk(KDF_EK(~TPM_EK_Seed))> )
+   ]
+
+  // loop breaker: [0]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) TPM_EKReveal:
+   [
+   !TPM_ENDORSEMENT_SK( PS, KDF_EK(~TPM_EK_Seed), pk(KDF_EK(~TPM_EK_Seed)) )
+   ]
+  --[
+  KeyReveal( 'TPM_EKReveal_tpm', PS ),
+  KeyReveal( 'TPM_EKReveal_pke', pk(KDF_EK(~TPM_EK_Seed)) )
+  ]->
+   [ Out( KDF_EK(~TPM_EK_Seed) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Host_Store_EK:
+   [
+   In_S( $PS, $AS,
+         <<'EK_public_data', pk(KDF_EK(~TPM_EK_Seed))>, 'returnEK'>
+   )
+   ]
+  --[ Store_EK( $PS, $AS ), OnlyOnce( 'Host_Store_EK' ) ]->
+   [
+   Out_S( $AS, $PS, <pk(KDF_EK(~TPM_EK_Seed)), 'createDAAKey'> ),
+   Host_State_01( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)) )
+   ]
+
+  // loop breaker: [0]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) TPM2_Create:
+   [
+   In_S( $AS, $PS, <pk(KDF_EK(~TPM_EK_Seed)), 'createDAAKey'> ),
+   !TPM_AES_Key( $PS, aes_key ), Fr( ~f )
+   ]
+  --[
+  TPM2_DAA_Created( $PS, $AS ),
+  DeriveDAAKey( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), ~f ),
+  OnlyOnce( 'TPM2_Create' )
+  ]->
+   [
+   Out_S( $PS, $AS,
+          <senc(~f, aes_key), <'DAA_public_data', multp(~f, 'P1')>, 'returnDAAKey'>
+   ),
+   !TPM_DAA_SK( $PS, pk(KDF_EK(~TPM_EK_Seed)), ~f )
+   ]
+
+  // loop breaker: [0]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) TPM_DAAReveal:
+   [ !TPM_DAA_SK( PS, pk(KDF_EK(~TPM_EK_Seed)), ~f ) ]
+  --[
+  KeyReveal( 'TPM_DAAReveal_tpm', PS ),
+  KeyReveal( 'TPM_DAAReveal_pke', pk(KDF_EK(~TPM_EK_Seed)) )
+  ]->
+   [ Out( ~f ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Host_Store_DAA_Key:
+   [
+   In_S( $PS, $AS,
+         <senc(~f, KDF_AES(~TPM_AES_Seed)), <'DAA_public_data', multp(~f, 'P1')>, 
+          'returnDAAKey'>
+   ),
+   Host_State_01( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)) )
+   ]
+  --[
+  Store_DAA( $PS, $AS ),
+  PlatformSendKeys( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)),
+                    <'DAA_public_data', multp(~f, 'P1')>, 'Issuer'
+  ),
+  Alive( $AS ), Role( 'Platform' ), Honest( $PS ), Honest( $AS ),
+  Honest( pk(KDF_EK(~TPM_EK_Seed)) ), Honest( 'Issuer' ),
+  OnlyOnce( 'Host_Store_DAA_Key' )
+  ]->
+   [
+   !EK_FOR_ISSUER( pk(KDF_EK(~TPM_EK_Seed)) ),
+   Out( <pk(KDF_EK(~TPM_EK_Seed)), <'DAA_public_data', multp(~f, 'P1')>, 
+         'join_Issuer_1'>
+   ),
+   Host_State_02( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)),
+                  <'DAA_public_data', multp(~f, 'P1')>, senc(~f, KDF_AES(~TPM_AES_Seed))
+   )
+   ]
+
+  // loop breaker: [0]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Issuer_Check_EK_Send_Challenge:
+   [
+   In( <pk(KDF_EK(TPM_EK_Seed)), <'DAA_public_data', multp(f, 'P1')>, 
+        'join_Issuer_1'>
+   ),
+   Fr( ~K_1 ), Fr( ~s ), !EK_FOR_ISSUER( pk(KDF_EK(TPM_EK_Seed)) )
+   ]
+  --[
+  Check_Ek( pk(KDF_EK(TPM_EK_Seed)) ),
+  Check_QPD( <'DAA_public_data', multp(f, 'P1')> ),
+  Associate( curlyK(~K_1), pk(KDF_EK(TPM_EK_Seed)),
+             <'DAA_public_data', multp(f, 'P1')>
+  ),
+  Alive( 'Issuer' ), Honest( 'Issuer' ), Honest( pk(KDF_EK(TPM_EK_Seed)) ),
+  IssuerReceivedKeys( 'Issuer', pk(KDF_EK(TPM_EK_Seed)),
+                      <'DAA_public_data', multp(f, 'P1')>
+  ),
+  OnlyOnce( 'Issuer_Check_EK_Send_Challenge' )
+  ]->
+   [
+   Out( <
+         MAC(<'1', 
+              len16(senc(<'1', curlyK(~K_1)>,
+                         KDF_a(<'1', ~s>, 'STORAGE',
+                               <'1', 'SHA256', H_SHA256(<'DAA_public_data', multp(f, 'P1')>)>))), 
+              senc(<'1', curlyK(~K_1)>,
+                   KDF_a(<'1', ~s>, 'STORAGE',
+                         <'1', 'SHA256', H_SHA256(<'DAA_public_data', multp(f, 'P1')>)>)), 
+              '1', 'SHA256', H_SHA256(<'DAA_public_data', multp(f, 'P1')>)>,
+             KDF_a(<'1', ~s>, 'INTEGRITY', 'NULL')), 
+         len16(senc(<'1', curlyK(~K_1)>,
+                    KDF_a(<'1', ~s>, 'STORAGE',
+                          <'1', 'SHA256', H_SHA256(<'DAA_public_data', multp(f, 'P1')>)>))), 
+         senc(<'1', curlyK(~K_1)>,
+              KDF_a(<'1', ~s>, 'STORAGE',
+                    <'1', 'SHA256', H_SHA256(<'DAA_public_data', multp(f, 'P1')>)>)), 
+         aenc(<'1', ~s>, pk(KDF_EK(TPM_EK_Seed))), 'Host_SendChallenge'>
+   ),
+   Issuer_State_01( 'Issuer', curlyK(~K_1), pk(KDF_EK(TPM_EK_Seed)),
+                    <'DAA_public_data', multp(f, 'P1')>
+   )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Host_Passthrough_1:
+   [
+   In( <curlyH, len16(curlyK_hat), curlyK_hat, 
+        aenc(s, pk(KDF_EK(~TPM_EK_Seed))), 'Host_SendChallenge'>
+   ),
+   Host_State_02( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), Q_PD, Q_SD )
+   ]
+  --[ Passthrough_ActivateCred( $PS, $AS ), OnlyOnce( 'Host_Passthrough' )
+  ]->
+   [
+   Out_S( $AS, $PS,
+          <Q_SD, Q_PD, curlyH, len16(curlyK_hat), curlyK_hat, 
+           aenc(s, pk(KDF_EK(~TPM_EK_Seed))), 'TPM2_ActivateCredentials'>
+   ),
+   Host_State_03( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), Q_PD, Q_SD )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) TPM2_ActivateCredential:
+   [
+   In_S( $AS, $PS,
+         <senc(~f, aes_key), <'DAA_public_data', multp(~f, 'P1')>, curlyH, 
+          len16(senc(<'1', curlyK(K_1)>, k_e)), senc(<'1', curlyK(K_1)>, k_e), 
+          aenc(<'1', s>, pk(KDF_EK(~TPM_EK_Seed))), 'TPM2_ActivateCredentials'>
+   ),
+   !TPM_AES_Key( $PS, aes_key ),
+   !TPM_ENDORSEMENT_SK( $PS, e, pk(KDF_EK(~TPM_EK_Seed)) )
+   ]
+  --[
+  Eq( MAC(<'1', len16(senc(<'1', curlyK(K_1)>, k_e)), 
+           senc(<'1', curlyK(K_1)>, k_e), '1', 'SHA256', 
+           H_SHA256(<'DAA_public_data', multp(~f, 'P1')>)>,
+          KDF_a(<'1', snd(adec(aenc(<'1', s>, pk(KDF_EK(~TPM_EK_Seed))), e))>,
+                'INTEGRITY', 'NULL')),
+      curlyH
+  ),
+  Eq( k_e,
+      KDF_a(<'1', snd(adec(aenc(<'1', s>, pk(KDF_EK(~TPM_EK_Seed))), e))>,
+            'STORAGE',
+            <'1', 'SHA256', H_SHA256(<'DAA_public_data', multp(~f, 'P1')>)>)
+  ),
+  CurlyK_recomputed( $PS, $AS ), OnlyOnce( 'TPM2_ActivateCredential' )
+  ]->
+   [
+   Out_S( $PS, $AS,
+          <
+           snd(sdec(senc(<'1', curlyK(K_1)>, k_e),
+                    KDF_a(<'1', snd(adec(aenc(<'1', s>, pk(KDF_EK(~TPM_EK_Seed))), e))>,
+                          'STORAGE',
+                          <'1', 'SHA256', H_SHA256(<'DAA_public_data', multp(~f, 'P1')>)>))), 
+           'ret_TPM2_ActivateCredentials'>
+   )
+   ]
+
+  // loop breaker: [0]
+  /*
+  rule (modulo AC) TPM2_ActivateCredential:
+     [
+     In_S( $AS, $PS,
+           <senc(~f, aes_key), <'DAA_public_data', multp(~f, 'P1')>, curlyH, 
+            len16(senc(<'1', curlyK(K_1)>, k_e)), senc(<'1', curlyK(K_1)>, k_e), 
+            aenc(<'1', s>, pk(KDF_EK(~TPM_EK_Seed))), 'TPM2_ActivateCredentials'>
+     ),
+     !TPM_AES_Key( $PS, aes_key ),
+     !TPM_ENDORSEMENT_SK( $PS, e, pk(KDF_EK(~TPM_EK_Seed)) )
+     ]
+    --[
+    Eq( MAC(<'1', len16(senc(<'1', curlyK(K_1)>, k_e)), 
+             senc(<'1', curlyK(K_1)>, k_e), '1', 'SHA256', 
+             H_SHA256(<'DAA_public_data', multp(~f, 'P1')>)>,
+            KDF_a(<'1', z.1>, 'INTEGRITY', 'NULL')),
+        curlyH
+    ),
+    Eq( k_e,
+        KDF_a(<'1', z.1>, 'STORAGE',
+              <'1', 'SHA256', H_SHA256(<'DAA_public_data', multp(~f, 'P1')>)>)
+    ),
+    CurlyK_recomputed( $PS, $AS ), OnlyOnce( 'TPM2_ActivateCredential' )
+    ]->
+     [ Out_S( $PS, $AS, <z, 'ret_TPM2_ActivateCredentials'> ) ]
+    variants (modulo AC)
+    1. ~TPM_EK_Seed
+             = ~TPM_EK_Seed.27
+       ~f    = ~f.28
+       K_1   = K_1.29
+       e     = e.32
+       k_e   = k_e.33
+       s     = s.34
+       z     = snd(sdec(senc(<'1', curlyK(K_1.29)>, k_e.33),
+                        KDF_a(<'1', 
+                               snd(adec(aenc(<'1', s.34>, pk(KDF_EK(~TPM_EK_Seed.27))), e.32))>,
+                              'STORAGE',
+                              <'1', 'SHA256', H_SHA256(<'DAA_public_data', multp(~f.28, 'P1')>)>)))
+       z.1   = snd(adec(aenc(<'1', s.34>, pk(KDF_EK(~TPM_EK_Seed.27))), e.32))
+    
+    2. ~TPM_EK_Seed
+             = ~TPM_EK_Seed.27
+       ~f    = ~f.28
+       K_1   = K_1.29
+       e     = e.32
+       k_e   = KDF_a(<'1', 
+                      snd(adec(aenc(<'1', s.34>, pk(KDF_EK(~TPM_EK_Seed.27))), e.32))>,
+                     'STORAGE',
+                     <'1', 'SHA256', H_SHA256(<'DAA_public_data', multp(~f.28, 'P1')>)>)
+       s     = s.34
+       z     = curlyK(K_1.29)
+       z.1   = snd(adec(aenc(<'1', s.34>, pk(KDF_EK(~TPM_EK_Seed.27))), e.32))
+    
+    3. ~TPM_EK_Seed
+             = ~TPM_EK_Seed.27
+       ~f    = ~f.28
+       K_1   = K_1.29
+       e     = KDF_EK(~TPM_EK_Seed.27)
+       k_e   = k_e.33
+       s     = s.34
+       z     = snd(sdec(senc(<'1', curlyK(K_1.29)>, k_e.33),
+                        KDF_a(<'1', s.34>, 'STORAGE',
+                              <'1', 'SHA256', H_SHA256(<'DAA_public_data', multp(~f.28, 'P1')>)>)))
+       z.1   = s.34
+    
+    4. ~TPM_EK_Seed
+             = ~TPM_EK_Seed.27
+       ~f    = ~f.28
+       K_1   = K_1.29
+       e     = KDF_EK(~TPM_EK_Seed.27)
+       k_e   = KDF_a(<'1', s.34>, 'STORAGE',
+                     <'1', 'SHA256', H_SHA256(<'DAA_public_data', multp(~f.28, 'P1')>)>)
+       s     = s.34
+       z     = curlyK(K_1.29)
+       z.1   = s.34
+    // loop breaker: [0]
+  */
+
+rule (modulo E) Host_ReceiveCurlyK:
+   [
+   In_S( $PS, $AS, <curlyK(K_1), 'ret_TPM2_ActivateCredentials'> ),
+   !Pk( 'Issuer', PkX(x, 'P2'), PkY(y, 'P2') ),
+   Host_State_03( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), Q_PD, Q_SD )
+   ]
+  --[ Received_CurlyK( $PS, $AS ), OnlyOnce( 'Host_ReceiveCurlyK' ) ]->
+   [
+   Out_S( $AS, $PS,
+          <BSN('bottom'), BSN('bottom'), BSN('bottom'), 'TPM2_Commit'>
+   ),
+   Host_CurlyK1( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), curlyK(K_1) ),
+   Host_State_04( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), Q_PD, Q_SD,
+                  <PkX(x, 'P2'), PkY(y, 'P2'), curlyK(K_1), pk(KDF_EK(~TPM_EK_Seed))>
+   )
+   ]
+
+  // loop breaker: [0]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) TPM2_Commit:
+   [
+   In_S( $AS, $PS,
+         <BSN('bottom'), BSN('bottom'), BSN('bottom'), 'TPM2_Commit'>
+   ),
+   Fr( ~cv ), Fr( ~r_cv )
+   ]
+  --[ TPM2_Commited( $PS, $AS ), OnlyOnce( 'TPM2_Commit' ) ]->
+   [
+   Out_S( $PS, $AS, <E(~r_cv, 'P1'), Nonce(~cv), 'retTPM2_commit'> ),
+   TPM_CV_E( $PS, Nonce(~cv), ~r_cv )
+   ]
+
+  // loop breaker: [0]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Host_ReceiveEAndCV:
+   [
+   In_S( $PS, $AS, <E(r_cv, 'P1'), Nonce(cv), 'retTPM2_commit'> ),
+   Host_State_04( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)),
+                  <'DAA_public_data', multp(~f, 'P1')>, Q_SD, str
+   )
+   ]
+  --[ Host_Created_p( $PS, $AS ), OnlyOnce( 'Host_ReceiveEAndCV' ) ]->
+   [
+   Out_S( $AS, $PS,
+          <H_k_4('P1', multp(~f, 'P1'), E(r_cv, 'P1'), str), 'TPM2_Hash'>
+   ),
+   Host_cv( $PS, $AS, Nonce(cv) ),
+   Host_State_05( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)),
+                  <'DAA_public_data', multp(~f, 'P1')>, Q_SD
+   )
+   ]
+
+  // loop breaker: [0]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) TPM2_Hash:
+   [ In_S( $AS, $PS, <p, 'TPM2_Hash'> ), Fr( ~tkt ) ]
+  --[ TPM2_Created_P_TPM( $PS, $AS ), OnlyOnce( 'TPM2_Hash' ) ]->
+   [
+   Out_S( $PS, $AS, <H_k_1(p), Nonce(~tkt), 'ret_TPM2_Hash'> ),
+   TPM_tkt( $PS, Nonce(~tkt) )
+   ]
+
+  // loop breaker: [0]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Host_Receive_P_TPM_TKT:
+   [
+   In_S( $PS, $AS, <H_k_1(p), Nonce(tkt), 'ret_TPM2_Hash'> ),
+   Host_cv( $PS, $AS, Nonce(cv) )
+   ]
+  --[ Host_Received_P_TPM( $PS, $AS ), OnlyOnce( 'Host_Receive_P_TPM_TKT' )
+  ]->
+   [
+   Out_S( $AS, $PS, <H_k_1(p), Nonce(tkt), Nonce(cv), 'TPM2_Sign'> ),
+   Host_Store_P_TPM( $AS, H_k_1(p) )
+   ]
+
+  // loop breaker: [0]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) TPM2_Sign:
+   [
+   In_S( $AS, $PS, <p_tpm, ticket_host, cv1, 'TPM2_Sign'> ),
+   TPM_tkt( $PS, ticket ), !TPM_DAA_SK( $PS, pk(KDF_EK(~TPM_EK_Seed)), ~f ),
+   TPM_CV_E( $PS, cvval, ~r_cv ), Fr( ~n_J )
+   ]
+  --[
+  TPM2_Signed_P_TPM( $PS, $AS ), Eq( cvval, cv1 ),
+  Eq( ticket_host, ticket ), OnlyOnce( 'TPM2_Sign' )
+  ]->
+   [
+   Out_S( $PS, $AS,
+          <Nonce(~n_J), plus(~r_cv, multp(H_n_2(Nonce(~n_J), p_tpm), ~f)), 
+           'ret_TPM2_Sign'>
+   )
+   ]
+
+  // loop breaker: [0]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Host_Receive_Signature_P_TPM:
+   [
+   In_S( $PS, $AS,
+         <Nonce(n_J), plus(r_cv, multp(H_n_2(Nonce(n_J), p_tpm), f)), 
+          'ret_TPM2_Sign'>
+   ),
+   Host_Store_P_TPM( $AS, p_tpm ),
+   Host_CurlyK1( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), curlyK(K_1) )
+   ]
+  --[
+  Host_Received_Signed_P_TPM( $PS, $AS ),
+  Running( pk(KDF_EK(~TPM_EK_Seed)), 'Issuer', curlyK(K_1) ), Alive( $AS ),
+  Honest( $AS ), Honest( pk(KDF_EK(~TPM_EK_Seed)) ), Honest( 'Issuer' ),
+  Role( 'Platform' ), OnlyOnce( 'Host_Receive_Signature_P_TPM' )
+  ]->
+   [
+   Out( <curlyK(K_1), Nonce(n_J), H_n_2(Nonce(n_J), p_tpm), 
+         plus(r_cv, multp(H_n_2(Nonce(n_J), p_tpm), f)), 
+         'Issuer_SendChallengeResponse'>
+   )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Issuer_Verify_Challenge_Issue_Credentials:
+   [
+   In( <curlyK(K_rec), Nonce(n_J), H_n_2(n_J_1, p_tpm_1), 
+        plus(r_cv, multp(v_1, f_1)), 'Issuer_SendChallengeResponse'>
+   ),
+   Issuer_State_01( 'Issuer', curlyK(K_1), pk(KDF_EK(TPM_EK_Seed)),
+                    <'DAA_public_data', multp(f, 'P1')>
+   ),
+   !Pk( 'Issuer', PkX(~x, 'P2'), PkY(~y, 'P2') ), !Ltk( 'Issuer', ~x, ~y ),
+   Fr( ~r ), Fr( ~l ), Fr( ~s_2 ), Fr( ~K_2 )
+   ]
+  --[
+  Eq( curlyK(K_rec), curlyK(K_1) ),
+  Eq( H_n_2(n_J_1, p_tpm_1),
+      H_n_2(Nonce(n_J),
+            H_k_1(H_k_4('P1', multp(f, 'P1'),
+                        calcE(minus(multp(plus(r_cv, multp(v_1, f_1)), 'P1'),
+                                    multp(H_n_2(n_J_1, p_tpm_1), multp(f, 'P1')))),
+                        <PkX(~x, 'P2'), PkY(~y, 'P2'), curlyK(K_1), pk(KDF_EK(TPM_EK_Seed))>)))
+  ),
+  Commit( 'Issuer', pk(KDF_EK(TPM_EK_Seed)), curlyK(K_1) ),
+  Running( 'Issuer', pk(KDF_EK(TPM_EK_Seed)),
+           <multp(~r, 'P1'), multp(~y, multp(~r, 'P1')), 
+            plus(multp(~x, multp(~r, 'P1')),
+                 multp(multp(multp(~r, ~x), ~y), multp(f, 'P1'))), 
+            multp(multp(~r, ~y), multp(f, 'P1'))>
+  ),
+  Alive( 'Issuer' ), Honest( 'Issuer' ), Honest( pk(KDF_EK(TPM_EK_Seed)) ),
+  Issuer_VerifyChallengeIssueCredentials( 'Issuer', pk(KDF_EK(TPM_EK_Seed))
+  ),
+  OnlyOnce( 'Issuer_Verify_Challenge' )
+  ]->
+   [
+   Out( <
+         MAC(<
+              len16(senc(curlyK(~K_2),
+                         KDF_a(~s_2, 'STORAGE',
+                               <'SHA256', H_SHA256(<'DAA_public_data', multp(f, 'P1')>)>))), 
+              senc(curlyK(~K_2),
+                   KDF_a(~s_2, 'STORAGE',
+                         <'SHA256', H_SHA256(<'DAA_public_data', multp(f, 'P1')>)>)), 
+              'SHA256', H_SHA256(<'DAA_public_data', multp(f, 'P1')>)>,
+             KDF_a(~s_2, 'INTEGRITY', 'NULL')), 
+         len16(senc(curlyK(~K_2),
+                    KDF_a(~s_2, 'STORAGE',
+                          <'SHA256', H_SHA256(<'DAA_public_data', multp(f, 'P1')>)>))), 
+         senc(curlyK(~K_2),
+              KDF_a(~s_2, 'STORAGE',
+                    <'SHA256', H_SHA256(<'DAA_public_data', multp(f, 'P1')>)>)), 
+         aenc(~s_2, pk(KDF_EK(TPM_EK_Seed))), 
+         senc(<multp(~r, 'P1'), multp(~y, multp(~r, 'P1')), 
+               plus(multp(~x, multp(~r, 'P1')),
+                    multp(multp(multp(~r, ~x), ~y), multp(f, 'P1'))), 
+               multp(multp(~r, ~y), multp(f, 'P1')), 
+               H_n_8('P1', multp(f, 'P1'), RB(~l, 'P1'), RD(~l, multp(f, 'P1')),
+                     multp(~r, 'P1'), multp(~y, multp(~r, 'P1')),
+                     plus(multp(~x, multp(~r, 'P1')),
+                          multp(multp(multp(~r, ~x), ~y), multp(f, 'P1'))),
+                     multp(multp(~r, ~y), multp(f, 'P1'))), 
+               plus(~l,
+                    multp(multp(~y, ~r),
+                          H_n_8('P1', multp(f, 'P1'), RB(~l, 'P1'), RD(~l, multp(f, 'P1')),
+                                multp(~r, 'P1'), multp(~y, multp(~r, 'P1')),
+                                plus(multp(~x, multp(~r, 'P1')),
+                                     multp(multp(multp(~r, ~x), ~y), multp(f, 'P1'))),
+                                multp(multp(~r, ~y), multp(f, 'P1')))))
+              >,
+              curlyK(~K_2)), 
+         'Host_CompleteJoin'>
+   )
+   ]
+
+  /*
+  rule (modulo AC) Issuer_Verify_Challenge_Issue_Credentials:
+     [
+     In( <curlyK(K_rec), Nonce(n_J), H_n_2(n_J_1, p_tpm_1), 
+          plus(r_cv, multp(v_1, f_1)), 'Issuer_SendChallengeResponse'>
+     ),
+     Issuer_State_01( 'Issuer', curlyK(K_1), pk(KDF_EK(TPM_EK_Seed)),
+                      <'DAA_public_data', multp(f, 'P1')>
+     ),
+     !Pk( 'Issuer', PkX(~x, 'P2'), PkY(~y, 'P2') ), !Ltk( 'Issuer', ~x, ~y ),
+     Fr( ~r ), Fr( ~l ), Fr( ~s_2 ), Fr( ~K_2 )
+     ]
+    --[
+    Eq( curlyK(K_rec), curlyK(K_1) ),
+    Eq( H_n_2(n_J_1, p_tpm_1),
+        H_n_2(Nonce(n_J),
+              H_k_1(H_k_4('P1', multp(f, 'P1'), z,
+                          <PkX(~x, 'P2'), PkY(~y, 'P2'), curlyK(K_1), pk(KDF_EK(TPM_EK_Seed))>)))
+    ),
+    Commit( 'Issuer', pk(KDF_EK(TPM_EK_Seed)), curlyK(K_1) ),
+    Running( 'Issuer', pk(KDF_EK(TPM_EK_Seed)),
+             <multp(~r, 'P1'), multp(~y, multp(~r, 'P1')), 
+              plus(multp(~x, multp(~r, 'P1')),
+                   multp(multp(multp(~r, ~x), ~y), multp(f, 'P1'))), 
+              multp(multp(~r, ~y), multp(f, 'P1'))>
+    ),
+    Alive( 'Issuer' ), Honest( 'Issuer' ), Honest( pk(KDF_EK(TPM_EK_Seed)) ),
+    Issuer_VerifyChallengeIssueCredentials( 'Issuer', pk(KDF_EK(TPM_EK_Seed))
+    ),
+    OnlyOnce( 'Issuer_Verify_Challenge' )
+    ]->
+     [
+     Out( <
+           MAC(<
+                len16(senc(curlyK(~K_2),
+                           KDF_a(~s_2, 'STORAGE',
+                                 <'SHA256', H_SHA256(<'DAA_public_data', multp(f, 'P1')>)>))), 
+                senc(curlyK(~K_2),
+                     KDF_a(~s_2, 'STORAGE',
+                           <'SHA256', H_SHA256(<'DAA_public_data', multp(f, 'P1')>)>)), 
+                'SHA256', H_SHA256(<'DAA_public_data', multp(f, 'P1')>)>,
+               KDF_a(~s_2, 'INTEGRITY', 'NULL')), 
+           len16(senc(curlyK(~K_2),
+                      KDF_a(~s_2, 'STORAGE',
+                            <'SHA256', H_SHA256(<'DAA_public_data', multp(f, 'P1')>)>))), 
+           senc(curlyK(~K_2),
+                KDF_a(~s_2, 'STORAGE',
+                      <'SHA256', H_SHA256(<'DAA_public_data', multp(f, 'P1')>)>)), 
+           aenc(~s_2, pk(KDF_EK(TPM_EK_Seed))), 
+           senc(<multp(~r, 'P1'), multp(~y, multp(~r, 'P1')), 
+                 plus(multp(~x, multp(~r, 'P1')),
+                      multp(multp(multp(~r, ~x), ~y), multp(f, 'P1'))), 
+                 multp(multp(~r, ~y), multp(f, 'P1')), 
+                 H_n_8('P1', multp(f, 'P1'), RB(~l, 'P1'), RD(~l, multp(f, 'P1')),
+                       multp(~r, 'P1'), multp(~y, multp(~r, 'P1')),
+                       plus(multp(~x, multp(~r, 'P1')),
+                            multp(multp(multp(~r, ~x), ~y), multp(f, 'P1'))),
+                       multp(multp(~r, ~y), multp(f, 'P1'))), 
+                 plus(~l,
+                      multp(multp(~y, ~r),
+                            H_n_8('P1', multp(f, 'P1'), RB(~l, 'P1'), RD(~l, multp(f, 'P1')),
+                                  multp(~r, 'P1'), multp(~y, multp(~r, 'P1')),
+                                  plus(multp(~x, multp(~r, 'P1')),
+                                       multp(multp(multp(~r, ~x), ~y), multp(f, 'P1'))),
+                                  multp(multp(~r, ~y), multp(f, 'P1')))))
+                >,
+                curlyK(~K_2)), 
+           'Host_CompleteJoin'>
+     )
+     ]
+    variants (modulo AC)
+    1. f     = f.35
+       f_1   = f_1.36
+       n_J_1 = n_J_1.38
+       p_tpm_1
+             = p_tpm_1.39
+       r_cv  = r_cv.40
+       v_1   = v_1.41
+       z     = calcE(minus(multp(plus(r_cv.40, multp(v_1.41, f_1.36)), 'P1'),
+                           multp(H_n_2(n_J_1.38, p_tpm_1.39), multp(f.35, 'P1'))))
+    
+    2. f     = f.224
+       f_1   = f.224
+       n_J_1 = n_J_1.227
+       p_tpm_1
+             = H_k_1(H_k_4('P1', x.435, E(r_cv.229, 'P1'), x.437))
+       r_cv  = r_cv.229
+       v_1   = H_n_2(n_J_1.227,
+                     H_k_1(H_k_4('P1', x.435, E(r_cv.229, 'P1'), x.437)))
+       z     = E(r_cv.229, 'P1')
+  */
+
+rule (modulo E) Host_Passthrough_2:
+   [
+   In( <curlyH, len16(curlyK_2_hat), curlyK_2_hat, 
+        aenc(~s_2, pk(KDF_EK(~TPM_EK_Seed))), C_hat, 'Host_CompleteJoin'>
+   ),
+   Host_State_05( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), Q_PD, Q_SD )
+   ]
+  --[
+  Passthrough_ActivateCred2( $PS, $AS ), OnlyOnce( 'Host_Passthrough_2' )
+  ]->
+   [
+   Out_S( $AS, $PS,
+          <Q_SD, Q_PD, curlyH, len16(curlyK_2_hat), curlyK_2_hat, 
+           aenc(~s_2, pk(KDF_EK(~TPM_EK_Seed))), 'TPM2_ActivateCredentials_2'>
+   ),
+   Host_State_06( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), Q_PD, C_hat )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) TPM2_ActivateCredential_2:
+   [
+   In_S( $AS, $PS,
+         <Q_SD, <'DAA_public_data', multp(~f, 'P1')>, curlyH, 
+          len16(senc(curlyK(K_2), k_e)), senc(curlyK(K_2), k_e), 
+          aenc(s_2, pk(KDF_EK(~TPM_EK_Seed))), 'TPM2_ActivateCredentials_2'>
+   ),
+   !TPM_AES_Key( $PS, aes_key ),
+   !TPM_ENDORSEMENT_SK( $PS, e, pk(KDF_EK(~TPM_EK_Seed)) )
+   ]
+  --[
+  Eq( MAC(<len16(senc(curlyK(K_2), k_e)), senc(curlyK(K_2), k_e), 
+           'SHA256', H_SHA256(<'DAA_public_data', multp(~f, 'P1')>)>,
+          KDF_a(s_2, 'INTEGRITY', 'NULL')),
+      curlyH
+  ),
+  Eq( k_e,
+      KDF_a(s_2, 'STORAGE',
+            <'SHA256', H_SHA256(<'DAA_public_data', multp(~f, 'P1')>)>)
+  ),
+  CurlyK2_recomputed( $PS, $AS ), OnlyOnce( 'TPM2_ActivateCredential_2' )
+  ]->
+   [
+   Out_S( $PS, $AS,
+          <
+           sdec(senc(curlyK(K_2), k_e),
+                KDF_a(s_2, 'STORAGE',
+                      <'SHA256', H_SHA256(<'DAA_public_data', multp(~f, 'P1')>)>)), 
+           'ret_TPM2_ActivateCredentials_2'>
+   )
+   ]
+
+  // loop breaker: [0]
+  /*
+  rule (modulo AC) TPM2_ActivateCredential_2:
+     [
+     In_S( $AS, $PS,
+           <Q_SD, <'DAA_public_data', multp(~f, 'P1')>, curlyH, 
+            len16(senc(curlyK(K_2), k_e)), senc(curlyK(K_2), k_e), 
+            aenc(s_2, pk(KDF_EK(~TPM_EK_Seed))), 'TPM2_ActivateCredentials_2'>
+     ),
+     !TPM_AES_Key( $PS, aes_key ),
+     !TPM_ENDORSEMENT_SK( $PS, e, pk(KDF_EK(~TPM_EK_Seed)) )
+     ]
+    --[
+    Eq( MAC(<len16(senc(curlyK(K_2), k_e)), senc(curlyK(K_2), k_e), 
+             'SHA256', H_SHA256(<'DAA_public_data', multp(~f, 'P1')>)>,
+            KDF_a(s_2, 'INTEGRITY', 'NULL')),
+        curlyH
+    ),
+    Eq( k_e,
+        KDF_a(s_2, 'STORAGE',
+              <'SHA256', H_SHA256(<'DAA_public_data', multp(~f, 'P1')>)>)
+    ),
+    CurlyK2_recomputed( $PS, $AS ), OnlyOnce( 'TPM2_ActivateCredential_2' )
+    ]->
+     [ Out_S( $PS, $AS, <z, 'ret_TPM2_ActivateCredentials_2'> ) ]
+    variants (modulo AC)
+    1. ~f    = ~f.24
+       K_2   = K_2.25
+       k_e   = k_e.30
+       s_2   = s_2.31
+       z     = sdec(senc(curlyK(K_2.25), k_e.30),
+                    KDF_a(s_2.31, 'STORAGE',
+                          <'SHA256', H_SHA256(<'DAA_public_data', multp(~f.24, 'P1')>)>))
+    
+    2. ~f    = ~f.24
+       K_2   = K_2.25
+       k_e   = KDF_a(s_2.31, 'STORAGE',
+                     <'SHA256', H_SHA256(<'DAA_public_data', multp(~f.24, 'P1')>)>)
+       s_2   = s_2.31
+       z     = curlyK(K_2.25)
+    // loop breaker: [0]
+  */
+
+rule (modulo E) Host_JoinComplete:
+   [
+   In_S( $PS, $AS, <curlyK(K_2_rec), 'ret_TPM2_ActivateCredentials_2'> ),
+   !Pk( 'Issuer', PkX(x, 'P2'), PkY(y, 'P2') ),
+   Host_State_06( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)),
+                  <'DAA_public_data', multp(~f, 'P1')>, senc(<A, B, C, D, u, j>, curlyK_2)
+   )
+   ]
+  --[
+  Eq( curlyK_2, curlyK(K_2_rec) ),
+  Eq( u,
+      H_n_8('P1', multp(~f, 'P1'), calcRB(minus(multp(j, 'P1'), multp(u, B))),
+            calcRD(minus(multp(j, multp(~f, 'P1')), multp(u, D))), A, B, C, D)
+  ),
+  Eq( verifyCre1(A, PkY(y, 'P2'), B, 'P2'), accept ),
+  Eq( verifyCre2(A, D, PkX(x, 'P2'), C, 'P2'), accept ),
+  JoinCompleted( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)) ),
+  Commit( pk(KDF_EK(~TPM_EK_Seed)), 'Issuer', <A, B, C, D> ),
+  Role( 'Platform' ),
+  Secret( pk(KDF_EK(~TPM_EK_Seed)), 'Issuer', <A, B, C, D> ),
+  Honest( $PS ), Honest( $AS ), Honest( pk(KDF_EK(~TPM_EK_Seed)) ),
+  Honest( 'Issuer' ), OnlyOnce( 'Host_JoinComplete' )
+  ]->
+   [
+   !Host_State_RNDCreds( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), A, B, C, D ),
+   !Host_Join_Complete( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)) ),
+   Host_Org_Creds( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), A, B, C, D )
+   ]
+
+  // loop breaker: [0]
+  /*
+  rule (modulo AC) Host_JoinComplete:
+     [
+     In_S( $PS, $AS, <curlyK(K_2_rec), 'ret_TPM2_ActivateCredentials_2'> ),
+     !Pk( 'Issuer', PkX(x, 'P2'), PkY(y, 'P2') ),
+     Host_State_06( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)),
+                    <'DAA_public_data', multp(~f, 'P1')>, senc(<A, B, C, D, u, j>, curlyK_2)
+     )
+     ]
+    --[
+    Eq( curlyK_2, curlyK(K_2_rec) ),
+    Eq( u, H_n_8('P1', multp(~f, 'P1'), z, z.1, A, B, C, D) ),
+    Eq( z.2, accept ), Eq( z.3, accept ),
+    JoinCompleted( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)) ),
+    Commit( pk(KDF_EK(~TPM_EK_Seed)), 'Issuer', <A, B, C, D> ),
+    Role( 'Platform' ),
+    Secret( pk(KDF_EK(~TPM_EK_Seed)), 'Issuer', <A, B, C, D> ),
+    Honest( $PS ), Honest( $AS ), Honest( pk(KDF_EK(~TPM_EK_Seed)) ),
+    Honest( 'Issuer' ), OnlyOnce( 'Host_JoinComplete' )
+    ]->
+     [
+     !Host_State_RNDCreds( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), A, B, C, D ),
+     !Host_Join_Complete( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)) ),
+     Host_Org_Creds( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), A, B, C, D )
+     ]
+    variants (modulo AC)
+     1. ~f    = ~f.35
+        A     = A.36
+        B     = B.37
+        C     = C.38
+        D     = D.39
+        j     = j.42
+        u     = u.43
+        x     = x.44
+        y     = y.45
+        z     = calcRB(minus(multp(j.42, 'P1'), multp(u.43, B.37)))
+        z.1   = calcRD(minus(multp(j.42, multp(~f.35, 'P1')), multp(u.43, D.39)))
+        z.2   = verifyCre1(A.36, PkY(y.45, 'P2'), B.37, 'P2')
+        z.3   = verifyCre2(A.36, D.39, PkX(x.44, 'P2'), C.38, 'P2')
+    
+     2. ~f    = ~f.158
+        A     = multp(x.310, x.311)
+        B     = multp(y.168, multp(x.310, x.311))
+        C     = C.161
+        D     = D.162
+        j     = j.165
+        u     = u.166
+        x     = x.167
+        y     = y.168
+        z     = calcRB(minus(multp(j.165, 'P1'),
+                             multp(u.166, multp(y.168, multp(x.310, x.311)))))
+        z.1   = calcRD(minus(multp(j.165, multp(~f.158, 'P1')),
+                             multp(u.166, D.162)))
+        z.2   = accept
+        z.3   = verifyCre2(multp(x.310, x.311), D.162, PkX(x.167, 'P2'), C.161,
+                           'P2')
+    
+     3. ~f    = ~f.163
+        A     = multp(x.315, x.316)
+        B     = B.165
+        C     = plus(multp(x.172, multp(x.315, x.316)),
+                     multp(multp(multp(x.315, x.172), x.319), multp(x.320, x.316)))
+        D     = multp(multp(~x.321, x.319), multp(x.320, x.316))
+        j     = j.170
+        u     = u.171
+        x     = x.172
+        y     = y.173
+        z     = calcRB(minus(multp(j.170, 'P1'), multp(u.171, B.165)))
+        z.1   = calcRD(minus(multp(j.170, multp(~f.163, 'P1')),
+                             multp(u.171, multp(multp(~x.321, x.319), multp(x.320, x.316)))))
+        z.2   = verifyCre1(multp(x.315, x.316), PkY(y.173, 'P2'), B.165, 'P2')
+        z.3   = accept
+    
+     4. ~f    = ~f.163
+        A     = multp(x.315, x.316)
+        B     = multp(y.173, multp(x.315, x.316))
+        C     = plus(multp(x.172, multp(x.315, x.316)),
+                     multp(multp(multp(x.315, x.172), x.319), multp(x.320, x.316)))
+        D     = multp(multp(~x.321, x.319), multp(x.320, x.316))
+        j     = j.170
+        u     = u.171
+        x     = x.172
+        y     = y.173
+        z     = calcRB(minus(multp(j.170, 'P1'),
+                             multp(u.171, multp(y.173, multp(x.315, x.316)))))
+        z.1   = calcRD(minus(multp(j.170, multp(~f.163, 'P1')),
+                             multp(u.171, multp(multp(~x.321, x.319), multp(x.320, x.316)))))
+        z.2   = accept
+        z.3   = accept
+    
+     5. ~f    = ~f.165
+        A     = multp(~x.318, 'P1')
+        B     = multp(y.175, multp(~x.318, 'P1'))
+        C     = plus(multp(x.174, multp(~x.318, 'P1')),
+                     multp(multp(multp(~x.318, x.174), y.175), multp(~f.165, 'P1')))
+        D     = multp(multp(~x.318, y.175), multp(~f.165, 'P1'))
+        j     = plus(x.323,
+                     multp(multp(y.175, ~x.318),
+                           H_n_8('P1', multp(~f.165, 'P1'), RB(x.323, 'P1'),
+                                 RD(x.323, multp(~f.165, 'P1')), multp(~x.318, 'P1'),
+                                 multp(y.175, multp(~x.318, 'P1')),
+                                 plus(multp(x.324, multp(~x.318, 'P1')),
+                                      multp(multp(multp(~x.318, x.324), y.175), x.325)),
+                                 multp(multp(~x.318, y.175), x.325))))
+        u     = H_n_8('P1', multp(~f.165, 'P1'), RB(x.323, 'P1'),
+                      RD(x.323, multp(~f.165, 'P1')), multp(~x.318, 'P1'),
+                      multp(y.175, multp(~x.318, 'P1')),
+                      plus(multp(x.324, multp(~x.318, 'P1')),
+                           multp(multp(multp(~x.318, x.324), y.175), x.325)),
+                      multp(multp(~x.318, y.175), x.325))
+        x     = x.174
+        y     = y.175
+        z     = RB(x.323, 'P1')
+        z.1   = RD(x.323, multp(~f.165, 'P1'))
+        z.2   = accept
+        z.3   = accept
+    
+     6. ~f    = ~f.165
+        A     = multp(x.318, 'P1')
+        B     = multp(y.175, multp(x.318, 'P1'))
+        C     = C.168
+        D     = multp(multp(x.318, y.175), multp(~f.165, 'P1'))
+        j     = plus(x.323,
+                     multp(multp(y.175, x.318),
+                           H_n_8('P1', multp(~f.165, 'P1'), RB(x.323, 'P1'),
+                                 RD(x.323, multp(~f.165, 'P1')), multp(x.318, 'P1'),
+                                 multp(y.175, multp(x.318, 'P1')),
+                                 plus(multp(x.324, multp(x.318, 'P1')),
+                                      multp(multp(multp(x.318, x.324), y.175), x.325)),
+                                 multp(multp(x.318, y.175), x.325))))
+        u     = H_n_8('P1', multp(~f.165, 'P1'), RB(x.323, 'P1'),
+                      RD(x.323, multp(~f.165, 'P1')), multp(x.318, 'P1'),
+                      multp(y.175, multp(x.318, 'P1')),
+                      plus(multp(x.324, multp(x.318, 'P1')),
+                           multp(multp(multp(x.318, x.324), y.175), x.325)),
+                      multp(multp(x.318, y.175), x.325))
+        x     = x.174
+        y     = y.175
+        z     = RB(x.323, 'P1')
+        z.1   = RD(x.323, multp(~f.165, 'P1'))
+        z.2   = accept
+        z.3   = verifyCre2(multp(x.318, 'P1'),
+                           multp(multp(x.318, y.175), multp(~f.165, 'P1')), PkX(x.174, 'P2'), C.168,
+                           'P2')
+    
+     7. ~f    = ~f.166
+        A     = A.167
+        B     = multp(x.318, multp(x.319, 'P1'))
+        C     = C.169
+        D     = D.170
+        j     = plus(x.324,
+                     multp(multp(x.318, x.319),
+                           H_n_8('P1', multp(x.325, 'P1'), RB(x.324, 'P1'),
+                                 RD(x.324, multp(x.325, 'P1')), multp(x.319, 'P1'),
+                                 multp(x.318, multp(x.319, 'P1')),
+                                 plus(multp(x.326, multp(x.319, 'P1')),
+                                      multp(multp(multp(x.319, x.326), x.318), x.327)),
+                                 multp(multp(x.319, x.318), x.327))))
+        u     = H_n_8('P1', multp(x.325, 'P1'), RB(x.324, 'P1'),
+                      RD(x.324, multp(x.325, 'P1')), multp(x.319, 'P1'),
+                      multp(x.318, multp(x.319, 'P1')),
+                      plus(multp(x.326, multp(x.319, 'P1')),
+                           multp(multp(multp(x.319, x.326), x.318), x.327)),
+                      multp(multp(x.319, x.318), x.327))
+        x     = x.175
+        y     = y.176
+        z     = RB(x.324, 'P1')
+        z.1   = calcRD(minus(multp(plus(x.324,
+                                        multp(multp(x.318, x.319),
+                                              H_n_8('P1', multp(x.325, 'P1'), RB(x.324, 'P1'),
+                                                    RD(x.324, multp(x.325, 'P1')), multp(x.319, 'P1'),
+                                                    multp(x.318, multp(x.319, 'P1')),
+                                                    plus(multp(x.326, multp(x.319, 'P1')),
+                                                         multp(multp(multp(x.319, x.326), x.318), x.327)),
+                                                    multp(multp(x.319, x.318), x.327)))),
+                                   multp(~f.166, 'P1')),
+                             multp(H_n_8('P1', multp(x.325, 'P1'), RB(x.324, 'P1'),
+                                         RD(x.324, multp(x.325, 'P1')), multp(x.319, 'P1'),
+                                         multp(x.318, multp(x.319, 'P1')),
+                                         plus(multp(x.326, multp(x.319, 'P1')),
+                                              multp(multp(multp(x.319, x.326), x.318), x.327)),
+                                         multp(multp(x.319, x.318), x.327)),
+                                   D.170)))
+        z.2   = verifyCre1(A.167, PkY(y.176, 'P2'),
+                           multp(x.318, multp(x.319, 'P1')), 'P2')
+        z.3   = verifyCre2(A.167, D.170, PkX(x.175, 'P2'), C.169, 'P2')
+    
+     8. ~f    = ~f.166
+        A     = A.167
+        B     = multp(x.320, multp(x.321, 'P1'))
+        C     = C.169
+        D     = multp(multp(x.321, x.320), multp(~f.166, 'P1'))
+        j     = plus(x.325,
+                     multp(multp(x.320, x.321),
+                           H_n_8('P1', multp(~f.166, 'P1'), RB(x.325, 'P1'),
+                                 RD(x.325, multp(~f.166, 'P1')), multp(x.321, 'P1'),
+                                 multp(x.320, multp(x.321, 'P1')),
+                                 plus(multp(x.326, multp(x.321, 'P1')),
+                                      multp(multp(multp(x.321, x.326), x.320), x.327)),
+                                 multp(multp(x.321, x.320), x.327))))
+        u     = H_n_8('P1', multp(~f.166, 'P1'), RB(x.325, 'P1'),
+                      RD(x.325, multp(~f.166, 'P1')), multp(x.321, 'P1'),
+                      multp(x.320, multp(x.321, 'P1')),
+                      plus(multp(x.326, multp(x.321, 'P1')),
+                           multp(multp(multp(x.321, x.326), x.320), x.327)),
+                      multp(multp(x.321, x.320), x.327))
+        x     = x.175
+        y     = y.176
+        z     = RB(x.325, 'P1')
+        z.1   = RD(x.325, multp(~f.166, 'P1'))
+        z.2   = verifyCre1(A.167, PkY(y.176, 'P2'),
+                           multp(x.320, multp(x.321, 'P1')), 'P2')
+        z.3   = verifyCre2(A.167,
+                           multp(multp(x.321, x.320), multp(~f.166, 'P1')), PkX(x.175, 'P2'), C.169,
+                           'P2')
+    
+     9. ~f    = ~f.166
+        A     = multp(x.318, 'P1')
+        B     = multp(y.176, multp(x.318, 'P1'))
+        C     = C.169
+        D     = D.170
+        j     = plus(x.324,
+                     multp(multp(y.176, x.318),
+                           H_n_8('P1', multp(x.325, 'P1'), RB(x.324, 'P1'),
+                                 RD(x.324, multp(x.325, 'P1')), multp(x.318, 'P1'),
+                                 multp(y.176, multp(x.318, 'P1')),
+                                 plus(multp(x.326, multp(x.318, 'P1')),
+                                      multp(multp(multp(x.318, x.326), y.176), x.327)),
+                                 multp(multp(x.318, y.176), x.327))))
+        u     = H_n_8('P1', multp(x.325, 'P1'), RB(x.324, 'P1'),
+                      RD(x.324, multp(x.325, 'P1')), multp(x.318, 'P1'),
+                      multp(y.176, multp(x.318, 'P1')),
+                      plus(multp(x.326, multp(x.318, 'P1')),
+                           multp(multp(multp(x.318, x.326), y.176), x.327)),
+                      multp(multp(x.318, y.176), x.327))
+        x     = x.175
+        y     = y.176
+        z     = RB(x.324, 'P1')
+        z.1   = calcRD(minus(multp(plus(x.324,
+                                        multp(multp(y.176, x.318),
+                                              H_n_8('P1', multp(x.325, 'P1'), RB(x.324, 'P1'),
+                                                    RD(x.324, multp(x.325, 'P1')), multp(x.318, 'P1'),
+                                                    multp(y.176, multp(x.318, 'P1')),
+                                                    plus(multp(x.326, multp(x.318, 'P1')),
+                                                         multp(multp(multp(x.318, x.326), y.176), x.327)),
+                                                    multp(multp(x.318, y.176), x.327)))),
+                                   multp(~f.166, 'P1')),
+                             multp(H_n_8('P1', multp(x.325, 'P1'), RB(x.324, 'P1'),
+                                         RD(x.324, multp(x.325, 'P1')), multp(x.318, 'P1'),
+                                         multp(y.176, multp(x.318, 'P1')),
+                                         plus(multp(x.326, multp(x.318, 'P1')),
+                                              multp(multp(multp(x.318, x.326), y.176), x.327)),
+                                         multp(multp(x.318, y.176), x.327)),
+                                   D.170)))
+        z.2   = accept
+        z.3   = verifyCre2(multp(x.318, 'P1'), D.170, PkX(x.175, 'P2'), C.169,
+                           'P2')
+    
+    10. ~f    = ~f.166
+        A     = multp(x.319, 'P1')
+        B     = multp(x.320, multp(~x.321, 'P1'))
+        C     = plus(multp(x.175, multp(x.319, 'P1')),
+                     multp(multp(multp(x.319, x.175), x.320), multp(~f.166, 'P1')))
+        D     = multp(multp(~x.321, x.320), multp(~f.166, 'P1'))
+        j     = plus(x.325,
+                     multp(multp(x.320, ~x.321),
+                           H_n_8('P1', multp(~f.166, 'P1'), RB(x.325, 'P1'),
+                                 RD(x.325, multp(~f.166, 'P1')), multp(~x.321, 'P1'),
+                                 multp(x.320, multp(~x.321, 'P1')),
+                                 plus(multp(x.326, multp(~x.321, 'P1')),
+                                      multp(multp(multp(~x.321, x.326), x.320), x.327)),
+                                 multp(multp(~x.321, x.320), x.327))))
+        u     = H_n_8('P1', multp(~f.166, 'P1'), RB(x.325, 'P1'),
+                      RD(x.325, multp(~f.166, 'P1')), multp(~x.321, 'P1'),
+                      multp(x.320, multp(~x.321, 'P1')),
+                      plus(multp(x.326, multp(~x.321, 'P1')),
+                           multp(multp(multp(~x.321, x.326), x.320), x.327)),
+                      multp(multp(~x.321, x.320), x.327))
+        x     = x.175
+        y     = y.176
+        z     = RB(x.325, 'P1')
+        z.1   = RD(x.325, multp(~f.166, 'P1'))
+        z.2   = verifyCre1(multp(x.319, 'P1'), PkY(y.176, 'P2'),
+                           multp(x.320, multp(~x.321, 'P1')), 'P2')
+        z.3   = accept
+    
+    11. ~f    = ~f.167
+        A     = A.168
+        B     = B.169
+        C     = C.170
+        D     = multp(multp(x.323, x.324), multp(~f.167, 'P1'))
+        j     = plus(x.327,
+                     multp(multp(x.324, x.323),
+                           H_n_8('P1', multp(~f.167, 'P1'), RB(x.327, 'P1'),
+                                 RD(x.327, multp(~f.167, 'P1')), multp(x.323, 'P1'),
+                                 multp(x.324, multp(x.323, 'P1')),
+                                 plus(multp(x.328, multp(x.323, 'P1')),
+                                      multp(multp(multp(x.323, x.328), x.324), x.329)),
+                                 multp(multp(x.323, x.324), x.329))))
+        u     = H_n_8('P1', multp(~f.167, 'P1'), RB(x.327, 'P1'),
+                      RD(x.327, multp(~f.167, 'P1')), multp(x.323, 'P1'),
+                      multp(x.324, multp(x.323, 'P1')),
+                      plus(multp(x.328, multp(x.323, 'P1')),
+                           multp(multp(multp(x.323, x.328), x.324), x.329)),
+                      multp(multp(x.323, x.324), x.329))
+        x     = x.176
+        y     = y.177
+        z     = calcRB(minus(multp(plus(x.327,
+                                        multp(multp(x.324, x.323),
+                                              H_n_8('P1', multp(~f.167, 'P1'), RB(x.327, 'P1'),
+                                                    RD(x.327, multp(~f.167, 'P1')), multp(x.323, 'P1'),
+                                                    multp(x.324, multp(x.323, 'P1')),
+                                                    plus(multp(x.328, multp(x.323, 'P1')),
+                                                         multp(multp(multp(x.323, x.328), x.324), x.329)),
+                                                    multp(multp(x.323, x.324), x.329)))),
+                                   'P1'),
+                             multp(H_n_8('P1', multp(~f.167, 'P1'), RB(x.327, 'P1'),
+                                         RD(x.327, multp(~f.167, 'P1')), multp(x.323, 'P1'),
+                                         multp(x.324, multp(x.323, 'P1')),
+                                         plus(multp(x.328, multp(x.323, 'P1')),
+                                              multp(multp(multp(x.323, x.328), x.324), x.329)),
+                                         multp(multp(x.323, x.324), x.329)),
+                                   B.169)))
+        z.1   = RD(x.327, multp(~f.167, 'P1'))
+        z.2   = verifyCre1(A.168, PkY(y.177, 'P2'), B.169, 'P2')
+        z.3   = verifyCre2(A.168,
+                           multp(multp(x.323, x.324), multp(~f.167, 'P1')), PkX(x.176, 'P2'), C.170,
+                           'P2')
+    
+    12. ~f    = ~f.167
+        A     = multp(x.320, 'P1')
+        B     = B.169
+        C     = plus(multp(x.176, multp(x.320, 'P1')),
+                     multp(multp(multp(x.320, x.176), x.323), multp(~f.167, 'P1')))
+        D     = multp(multp(~x.324, x.323), multp(~f.167, 'P1'))
+        j     = plus(x.327,
+                     multp(multp(x.323, ~x.324),
+                           H_n_8('P1', multp(~f.167, 'P1'), RB(x.327, 'P1'),
+                                 RD(x.327, multp(~f.167, 'P1')), multp(~x.324, 'P1'),
+                                 multp(x.323, multp(~x.324, 'P1')),
+                                 plus(multp(x.328, multp(~x.324, 'P1')),
+                                      multp(multp(multp(~x.324, x.328), x.323), x.329)),
+                                 multp(multp(~x.324, x.323), x.329))))
+        u     = H_n_8('P1', multp(~f.167, 'P1'), RB(x.327, 'P1'),
+                      RD(x.327, multp(~f.167, 'P1')), multp(~x.324, 'P1'),
+                      multp(x.323, multp(~x.324, 'P1')),
+                      plus(multp(x.328, multp(~x.324, 'P1')),
+                           multp(multp(multp(~x.324, x.328), x.323), x.329)),
+                      multp(multp(~x.324, x.323), x.329))
+        x     = x.176
+        y     = y.177
+        z     = calcRB(minus(multp(plus(x.327,
+                                        multp(multp(x.323, ~x.324),
+                                              H_n_8('P1', multp(~f.167, 'P1'), RB(x.327, 'P1'),
+                                                    RD(x.327, multp(~f.167, 'P1')), multp(~x.324, 'P1'),
+                                                    multp(x.323, multp(~x.324, 'P1')),
+                                                    plus(multp(x.328, multp(~x.324, 'P1')),
+                                                         multp(multp(multp(~x.324, x.328), x.323), x.329)),
+                                                    multp(multp(~x.324, x.323), x.329)))),
+                                   'P1'),
+                             multp(H_n_8('P1', multp(~f.167, 'P1'), RB(x.327, 'P1'),
+                                         RD(x.327, multp(~f.167, 'P1')), multp(~x.324, 'P1'),
+                                         multp(x.323, multp(~x.324, 'P1')),
+                                         plus(multp(x.328, multp(~x.324, 'P1')),
+                                              multp(multp(multp(~x.324, x.328), x.323), x.329)),
+                                         multp(multp(~x.324, x.323), x.329)),
+                                   B.169)))
+        z.1   = RD(x.327, multp(~f.167, 'P1'))
+        z.2   = verifyCre1(multp(x.320, 'P1'), PkY(y.177, 'P2'), B.169, 'P2')
+        z.3   = accept
+    
+    13. ~f    = ~f.167
+        A     = multp(x.320, 'P1')
+        B     = multp(y.177, multp(x.320, 'P1'))
+        C     = plus(multp(x.176, multp(x.320, 'P1')),
+                     multp(multp(multp(x.320, x.176), x.323), multp(~f.167, 'P1')))
+        D     = multp(multp(~x.324, x.323), multp(~f.167, 'P1'))
+        j     = plus(x.327,
+                     multp(multp(x.323, ~x.324),
+                           H_n_8('P1', multp(~f.167, 'P1'), RB(x.327, 'P1'),
+                                 RD(x.327, multp(~f.167, 'P1')), multp(~x.324, 'P1'),
+                                 multp(x.323, multp(~x.324, 'P1')),
+                                 plus(multp(x.328, multp(~x.324, 'P1')),
+                                      multp(multp(multp(~x.324, x.328), x.323), x.329)),
+                                 multp(multp(~x.324, x.323), x.329))))
+        u     = H_n_8('P1', multp(~f.167, 'P1'), RB(x.327, 'P1'),
+                      RD(x.327, multp(~f.167, 'P1')), multp(~x.324, 'P1'),
+                      multp(x.323, multp(~x.324, 'P1')),
+                      plus(multp(x.328, multp(~x.324, 'P1')),
+                           multp(multp(multp(~x.324, x.328), x.323), x.329)),
+                      multp(multp(~x.324, x.323), x.329))
+        x     = x.176
+        y     = y.177
+        z     = calcRB(minus(multp(plus(x.327,
+                                        multp(multp(x.323, ~x.324),
+                                              H_n_8('P1', multp(~f.167, 'P1'), RB(x.327, 'P1'),
+                                                    RD(x.327, multp(~f.167, 'P1')), multp(~x.324, 'P1'),
+                                                    multp(x.323, multp(~x.324, 'P1')),
+                                                    plus(multp(x.328, multp(~x.324, 'P1')),
+                                                         multp(multp(multp(~x.324, x.328), x.323), x.329)),
+                                                    multp(multp(~x.324, x.323), x.329)))),
+                                   'P1'),
+                             multp(H_n_8('P1', multp(~f.167, 'P1'), RB(x.327, 'P1'),
+                                         RD(x.327, multp(~f.167, 'P1')), multp(~x.324, 'P1'),
+                                         multp(x.323, multp(~x.324, 'P1')),
+                                         plus(multp(x.328, multp(~x.324, 'P1')),
+                                              multp(multp(multp(~x.324, x.328), x.323), x.329)),
+                                         multp(multp(~x.324, x.323), x.329)),
+                                   multp(y.177, multp(x.320, 'P1')))))
+        z.1   = RD(x.327, multp(~f.167, 'P1'))
+        z.2   = accept
+        z.3   = accept
+    
+    14. ~f    = ~f.168
+        A     = multp(x.320, 'P1')
+        B     = multp(y.178, multp(x.320, 'P1'))
+        C     = plus(multp(x.177, multp(x.320, 'P1')),
+                     multp(multp(multp(x.320, x.177), x.323), multp(x.324, 'P1')))
+        D     = multp(multp(~x.325, x.323), multp(x.324, 'P1'))
+        j     = plus(x.328,
+                     multp(multp(y.178, x.320),
+                           H_n_8('P1', multp(x.329, 'P1'), RB(x.328, 'P1'),
+                                 RD(x.328, multp(x.329, 'P1')), multp(x.320, 'P1'),
+                                 multp(y.178, multp(x.320, 'P1')),
+                                 plus(multp(x.330, multp(x.320, 'P1')),
+                                      multp(multp(multp(x.320, x.330), y.178), x.331)),
+                                 multp(multp(x.320, y.178), x.331))))
+        u     = H_n_8('P1', multp(x.329, 'P1'), RB(x.328, 'P1'),
+                      RD(x.328, multp(x.329, 'P1')), multp(x.320, 'P1'),
+                      multp(y.178, multp(x.320, 'P1')),
+                      plus(multp(x.330, multp(x.320, 'P1')),
+                           multp(multp(multp(x.320, x.330), y.178), x.331)),
+                      multp(multp(x.320, y.178), x.331))
+        x     = x.177
+        y     = y.178
+        z     = RB(x.328, 'P1')
+        z.1   = calcRD(minus(multp(plus(x.328,
+                                        multp(multp(y.178, x.320),
+                                              H_n_8('P1', multp(x.329, 'P1'), RB(x.328, 'P1'),
+                                                    RD(x.328, multp(x.329, 'P1')), multp(x.320, 'P1'),
+                                                    multp(y.178, multp(x.320, 'P1')),
+                                                    plus(multp(x.330, multp(x.320, 'P1')),
+                                                         multp(multp(multp(x.320, x.330), y.178), x.331)),
+                                                    multp(multp(x.320, y.178), x.331)))),
+                                   multp(~f.168, 'P1')),
+                             multp(H_n_8('P1', multp(x.329, 'P1'), RB(x.328, 'P1'),
+                                         RD(x.328, multp(x.329, 'P1')), multp(x.320, 'P1'),
+                                         multp(y.178, multp(x.320, 'P1')),
+                                         plus(multp(x.330, multp(x.320, 'P1')),
+                                              multp(multp(multp(x.320, x.330), y.178), x.331)),
+                                         multp(multp(x.320, y.178), x.331)),
+                                   multp(multp(~x.325, x.323), multp(x.324, 'P1')))))
+        z.2   = accept
+        z.3   = accept
+    
+    15. ~f    = ~f.168
+        A     = multp(x.321, x.322)
+        B     = multp(y.178, multp(x.321, x.322))
+        C     = C.171
+        D     = multp(multp(x.325, x.326), multp(~f.168, 'P1'))
+        j     = plus(x.329,
+                     multp(multp(x.326, x.325),
+                           H_n_8('P1', multp(~f.168, 'P1'), RB(x.329, 'P1'),
+                                 RD(x.329, multp(~f.168, 'P1')), multp(x.325, 'P1'),
+                                 multp(x.326, multp(x.325, 'P1')),
+                                 plus(multp(x.330, multp(x.325, 'P1')),
+                                      multp(multp(multp(x.325, x.330), x.326), x.331)),
+                                 multp(multp(x.325, x.326), x.331))))
+        u     = H_n_8('P1', multp(~f.168, 'P1'), RB(x.329, 'P1'),
+                      RD(x.329, multp(~f.168, 'P1')), multp(x.325, 'P1'),
+                      multp(x.326, multp(x.325, 'P1')),
+                      plus(multp(x.330, multp(x.325, 'P1')),
+                           multp(multp(multp(x.325, x.330), x.326), x.331)),
+                      multp(multp(x.325, x.326), x.331))
+        x     = x.177
+        y     = y.178
+        z     = calcRB(minus(multp(plus(x.329,
+                                        multp(multp(x.326, x.325),
+                                              H_n_8('P1', multp(~f.168, 'P1'), RB(x.329, 'P1'),
+                                                    RD(x.329, multp(~f.168, 'P1')), multp(x.325, 'P1'),
+                                                    multp(x.326, multp(x.325, 'P1')),
+                                                    plus(multp(x.330, multp(x.325, 'P1')),
+                                                         multp(multp(multp(x.325, x.330), x.326), x.331)),
+                                                    multp(multp(x.325, x.326), x.331)))),
+                                   'P1'),
+                             multp(H_n_8('P1', multp(~f.168, 'P1'), RB(x.329, 'P1'),
+                                         RD(x.329, multp(~f.168, 'P1')), multp(x.325, 'P1'),
+                                         multp(x.326, multp(x.325, 'P1')),
+                                         plus(multp(x.330, multp(x.325, 'P1')),
+                                              multp(multp(multp(x.325, x.330), x.326), x.331)),
+                                         multp(multp(x.325, x.326), x.331)),
+                                   multp(y.178, multp(x.321, x.322)))))
+        z.1   = RD(x.329, multp(~f.168, 'P1'))
+        z.2   = accept
+        z.3   = verifyCre2(multp(x.321, x.322),
+                           multp(multp(x.325, x.326), multp(~f.168, 'P1')), PkX(x.177, 'P2'), C.171,
+                           'P2')
+    
+    16. ~f    = ~f.170
+        A     = multp(x.322, x.323)
+        B     = multp(x.324, multp(x.325, 'P1'))
+        C     = plus(multp(x.179, multp(x.322, x.323)),
+                     multp(multp(multp(x.322, x.179), x.327), multp(x.328, x.323)))
+        D     = multp(multp(~x.329, x.327), multp(x.328, x.323))
+        j     = plus(x.332,
+                     multp(multp(x.324, x.325),
+                           H_n_8('P1', multp(x.333, 'P1'), RB(x.332, 'P1'),
+                                 RD(x.332, multp(x.333, 'P1')), multp(x.325, 'P1'),
+                                 multp(x.324, multp(x.325, 'P1')),
+                                 plus(multp(x.334, multp(x.325, 'P1')),
+                                      multp(multp(multp(x.325, x.334), x.324), x.335)),
+                                 multp(multp(x.325, x.324), x.335))))
+        u     = H_n_8('P1', multp(x.333, 'P1'), RB(x.332, 'P1'),
+                      RD(x.332, multp(x.333, 'P1')), multp(x.325, 'P1'),
+                      multp(x.324, multp(x.325, 'P1')),
+                      plus(multp(x.334, multp(x.325, 'P1')),
+                           multp(multp(multp(x.325, x.334), x.324), x.335)),
+                      multp(multp(x.325, x.324), x.335))
+        x     = x.179
+        y     = y.180
+        z     = RB(x.332, 'P1')
+        z.1   = calcRD(minus(multp(plus(x.332,
+                                        multp(multp(x.324, x.325),
+                                              H_n_8('P1', multp(x.333, 'P1'), RB(x.332, 'P1'),
+                                                    RD(x.332, multp(x.333, 'P1')), multp(x.325, 'P1'),
+                                                    multp(x.324, multp(x.325, 'P1')),
+                                                    plus(multp(x.334, multp(x.325, 'P1')),
+                                                         multp(multp(multp(x.325, x.334), x.324), x.335)),
+                                                    multp(multp(x.325, x.324), x.335)))),
+                                   multp(~f.170, 'P1')),
+                             multp(H_n_8('P1', multp(x.333, 'P1'), RB(x.332, 'P1'),
+                                         RD(x.332, multp(x.333, 'P1')), multp(x.325, 'P1'),
+                                         multp(x.324, multp(x.325, 'P1')),
+                                         plus(multp(x.334, multp(x.325, 'P1')),
+                                              multp(multp(multp(x.325, x.334), x.324), x.335)),
+                                         multp(multp(x.325, x.324), x.335)),
+                                   multp(multp(~x.329, x.327), multp(x.328, x.323)))))
+        z.2   = verifyCre1(multp(x.322, x.323), PkY(y.180, 'P2'),
+                           multp(x.324, multp(x.325, 'P1')), 'P2')
+        z.3   = accept
+    // loop breaker: [0]
+  */
+
+rule (modulo E) Host_CredentialsReveal:
+   [ Host_Org_Creds( $PS, $AS, pk(KDF_EK(TPM_EK_Seed)), A, B, C, D ) ]
+  --[
+  KeyReveal( 'Host_OrgCred_Reveal', $AS ),
+  KeyReveal( 'TPM_OrgCred_Reveal', $PS ),
+  KeyReveal( 'PKE_OrgCred_Reveal', pk(KDF_EK(TPM_EK_Seed)) )
+  ]->
+   [ Out( <A, B, C, D> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Host_Randomise_Credentials:
+   [
+   !Host_State_RNDCreds( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), A, B, C, D ),
+   Fr( ~l )
+   ]
+  --[ RandomisedCredentials( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)) ) ]->
+   [
+   !Host_Random_Credentials( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)),
+                             multp(~l, A), multp(~l, B), multp(~l, C), multp(~l, D)
+   )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Generate_Basename:
+   [
+   !Host_Join_Complete( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)) ),
+   Fr( ~BaseName )
+   ]
+  --[ GenerateBasename( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)) ) ]->
+   [ !Host_BaseName( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), BSN(~BaseName) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Host_Basename:
+   [
+   !Host_Random_Credentials( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), R, S, T, W
+   ),
+   !Host_BaseName( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), bsn )
+   ]
+  --[ SetBasename( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), bsn ) ]->
+   [ !Host_State_07( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), R, S, T, W, bsn ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Host_Process_Credentials:
+   [
+   !Host_State_07( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)),
+                   multp(~l, multp(r, 'P1')), multp(~l, multp(y, multp(r, 'P1'))),
+                   multp(~l,
+                         plus(multp(x, multp(r, 'P1')), multp(multp(multp(r, x), y), Q))),
+                   multp(~l, multp(multp(r, y), Q)), BSN(basename)
+   )
+   ]
+  --[
+  ProcessRandomisedCredentials( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)),
+                                BSN(basename)
+  ),
+  CertifyOnlyOnce( 'Host_Process_Credentials' )
+  ]->
+   [
+   Out_S( $AS, $PS,
+          <F1(BSN(basename)), F2(BSN(basename)), 
+           multp(~l, multp(y, multp(r, 'P1'))), 'TPM2_Commit_rand'>
+   ),
+   Host_State_08( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), BSN(basename),
+                  multp(~l, multp(r, 'P1')), multp(~l, multp(y, multp(r, 'P1'))),
+                  multp(~l,
+                        plus(multp(x, multp(r, 'P1')), multp(multp(multp(r, x), y), Q))),
+                  multp(~l, multp(multp(r, y), Q)),
+                  PointG1(H_p(F1(BSN(basename))), F2(BSN(basename)))
+   ),
+   Host_Rnd_Creds( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), BSN(basename),
+                   multp(~l, multp(r, 'P1')), multp(~l, multp(y, multp(r, 'P1'))),
+                   multp(~l,
+                         plus(multp(x, multp(r, 'P1')), multp(multp(multp(r, x), y), Q))),
+                   multp(~l, multp(multp(r, y), Q))
+   )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Host_RandomCredentialsReveal:
+   [ Host_Rnd_Creds( $PS, $AS, pk(KDF_EK(TPM_EK_Seed)), bsn, R, S, T, W ) ]
+  --[
+  KeyReveal( 'Host_RndCred_Reveal', $AS ),
+  KeyReveal( 'TPM_RndCred_Reveal', $PS ),
+  KeyReveal( 'PKE_RndCred_Reveal', pk(KDF_EK(TPM_EK_Seed)) )
+  ]->
+   [ Out( <bsn, R, S, T, W> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) TPM2_Commit_2:
+   [
+   In_S( $AS, $PS, <F1(bsn), F2(bsn), S, 'TPM2_Commit_rand'> ),
+   !TPM_DAA_SK( $PS, pk(KDF_EK(~TPM_EK_Seed)), ~f ), Fr( ~cv1 ),
+   Fr( ~r_cv1 )
+   ]
+  --[
+  TPMCommitRandomised( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), bsn ),
+  CheckInG1( PointG1(H_p(F1(bsn)), F2(bsn)) ),
+  CertifyOnlyOnce( 'TPM2_Commit_2' )
+  ]->
+   [
+   Out_S( $PS, $AS,
+          <S, multp(~f, PointG1(H_p(F1(bsn)), F2(bsn))), 
+           L_J(~r_cv1, PointG1(H_p(F1(bsn)), F2(bsn))), E_S(~r_cv1, S), 
+           Nonce(~cv1), 'ret_TPM2_Commit_rand'>
+   ),
+   !TPM_Commit_RCV1( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), Nonce(~cv1), ~r_cv1
+   )
+   ]
+
+  // loop breaker: [0]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Host_Store_Randomised_Credentials:
+   [
+   In_S( $PS, $AS, <multp(sl, B), K, L, E, cv1val, 'ret_TPM2_Commit_rand'>
+   ),
+   Host_State_08( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), BSN(basename),
+                  multp(sl, A), multp(sl, B), multp(sl, C), multp(sl, D),
+                  PointG1(H_p(s_2_bar), y_2)
+   )
+   ]
+  --[ StoreRandomisedCredentials( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)) ) ]->
+   [
+   !Host_State_09( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), BSN(basename),
+                   multp(sl, A), multp(sl, B), multp(sl, C), multp(sl, D),
+                   PointG1(H_p(s_2_bar), y_2), K, L, E, cv1val
+   )
+   ]
+
+  // loop breaker: [0]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Create_Generic_DAA_Key:
+   [ !TPM_AES_Key( $PS, aes_key ), Fr( ~g ), Fr( ~genP ), Fr( ~keyID ) ]
+  --[
+  TPM2_Generic_DAA_Created( $PS, $AS, DAAKeyID(~keyID),
+                            QPub('Generic_DAA_public_data', multp(~g, ~genP))
+  ),
+  DeriveGenericDAAKey( ~g ), CertifyOnlyOnce( 'Create_Generic_DAA_Key' )
+  ]->
+   [
+   TPM_Created_DAA_Key( $PS, $AS,
+                        <DAAKeyID(~keyID), senc(~g, aes_key), 
+                         QPub('Generic_DAA_public_data', multp(~g, ~genP)), 'createdGenericDAAKey'
+                        >
+   ),
+   TPM_Generic_DAA_SK( $PS,
+                       QPub('Generic_DAA_public_data', multp(~g, ~genP))
+   )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) TPM_Generic_DAAReveal:
+   [
+   TPM_Generic_DAA_SK( $PS,
+                       QPub('Generic_DAA_public_data', multp(~g, ~genP))
+   )
+   ]
+  --[ KeyReveal( 'TPM_DAAReveal_tpm', $PS ) ]->
+   [ Out( ~g ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Host_Load_Qk_For_Ceritfication:
+   [
+   TPM_Created_DAA_Key( $PS, $AS,
+                        <DAAKeyID(keyID), senc(g, aes_key), 
+                         QPub('Generic_DAA_public_data', multp(g, genP)), 'createdGenericDAAKey'>
+   ),
+   !Host_State_09( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), BSN(basename),
+                   multp(sl, multp(r, 'P1')), multp(sl, multp(y, multp(r, 'P1'))),
+                   multp(sl,
+                         plus(multp(x, multp(r, 'P1')), multp(multp(multp(r, x), y), Q))),
+                   multp(sl, multp(multp(r, y), Q)), J, K, L, E, Nonce(cv1)
+   )
+   ]
+  --[
+  LoadKeyForCertification( $PS, $AS, DAAKeyID(keyID),
+                           QPub('Generic_DAA_public_data', multp(g, genP))
+  ),
+  CertifyOnlyOnce( 'Host_Load_Qk_For_Ceritfication' )
+  ]->
+   [
+   Out_S( $AS, $PS,
+          <pk(KDF_EK(~TPM_EK_Seed)), DAAKeyID(keyID), senc(g, aes_key), 
+           QPub('Generic_DAA_public_data', multp(g, genP)), 
+           H_k_9('CredentialData', multp(sl, multp(r, 'P1')),
+                 multp(sl, multp(y, multp(r, 'P1'))),
+                 multp(sl,
+                       plus(multp(x, multp(r, 'P1')), multp(multp(multp(r, x), y), Q))),
+                 multp(sl, multp(multp(r, y), Q)), J, K, L, E), 
+           Nonce(cv1), 'TPM2_Certify'>
+   ),
+   Host_State_10( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), DAAKeyID(keyID),
+                  multp(g, genP),
+                  H_k_9('CredentialData', multp(sl, multp(r, 'P1')),
+                        multp(sl, multp(y, multp(r, 'P1'))),
+                        multp(sl,
+                              plus(multp(x, multp(r, 'P1')), multp(multp(multp(r, x), y), Q))),
+                        multp(sl, multp(multp(r, y), Q)), J, K, L, E),
+                  'CredentialData', BSN(basename), multp(sl, multp(r, 'P1')),
+                  multp(sl, multp(y, multp(r, 'P1'))),
+                  multp(sl,
+                        plus(multp(x, multp(r, 'P1')), multp(multp(multp(r, x), y), Q))),
+                  multp(sl, multp(multp(r, y), Q)), J, K, L, E
+   )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) TPM2_Load_And_Certify:
+   [
+   In_S( $AS, $PS,
+         <pk(KDF_EK(~TPM_EK_Seed)), DAAKeyID(keyID), senc(~g, aes_key), 
+          QPub('Generic_DAA_public_data', multp(~g, ~genP)), 
+          H_k_9('CredentialData', R, S, T, W, J, K, L, E), cv1val_in, 
+          'TPM2_Certify'>
+   ),
+   !TPM_DAA_SK( $PS, pk(KDF_EK(~TPM_EK_Seed)), ~f ),
+   !TPM_AES_Key( $PS, aes_key ),
+   !TPM_Commit_RCV1( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), cv1val, ~r_cv1 ),
+   Fr( ~rnd_n_C )
+   ]
+  --[
+  TPM2_Created_Cert_TPM( $PS, $AS, DAAKeyID(keyID),
+                         QPub('Generic_DAA_public_data', multp(~g, ~genP))
+  ),
+  Eq( cv1val_in, cv1val ), CertifyOnlyOnce( 'TPM2_Load_And_Certify' )
+  ]->
+   [
+   Out_S( $PS, $AS,
+          <DAAKeyID(keyID), 
+           certData('certificationData',
+                    QName('SHA256',
+                          H_SHA256(QPub('Generic_DAA_public_data', multp(~g, ~genP))))), 
+           plus(~r_cv1,
+                multp(H_n_2(Nonce(~rnd_n_C),
+                            H_k_2(H_k_9('CredentialData', R, S, T, W, J, K, L, E),
+                                  H_6(certData('certificationData',
+                                               QName('SHA256',
+                                                     H_SHA256(QPub('Generic_DAA_public_data',
+                                                                   multp(~g, ~genP)))))))),
+                      ~f)), 
+           Nonce(~rnd_n_C), 'ret_TPM2_Certify'>
+   )
+   ]
+
+  // loop breaker: [0]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Host_Receive_Certified_Q_k:
+   [
+   In_S( $PS, $AS,
+         <DAAKeyID(keyID), 
+          certData('certificationData',
+                   QName('SHA256',
+                         H_SHA256(QPub('Generic_DAA_public_data', multp(g, genP))))), 
+          plus(r_cv1, multp(h2, f)), Nonce(rnd_n_C), 'ret_TPM2_Certify'>
+   ),
+   Host_State_10( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)), DAAKeyID(keyID),
+                  multp(g, genP), small_c, 'CredentialData', BSN(basename), multp(sl, A),
+                  multp(sl, B), multp(sl, C), multp(sl, D),
+                  PointG1(H_p(F1(BSN(basename))), F2(BSN(basename))),
+                  multp(f, PointG1(H_p(F1(BSN(basename))), F2(BSN(basename)))),
+                  L_J(r_cv1, PointG1(H_p(F1(BSN(basename))), F2(BSN(basename)))),
+                  E_S(r_cv1, S)
+   )
+   ]
+  --[
+  Host_Receive_Certified_Q_K( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)),
+                              DAAKeyID(keyID), QPub('Generic_DAA_public_data', multp(g, genP))
+  ),
+  Host_Sends_Certified_Q_K( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)),
+                            <QPub('Generic_DAA_public_data', multp(g, genP)), 
+                             certData('certificationData',
+                                      QName('SHA256',
+                                            H_SHA256(QPub('Generic_DAA_public_data', multp(g, genP))))), 
+                             BSN(basename), multp(sl, A), multp(sl, B), multp(sl, C), multp(sl, D), 
+                             PointG1(H_p(F1(BSN(basename))), F2(BSN(basename))), 
+                             multp(f, PointG1(H_p(F1(BSN(basename))), F2(BSN(basename)))), 
+                             H_n_2(Nonce(rnd_n_C),
+                                   H_k_2(small_c,
+                                         H_6(certData('certificationData',
+                                                      QName('SHA256',
+                                                            H_SHA256(QPub('Generic_DAA_public_data',
+                                                                          multp(g, genP)))))))), 
+                             plus(r_cv1, multp(h2, f)), Nonce(rnd_n_C)>
+  ),
+  Host_Sends_Certified_Q_K_With_BSN( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)),
+                                     BSN(basename),
+                                     <QPub('Generic_DAA_public_data', multp(g, genP)), 
+                                      certData('certificationData',
+                                               QName('SHA256',
+                                                     H_SHA256(QPub('Generic_DAA_public_data',
+                                                                   multp(g, genP))))), 
+                                      BSN(basename), multp(sl, A), multp(sl, B), multp(sl, C), multp(sl, D), 
+                                      PointG1(H_p(F1(BSN(basename))), F2(BSN(basename))), 
+                                      multp(f, PointG1(H_p(F1(BSN(basename))), F2(BSN(basename)))), 
+                                      H_n_2(Nonce(rnd_n_C),
+                                            H_k_2(small_c,
+                                                  H_6(certData('certificationData',
+                                                               QName('SHA256',
+                                                                     H_SHA256(QPub('Generic_DAA_public_data',
+                                                                                   multp(g, genP)))))))), 
+                                      plus(r_cv1, multp(h2, f)), Nonce(rnd_n_C)>
+  ),
+  Host_Sends_Certified_Q_K_cred( $PS, $AS, pk(KDF_EK(~TPM_EK_Seed)),
+                                 BSN(basename), multp(sl, A), multp(sl, B), multp(sl, C), multp(sl, D),
+                                 <QPub('Generic_DAA_public_data', multp(g, genP)), 
+                                  certData('certificationData',
+                                           QName('SHA256',
+                                                 H_SHA256(QPub('Generic_DAA_public_data', multp(g, genP))))), 
+                                  BSN(basename), multp(sl, A), multp(sl, B), multp(sl, C), multp(sl, D), 
+                                  PointG1(H_p(F1(BSN(basename))), F2(BSN(basename))), 
+                                  multp(f, PointG1(H_p(F1(BSN(basename))), F2(BSN(basename)))), 
+                                  H_n_2(Nonce(rnd_n_C),
+                                        H_k_2(small_c,
+                                              H_6(certData('certificationData',
+                                                           QName('SHA256',
+                                                                 H_SHA256(QPub('Generic_DAA_public_data',
+                                                                               multp(g, genP)))))))), 
+                                  plus(r_cv1, multp(h2, f)), Nonce(rnd_n_C)>
+  ),
+  Honest( $PS ), Honest( $AS ), Honest( pk(KDF_EK(~TPM_EK_Seed)) ),
+  CertifyOnlyOnce( 'Host_Receive_Certified_Q_K' )
+  ]->
+   [
+   Out( <QPub('Generic_DAA_public_data', multp(g, genP)), 
+         certData('certificationData',
+                  QName('SHA256',
+                        H_SHA256(QPub('Generic_DAA_public_data', multp(g, genP))))), 
+         BSN(basename), multp(sl, A), multp(sl, B), multp(sl, C), multp(sl, D), 
+         PointG1(H_p(F1(BSN(basename))), F2(BSN(basename))), 
+         multp(f, PointG1(H_p(F1(BSN(basename))), F2(BSN(basename)))), 
+         H_n_2(Nonce(rnd_n_C),
+               H_k_2(small_c,
+                     H_6(certData('certificationData',
+                                  QName('SHA256',
+                                        H_SHA256(QPub('Generic_DAA_public_data', multp(g, genP)))))))), 
+         plus(r_cv1, multp(h2, f)), Nonce(rnd_n_C)>
+   )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Verifier_Check_TPM_Certificate:
+   [
+   In( <
+        <QPub('Generic_DAA_public_data', multp(g, genP)), 
+         certData('certificationData',
+                  QName('SHA256',
+                        H_SHA256(QPub('Generic_DAA_public_data', multp(g, genP))))), 
+         BSN(basename), multp(sl, A), multp(sl, B), multp(sl, C), multp(sl, D), 
+         PointG1(H_p(s_2_bar), y_2), multp(f, PointG1(H_p(s_2_bar), y_2)), 
+         h2_host, plus(r_cv1, multp(h2, f)), Nonce(rnd_n_C)>, 
+        'TPM_Certificate_Of_Q_K'>
+   ),
+   !Pk( 'Issuer', pkX, pkY )
+   ]
+  --[
+  Eq( PointG1(H_p(F1(BSN(basename))), F2(BSN(basename))),
+      PointG1(H_p(s_2_bar), y_2)
+  ),
+  Eq( verifyCre3(multp(sl, A), pkY, multp(sl, B), 'P2'), accept ),
+  Eq( verifyCre4(multp(sl, A), multp(sl, D), pkX, multp(sl, C), 'P2'),
+      accept
+  ),
+  Eq( H_n_2(Nonce(rnd_n_C),
+            H_k_2(H_k_9('CredentialData', multp(sl, A), multp(sl, B), multp(sl, C),
+                        multp(sl, D), PointG1(H_p(F1(BSN(basename))), F2(BSN(basename))),
+                        multp(f, PointG1(H_p(s_2_bar), y_2)),
+                        calcL_J_cert(plus(r_cv1, multp(h2, f)), PointG1(H_p(s_2_bar), y_2),
+                                     h2_host, multp(f, PointG1(H_p(s_2_bar), y_2))),
+                        calcE_S_cert(plus(r_cv1, multp(h2, f)), multp(sl, B), h2_host,
+                                     multp(sl, D))),
+                  H_6(certData('certificationData',
+                               QName('SHA256',
+                                     H_SHA256(QPub('Generic_DAA_public_data', multp(g, genP)))))))),
+      h2_host
+  ),
+  VerifiedCertificate( $V,
+                       <QPub('Generic_DAA_public_data', multp(g, genP)), 
+                        certData('certificationData',
+                                 QName('SHA256',
+                                       H_SHA256(QPub('Generic_DAA_public_data', multp(g, genP))))), 
+                        BSN(basename), multp(sl, A), multp(sl, B), multp(sl, C), multp(sl, D), 
+                        PointG1(H_p(s_2_bar), y_2), multp(f, PointG1(H_p(s_2_bar), y_2)), 
+                        h2_host, plus(r_cv1, multp(h2, f)), Nonce(rnd_n_C)>
+  ),
+  VerifiedCertificateDeAnonymised( BSN(basename),
+                                   <QPub('Generic_DAA_public_data', multp(g, genP)), 
+                                    certData('certificationData',
+                                             QName('SHA256',
+                                                   H_SHA256(QPub('Generic_DAA_public_data',
+                                                                 multp(g, genP))))), 
+                                    BSN(basename), multp(sl, A), multp(sl, B), multp(sl, C), multp(sl, D), 
+                                    PointG1(H_p(s_2_bar), y_2), multp(f, PointG1(H_p(s_2_bar), y_2)), 
+                                    h2_host, plus(r_cv1, multp(h2, f)), Nonce(rnd_n_C)>,
+                                   f
+  ),
+  CertifyOnlyOnce( 'Verifier_Check_TPM_Certificate' )
+  ]->
+   [
+   !SignatureVerified( $V,
+                       <QPub('Generic_DAA_public_data', multp(g, genP)), 
+                        certData('certificationData',
+                                 QName('SHA256',
+                                       H_SHA256(QPub('Generic_DAA_public_data', multp(g, genP))))), 
+                        BSN(basename), multp(sl, A), multp(sl, B), multp(sl, C), multp(sl, D), 
+                        PointG1(H_p(s_2_bar), y_2), multp(f, PointG1(H_p(s_2_bar), y_2)), 
+                        h2_host, plus(r_cv1, multp(h2, f)), Nonce(rnd_n_C)>
+   )
+   ]
+
+  /*
+  rule (modulo AC) Verifier_Check_TPM_Certificate:
+     [
+     In( <
+          <QPub('Generic_DAA_public_data', multp(g, genP)), 
+           certData('certificationData',
+                    QName('SHA256',
+                          H_SHA256(QPub('Generic_DAA_public_data', multp(g, genP))))), 
+           BSN(basename), multp(sl, A), multp(sl, B), multp(sl, C), multp(sl, D), 
+           PointG1(H_p(s_2_bar), y_2), multp(f, PointG1(H_p(s_2_bar), y_2)), 
+           h2_host, plus(r_cv1, multp(h2, f)), Nonce(rnd_n_C)>, 
+          'TPM_Certificate_Of_Q_K'>
+     ),
+     !Pk( 'Issuer', pkX, pkY )
+     ]
+    --[
+    Eq( PointG1(H_p(F1(BSN(basename))), F2(BSN(basename))),
+        PointG1(H_p(s_2_bar), y_2)
+    ),
+    Eq( z, accept ), Eq( z.1, accept ),
+    Eq( H_n_2(Nonce(rnd_n_C),
+              H_k_2(H_k_9('CredentialData', multp(sl, A), multp(sl, B), multp(sl, C),
+                          multp(sl, D), PointG1(H_p(F1(BSN(basename))), F2(BSN(basename))),
+                          multp(f, PointG1(H_p(s_2_bar), y_2)), z.2, z.3),
+                    H_6(certData('certificationData',
+                                 QName('SHA256',
+                                       H_SHA256(QPub('Generic_DAA_public_data', multp(g, genP)))))))),
+        h2_host
+    ),
+    VerifiedCertificate( $V,
+                         <QPub('Generic_DAA_public_data', multp(g, genP)), 
+                          certData('certificationData',
+                                   QName('SHA256',
+                                         H_SHA256(QPub('Generic_DAA_public_data', multp(g, genP))))), 
+                          BSN(basename), multp(sl, A), multp(sl, B), multp(sl, C), multp(sl, D), 
+                          PointG1(H_p(s_2_bar), y_2), multp(f, PointG1(H_p(s_2_bar), y_2)), 
+                          h2_host, plus(r_cv1, multp(h2, f)), Nonce(rnd_n_C)>
+    ),
+    VerifiedCertificateDeAnonymised( BSN(basename),
+                                     <QPub('Generic_DAA_public_data', multp(g, genP)), 
+                                      certData('certificationData',
+                                               QName('SHA256',
+                                                     H_SHA256(QPub('Generic_DAA_public_data',
+                                                                   multp(g, genP))))), 
+                                      BSN(basename), multp(sl, A), multp(sl, B), multp(sl, C), multp(sl, D), 
+                                      PointG1(H_p(s_2_bar), y_2), multp(f, PointG1(H_p(s_2_bar), y_2)), 
+                                      h2_host, plus(r_cv1, multp(h2, f)), Nonce(rnd_n_C)>,
+                                     f
+    ),
+    CertifyOnlyOnce( 'Verifier_Check_TPM_Certificate' )
+    ]->
+     [
+     !SignatureVerified( $V,
+                         <QPub('Generic_DAA_public_data', multp(g, genP)), 
+                          certData('certificationData',
+                                   QName('SHA256',
+                                         H_SHA256(QPub('Generic_DAA_public_data', multp(g, genP))))), 
+                          BSN(basename), multp(sl, A), multp(sl, B), multp(sl, C), multp(sl, D), 
+                          PointG1(H_p(s_2_bar), y_2), multp(f, PointG1(H_p(s_2_bar), y_2)), 
+                          h2_host, plus(r_cv1, multp(h2, f)), Nonce(rnd_n_C)>
+     )
+     ]
+    variants (modulo AC)
+     1. A     = A.46
+        B     = B.47
+        C     = C.48
+        D     = D.49
+        f     = f.51
+        h2    = h2.54
+        h2_host
+              = h2_host.55
+        pkX   = pkX.56
+        pkY   = pkY.57
+        r_cv1 = r_cv1.58
+        s_2_bar
+              = s_2_bar.60
+        sl    = sl.61
+        y_2   = y_2.62
+        z     = verifyCre3(multp(sl.61, A.46), pkY.57, multp(sl.61, B.47), 'P2')
+        z.1   = verifyCre4(multp(sl.61, A.46), multp(sl.61, D.49), pkX.56,
+                           multp(sl.61, C.48), 'P2')
+        z.2   = calcL_J_cert(plus(r_cv1.58, multp(h2.54, f.51)),
+                             PointG1(H_p(s_2_bar.60), y_2.62), h2_host.55,
+                             multp(f.51, PointG1(H_p(s_2_bar.60), y_2.62)))
+        z.3   = calcE_S_cert(plus(r_cv1.58, multp(h2.54, f.51)),
+                             multp(sl.61, B.47), h2_host.55, multp(sl.61, D.49))
+    
+     2. A     = A.206
+        B     = B.207
+        C     = C.208
+        D     = D.209
+        f     = f.211
+        h2    = H_n_2(x.401, H_k_2(x.402, H_6(certData(x.403, x.404))))
+        h2_host
+              = H_n_2(x.401, H_k_2(x.402, H_6(certData(x.403, x.404))))
+        pkX   = pkX.216
+        pkY   = pkY.217
+        r_cv1 = r_cv1.218
+        s_2_bar
+              = F1(x.409)
+        sl    = sl.221
+        y_2   = F2(x.409)
+        z     = verifyCre3(multp(sl.221, A.206), pkY.217, multp(sl.221, B.207),
+                           'P2')
+        z.1   = verifyCre4(multp(sl.221, A.206), multp(sl.221, D.209), pkX.216,
+                           multp(sl.221, C.208), 'P2')
+        z.2   = L_J(r_cv1.218, PointG1(H_p(F1(x.409)), F2(x.409)))
+        z.3   = calcE_S_cert(plus(r_cv1.218,
+                                  multp(H_n_2(x.401, H_k_2(x.402, H_6(certData(x.403, x.404)))), f.211)),
+                             multp(sl.221, B.207),
+                             H_n_2(x.401, H_k_2(x.402, H_6(certData(x.403, x.404)))),
+                             multp(sl.221, D.209))
+    
+     3. A     = A.209
+        B     = multp(x.404, multp(x.405, x.406))
+        C     = C.211
+        D     = multp(multp(x.405, x.404), multp(f.214, x.406))
+        f     = f.214
+        h2    = H_n_2(x.412, H_k_2(x.413, H_6(certData(x.414, x.415))))
+        h2_host
+              = H_n_2(x.412, H_k_2(x.413, H_6(certData(x.414, x.415))))
+        pkX   = pkX.219
+        pkY   = pkY.220
+        r_cv1 = r_cv1.221
+        s_2_bar
+              = s_2_bar.223
+        sl    = sl.224
+        y_2   = y_2.225
+        z     = verifyCre3(multp(sl.224, A.209), pkY.220,
+                           multp(sl.224, multp(x.404, multp(x.405, x.406))), 'P2')
+        z.1   = verifyCre4(multp(sl.224, A.209),
+                           multp(sl.224, multp(multp(x.405, x.404), multp(f.214, x.406))), pkX.219,
+                           multp(sl.224, C.211), 'P2')
+        z.2   = calcL_J_cert(plus(r_cv1.221,
+                                  multp(H_n_2(x.412, H_k_2(x.413, H_6(certData(x.414, x.415)))), f.214)),
+                             PointG1(H_p(s_2_bar.223), y_2.225),
+                             H_n_2(x.412, H_k_2(x.413, H_6(certData(x.414, x.415)))),
+                             multp(f.214, PointG1(H_p(s_2_bar.223), y_2.225)))
+        z.3   = E_S(r_cv1.221, multp(sl.224, multp(x.404, multp(x.405, x.406))))
+    
+     4. A     = A.214
+        B     = multp(x.409, multp(x.410, x.411))
+        C     = C.216
+        D     = multp(multp(x.410, x.409), multp(f.219, x.411))
+        f     = f.219
+        h2    = H_n_2(x.417, H_k_2(x.418, H_6(certData(x.419, x.420))))
+        h2_host
+              = H_n_2(x.417, H_k_2(x.418, H_6(certData(x.419, x.420))))
+        pkX   = pkX.224
+        pkY   = pkY.225
+        r_cv1 = r_cv1.226
+        s_2_bar
+              = F1(x.425)
+        sl    = sl.229
+        y_2   = F2(x.425)
+        z     = verifyCre3(multp(sl.229, A.214), pkY.225,
+                           multp(sl.229, multp(x.409, multp(x.410, x.411))), 'P2')
+        z.1   = verifyCre4(multp(sl.229, A.214),
+                           multp(sl.229, multp(multp(x.410, x.409), multp(f.219, x.411))), pkX.224,
+                           multp(sl.229, C.216), 'P2')
+        z.2   = L_J(r_cv1.226, PointG1(H_p(F1(x.425)), F2(x.425)))
+        z.3   = E_S(r_cv1.226, multp(sl.229, multp(x.409, multp(x.410, x.411))))
+    
+     5. A     = multp(x.333, x.334)
+        B     = multp(x.335, multp(x.333, x.334))
+        C     = plus(multp(x.336, multp(x.333, x.334)),
+                     multp(multp(multp(x.333, x.336), x.337), multp(x.338, x.334)))
+        D     = multp(multp(x.333, x.337), multp(x.338, x.334))
+        f     = f.173
+        h2    = h2.176
+        h2_host
+              = h2_host.177
+        pkX   = PkX(x.336, 'P2')
+        pkY   = PkY(x.335, 'P2')
+        r_cv1 = r_cv1.180
+        s_2_bar
+              = s_2_bar.182
+        sl    = sl.183
+        y_2   = y_2.184
+        z     = accept
+        z.1   = accept
+        z.2   = calcL_J_cert(plus(r_cv1.180, multp(h2.176, f.173)),
+                             PointG1(H_p(s_2_bar.182), y_2.184), h2_host.177,
+                             multp(f.173, PointG1(H_p(s_2_bar.182), y_2.184)))
+        z.3   = calcE_S_cert(plus(r_cv1.180, multp(h2.176, f.173)),
+                             multp(sl.183, multp(x.335, multp(x.333, x.334))), h2_host.177,
+                             multp(sl.183, multp(multp(x.333, x.337), multp(x.338, x.334))))
+    
+     6. A     = multp(x.339, x.340)
+        B     = multp(x.341, multp(x.339, x.340))
+        C     = plus(multp(x.342, multp(x.339, x.340)),
+                     multp(multp(multp(x.339, x.342), x.341), multp(f.179, x.340)))
+        D     = multp(multp(x.339, x.341), multp(f.179, x.340))
+        f     = f.179
+        h2    = H_n_2(x.347, H_k_2(x.348, H_6(certData(x.349, x.350))))
+        h2_host
+              = H_n_2(x.347, H_k_2(x.348, H_6(certData(x.349, x.350))))
+        pkX   = PkX(x.342, 'P2')
+        pkY   = pkY.185
+        r_cv1 = r_cv1.186
+        s_2_bar
+              = s_2_bar.188
+        sl    = sl.189
+        y_2   = y_2.190
+        z     = verifyCre3(multp(sl.189, multp(x.339, x.340)), pkY.185,
+                           multp(sl.189, multp(x.341, multp(x.339, x.340))), 'P2')
+        z.1   = accept
+        z.2   = calcL_J_cert(plus(r_cv1.186,
+                                  multp(H_n_2(x.347, H_k_2(x.348, H_6(certData(x.349, x.350)))), f.179)),
+                             PointG1(H_p(s_2_bar.188), y_2.190),
+                             H_n_2(x.347, H_k_2(x.348, H_6(certData(x.349, x.350)))),
+                             multp(f.179, PointG1(H_p(s_2_bar.188), y_2.190)))
+        z.3   = E_S(r_cv1.186, multp(sl.189, multp(x.341, multp(x.339, x.340))))
+    
+     7. A     = multp(x.339, x.340)
+        B     = multp(x.341, multp(x.339, x.340))
+        C     = plus(multp(x.342, multp(x.339, x.340)),
+                     multp(multp(multp(x.339, x.342), x.341), multp(f.179, x.340)))
+        D     = multp(multp(x.339, x.341), multp(f.179, x.340))
+        f     = f.179
+        h2    = H_n_2(x.347, H_k_2(x.348, H_6(certData(x.349, x.350))))
+        h2_host
+              = H_n_2(x.347, H_k_2(x.348, H_6(certData(x.349, x.350))))
+        pkX   = PkX(x.342, 'P2')
+        pkY   = PkY(x.341, 'P2')
+        r_cv1 = r_cv1.186
+        s_2_bar
+              = s_2_bar.188
+        sl    = sl.189
+        y_2   = y_2.190
+        z     = accept
+        z.1   = accept
+        z.2   = calcL_J_cert(plus(r_cv1.186,
+                                  multp(H_n_2(x.347, H_k_2(x.348, H_6(certData(x.349, x.350)))), f.179)),
+                             PointG1(H_p(s_2_bar.188), y_2.190),
+                             H_n_2(x.347, H_k_2(x.348, H_6(certData(x.349, x.350)))),
+                             multp(f.179, PointG1(H_p(s_2_bar.188), y_2.190)))
+        z.3   = E_S(r_cv1.186, multp(sl.189, multp(x.341, multp(x.339, x.340))))
+    
+     8. A     = multp(x.342, x.343)
+        B     = multp(x.344, multp(x.342, x.343))
+        C     = plus(multp(x.345, multp(x.342, x.343)),
+                     multp(multp(multp(x.342, x.345), x.344), multp(f.182, x.343)))
+        D     = multp(multp(x.342, x.344), multp(f.182, x.343))
+        f     = f.182
+        h2    = H_n_2(x.350, H_k_2(x.351, H_6(certData(x.352, x.353))))
+        h2_host
+              = H_n_2(x.350, H_k_2(x.351, H_6(certData(x.352, x.353))))
+        pkX   = PkX(x.345, 'P2')
+        pkY   = PkY(x.344, 'P2')
+        r_cv1 = r_cv1.189
+        s_2_bar
+              = F1(x.356)
+        sl    = sl.192
+        y_2   = F2(x.356)
+        z     = accept
+        z.1   = accept
+        z.2   = L_J(r_cv1.189, PointG1(H_p(F1(x.356)), F2(x.356)))
+        z.3   = E_S(r_cv1.189, multp(sl.192, multp(x.344, multp(x.342, x.343))))
+    
+     9. A     = multp(x.343, x.344)
+        B     = multp(x.345, multp(x.343, x.344))
+        C     = plus(multp(x.346, multp(x.343, x.344)),
+                     multp(multp(multp(x.343, x.346), x.345), multp(f.183, x.344)))
+        D     = multp(multp(x.343, x.345), multp(f.183, x.344))
+        f     = f.183
+        h2    = H_n_2(x.351, H_k_2(x.352, H_6(certData(x.353, x.354))))
+        h2_host
+              = H_n_2(x.351, H_k_2(x.352, H_6(certData(x.353, x.354))))
+        pkX   = PkX(x.346, 'P2')
+        pkY   = pkY.189
+        r_cv1 = r_cv1.190
+        s_2_bar
+              = F1(x.358)
+        sl    = sl.193
+        y_2   = F2(x.358)
+        z     = verifyCre3(multp(sl.193, multp(x.343, x.344)), pkY.189,
+                           multp(sl.193, multp(x.345, multp(x.343, x.344))), 'P2')
+        z.1   = accept
+        z.2   = L_J(r_cv1.190, PointG1(H_p(F1(x.358)), F2(x.358)))
+        z.3   = E_S(r_cv1.190, multp(sl.193, multp(x.345, multp(x.343, x.344))))
+    
+    10. A     = multp(x.344, x.345)
+        B     = multp(x.346, multp(x.344, x.345))
+        C     = plus(multp(x.347, multp(x.344, x.345)),
+                     multp(multp(multp(x.344, x.347), x.348), multp(x.349, x.345)))
+        D     = multp(multp(x.344, x.348), multp(x.349, x.345))
+        f     = f.184
+        h2    = H_n_2(x.354, H_k_2(x.355, H_6(certData(x.356, x.357))))
+        h2_host
+              = H_n_2(x.354, H_k_2(x.355, H_6(certData(x.356, x.357))))
+        pkX   = PkX(x.347, 'P2')
+        pkY   = PkY(x.346, 'P2')
+        r_cv1 = r_cv1.191
+        s_2_bar
+              = F1(x.360)
+        sl    = sl.194
+        y_2   = F2(x.360)
+        z     = accept
+        z.1   = accept
+        z.2   = L_J(r_cv1.191, PointG1(H_p(F1(x.360)), F2(x.360)))
+        z.3   = calcE_S_cert(plus(r_cv1.191,
+                                  multp(H_n_2(x.354, H_k_2(x.355, H_6(certData(x.356, x.357)))), f.184)),
+                             multp(sl.194, multp(x.346, multp(x.344, x.345))),
+                             H_n_2(x.354, H_k_2(x.355, H_6(certData(x.356, x.357)))),
+                             multp(sl.194, multp(multp(x.344, x.348), multp(x.349, x.345))))
+    
+    11. A     = multp(x.369, x.370)
+        B     = multp(x.371, multp(x.369, x.370))
+        C     = C.188
+        D     = D.189
+        f     = f.191
+        h2    = h2.194
+        h2_host
+              = h2_host.195
+        pkX   = pkX.196
+        pkY   = PkY(x.371, 'P2')
+        r_cv1 = r_cv1.198
+        s_2_bar
+              = s_2_bar.200
+        sl    = sl.201
+        y_2   = y_2.202
+        z     = accept
+        z.1   = verifyCre4(multp(sl.201, multp(x.369, x.370)),
+                           multp(sl.201, D.189), pkX.196, multp(sl.201, C.188), 'P2')
+        z.2   = calcL_J_cert(plus(r_cv1.198, multp(h2.194, f.191)),
+                             PointG1(H_p(s_2_bar.200), y_2.202), h2_host.195,
+                             multp(f.191, PointG1(H_p(s_2_bar.200), y_2.202)))
+        z.3   = calcE_S_cert(plus(r_cv1.198, multp(h2.194, f.191)),
+                             multp(sl.201, multp(x.371, multp(x.369, x.370))), h2_host.195,
+                             multp(sl.201, D.189))
+    
+    12. A     = multp(x.378, x.379)
+        B     = multp(x.380, multp(x.378, x.379))
+        C     = C.197
+        D     = multp(multp(x.378, x.380), multp(f.200, x.379))
+        f     = f.200
+        h2    = H_n_2(x.386, H_k_2(x.387, H_6(certData(x.388, x.389))))
+        h2_host
+              = H_n_2(x.386, H_k_2(x.387, H_6(certData(x.388, x.389))))
+        pkX   = pkX.205
+        pkY   = PkY(x.380, 'P2')
+        r_cv1 = r_cv1.207
+        s_2_bar
+              = s_2_bar.209
+        sl    = sl.210
+        y_2   = y_2.211
+        z     = accept
+        z.1   = verifyCre4(multp(sl.210, multp(x.378, x.379)),
+                           multp(sl.210, multp(multp(x.378, x.380), multp(f.200, x.379))), pkX.205,
+                           multp(sl.210, C.197), 'P2')
+        z.2   = calcL_J_cert(plus(r_cv1.207,
+                                  multp(H_n_2(x.386, H_k_2(x.387, H_6(certData(x.388, x.389)))), f.200)),
+                             PointG1(H_p(s_2_bar.209), y_2.211),
+                             H_n_2(x.386, H_k_2(x.387, H_6(certData(x.388, x.389)))),
+                             multp(f.200, PointG1(H_p(s_2_bar.209), y_2.211)))
+        z.3   = E_S(r_cv1.207, multp(sl.210, multp(x.380, multp(x.378, x.379))))
+    
+    13. A     = multp(x.382, x.383)
+        B     = multp(x.384, multp(x.382, x.383))
+        C     = C.201
+        D     = multp(multp(x.382, x.384), multp(f.204, x.383))
+        f     = f.204
+        h2    = H_n_2(x.390, H_k_2(x.391, H_6(certData(x.392, x.393))))
+        h2_host
+              = H_n_2(x.390, H_k_2(x.391, H_6(certData(x.392, x.393))))
+        pkX   = pkX.209
+        pkY   = PkY(x.384, 'P2')
+        r_cv1 = r_cv1.211
+        s_2_bar
+              = F1(x.397)
+        sl    = sl.214
+        y_2   = F2(x.397)
+        z     = accept
+        z.1   = verifyCre4(multp(sl.214, multp(x.382, x.383)),
+                           multp(sl.214, multp(multp(x.382, x.384), multp(f.204, x.383))), pkX.209,
+                           multp(sl.214, C.201), 'P2')
+        z.2   = L_J(r_cv1.211, PointG1(H_p(F1(x.397)), F2(x.397)))
+        z.3   = E_S(r_cv1.211, multp(sl.214, multp(x.384, multp(x.382, x.383))))
+    
+    14. A     = multp(x.383, x.384)
+        B     = multp(x.385, multp(x.383, x.384))
+        C     = C.202
+        D     = D.203
+        f     = f.205
+        h2    = H_n_2(x.392, H_k_2(x.393, H_6(certData(x.394, x.395))))
+        h2_host
+              = H_n_2(x.392, H_k_2(x.393, H_6(certData(x.394, x.395))))
+        pkX   = pkX.210
+        pkY   = PkY(x.385, 'P2')
+        r_cv1 = r_cv1.212
+        s_2_bar
+              = F1(x.399)
+        sl    = sl.215
+        y_2   = F2(x.399)
+        z     = accept
+        z.1   = verifyCre4(multp(sl.215, multp(x.383, x.384)),
+                           multp(sl.215, D.203), pkX.210, multp(sl.215, C.202), 'P2')
+        z.2   = L_J(r_cv1.212, PointG1(H_p(F1(x.399)), F2(x.399)))
+        z.3   = calcE_S_cert(plus(r_cv1.212,
+                                  multp(H_n_2(x.392, H_k_2(x.393, H_6(certData(x.394, x.395)))), f.205)),
+                             multp(sl.215, multp(x.385, multp(x.383, x.384))),
+                             H_n_2(x.392, H_k_2(x.393, H_6(certData(x.394, x.395)))),
+                             multp(sl.215, D.203))
+    
+    15. A     = multp(x.385, x.386)
+        B     = B.197
+        C     = plus(multp(x.388, multp(x.385, x.386)),
+                     multp(multp(multp(x.385, x.388), x.389), multp(x.390, x.386)))
+        D     = multp(multp(x.385, x.389), multp(x.390, x.386))
+        f     = f.201
+        h2    = h2.204
+        h2_host
+              = h2_host.205
+        pkX   = PkX(x.388, 'P2')
+        pkY   = pkY.207
+        r_cv1 = r_cv1.208
+        s_2_bar
+              = s_2_bar.210
+        sl    = sl.211
+        y_2   = y_2.212
+        z     = verifyCre3(multp(sl.211, multp(x.385, x.386)), pkY.207,
+                           multp(sl.211, B.197), 'P2')
+        z.1   = accept
+        z.2   = calcL_J_cert(plus(r_cv1.208, multp(h2.204, f.201)),
+                             PointG1(H_p(s_2_bar.210), y_2.212), h2_host.205,
+                             multp(f.201, PointG1(H_p(s_2_bar.210), y_2.212)))
+        z.3   = calcE_S_cert(plus(r_cv1.208, multp(h2.204, f.201)),
+                             multp(sl.211, B.197), h2_host.205,
+                             multp(sl.211, multp(multp(x.385, x.389), multp(x.390, x.386))))
+    
+    16. A     = multp(x.397, x.398)
+        B     = B.209
+        C     = plus(multp(x.400, multp(x.397, x.398)),
+                     multp(multp(multp(x.397, x.400), x.401), multp(x.402, x.398)))
+        D     = multp(multp(x.397, x.401), multp(x.402, x.398))
+        f     = f.213
+        h2    = H_n_2(x.407, H_k_2(x.408, H_6(certData(x.409, x.410))))
+        h2_host
+              = H_n_2(x.407, H_k_2(x.408, H_6(certData(x.409, x.410))))
+        pkX   = PkX(x.400, 'P2')
+        pkY   = pkY.219
+        r_cv1 = r_cv1.220
+        s_2_bar
+              = F1(x.414)
+        sl    = sl.223
+        y_2   = F2(x.414)
+        z     = verifyCre3(multp(sl.223, multp(x.397, x.398)), pkY.219,
+                           multp(sl.223, B.209), 'P2')
+        z.1   = accept
+        z.2   = L_J(r_cv1.220, PointG1(H_p(F1(x.414)), F2(x.414)))
+        z.3   = calcE_S_cert(plus(r_cv1.220,
+                                  multp(H_n_2(x.407, H_k_2(x.408, H_6(certData(x.409, x.410)))), f.213)),
+                             multp(sl.223, B.209),
+                             H_n_2(x.407, H_k_2(x.408, H_6(certData(x.409, x.410)))),
+                             multp(sl.223, multp(multp(x.397, x.401), multp(x.402, x.398))))
+  */
+
+rule (modulo E) Signatures_Linked:
+   [
+   !SignatureVerified( $V,
+                       <Qk_PD1, curlyA1, bsn_in1, R1, S1, T1, W1, J1, K1, h2_host1, small_s1, 
+                        n_C1>
+   ),
+   !SignatureVerified( $V,
+                       <Qk_PD2, curlyA2, bsn_in2, R2, S2, T2, W2, J2, K2, h2_host2, small_s2, 
+                        n_C2>
+   )
+   ]
+  --[
+  Eq( bsn_in1, bsn_in2 ), Eq( J1, J2 ), Eq( K1, K2 ),
+  LinkedSignatures( bsn_in1,
+                    <Qk_PD1, curlyA1, bsn_in1, R1, S1, T1, W1, J1, K1, h2_host1, small_s1, 
+                     n_C1>,
+                    <Qk_PD2, curlyA2, bsn_in2, R2, S2, T2, W2, J2, K2, h2_host2, small_s2, 
+                     n_C2>
+  )
+  ]->
+   [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Signatures_NotLinked:
+   [
+   !SignatureVerified( $V,
+                       <Qk_PD1, curlyA1, bsn_in1, R1, S1, T1, W1, J1, K1, h2_host1, small_s1, 
+                        n_C1>
+   ),
+   !SignatureVerified( $V,
+                       <Qk_PD2, curlyA2, bsn_in2, R2, S2, T2, W2, J2, K2, h2_host2, small_s2, 
+                        n_C2>
+   )
+   ]
+  --[
+  NotLinked( J1, J2, K1, K2 ),
+  UnlinkedSignatures( <Qk_PD1, curlyA1, bsn_in1, R1, S1, T1, W1, J1, K1, 
+                       h2_host1, small_s1, n_C1>,
+                      <Qk_PD2, curlyA2, bsn_in2, R2, S2, T2, W2, J2, K2, h2_host2, small_s2, 
+                       n_C2>
+  )
+  ]->
+   [ ]
+
+  /* has exactly the trivial AC variant */
+
+lemma auto_bind_restriction:
+  all-traces
+  "∀ Ent1 Ent2 Ent3 #i.
+    (Bind( Ent1, Ent2, Ent3 ) @ #i) ⇒
+    (((¬(Ent1 = Ent2)) ∧ (¬(Ent1 = Ent3))) ∧ (¬(Ent2 = Ent3)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ Ent1 Ent2 Ent3 #i.
+  (Bind( Ent1, Ent2, Ent3 ) @ #i)
+ ∧
+  ((Ent1 = Ent2) ∨ (Ent1 = Ent3) ∨ (Ent2 = Ent3))"
+*/
+by sorry
+
+lemma auto_restriction_one_host_per_tpm:
+  all-traces
+  "∀ TPM Host1 Host2 #i #j.
+    ((Bind( Host1, TPM, 'Issuer' ) @ #i) ∧
+     (Bind( Host2, TPM, 'Issuer' ) @ #j)) ⇒
+    (#i = #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ TPM Host1 Host2 #i #j.
+  (Bind( Host1, TPM, 'Issuer' ) @ #i) ∧ (Bind( Host2, TPM, 'Issuer' ) @ #j)
+ ∧
+  ¬(#i = #j)"
+*/
+by sorry
+
+lemma auto_restriction_one_tpm_per_host:
+  all-traces
+  "∀ TPM1 TPM2 Host #i #j.
+    ((Bind( Host, TPM1, 'Issuer' ) @ #i) ∧
+     (Bind( Host, TPM2, 'Issuer' ) @ #j)) ⇒
+    (#i = #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ TPM1 TPM2 Host #i #j.
+  (Bind( Host, TPM1, 'Issuer' ) @ #i) ∧ (Bind( Host, TPM2, 'Issuer' ) @ #j)
+ ∧
+  ¬(#i = #j)"
+*/
+by sorry
+
+lemma auto_restricition_pke_comes_from_tpm:
+  all-traces
+  "∀ pke #i.
+    (Check_Ek( pke ) @ #i) ⇒
+    (∃ TPM Host #j. TPM2_EK_Created( TPM, Host, pke ) @ #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ pke #i.
+  (Check_Ek( pke ) @ #i)
+ ∧
+  ∀ TPM Host #j. (TPM2_EK_Created( TPM, Host, pke ) @ #j) ⇒ ⊥"
+*/
+by sorry
+
+lemma auto_restriction_single_issuer:
+  all-traces
+  "∀ I1 I2 #i #j.
+    ((Issuer_Init( I1 ) @ #i) ∧ (Issuer_Init( I2 ) @ #j)) ⇒ (I1 = I2)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ I1 I2 #i #j.
+  (Issuer_Init( I1 ) @ #i) ∧ (Issuer_Init( I2 ) @ #j) ∧ ¬(I1 = I2)"
+*/
+by sorry
+
+lemma auto_verify_multiple_pkes:
+  exists-trace
+  "∃ TPM1 TPM2 Host1 Host2 pke1 qpd1 pke2 qpd2 #t1 #t2 #t3 #t4.
+    ((((((((PlatformSendKeys( TPM1, Host1, pke1, qpd1, 'Issuer' ) @ #t1) ∧
+           (PlatformSendKeys( TPM2, Host2, pke2, qpd2, 'Issuer' ) @ #t2)) ∧
+          (IssuerReceivedKeys( 'Issuer', pke1, qpd1 ) @ #t3)) ∧
+         (IssuerReceivedKeys( 'Issuer', pke2, qpd2 ) @ #t4)) ∧
+        (¬(pke1 = pke2))) ∧
+       (¬(qpd1 = qpd2))) ∧
+      (¬(Host1 = Host2))) ∧
+     (¬(TPM1 = TPM2))) ∧
+    (¬(∃ RevealEvent ENTITY #k1. KeyReveal( RevealEvent, ENTITY ) @ #k1))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ TPM1 TPM2 Host1 Host2 pke1 qpd1 pke2 qpd2 #t1 #t2 #t3 #t4.
+  (PlatformSendKeys( TPM1, Host1, pke1, qpd1, 'Issuer' ) @ #t1) ∧
+  (PlatformSendKeys( TPM2, Host2, pke2, qpd2, 'Issuer' ) @ #t2) ∧
+  (IssuerReceivedKeys( 'Issuer', pke1, qpd1 ) @ #t3) ∧
+  (IssuerReceivedKeys( 'Issuer', pke2, qpd2 ) @ #t4)
+ ∧
+  (¬(pke1 = pke2)) ∧
+  (¬(qpd1 = qpd2)) ∧
+  (¬(Host1 = Host2)) ∧
+  (¬(TPM1 = TPM2)) ∧
+  (∀ RevealEvent ENTITY #k1. (KeyReveal( RevealEvent, ENTITY ) @ #k1) ⇒ ⊥)"
+*/
+by sorry
+
+lemma oracle_correctness_two_certs_same_credentials_same_bsn [heuristic={oracle_corr}]:
+  exists-trace
+  "∃ TPM Host pke bsn R S T W sigma1 sigma2 #t01 #t02.
+    (((((Host_Sends_Certified_Q_K_cred( TPM, Host, pke, bsn, R, S, T, W,
+                                        sigma1
+         ) @ #t01) ∧
+        (Host_Sends_Certified_Q_K_cred( TPM, Host, pke, bsn, R, S, T, W, sigma2
+         ) @ #t02)) ∧
+       (#t01 < #t02)) ∧
+      (¬(sigma1 = sigma2))) ∧
+     (¬(∃ RevealEvent ENTITY #k1. KeyReveal( RevealEvent, ENTITY ) @ #k1))) ∧
+    (∀ event #i #j.
+      ((OnlyOnce( event ) @ #i) ∧ (OnlyOnce( event ) @ #j)) ⇒ (#i = #j))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ TPM Host pke bsn R S T W sigma1 sigma2 #t01 #t02.
+  (Host_Sends_Certified_Q_K_cred( TPM, Host, pke, bsn, R, S, T, W, sigma1
+   ) @ #t01) ∧
+  (Host_Sends_Certified_Q_K_cred( TPM, Host, pke, bsn, R, S, T, W, sigma2
+   ) @ #t02)
+ ∧
+  (#t01 < #t02) ∧
+  (¬(sigma1 = sigma2)) ∧
+  (∀ RevealEvent ENTITY #k1.
+    (KeyReveal( RevealEvent, ENTITY ) @ #k1) ⇒ ⊥) ∧
+  (∀ event #i #j.
+    (OnlyOnce( event ) @ #i) ∧ (OnlyOnce( event ) @ #j) ⇒ #i = #j)"
+*/
+by sorry
+
+lemma oracle_correctness_two_certs_same_credentials_different_bsn [heuristic={oracle_corr}]:
+  exists-trace
+  "∃ TPM Host pke bsn1 bsn2 R S T W sigma1 sigma2 #t01 #t02.
+    ((((((Host_Sends_Certified_Q_K_cred( TPM, Host, pke, bsn1, R, S, T, W,
+                                         sigma1
+          ) @ #t01) ∧
+         (Host_Sends_Certified_Q_K_cred( TPM, Host, pke, bsn2, R, S, T, W, sigma2
+          ) @ #t02)) ∧
+        (#t01 < #t02)) ∧
+       (¬(sigma1 = sigma2))) ∧
+      (¬(bsn1 = bsn2))) ∧
+     (¬(∃ RevealEvent ENTITY #k1. KeyReveal( RevealEvent, ENTITY ) @ #k1))) ∧
+    (∀ event #i #j.
+      ((OnlyOnce( event ) @ #i) ∧ (OnlyOnce( event ) @ #j)) ⇒ (#i = #j))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ TPM Host pke bsn1 bsn2 R S T W sigma1 sigma2 #t01 #t02.
+  (Host_Sends_Certified_Q_K_cred( TPM, Host, pke, bsn1, R, S, T, W, sigma1
+   ) @ #t01) ∧
+  (Host_Sends_Certified_Q_K_cred( TPM, Host, pke, bsn2, R, S, T, W, sigma2
+   ) @ #t02)
+ ∧
+  (#t01 < #t02) ∧
+  (¬(sigma1 = sigma2)) ∧
+  (¬(bsn1 = bsn2)) ∧
+  (∀ RevealEvent ENTITY #k1.
+    (KeyReveal( RevealEvent, ENTITY ) @ #k1) ⇒ ⊥) ∧
+  (∀ event #i #j.
+    (OnlyOnce( event ) @ #i) ∧ (OnlyOnce( event ) @ #j) ⇒ #i = #j)"
+*/
+by sorry
+
+lemma oracle_correctness_two_certs_different_credentials_same_bsn [heuristic={oracle_corr}]:
+  exists-trace
+  "∃ TPM Host pke bsn R1 S1 T1 W1 sigma1 R2 S2 T2 W2 sigma2 #t01 #t02.
+    (((((((((Host_Sends_Certified_Q_K_cred( TPM, Host, pke, bsn, R1, S1, T1,
+                                            W1, sigma1
+             ) @ #t01) ∧
+            (Host_Sends_Certified_Q_K_cred( TPM, Host, pke, bsn, R2, S2, T2, W2,
+                                            sigma2
+             ) @ #t02)) ∧
+           (¬(#t01 = #t02))) ∧
+          (¬(R1 = R2))) ∧
+         (¬(S1 = S2))) ∧
+        (¬(T1 = T2))) ∧
+       (¬(W1 = W2))) ∧
+      (¬(sigma1 = sigma2))) ∧
+     (¬(∃ RevealEvent ENTITY #k1. KeyReveal( RevealEvent, ENTITY ) @ #k1))) ∧
+    (∀ event #i #j.
+      ((OnlyOnce( event ) @ #i) ∧ (OnlyOnce( event ) @ #j)) ⇒ (#i = #j))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ TPM Host pke bsn R1 S1 T1 W1 sigma1 R2 S2 T2 W2 sigma2 #t01 #t02.
+  (Host_Sends_Certified_Q_K_cred( TPM, Host, pke, bsn, R1, S1, T1, W1,
+                                  sigma1
+   ) @ #t01) ∧
+  (Host_Sends_Certified_Q_K_cred( TPM, Host, pke, bsn, R2, S2, T2, W2,
+                                  sigma2
+   ) @ #t02)
+ ∧
+  (¬(#t01 = #t02)) ∧
+  (¬(R1 = R2)) ∧
+  (¬(S1 = S2)) ∧
+  (¬(T1 = T2)) ∧
+  (¬(W1 = W2)) ∧
+  (¬(sigma1 = sigma2)) ∧
+  (∀ RevealEvent ENTITY #k1.
+    (KeyReveal( RevealEvent, ENTITY ) @ #k1) ⇒ ⊥) ∧
+  (∀ event #i #j.
+    (OnlyOnce( event ) @ #i) ∧ (OnlyOnce( event ) @ #j) ⇒ #i = #j)"
+*/
+by sorry
+
+lemma oracle_correctness_two_certs_different_credentials_different_bsn [heuristic={oracle_corr}]:
+  exists-trace
+  "∃ TPM Host pke bsn1 R1 S1 T1 W1 sigma1 bsn2 R2 S2 T2 W2 sigma2 #t01
+     #t02.
+    ((((((((((Host_Sends_Certified_Q_K_cred( TPM, Host, pke, bsn1, R1, S1,
+                                             T1, W1, sigma1
+              ) @ #t01) ∧
+             (Host_Sends_Certified_Q_K_cred( TPM, Host, pke, bsn2, R2, S2, T2, W2,
+                                             sigma2
+              ) @ #t02)) ∧
+            (¬(#t01 = #t02))) ∧
+           (¬(R1 = R2))) ∧
+          (¬(S1 = S2))) ∧
+         (¬(T1 = T2))) ∧
+        (¬(W1 = W2))) ∧
+       (¬(sigma1 = sigma2))) ∧
+      (¬(bsn1 = bsn2))) ∧
+     (¬(∃ RevealEvent ENTITY #k1. KeyReveal( RevealEvent, ENTITY ) @ #k1))) ∧
+    (∀ event #i #j.
+      ((OnlyOnce( event ) @ #i) ∧ (OnlyOnce( event ) @ #j)) ⇒ (#i = #j))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ TPM Host pke bsn1 R1 S1 T1 W1 sigma1 bsn2 R2 S2 T2 W2 sigma2 #t01
+   #t02.
+  (Host_Sends_Certified_Q_K_cred( TPM, Host, pke, bsn1, R1, S1, T1, W1,
+                                  sigma1
+   ) @ #t01) ∧
+  (Host_Sends_Certified_Q_K_cred( TPM, Host, pke, bsn2, R2, S2, T2, W2,
+                                  sigma2
+   ) @ #t02)
+ ∧
+  (¬(#t01 = #t02)) ∧
+  (¬(R1 = R2)) ∧
+  (¬(S1 = S2)) ∧
+  (¬(T1 = T2)) ∧
+  (¬(W1 = W2)) ∧
+  (¬(sigma1 = sigma2)) ∧
+  (¬(bsn1 = bsn2)) ∧
+  (∀ RevealEvent ENTITY #k1.
+    (KeyReveal( RevealEvent, ENTITY ) @ #k1) ⇒ ⊥) ∧
+  (∀ event #i #j.
+    (OnlyOnce( event ) @ #i) ∧ (OnlyOnce( event ) @ #j) ⇒ #i = #j)"
+*/
+by sorry
+
+lemma oracle_correctness_two_valid_linked_certs [heuristic={oracle_corr}]:
+  exists-trace
+  "∃ TPM Host pke bsn sigma1 sigma2 #t01 #t02 #t03.
+    (((((((Host_Sends_Certified_Q_K_With_BSN( TPM, Host, pke, bsn, sigma1
+           ) @ #t01) ∧
+          (Host_Sends_Certified_Q_K_With_BSN( TPM, Host, pke, bsn, sigma2
+           ) @ #t02)) ∧
+         (¬(sigma1 = sigma2))) ∧
+        (¬(∃ RevealEvent ENTITY #k1. KeyReveal( RevealEvent, ENTITY ) @ #k1))) ∧
+       (LinkedSignatures( bsn, sigma1, sigma2 ) @ #t03)) ∧
+      (#t01 < #t02)) ∧
+     (#t02 < #t03)) ∧
+    (∀ event #i #j.
+      ((OnlyOnce( event ) @ #i) ∧ (OnlyOnce( event ) @ #j)) ⇒ (#i = #j))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ TPM Host pke bsn sigma1 sigma2 #t01 #t02 #t03.
+  (Host_Sends_Certified_Q_K_With_BSN( TPM, Host, pke, bsn, sigma1
+   ) @ #t01) ∧
+  (Host_Sends_Certified_Q_K_With_BSN( TPM, Host, pke, bsn, sigma2
+   ) @ #t02) ∧
+  (LinkedSignatures( bsn, sigma1, sigma2 ) @ #t03)
+ ∧
+  (¬(sigma1 = sigma2)) ∧
+  (∀ RevealEvent ENTITY #k1.
+    (KeyReveal( RevealEvent, ENTITY ) @ #k1) ⇒ ⊥) ∧
+  (#t01 < #t02) ∧
+  (#t02 < #t03) ∧
+  (∀ event #i #j.
+    (OnlyOnce( event ) @ #i) ∧ (OnlyOnce( event ) @ #j) ⇒ #i = #j)"
+*/
+by sorry
+
+lemma oracle_correctness_two_valid_unlinked_certs [heuristic={oracle_corr}]:
+  exists-trace
+  "∃ TPM Host pke bsn1 bsn2 sigma1 sigma2 #t01 #t02 #t03.
+    (((((((Host_Sends_Certified_Q_K_With_BSN( TPM, Host, pke, bsn1, sigma1
+           ) @ #t01) ∧
+          (Host_Sends_Certified_Q_K_With_BSN( TPM, Host, pke, bsn2, sigma2
+           ) @ #t02)) ∧
+         (¬(bsn1 = bsn2))) ∧
+        (¬(∃ RevealEvent ENTITY #k1. KeyReveal( RevealEvent, ENTITY ) @ #k1))) ∧
+       (UnlinkedSignatures( sigma1, sigma2 ) @ #t03)) ∧
+      (#t01 < #t02)) ∧
+     (#t02 < #t03)) ∧
+    (∀ event #i #j.
+      ((OnlyOnce( event ) @ #i) ∧ (OnlyOnce( event ) @ #j)) ⇒ (#i = #j))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ TPM Host pke bsn1 bsn2 sigma1 sigma2 #t01 #t02 #t03.
+  (Host_Sends_Certified_Q_K_With_BSN( TPM, Host, pke, bsn1, sigma1
+   ) @ #t01) ∧
+  (Host_Sends_Certified_Q_K_With_BSN( TPM, Host, pke, bsn2, sigma2
+   ) @ #t02) ∧
+  (UnlinkedSignatures( sigma1, sigma2 ) @ #t03)
+ ∧
+  (¬(bsn1 = bsn2)) ∧
+  (∀ RevealEvent ENTITY #k1.
+    (KeyReveal( RevealEvent, ENTITY ) @ #k1) ⇒ ⊥) ∧
+  (#t01 < #t02) ∧
+  (#t02 < #t03) ∧
+  (∀ event #i #j.
+    (OnlyOnce( event ) @ #i) ∧ (OnlyOnce( event ) @ #j) ⇒ #i = #j)"
+*/
+by sorry
+
+lemma oracle_correctness_join_only [heuristic={oracle_corr}]:
+  exists-trace
+  "∃ TPM Host pke qpd #t01 #t02 #t03 #t04 #t05 #t06 #t07 #t08 #t09 #t10
+     #t11 #t12 #t13 #t14 #t15 #t16 #t17 #t18 #t19 #t20 #t21 #t22.
+    ((((((((((((((((((((((((((((((((((((((((((((Issuer_Init( 'Issuer'
+                                                ) @ #t01) ∧
+                                               (Host_Init( Host ) @ #t02)) ∧
+                                              (TPM_Init( TPM ) @ #t03)) ∧
+                                             (¬(∃ RevealEvent ENTITY #k1.
+                                                 KeyReveal( RevealEvent, ENTITY ) @ #k1))) ∧
+                                            (Bind( TPM, Host, 'Issuer' ) @ #t04)) ∧
+                                           (TPM2_EK_Created( TPM, Host, pke ) @ #t05)) ∧
+                                          (Store_EK( TPM, Host ) @ #t06)) ∧
+                                         (TPM2_DAA_Created( TPM, Host ) @ #t07)) ∧
+                                        (Store_DAA( TPM, Host ) @ #t08)) ∧
+                                       (IssuerReceivedKeys( 'Issuer', pke, qpd ) @ #t09)) ∧
+                                      (Passthrough_ActivateCred( TPM, Host ) @ #t10)) ∧
+                                     (CurlyK_recomputed( TPM, Host ) @ #t11)) ∧
+                                    (Received_CurlyK( TPM, Host ) @ #t12)) ∧
+                                   (TPM2_Commited( TPM, Host ) @ #t13)) ∧
+                                  (Host_Created_p( TPM, Host ) @ #t14)) ∧
+                                 (TPM2_Created_P_TPM( TPM, Host ) @ #t15)) ∧
+                                (Host_Received_P_TPM( TPM, Host ) @ #t16)) ∧
+                               (TPM2_Signed_P_TPM( TPM, Host ) @ #t17)) ∧
+                              (Host_Received_Signed_P_TPM( TPM, Host ) @ #t18)) ∧
+                             (Issuer_VerifyChallengeIssueCredentials( 'Issuer', pke ) @ #t19)) ∧
+                            (Passthrough_ActivateCred2( TPM, Host ) @ #t20)) ∧
+                           (CurlyK2_recomputed( TPM, Host ) @ #t21)) ∧
+                          (JoinCompleted( TPM, Host, pke ) @ #t22)) ∧
+                         (#t01 < #t02)) ∧
+                        (#t02 < #t04)) ∧
+                       (#t03 < #t04)) ∧
+                      (#t04 < #t05)) ∧
+                     (#t05 < #t06)) ∧
+                    (#t06 < #t07)) ∧
+                   (#t07 < #t08)) ∧
+                  (#t08 < #t09)) ∧
+                 (#t09 < #t10)) ∧
+                (#t10 < #t11)) ∧
+               (#t11 < #t12)) ∧
+              (#t12 < #t13)) ∧
+             (#t13 < #t14)) ∧
+            (#t14 < #t15)) ∧
+           (#t15 < #t16)) ∧
+          (#t16 < #t17)) ∧
+         (#t17 < #t18)) ∧
+        (#t18 < #t19)) ∧
+       (#t19 < #t20)) ∧
+      (#t20 < #t21)) ∧
+     (#t21 < #t22)) ∧
+    (∀ event #i #j.
+      ((OnlyOnce( event ) @ #i) ∧ (OnlyOnce( event ) @ #j)) ⇒ (#i = #j))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ TPM Host pke qpd #t01 #t02 #t03 #t04 #t05 #t06 #t07 #t08 #t09 #t10
+   #t11 #t12 #t13 #t14 #t15 #t16 #t17 #t18 #t19 #t20 #t21 #t22.
+  (Issuer_Init( 'Issuer' ) @ #t01) ∧
+  (Host_Init( Host ) @ #t02) ∧
+  (TPM_Init( TPM ) @ #t03) ∧
+  (Bind( TPM, Host, 'Issuer' ) @ #t04) ∧
+  (TPM2_EK_Created( TPM, Host, pke ) @ #t05) ∧
+  (Store_EK( TPM, Host ) @ #t06) ∧
+  (TPM2_DAA_Created( TPM, Host ) @ #t07) ∧
+  (Store_DAA( TPM, Host ) @ #t08) ∧
+  (IssuerReceivedKeys( 'Issuer', pke, qpd ) @ #t09) ∧
+  (Passthrough_ActivateCred( TPM, Host ) @ #t10) ∧
+  (CurlyK_recomputed( TPM, Host ) @ #t11) ∧
+  (Received_CurlyK( TPM, Host ) @ #t12) ∧
+  (TPM2_Commited( TPM, Host ) @ #t13) ∧
+  (Host_Created_p( TPM, Host ) @ #t14) ∧
+  (TPM2_Created_P_TPM( TPM, Host ) @ #t15) ∧
+  (Host_Received_P_TPM( TPM, Host ) @ #t16) ∧
+  (TPM2_Signed_P_TPM( TPM, Host ) @ #t17) ∧
+  (Host_Received_Signed_P_TPM( TPM, Host ) @ #t18) ∧
+  (Issuer_VerifyChallengeIssueCredentials( 'Issuer', pke ) @ #t19) ∧
+  (Passthrough_ActivateCred2( TPM, Host ) @ #t20) ∧
+  (CurlyK2_recomputed( TPM, Host ) @ #t21) ∧
+  (JoinCompleted( TPM, Host, pke ) @ #t22)
+ ∧
+  (∀ RevealEvent ENTITY #k1.
+    (KeyReveal( RevealEvent, ENTITY ) @ #k1) ⇒ ⊥) ∧
+  (#t01 < #t02) ∧
+  (#t02 < #t04) ∧
+  (#t03 < #t04) ∧
+  (#t04 < #t05) ∧
+  (#t05 < #t06) ∧
+  (#t06 < #t07) ∧
+  (#t07 < #t08) ∧
+  (#t08 < #t09) ∧
+  (#t09 < #t10) ∧
+  (#t10 < #t11) ∧
+  (#t11 < #t12) ∧
+  (#t12 < #t13) ∧
+  (#t13 < #t14) ∧
+  (#t14 < #t15) ∧
+  (#t15 < #t16) ∧
+  (#t16 < #t17) ∧
+  (#t17 < #t18) ∧
+  (#t18 < #t19) ∧
+  (#t19 < #t20) ∧
+  (#t20 < #t21) ∧
+  (#t21 < #t22) ∧
+  (∀ event #i #j.
+    (OnlyOnce( event ) @ #i) ∧ (OnlyOnce( event ) @ #j) ⇒ #i = #j)"
+*/
+by sorry
+
+lemma oracle_correctness_no_verify [heuristic={oracle_corr}]:
+  exists-trace
+  "∃ TPM Host pke qpd #t01 #t02 #t03 #t04 #t05 #t06 #t07 #t08 #t09 #t10
+     #t11 #t12 #t13 #t14 #t15 #t16 #t17 #t18 #t19 #t20 #t21 #t22 kID Qk_PD bsn
+     sigma #t23 #t24 #t25 #t26 #t27 #t28 #t29.
+    (((((((((((((((((((((((((((((((((((((((((((((((((((((((((((Issuer_Init( 'Issuer'
+                                                               ) @ #t01) ∧
+                                                              (Host_Init( Host ) @ #t02)) ∧
+                                                             (TPM_Init( TPM ) @ #t03)) ∧
+                                                            (¬(∃ RevealEvent ENTITY #k1.
+                                                                KeyReveal( RevealEvent, ENTITY ) @ #k1))) ∧
+                                                           (Bind( TPM, Host, 'Issuer' ) @ #t04)) ∧
+                                                          (TPM2_EK_Created( TPM, Host, pke ) @ #t05)) ∧
+                                                         (Store_EK( TPM, Host ) @ #t06)) ∧
+                                                        (TPM2_DAA_Created( TPM, Host ) @ #t07)) ∧
+                                                       (Store_DAA( TPM, Host ) @ #t08)) ∧
+                                                      (IssuerReceivedKeys( 'Issuer', pke, qpd ) @ #t09)) ∧
+                                                     (Passthrough_ActivateCred( TPM, Host ) @ #t10)) ∧
+                                                    (CurlyK_recomputed( TPM, Host ) @ #t11)) ∧
+                                                   (Received_CurlyK( TPM, Host ) @ #t12)) ∧
+                                                  (TPM2_Commited( TPM, Host ) @ #t13)) ∧
+                                                 (Host_Created_p( TPM, Host ) @ #t14)) ∧
+                                                (TPM2_Created_P_TPM( TPM, Host ) @ #t15)) ∧
+                                               (Host_Received_P_TPM( TPM, Host ) @ #t16)) ∧
+                                              (TPM2_Signed_P_TPM( TPM, Host ) @ #t17)) ∧
+                                             (Host_Received_Signed_P_TPM( TPM, Host ) @ #t18)) ∧
+                                            (Issuer_VerifyChallengeIssueCredentials( 'Issuer', pke
+                                             ) @ #t19)) ∧
+                                           (Passthrough_ActivateCred2( TPM, Host ) @ #t20)) ∧
+                                          (CurlyK2_recomputed( TPM, Host ) @ #t21)) ∧
+                                         (JoinCompleted( TPM, Host, pke ) @ #t22)) ∧
+                                        (RandomisedCredentials( TPM, Host, pke ) @ #t23)) ∧
+                                       (SetBasename( TPM, Host, pke, bsn ) @ #t24)) ∧
+                                      (TPMCommitRandomised( TPM, Host, pke, bsn ) @ #t25)) ∧
+                                     (TPM2_Generic_DAA_Created( TPM, Host, kID, Qk_PD ) @ #t26)) ∧
+                                    (LoadKeyForCertification( TPM, Host, kID, Qk_PD ) @ #t27)) ∧
+                                   (TPM2_Created_Cert_TPM( TPM, Host, kID, Qk_PD ) @ #t28)) ∧
+                                  (Host_Sends_Certified_Q_K( TPM, Host, pke, sigma ) @ #t29)) ∧
+                                 (#t01 < #t02)) ∧
+                                (#t02 < #t04)) ∧
+                               (#t03 < #t04)) ∧
+                              (#t04 < #t05)) ∧
+                             (#t05 < #t06)) ∧
+                            (#t06 < #t07)) ∧
+                           (#t07 < #t08)) ∧
+                          (#t08 < #t09)) ∧
+                         (#t09 < #t10)) ∧
+                        (#t10 < #t11)) ∧
+                       (#t11 < #t12)) ∧
+                      (#t12 < #t13)) ∧
+                     (#t13 < #t14)) ∧
+                    (#t14 < #t15)) ∧
+                   (#t15 < #t16)) ∧
+                  (#t16 < #t17)) ∧
+                 (#t17 < #t18)) ∧
+                (#t18 < #t19)) ∧
+               (#t19 < #t20)) ∧
+              (#t20 < #t21)) ∧
+             (#t21 < #t22)) ∧
+            (#t22 < #t23)) ∧
+           (#t23 < #t24)) ∧
+          (#t24 < #t25)) ∧
+         (#t25 < #t26)) ∧
+        (#t26 < #t27)) ∧
+       (#t27 < #t28)) ∧
+      (#t28 < #t29)) ∧
+     (∀ event #i #j.
+       ((OnlyOnce( event ) @ #i) ∧ (OnlyOnce( event ) @ #j)) ⇒ (#i = #j))) ∧
+    (∀ event #i #j.
+      ((CertifyOnlyOnce( event ) @ #i) ∧ (CertifyOnlyOnce( event ) @ #j)) ⇒
+      (#i = #j))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ TPM Host pke qpd #t01 #t02 #t03 #t04 #t05 #t06 #t07 #t08 #t09 #t10
+   #t11 #t12 #t13 #t14 #t15 #t16 #t17 #t18 #t19 #t20 #t21 #t22 kID Qk_PD bsn
+   sigma #t23 #t24 #t25 #t26 #t27 #t28 #t29.
+  (Issuer_Init( 'Issuer' ) @ #t01) ∧
+  (Host_Init( Host ) @ #t02) ∧
+  (TPM_Init( TPM ) @ #t03) ∧
+  (Bind( TPM, Host, 'Issuer' ) @ #t04) ∧
+  (TPM2_EK_Created( TPM, Host, pke ) @ #t05) ∧
+  (Store_EK( TPM, Host ) @ #t06) ∧
+  (TPM2_DAA_Created( TPM, Host ) @ #t07) ∧
+  (Store_DAA( TPM, Host ) @ #t08) ∧
+  (IssuerReceivedKeys( 'Issuer', pke, qpd ) @ #t09) ∧
+  (Passthrough_ActivateCred( TPM, Host ) @ #t10) ∧
+  (CurlyK_recomputed( TPM, Host ) @ #t11) ∧
+  (Received_CurlyK( TPM, Host ) @ #t12) ∧
+  (TPM2_Commited( TPM, Host ) @ #t13) ∧
+  (Host_Created_p( TPM, Host ) @ #t14) ∧
+  (TPM2_Created_P_TPM( TPM, Host ) @ #t15) ∧
+  (Host_Received_P_TPM( TPM, Host ) @ #t16) ∧
+  (TPM2_Signed_P_TPM( TPM, Host ) @ #t17) ∧
+  (Host_Received_Signed_P_TPM( TPM, Host ) @ #t18) ∧
+  (Issuer_VerifyChallengeIssueCredentials( 'Issuer', pke ) @ #t19) ∧
+  (Passthrough_ActivateCred2( TPM, Host ) @ #t20) ∧
+  (CurlyK2_recomputed( TPM, Host ) @ #t21) ∧
+  (JoinCompleted( TPM, Host, pke ) @ #t22) ∧
+  (RandomisedCredentials( TPM, Host, pke ) @ #t23) ∧
+  (SetBasename( TPM, Host, pke, bsn ) @ #t24) ∧
+  (TPMCommitRandomised( TPM, Host, pke, bsn ) @ #t25) ∧
+  (TPM2_Generic_DAA_Created( TPM, Host, kID, Qk_PD ) @ #t26) ∧
+  (LoadKeyForCertification( TPM, Host, kID, Qk_PD ) @ #t27) ∧
+  (TPM2_Created_Cert_TPM( TPM, Host, kID, Qk_PD ) @ #t28) ∧
+  (Host_Sends_Certified_Q_K( TPM, Host, pke, sigma ) @ #t29)
+ ∧
+  (∀ RevealEvent ENTITY #k1.
+    (KeyReveal( RevealEvent, ENTITY ) @ #k1) ⇒ ⊥) ∧
+  (#t01 < #t02) ∧
+  (#t02 < #t04) ∧
+  (#t03 < #t04) ∧
+  (#t04 < #t05) ∧
+  (#t05 < #t06) ∧
+  (#t06 < #t07) ∧
+  (#t07 < #t08) ∧
+  (#t08 < #t09) ∧
+  (#t09 < #t10) ∧
+  (#t10 < #t11) ∧
+  (#t11 < #t12) ∧
+  (#t12 < #t13) ∧
+  (#t13 < #t14) ∧
+  (#t14 < #t15) ∧
+  (#t15 < #t16) ∧
+  (#t16 < #t17) ∧
+  (#t17 < #t18) ∧
+  (#t18 < #t19) ∧
+  (#t19 < #t20) ∧
+  (#t20 < #t21) ∧
+  (#t21 < #t22) ∧
+  (#t22 < #t23) ∧
+  (#t23 < #t24) ∧
+  (#t24 < #t25) ∧
+  (#t25 < #t26) ∧
+  (#t26 < #t27) ∧
+  (#t27 < #t28) ∧
+  (#t28 < #t29) ∧
+  (∀ event #i #j.
+    (OnlyOnce( event ) @ #i) ∧ (OnlyOnce( event ) @ #j) ⇒ #i = #j) ∧
+  (∀ event #i #j.
+    (CertifyOnlyOnce( event ) @ #i) ∧ (CertifyOnlyOnce( event ) @ #j)
+   ⇒
+    #i = #j)"
+*/
+by sorry
+
+lemma oracle_correctness_with_verify [heuristic={oracle_corr}]:
+  exists-trace
+  "∃ TPM Host pke qpd #t01 #t02 #t03 #t04 #t05 #t06 #t07 #t08 #t09 #t10
+     #t11 #t12 #t13 #t14 #t15 #t16 #t17 #t18 #t19 #t20 #t21 #t22 kID Qk_PD bsn
+     sigma Verifier #t23 #t24 #t25 #t26 #t27 #t28 #t29 #t30.
+    (((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((Issuer_Init( 'Issuer'
+                                                                 ) @ #t01) ∧
+                                                                (Host_Init( Host ) @ #t02)) ∧
+                                                               (TPM_Init( TPM ) @ #t03)) ∧
+                                                              (¬(∃ RevealEvent ENTITY #k1.
+                                                                  KeyReveal( RevealEvent, ENTITY ) @ #k1))) ∧
+                                                             (Bind( TPM, Host, 'Issuer' ) @ #t04)) ∧
+                                                            (TPM2_EK_Created( TPM, Host, pke ) @ #t05)) ∧
+                                                           (Store_EK( TPM, Host ) @ #t06)) ∧
+                                                          (TPM2_DAA_Created( TPM, Host ) @ #t07)) ∧
+                                                         (Store_DAA( TPM, Host ) @ #t08)) ∧
+                                                        (IssuerReceivedKeys( 'Issuer', pke, qpd ) @ #t09)) ∧
+                                                       (Passthrough_ActivateCred( TPM, Host ) @ #t10)) ∧
+                                                      (CurlyK_recomputed( TPM, Host ) @ #t11)) ∧
+                                                     (Received_CurlyK( TPM, Host ) @ #t12)) ∧
+                                                    (TPM2_Commited( TPM, Host ) @ #t13)) ∧
+                                                   (Host_Created_p( TPM, Host ) @ #t14)) ∧
+                                                  (TPM2_Created_P_TPM( TPM, Host ) @ #t15)) ∧
+                                                 (Host_Received_P_TPM( TPM, Host ) @ #t16)) ∧
+                                                (TPM2_Signed_P_TPM( TPM, Host ) @ #t17)) ∧
+                                               (Host_Received_Signed_P_TPM( TPM, Host ) @ #t18)) ∧
+                                              (Issuer_VerifyChallengeIssueCredentials( 'Issuer', pke
+                                               ) @ #t19)) ∧
+                                             (Passthrough_ActivateCred2( TPM, Host ) @ #t20)) ∧
+                                            (CurlyK2_recomputed( TPM, Host ) @ #t21)) ∧
+                                           (JoinCompleted( TPM, Host, pke ) @ #t22)) ∧
+                                          (RandomisedCredentials( TPM, Host, pke ) @ #t23)) ∧
+                                         (SetBasename( TPM, Host, pke, bsn ) @ #t24)) ∧
+                                        (TPMCommitRandomised( TPM, Host, pke, bsn ) @ #t25)) ∧
+                                       (TPM2_Generic_DAA_Created( TPM, Host, kID, Qk_PD ) @ #t26)) ∧
+                                      (LoadKeyForCertification( TPM, Host, kID, Qk_PD ) @ #t27)) ∧
+                                     (TPM2_Created_Cert_TPM( TPM, Host, kID, Qk_PD ) @ #t28)) ∧
+                                    (Host_Sends_Certified_Q_K( TPM, Host, pke, sigma ) @ #t29)) ∧
+                                   (VerifiedCertificate( Verifier, sigma ) @ #t30)) ∧
+                                  (#t01 < #t02)) ∧
+                                 (#t02 < #t04)) ∧
+                                (#t03 < #t04)) ∧
+                               (#t04 < #t05)) ∧
+                              (#t05 < #t06)) ∧
+                             (#t06 < #t07)) ∧
+                            (#t07 < #t08)) ∧
+                           (#t08 < #t09)) ∧
+                          (#t09 < #t10)) ∧
+                         (#t10 < #t11)) ∧
+                        (#t11 < #t12)) ∧
+                       (#t12 < #t13)) ∧
+                      (#t13 < #t14)) ∧
+                     (#t14 < #t15)) ∧
+                    (#t15 < #t16)) ∧
+                   (#t16 < #t17)) ∧
+                  (#t17 < #t18)) ∧
+                 (#t18 < #t19)) ∧
+                (#t19 < #t20)) ∧
+               (#t20 < #t21)) ∧
+              (#t21 < #t22)) ∧
+             (#t22 < #t23)) ∧
+            (#t23 < #t24)) ∧
+           (#t24 < #t25)) ∧
+          (#t25 < #t26)) ∧
+         (#t26 < #t27)) ∧
+        (#t27 < #t28)) ∧
+       (#t28 < #t29)) ∧
+      (#t29 < #t30)) ∧
+     (∀ event #i #j.
+       ((OnlyOnce( event ) @ #i) ∧ (OnlyOnce( event ) @ #j)) ⇒ (#i = #j))) ∧
+    (∀ event #i #j.
+      ((CertifyOnlyOnce( event ) @ #i) ∧ (CertifyOnlyOnce( event ) @ #j)) ⇒
+      (#i = #j))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ TPM Host pke qpd #t01 #t02 #t03 #t04 #t05 #t06 #t07 #t08 #t09 #t10
+   #t11 #t12 #t13 #t14 #t15 #t16 #t17 #t18 #t19 #t20 #t21 #t22 kID Qk_PD bsn
+   sigma Verifier #t23 #t24 #t25 #t26 #t27 #t28 #t29 #t30.
+  (Issuer_Init( 'Issuer' ) @ #t01) ∧
+  (Host_Init( Host ) @ #t02) ∧
+  (TPM_Init( TPM ) @ #t03) ∧
+  (Bind( TPM, Host, 'Issuer' ) @ #t04) ∧
+  (TPM2_EK_Created( TPM, Host, pke ) @ #t05) ∧
+  (Store_EK( TPM, Host ) @ #t06) ∧
+  (TPM2_DAA_Created( TPM, Host ) @ #t07) ∧
+  (Store_DAA( TPM, Host ) @ #t08) ∧
+  (IssuerReceivedKeys( 'Issuer', pke, qpd ) @ #t09) ∧
+  (Passthrough_ActivateCred( TPM, Host ) @ #t10) ∧
+  (CurlyK_recomputed( TPM, Host ) @ #t11) ∧
+  (Received_CurlyK( TPM, Host ) @ #t12) ∧
+  (TPM2_Commited( TPM, Host ) @ #t13) ∧
+  (Host_Created_p( TPM, Host ) @ #t14) ∧
+  (TPM2_Created_P_TPM( TPM, Host ) @ #t15) ∧
+  (Host_Received_P_TPM( TPM, Host ) @ #t16) ∧
+  (TPM2_Signed_P_TPM( TPM, Host ) @ #t17) ∧
+  (Host_Received_Signed_P_TPM( TPM, Host ) @ #t18) ∧
+  (Issuer_VerifyChallengeIssueCredentials( 'Issuer', pke ) @ #t19) ∧
+  (Passthrough_ActivateCred2( TPM, Host ) @ #t20) ∧
+  (CurlyK2_recomputed( TPM, Host ) @ #t21) ∧
+  (JoinCompleted( TPM, Host, pke ) @ #t22) ∧
+  (RandomisedCredentials( TPM, Host, pke ) @ #t23) ∧
+  (SetBasename( TPM, Host, pke, bsn ) @ #t24) ∧
+  (TPMCommitRandomised( TPM, Host, pke, bsn ) @ #t25) ∧
+  (TPM2_Generic_DAA_Created( TPM, Host, kID, Qk_PD ) @ #t26) ∧
+  (LoadKeyForCertification( TPM, Host, kID, Qk_PD ) @ #t27) ∧
+  (TPM2_Created_Cert_TPM( TPM, Host, kID, Qk_PD ) @ #t28) ∧
+  (Host_Sends_Certified_Q_K( TPM, Host, pke, sigma ) @ #t29) ∧
+  (VerifiedCertificate( Verifier, sigma ) @ #t30)
+ ∧
+  (∀ RevealEvent ENTITY #k1.
+    (KeyReveal( RevealEvent, ENTITY ) @ #k1) ⇒ ⊥) ∧
+  (#t01 < #t02) ∧
+  (#t02 < #t04) ∧
+  (#t03 < #t04) ∧
+  (#t04 < #t05) ∧
+  (#t05 < #t06) ∧
+  (#t06 < #t07) ∧
+  (#t07 < #t08) ∧
+  (#t08 < #t09) ∧
+  (#t09 < #t10) ∧
+  (#t10 < #t11) ∧
+  (#t11 < #t12) ∧
+  (#t12 < #t13) ∧
+  (#t13 < #t14) ∧
+  (#t14 < #t15) ∧
+  (#t15 < #t16) ∧
+  (#t16 < #t17) ∧
+  (#t17 < #t18) ∧
+  (#t18 < #t19) ∧
+  (#t19 < #t20) ∧
+  (#t20 < #t21) ∧
+  (#t21 < #t22) ∧
+  (#t22 < #t23) ∧
+  (#t23 < #t24) ∧
+  (#t24 < #t25) ∧
+  (#t25 < #t26) ∧
+  (#t26 < #t27) ∧
+  (#t27 < #t28) ∧
+  (#t28 < #t29) ∧
+  (#t29 < #t30) ∧
+  (∀ event #i #j.
+    (OnlyOnce( event ) @ #i) ∧ (OnlyOnce( event ) @ #j) ⇒ #i = #j) ∧
+  (∀ event #i #j.
+    (CertifyOnlyOnce( event ) @ #i) ∧ (CertifyOnlyOnce( event ) @ #j)
+   ⇒
+    #i = #j)"
+*/
+by sorry
+
+lemma oracle_auth_aliveness_host_very_weak [heuristic={oracle_auth_alive}]:
+  all-traces
+  "∀ pke n #i.
+    (Commit( pke, 'Issuer', n ) @ #i) ⇒
+    ((∃ #j. Issuer_Init( 'Issuer' ) @ #j) ∨
+     (∃ RevealEvent Entity #kr.
+       (KeyReveal( RevealEvent, Entity ) @ #kr) ∧ (Honest( Entity ) @ #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ pke n #i.
+  (Commit( pke, 'Issuer', n ) @ #i)
+ ∧
+  (∀ #j. (Issuer_Init( 'Issuer' ) @ #j) ⇒ ⊥) ∧
+  (∀ RevealEvent Entity #kr.
+    (KeyReveal( RevealEvent, Entity ) @ #kr) ∧ (Honest( Entity ) @ #i) ⇒ ⊥)"
+*/
+by sorry
+
+lemma oracle_auth_aliveness_host [heuristic={oracle_auth_alive}]:
+  all-traces
+  "∀ pke n1 #i.
+    (Commit( pke, 'Issuer', n1 ) @ #i) ⇒
+    ((∃ #k. Alive( 'Issuer' ) @ #k) ∨
+     (∃ RevealEvent Entity #kr.
+       (KeyReveal( RevealEvent, Entity ) @ #kr) ∧ (Honest( Entity ) @ #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ pke n1 #i.
+  (Commit( pke, 'Issuer', n1 ) @ #i)
+ ∧
+  (∀ #k. (Alive( 'Issuer' ) @ #k) ⇒ ⊥) ∧
+  (∀ RevealEvent Entity #kr.
+    (KeyReveal( RevealEvent, Entity ) @ #kr) ∧ (Honest( Entity ) @ #i) ⇒ ⊥)"
+*/
+by sorry
+
+lemma oracle_auth_aliveness_issuer [heuristic={oracle_auth_alive}]:
+  all-traces
+  "∀ pke curlyK1 #i.
+    (Commit( 'Issuer', pke, curlyK1 ) @ #i) ⇒
+    ((∃ Host2 #k. (Alive( Host2 ) @ #k) ∧ (Role( 'Platform' ) @ #k)) ∨
+     (∃ RevealEvent Entity #kr.
+       (KeyReveal( RevealEvent, Entity ) @ #kr) ∧ (Honest( Entity ) @ #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ pke curlyK1 #i.
+  (Commit( 'Issuer', pke, curlyK1 ) @ #i)
+ ∧
+  (∀ Host2 #k. (Alive( Host2 ) @ #k) ∧ (Role( 'Platform' ) @ #k) ⇒ ⊥) ∧
+  (∀ RevealEvent Entity #kr.
+    (KeyReveal( RevealEvent, Entity ) @ #kr) ∧ (Honest( Entity ) @ #i) ⇒ ⊥)"
+*/
+by sorry
+
+lemma oracle_auth_weak_agreement_host [heuristic={oracle_auth_many}]:
+  all-traces
+  "∀ TPM Host pke n1 #i.
+    ((Commit( pke, 'Issuer', n1 ) @ #i) ∧
+     (JoinCompleted( TPM, Host, pke ) @ #i)) ⇒
+    ((∃ n2 #j. Running( 'Issuer', pke, n2 ) @ #j) ∨
+     (∃ RevealEvent Entity #kr.
+       (KeyReveal( RevealEvent, Entity ) @ #kr) ∧ (Honest( Entity ) @ #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ TPM Host pke n1 #i.
+  (Commit( pke, 'Issuer', n1 ) @ #i) ∧
+  (JoinCompleted( TPM, Host, pke ) @ #i)
+ ∧
+  (∀ n2 #j. (Running( 'Issuer', pke, n2 ) @ #j) ⇒ ⊥) ∧
+  (∀ RevealEvent Entity #kr.
+    (KeyReveal( RevealEvent, Entity ) @ #kr) ∧ (Honest( Entity ) @ #i) ⇒ ⊥)"
+*/
+by sorry
+
+lemma oracle_auth_non_injective_agreement_host_issuer [heuristic={oracle_auth_many}]:
+  all-traces
+  "∀ pke n #i.
+    (Commit( pke, 'Issuer', n ) @ #i) ⇒
+    ((∃ #j. Running( 'Issuer', pke, n ) @ #j) ∨
+     (∃ RevealEvent Entity #kr.
+       (KeyReveal( RevealEvent, Entity ) @ #kr) ∧ (Honest( Entity ) @ #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ pke n #i.
+  (Commit( pke, 'Issuer', n ) @ #i)
+ ∧
+  (∀ #j. (Running( 'Issuer', pke, n ) @ #j) ⇒ ⊥) ∧
+  (∀ RevealEvent Entity #kr.
+    (KeyReveal( RevealEvent, Entity ) @ #kr) ∧ (Honest( Entity ) @ #i) ⇒ ⊥)"
+*/
+by sorry
+
+lemma oracle_auth_injective_agreement_host_issuer [heuristic={oracle_auth_many}]:
+  all-traces
+  "∀ pke n #i.
+    (Commit( pke, 'Issuer', n ) @ #i) ⇒
+    ((∃ #j.
+       ((Running( 'Issuer', pke, n ) @ #j) ∧ (#j < #i)) ∧
+       (¬(∃ pke2 #i2. (Commit( pke2, 'Issuer', n ) @ #i2) ∧ (¬(#i2 = #i))))) ∨
+     (∃ RevealEvent Entity #kr.
+       (KeyReveal( RevealEvent, Entity ) @ #kr) ∧ (Honest( Entity ) @ #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ pke n #i.
+  (Commit( pke, 'Issuer', n ) @ #i)
+ ∧
+  (∀ #j.
+    (Running( 'Issuer', pke, n ) @ #j)
+   ⇒
+    ((¬(#j < #i)) ∨
+     (∃ pke2 #i2. (Commit( pke2, 'Issuer', n ) @ #i2) ∧ ¬(#i2 = #i)))) ∧
+  (∀ RevealEvent Entity #kr.
+    (KeyReveal( RevealEvent, Entity ) @ #kr) ∧ (Honest( Entity ) @ #i) ⇒ ⊥)"
+*/
+by sorry
+
+lemma oracle_auth_secrecy_cre [heuristic={oracle_auth_secrecy}]:
+  all-traces
+  "∀ pke cred #i.
+    (Secret( pke, 'Issuer', cred ) @ #i) ⇒
+    ((¬(∃ #k. K( cred ) @ #k)) ∨
+     (∃ RevealEvent Entity #kr.
+       (KeyReveal( RevealEvent, Entity ) @ #kr) ∧ (Honest( Entity ) @ #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ pke cred #i.
+  (Secret( pke, 'Issuer', cred ) @ #i)
+ ∧
+  (∃ #k. (K( cred ) @ #k)) ∧
+  (∀ RevealEvent Entity #kr.
+    (KeyReveal( RevealEvent, Entity ) @ #kr) ∧ (Honest( Entity ) @ #i) ⇒ ⊥)"
+*/
+by sorry
+
+lemma auto_SP2_UserControlledLinkability:
+  all-traces
+  "∀ bsn sigma1 sigma2 f1 f2 #t01 #t02 #t03.
+    ((((UnlinkedSignatures( sigma1, sigma2 ) @ #t01) ∧
+       (¬(sigma1 = sigma2))) ∧
+      (VerifiedCertificateDeAnonymised( bsn, sigma1, f1 ) @ #t02)) ∧
+     (VerifiedCertificateDeAnonymised( bsn, sigma2, f2 ) @ #t03)) ⇒
+    (¬(f1 = f2))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ bsn sigma1 sigma2 f1 f2 #t01 #t02 #t03.
+  (UnlinkedSignatures( sigma1, sigma2 ) @ #t01) ∧
+  (VerifiedCertificateDeAnonymised( bsn, sigma1, f1 ) @ #t02) ∧
+  (VerifiedCertificateDeAnonymised( bsn, sigma2, f2 ) @ #t03)
+ ∧
+  (¬(sigma1 = sigma2)) ∧ (f1 = f2)"
+*/
+by sorry
+
+lemma oracle_SP3_Unforgeability [heuristic={oracle_SP3_Unfo}]:
+  all-traces
+  "∀ TPM Host pke bsn f sigma #t01 #t02.
+    ((((((DeriveDAAKey( TPM, Host, pke, f ) @ #t01) ∧
+         (VerifiedCertificateDeAnonymised( bsn, sigma, f ) @ #t02)) ∧
+        (¬(∃ Event #r1. KeyReveal( Event, TPM ) @ #r1))) ∧
+       (¬(∃ Event #r2. KeyReveal( Event, Host ) @ #r2))) ∧
+      (¬(∃ Event #r3. KeyReveal( Event, pke ) @ #r3))) ∧
+     (¬(∃ Event #ir. KeyReveal( Event, 'Issuer' ) @ #ir))) ⇒
+    (∃ #t03.
+      Host_Sends_Certified_Q_K_With_BSN( TPM, Host, pke, bsn, sigma ) @ #t03)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ TPM Host pke bsn f sigma #t01 #t02.
+  (DeriveDAAKey( TPM, Host, pke, f ) @ #t01) ∧
+  (VerifiedCertificateDeAnonymised( bsn, sigma, f ) @ #t02)
+ ∧
+  (∀ Event #r1. (KeyReveal( Event, TPM ) @ #r1) ⇒ ⊥) ∧
+  (∀ Event #r2. (KeyReveal( Event, Host ) @ #r2) ⇒ ⊥) ∧
+  (∀ Event #r3. (KeyReveal( Event, pke ) @ #r3) ⇒ ⊥) ∧
+  (∀ Event #ir. (KeyReveal( Event, 'Issuer' ) @ #ir) ⇒ ⊥) ∧
+  (∀ #t03.
+    (Host_Sends_Certified_Q_K_With_BSN( TPM, Host, pke, bsn, sigma ) @ #t03)
+   ⇒
+    ⊥)"
+*/
+by sorry
+
+lemma oracle_SP4_NonFrameability [heuristic={oracle_SP4_Non}]:
+  all-traces
+  "∀ bsn sigma1 sigma2 TPM Host pke #t01 #t02.
+    ((((((Host_Sends_Certified_Q_K_With_BSN( TPM, Host, pke, bsn, sigma1
+          ) @ #t01) ∧
+         (LinkedSignatures( bsn, sigma1, sigma2 ) @ #t02)) ∧
+        (¬(sigma1 = sigma2))) ∧
+       (¬(∃ RevealEvent #kr1. KeyReveal( RevealEvent, TPM ) @ #kr1))) ∧
+      (¬(∃ RevealEvent #kr2. KeyReveal( RevealEvent, Host ) @ #kr2))) ∧
+     (¬(∃ RevealEvent #kr3. KeyReveal( RevealEvent, pke ) @ #kr3))) ⇒
+    (∃ #t04.
+      Host_Sends_Certified_Q_K_With_BSN( TPM, Host, pke, bsn, sigma2 ) @ #t04)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ bsn sigma1 sigma2 TPM Host pke #t01 #t02.
+  (Host_Sends_Certified_Q_K_With_BSN( TPM, Host, pke, bsn, sigma1
+   ) @ #t01) ∧
+  (LinkedSignatures( bsn, sigma1, sigma2 ) @ #t02)
+ ∧
+  (¬(sigma1 = sigma2)) ∧
+  (∀ RevealEvent #kr1. (KeyReveal( RevealEvent, TPM ) @ #kr1) ⇒ ⊥) ∧
+  (∀ RevealEvent #kr2. (KeyReveal( RevealEvent, Host ) @ #kr2) ⇒ ⊥) ∧
+  (∀ RevealEvent #kr3. (KeyReveal( RevealEvent, pke ) @ #kr3) ⇒ ⊥) ∧
+  (∀ #t04.
+    (Host_Sends_Certified_Q_K_With_BSN( TPM, Host, pke, bsn, sigma2 ) @ #t04)
+   ⇒
+    ⊥)"
+*/
+by sorry
+
+
+
+end

@@ -1,0 +1,5 @@
+theory Parr1 begin
+rule AR: [ In(x) ] --[ Actfact(actvariablename000001), Actfacu(actvariablename000002) ]-> [ Out(x) ]
+rule CO: [ In(x) ] --> [ Cnclfact(averyverylongvariable01), Cnclfacu(averyverylongvariable2) ]
+rule PR: [ Prmfact(averyverylongvariable01), Prmfacu(averyverylongvariable2) ] --> [ Out(x) ]
+end

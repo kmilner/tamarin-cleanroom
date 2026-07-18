@@ -13,3 +13,5 @@ bilinear, pmult/em	sp14/Joux.spthy
 private, destructor	features/private_function_symbols/test.spthy
 hashing, functions	Tutorial.spthy
 asym-enc, standard	classic/NSLPK3.spthy
+eq-order counter-example (checkpcs), sapic	sapic/fast/GJM-contract/contract.spthy
+eq-order + wide-tuple counter-example	esorics23-bluetooth/models/mesh.spthy

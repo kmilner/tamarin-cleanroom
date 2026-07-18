@@ -1,0 +1,5 @@
+theory Pmac1 begin
+functions: h/1
+macros: m1(x, y) = h(<x, y>), m2() = h('c'), mlongernameAAAAAAAAAAAAAAAA(xlongvariablename1, ylongvariablename2) = h(<xlongvariablename1, ylongvariablename2, xlongvariablename1>)
+rule A: [ In(x) ] --> [ Out(m1(x, x)) ]
+end

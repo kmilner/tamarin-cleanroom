@@ -1,0 +1,5 @@
+theory PeqE begin
+functions: h/2, g/1, k/1
+equations: h(g(x), k(y)) = y, h(<x, y>, k(z)) = z, h(w, k(v)) = v
+rule A: [ In(x) ] --> [ Out(x) ]
+end

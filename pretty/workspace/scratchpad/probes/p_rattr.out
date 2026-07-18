@@ -1,0 +1,28 @@
+theory Prattr
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) R1[color=#a1b2c3, no_derivcheck, role='myrole']:
+   [ In( x ) ] --> [ Out( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) R2[color=#abcdef]:
+   [ In( x ) ] --> [ Out( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) R3[color=#ff0000, no_derivcheck, issapicrule,
+                   role='r3longroleAAAAAAAAAAAA']:
+   [ In( x ) ] --> [ Out( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+
+
+end

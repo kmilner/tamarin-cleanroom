@@ -1,0 +1,53 @@
+theory RuleAttribute
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) test7:
+   [ ] --> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) test5:
+   [ ] --> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) process:
+   [ ] --> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) bla[color=#000000, no_derivcheck, issapicrule,
+                    role='test']:
+   [ ] --> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) test2[no_derivcheck]:
+   [ ] --> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) test4[role='test']:
+   [ ] --> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) test6[role='overwritten']:
+   [ ] --> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) process_backwardcompat:
+   [ ] --> [ ]
+
+  /* has exactly the trivial AC variant */
+
+
+
+end

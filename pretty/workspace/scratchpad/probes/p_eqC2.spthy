@@ -1,0 +1,5 @@
+theory PeqC2 begin
+functions: a0/0, f/2, g/1
+equations: f(zzz, g(w)) = zzz, f(a0, g(w)) = w
+rule A: [ In(x) ] --> [ Out(x) ]
+end

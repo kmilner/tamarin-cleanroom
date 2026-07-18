@@ -1,0 +1,5 @@
+theory Prattr begin
+rule R1 [role='myrole', no_derivcheck, color='#a1b2c3']: [ In(x) ] --> [ Out(x) ]
+rule R2 [color='#AbCdEf']: [ In(x) ] --> [ Out(x) ]
+rule R3 [issapicrule, color='#ff0000', role='r3longroleAAAAAAAAAAAA', no_derivcheck]: [ In(x) ] --> [ Out(x) ]
+end

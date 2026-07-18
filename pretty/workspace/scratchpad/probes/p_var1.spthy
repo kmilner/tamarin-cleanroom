@@ -1,0 +1,4 @@
+theory Pvar1 begin
+builtins: xor
+rule V: [ Fr(~longvariablenameone), Fr(~lv2) ] --> [ Out((~longvariablenameone XOR ~lv2)) ]
+end

@@ -614,14 +614,322 @@ equations:
     assert_eq!(render_signature_block(&s), expected);
 }
 
-// ── whole-signature-block parity: the 10 round-1 files ──────────────────────
+// ── equations: structural sort order (probes p_eqA–p_eqI) ───────────────────
+
+#[test]
+fn equation_order_is_structural_not_source_or_byte() {
+    // probes p_eqA/p_eqB: both declaration orders echo identically, with the
+    // var-argument equation before the app-argument one (head groups in name
+    // byte order; within f, arg1 x < g(x)).
+    let e_var = equation(
+        app("f", vec![msg("x"), app("g", vec![msg("y")])]),
+        msg("x"),
+    );
+    let e_app = equation(
+        app("f", vec![app("g", vec![msg("x")]), app("h", vec![msg("y")])]),
+        msg("y"),
+    );
+    let e_aa = equation(app("aa", vec![app("g", vec![msg("x")])]), msg("x"));
+    let expected = "\
+equations:
+    aa(g(x)) = x,
+    f(x, g(y)) = x,
+    f(g(x), h(y)) = y,
+    fst(<x.1, x.2>) = x.1,
+    snd(<x.1, x.2>) = x.2";
+    let fns = || {
+        vec![
+            fdecl("f", 2, false, false),
+            fdecl("g", 1, false, false),
+            fdecl("h", 1, false, false),
+            fdecl("aa", 1, false, false),
+        ]
+    };
+    for eqs in [
+        vec![e_var.clone(), e_app.clone(), e_aa.clone()],
+        vec![e_aa, e_app, e_var],
+    ] {
+        assert!(render_signature_block(&sig(&[], fns(), eqs)).contains(expected));
+    }
+}
+
+#[test]
+fn variables_sort_below_all_applications() {
+    // probes p_eqC/p_eqC2: f(zzz, …) before f(a0, …) in BOTH declaration
+    // orders — a rank distinction, not name bytes ('z' > 'a', a0 nullary).
+    let e_a0 = equation(
+        app("f", vec![app("a0", vec![]), app("g", vec![msg("w")])]),
+        msg("w"),
+    );
+    let e_zzz = equation(
+        app("f", vec![msg("zzz"), app("g", vec![msg("w")])]),
+        msg("zzz"),
+    );
+    let expected = "\
+equations:
+    f(zzz, g(w)) = zzz,
+    f(a0, g(w)) = w,
+    fst(<x.1, x.2>) = x.1,
+    snd(<x.1, x.2>) = x.2";
+    let fns = || {
+        vec![
+            fdecl("a0", 0, false, false),
+            fdecl("f", 2, false, false),
+            fdecl("g", 1, false, false),
+        ]
+    };
+    for eqs in [
+        vec![e_a0.clone(), e_zzz.clone()],
+        vec![e_zzz, e_a0],
+    ] {
+        assert!(render_signature_block(&sig(&[], fns(), eqs)).contains(expected));
+    }
+}
+
+#[test]
+fn variable_names_compare_bytewise_then_index() {
+    // probe:p_eqD — azz < b (byte order, not shortlex).
+    let s = sig(
+        &[],
+        vec![fdecl("f", 2, false, false), fdecl("g", 1, false, false)],
+        vec![
+            equation(
+                app("f", vec![msg("b"), app("g", vec![msg("b")])]),
+                msg("b"),
+            ),
+            equation(
+                app("f", vec![msg("azz"), app("g", vec![msg("azz")])]),
+                msg("azz"),
+            ),
+        ],
+    );
+    assert!(render_signature_block(&s).contains(
+        "\
+equations:
+    f(azz, g(azz)) = azz,
+    f(b, g(b)) = b,"
+    ));
+    // probe:p_eqH — user `x` (index 0) sorts before builtin `x.1`.
+    let s2 = sig(
+        &[],
+        vec![],
+        vec![equation(
+            app("fst", vec![Term::Pair(vec![msg("x"), msg("y")])]),
+            msg("x"),
+        )],
+    );
+    assert!(render_signature_block(&s2).contains(
+        "equations: fst(<x, y>) = x, fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2"
+    ));
+}
+
+#[test]
+fn tuples_compare_as_right_nested_pair_applications() {
+    // probe:p_eqE — h(w, …) < h(g(x), …) < h(<x, y>, …): var rank first,
+    // then head names "g" < "pair"; probe:p_eqG — h(<x, y>, …) < h(z1(x), …)
+    // ("pair" < "z1"; arity-first would order z1/1 before pair/2).
+    let s = sig(
+        &[],
+        vec![
+            fdecl("h", 2, false, false),
+            fdecl("g", 1, false, false),
+            fdecl("k", 1, false, false),
+            fdecl("z1", 1, false, false),
+        ],
+        vec![
+            equation(
+                app("h", vec![app("z1", vec![msg("x")]), app("k", vec![msg("q")])]),
+                msg("q"),
+            ),
+            equation(
+                app(
+                    "h",
+                    vec![app("g", vec![msg("x")]), app("k", vec![msg("y")])],
+                ),
+                msg("y"),
+            ),
+            equation(
+                app(
+                    "h",
+                    vec![
+                        Term::Pair(vec![msg("x"), msg("y")]),
+                        app("k", vec![msg("z")]),
+                    ],
+                ),
+                msg("z"),
+            ),
+            equation(
+                app("h", vec![msg("w"), app("k", vec![msg("v")])]),
+                msg("v"),
+            ),
+        ],
+    );
+    assert!(render_signature_block(&s).contains(
+        "\
+    h(w, k(v)) = v,
+    h(g(x), k(y)) = y,
+    h(<x, y>, k(z)) = z,
+    h(z1(x), k(q)) = q,"
+    ));
+    // probe:p_eqI — <x, zz> before <x, b, c>: the binary right-nested view
+    // compares zz (var) against pair(b, c) (app); the flattened elementwise
+    // view (b < zz) would order the 3-tuple first.
+    let s2 = sig(
+        &[],
+        vec![fdecl("h", 2, false, false), fdecl("k", 1, false, false)],
+        vec![
+            equation(
+                app(
+                    "h",
+                    vec![
+                        Term::Pair(vec![msg("x"), msg("b"), msg("c")]),
+                        app("k", vec![msg("y")]),
+                    ],
+                ),
+                msg("y"),
+            ),
+            equation(
+                app(
+                    "h",
+                    vec![
+                        Term::Pair(vec![msg("x"), msg("zz")]),
+                        app("k", vec![msg("w")]),
+                    ],
+                ),
+                msg("w"),
+            ),
+        ],
+    );
+    assert!(render_signature_block(&s2).contains(
+        "\
+    h(<x, zz>, k(w)) = w,
+    h(<x, b, c>, k(y)) = y,"
+    ));
+}
+
+#[test]
+fn rhs_breaks_lhs_ties() {
+    // probes p_eqF/p_eqF2 [convergent]: identical lhs — `= x` precedes `= y`
+    // in both declaration orders, so the rhs participates in the order.
+    let e_x = equation(
+        app("f", vec![app("g", vec![msg("x")]), app("h", vec![msg("y")])]),
+        msg("x"),
+    );
+    let e_y = equation(
+        app("f", vec![app("g", vec![msg("x")]), app("h", vec![msg("y")])]),
+        msg("y"),
+    );
+    let expected = "\
+equations [convergent]:
+    f(g(x), h(y)) = x,
+    f(g(x), h(y)) = y,";
+    for eqs in [vec![e_y.clone(), e_x.clone()], vec![e_x, e_y]] {
+        let s = Signature {
+            builtins: vec![],
+            functions: vec![
+                fdecl("f", 2, false, false),
+                fdecl("g", 1, false, false),
+                fdecl("h", 1, false, false),
+            ],
+            equations: eqs,
+            convergent: true,
+        };
+        assert!(render_signature_block(&s).contains(expected));
+    }
+}
+
+// ── wide-tuple wrap shapes (probe:p_pw1; target:mesh k2) ────────────────────
+
+#[test]
+fn wide_tuple_wrap_shapes() {
+    // probe:p_pw1 — the four break shapes of an over-wide tuple:
+    //   wfa: one-line elements fill at (col of '<')+1, '>' beside the last;
+    //   wfb: first element's one-liner cannot sit beside '<' → '<' ALONE;
+    //   wfc: last element multi-line → '>' alone at the column of '<';
+    //   wfd: same construction inside a LHS argument position.
+    let v = |i: usize| msg(&format!("averyverylongname000{i}"));
+    let x = || msg("xlongvariablename1");
+    let y = || msg("ylongvariablename2");
+    let wrap = |a: Term, b: Term, c: Term| {
+        app("wrapfnAAAAAAAAAAAAAAAAAA", vec![a, b, c])
+    };
+    let s = sig(
+        &[],
+        vec![
+            fdecl("wfa", 4, false, false),
+            fdecl("wfb", 2, false, false),
+            fdecl("wfc", 2, false, false),
+            fdecl("wrapfnAAAAAAAAAAAAAAAAAA", 3, false, false),
+            fdecl("wfd", 2, false, false),
+            fdecl("k", 1, false, false),
+        ],
+        vec![
+            equation(
+                app("wfa", vec![v(1), v(2), v(3), v(4)]),
+                Term::Pair(vec![v(1), v(2), v(3), v(4)]),
+            ),
+            equation(
+                app("wfb", vec![x(), y()]),
+                Term::Pair(vec![wrap(x(), y(), x()), y()]),
+            ),
+            equation(
+                app("wfc", vec![x(), y()]),
+                Term::Pair(vec![y(), wrap(x(), y(), x())]),
+            ),
+            equation(
+                app(
+                    "wfd",
+                    vec![
+                        Term::Pair(vec![v(1), v(2), v(3), v(4)]),
+                        app("k", vec![msg("x")]),
+                    ],
+                ),
+                msg("x"),
+            ),
+        ],
+    );
+    // Byte-exact from probe:p_pw1.out — note the trailing spaces where a
+    // fill line ends with an element's attached ", ".
+    let expected = [
+        "// Function signature and definition of the equational theory E",
+        "",
+        "functions: fst/1, k/1, pair/2, snd/1, wfa/4, wfb/2, wfc/2, wfd/2,",
+        "           wrapfnAAAAAAAAAAAAAAAAAA/3",
+        "equations:",
+        "    fst(<x.1, x.2>) = x.1,",
+        "    snd(<x.1, x.2>) = x.2,",
+        "    wfa(averyverylongname0001, averyverylongname0002, averyverylongname0003,",
+        "        averyverylongname0004)",
+        "  = <averyverylongname0001, averyverylongname0002, averyverylongname0003, ",
+        "     averyverylongname0004>,",
+        "    wfb(xlongvariablename1, ylongvariablename2)",
+        "  = <",
+        "     wrapfnAAAAAAAAAAAAAAAAAA(xlongvariablename1, ylongvariablename2,",
+        "                              xlongvariablename1), ",
+        "     ylongvariablename2>,",
+        "    wfc(xlongvariablename1, ylongvariablename2)",
+        "  = <ylongvariablename2, ",
+        "     wrapfnAAAAAAAAAAAAAAAAAA(xlongvariablename1, ylongvariablename2,",
+        "                              xlongvariablename1)",
+        "    >,",
+        "    wfd(<averyverylongname0001, averyverylongname0002, ",
+        "         averyverylongname0003, averyverylongname0004>,",
+        "        k(x))",
+        "  = x",
+    ]
+    .join("\n");
+    assert_eq!(render_signature_block(&s), expected);
+}
+
+// ── whole-signature-block parity: the 12 round-1 files ──────────────────────
+// (the original 10 plus the two Part-1 counter-examples contract/mesh.)
 // Fixtures are the SOURCE declarations of each file (readable inputs);
 // expected strings are the corresponding lines of round1/targets/<f>.hs.txt.
 // `parity_blocks_match_capture_files` additionally re-extracts each block
 // straight from the capture file and byte-compares, guarding the literals
 // against transcription slips (it self-skips once the capture dir is gone).
 
-/// The 10 fixtures, paired with their capture-file basename.
+/// The 12 fixtures, paired with their capture-file basename.
 fn round1_fixtures() -> Vec<(&'static str, Signature)> {
     vec![
         (
@@ -711,7 +1019,273 @@ fn round1_fixtures() -> Vec<(&'static str, Signature)> {
                 )],
             ),
         ),
+        (
+            "sapic_fast_GJM-contract_contract.spthy.hs.txt",
+            contract_fixture(),
+        ),
+        (
+            "esorics23-bluetooth_models_mesh.spthy.hs.txt",
+            mesh_fixture(),
+        ),
     ]
+}
+
+/// sapic/fast/GJM-contract/contract.spthy — the equation-order
+/// counter-example: its two checkpcs equations echo in the OPPOSITE of
+/// rendered-byte order (target:contract).
+fn contract_fixture() -> Signature {
+    sig(
+        &["signing"],
+        vec![
+            fdecl("pcs", 3, false, false),
+            fdecl("checkpcs", 5, false, false),
+            fdecl("convertpcs", 2, false, false),
+            fdecl("check_getmsg", 2, false, false),
+            fdecl("fakepcs", 4, false, false),
+        ],
+        vec![
+            equation(
+                app(
+                    "check_getmsg",
+                    vec![
+                        app("sign", vec![msg("xm"), msg("xsk")]),
+                        app("pk", vec![msg("xsk")]),
+                    ],
+                ),
+                msg("xm"),
+            ),
+            equation(
+                app(
+                    "checkpcs",
+                    vec![
+                        msg("xc"),
+                        app("pk", vec![msg("xsk")]),
+                        msg("ypk"),
+                        msg("zpk"),
+                        app(
+                            "pcs",
+                            vec![
+                                app("sign", vec![msg("xc"), msg("xsk")]),
+                                msg("ypk"),
+                                msg("zpk"),
+                            ],
+                        ),
+                    ],
+                ),
+                app("true", vec![]),
+            ),
+            equation(
+                app(
+                    "convertpcs",
+                    vec![
+                        msg("zsk"),
+                        app(
+                            "pcs",
+                            vec![
+                                app("sign", vec![msg("xc"), msg("xsk")]),
+                                msg("ypk"),
+                                app("pk", vec![msg("zsk")]),
+                            ],
+                        ),
+                    ],
+                ),
+                app("sign", vec![msg("xc"), msg("xsk")]),
+            ),
+            equation(
+                app(
+                    "checkpcs",
+                    vec![
+                        msg("xc"),
+                        msg("xpk"),
+                        app("pk", vec![msg("ysk")]),
+                        msg("zpk"),
+                        app(
+                            "fakepcs",
+                            vec![msg("xpk"), msg("ysk"), msg("zpk"), msg("xc")],
+                        ),
+                    ],
+                ),
+                app("true", vec![]),
+            ),
+        ],
+    )
+}
+
+/// esorics23-bluetooth/models/mesh.spthy — the second equation-order
+/// counter-example (get_b1/get_b2/aes_cmac groups) AND the wide-tuple wrap
+/// witness (the k2 equation's rhs; target:mesh).
+fn mesh_fixture() -> Signature {
+    let c0 = |n: &str| app(n, vec![]);
+    let cm = |a: Term, b: Term| app("aes_cmac", vec![a, b]);
+    // aes_cmac(aes_cmac(s1(smk2), n), p) — the k2 key-derivation round.
+    let round = |p: Term| {
+        cm(cm(app("s1", vec![app("smk2", vec![])]), msg("n")), p)
+    };
+    let t1 = round(Term::Pair(vec![msg("p"), c0("nb_one")]));
+    let t2 = round(Term::Pair(vec![t1.clone(), msg("p"), c0("nb_two")]));
+    let t3 = round(Term::Pair(vec![t2.clone(), msg("p"), c0("nb_three")]));
+    sig(
+        &["diffie-hellman", "symmetric-encryption"],
+        vec![
+            fdecl("aes_cmac", 2, false, false),
+            fdecl("null", 0, false, false),
+            fdecl("smk2", 0, false, false),
+            fdecl("smk3", 0, false, false),
+            fdecl("smk4", 0, false, false),
+            fdecl("nb_one", 0, false, false),
+            fdecl("nb_two", 0, false, false),
+            fdecl("nb_three", 0, false, false),
+            fdecl("id6", 0, false, false),
+            fdecl("id7", 0, false, false),
+            fdecl("s1", 1, false, false),
+            fdecl("k1", 3, false, false),
+            fdecl("k2", 2, false, false),
+            fdecl("k3", 1, false, false),
+            fdecl("k4", 1, false, false),
+            fdecl("aes_ccm_enc", 3, false, false),
+            fdecl("aes_ccm_dec", 3, false, false),
+            fdecl("aes_ccm_verify", 4, false, false),
+            fdecl("net_key", 0, true, false),
+            fdecl("app_key", 0, true, false),
+            fdecl("true_val", 0, false, false),
+            fdecl("prov_invite", 0, false, false),
+            fdecl("prov_capabilities", 0, false, false),
+            fdecl("prov_start", 0, false, false),
+            fdecl("prov_complete", 0, false, false),
+            fdecl("static_oob", 0, true, false),
+            fdecl("e", 3, false, false),
+            fdecl("extract_e", 1, false, false),
+            fdecl("get_b1", 3, false, false),
+            fdecl("get_b2", 3, false, false),
+        ],
+        vec![
+            equation(
+                app("s1", vec![msg("m")]),
+                cm(c0("null"), msg("m")),
+            ),
+            equation(
+                app("k1", vec![msg("n"), msg("salt"), msg("p")]),
+                cm(cm(msg("salt"), msg("n")), msg("p")),
+            ),
+            equation(
+                app("k2", vec![msg("n"), msg("p")]),
+                Term::Pair(vec![t1, t2, t3]),
+            ),
+            equation(
+                app("k3", vec![msg("n")]),
+                cm(cm(app("s1", vec![app("smk3", vec![])]), msg("n")), c0("id7")),
+            ),
+            equation(
+                app("k4", vec![msg("n")]),
+                cm(cm(app("s1", vec![app("smk4", vec![])]), msg("n")), c0("id6")),
+            ),
+            equation(
+                app(
+                    "aes_ccm_dec",
+                    vec![
+                        msg("k"),
+                        msg("n"),
+                        app("aes_ccm_enc", vec![msg("k"), msg("n"), msg("m")]),
+                    ],
+                ),
+                msg("m"),
+            ),
+            equation(
+                app(
+                    "aes_ccm_enc",
+                    vec![
+                        msg("k"),
+                        msg("n"),
+                        app("aes_ccm_dec", vec![msg("k"), msg("n"), msg("m")]),
+                    ],
+                ),
+                msg("m"),
+            ),
+            equation(
+                app(
+                    "aes_ccm_verify",
+                    vec![
+                        app("aes_ccm_enc", vec![msg("k"), msg("n"), msg("m")]),
+                        msg("k"),
+                        msg("n"),
+                        msg("m"),
+                    ],
+                ),
+                c0("true_val"),
+            ),
+            equation(
+                app(
+                    "extract_e",
+                    vec![app("e", vec![msg("t"), msg("s"), msg("n")])],
+                ),
+                msg("n"),
+            ),
+            equation(
+                app(
+                    "get_b1",
+                    vec![
+                        cm(msg("k"), Term::Pair(vec![msg("b1"), msg("b2")])),
+                        msg("k"),
+                        msg("b2"),
+                    ],
+                ),
+                msg("b1"),
+            ),
+            equation(
+                app(
+                    "get_b2",
+                    vec![
+                        cm(msg("k"), Term::Pair(vec![msg("b1"), msg("b2")])),
+                        msg("k"),
+                        msg("b1"),
+                    ],
+                ),
+                msg("b2"),
+            ),
+            equation(
+                app(
+                    "get_b1",
+                    vec![
+                        msg("cnf"),
+                        msg("k"),
+                        app("get_b2", vec![msg("cnf"), msg("dh"), msg("b1")]),
+                    ],
+                ),
+                msg("b1"),
+            ),
+            equation(
+                app(
+                    "get_b2",
+                    vec![
+                        msg("cnf"),
+                        msg("k"),
+                        app("get_b1", vec![msg("cnf"), msg("dh"), msg("b2")]),
+                    ],
+                ),
+                msg("b2"),
+            ),
+            equation(
+                cm(
+                    msg("k"),
+                    Term::Pair(vec![
+                        app("get_b1", vec![msg("c"), msg("k"), msg("b2")]),
+                        msg("b2"),
+                    ]),
+                ),
+                msg("c"),
+            ),
+            equation(
+                cm(
+                    msg("k"),
+                    Term::Pair(vec![
+                        msg("b1"),
+                        app("get_b2", vec![msg("c"), msg("k"), msg("b1")]),
+                    ]),
+                ),
+                msg("c"),
+            ),
+        ],
+    )
 }
 
 /// Signature block of a capture: the `// Function signature …` header, the

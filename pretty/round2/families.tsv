@@ -1,0 +1,18 @@
+# Round-2 byte targets — sub-target R2 (rule rendering).
+# Curated corpus files spanning the rule-surface variety: persistent facts,
+# AC-variant blocks (1/2/3-digit numbering, multi-line substitution rhs),
+# rule attributes, fact annotations, loop breakers, no-action arrow, macro
+# surface, xor/dh/multiset/nat terms, wide fact-list wraps.
+# Format: <feature tags><TAB><relpath under examples/>
+dh variants (7, 1-digit numbering)	cav13/DH_example.spthy
+xor variants	features/xor/xor.spthy
+bilinear, 160 variants (3-digit numbering), multiset facts	sp14/Joux.spthy
+persistent facts, fact-list wraps	classic/NSLPK3.spthy
+basics, h/aenc rules	Tutorial.spthy
+macros:-line + AC-rule-differs comment	regression/trace/issue777.spthy
+rule attributes (color/role/no_derivcheck/issapicrule), attr wrap	regression/trace/issue713-ruleattributes.spthy
+loop breaker (single premise)	loops/Minimal_Loop_Example.spthy
+fact annotations [+]/[-]/no_precomp, loop breakers, 73-col one-liner	regression/trace/seqdfsneeded.spthy
+wide fact wraps, multi-line variant substitutions, empty-arg facts	esorics23-bluetooth/models/mesh.spthy
+nat/multiset terms in rules	features/multiset/NumberSubtermTests.spthy
+xor+dh mix, 2-digit variant numbering	csf18-xor/CH07.spthy

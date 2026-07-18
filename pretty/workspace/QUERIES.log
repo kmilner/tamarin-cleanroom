@@ -34,3 +34,29 @@ probes/e_dup.spthy -- exact duplicate user equations dedup
 probes/b_dupline.spthy -- duplicate builtins dedup + canonical order (multiset before xor)
 probes/t_xorwide.spthy -- FAILED (4-way xor variant computation exceeds 500s timeout)
 probes/t_xorwide3.spthy -- xor wide-wrap: same fcat construction as union (break after ⊕, continuation after open paren)
+sapic/fast/GJM-contract/contract.spthy (corpus) -- Part-1 counter-example capture: checkpcs equations echo OPPOSITE of rendered-byte order; source order also refuted
+esorics23-bluetooth/models/mesh.spthy (corpus) -- Part-1 counter-example capture: get_b1/get_b2/aes_cmac same-head groups violate byte order; k2 equation is the wide-tuple wrap witness
+probes/p_eqA.spthy p_eqB.spthy -- same equations, reversed declaration order: identical echoes -> order source-independent; var-arg eq before app-arg eq (structural)
+probes/p_eqC.spthy p_eqC2.spthy -- f(zzz,..) before f(a0,..) both orders: variables rank below ALL applications (refutes rendered-byte order)
+probes/p_eqD.spthy -- azz before b: variable names compare bytewise, not shortlex
+probes/p_eqE.spthy -- var < g(..) < <x, y>: tuple sorts as an application named "pair" after g
+probes/p_eqF.spthy p_eqF2.spthy -- [convergent] identical-lhs pair: "= x" before "= y" both orders: rhs participates, breaks lhs ties
+probes/p_eqG.spthy -- <x, y> before z1(x): "pair" < "z1" by name; refutes arity-first app comparison
+probes/p_eqH.spthy -- user fst(<x, y>)=x before builtin fst(<x.1, x.2>)=x.1: var compare = name then index
+probes/p_eqI.spthy -- <x, zz> before <x, b, c>: tuples compare as RIGHT-NESTED binary pair apps, not flattened lists
+probes/p_pw1.spthy -- wide-tuple wrap shapes wfa-wfd: elements fill at col('<')+1; '<' alone when first elem one-liner cannot sit beside it; '>' beside last elem unless that elem is multi-line (then own line at col('<')); same in lhs argument position
+round1/fetch_hs_targets.sh (contract + mesh appended to families.tsv) -- materialize the two Part-1 counter-example echoes as round-1 byte targets (verified identical to the scratchpad captures)
+# ── R2 (rule rendering) probes ──
+probes/c_loop.out (loops/Minimal_Loop_Example.spthy) -- loop-breaker line spelling/placement; theory-level "looping facts with injective instances" comment
+probes/c_attrs.out (regression/trace/issue713-ruleattributes.spthy) -- rule-attribute echo: canonical order, color normalization, process/external dropped, attr wrap after [
+probes/c_annot.out (regression/trace/seqdfsneeded.spthy) -- fact annotation echo [-, no_precomp]; 73-col one-line premise; lemma-before-rule item order
+probes/c_restrict.out (asiaccs20-eccDAA TPM_DAA BSN) -- embedded _restrict rules: no rule-level restriction surface in echo (lifted to top-level restrictions)
+probes/p_lb2.spthy -- plural "loop breakers: [0,1]" comma without space
+probes/p_fann.spthy -- annotation canonical order: [no_precomp,+] echoes [+, no_precomp]; broken 3-row body
+probes/p_var1.spthy -- variant substitution layout: lhs field 6 via overlap ($$ nest 6), overlong lhs pushes "= rhs" to next line at col 6; 4-space separator line between groups
+probes/p_rattr.spthy -- FIRST RUN FAILED (color 'abc' not RGB); rerun: canonical attr order color/no_derivcheck/issapicrule/role, last color/role wins, #hex lowercased
+probes/p_mac1.spthy -- macros: block all-or-nothing item list aligned after "macros: "; fact-style head with ATTACHED ")"; ") =  body" two-space; body always beside
+probes/p_lbvar.spthy -- AC rule's own loop-breaker line renders INSIDE the variants comment at col 4 AFTER the substitution list
+probes/c_ch07.out (csf18-xor/CH07.spthy) -- 2-digit variant numbering right-aligned (" 9."/"12."); timing check for curation
+probes/p_arr1.spthy -- bracket-group boundary: actions stay beside "--[" while "]->" drops (arrow = same nested-sep as [ ] groups); conclusion/premise one-line kept at exactly 73
+round2/fetch_hs_targets.sh (12 curated files, families in round2/families.tsv) -- materialize the round-2 rule-parity byte targets (72 rule blocks)
