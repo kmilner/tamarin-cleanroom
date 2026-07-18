@@ -30,8 +30,9 @@
 //! shorter than a later one (e.g. two arguments then four wider ones) — which a
 //! greedy fill can never do and which the reference's output requires (see
 //! [`budget_line_len`] and the `ragged_fill_line0_shorter_than_line1` test). How
-//! the cells of one record group share the budget is a separate, probe-derived
-//! proportional allocation and lives in [`crate::generate::group_widths`].
+//! the cells of one record group share the row is a separate, probe-derived
+//! two-layer (wrap trigger + fill share) allocation and lives in
+//! [`crate::generate::group_widths`].
 
 use crate::pretty::{beside_op, char as pchar, fcat, fsep, nest, render_page, sep, text, vcat, Doc};
 

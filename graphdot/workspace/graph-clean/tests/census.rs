@@ -262,8 +262,7 @@ fn corpus_census() {
                 (&flat.premises, &raw.premises),
                 (&flat.conclusions, &raw.conclusions),
             ] {
-                let widths: Vec<usize> = flats.iter().map(|t| t.chars().count()).collect();
-                let ws = group_widths(&widths);
+                let ws = group_widths(flats);
                 for ((f, r), w) in flats.iter().zip(raws).zip(ws) {
                     let got = wrap_cell_dot(f, w as isize);
                     all_pc += 1;

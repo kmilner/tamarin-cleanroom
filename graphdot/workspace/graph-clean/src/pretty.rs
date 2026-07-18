@@ -18,7 +18,20 @@
 //! The annotation machinery of the original is elided (this port renders to a
 //! plain `String`), so `TextBeside` carries the text and its column width
 //! directly instead of an `AnnotDetails`.
+//!
+//! **Evaluation strategy.** The Haskell original relies on lazy evaluation: the
+//! combinators (`sep`/`fill`/`beside`/`aboveNest`) describe exponentially large
+//! sets of layouts as union trees, but `best` only ever forces the branches it
+//! inspects, and `fits` only forces the *first line* of a candidate. A naive
+//! strict port materializes those whole trees (exponential in the number of
+//! fill elements). This port mirrors the laziness explicitly: recursive
+//! combinator continuations are built as [`Doc::Lazy`] thunks (forced on
+//! demand, memoized), and the `nicest` union choice uses [`fits_ahead`], which
+//! decides `fits (min w r - sl) (best' ...)` by walking the *unresolved*
+//! branch's first line only. Both are pure evaluation-order mirrors of the
+//! sanctioned semantics: the resolved layout is byte-identical.
 
+use std::cell::RefCell;
 use std::rc::Rc;
 
 /// The abstract document type. A `Doc` denotes a *set* of layouts; a `Doc` with
@@ -43,12 +56,61 @@ pub enum Doc {
     Beside(Rc<Doc>, bool, Rc<Doc>),
     /// `Above u never_overlap l` — `never_overlap` = true forbids overlap.
     Above(Rc<Doc>, bool, Rc<Doc>),
+    /// A suspended sub-document (the strict mirror of a Haskell thunk):
+    /// computed on first [`force`], then memoized. Only ever wraps an already
+    /// *reduced* document (an RDoc — no `Beside`/`Above`).
+    Lazy(Rc<LazyDoc>),
+}
+
+/// The shared state of a [`Doc::Lazy`] thunk.
+pub struct LazyDoc(RefCell<LazyState>);
+
+enum LazyState {
+    Pending(Option<Box<dyn FnOnce() -> Doc>>),
+    Forced(Doc),
+}
+
+impl std::fmt::Debug for LazyDoc {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match &*self.0.borrow() {
+            LazyState::Pending(_) => write!(f, "Lazy(<pending>)"),
+            LazyState::Forced(d) => write!(f, "Lazy({:?})", d),
+        }
+    }
 }
 
 use Doc::*;
 
 fn rc(d: Doc) -> Rc<Doc> {
     Rc::new(d)
+}
+
+/// Suspend a document computation (a thunk). The closure runs at most once.
+fn lazy<F: FnOnce() -> Doc + 'static>(f: F) -> Doc {
+    Lazy(Rc::new(LazyDoc(RefCell::new(LazyState::Pending(Some(
+        Box::new(f),
+    ))))))
+}
+
+/// Force a document to its outermost non-`Lazy` constructor (shallow clone —
+/// children stay shared via `Rc`). Thunks are computed once and memoized;
+/// chains of thunks collapse to the final value.
+fn force(d: &Doc) -> Doc {
+    match d {
+        Lazy(l) => {
+            if let LazyState::Forced(v) = &*l.0.borrow() {
+                return v.clone();
+            }
+            let f = match &mut *l.0.borrow_mut() {
+                LazyState::Pending(f) => f.take().expect("re-entrant force"),
+                LazyState::Forced(v) => return v.clone(),
+            };
+            let v = force(&f());
+            *l.0.borrow_mut() = LazyState::Forced(v.clone());
+            v
+        }
+        _ => d.clone(),
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -80,7 +142,7 @@ pub fn empty() -> Doc {
 
 /// Is this the empty document?
 pub fn is_empty(d: &Doc) -> bool {
-    matches!(d, Empty)
+    matches!(force(d), Empty)
 }
 
 
@@ -121,19 +183,20 @@ pub fn nest(k: isize, p: &Doc) -> Doc {
 }
 
 fn mk_nest(k: isize, d: &Doc) -> Doc {
-    match d {
+    let df = force(d);
+    match &df {
         Nest(k1, p) => mk_nest(k + k1, p),
         NoDoc => NoDoc,
         Empty => Empty,
-        _ if k == 0 => d.clone(),
-        _ => nest_(k, rc(d.clone())),
+        _ if k == 0 => df,
+        _ => nest_(k, rc(df)),
     }
 }
 
 fn mk_union(p: Doc, q: Doc) -> Doc {
-    match p {
+    match force(&p) {
         Empty => Empty,
-        _ => union_(rc(p), rc(q)),
+        pf => union_(rc(pf), rc(q)),
     }
 }
 
@@ -158,42 +221,54 @@ fn beside_(p: Doc, g: bool, q: Doc) -> Doc {
     }
 }
 
-/// `beside p g q` (spec: `p <g> q`) over reduced docs.
+/// `beside p g q` (spec: `p <g> q`) over reduced docs. Union branches and the
+/// text-tail continuation are suspended ([`lazy`]), mirroring the sanctioned
+/// source's (non-`$!`) laziness.
 fn beside(p: &Doc, g: bool, q: &Doc) -> Doc {
-    match p {
+    let pf = force(p);
+    match &pf {
         NoDoc => NoDoc,
-        Union(p1, p2) => union_(rc(beside(p1, g, q)), rc(beside(p2, g, q))),
+        Union(p1, p2) => {
+            let (p1, p2, qa, qb) = (p1.clone(), p2.clone(), q.clone(), q.clone());
+            union_(
+                rc(lazy(move || beside(&p1, g, &qa))),
+                rc(lazy(move || beside(&p2, g, &qb))),
+            )
+        }
         Empty => q.clone(),
         Nest(k, p1) => nest_(*k, rc(beside(p1, g, q))),
         Beside(p1, g1, q1) => {
             if *g1 == g {
                 beside(p1, *g1, &beside(q1, g, q))
             } else {
-                beside(&reduce_doc(p), g, q)
+                beside(&reduce_doc(&pf), g, q)
             }
         }
-        Above(..) => beside(&reduce_doc(p), g, q),
+        Above(..) => beside(&reduce_doc(&pf), g, q),
         NilAbove(p1) => nil_above_(rc(beside(p1, g, q))),
         TextBeside(s, l, p1) => {
-            let rest = match p1.as_ref() {
-                Empty => nil_beside(g, q),
-                _ => beside(p1, g, q),
-            };
+            let (p1, q1) = (p1.clone(), q.clone());
+            let rest = lazy(move || match force(&p1) {
+                Empty => nil_beside(g, &q1),
+                _ => beside(&p1, g, &q1),
+            });
             text_beside_(s.clone(), *l, rc(rest))
         }
+        Lazy(_) => unreachable!("beside: forced doc"),
     }
 }
 
 /// `nilBeside g p` (spec: `text "" <g> p`).
 fn nil_beside(g: bool, p: &Doc) -> Doc {
-    match p {
+    let pf = force(p);
+    match &pf {
         Empty => Empty,
         Nest(_, p1) => nil_beside(g, p1),
         _ => {
             if g {
-                TextBeside(Rc::from(" "), 1, rc(p.clone()))
+                TextBeside(Rc::from(" "), 1, rc(pf))
             } else {
-                p.clone()
+                pf
             }
         }
     }
@@ -221,49 +296,64 @@ fn above_(p: Doc, g: bool, q: Doc) -> Doc {
 }
 
 fn above(p: &Doc, g: bool, q: &Doc) -> Doc {
-    match p {
+    let pf = force(p);
+    match &pf {
         Above(p1, g1, q1) => above(p1, *g1, &above(q1, g, q)),
-        Beside(..) => above_nest(&reduce_doc(p), g, 0, &reduce_doc(q)),
-        _ => above_nest(p, g, 0, &reduce_doc(q)),
+        Beside(..) => above_nest(&reduce_doc(&pf), g, 0, &reduce_doc(q)),
+        _ => above_nest(&pf, g, 0, &reduce_doc(q)),
     }
 }
 
-/// `aboveNest p g k q` (spec: `p $g$ (nest k q)`).
+/// `aboveNest p g k q` (spec: `p $g$ (nest k q)`). Union branches and the
+/// recursive continuations are suspended, mirroring the sanctioned laziness.
 fn above_nest(p: &Doc, g: bool, k: isize, q: &Doc) -> Doc {
-    match p {
+    let pf = force(p);
+    match &pf {
         NoDoc => NoDoc,
-        Union(p1, p2) => union_(
-            rc(above_nest(p1, g, k, q)),
-            rc(above_nest(p2, g, k, q)),
-        ),
+        Union(p1, p2) => {
+            let (p1, p2, qa, qb) = (p1.clone(), p2.clone(), q.clone(), q.clone());
+            union_(
+                rc(lazy(move || above_nest(&p1, g, k, &qa))),
+                rc(lazy(move || above_nest(&p2, g, k, &qb))),
+            )
+        }
         Empty => mk_nest(k, q),
-        Nest(k1, p1) => nest_(*k1, rc(above_nest(p1, g, k - k1, q))),
-        NilAbove(p1) => nil_above_(rc(above_nest(p1, g, k, q))),
+        Nest(k1, p1) => {
+            let (k1, p1, q1) = (*k1, p1.clone(), q.clone());
+            nest_(k1, rc(lazy(move || above_nest(&p1, g, k - k1, &q1))))
+        }
+        NilAbove(p1) => {
+            let (p1, q1) = (p1.clone(), q.clone());
+            nil_above_(rc(lazy(move || above_nest(&p1, g, k, &q1))))
+        }
         TextBeside(s, l, p1) => {
             let k1 = k - (*l as isize);
-            let rest = match p1.as_ref() {
-                Empty => nil_above_nest(g, k1, q),
-                _ => above_nest(p1, g, k1, q),
-            };
+            let (p1, q1) = (p1.clone(), q.clone());
+            let rest = lazy(move || match force(&p1) {
+                Empty => nil_above_nest(g, k1, &q1),
+                _ => above_nest(&p1, g, k1, &q1),
+            });
             text_beside_(s.clone(), *l, rc(rest))
         }
         Above(..) => panic!("aboveNest Above"),
         Beside(..) => panic!("aboveNest Beside"),
+        Lazy(_) => unreachable!("aboveNest: forced doc"),
     }
 }
 
 /// `nilAboveNest g k q` (spec: `text s <> (text "" $g$ nest k q)`).
 fn nil_above_nest(g: bool, k: isize, q: &Doc) -> Doc {
-    match q {
+    let qf = force(q);
+    match &qf {
         Empty => Empty,
         Nest(k1, q1) => nil_above_nest(g, k + k1, q1),
         _ => {
             if !g && k > 0 {
                 let ind = indent(k);
                 let len = ind.chars().count();
-                text_beside_(Rc::from(ind.as_str()), len, rc(q.clone()))
+                text_beside_(Rc::from(ind.as_str()), len, rc(qf))
             } else {
-                nil_above_(rc(mk_nest(k, q)))
+                nil_above_(rc(mk_nest(k, &qf)))
             }
         }
     }
@@ -393,30 +483,48 @@ fn sep_x(x: bool, ds: Vec<Doc>) -> Doc {
 }
 
 fn sep1(g: bool, p: &Doc, k: isize, ys: &[Doc]) -> Doc {
-    match p {
+    let pf = force(p);
+    match &pf {
         NoDoc => NoDoc,
-        Union(p1, q) => union_(
-            rc(sep1(g, p1, k, ys)),
-            rc(above_nest(q, false, k, &reduce_doc(&vcat(ys.to_vec())))),
-        ),
+        Union(p1, q) => {
+            let (p1, q) = (p1.clone(), q.clone());
+            let (ya, yb) = (ys.to_vec(), ys.to_vec());
+            union_(
+                rc(lazy(move || sep1(g, &p1, k, &ya))),
+                rc(lazy(move || {
+                    above_nest(&q, false, k, &reduce_doc(&vcat(yb)))
+                })),
+            )
+        }
         Empty => mk_nest(k, &sep_x(g, ys.to_vec())),
-        Nest(n, p1) => nest_(*n, rc(sep1(g, p1, k - n, ys))),
-        NilAbove(p1) => nil_above_(rc(above_nest(
-            p1,
-            false,
-            k,
-            &reduce_doc(&vcat(ys.to_vec())),
-        ))),
+        Nest(n, p1) => {
+            let (n, p1, ys) = (*n, p1.clone(), ys.to_vec());
+            nest_(n, rc(lazy(move || sep1(g, &p1, k - n, &ys))))
+        }
+        NilAbove(p1) => {
+            let (p1, ys) = (p1.clone(), ys.to_vec());
+            nil_above_(rc(lazy(move || {
+                above_nest(&p1, false, k, &reduce_doc(&vcat(ys)))
+            })))
+        }
         TextBeside(s, l, p1) => {
-            text_beside_(s.clone(), *l, rc(sep_nb(g, p1, k - (*l as isize), ys)))
+            let li = *l as isize;
+            let (p1, ys) = (p1.clone(), ys.to_vec());
+            text_beside_(
+                s.clone(),
+                *l,
+                rc(lazy(move || sep_nb(g, &p1, k - li, &ys))),
+            )
         }
         Above(..) => panic!("sep1 Above"),
         Beside(..) => panic!("sep1 Beside"),
+        Lazy(_) => unreachable!("sep1: forced doc"),
     }
 }
 
 fn sep_nb(g: bool, p: &Doc, k: isize, ys: &[Doc]) -> Doc {
-    match p {
+    let pf = force(p);
+    match &pf {
         Nest(_, p1) => sep_nb(g, p1, k, ys),
         Empty => {
             let rest = if g {
@@ -425,10 +533,11 @@ fn sep_nb(g: bool, p: &Doc, k: isize, ys: &[Doc]) -> Doc {
                 hcat(ys.to_vec())
             };
             let left = one_liner(&nil_beside(g, &reduce_doc(&rest)));
-            let right = nil_above_nest(false, k, &reduce_doc(&vcat(ys.to_vec())));
+            let (k1, ys1) = (k, ys.to_vec());
+            let right = lazy(move || nil_above_nest(false, k1, &reduce_doc(&vcat(ys1))));
             mk_union(left, right)
         }
-        _ => sep1(g, p, k, ys),
+        _ => sep1(g, &pf, k, ys),
     }
 }
 
@@ -456,36 +565,57 @@ fn fill(g: bool, ds: Vec<Doc>) -> Doc {
 }
 
 fn fill1(g: bool, p: &Doc, k: isize, ys: &[Doc]) -> Doc {
-    match p {
+    let pf = force(p);
+    match &pf {
         NoDoc => NoDoc,
-        Union(p1, q) => union_(
-            rc(fill1(g, p1, k, ys)),
-            rc(above_nest(q, false, k, &fill(g, ys.to_vec()))),
-        ),
+        Union(p1, q) => {
+            let (p1, q) = (p1.clone(), q.clone());
+            let (ya, yb) = (ys.to_vec(), ys.to_vec());
+            union_(
+                rc(lazy(move || fill1(g, &p1, k, &ya))),
+                rc(lazy(move || above_nest(&q, false, k, &fill(g, yb)))),
+            )
+        }
         Empty => mk_nest(k, &fill(g, ys.to_vec())),
-        Nest(n, p1) => nest_(*n, rc(fill1(g, p1, k - n, ys))),
-        NilAbove(p1) => nil_above_(rc(above_nest(p1, false, k, &fill(g, ys.to_vec())))),
+        Nest(n, p1) => {
+            let (n, p1, ys) = (*n, p1.clone(), ys.to_vec());
+            nest_(n, rc(lazy(move || fill1(g, &p1, k - n, &ys))))
+        }
+        NilAbove(p1) => {
+            let (p1, ys) = (p1.clone(), ys.to_vec());
+            nil_above_(rc(lazy(move || {
+                above_nest(&p1, false, k, &fill(g, ys))
+            })))
+        }
         TextBeside(s, l, p1) => {
-            text_beside_(s.clone(), *l, rc(fill_nb(g, p1, k - (*l as isize), ys)))
+            let li = *l as isize;
+            let (p1, ys) = (p1.clone(), ys.to_vec());
+            text_beside_(
+                s.clone(),
+                *l,
+                rc(lazy(move || fill_nb(g, &p1, k - li, &ys))),
+            )
         }
         Above(..) => panic!("fill1 Above"),
         Beside(..) => panic!("fill1 Beside"),
+        Lazy(_) => unreachable!("fill1: forced doc"),
     }
 }
 
 fn fill_nb(g: bool, p: &Doc, k: isize, ys: &[Doc]) -> Doc {
-    match p {
+    let pf = force(p);
+    match &pf {
         Nest(_, p1) => fill_nb(g, p1, k, ys),
         Empty => {
             if ys.is_empty() {
                 Empty
-            } else if matches!(ys[0], Empty) {
+            } else if matches!(force(&ys[0]), Empty) {
                 fill_nb(g, &Empty, k, &ys[1..])
             } else {
                 fill_nbe(g, k, &ys[0], &ys[1..])
             }
         }
-        _ => fill1(g, p, k, ys),
+        _ => fill1(g, &pf, k, ys),
     }
 }
 
@@ -493,16 +623,20 @@ fn fill_nbe(g: bool, k: isize, y: &Doc, ys: &[Doc]) -> Doc {
     let k1 = if g { k - 1 } else { k };
     let y_one = elide_nest(&one_liner(&reduce_doc(y)));
     let left = nil_beside(g, &fill1(g, &y_one, k1, ys));
-    let mut rest = vec![y.clone()];
-    rest.extend_from_slice(ys);
-    let right = nil_above_nest(false, k, &fill(g, rest));
+    let (y2, ys2) = (y.clone(), ys.to_vec());
+    let right = lazy(move || {
+        let mut rest = vec![y2];
+        rest.extend(ys2);
+        nil_above_nest(false, k, &fill(g, rest))
+    });
     mk_union(left, right)
 }
 
 fn elide_nest(d: &Doc) -> Doc {
-    match d {
+    let df = force(d);
+    match &df {
         Nest(_, d1) => d1.as_ref().clone(),
-        _ => d.clone(),
+        _ => df,
     }
 }
 
@@ -510,51 +644,82 @@ fn elide_nest(d: &Doc) -> Doc {
 // Best layout: best / nicest / fits / oneLiner
 
 fn one_liner(d: &Doc) -> Doc {
-    match d {
+    let df = force(d);
+    match &df {
         NoDoc => NoDoc,
         Empty => Empty,
         NilAbove(_) => NoDoc,
-        TextBeside(s, l, p) => text_beside_(s.clone(), *l, rc(one_liner(p))),
-        Nest(k, p) => nest_(*k, rc(one_liner(p))),
+        TextBeside(s, l, p) => {
+            let p = p.clone();
+            text_beside_(s.clone(), *l, rc(lazy(move || one_liner(&p))))
+        }
+        Nest(k, p) => {
+            let (k, p) = (*k, p.clone());
+            nest_(k, rc(lazy(move || one_liner(&p))))
+        }
         Union(p, _) => one_liner(p),
         Above(..) => panic!("oneLiner Above"),
         Beside(..) => panic!("oneLiner Beside"),
+        Lazy(_) => unreachable!("oneLiner: forced doc"),
     }
 }
 
 /// `best w r doc` — resolve unions to a single layout for line width `w`,
-/// ribbon width `r`. This is a strict but semantically faithful rendering of
-/// the Haskell lazy `best`/`nicest1`: at a `Union` the left branch is resolved
-/// and kept iff its first line fits; the right is resolved only otherwise.
+/// ribbon width `r`. Mirrors the Haskell `best`/`nicest1` including its
+/// laziness: the resolved document's tails are thunks, so `fits` (which only
+/// inspects a candidate's *first line*) never forces a branch beyond that
+/// line, and the right branch of a union is only resolved when the left's
+/// first line does not fit.
 fn best(w: isize, r: isize, d: &Doc) -> Doc {
     get(w, r, d)
 }
 
 fn get(w: isize, r: isize, d: &Doc) -> Doc {
-    match d {
+    let df = force(d);
+    match &df {
         Empty => Empty,
         NoDoc => NoDoc,
-        NilAbove(p) => nil_above_(rc(get(w, r, p))),
-        TextBeside(s, l, p) => text_beside_(s.clone(), *l, rc(get1(w, r, *l as isize, p))),
-        Nest(k, p) => nest_(*k, rc(get(w - k, r, p))),
+        NilAbove(p) => {
+            let p = p.clone();
+            nil_above_(rc(lazy(move || get(w, r, &p))))
+        }
+        TextBeside(s, l, p) => {
+            let (li, p) = (*l as isize, p.clone());
+            text_beside_(s.clone(), *l, rc(lazy(move || get1(w, r, li, &p))))
+        }
+        Nest(k, p) => {
+            let (k, p) = (*k, p.clone());
+            nest_(k, rc(lazy(move || get(w - k, r, &p))))
+        }
         Union(p, q) => nicest(w, r, p, q),
         Above(..) => panic!("best get Above"),
         Beside(..) => panic!("best get Beside"),
+        Lazy(_) => unreachable!("get: forced doc"),
     }
 }
 
 fn get1(w: isize, r: isize, sl: isize, d: &Doc) -> Doc {
-    match d {
+    let df = force(d);
+    match &df {
         Empty => Empty,
         NoDoc => NoDoc,
-        NilAbove(p) => nil_above_(rc(get(w - sl, r, p))),
+        NilAbove(p) => {
+            let p = p.clone();
+            nil_above_(rc(lazy(move || get(w - sl, r, &p))))
+        }
         TextBeside(s, l, p) => {
-            text_beside_(s.clone(), *l, rc(get1(w, r, sl + *l as isize, p)))
+            let (li, p) = (*l as isize, p.clone());
+            text_beside_(
+                s.clone(),
+                *l,
+                rc(lazy(move || get1(w, r, sl + li, &p))),
+            )
         }
         Nest(_, p) => get1(w, r, sl, p),
         Union(p, q) => nicest1(w, r, sl, p, q),
         Above(..) => panic!("best get1 Above"),
         Beside(..) => panic!("best get1 Beside"),
+        Lazy(_) => unreachable!("get1: forced doc"),
     }
 }
 
@@ -563,22 +728,24 @@ fn nicest(w: isize, r: isize, p: &Doc, q: &Doc) -> Doc {
 }
 
 fn nicest1(w: isize, r: isize, sl: isize, p: &Doc, q: &Doc) -> Doc {
-    // Resolve the left branch; keep it iff its first line fits. Only resolve the
-    // right branch if the left does not fit (matching the Haskell laziness).
-    let lp = get1(w, r, sl, p);
+    // Resolve the left branch lazily; keep it iff its first line fits (`fits`
+    // forces only that first line). Resolve the right branch only otherwise.
+    let (pc, qc) = (p.clone(), q.clone());
+    let lp = lazy(move || get1(w, r, sl, &pc));
     if fits(w.min(r) - sl, &lp) {
         lp
     } else {
-        get1(w, r, sl, q)
+        lazy(move || get1(w, r, sl, &qc))
     }
 }
 
-/// True iff the *first line* of `d` fits in `n` columns.
+/// True iff the *first line* of `d` fits in `n` columns. Forces only up to the
+/// first line break of an already-`best`-resolved (thunked) document.
 fn fits(n: isize, d: &Doc) -> bool {
     if n < 0 {
         return false;
     }
-    match d {
+    match &force(d) {
         NoDoc => false,
         Empty => true,
         NilAbove(_) => true,
@@ -587,6 +754,7 @@ fn fits(n: isize, d: &Doc) -> bool {
         Beside(..) => panic!("fits Beside"),
         Union(..) => panic!("fits Union"),
         Nest(..) => panic!("fits Nest"),
+        Lazy(_) => unreachable!("fits: forced doc"),
     }
 }
 
@@ -638,7 +806,7 @@ fn display_page(page_width: isize, ribbon_width: isize, doc: &Doc) -> String {
 }
 
 fn lay(out: &mut String, k: isize, d: &Doc) {
-    match d {
+    match &force(d) {
         Nest(k1, p) => lay(out, k + k1, p),
         Empty => {}
         NilAbove(p) => {
@@ -650,6 +818,7 @@ fn lay(out: &mut String, k: isize, d: &Doc) {
         Beside(..) => panic!("display lay Beside"),
         NoDoc => panic!("display lay NoDoc"),
         Union(..) => panic!("display lay Union"),
+        Lazy(_) => unreachable!("lay: forced doc"),
     }
 }
 
@@ -660,7 +829,7 @@ fn lay1(out: &mut String, k: isize, s: &str, l: usize, p: &Doc) {
 }
 
 fn lay2(out: &mut String, k: isize, d: &Doc) {
-    match d {
+    match &force(d) {
         NilAbove(p) => {
             out.push('\n');
             lay(out, k, p);
@@ -675,6 +844,7 @@ fn lay2(out: &mut String, k: isize, d: &Doc) {
         Beside(..) => panic!("display lay2 Beside"),
         NoDoc => panic!("display lay2 NoDoc"),
         Union(..) => panic!("display lay2 Union"),
+        Lazy(_) => unreachable!("lay2: forced doc"),
     }
 }
 

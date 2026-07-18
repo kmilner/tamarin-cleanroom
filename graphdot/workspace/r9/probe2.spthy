@@ -1,0 +1,510 @@
+theory RowCouplingProbe
+begin
+
+builtins: hashing
+
+// A: prem width 17, concl [87, 33]
+rule A_017:
+  [ In(<$bo, $bp>) ]
+  --[ F0() ]->
+  [ Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>), Sib('aaaaaaaaaaaaaaaaaaaaaa00') ]
+
+// A: prem width 27, concl [87, 33]
+rule A_027:
+  [ In(<$bo, $bp, $bq, $br>) ]
+  --[ F1() ]->
+  [ Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>), Sib('aaaaaaaaaaaaaaaaaaaaaa01') ]
+
+// A: prem width 37, concl [87, 33]
+rule A_037:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt>) ]
+  --[ F2() ]->
+  [ Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>), Sib('aaaaaaaaaaaaaaaaaaaaaa02') ]
+
+// A: prem width 47, concl [87, 33]
+rule A_047:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv>) ]
+  --[ F3() ]->
+  [ Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>), Sib('aaaaaaaaaaaaaaaaaaaaaa03') ]
+
+// A: prem width 57, concl [87, 33]
+rule A_057:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx>) ]
+  --[ F4() ]->
+  [ Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>), Sib('aaaaaaaaaaaaaaaaaaaaaa04') ]
+
+// A: prem width 67, concl [87, 33]
+rule A_067:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz>) ]
+  --[ F5() ]->
+  [ Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>), Sib('aaaaaaaaaaaaaaaaaaaaaa05') ]
+
+// A: prem width 77, concl [87, 33]
+rule A_077:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb>) ]
+  --[ F6() ]->
+  [ Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>), Sib('aaaaaaaaaaaaaaaaaaaaaa06') ]
+
+// A: prem width 87, concl [87, 33]
+rule A_087:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd>) ]
+  --[ F7() ]->
+  [ Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>), Sib('aaaaaaaaaaaaaaaaaaaaaa07') ]
+
+// A: prem width 97, concl [87, 33]
+rule A_097:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd, $ce, $cf>) ]
+  --[ F8() ]->
+  [ Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>), Sib('aaaaaaaaaaaaaaaaaaaaaa08') ]
+
+// A: prem width 117, concl [87, 33]
+rule A_117:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd, $ce, $cf, $cg, $ch, $ci, $cj>) ]
+  --[ F9() ]->
+  [ Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>), Sib('aaaaaaaaaaaaaaaaaaaaaa09') ]
+
+// B: prem width 27, concl [33, 87]
+rule B_027:
+  [ In(<$bo, $bp, $bq, $br>) ]
+  --[ F10() ]->
+  [ Sib('aaaaaaaaaaaaaaaaaaaaaa10'), Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>) ]
+
+// B: prem width 47, concl [33, 87]
+rule B_047:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv>) ]
+  --[ F11() ]->
+  [ Sib('aaaaaaaaaaaaaaaaaaaaaa11'), Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>) ]
+
+// B: prem width 67, concl [33, 87]
+rule B_067:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz>) ]
+  --[ F12() ]->
+  [ Sib('aaaaaaaaaaaaaaaaaaaaaa12'), Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>) ]
+
+// B: prem width 87, concl [33, 87]
+rule B_087:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd>) ]
+  --[ F13() ]->
+  [ Sib('aaaaaaaaaaaaaaaaaaaaaa13'), Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>) ]
+
+// B: prem width 117, concl [33, 87]
+rule B_117:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd, $ce, $cf, $cg, $ch, $ci, $cj>) ]
+  --[ F14() ]->
+  [ Sib('aaaaaaaaaaaaaaaaaaaaaa14'), Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>) ]
+
+// C: prem width 17, lone concl 93
+rule C_017:
+  [ In(<$bo, $bp>) ]
+  --[ F15() ]->
+  [ Bigg(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap, $aq>) ]
+
+// C: prem width 47, lone concl 93
+rule C_047:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv>) ]
+  --[ F16() ]->
+  [ Bigg(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap, $aq>) ]
+
+// C: prem width 87, lone concl 93
+rule C_087:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd>) ]
+  --[ F17() ]->
+  [ Bigg(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap, $aq>) ]
+
+// C: prem width 127, lone concl 93
+rule C_127:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd, $ce, $cf, $cg, $ch, $ci, $cj, $ck, $cl>) ]
+  --[ F18() ]->
+  [ Bigg(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap, $aq>) ]
+
+// E: info padded by rule-name len 0, concl [87, 33]
+rule E_000:
+  [ In(<$bo, $bp>) ]
+  --[ F19() ]->
+  [ Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>), Sib('aaaaaaaaaaaaaaaaaaaaaa19') ]
+
+// E: info padded by rule-name len 30, concl [87, 33]
+rule Exxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_030:
+  [ In(<$bo, $bp>) ]
+  --[ F20() ]->
+  [ Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>), Sib('aaaaaaaaaaaaaaaaaaaaaa20') ]
+
+// E: info padded by rule-name len 60, concl [87, 33]
+rule Exxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_060:
+  [ In(<$bo, $bp>) ]
+  --[ F21() ]->
+  [ Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>), Sib('aaaaaaaaaaaaaaaaaaaaaa21') ]
+
+// E: info padded by rule-name len 110, concl [87, 33]
+rule Exxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_110:
+  [ In(<$bo, $bp>) ]
+  --[ F22() ]->
+  [ Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>), Sib('aaaaaaaaaaaaaaaaaaaaaa22') ]
+
+// D: prem 127, concl [30, 30]
+rule D_30_30:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd, $ce, $cf, $cg, $ch, $ci, $cj, $ck, $cl>) ]
+  --[ F23() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae), Fbb($af, $ag, $ah, $ai, $aj) ]
+
+// D: prem 127, concl [40, 40]
+rule D_40_40:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd, $ce, $cf, $cg, $ch, $ci, $cj, $ck, $cl>) ]
+  --[ F24() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag), Fbb($ah, $ai, $aj, $ak, $al, $am, $an) ]
+
+// D: prem 127, concl [45, 45]
+rule D_45_45:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd, $ce, $cf, $cg, $ch, $ci, $cj, $ck, $cl>) ]
+  --[ F25() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Fbb($ai, $aj, $ak, $al, $am, $an, $ao, $ap) ]
+
+// D: prem 127, concl [50, 40]
+rule D_50_40:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd, $ce, $cf, $cg, $ch, $ci, $cj, $ck, $cl>) ]
+  --[ F26() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai), Fbb($aj, $ak, $al, $am, $an, $ao, $ap) ]
+
+// D: prem 127, concl [40, 50]
+rule D_40_50:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd, $ce, $cf, $cg, $ch, $ci, $cj, $ck, $cl>) ]
+  --[ F27() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag), Fbb($ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap) ]
+
+// D: prem 127, concl [60, 30]
+rule D_60_30:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd, $ce, $cf, $cg, $ch, $ci, $cj, $ck, $cl>) ]
+  --[ F28() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak), Fbb($al, $am, $an, $ao, $ap) ]
+
+// D: prem 127, concl [30, 60]
+rule D_30_60:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd, $ce, $cf, $cg, $ch, $ci, $cj, $ck, $cl>) ]
+  --[ F29() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae), Fbb($af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap) ]
+
+// D: prem 127, concl [50, 50]
+rule D_50_50:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd, $ce, $cf, $cg, $ch, $ci, $cj, $ck, $cl>) ]
+  --[ F30() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai), Fbb($aj, $ak, $al, $am, $an, $ao, $ap, $aq, $ar) ]
+
+// D: prem 127, concl [55, 45]
+rule D_55_45:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd, $ce, $cf, $cg, $ch, $ci, $cj, $ck, $cl>) ]
+  --[ F31() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj), Fbb($ak, $al, $am, $an, $ao, $ap, $aq, $ar) ]
+
+// G: prem 17, concl [30, 30]
+rule G_30_30:
+  [ In(<$bo, $bp>) ]
+  --[ F32() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae), Fbb($af, $ag, $ah, $ai, $aj) ]
+
+// G: prem 17, concl [40, 40]
+rule G_40_40:
+  [ In(<$bo, $bp>) ]
+  --[ F33() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag), Fbb($ah, $ai, $aj, $ak, $al, $am, $an) ]
+
+// G: prem 17, concl [45, 45]
+rule G_45_45:
+  [ In(<$bo, $bp>) ]
+  --[ F34() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Fbb($ai, $aj, $ak, $al, $am, $an, $ao, $ap) ]
+
+// G: prem 17, concl [50, 40]
+rule G_50_40:
+  [ In(<$bo, $bp>) ]
+  --[ F35() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai), Fbb($aj, $ak, $al, $am, $an, $ao, $ap) ]
+
+// G: prem 17, concl [40, 50]
+rule G_40_50:
+  [ In(<$bo, $bp>) ]
+  --[ F36() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag), Fbb($ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap) ]
+
+// G: prem 17, concl [60, 30]
+rule G_60_30:
+  [ In(<$bo, $bp>) ]
+  --[ F37() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak), Fbb($al, $am, $an, $ao, $ap) ]
+
+// G: prem 17, concl [30, 60]
+rule G_30_60:
+  [ In(<$bo, $bp>) ]
+  --[ F38() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae), Fbb($af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap) ]
+
+// G: prem 17, concl [50, 50]
+rule G_50_50:
+  [ In(<$bo, $bp>) ]
+  --[ F39() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai), Fbb($aj, $ak, $al, $am, $an, $ao, $ap, $aq, $ar) ]
+
+// G: prem 17, concl [55, 45]
+rule G_55_45:
+  [ In(<$bo, $bp>) ]
+  --[ F40() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj), Fbb($ak, $al, $am, $an, $ao, $ap, $aq, $ar) ]
+
+// FW: prem 127, concl [30, 30, 30]
+rule FW_5_5_5:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd, $ce, $cf, $cg, $ch, $ci, $cj, $ck, $cl>) ]
+  --[ F41() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae), Fbb($af, $ag, $ah, $ai, $aj), Fcc($ak, $al, $am, $an, $ao) ]
+
+// FN: prem 17, concl [30, 30, 30]
+rule FN_5_5_5:
+  [ In(<$bo, $bp>) ]
+  --[ F42() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae), Fbb($af, $ag, $ah, $ai, $aj), Fcc($ak, $al, $am, $an, $ao) ]
+
+// FW: prem 127, concl [45, 25, 25]
+rule FW_8_4_4:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd, $ce, $cf, $cg, $ch, $ci, $cj, $ck, $cl>) ]
+  --[ F43() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Fbb($ai, $aj, $ak, $al), Fcc($am, $an, $ao, $ap) ]
+
+// FN: prem 17, concl [45, 25, 25]
+rule FN_8_4_4:
+  [ In(<$bo, $bp>) ]
+  --[ F44() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Fbb($ai, $aj, $ak, $al), Fcc($am, $an, $ao, $ap) ]
+
+// FW: prem 127, concl [25, 25, 45]
+rule FW_4_4_8:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd, $ce, $cf, $cg, $ch, $ci, $cj, $ck, $cl>) ]
+  --[ F45() ]->
+  [ Faa($aa, $ab, $ac, $ad), Fbb($ae, $af, $ag, $ah), Fcc($ai, $aj, $ak, $al, $am, $an, $ao, $ap) ]
+
+// FN: prem 17, concl [25, 25, 45]
+rule FN_4_4_8:
+  [ In(<$bo, $bp>) ]
+  --[ F46() ]->
+  [ Faa($aa, $ab, $ac, $ad), Fbb($ae, $af, $ag, $ah), Fcc($ai, $aj, $ak, $al, $am, $an, $ao, $ap) ]
+
+// FW: prem 127, concl [35, 35, 35]
+rule FW_6_6_6:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd, $ce, $cf, $cg, $ch, $ci, $cj, $ck, $cl>) ]
+  --[ F47() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af), Fbb($ag, $ah, $ai, $aj, $ak, $al), Fcc($am, $an, $ao, $ap, $aq, $ar) ]
+
+// FN: prem 17, concl [35, 35, 35]
+rule FN_6_6_6:
+  [ In(<$bo, $bp>) ]
+  --[ F48() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af), Fbb($ag, $ah, $ai, $aj, $ak, $al), Fcc($am, $an, $ao, $ap, $aq, $ar) ]
+
+// FW: prem 127, concl [45, 45, 45]
+rule FW_8_8_8:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd, $ce, $cf, $cg, $ch, $ci, $cj, $ck, $cl>) ]
+  --[ F49() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Fbb($ai, $aj, $ak, $al, $am, $an, $ao, $ap), Fcc($aq, $ar, $as, $at, $au, $av, $aw, $ax) ]
+
+// FN: prem 17, concl [45, 45, 45]
+rule FN_8_8_8:
+  [ In(<$bo, $bp>) ]
+  --[ F50() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Fbb($ai, $aj, $ak, $al, $am, $an, $ao, $ap), Fcc($aq, $ar, $as, $at, $au, $av, $aw, $ax) ]
+
+// H: prem 127, concl [87, 21]
+rule H_10:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd, $ce, $cf, $cg, $ch, $ci, $cj, $ck, $cl>) ]
+  --[ F51() ]->
+  [ Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>), Sib('aaaaaaaaaa51') ]
+
+// H: prem 127, concl [87, 31]
+rule H_20:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd, $ce, $cf, $cg, $ch, $ci, $cj, $ck, $cl>) ]
+  --[ F52() ]->
+  [ Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>), Sib('aaaaaaaaaaaaaaaaaaaa52') ]
+
+// H: prem 127, concl [87, 41]
+rule H_30:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd, $ce, $cf, $cg, $ch, $ci, $cj, $ck, $cl>) ]
+  --[ F53() ]->
+  [ Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa53') ]
+
+// H: prem 127, concl [87, 51]
+rule H_40:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd, $ce, $cf, $cg, $ch, $ci, $cj, $ck, $cl>) ]
+  --[ F54() ]->
+  [ Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa54') ]
+
+// H: prem 127, concl [87, 66]
+rule H_55:
+  [ In(<$bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by, $bz, $ca, $cb, $cc, $cd, $ce, $cf, $cg, $ch, $ci, $cj, $ck, $cl>) ]
+  --[ F55() ]->
+  [ Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa55') ]
+
+lemma l_A_017:
+  exists-trace "Ex #i. F0() @ #i"
+
+lemma l_A_027:
+  exists-trace "Ex #i. F1() @ #i"
+
+lemma l_A_037:
+  exists-trace "Ex #i. F2() @ #i"
+
+lemma l_A_047:
+  exists-trace "Ex #i. F3() @ #i"
+
+lemma l_A_057:
+  exists-trace "Ex #i. F4() @ #i"
+
+lemma l_A_067:
+  exists-trace "Ex #i. F5() @ #i"
+
+lemma l_A_077:
+  exists-trace "Ex #i. F6() @ #i"
+
+lemma l_A_087:
+  exists-trace "Ex #i. F7() @ #i"
+
+lemma l_A_097:
+  exists-trace "Ex #i. F8() @ #i"
+
+lemma l_A_117:
+  exists-trace "Ex #i. F9() @ #i"
+
+lemma l_B_027:
+  exists-trace "Ex #i. F10() @ #i"
+
+lemma l_B_047:
+  exists-trace "Ex #i. F11() @ #i"
+
+lemma l_B_067:
+  exists-trace "Ex #i. F12() @ #i"
+
+lemma l_B_087:
+  exists-trace "Ex #i. F13() @ #i"
+
+lemma l_B_117:
+  exists-trace "Ex #i. F14() @ #i"
+
+lemma l_C_017:
+  exists-trace "Ex #i. F15() @ #i"
+
+lemma l_C_047:
+  exists-trace "Ex #i. F16() @ #i"
+
+lemma l_C_087:
+  exists-trace "Ex #i. F17() @ #i"
+
+lemma l_C_127:
+  exists-trace "Ex #i. F18() @ #i"
+
+lemma l_E_000:
+  exists-trace "Ex #i. F19() @ #i"
+
+lemma l_Exxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_030:
+  exists-trace "Ex #i. F20() @ #i"
+
+lemma l_Exxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_060:
+  exists-trace "Ex #i. F21() @ #i"
+
+lemma l_Exxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_110:
+  exists-trace "Ex #i. F22() @ #i"
+
+lemma l_D_30_30:
+  exists-trace "Ex #i. F23() @ #i"
+
+lemma l_D_40_40:
+  exists-trace "Ex #i. F24() @ #i"
+
+lemma l_D_45_45:
+  exists-trace "Ex #i. F25() @ #i"
+
+lemma l_D_50_40:
+  exists-trace "Ex #i. F26() @ #i"
+
+lemma l_D_40_50:
+  exists-trace "Ex #i. F27() @ #i"
+
+lemma l_D_60_30:
+  exists-trace "Ex #i. F28() @ #i"
+
+lemma l_D_30_60:
+  exists-trace "Ex #i. F29() @ #i"
+
+lemma l_D_50_50:
+  exists-trace "Ex #i. F30() @ #i"
+
+lemma l_D_55_45:
+  exists-trace "Ex #i. F31() @ #i"
+
+lemma l_G_30_30:
+  exists-trace "Ex #i. F32() @ #i"
+
+lemma l_G_40_40:
+  exists-trace "Ex #i. F33() @ #i"
+
+lemma l_G_45_45:
+  exists-trace "Ex #i. F34() @ #i"
+
+lemma l_G_50_40:
+  exists-trace "Ex #i. F35() @ #i"
+
+lemma l_G_40_50:
+  exists-trace "Ex #i. F36() @ #i"
+
+lemma l_G_60_30:
+  exists-trace "Ex #i. F37() @ #i"
+
+lemma l_G_30_60:
+  exists-trace "Ex #i. F38() @ #i"
+
+lemma l_G_50_50:
+  exists-trace "Ex #i. F39() @ #i"
+
+lemma l_G_55_45:
+  exists-trace "Ex #i. F40() @ #i"
+
+lemma l_FW_5_5_5:
+  exists-trace "Ex #i. F41() @ #i"
+
+lemma l_FN_5_5_5:
+  exists-trace "Ex #i. F42() @ #i"
+
+lemma l_FW_8_4_4:
+  exists-trace "Ex #i. F43() @ #i"
+
+lemma l_FN_8_4_4:
+  exists-trace "Ex #i. F44() @ #i"
+
+lemma l_FW_4_4_8:
+  exists-trace "Ex #i. F45() @ #i"
+
+lemma l_FN_4_4_8:
+  exists-trace "Ex #i. F46() @ #i"
+
+lemma l_FW_6_6_6:
+  exists-trace "Ex #i. F47() @ #i"
+
+lemma l_FN_6_6_6:
+  exists-trace "Ex #i. F48() @ #i"
+
+lemma l_FW_8_8_8:
+  exists-trace "Ex #i. F49() @ #i"
+
+lemma l_FN_8_8_8:
+  exists-trace "Ex #i. F50() @ #i"
+
+lemma l_H_10:
+  exists-trace "Ex #i. F51() @ #i"
+
+lemma l_H_20:
+  exists-trace "Ex #i. F52() @ #i"
+
+lemma l_H_30:
+  exists-trace "Ex #i. F53() @ #i"
+
+lemma l_H_40:
+  exists-trace "Ex #i. F54() @ #i"
+
+lemma l_H_55:
+  exists-trace "Ex #i. F55() @ #i"
+
+end

@@ -39,8 +39,33 @@ expression, so the results are original works relicensable at will.
 2. Similarity audit: a reviewer (may see both sides) compares the clean code
    against the Haskell originals; flagged similarities are sent back as
    redo-instructions, never patched directly.
-3. Behavioral acceptance: byte-parity corpus must pass.
-4. Integration: dirty room may write thin adapters and mechanical renames to
+3. Behavioral acceptance: the FULL-CORPUS gate for the slice must pass, not a
+   fixture subset (see "Full-corpus gates" below). A narrow fixture suite that
+   passes while the corpus gate fails is not acceptance.
+4. Integration: the open side may write thin adapters and mechanical renames to
    fit the workspace API, but must not transplant logic from the replaced
    modules. The replaced modules are deleted; their GPL-pending headers go
-   with them (history retains them under GPL).
+   with them (history retains them under GPL). Every integrator that touches a
+   slice with a full-corpus gate MUST run that gate before declaring green.
+
+## Full-corpus gates (standard, not optional)
+
+Each slice has a fast oracle gate over the whole 419-file example corpus,
+diffing the slice's output against the Haskell reference cache. These are the
+sealed implementer's primary data source (run between build and the HS cache
+every iteration) AND the integrator's mandatory acceptance check. Both take
+`RS_PATH` (point at any build) and `ALLOWLIST` (subset while iterating).
+
+- Wellformedness: `scripts/wf_gate.sh` — runs the binary WITHOUT `--prove`
+  (the wf block prints at theory-load, ~1s/file; full corpus ~72s at JOBS=6),
+  extracts the `/* WARNING … */` block, diffs vs `scripts/.hs_file_cache`.
+- Web: `scripts/web_parity.sh` — crawls HS and RS interactive servers per
+  theory, semantic-diffs the response manifests vs `scripts/.web_hs_cache`.
+- Full batch (proof output, slow ~30-60min): `scripts/corpus_file_diff.sh` —
+  the ground-truth `--prove` byte diff; run at milestones, not every iteration.
+
+Once a slice's ported code is DELETED, the integrated module IS the sealed
+reimplementation, so running the gate against the tree observes the sealed
+code's own output vs the reference — legitimate feedback, not observation of
+replaced code. For a not-yet-integrated slice the tree still holds the ported
+code, so gate only the workspace build (via `RS_PATH`), never the stock tree.

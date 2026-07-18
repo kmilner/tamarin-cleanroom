@@ -490,54 +490,146 @@ fn build_record(spec: &RecordSpec, ports_prem: &[String], port_info: &str, ports
     }
 }
 
-/// The per-cell fit **budgets** of one record group (all premises together, or all
-/// conclusions together): the cells share the group's [`FILL_WIDTH`] budget
-/// (BEHAVIOR.md §3f), and each cell is then laid out INDEPENDENTLY at its budget by
-/// the faithful pretty-printer ([`crate::doclayout`]). A single budget per cell
-/// (the exact engine turns it into the wrap decision AND the ragged fill packing —
-/// no separate trigger/fill split is needed once the fitting is faithful).
-///
-/// The budgets are a **proportional** allocation of the group's [`FILL_WIDTH`]:
-/// cell *i* gets `round(87 · flat_i / T)` where `T = Σ flat_j` is the group's flat
-/// width, floored at [`MIN_CELL_BUDGET`]. This distributes the shared row width in
-/// proportion to each cell's content — the model the corpus census selects (81 %
-/// of wrapping cells byte-exact; 94.7 % of single-cell groups, whose budget is 87
-/// since `T = flat`). Consequences:
-///   * a group whose total fits (`T ≤ 87`) gives every cell `≥ flat_i` → nothing
-///     wraps;
-///   * the Wide-rule conclusion group `[Ack 25, Big 68, Out 11]` (`T = 104`):
-///     `Ack` gets `round(87·25/104) = 21` (wraps), `Big` `round(87·68/104) = 57`
-///     (eight tuple elements on line 0), `Out` `round(87·11/104) = 9 → 20` (fits);
-///   * the `20` floor is the observed per-cell minimum (a cell of flat ≤ 20 never
-///     wraps).
-///
-/// Residual (honest): the true per-cell coupling is the reference pretty-printer's
-/// own `fits` over the whole group, which proportional approximates to within a
-/// few columns; the ~20 % of multi-cell wrapping cells that miss are that ±few-
-/// column bucket boundary plus cells whose wrap is decided on their un-abbreviated
-/// width (BEHAVIOR.md §3f) — beyond a rendering crate that receives post-
-/// abbreviation cell text.
-pub fn group_widths(widths: &[usize]) -> Vec<usize> {
-    let t: usize = widths.iter().sum();
-    if t == 0 {
-        return vec![FILL_WIDTH as usize; widths.len()];
-    }
-    let full = FILL_WIDTH as usize;
-    widths
-        .iter()
-        .map(|&f| {
-            // round(87 * f / T)
-            let b = (full * f + t / 2) / t;
-            b.max(MIN_CELL_BUDGET)
-        })
-        .collect()
+/// Shape features of one cell's flat text that enter the row-share model
+/// (probe-derived, BEHAVIOR.md §3f round 9): `flat` = display width; `dtop` =
+/// Σ over top-level tuple arguments of `2·elems − 4` (the width surplus of the
+/// reference's internal right-nested-pair form of an n-tuple over its flattened
+/// display); `sqa` = the cell is a fact with exactly one argument that is a
+/// single-quoted constant (whose internal form drops the quotes).
+struct CellShape {
+    flat: usize,
+    dtop: i64,
+    sqa: bool,
 }
 
-/// Wrap every cell of one record group, sharing the group [`FILL_WIDTH`] via
-/// [`group_widths`] and laying each cell out at its width with the faithful engine.
+/// Split a term list at top-level `", "`, honoring nesting and quotes.
+fn split_level(s: &str) -> Vec<&str> {
+    let b: Vec<(usize, char)> = s.char_indices().collect();
+    let mut parts = Vec::new();
+    let (mut depth, mut inq, mut start) = (0i32, false, 0usize);
+    let mut i = 0;
+    while i < b.len() {
+        let (pos, c) = b[i];
+        if inq {
+            if c == '\'' {
+                inq = false;
+            }
+        } else {
+            match c {
+                '\'' => inq = true,
+                '(' | '<' | '[' => depth += 1,
+                ')' | '>' | ']' => depth -= 1,
+                ',' if depth == 0 && i + 1 < b.len() && b[i + 1].1 == ' ' => {
+                    parts.push(&s[start..pos]);
+                    start = b[i + 1].0 + 1;
+                    i += 1;
+                }
+                _ => {}
+            }
+        }
+        i += 1;
+    }
+    parts.push(&s[start..]);
+    parts
+}
+
+fn cell_shape(flat: &str) -> CellShape {
+    let width = flat.chars().count();
+    let mut dtop = 0i64;
+    let mut sqa = false;
+    if let Some(open) = flat.find("( ") {
+        // a padded fact with at least one argument (`Name( )` has none)
+        if flat.ends_with(" )")
+            && open + 2 <= flat.len() - 2
+            && !flat[..open].contains(['(', ')', '<', '>', ' ', ','])
+        {
+            let inner = &flat[open + 2..flat.len() - 2];
+            let args = split_level(inner);
+            for a in &args {
+                let t = a.trim();
+                if t.starts_with('<') && t.ends_with('>') {
+                    let elems = split_level(&t[1..t.len() - 1]).len() as i64;
+                    dtop += 2 * elems - 4;
+                }
+            }
+            if args.len() == 1 {
+                let a = args[0].trim();
+                sqa = a.starts_with('\'')
+                    && a.ends_with('\'')
+                    && a.len() >= 2
+                    && !a[1..a.len() - 1].contains('\'');
+            }
+        }
+    }
+    CellShape { flat: width, dtop, sqa }
+}
+
+/// The per-cell fit **budgets** of one record group (all premises together, or
+/// all conclusions together), from the cells' flat texts. Two probe-derived
+/// layers (BEHAVIOR.md §3f, round 9; every parameter pinned by live probe
+/// batteries — QUERIES.log Session 9):
+///
+/// **Trigger** (which cells wrap). Each cell occupies
+/// `C_j = flat_j + dtop_j` columns of the row (`dtop` = the internal
+/// pair-nested surplus of top-level tuple args, `2n − 4` each); cell *i*'s
+/// trigger budget is `max(87 [+ 4 if cell i has a tuple arg with ≥ 3 elems and
+/// the row has ≥ 2 cells] − Σ_{j≠i} C_j, 20)`, and it wraps iff its effective
+/// width exceeds that budget — the effective width is `flat`, except that a
+/// single-quoted-atom fact above the floor measures `flat − 2` (its internal
+/// form drops the quotes). Exact on 343/343 probe cells across three live
+/// batteries; on the corpus it beats the round-6 flat-sum trigger (1.05 % vs
+/// 1.45 % cell error), with the residual dominated by cells whose widths the
+/// reference computes on the UN-abbreviated term (invisible here).
+///
+/// **Fill** (the ribbon a wrapping cell is laid out at):
+/// `max(round(87·flat_i / (flat_i + Σ_{j≠i} w_j·flat_j)), 20)` — proportional
+/// over display flats, with single-quoted-atom siblings discounted `w_j = 5/6`
+/// (probed: the [Big 87, atom s] fill follows 87²/(87 + 5s/6) across
+/// s = 12…120 with no saturation). Clamped below the cell's flat (a
+/// trigger-wrapped cell must actually break). A fitting cell keeps
+/// `max(trigger, flat)` so it renders flat; a lone cell's budget is exactly 87
+/// (no bonus — the probed single-cell boundary).
+pub fn group_widths(cells: &[String]) -> Vec<usize> {
+    let shapes: Vec<CellShape> = cells.iter().map(|t| cell_shape(t)).collect();
+    let n = shapes.len();
+    let full = FILL_WIDTH as i64; // 87
+    let cs: Vec<i64> = shapes.iter().map(|s| s.flat as i64 + s.dtop).collect();
+    let ctot: i64 = cs.iter().sum();
+    let mut out = Vec::with_capacity(n);
+    for (i, sh) in shapes.iter().enumerate() {
+        let flat = sh.flat as i64;
+        if n == 1 {
+            out.push(full as usize);
+            continue;
+        }
+        let bonus = if sh.dtop > 0 { 4 } else { 0 };
+        let b_trig = (full + bonus - (ctot - cs[i])).max(MIN_CELL_BUDGET as i64);
+        let eff = if sh.sqa && b_trig > MIN_CELL_BUDGET as i64 { flat - 2 } else { flat };
+        if eff <= b_trig {
+            // fits: any budget ≥ flat renders the cell flat
+            out.push(b_trig.max(flat) as usize);
+            continue;
+        }
+        // wraps: proportional fill share (siblings at display flat, single-
+        // quoted-atom siblings discounted 5/6)
+        let mut t = flat as f64;
+        for j in 0..n {
+            if j != i {
+                let w = if shapes[j].sqa { 5.0 / 6.0 } else { 1.0 };
+                t += w * shapes[j].flat as f64;
+            }
+        }
+        let mut b = ((full as f64) * (flat as f64) / t + 0.5).floor() as i64;
+        b = b.max(MIN_CELL_BUDGET as i64).min((flat - 1).max(MIN_CELL_BUDGET as i64));
+        out.push(b as usize);
+    }
+    out
+}
+
+/// Wrap every cell of one record group, sharing the row via [`group_widths`]
+/// and laying each cell out at its budget with the faithful engine.
 fn group_cells(flat_cells: &[String], ports: &[String]) -> Vec<Cell> {
-    let widths: Vec<usize> = flat_cells.iter().map(|t| t.chars().count()).collect();
-    let fills = group_widths(&widths);
+    let fills = group_widths(flat_cells);
     flat_cells
         .iter()
         .zip(ports)

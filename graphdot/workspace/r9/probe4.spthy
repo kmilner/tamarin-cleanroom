@@ -1,0 +1,411 @@
+theory ShapePinProbe
+begin
+
+builtins: hashing
+
+// PA: [A-shape 48, Nar 23]
+rule PA_48_23:
+  [ In(<$dw, $dx>) ]
+  --[ F0() ]->
+  [ Fnn($aa, $ab, $ac, $ad, $ae, $af, $ag, h($ah)), N($be, $bf, $bg, $bh) ]
+
+// PA: [A-shape 48, Nar 24]
+rule PA_48_24:
+  [ In(<$dw, $dx>) ]
+  --[ F1() ]->
+  [ Fnn($aa, $ab, $ac, $ad, $ae, $af, $ag, h($ah)), Na($be, $bf, $bg, $bh) ]
+
+// PA: [A-shape 48, Nar 25]
+rule PA_48_25:
+  [ In(<$dw, $dx>) ]
+  --[ F2() ]->
+  [ Fnn($aa, $ab, $ac, $ad, $ae, $af, $ag, h($ah)), Naa($be, $bf, $bg, $bh) ]
+
+// PA: [A-shape 48, Nar 26]
+rule PA_48_26:
+  [ In(<$dw, $dx>) ]
+  --[ F3() ]->
+  [ Fnn($aa, $ab, $ac, $ad, $ae, $af, $ag, h($ah)), Naaa($be, $bf, $bg, $bh) ]
+
+// PA: [A-shape 48, Nar 28]
+rule PA_48_28:
+  [ In(<$dw, $dx>) ]
+  --[ F4() ]->
+  [ Fnn($aa, $ab, $ac, $ad, $ae, $af, $ag, h($ah)), N($be, $bf, $bg, $bh, $bi) ]
+
+// PA: [A-shape 48, Nar 29]
+rule PA_48_29:
+  [ In(<$dw, $dx>) ]
+  --[ F5() ]->
+  [ Fnn($aa, $ab, $ac, $ad, $ae, $af, $ag, h($ah)), Na($be, $bf, $bg, $bh, $bi) ]
+
+// PA: [A-shape 48, Nar 30]
+rule PA_48_30:
+  [ In(<$dw, $dx>) ]
+  --[ F6() ]->
+  [ Fnn($aa, $ab, $ac, $ad, $ae, $af, $ag, h($ah)), Naa($be, $bf, $bg, $bh, $bi) ]
+
+// PA: [A-shape 48, Nar 31]
+rule PA_48_31:
+  [ In(<$dw, $dx>) ]
+  --[ F7() ]->
+  [ Fnn($aa, $ab, $ac, $ad, $ae, $af, $ag, h($ah)), Naaa($be, $bf, $bg, $bh, $bi) ]
+
+// PB: [B-shape 46, Nar 23]
+rule PB_46_23:
+  [ In(<$dw, $dx>) ]
+  --[ F8() ]->
+  [ Fqq('aaaa', 'bbbb', $ai, $aj, $ak, $al, $am), N($be, $bf, $bg, $bh) ]
+
+// PB: [B-shape 46, Nar 24]
+rule PB_46_24:
+  [ In(<$dw, $dx>) ]
+  --[ F9() ]->
+  [ Fqq('aaaa', 'bbbb', $ai, $aj, $ak, $al, $am), Na($be, $bf, $bg, $bh) ]
+
+// PB: [B-shape 46, Nar 25]
+rule PB_46_25:
+  [ In(<$dw, $dx>) ]
+  --[ F10() ]->
+  [ Fqq('aaaa', 'bbbb', $ai, $aj, $ak, $al, $am), Naa($be, $bf, $bg, $bh) ]
+
+// PB: [B-shape 46, Nar 26]
+rule PB_46_26:
+  [ In(<$dw, $dx>) ]
+  --[ F11() ]->
+  [ Fqq('aaaa', 'bbbb', $ai, $aj, $ak, $al, $am), Naaa($be, $bf, $bg, $bh) ]
+
+// PB: [B-shape 46, Nar 28]
+rule PB_46_28:
+  [ In(<$dw, $dx>) ]
+  --[ F12() ]->
+  [ Fqq('aaaa', 'bbbb', $ai, $aj, $ak, $al, $am), N($be, $bf, $bg, $bh, $bi) ]
+
+// PB: [B-shape 46, Nar 29]
+rule PB_46_29:
+  [ In(<$dw, $dx>) ]
+  --[ F13() ]->
+  [ Fqq('aaaa', 'bbbb', $ai, $aj, $ak, $al, $am), Na($be, $bf, $bg, $bh, $bi) ]
+
+// PB: [B-shape 46, Nar 30]
+rule PB_46_30:
+  [ In(<$dw, $dx>) ]
+  --[ F14() ]->
+  [ Fqq('aaaa', 'bbbb', $ai, $aj, $ak, $al, $am), Naa($be, $bf, $bg, $bh, $bi) ]
+
+// PB: [B-shape 46, Nar 31]
+rule PB_46_31:
+  [ In(<$dw, $dx>) ]
+  --[ F15() ]->
+  [ Fqq('aaaa', 'bbbb', $ai, $aj, $ak, $al, $am), Naaa($be, $bf, $bg, $bh, $bi) ]
+
+// PC: [C-shape 42, Nar 23]
+rule PC_42_23:
+  [ In(<$dw, $dx>) ]
+  --[ F16() ]->
+  [ Fpp(<$aq, $ar>, $as, $at, $au, $av, $aw), N($be, $bf, $bg, $bh) ]
+
+// PC: [C-shape 42, Nar 24]
+rule PC_42_24:
+  [ In(<$dw, $dx>) ]
+  --[ F17() ]->
+  [ Fpp(<$aq, $ar>, $as, $at, $au, $av, $aw), Na($be, $bf, $bg, $bh) ]
+
+// PC: [C-shape 42, Nar 25]
+rule PC_42_25:
+  [ In(<$dw, $dx>) ]
+  --[ F18() ]->
+  [ Fpp(<$aq, $ar>, $as, $at, $au, $av, $aw), Naa($be, $bf, $bg, $bh) ]
+
+// PC: [C-shape 42, Nar 26]
+rule PC_42_26:
+  [ In(<$dw, $dx>) ]
+  --[ F19() ]->
+  [ Fpp(<$aq, $ar>, $as, $at, $au, $av, $aw), Naaa($be, $bf, $bg, $bh) ]
+
+// PC: [C-shape 42, Nar 28]
+rule PC_42_28:
+  [ In(<$dw, $dx>) ]
+  --[ F20() ]->
+  [ Fpp(<$aq, $ar>, $as, $at, $au, $av, $aw), N($be, $bf, $bg, $bh, $bi) ]
+
+// PC: [C-shape 42, Nar 29]
+rule PC_42_29:
+  [ In(<$dw, $dx>) ]
+  --[ F21() ]->
+  [ Fpp(<$aq, $ar>, $as, $at, $au, $av, $aw), Na($be, $bf, $bg, $bh, $bi) ]
+
+// PC: [C-shape 42, Nar 30]
+rule PC_42_30:
+  [ In(<$dw, $dx>) ]
+  --[ F22() ]->
+  [ Fpp(<$aq, $ar>, $as, $at, $au, $av, $aw), Naa($be, $bf, $bg, $bh, $bi) ]
+
+// PC: [C-shape 42, Nar 31]
+rule PC_42_31:
+  [ In(<$dw, $dx>) ]
+  --[ F23() ]->
+  [ Fpp(<$aq, $ar>, $as, $at, $au, $av, $aw), Naaa($be, $bf, $bg, $bh, $bi) ]
+
+// PD: [D-shape 42, Nar 23]
+rule PD_42_23:
+  [ In(<$dw, $dx>) ]
+  --[ F24() ]->
+  [ Fdd(<$aq, $ar, $as, $at>, $au, $av, $aw), N($be, $bf, $bg, $bh) ]
+
+// PD: [D-shape 42, Nar 24]
+rule PD_42_24:
+  [ In(<$dw, $dx>) ]
+  --[ F25() ]->
+  [ Fdd(<$aq, $ar, $as, $at>, $au, $av, $aw), Na($be, $bf, $bg, $bh) ]
+
+// PD: [D-shape 42, Nar 25]
+rule PD_42_25:
+  [ In(<$dw, $dx>) ]
+  --[ F26() ]->
+  [ Fdd(<$aq, $ar, $as, $at>, $au, $av, $aw), Naa($be, $bf, $bg, $bh) ]
+
+// PD: [D-shape 42, Nar 26]
+rule PD_42_26:
+  [ In(<$dw, $dx>) ]
+  --[ F27() ]->
+  [ Fdd(<$aq, $ar, $as, $at>, $au, $av, $aw), Naaa($be, $bf, $bg, $bh) ]
+
+// PD: [D-shape 42, Nar 28]
+rule PD_42_28:
+  [ In(<$dw, $dx>) ]
+  --[ F28() ]->
+  [ Fdd(<$aq, $ar, $as, $at>, $au, $av, $aw), N($be, $bf, $bg, $bh, $bi) ]
+
+// PD: [D-shape 42, Nar 29]
+rule PD_42_29:
+  [ In(<$dw, $dx>) ]
+  --[ F29() ]->
+  [ Fdd(<$aq, $ar, $as, $at>, $au, $av, $aw), Na($be, $bf, $bg, $bh, $bi) ]
+
+// PD: [D-shape 42, Nar 30]
+rule PD_42_30:
+  [ In(<$dw, $dx>) ]
+  --[ F30() ]->
+  [ Fdd(<$aq, $ar, $as, $at>, $au, $av, $aw), Naa($be, $bf, $bg, $bh, $bi) ]
+
+// PD: [D-shape 42, Nar 31]
+rule PD_42_31:
+  [ In(<$dw, $dx>) ]
+  --[ F31() ]->
+  [ Fdd(<$aq, $ar, $as, $at>, $au, $av, $aw), Naaa($be, $bf, $bg, $bh, $bi) ]
+
+// PE: [E-shape 40, Nar 23]
+rule PE_40_23:
+  [ Fr(~nn), In(<$dw, $dx>) ]
+  --[ F32() ]->
+  [ Fee(~nn, $aq, $ar, $as, $at, $au, $av), N($be, $bf, $bg, $bh) ]
+
+// PE: [E-shape 40, Nar 24]
+rule PE_40_24:
+  [ Fr(~nn), In(<$dw, $dx>) ]
+  --[ F33() ]->
+  [ Fee(~nn, $aq, $ar, $as, $at, $au, $av), Na($be, $bf, $bg, $bh) ]
+
+// PE: [E-shape 40, Nar 25]
+rule PE_40_25:
+  [ Fr(~nn), In(<$dw, $dx>) ]
+  --[ F34() ]->
+  [ Fee(~nn, $aq, $ar, $as, $at, $au, $av), Naa($be, $bf, $bg, $bh) ]
+
+// PE: [E-shape 40, Nar 26]
+rule PE_40_26:
+  [ Fr(~nn), In(<$dw, $dx>) ]
+  --[ F35() ]->
+  [ Fee(~nn, $aq, $ar, $as, $at, $au, $av), Naaa($be, $bf, $bg, $bh) ]
+
+// PE: [E-shape 40, Nar 28]
+rule PE_40_28:
+  [ Fr(~nn), In(<$dw, $dx>) ]
+  --[ F36() ]->
+  [ Fee(~nn, $aq, $ar, $as, $at, $au, $av), N($be, $bf, $bg, $bh, $bi) ]
+
+// PE: [E-shape 40, Nar 29]
+rule PE_40_29:
+  [ Fr(~nn), In(<$dw, $dx>) ]
+  --[ F37() ]->
+  [ Fee(~nn, $aq, $ar, $as, $at, $au, $av), Na($be, $bf, $bg, $bh, $bi) ]
+
+// PE: [E-shape 40, Nar 30]
+rule PE_40_30:
+  [ Fr(~nn), In(<$dw, $dx>) ]
+  --[ F38() ]->
+  [ Fee(~nn, $aq, $ar, $as, $at, $au, $av), Naa($be, $bf, $bg, $bh, $bi) ]
+
+// PE: [E-shape 40, Nar 31]
+rule PE_40_31:
+  [ Fr(~nn), In(<$dw, $dx>) ]
+  --[ F39() ]->
+  [ Fee(~nn, $aq, $ar, $as, $at, $au, $av), Naaa($be, $bf, $bg, $bh, $bi) ]
+
+// Q: [Big87, Sib 78] fill saturation
+rule Q_078:
+  [ In(<$dw, $dx>) ]
+  --[ F40() ]->
+  [ Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa40') ]
+
+// Q: [Big87, Sib 84] fill saturation
+rule Q_084:
+  [ In(<$dw, $dx>) ]
+  --[ F41() ]->
+  [ Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa41') ]
+
+// Q: [Big87, Sib 92] fill saturation
+rule Q_092:
+  [ In(<$dw, $dx>) ]
+  --[ F42() ]->
+  [ Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa42') ]
+
+// Q: [Big87, Sib 104] fill saturation
+rule Q_104:
+  [ In(<$dw, $dx>) ]
+  --[ F43() ]->
+  [ Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa43') ]
+
+// Q: [Big87, Sib 120] fill saturation
+rule Q_120:
+  [ In(<$dw, $dx>) ]
+  --[ F44() ]->
+  [ Big(<$aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa44') ]
+
+lemma l_PA_48_23:
+  exists-trace "Ex #i. F0() @ #i"
+
+lemma l_PA_48_24:
+  exists-trace "Ex #i. F1() @ #i"
+
+lemma l_PA_48_25:
+  exists-trace "Ex #i. F2() @ #i"
+
+lemma l_PA_48_26:
+  exists-trace "Ex #i. F3() @ #i"
+
+lemma l_PA_48_28:
+  exists-trace "Ex #i. F4() @ #i"
+
+lemma l_PA_48_29:
+  exists-trace "Ex #i. F5() @ #i"
+
+lemma l_PA_48_30:
+  exists-trace "Ex #i. F6() @ #i"
+
+lemma l_PA_48_31:
+  exists-trace "Ex #i. F7() @ #i"
+
+lemma l_PB_46_23:
+  exists-trace "Ex #i. F8() @ #i"
+
+lemma l_PB_46_24:
+  exists-trace "Ex #i. F9() @ #i"
+
+lemma l_PB_46_25:
+  exists-trace "Ex #i. F10() @ #i"
+
+lemma l_PB_46_26:
+  exists-trace "Ex #i. F11() @ #i"
+
+lemma l_PB_46_28:
+  exists-trace "Ex #i. F12() @ #i"
+
+lemma l_PB_46_29:
+  exists-trace "Ex #i. F13() @ #i"
+
+lemma l_PB_46_30:
+  exists-trace "Ex #i. F14() @ #i"
+
+lemma l_PB_46_31:
+  exists-trace "Ex #i. F15() @ #i"
+
+lemma l_PC_42_23:
+  exists-trace "Ex #i. F16() @ #i"
+
+lemma l_PC_42_24:
+  exists-trace "Ex #i. F17() @ #i"
+
+lemma l_PC_42_25:
+  exists-trace "Ex #i. F18() @ #i"
+
+lemma l_PC_42_26:
+  exists-trace "Ex #i. F19() @ #i"
+
+lemma l_PC_42_28:
+  exists-trace "Ex #i. F20() @ #i"
+
+lemma l_PC_42_29:
+  exists-trace "Ex #i. F21() @ #i"
+
+lemma l_PC_42_30:
+  exists-trace "Ex #i. F22() @ #i"
+
+lemma l_PC_42_31:
+  exists-trace "Ex #i. F23() @ #i"
+
+lemma l_PD_42_23:
+  exists-trace "Ex #i. F24() @ #i"
+
+lemma l_PD_42_24:
+  exists-trace "Ex #i. F25() @ #i"
+
+lemma l_PD_42_25:
+  exists-trace "Ex #i. F26() @ #i"
+
+lemma l_PD_42_26:
+  exists-trace "Ex #i. F27() @ #i"
+
+lemma l_PD_42_28:
+  exists-trace "Ex #i. F28() @ #i"
+
+lemma l_PD_42_29:
+  exists-trace "Ex #i. F29() @ #i"
+
+lemma l_PD_42_30:
+  exists-trace "Ex #i. F30() @ #i"
+
+lemma l_PD_42_31:
+  exists-trace "Ex #i. F31() @ #i"
+
+lemma l_PE_40_23:
+  exists-trace "Ex #i. F32() @ #i"
+
+lemma l_PE_40_24:
+  exists-trace "Ex #i. F33() @ #i"
+
+lemma l_PE_40_25:
+  exists-trace "Ex #i. F34() @ #i"
+
+lemma l_PE_40_26:
+  exists-trace "Ex #i. F35() @ #i"
+
+lemma l_PE_40_28:
+  exists-trace "Ex #i. F36() @ #i"
+
+lemma l_PE_40_29:
+  exists-trace "Ex #i. F37() @ #i"
+
+lemma l_PE_40_30:
+  exists-trace "Ex #i. F38() @ #i"
+
+lemma l_PE_40_31:
+  exists-trace "Ex #i. F39() @ #i"
+
+lemma l_Q_078:
+  exists-trace "Ex #i. F40() @ #i"
+
+lemma l_Q_084:
+  exists-trace "Ex #i. F41() @ #i"
+
+lemma l_Q_092:
+  exists-trace "Ex #i. F42() @ #i"
+
+lemma l_Q_104:
+  exists-trace "Ex #i. F43() @ #i"
+
+lemma l_Q_120:
+  exists-trace "Ex #i. F44() @ #i"
+
+end

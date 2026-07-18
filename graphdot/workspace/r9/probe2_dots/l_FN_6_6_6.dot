@@ -1,0 +1,10 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n5[shape="record",label="{{<n0> In( \<$bo, $bp\> )}|{<n1> #i : FN_6_6_6[F48( )]}|{<n2> Faa( $aa, $ab, $ac, $ad, $ae,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$af\l)\l|<n3> Fbb( $ag, $ah, $ai, $aj, $ak,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$al\l)\l|<n4> Fcc( $am, $an, $ao, $ap, $aq,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$ar\l)\l}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+n6[label="#vf : isend",shape="ellipse"];
+n6 -> n5:n0[color="gray30"];
+
+}

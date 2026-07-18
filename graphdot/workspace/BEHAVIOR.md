@@ -334,6 +334,9 @@ renders `{info}|{concl}`).
     with wrapping siblings (live G: `[A,B]` ≡ `[B,A]`, and `[A,30,30]` gives the
     same `A` boundary in every position). So the fill allocation is order-free
     (sorted by flat, not by position).
+  - **REVISED (Session 9) — the per-group share is a TWO-LAYER trigger + fill
+    allocation with SHAPE-CORRECTED occupancies; the round-8 proportional rule is
+    superseded (see the Session-9 items below and the Round-9 report).**
   - **RESOLVED (Session 8) — the fill is HughesPJ `fill` with a 1.5 RIBBON, and the
     per-group share is PROPORTIONAL.** With the sanctioned BSD `pretty` library
     (Text.PrettyPrint.HughesPJ) ported faithfully, two parameters close most of the
@@ -372,6 +375,39 @@ renders `{info}|{concl}`).
       does not model. The width-model CEILING (any budget reproduces the cell) was
       78 % of multi-cell under greedy; the ragged fill raised it so proportional now
       reaches 80 %.
+
+  - **RESOLVED (Session 9) — the group WRAP TRIGGER is shape-corrected flat-sum,
+    exact on every controlled probe.** Three live probe batteries (157 crafted
+    2-/3-cell rows: cross-row sweeps, order swaps, 1-column sib steps, equal
+    pairs/triples, mixed breakable/unbreakable pairs — QUERIES.log Session 9)
+    plus the r8 grid pin the wrap decision to:
+    > Cell *j* occupies `C_j = flat_j + Σ_{top-level tuple args}(2·elems − 4)`.
+    > Cell *i*'s trigger budget is `max(87 [+4 if cell i has a ≥3-elem tuple arg
+    > and the row has ≥2 cells] − Σ_{j≠i} C_j, 20)`; it wraps iff its effective
+    > width exceeds the budget, where a single-quoted-atom fact above the floor
+    > measures `flat − 2` and everything else `flat`. A lone cell's budget is
+    > exactly 87.
+    This scores **343/343** probe cells (flat-sum: 13 errors) and, on the corpus,
+    1.051 % cell error vs flat-sum's 1.450 %. The corrections read as the
+    reference deciding wraps on an *internal* term rendering (tuples as
+    right-nested pairs — surplus `2n − 4`; quoted constants without quotes),
+    which also explains the previously-unexplained probe anomalies (a sib
+    wrapping at row total 78; nothing wrapping at total 90).
+  - **REVISED (Session 9) — the FILL share is proportional over display flats
+    with a 5/6 discount for single-quoted-atom siblings**:
+    `b_i = clamp(round(87·flat_i / (flat_i + Σ_{j≠i} w_j·flat_j)), 20, flat_i−1)`,
+    `w_j = 5/6` for single-quoted-atom siblings else 1. Probed: the
+    [Big 87, atom-sib s] fill follows `87²/(87 + 5s/6)` across s = 12…120 with
+    NO saturation (fill-band hit 96.9 % of probe wrap cells; corpus 90.94 % of
+    banded wrap cells). Trigger and fill are genuinely separate layers: the
+    trigger residual (87 − ΣC) does not reproduce the fill bands.
+  - **REFUTED (Session 9): the group is NOT one horizontal HughesPJ document**
+    (fcat/fsep/cat/sep of cell docs at any (lineLen, ribbon) tried fails almost
+    every controlled case — cells that share a line would never wrap
+    internally), and **premise-row width does NOT couple into conclusion-row
+    budgets** (byte-identical conclusion rows across premise widths 17…127),
+    and **cell order within a group is irrelevant** (order-swapped probes
+    byte-identical modulo the swap).
 
 --------------------------------------------------------------------------------
 ## 4. Clustering / simplification (§ priority 3)
@@ -644,28 +680,41 @@ Reproduced & byte-tested against captured/live payloads:
 - Abbreviation naming, numbering, legend HTML (65-space indent), and the SELECTION
   rule (§5c, REPORT2.md), plus the cluster/compact trigger (§4).
 
-- **Record-cell group WRAP** (§3f, RESOLVED Session 8): a **faithful HughesPJ port**
-  (`pretty.rs`, from the sanctioned BSD `pretty` library) laid out at
-  **ribbonsPerLine = 1.5** (`doclayout`: lineLength = 1.5 × the fit budget) so the
-  paragraph fill is RAGGED, plus a **proportional per-group budget**
-  (`generate::group_widths`: `B_i = max(round(87·flat_i/T), 20)`). The engine at the
-  right budget is byte-exact (the cell doc is faithful): single-cell wrapping cells
-  match **94.7 %**. Corpus census wrapping-cell byte-exactness **44.1 % → 81.1 %**
-  (multi-cell 80.0 %). Reproduces the live `Wide` record and the ragged `St_1_gNB`
-  fill byte-exact (`wide_conclusion_group_fill_byte_exact`,
-  `ragged_fill_line0_shorter_than_line1`).
+- **Record-cell group WRAP** (§3f, Sessions 8–9): a **faithful HughesPJ port**
+  (`pretty.rs`, from the sanctioned BSD `pretty` library, with the Haskell
+  laziness mirrored via `Doc::Lazy` thunks + first-line-only `fits` — pure
+  evaluation-order change, byte-identical, kills an exponential blowup on
+  many-element fills) laid out at **ribbonsPerLine = 1.5** so the paragraph fill
+  is RAGGED, plus the Session-9 **two-layer allocation**
+  (`generate::group_widths`): shape-corrected flat-sum TRIGGER (343/343 probe
+  cells; corpus trigger error 1.05 % vs flat-sum 1.45 %) and proportional FILL
+  with 5/6-discounted quoted-atom siblings. Corpus census: all-cells
+  **95.57 %**, wrapping cells **81.59 %** (single-cell 94.75 %, multi-cell
+  **80.45 %**), false-flat predictions 1000 (was 1843). Reproduces the live
+  `Wide` record and the ragged `St_1_gNB` fill byte-exact.
 
 Documented gaps (need the GPL solver or an unavailable backend):
 - JSON graph backend format (unavailable / not in corpus).
-- **Record-cell wrap residuals** (§3f, Session 8) — the remaining ~19 % of wrapping
-  cells, from the reference's own coupled `fits` / pre-abbreviation document, not
-  derivable from the POST-abbreviation cell text the crate consumes:
-  (a) the ±1 `fits` boundary flip when proportional lands the budget a column off
-      the reference's coupled per-cell `fits`;
-  (b) cells whose wrap is decided on their **un-abbreviated** width (abbreviations
-      substituted into an already-broken layout);
-  (c) `++`-union / deeply nested function-application cells whose internal break the
-      fact/tuple grammar does not model.
+- **Record-cell wrap residuals** (§3f, Session 9) — the remaining ~18 % of wrapping
+  cells, characterized by the corpus band census (bands3):
+  (a) **pre-abbreviation widths** — 84 % of the fill misses are cells whose group
+      contains abbreviation names (`KD19`, `EX1`, …): the reference decides both
+      trigger and fill on the UN-abbreviated internal term widths, which a crate
+      consuming post-abbreviation cell text cannot see. (The Session-9 occupancy
+      model makes this concrete: `C_j` is the *internal* width; abbreviated
+      siblings have a larger internal width than their display.) A caller that
+      passes unabbreviated widths could close this family — the crate model is
+      parameterized by cell texts and could accept explicit occupancies.
+  (b) **cell-doc ceiling** — 14 095 wrapping cells (9.9 %) are reproducible at NO
+      budget (band-NONE): `++`-union and deeply-nested function-application cells
+      whose internal breaks the fact/tuple cell grammar does not model, plus
+      abbreviation-expansion layouts.
+  (c) the residual ±1 boundary flips on clean cells (clean-cell fill hit 93.6 %).
+- **Shape-occupancy corrections for further shapes** (§3f Session 9): the probed
+  corrections cover tuple args, quoted-atom facts, and arg-facts; function-node
+  (`senc(…)`) and multi-quote corrections are visible in corpus false-negatives
+  but not yet pinned by controlled probes (the Session-9 P-series shapes were too
+  narrow to force transitions).
 - **compress/compact content** (§4, §6): which nodes/edges a raw constraint system
   yields — a solver transform. (The L1/L2/L3 level distinction is no longer a gap:
   it is proven non-existent, §7a.)
@@ -712,3 +761,63 @@ outside a crate that consumes post-abbreviation cell text.
 
 **Probes logged** in QUERIES.log Session 8 (probe.spthy 70 rules on :3200; all
 servers stopped, ports 3200-3299 clear). No forbidden paths read.
+
+--------------------------------------------------------------------------------
+## Round 9 report — cracking the multi-cell allocation (folded here per protocol)
+
+**Task.** Invert the corpus through the now-exact engine (round 8): extract
+per-cell width BANDS (the set of engine widths reproducing each observed cell),
+fit the allocation function against thousands of band constraints, split
+remaining candidates with live probes, implement, and re-census.
+
+**Tooling.** `band_dump` (src/bin): for every prem/concl group in a dot corpus,
+per cell, the L-space band (ribbonsPerLine 1.5) at which the engine reproduces
+the observed bytes, plus shape features (top-level tuple-arg elem counts, quoted
+constants, single-quoted-atom flag, function nodes, abbreviation tokens). Runs
+over the 12 022-file corpus; also over all probe captures.
+
+**Engine fix en route.** The strict HughesPJ port materialized exponential union
+trees (2.7 s / 1 GB for a 20-element tuple fill; probe extraction hung). Fixed by
+mirroring the Haskell laziness: `Doc::Lazy` thunks (forced once, memoized) at
+every union branch / continuation the sanctioned source leaves un-forced, and
+`fits` forcing only a candidate's first line. Byte-equivalence verified: all
+tests, fill-census numbers identical to round 8, corpus round-trip 12022/12022
+(now 3 s). 2 ms for the 20-element fill.
+
+**Method & findings.**
+1. Corpus bands alone REFUTED every single-parameter proportional family (pairs
+   of narrow bands are mutually unsatisfiable, e.g. [42,116] needs b0 ≤ 21 with
+   b1 ≥ 60), and refuted `b_i = 87 − mw(sibling)` fixpoints.
+2. Live battery #2 (probe2, 56 rules): premise-width coupling REFUTED (byte-
+   identical conclusions across premise 17…127); order effects REFUTED;
+   group-as-one-HughesPJ-doc REFUTED computationally (`groupdoc_lab`).
+3. Live battery #3 (probe3, 56 rules; 1-column sib steps + equal pairs/triples +
+   mixed pairs) exposed shape anomalies (a 31-flat atom-sib wrapping at row
+   total 86; a 71-flat tuple-fact fitting at total 90) and pinned the trigger:
+   occupancies C = flat + (2n−4 per top-level tuple arg), +4 self-budget bonus
+   for ≥3-elem tuple-facts in multi-cell rows, quoted-atom −2 fit-check
+   discount, floor 20, lone-cell budget 87 — **0 errors on 343 probe cells**,
+   corpus trigger error 1.05 % (flat-sum: 1.45 %). Reads as the reference
+   measuring INTERNAL term renderings (tuples = right-nested pairs, quotes
+   dropped).
+4. Battery #4 (probe4 Q-series) killed the fill-saturation hypothesis: the
+   [Big 87, atom s] fill follows 87²/(87 + 5s/6) for s = 12…120. Fill =
+   proportional over display flats with single-quoted-atom siblings at 5/6,
+   half-up rounding, clamped to [20, flat−1]. Probe fill-band hit 96.9 %.
+5. Implemented in `generate::group_widths` (cells passed as flat texts; shape
+   parsing in-crate). Census (12 022 files): **all cells 95.572 %** (prop87
+   95.451 %), wrapping cells **81.59 %** (81.09 %), multi-cell wrapping
+   **80.45 %** (79.90 %), false-flat 1000 (1843). Round-trip 12022/12022; all
+   55 tests green; `Wide`/`St_1_gNB`/E-W fixtures unchanged.
+
+**Residual, characterized honestly.** The corpus fill-band ceiling is 90.94 %
+of banded wrap cells (93.6 % on cells with no abbreviations/functions in the
+group); 84 % of misses involve abbreviation names whose internal (unabbreviated)
+widths drive the reference's decisions — structurally invisible post-
+abbreviation; 9.9 % of wrap cells are band-NONE (cell-doc gap: ++-unions, deep
+nesting, abbreviation-expansion layouts). These are the honest limits of a crate
+consuming post-abbreviation cell text; the model would accept caller-supplied
+internal occupancies to close family (a).
+
+**Probes logged** in QUERIES.log Session 9 (probe2/3/4 on ports 3200-3202, all
+servers stopped, ports verified clear). No forbidden paths read.

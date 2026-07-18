@@ -403,3 +403,47 @@ across siblings collide -> occ>=2 -> ABBREVIATED, which corrupted the first
   reproduce byte-exact under rpl=1.5. => the per-cell parameter is the fit BUDGET
   (ribbon); doclayout renders at lineLen=3*budget/2, rpl=1.5.
 - Servers stopped after probing (serve.sh stop 3200).
+
+## Session 9 (round 9) — allocation cracking: probe batteries 2+3
+- serve.sh start probe2.spthy :3200 (RowCouplingProbe, 56 rules; genprobe2.py):
+  A prem-width sweep x [Big87,Sib33]; B order swap; C lone-93; D/G pair grids
+  wide/narrow prem; FW/FN triples; E info-width; H [Big87,sib] replicate.
+  drive.py autoprove+graph-def -> r9/probe2_dots/*.dot (56 graphs).
+- serve.sh stop 3200; start probe3.spthy :3201 (BudgetPinProbe, 56 rules;
+  genprobe3.py): I sib flat 21..74 step1-in-windows vs [Big(<16 $vars>)=87];
+  J equal pairs 39..47; K equal triples 28..32; L breakable/unbreakable pairs
+  T=84..92 both orders; M [Wide61, Nar 23..31 step1]. -> r9/probe3_dots (56).
+- FINDINGS (behavioral, from captured graphs):
+  * premise-row width does NOT couple into concl-row budgets (A/D-G/C byte-id
+    across prem 17..127); order-free (B, LB); info width untested-relevant.
+  * trigger for arg-facts: T>87 exact (J 86 flat/88 wrap; K 87 flat/90 wrap;
+    M 87 flat/89 wrap; L (45,41) flat / (45,43) wrap).
+  * r8 tuple-fact anomalies ((55,31) sib wraps at T=86; (71,19) nothing wraps
+    at T=90; (39,41) sib wraps at T=80) + L/M edges pin SHAPE-CORRECTED
+    occupancies C: C(argfact)=flat, C(single-quoted-atom-fact)=flat-4,
+    C(tuple-fact)=flat+2n-4 (n = tuple elems); trigger b_i = max(87 - sum_{j!=i}
+    C_j, 20); every probe edge (39,36)/(55,36)/(71,19)/(71,21)/M_26/M_28/J_43/
+    J_44 pinches these exactly.
+  * group-as-one-HughesPJ-doc REFUTED computationally (groupdoc_lab: fcat/fsep/
+    cat/sep x (L,rpl) grid vs 15 byte-cases: no config close).
+  * FILL budget of a wrapping cell is a separate layer (I-series Big fill bands
+    do not equal trigger residuals); prop-family close but pure prop(W) refuted
+    at 1-col level (I windows s=34 vs s=44 mutually exclude any W).
+- servers: 3200 stopped before 3201 start; 3201 still up (stop after followups).
+- serve.sh stop 3201; start probe4.spthy :3202 (ShapePinProbe, 45 rules;
+  genprobe4.py): P-series shape-C pins (func/quote/pair/4-tuple/fresh shapes vs
+  stepped Nar — shapes too small, T<=81, no transitions: only weak upper bounds;
+  design miss) + Q-series [Big87, Sib s] s=78..120 fill saturation probes.
+  -> r9/probe4_dots (45 graphs). Q FINDING: no fill saturation; Big fill bands
+  follow 87^2/(87 + (5/6)s) across s=12..120 (floor-rounded), refuting the
+  earlier apparent plateau.
+- serve.sh stop 3202; ports 3200-3299 verified clear.
+- Corpus analysis (captured OUTPUT: oracle/dot_corpus 12022; bands3.tsv with
+  shape features): trigger v3 corpus cell-error 1.051% (fp 1014 fn 1000) vs
+  flat-sum 1.450%; fill (prop over display flats, 5/6 sqa discount, half-up,
+  clamp flat-1) band-hit 90.94% of banded wrap cells; residue: 84% of misses
+  are cells with abbreviation tokens (width decided pre-abbreviation), 9%
+  sibling function-nodes; clean cells 93.55%.
+- fill_census (crate group_widths, final): all-cells 95.572% (prop87 95.451%),
+  wrapping 81.59% (81.09%), multi-cell 80.45% (79.90%), falseNeg 1000 (1843).
+  GRAPHCLEAN_CORPUS roundtrip stays 12022/12022; all 55 tests green.

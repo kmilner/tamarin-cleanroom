@@ -189,12 +189,15 @@ fn main_census() {
         eprintln!("set GRAPHCLEAN_CORPUS");
         return;
     };
-    type Alloc = (&'static str, Box<dyn Fn(&[usize]) -> Vec<usize>>);
+    type Alloc = (&'static str, Box<dyn Fn(&[usize], &[String]) -> Vec<usize>>);
     let allocs: Vec<Alloc> = vec![
-        ("proportional(87)", Box::new(alloc_proportional)),
-        ("prop_ceil", Box::new(alloc_prop_ceil)),
-        ("reserve_small", Box::new(alloc_reserve_small)),
-        ("prop(89)", Box::new(|f: &[usize]| alloc_prop_l(f, 89))),
+        (
+            "crate group_widths",
+            Box::new(|_f: &[usize], texts: &[String]| graph_clean::generate::group_widths(texts)),
+        ),
+        ("proportional(87)", Box::new(|f: &[usize], _t: &[String]| alloc_proportional(f))),
+        ("prop_ceil", Box::new(|f: &[usize], _t: &[String]| alloc_prop_ceil(f))),
+        ("reserve_small", Box::new(|f: &[usize], _t: &[String]| alloc_reserve_small(f))),
     ];
     let _ = (alloc_smallest_first, alloc_flatsum, alloc_prop_l);
     let mut tallies: Vec<Tally> = allocs
@@ -246,7 +249,7 @@ fn main_census() {
                 let flat_texts: Vec<String> = bodies.iter().map(|b| dewrap(b)).collect();
                 let single = bodies.len() == 1;
                 for (ti, (_, alloc)) in allocs.iter().enumerate() {
-                    let widths = alloc(&flats);
+                    let widths = alloc(&flats, &flat_texts);
                     for (k, body) in bodies.iter().enumerate() {
                         let predicted = wrap_cell_dot(&flat_texts[k], widths[k] as isize);
                         let is_wrap = body.contains("\\l");
@@ -294,8 +297,11 @@ fn main_census() {
     }
     for t in &tallies {
         eprintln!(
-            "{:16} wrap {:>6}/{:<6}={:6.2}% | single {:>6}/{:<6}={:6.2}% | multi {:>6}/{:<6}={:6.2}% | falseNeg {:>5} fillErr {:>5}",
+            "{:16} all {:>6}/{:<6}={:6.3}% | wrap {:>6}/{:<6}={:6.2}% | single {:>6}/{:<6}={:6.2}% | multi {:>6}/{:<6}={:6.2}% | falseNeg {:>5} fillErr {:>5}",
             t.name,
+            t.all_match,
+            t.all_total,
+            100.0 * t.all_match as f64 / t.all_total.max(1) as f64,
             t.wrap_match,
             t.wrap_total,
             100.0 * t.wrap_match as f64 / t.wrap_total.max(1) as f64,

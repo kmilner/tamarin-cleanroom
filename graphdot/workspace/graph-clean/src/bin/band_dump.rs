@@ -161,6 +161,137 @@ fn cell_status(flat_text: &str, body: &str, flat: usize) -> String {
     runs.iter().map(|(a, b)| format!("{}-{}", a, b)).collect::<Vec<_>>().join(",")
 }
 
+/// Shape features of a cell's flat text, for occupancy-model fitting:
+/// `(dtop, drec, nq, sqa, nargs)` where `dtop` = Σ over TOP-LEVEL tuple args of
+/// (2·elems − 4), `drec` = the same over ALL tuple nodes recursively, `nq` =
+/// number of single-quoted constants anywhere, `sqa` = 1 if the cell is a fact
+/// with exactly one argument that is a quoted constant, `nargs` = top-level
+/// argument count (0 if the text is not a padded fact).
+fn shape_features(flat: &str) -> (i64, i64, i64, i64, i64, i64, i64) {
+    fn split_args(s: &str) -> Vec<&str> {
+        let mut parts = Vec::new();
+        let (mut depth, mut inq, mut start) = (0i32, false, 0usize);
+        let b: Vec<(usize, char)> = s.char_indices().collect();
+        let mut i = 0;
+        while i < b.len() {
+            let (pos, c) = b[i];
+            if inq {
+                if c == '\'' {
+                    inq = false;
+                }
+            } else {
+                match c {
+                    '\'' => inq = true,
+                    '(' | '<' | '[' => depth += 1,
+                    ')' | '>' | ']' => depth -= 1,
+                    ',' if depth == 0 && i + 1 < b.len() && b[i + 1].1 == ' ' => {
+                        parts.push(&s[start..pos]);
+                        start = b[i + 1].0 + 1;
+                        i += 1;
+                    }
+                    _ => {}
+                }
+            }
+            i += 1;
+        }
+        parts.push(&s[start..]);
+        parts
+    }
+    fn tuple_nodes(s: &str, top: bool, dtop: &mut i64, drec: &mut i64) {
+        let t = s.trim();
+        if t.starts_with('<') && t.ends_with('>') {
+            let inner = &t[1..t.len() - 1];
+            let elems = split_args(inner);
+            let d = 2 * elems.len() as i64 - 4;
+            *drec += d;
+            if top {
+                *dtop += d;
+            }
+            for e in elems {
+                tuple_nodes(e, false, dtop, drec);
+            }
+        } else if let Some(open) = t.find('(') {
+            if t.ends_with(')') {
+                let inner = &t[open + 1..t.len() - 1];
+                let inner = inner.strip_prefix(' ').unwrap_or(inner);
+                let inner = inner.strip_suffix(' ').unwrap_or(inner);
+                for a in split_args(inner) {
+                    tuple_nodes(a, false, dtop, drec);
+                }
+            }
+        }
+    }
+    let nq = flat.split('\'').count() as i64 / 2;
+    let (mut dtop, mut drec) = (0i64, 0i64);
+    let mut nargs = 0i64;
+    let mut sqa = 0i64;
+    // function-application nodes inside the fact (name directly followed by
+    // '(' with no ' ' after — the unpadded display form), e.g. senc(, pk(
+    let nfunc = {
+        let b: Vec<char> = flat.chars().collect();
+        let mut n = 0i64;
+        for i in 1..b.len() {
+            if b[i] == '('
+                && (b[i - 1].is_alphanumeric() || b[i - 1] == '_')
+                && (i + 1 >= b.len() || b[i + 1] != ' ')
+            {
+                n += 1;
+            }
+        }
+        n
+    };
+    // abbreviation-name tokens (2 uppercase letters + digits, e.g. KD19, EX1)
+    let nabbr = {
+        let b: Vec<char> = flat.chars().collect();
+        let mut n = 0i64;
+        let mut i = 0;
+        while i < b.len() {
+            if b[i].is_ascii_uppercase()
+                && (i == 0 || !(b[i - 1].is_alphanumeric() || b[i - 1] == '_'))
+            {
+                let mut j = i + 1;
+                while j < b.len() && b[j].is_ascii_uppercase() {
+                    j += 1;
+                }
+                let letters = j - i;
+                let ds = j;
+                while j < b.len() && b[j].is_ascii_digit() {
+                    j += 1;
+                }
+                if letters <= 2 && j > ds && (j >= b.len() || !(b[j].is_alphanumeric() || b[j] == '_')) {
+                    n += 1;
+                }
+                i = j;
+            } else {
+                i += 1;
+            }
+        }
+        n
+    };
+    if let Some(open) = flat.find("( ") {
+        if flat.ends_with(" )") {
+            let name = &flat[..open];
+            if !name.is_empty() && !name.contains(['(', ')', '<', '>', ' ', ',']) {
+                let inner = &flat[open + 2..flat.len() - 2];
+                let args = split_args(inner);
+                nargs = args.len() as i64;
+                for a in &args {
+                    tuple_nodes(a, true, &mut dtop, &mut drec);
+                }
+                if args.len() == 1 {
+                    let a = args[0].trim();
+                    if a.starts_with('\'') && a.ends_with('\'') && a.len() >= 2
+                        && !a[1..a.len() - 1].contains('\'')
+                    {
+                        sqa = 1;
+                    }
+                }
+            }
+        }
+    }
+    (dtop, drec, nq, sqa, nargs, nfunc, nabbr)
+}
+
 fn process_file(path: &std::path::Path, cache: &mut HashMap<(String, String), String>) -> Vec<String> {
     let mut out = Vec::new();
     let Ok(dot) = std::fs::read_to_string(path) else { return out };
@@ -240,7 +371,11 @@ fn process_file(path: &std::path::Path, cache: &mut HashMap<(String, String), St
                     cache.insert(key, s.clone());
                     s
                 };
-                cellfields.push(format!("{}:{}", flats[k], status));
+                let (dtop, drec, nq, sqa, nargs, nfunc, nabbr) = shape_features(&flat_text);
+                cellfields.push(format!(
+                    "{}:{}:{}:{}:{}:{}:{}:{}:{}",
+                    flats[k], status, dtop, drec, nq, sqa, nargs, nfunc, nabbr
+                ));
             }
             out.push(format!(
                 "{}\t{}\t{}\t{}\t{}\t{}",

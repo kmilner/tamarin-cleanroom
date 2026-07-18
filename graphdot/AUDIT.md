@@ -924,3 +924,118 @@ The ragged-fill behavior is the sanctioned HughesPJ `fill`. Behavioral claims re
 quantitative claim traces to a logged probe/census (`r8/`, `fill_census.rs`, `width_probe.rs`).
 Findings that survive filtration: 0. No redo instructions issued.
 VERDICT: pass
+
+## Round 9 incremental audit — laziness port + two-layer shape-corrected allocation (trigger + fill)
+
+**Scope.** This round's delta = the uncommitted working tree under `graphdot/` on top of
+`78432bf` (the task's "HEAD dca6334" is stale; the round is the working-tree diff, confirmed via
+`git status`/`git diff -- graphdot/`). Touched: `pretty.rs` (+260/−90, laziness port),
+`generate.rs` (`group_widths` two-layer rewrite + `cell_shape`/`split_level`), `band_dump.rs`
+(`shape_features` inversion column), `doclayout.rs` (doc-comment only), new bin `groupdoc_lab.rs`,
+tests (`fill_census.rs`, `census.rs`, `fill_census` allocator registration), and the round-9
+probe artifacts (`r9/`: `probe2/3/4.spthy`+`_dots`+`_b3.tsv`, `genprobe{2,3,4}.py`, `fit2.py`,
+`bands2/3.tsv`, `probe_bands.tsv`), plus BEHAVIOR.md §3f/Round-9 report and QUERIES.log Session 9.
+
+**Sides & method.** Abstraction–filtration–comparison against the GPL source
+`lib/theory/src/Theory/Constraint/System/Dot.hs` `renderRow`/`renderBalanced`/`scaleIndent`
+(lines 357–379) and its HughesPJ usage; sanctioned comparand is `pretty-1.1.3.6` (BSD). Source's
+protectable expression, restated for the comparison: a **single-layer** allocation — cell *i*
+renders at `lineLength = conv(ratio·usedWidth_i)` with `conv = max 30 . round . (*1.3)` and
+`ratio = 100 / Σ usedWidth_j`, i.e. `max(30, round(130·flat_i/T))`, then `scaleIndent` multiplies
+each rendered line's leading spaces by `1.5`. Distinctive constants: `100`, `1.3`, `30`, indent-`1.5`,
+the `magic factor 1.3` font-compensation comment; no trigger/fill split, uniform weights, no shape
+awareness.
+
+### pretty.rs laziness port — filtered as sanctioned BSD-library resemblance
+
+The largest change adds `Doc::Lazy`/`LazyDoc`/`lazy`/`force` thunks and threads them through
+`beside`/`above_nest`/`sep1`/`sep_nb`/`fill1`/`fill_nb`/`fill_nbe`/`one_liner`/`get`/`get1`/
+`nicest1`/`fits`/`lay`. This is a pure **evaluation-order** mirror of HughesPJ's own laziness:
+`nicest1` resolves the left branch as a thunk and only forces the right when the left's first
+line does not fit; `fits` forces only up to the first line break; union branches and text-tail
+continuations are suspended. These are properties of `Text.PrettyPrint.HughesPJ` (the sanctioned
+BSD comparand), NOT of Dot.hs — Dot.hs merely *calls* `renderStyle`/`renderBalanced` and never
+touches `best`/`nicest`/`fits`. The port introduces **zero** width or allocation constants and no
+source identifier. Byte-equivalence is asserted in the module docs and gated by the unchanged
+`fill_census`/round-trip (12022/12022). Resemblance here is to the BSD library — sanctioned.
+Filtered out.
+
+### The fitted allocation (group_widths) — residual protectable expression, provenance checked hard
+
+The round replaces round-8's single-layer proportional `max(round(87·flat_i/T),20)` with a
+**two-layer, shape-corrected** model. Compared element-by-element to Dot.hs:
+
+- **Structure.** Dot.hs has one layer and no per-cell trigger; the clean side splits a **trigger**
+  (`b_trig = max(87 [+4] − Σ_{j≠i} C_j, 20)`, wrap iff effective width > `b_trig`) from a **fill**
+  (`clamp(round(87·flat_i/(flat_i+Σ_{j≠i} w_j·flat_j)), 20, flat_i−1)`). The trigger layer, the
+  shape occupancies `C_j = flat_j + Σ_tuple(2n−4)`, the weighted denominator, and the `flat−1`
+  clamp have **no analogue in `renderBalanced`**. This is divergent structure, not obfuscated copy.
+- **Constants, each traced to logged probe/corpus, none to Dot.hs:**
+  * `87` / `20` — pre-existing (Sessions 4/6 live boundary + floor probes), audited Rounds 4/6/8;
+    ≠ source `100`/`30`. Not this round's delta.
+  * `2n−4` tuple surplus (`generate.rs:74`, `band_dump.rs:64`) — Session-9 probe3; **grounded in
+    the probe shape-feature data directly**: `r9/probe3_b3.tsv` records the 16-element `Big` tuple
+    with `dtop = 28 = 2·16−4`. The "internal right-nested-pair" rationale is a black-box inference
+    from the wrap anomalies (sib wrapping at row-total 78; nothing at 90); Dot.hs has no tuple-shape
+    term — `renderBalanced` measures `oneLineRender` widths only.
+  * `+4` self-budget bonus for ≥3-elem tuple-facts in multi-cell rows — Session-9 probe3, pinned by
+    the enumerated edges in QUERIES.log ((39,36)/(55,36)/(71,19)/(71,21)/M_26/M_28/J_43/J_44);
+    absent from the source.
+  * `5/6` single-quoted-atom sibling discount — Session-9 probe4 Q-series. **Independently
+    re-verified against the probe bands:** converting `r9/probe4_b3.tsv` L-space bands to ribbon
+    (b=2L/3), s=78→b≈50 vs `87²/(87+5·78/6)=49.8`, s=120→b=40 vs `40.5` — reproduces
+    `87²/(87+5s/6)` within the acknowledged ±1 `fits` residual. Not derivable from Dot.hs.
+  * half-up rounding + clamp `[20, flat−1]` — `fit2.py` `propF_half`; ≠ source's bare `round` with
+    no floor-on-flat clamp.
+- **The proportional-share idea** (`87·flat_i/Σ`) does overlap Dot.hs's proportional
+  `130·flat_i/T` at the abstraction level, but (a) it is one obvious closed form (merger), (b) it
+  was selected by a logged corpus census over multiple candidate allocators (bands3;
+  smallest-first/flat-sum/prop-ceil/reserve-small all scored and rejected — QUERIES.log Session
+  8/9), and (c) the clean side's weighting (self at 1, sqa siblings at 5/6) and budget (87 vs 130)
+  differ. Selected by observed behavior, not lifted. The Round-8 finding on this point stands.
+- **The `≈130` collision is emergent, not copied.** A lone cell renders at
+  `lineLength = ⌊3·87/2⌋ = 130` via probed ribbon-87 × the sanctioned BSD `ribbonsPerLine = 1.5`;
+  the `130`/`134` values throughout `bands*.tsv`, `probe*_b3.tsv`, and `groupdoc_lab.rs`
+  `(130,1.5)` are this emergent L-space column / lineLength candidate, arrived at from the
+  probe-pinned ribbon and the library default — NOT Dot.hs's `100·1.3`. No `1.3`, no `magic
+  factor` comment, no `scaleIndent` ×1.5 leading-space scaling, and none of
+  `renderBalanced`/`scaleIndent`/`widthRender`/`oneLineRender`/`usedWidths`/`ratio`/`conv`/
+  `renderRow` appears anywhere in the delta.
+
+### groupdoc_lab.rs / band_dump shape_features — measurement instruments, no lineage
+
+`groupdoc_lab` is a black-box **refutation** harness: it composes the cell docs as one HughesPJ
+document (`fcat`/`fsep`/`cat`/`sep`) at an (L,rpl) sweep `{130,100,87,90}×{1.0,1.5}` through the
+crate's OWN engine and checks against 18 observed byte-cases — establishing the logged "group is
+NOT one HughesPJ doc" negative. The `130` is the derived lone-cell lineLength candidate, not a
+reconstruction of `renderRow`. `band_dump::shape_features` computes tuple/quote/func/abbrev
+features from post-abbreviation cell text for the inversion; it is an observing tool, no source
+resemblance.
+
+### ADVISORY (non-blocking; not a Dot.hs-resemblance violation)
+
+The single-quoted-atom correction is logged **inconsistently with the shipped code**, weakening
+its provenance trail (though not implicating Dot.hs, which has no quoted-constant handling at all):
+QUERIES.log Session 9 and `fit2.py` (`asq=−4`, `pred_wrap = c["f"] > b`) pin `C(sqa) = flat−4` as a
+**sibling-occupancy** correction with the cell's own width left raw; the shipped
+`generate::group_widths` instead applies `−2` to the cell's **own** effective width
+(`eff = flat − 2`) and **no** occupancy correction (`cs[j] = flat_j + dtop_j`), which is what
+BEHAVIOR §3f documents. These two placements predict different wrap boundaries (own-width −2 vs
+sibling-occupancy −4 diverge by 2–4 columns on 2-cell rows), so the raw probe log does not cleanly
+pin the constant the code ships. Because this is orthogonal to the source (no `renderBalanced`
+quoted-atom term exists), it does not survive filtration as a similarity finding and does not block
+the verdict. **Behavioral redo (provenance hygiene, not a patch):** re-run the quoted-atom probe
+cells (probe2/3 `sqa=1` rows) through the shipped `group_widths` and through the `fit2.py` `asq=−4`
+model, report which reproduces the census figures actually cited (trigger 1.051 %, all-cells
+95.572 %), and reconcile QUERIES.log Session 9, BEHAVIOR §3f, and the code so all three state the
+same magnitude AND placement (own-width vs occupancy) for the quoted-atom correction.
+
+### Findings surviving filtration (Round 9)
+
+Dot.hs-resemblance violations: **0**. Every allocation constant and structural choice in the delta
+traces to a logged live probe (`r9/` batteries 2/3/4, verified against `probe3_b3.tsv`/`probe4_b3.tsv`)
+or corpus band inversion (`bands3.tsv`, `fill_census.rs`), and none matches or derives from
+`renderBalanced`/`scaleIndent`/`renderRow` (`100`/`1.3`/`130`-as-totalWidth/`30`/indent-`1.5`). The
+`pretty.rs` laziness is sanctioned BSD-library semantics. One non-blocking provenance-hygiene
+advisory (sqa −2/−4 log↔code inconsistency) issued as a behavioral redo.
+VERDICT: pass
