@@ -385,3 +385,110 @@ byte-exact reproduction of the `--diff` line forms via a tagged-union abstractio
 does not exist upstream. Nothing in the delta is a copied protectable expression.
 
 VERDICT: pass
+
+## Round 6 (cont.) audit
+
+Delta audited: the **working-tree changes** in `console/` on top of committed HEAD
+`ce83726` (the prior Round-6 section above is already landed). Scope, from
+`git -C /home/kamilner/tamarin-cleanroom status/diff -- console/`:
+
+- **`cli-clean/tests/cli_tests.rs`** (+107): four new tests —
+  `diff_summary_projected_falsified_both_kinds`,
+  `diff_summary_projected_incomplete_without_prove`,
+  `diff_summary_projected_sides_are_independent`,
+  `frame_batch_multi_warn_then_two_lemmas_reproduces_both_streams`.
+- **`workspace/BEHAVIOR.md`** (+37): §14b/§14e amendments (projected verdict set,
+  lemma-selection never omits a line, side-independence).
+- **`workspace/QUERIES.log`** (+9): Round-6-cont probe log `14:30–14:35`.
+- **New self-authored probes** `probes/round6/{diff_asym,diff_false,two_lemma}.spthy`;
+  new fixtures/captures `r6_diff_{asym,false,lemma_noprove}`, `r6_multi_warn_two`,
+  and closure captures `r6_twolemma_{prove,proveone,lemmafilter}`.
+- **No production source changed.** `git diff -- console/workspace/cli-clean/src/`
+  is empty; `framing.rs`/`lib.rs`/`version.rs` are untouched this round. There is
+  therefore no new code surface on which protectable expression could land — the
+  delta is tests, self-authored input theories, oracle-derived fixtures, and prose.
+
+Both-sides comparison ran against `lib/theory/src/Theory/Proof.hs`
+(`showProofStatus`/`showDiffProofStatus`, 1104–1121), `lib/theory/src/ClosedTheory.hs`
+(the `lemmaSummaries`/`diffLemmaSummaries` `<->`-combinator render, 505–545),
+`src/Main/Mode/Batch.hs` (`summary of summaries`, 138), and
+`lib/theory/src/Theory/Tools/Wellformedness.hs` (1163/1183). Findings:
+
+- **No new source ⇒ no new copied structure.** Every identifier the four tests
+  touch (`assert_diff_summary`, `rhs`, `lhs`, `diff_lemma`, `frame_batch`,
+  `BatchTheory`, `Summary`, `MaudeInfo`, `slots`, `summary_start`, `warn`, `lemma`,
+  `s`, `TraceKind`, `LemmaResult`) is the clean crate's own pre-existing API landed
+  and audited in earlier rounds (`src/framing.rs`, `src/version.rs`); confirmed the
+  committed test file already defined/imported all of them. The tests add call sites
+  and data, not logic.
+
+- **Verdict-phrase strings — boundary interop, unchanged.** `"verified"`,
+  `"falsified - found trace"`, `"falsified - no trace found"`, `"analysis incomplete"`
+  are verbatim `showProofStatus`/`showDiffProofStatus` outputs (Proof.hs 1105–1110),
+  but they are byte-exact output tokens the console exists to reproduce; they entered
+  the clean in Round 5 (`verdict_phrase`) and are untouched here. This round adds
+  **no new phrase** — and, decisively, the three still-unprobed statuses
+  (`"analysis cannot be finished (reducible operators in subterms)"`,
+  `"analysis undetermined"`, `"proof has been invalidated"`, Proof.hs 1111–1113 /
+  1118–1120) remain **absent** from the clean. The projected RHS/LHS lines are shown
+  (tests + fixtures) to reuse the *same* observed-only 3-value phrase map for their
+  own `kind`, rather than transcribing upstream's dual 6-arm `showProofStatus` +
+  6-arm `showDiffProofStatus` pair. Reproducing only the probed subset off one shared
+  reused mapping is the fingerprint of reconstruction, not of copying the source's
+  two exhaustive status functions. Filtered.
+
+- **RHS/LHS/DiffLemma line forms — unchanged Round-5/6 bytes-first design.** Upstream
+  emits `text (show s) <-> text ": " <-> … <-> showProofStatus …` and
+  `text "DiffLemma: " <-> …` via Pretty `<->` spacing (ClosedTheory.hs 510–541); the
+  clean writes the observed bytes directly (`format!("RHS :  {core}")`, prior round).
+  No combinator lineage, and nothing in this delta modifies that path — the new tests
+  merely pin previously-unobserved *verdict* values (falsified/both-kinds, incomplete,
+  asymmetric) through it. Filtered.
+
+- **Probes are self-authored; input syntax is merger.** `diff_asym.spthy` /
+  `diff_false.spthy` / `two_lemma.spthy` carry own theory names (`DiffAsym`,
+  `DiffFalse`, `TwoLemma`), own rule/lemma names (`Send`/`Leak`/`A`,
+  `secret`/`leaked`/`impossible`/`first`/`second`) and own `diff()` constructions
+  (`diff(~m, senc(~m,~k))`, `diff(~m,~m)`). The `.spthy` surface syntax
+  (`builtins:`, `rule`, `--[ ]->`, `lemma`, `exists-trace`) is the tool's required
+  input language — merger, dictated by the need to drive tamarin. No resemblance to
+  any upstream `examples/` theory. Filtered.
+
+- **Fixtures are oracle golden bytes.** `r6_diff_{asym,false,lemma_noprove}.out.txt`
+  and `r6_multi_warn_two.{out,err}.txt` each carry the full HS proof body plus the
+  `Generated from: Tamarin version 1.13.0 … Git revision 0234f6a1…` trailer and the
+  `summary of summaries:` block — i.e. the reference prover's own emitted bytes via
+  `oracle/hs_oracle.sh`, not authored expression. All four new tests reproduce these
+  bytes through the *unchanged* clean code path and **pass** (verified by running
+  `cargo test diff_summary_projected` and `…multi_warn_then_two`: 4/4 ok). Their step
+  counts (`3/2/67/1/44`) and lemma names are boundary observations copied from the
+  captures, cross-referenced in `QUERIES.log 14:30–14:35`. Probe-/boundary-derived,
+  filtered.
+
+- **Doc echo of a wellformedness string — observed output, not source.**
+  `BEHAVIOR.md` describes the `--lemma`/`--prove` mismatch as tripping a check
+  ("… does not correspond to a specified lemma in the theory"). Upstream's literal is
+  `"do(es) not correspond to a specified lemma in the theory"`
+  (Wellformedness.hs 1163/1183). The clean's text is (a) a *paraphrase* ("does" vs the
+  source's `"do(es)"`), (b) a description of a **warning string surfaced in tamarin's
+  own OUTPUT** — a boundary datum captured in `r6_twolemma_lemmafilter`, not internal
+  source expression — and (c) present only in a behaviour note, embedded in **no**
+  clean source file. Boundary observation in prose; filtered. (The clean correctly
+  routes this to the existing §12b WARNING count-line slot rather than inventing a
+  per-lemma "skipped" form, matching observed behaviour, not the source's WF plumbing.)
+
+- **Side-independence / LHS=left, RHS=right.** The `diff_asym` claim that `LHS` is the
+  first `diff()` argument and `RHS` the second, and that the two sides compute
+  independently, is established by capture (`r6_diff_asym`: `RHS secret verified` vs
+  `LHS secret falsified`), logged at `QUERIES.log 14:32:00`. Behavioural fact read off
+  the oracle, not lifted from source. Filtered.
+
+Every behavioural claim added this round traces to a logged Round-6-cont probe
+(`QUERIES.log 14:30:00–14:35:00`) or a captured golden fixture. The delta introduces
+no production source, no new interop token, no upstream identifier constellation, no
+combinator/structure lineage, and no comment lineage (the `TODO: The whole consruction
+seems a bit hacky` note and the `Just`-annotation-invariant block repeated across
+ClosedTheory.hs's comprehensions are, as before, not echoed). Nothing in the delta is a
+copied protectable expression.
+
+VERDICT: pass

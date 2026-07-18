@@ -360,3 +360,46 @@ across siblings collide -> occ>=2 -> ABBREVIATED, which corrupted the first
   Wide record byte-exact (Ack@20, Big@56 -> 8 elements). Implemented in
   generate::group_cells; corpus round-trip stays 12022/12022; new test
   wide_conclusion_group_fill_byte_exact (fixture wide_record.dot vs live wide_group.dot).
+
+## Session 8 (round 8) — faithful HughesPJ engine + the ribbon that drives ragged fill
+
+### Sanctioned material read
+- sanctioned/pretty-1.1.3.6/src/Text/PrettyPrint/Annotated/HughesPJ.hs (BSD; the
+  reference toolchain's pretty-printer). Confirmed default Style
+  `lineLength=100, ribbonsPerLine=1.5, PageMode`. Ported Doc/best/fits/fill into
+  crate `pretty.rs` (pre-existing port audited). NOT tamarin source.
+
+### Live probes (scratchpad r8/serve.sh --port= form; port 3200)
+- probe.spthy (70 one-rule theories `GroupShareProbe`): conclusion group
+  [Big(<K distinct 2-char vars>), Sib(single pub const of len P)], K∈{8,10,12,16,20},
+  P swept. Distinct vars/occ-1 consts => no abbreviation. Autoproved each lemma
+  (drive.py: GET autoprove/idfs/0/False/proof/l_R_K_P -> JSON redirect -> GET
+  interactive-graph-def/proof/l_R_K_P/_). Captured 70 records (r8/probe_dots/).
+- Purpose: measure how a group's cells share the row. For each wrapping cell,
+  back out the effective per-cell width via the crate engine (analyze2.py).
+- FINDING: the per-cell effective width is NOT a clean closed form of the sibling
+  flats (fractional slopes ~0.25*flat_i - 0.4*flat_sib). Proportional 87*flat_i/T
+  is the best simple fit and reproduces the Wide record exactly, but under-predicts
+  for many-cell groups.
+
+### Corpus analysis (captured OUTPUT: oracle/dot_corpus/ 12022) — crate tests
+- fill_census (tests/fill_census.rs): per-cell wrap byte-exactness of candidate
+  allocators through the exact engine. Baseline (rpl=1.0, greedy fill): smallest-
+  first 32.8%, proportional 44.6% of 142540 wrapping cells; single-cell groups
+  90.8% (allocator-independent, near abbrev-expansion ceiling), multi-cell 40.5%.
+- width_probe (tests/width_probe.rs): for each wrapping cell, sweep the width and
+  record the band that reproduces its bytes. Ceiling (reproducible at SOME width,
+  rpl=1.0) = 78.2% of multi-cell cells; the other ~22% (++ unions, deep nesting,
+  abbrev-expansion) are cell-doc/GAP.
+- KEY: many band=[0,0] cells are SIMPLE facts (e.g. `St_1_gNB( ~gNB_ID, KD8, KD1,
+  '0', AM2, GN1 )`) that wrap as "2 args line0, 4 WIDER args line1" (a physical
+  line shorter than a later one) — HughesPJ's RAGGED `fill`, impossible for a
+  greedy fill. A greedy engine (lineLength==ribbon) can never produce it.
+- RESOLUTION (probe via layout_at LINELEN/RIBBON env): rendering at
+  ribbonsPerLine=1.5 (lineLength = 1.5 x ribbon) reproduces the ragged fill: at
+  ribbon 24-26 (lineLength 36-39) St_1_gNB comes out byte-exact "2/4". The 87 flat-
+  fit boundary is the RIBBON; lineLength is 1.5x larger; the gap is what lets
+  `fill` look ahead and break early. All prior fixtures (E12/W74/Ack/Big/In) still
+  reproduce byte-exact under rpl=1.5. => the per-cell parameter is the fit BUDGET
+  (ribbon); doclayout renders at lineLen=3*budget/2, rpl=1.5.
+- Servers stopped after probing (serve.sh stop 3200).

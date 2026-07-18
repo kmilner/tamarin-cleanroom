@@ -83,9 +83,6 @@ pub fn is_empty(d: &Doc) -> bool {
     matches!(d, Empty)
 }
 
-fn space_text() -> Doc {
-    TextBeside(Rc::from(" "), 1, rc(Empty))
-}
 
 // ---------------------------------------------------------------------------
 // Structural smart-constructors
@@ -113,10 +110,6 @@ pub fn reduce_doc(d: &Doc) -> Doc {
         Above(p, g, q) => above(p, *g, &reduce_doc(q)),
         other => other.clone(),
     }
-}
-
-fn reduce_rc(d: &Doc) -> Rc<Doc> {
-    rc(reduce_doc(d))
 }
 
 // ---------------------------------------------------------------------------
@@ -281,6 +274,10 @@ fn nil_above_nest(g: bool, k: isize, q: &Doc) -> Doc {
 
 #[derive(Clone, Copy)]
 enum IsEmpty {
+    // `Empty` mirrors the Haskell `reduceHoriz`/`reduceVert` return type; this
+    // strict port only ever yields `NotEmpty`, but the variant is kept to match
+    // the sanctioned source's shape.
+    #[allow(dead_code)]
     Empty,
     NotEmpty,
 }

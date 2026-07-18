@@ -334,6 +334,44 @@ renders `{info}|{concl}`).
     with wrapping siblings (live G: `[A,B]` ≡ `[B,A]`, and `[A,30,30]` gives the
     same `A` boundary in every position). So the fill allocation is order-free
     (sorted by flat, not by position).
+  - **RESOLVED (Session 8) — the fill is HughesPJ `fill` with a 1.5 RIBBON, and the
+    per-group share is PROPORTIONAL.** With the sanctioned BSD `pretty` library
+    (Text.PrettyPrint.HughesPJ) ported faithfully, two parameters close most of the
+    round-7 fill GAP:
+    * **Ribbon.** A record cell is laid out with **ribbonsPerLine = 1.5** (the
+      HughesPJ default): the fit boundary is the *ribbon* (= 87 for a lone cell),
+      and the line length is `1.5 ×` the ribbon. Because lineLength > ribbon,
+      HughesPJ `fill` produces **ragged** paragraph fills — a physical line can be
+      SHORTER than a later one. Corpus proof: `St_1_gNB( ~gNB_ID, KD8, KD1, '0',
+      AM2, GN1 )` wraps as `~gNB_ID, KD8,` (2 args) │ `KD1, '0', AM2, GN1` (4 wider
+      args, aligned under `(`) │ `)`. No greedy fill (lineLength == ribbon) can ever
+      produce a shorter line0; the round-7 model always could not, which is why 56 %
+      of multi-line cells were a GAP. Re-probed live (`layout_at` LINELEN/RIBBON):
+      ribbon 24–26 (lineLength 36–39) reproduces `St_1_gNB` byte-exact; all prior
+      fixtures (E11–E14, W71/W72/W74, Ack, Big, In) still reproduce under rpl=1.5.
+    * **Per-group share = proportional.** Cell *i* of a prem/concl group gets fit
+      budget (ribbon) `B_i = max(round(87 · flat_i / T), 20)`, `T = Σ flat_j`. For a
+      lone cell `T = flat` ⇒ `B = 87` (recovers the boundary). `T ≤ 87` ⇒ every
+      `B_i ≥ flat_i` ⇒ nothing wraps. Wide conclusions `[Ack 25, Big 68, Out 11]`,
+      `T = 104`: `Ack 21` (wraps), `Big 57` (8 tuple elems on line 0), `Out 9→20`
+      (fits) — byte-exact. The 20 floor is the §3f per-cell minimum.
+    * **The engine at the right budget IS byte-exact** (the cell doc — fact `fsep` /
+      tuple `fcat` / info `vcat` — is correct): single-cell wrapping cells match
+      **94.7 %** (allocator-independent; residual = abbreviation-expansion + ±1).
+    * **Corpus census (12 022 dot).** Wrapping-cell byte-exactness rose from ~44 %
+      (round-7 greedy) to **81.1 %** overall (single-cell 94.7 %, multi-cell 80.0 %).
+      Proportional is the best of the allocators tried (smallest-first 62.6 %,
+      flat-sum 59.3 %, prop-ceil 79.9 %, reserve-small 77.4 %).
+    * **Residual [GAP], honestly.** (a) ±1 `fits` boundary — proportional lands the
+      budget within a few columns of the reference's own coupled `fits`; at a bucket
+      edge (e.g. `In_S( 'D2', 'H2', spkDD )` where prop=24.2→24 but the reference
+      breaks at ≤23) it flips. (b) Wrap decided on the UN-abbreviated width
+      (abbreviations substituted into an already-broken layout) — structurally
+      outside a crate that receives POST-abbreviation text. (c) `++`-union / deeply
+      nested function-application cells whose internal breaks the fact/tuple grammar
+      does not model. The width-model CEILING (any budget reproduces the cell) was
+      78 % of multi-cell under greedy; the ragged fill raised it so proportional now
+      reaches 80 %.
 
 --------------------------------------------------------------------------------
 ## 4. Clustering / simplification (§ priority 3)
@@ -606,29 +644,71 @@ Reproduced & byte-tested against captured/live payloads:
 - Abbreviation naming, numbering, legend HTML (65-space indent), and the SELECTION
   rule (§5c, REPORT2.md), plus the cluster/compact trigger (§4).
 
-- **Record-cell group WRAP** (§3f): the per-GROUP flat-sum TRIGGER
-  (`budget_i = max(87 − Σ(other cell flats), 20)`, wrap iff `flat_i > budget_i`;
-  info-cell ≥2-actions-always-vertical) plus the **smallest-flat-first fill-budget
-  allocation** for how a wrapped cell packs (`generate::group_cells`,
-  `wrap_cell_budget`). Trigger matches 98.3 % of records / 99.6 % of cells; the fill
-  reproduces the live `Wide` record byte-exact (`wide_conclusion_group_fill_byte_exact`)
-  and 44.1 % of all multi-line prem/concl cells corpus-wide.
+- **Record-cell group WRAP** (§3f, RESOLVED Session 8): a **faithful HughesPJ port**
+  (`pretty.rs`, from the sanctioned BSD `pretty` library) laid out at
+  **ribbonsPerLine = 1.5** (`doclayout`: lineLength = 1.5 × the fit budget) so the
+  paragraph fill is RAGGED, plus a **proportional per-group budget**
+  (`generate::group_widths`: `B_i = max(round(87·flat_i/T), 20)`). The engine at the
+  right budget is byte-exact (the cell doc is faithful): single-cell wrapping cells
+  match **94.7 %**. Corpus census wrapping-cell byte-exactness **44.1 % → 81.1 %**
+  (multi-cell 80.0 %). Reproduces the live `Wide` record and the ragged `St_1_gNB`
+  fill byte-exact (`wide_conclusion_group_fill_byte_exact`,
+  `ragged_fill_line0_shorter_than_line1`).
 
-Documented gaps (need the GPL solver / pretty-printer or an unavailable backend):
+Documented gaps (need the GPL solver or an unavailable backend):
 - JSON graph backend format (unavailable / not in corpus).
-- **Record-cell wrap residuals** (§3f, refined Session 7) — all need the GPL
-  HughesPJ `fits`/`fillSep` over the *pre-abbreviation* document, not derivable from
-  the rendered output the crate consumes:
-  (a) the ±1 `fits` boundary flip when a cell sits exactly at its budget;
-  (b) the exact greedy fill of a multi-line cell (a sibling's contribution is not a
-      clean function of its width — 56 % of multi-line cells);
-  (c) the occ-relief false-positives (a small cell fitting beside a wide wrapping
-      sibling — the greedy coupling, uncapturable by a closed rule);
-  (d) the false-negatives where a cell wraps on its **unabbreviated** width
-      (abbreviations substituted into an already-broken layout).
+- **Record-cell wrap residuals** (§3f, Session 8) — the remaining ~19 % of wrapping
+  cells, from the reference's own coupled `fits` / pre-abbreviation document, not
+  derivable from the POST-abbreviation cell text the crate consumes:
+  (a) the ±1 `fits` boundary flip when proportional lands the budget a column off
+      the reference's coupled per-cell `fits`;
+  (b) cells whose wrap is decided on their **un-abbreviated** width (abbreviations
+      substituted into an already-broken layout);
+  (c) `++`-union / deeply nested function-application cells whose internal break the
+      fact/tuple grammar does not model.
 - **compress/compact content** (§4, §6): which nodes/edges a raw constraint system
   yields — a solver transform. (The L1/L2/L3 level distinction is no longer a gap:
   it is proven non-existent, §7a.)
 - Per-rule/per-cluster **color hashes** (§3a, §4); the `trapezium` dual (§3d, unobserved).
 - Abbreviation of AC/DH sub-terms (§5c residual, normalised-form occurrence).
 - Canonical per-prefix numbering tie-break (§5b); empty-prefix start index.
+
+--------------------------------------------------------------------------------
+## Round 8 report — faithful layout engine + record-cell feeding (folded here per protocol)
+
+**Task.** Replace the closed-form fill with a faithful layout engine; reconstruct
+how record-cell content is fed through it; wire through wrap/build_record/RawRule;
+keep the GRAPHCLEAN_CORPUS round-trip at 12022/12022.
+
+**Sanctioned material.** `sanctioned/pretty-1.1.3.6/` (BSD HughesPJ). The
+Doc/best/fits/fill port lives in `graph-clean/src/pretty.rs` (audited faithful;
+default Style confirmed `lineLength=100, ribbonsPerLine=1.5`). Everything
+tamarin-specific (which combinators, widths, ribbon) came from black-box probes.
+
+**What changed vs round 7.**
+1. The fill is the sanctioned HughesPJ `fill`, not a bespoke greedy pass.
+2. **Ribbon = 1.5** (was implicitly 1.0). `doclayout` renders each cell at
+   lineLength = `⌊3·budget/2⌋`, ribbonsPerLine 1.5, so the fit boundary is the
+   ribbon (= budget) but lineLength is 1.5× larger — the gap that makes `fill`
+   RAGGED. This was THE missing piece: it reproduces `2-args-then-4-wider-args`
+   cells (`St_1_gNB`) that no greedy fill can. Derived by live re-probe
+   (`layout_at` LINELEN/RIBBON) after finding such cells in the corpus.
+3. **Per-group budget = proportional** (`generate::group_widths`):
+   `B_i = max(round(87·flat_i/T), 20)`, replacing round-7's smallest-flat-first.
+   Best of every allocator tried on the full corpus census.
+
+**Result (corpus census, `tests/fill_census.rs`, 12 022 dot, 142 540 wrapping
+prem/concl cells).** Wrapping-cell byte-exactness **44 % → 81.1 %** (single-cell
+94.7 %, multi-cell 80.0 %). The Wide-rule probe is byte-exact for ALL cells
+(`wide_conclusion_group_fill_byte_exact`); `ragged_fill_line0_shorter_than_line1`
+pins the ragged fill. GRAPHCLEAN_CORPUS round-trip stays **12022/12022**.
+
+**Residual, characterized honestly (§3f, §8).** ~19 % of wrapping cells: (a) ±1
+`fits` boundary where proportional is a column off the reference's coupled per-cell
+`fits`; (b) cells wrapped on their UN-abbreviated width; (c) `++`-union / deep
+function-application internal breaks not in the fact/tuple grammar. All need the
+reference's exact per-cell `fits` over the pre-abbreviation document, structurally
+outside a crate that consumes post-abbreviation cell text.
+
+**Probes logged** in QUERIES.log Session 8 (probe.spthy 70 rules on :3200; all
+servers stopped, ports 3200-3299 clear). No forbidden paths read.

@@ -1,0 +1,30 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n5[shape="record",label="{{<n0> Fr( ~n25 )|<n1> In( \<aa, ab, ac, ad, ae, af, ag, ah, ai, aj\> )}|{<n2> #i : R_10_40[Fire25( )]}|{<n3> Big( \<aa, ab, ac, ad, ae, af, ag, ah, ai, aj\>\l)\l|<n4> Sib( 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa25'\l)\l}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+n6[label="#vf.1 : isend",shape="ellipse"];
+n7[label="!KU( aa ) @ #vk.1",shape="ellipse",color="gray"];
+n8[label="!KU( ab ) @ #vk.3",shape="ellipse",color="gray"];
+n9[label="!KU( ac ) @ #vk.5",shape="ellipse",color="gray"];
+n10[label="!KU( ad ) @ #vk.7",shape="ellipse",color="gray"];
+n11[label="!KU( ae ) @ #vk.9",shape="ellipse",color="gray"];
+n12[label="!KU( af ) @ #vk.11",shape="ellipse",color="gray"];
+n13[label="!KU( ag ) @ #vk.13",shape="ellipse",color="gray"];
+n14[label="!KU( ah ) @ #vk.15",shape="ellipse",color="gray"];
+n15[label="!KU( ai ) @ #vk.17",shape="ellipse",color="gray"];
+n16[label="!KU( aj ) @ #vk.18",shape="ellipse",color="gray"];
+n6 -> n5:n1[color="gray30"];
+n7 -> n6[color="red",style="dashed"];
+n8 -> n6[color="red",style="dashed"];
+n9 -> n6[color="red",style="dashed"];
+n10 -> n6[color="red",style="dashed"];
+n11 -> n6[color="red",style="dashed"];
+n12 -> n6[color="red",style="dashed"];
+n13 -> n6[color="red",style="dashed"];
+n14 -> n6[color="red",style="dashed"];
+n15 -> n6[color="red",style="dashed"];
+n16 -> n6[color="red",style="dashed"];
+
+}

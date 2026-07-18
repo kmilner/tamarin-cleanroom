@@ -1,0 +1,14 @@
+theory DivProbe
+begin
+
+builtins: hashing
+
+rule R16_10:
+  [ Fr(~n), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>) ]
+  --[ Fire() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>), Sib('aaaaaaaaaa0') ]
+
+lemma l:
+  exists-trace "Ex #i. Fire() @ #i"
+
+end

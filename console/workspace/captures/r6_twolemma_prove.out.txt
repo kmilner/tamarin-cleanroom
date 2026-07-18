@@ -1,0 +1,55 @@
+theory TwoLemma
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) A:
+   [ Fr( ~x ) ] --[ P( ~x ) ]-> [ Out( ~x ) ]
+
+  /* has exactly the trivial AC variant */
+
+lemma first:
+  all-traces "∀ x #i. (P( x ) @ #i) ⇒ (∃ #j. P( x ) @ #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i. (P( x ) @ #i) ∧ ∀ #j. (P( x ) @ #j) ⇒ ⊥"
+*/
+simplify
+by contradiction /* from formulas */
+
+lemma second:
+  exists-trace "∃ x #i. P( x ) @ #i"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ x #i. (P( x ) @ #i)"
+*/
+simplify
+SOLVED // trace found
+
+/* All wellformedness checks were successful. */
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: probes/round6/two_lemma.spthy
+
+  processing time: 0.09s
+  
+  first (all-traces): verified (2 steps)
+  second (exists-trace): verified (2 steps)
+
+==============================================================================

@@ -46,5 +46,4 @@ pub use dot::to_dot;
 pub use generate::{generate, ClusterRef, GraphNode, RawRule, RuleInstance, System};
 pub use model::{Graph, Header};
 pub use options::Options;
-pub use render::wrap_cell;
 pub use term::Term;

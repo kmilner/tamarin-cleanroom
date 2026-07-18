@@ -502,6 +502,17 @@ self-authored in `probes/round6/*.spthy`; diff summary captures are copied to
   attribute is invisible in the summary — such a lemma prints with the identical
   line form (`secret (all-traces): falsified - found trace (4 steps)`).
 
+Lemma SELECTION never omits a line: a lemma the run did not prove — because
+`--prove=PREFIX`/`--lemma=NAME` did not select it — still appears, as `analysis
+incomplete`, never as a "skipped"/absent line `[r6_twolemma_proveone,
+r6_twolemma_lemmafilter]`. `--prove=first` on a two-lemma theory prints `first`
+verified and `second (exists-trace): analysis incomplete (1 steps)`. There is thus
+no distinct summary form for an unselected/filtered lemma. A `--prove`/`--lemma`
+PREFIX that matches no lemma is itself a wellformedness check ("... does not
+correspond to a specified lemma in the theory") and so feeds the whole-theory
+WARNING count-line slot (§12b), not a new per-lemma form `[r6_twolemma_lemmafilter:
+count 1 + advisory]` — reinforcing §14e.
+
 Partial deconstructions / open chains do NOT add a summary-of-summaries line: a
 theory that exercises them prints exactly one verdict line per lemma
 `[r6_openchains_default, r6_woolam_noautosrc]` (they only add opaque stderr
@@ -519,6 +530,22 @@ layout (each still carries the `  ` body indent of §12a):
 - `RHS`/`LHS` prefix = `RHS` + ` :  ` (space, colon, two spaces); the remainder is
   the *identical* regular line form of §12c (the `<kind>` renders normally,
   including `exists-trace` `[r6_diff_two_lemmas: can_send]`).
+  A projected line carries the SAME kind-dependent verdict set as a whole-theory
+  lemma — earlier captures only exercised `verified`; the remaining projected
+  verdicts were driven out explicitly:
+  - projected falsified, both kinds: `RHS/LHS :  leaked (all-traces): falsified -
+    found trace` and `RHS/LHS :  impossible (exists-trace): falsified - no trace
+    found` `[r6_diff_false]`;
+  - projected `analysis incomplete`: a `--diff` run WITHOUT `--prove` leaves each
+    ordinary lemma's `RHS`/`LHS` lines (and the `DiffLemma`) at `analysis
+    incomplete` `[r6_diff_lemma_noprove]`.
+  The two sides are computed INDEPENDENTLY, not mirrored: when the two projected
+  systems genuinely differ, one side's line can read `verified` while the other
+  reads `falsified` for the same lemma (`RHS :  secret (all-traces): verified` vs
+  `LHS :  secret (all-traces): falsified - found trace`) `[r6_diff_asym]`. `LHS`
+  is the first `diff(L,R)` argument (the left system), `RHS` the second (the right
+  system): here `diff(~m, senc(~m,~k))` gives LHS `Out(~m)` (secrecy false) and
+  RHS `Out(senc(~m,~k))` (secrecy true).
 - `DiffLemma` prefix = `DiffLemma` + `:  ` (colon, two spaces — NO space before the
   colon, unlike RHS/LHS). Its content is `<name> : <verdict>` (a single space each
   side of the colon) with NO `(<kind>)`: an observational-equivalence lemma has no
@@ -560,5 +587,13 @@ surface, not the summary taxonomy.
 `DiffLemma:` form and ignores `kind` (set to `AllTraces` by the `diff_lemma`
 constructor). `Summary.lemmas` stays a single ordered `Vec` — a diff theory lists
 its `Rhs`/`Lhs`/`Diff` entries in the §14c order and `render_block` prints them in
-sequence. The verdict phrase moved to a shared `verdict_phrase(result, kind)`.
-Byte-parity tests: `diff_summary_*` (five captures) + `diff_summary_line_bytes_are_exact`.
+sequence. The verdict phrase moved to a shared `verdict_phrase(result, kind)`, so a
+projected `Rhs`/`Lhs` line reuses it with that side's own `kind` — the projected
+falsified/incomplete forms of the amended §14b are therefore rendered by the same
+code path as whole-theory lemmas, now pinned against observed captures rather than
+inferred. Byte-parity tests: `diff_summary_*` (eight captures: the original five
+plus `r6_diff_false` projected-falsified-both-kinds, `r6_diff_lemma_noprove`
+projected-incomplete, `r6_diff_asym` independent-sides) +
+`diff_summary_line_bytes_are_exact`, and
+`frame_batch_multi_warn_then_two_lemmas_reproduces_both_streams` re-verifies the
+multi-lemma/multi-theory warning-vs-lemma interleaving (`r6_multi_warn_two`).

@@ -1,0 +1,44 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n5[shape="record",label="{{<n0> Fr( ~n.3 )|<n1> In( \<aa.3, ab.3, ac.3, ad.3, ae.3, af.3, ag.3, ah.3, ai.3, aj.3, ak.3, al.3, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;am.3, an.3, ao.3, ap.3\>\l)\l}|{<n2> #vr.2 : R16_10[Fire( )]}|{<n3> Big( \<aa.3, ab.3, ac.3, ad.3, ae.3, af.3, ag.3, ah.3, ai.3, aj.3, ak.3, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;al.3, am.3, an.3, ao.3, ap.3\>\l)\l|<n4> Sib( 'aaaaaaaaaa0' )}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+n6[label="#vf.5 : isend",shape="ellipse"];
+n7[label="!KU( aa.3 ) @ #vk.7",shape="ellipse",color="gray"];
+n8[label="!KU( ab.3 ) @ #vk.9",shape="ellipse",color="gray"];
+n9[label="!KU( ac.3 ) @ #vk.11",shape="ellipse",color="gray"];
+n10[label="!KU( ad.3 ) @ #vk.13",shape="ellipse",color="gray"];
+n11[label="!KU( ae.3 ) @ #vk.15",shape="ellipse",color="gray"];
+n12[label="!KU( af.3 ) @ #vk.17",shape="ellipse",color="gray"];
+n13[label="!KU( ag.3 ) @ #vk.19",shape="ellipse",color="gray"];
+n14[label="!KU( ah.3 ) @ #vk.21",shape="ellipse",color="gray"];
+n15[label="!KU( ai.3 ) @ #vk.23",shape="ellipse",color="gray"];
+n16[label="!KU( aj.3 ) @ #vk.25",shape="ellipse",color="gray"];
+n17[label="!KU( ak.3 ) @ #vk.27",shape="ellipse",color="gray"];
+n18[label="!KU( al.3 ) @ #vk.29",shape="ellipse",color="gray"];
+n19[label="!KU( am.3 ) @ #vk.31",shape="ellipse",color="gray"];
+n20[label="!KU( an.3 ) @ #vk.33",shape="ellipse",color="gray"];
+n21[label="!KU( ao.3 ) @ #vk.35",shape="ellipse",color="gray"];
+n22[label="!KU( ap.3 ) @ #vk.36",shape="ellipse",color="gray"];
+n23[label="(#i, 0)",shape="invtrapezium"];
+n5:n3 -> n23[style="bold",weight="10.0"];
+n6 -> n5:n1[color="gray30"];
+n7 -> n6[color="red",style="dashed"];
+n8 -> n6[color="red",style="dashed"];
+n9 -> n6[color="red",style="dashed"];
+n10 -> n6[color="red",style="dashed"];
+n11 -> n6[color="red",style="dashed"];
+n12 -> n6[color="red",style="dashed"];
+n13 -> n6[color="red",style="dashed"];
+n14 -> n6[color="red",style="dashed"];
+n15 -> n6[color="red",style="dashed"];
+n16 -> n6[color="red",style="dashed"];
+n17 -> n6[color="red",style="dashed"];
+n18 -> n6[color="red",style="dashed"];
+n19 -> n6[color="red",style="dashed"];
+n20 -> n6[color="red",style="dashed"];
+n21 -> n6[color="red",style="dashed"];
+n22 -> n6[color="red",style="dashed"];
+
+}

@@ -823,3 +823,104 @@ every Session-7 quantitative claim is backed by a logged `r7/` probe or corpus s
 No mirrored internal decomposition, no shared internal names, no source magic constants,
 no echoed comments. Findings that survive filtration: 0. No redo instructions issued.
 VERDICT: pass
+
+## Round 8 incremental audit — faithful HughesPJ engine, 1.5 ribbon (ragged fill), proportional per-group budget
+
+### Scope of this round's delta (audited, restricted to graphdot/)
+
+Working-tree change vs HEAD e76455a: `doclayout.rs` (RIBBONS 1.0→1.5, new `budget_line_len`,
+`layout_lines`/`wrap_cell_dot` reparameterised width→budget, new `layout_lines_lr` /
+`wrap_cell_dot_lr`, new `ragged_fill_line0_shorter_than_line1` test); `generate.rs`
+(`group_widths` rewritten smallest-flat-first → proportional; doc updates); `render.rs`
+(WHOLE bespoke greedy-fill machinery DELETED — `wrap_cell`/`wrap_cell_budget`/`cell_budget`/
+`layout_cell`/`layout_fact`/`layout_tuple`/`layout_info`/`run_layout`/`fill`/`paragraph_fill`/
+`join_wrapped`/`FILL_WIDTH`/`MIN_CELL_BUDGET` and their tests; module now emits only flat text
++ escaping); `lib.rs` (`pub use render::wrap_cell` dropped); `pretty.rs` (dead `space_text`/
+`reduce_rc` removed, `IsEmpty::Empty` gains a shape-note comment). BEHAVIOR.md §3f + Round-8
+report and QUERIES.log Session 8 added. Behavior re-verified live this audit: `doclayout::`
+unit tests (incl. `ragged_fill_line0_shorter_than_line1`, `e12`, `w74`, `ack`) pass; the
+external-capture `wide_conclusion_group_fill_byte_exact` passes under the new proportional
+allocator. No source identifier and no `1.3` appears in any added source line (grepped).
+
+### The load-bearing comparison this round — convergence toward `renderBalanced`
+
+Round 7 was cleared **because** the clean allocator was smallest-flat-first, structurally and
+numerically UNLIKE the source's proportional `renderBalanced`/`scaleIndent` (Dot.hs:357–381).
+Round 8 replaces it with a PROPORTIONAL allocation, so that differentiator no longer holds and
+the convergence is the thing to filter. Laid side by side against the sanctioned probe target:
+
+- Source `renderBalanced 100 (max 30 . round . (* 1.3))`: cell *i* lineLength
+  `w_i = max(30, round(1.3·100·f_i/T))`; ribbon = default `1.5`, so its effective ribbon is
+  `w_i/1.5 = max(20, round(86.67·f_i/T))`. Plus `scaleIndent` scaling leading spaces by `1.5`.
+- Clean `group_widths`: budget (ribbon) `B_i = max(round(87·f_i/T), 20)`, rendered at
+  lineLength `⌊3·B_i/2⌋`, `RIBBONS = 1.5`.
+
+The clean per-cell RIBBON `max(20, round(87·f_i/T))` is numerically the SAME quantity the source
+computes (`86.67 = 130/1.5 ≈ 87`; floor `20 = 30/1.5`). Under abstraction-filtration this
+convergence is EXPECTED and does not survive as a finding:
+
+- **Merger / behavior-dictated.** Distributing one shared row budget among cells in proportion to
+  their content is the single obvious closed form (`total·size_i/Σsize`); it is not the source's
+  creative expression. It was, moreover, *selected empirically* — QUERIES.log Session 8 records a
+  full corpus census (12 022 dot / 142 540 wrapping cells) picking proportional (81.1 %) over
+  smallest-first (62.6 %), flat-sum (59.3 %), prop-ceil (79.9 %), reserve-small (77.4 %). That is
+  model SELECTION by observed byte-exactness, i.e. probe-derived, not a lift.
+- **The source's protectable flourishes are ABSENT.** No `1.3` magic factor and no
+  "non-proportional font" rationale comment (grep-confirmed). `totalWidth 100 → 87` (FILL_WIDTH,
+  the probe-pinned lone-cell flat-fit boundary; a lone cell `T=flat ⇒ B=87` recovers it). Floor
+  `30 → 20` (MIN_CELL_BUDGET, the probe-pinned per-cell minimum, established rounds ago). The
+  clean side parameterises on the RIBBON and floors the ribbon; the source parameterises on
+  lineLength and floors lineLength. The residual numeric agreement is convergence on the SAME
+  observable wrapping, which the clean model reaches at only ~81 % (not 100 %) — a copier holding
+  the source's `100/1.3/30` would land far closer; approximating from probe constants is the
+  signature of black-box derivation, not of reading Dot.hs.
+- **`scaleIndent` (the source's own 1.5 indent scaling) is NOT reproduced.** The clean side emits
+  the raw HughesPJ nest column as `&nbsp;` runs with no ×1.5 — `ragged_fill_line0_shorter_than_line1`
+  pins a 10-column prefix → 10 `&nbsp;` (not 15). The two source `1.5`s (library ribbon default +
+  tamarin's `scaleIndent`) are collapsed on the clean side to a SINGLE 1.5, and that one is the
+  library's, not tamarin's — see next.
+
+### RIBBONS = 1.5 — sanctioned twice over (library default + independent probe)
+
+The lone new constant that could read as lifted is the `1.5` ribbon. It is attributable to
+SANCTIONED material two independent ways, so resemblance is fine: (a) it is the documented
+default `ribbonsPerLine` of the BSD `pretty-1.1.3.6` library the graphdot cluster sanctions
+(`Annotated/HughesPJ.hs:937`, `Style { lineLength = 100, ribbonsPerLine = 1.5 }`), which the
+clean-room comment cites; (b) QUERIES.log Session 8 logs a live black-box re-probe
+(`layout_at` LINELEN/RIBBON) finding ribbon 24–26 / lineLength 36–39 reproduces `St_1_gNB`
+byte-exact and all prior fixtures still reproduce under rpl 1.5 — an observable, probe-pinned
+parameter. `budget_line_len(b) = ⌊3b/2⌋` is the clean side's OWN inversion (the lineLength that
+yields ribbon `b` at rpl 1.5); the source has no such function (it passes lineLength directly),
+so it is clean-room-coined, not mirrored. The ragged-fill *behavior* (lineLength > ribbon lets
+`fill` break early → a physical line shorter than a later one) is a property of the sanctioned
+HughesPJ `fill` itself; reproducing it is resemblance to the BSD library, sanctioned.
+
+### Deletions, pretty.rs cleanup, identifier/comment lineage
+
+The bulk of the diff is DELETION: the entire round-4…7 bespoke greedy-fill apparatus in
+`render.rs` is removed in favour of driving the sanctioned engine. Deletions cannot add
+similarity, and they retire the Round-7 stale-`cell_occ`-doc nit (that code is gone).
+`pretty.rs` only drops two dead private helpers and annotates the `IsEmpty::Empty` variant with a
+note that it "mirrors the sanctioned source's shape" — a reference to HughesPJ (BSD), not
+tamarin. New/changed identifiers (`group_widths`, `budget`, `budget_line_len`, `RIBBONS`,
+`layout_lines_lr`, `wrap_cell_dot_lr`) share nothing with the source constellation
+(`renderBalanced`/`scaleIndent`/`widthRender`/`oneLineRender`/`usedWidths`/`ratio`/`conv`/
+`renderRow`). No echoed comments. The cell-doc grammar (`fact_doc`/`tuple_doc`/`info_doc`,
+`nest(-1)` `>`, `sep[opened, ")"]`) is unchanged pre-existing code audited in Rounds 4–7, out of
+this round's delta.
+
+### VIOLATIONS (Round 8)
+
+None. The round moves the clean allocator ONTO the proportional shape the source uses, but every
+protectable element that makes `renderBalanced`/`scaleIndent` tamarin's own EXPRESSION is absent:
+no `1.3` and no font-compensation comment, `totalWidth`/floor are the probe-pinned `87`/`20` not
+`100`/`30`, `scaleIndent`'s 1.5 indent-scaling is not reproduced, and no source identifier
+appears. The proportional formula itself is merger — one obvious closed form — and was chosen by a
+logged corpus census over five candidate allocators, i.e. selected by observed behavior, not
+lifted. The sole genuinely new constant, ribbon `1.5`, is the sanctioned BSD library's own default
+and is independently probe-confirmed; `budget_line_len` is a clean-room inversion the source lacks.
+The ragged-fill behavior is the sanctioned HughesPJ `fill`. Behavioral claims re-verified live
+(doclayout tests + external-capture Wide record pass under the new allocator). Every Session-8
+quantitative claim traces to a logged probe/census (`r8/`, `fill_census.rs`, `width_probe.rs`).
+Findings that survive filtration: 0. No redo instructions issued.
+VERDICT: pass

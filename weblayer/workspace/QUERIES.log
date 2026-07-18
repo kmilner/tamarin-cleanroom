@@ -440,3 +440,22 @@
       {"alert":"Sorry, but the autoprover () failed!"} (observed idx3 eCK_same_key,
       NAXOS, idfs/0/True). Analogous to method-failure alert; current dispatch models
       autoprove as always-redirect -> documented gap, not changed this round.
+
+[R77] ROUND-7 INDEPENDENT RE-CORROBORATION (fresh session; my own hands, not prior
+      logs) | Reference: tamarin-prover interactive on scratch/r7/served (idx1=Tutorial
+      idx2=NSLPK3 idx3=NAXOS_eCK idx4=RYY), port 3100. scratch/r7/probe_verify.sh +
+      an inline visibility probe. Server stopped after; 3100-3199 clear.
+      (a) NON-BLOCKING (§17.1): during an in-flight RYY key_secrecy_PFS autoprove, a
+          5-way concurrent burst all returned 200 in 0.02-0.34s -- read other theory
+          (Tutorial 0.02s), read the SAME theory being proved (RYY 0.02s), read another
+          version (NAXOS 0.34s), a fast proof op (0.02s), an upload POST/ (0.02s). Also
+          a read fired mid-compute of a ~1.5s NAXOS autoprove returned 200 in 0.02s.
+      (b) COMMIT-ORDER ALLOCATION (§17.2): RYY autoprove STARTED first (t=0.004) but
+          COMMITTED last (t=0.634) and got the HIGHER index 6; a fast Tutorial method
+          committed at t=0.427 -> LOWER index 5. Indices follow completion order.
+      (c) INVISIBLE-UNTIL-COMMIT (§17.2/§17.3): PRE max=7; a ~1.5s NAXOS autoprove
+          (start t=0.017, commit t=1.536 -> idx8) was ABSENT from every version poll
+          across the whole compute window (t=0.032..1.346 all showed [1..7]); idx8
+          appeared only at the first post-commit poll (t=1.564). Contiguous, no skip.
+      Corroborates the §17 contract the round-7 dispatch implements; all live servers
+      stopped.

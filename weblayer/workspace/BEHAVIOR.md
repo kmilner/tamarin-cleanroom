@@ -915,3 +915,11 @@ contract a backend must satisfy.
 (observed on NAXOS `eCK_same_key`, `idfs/0/True`), analogous to the `method`-failure
 alert. The current dispatcher models `autoprove` as always-redirect; modelling the alert
 branch is a documented gap, deferred to keep the round-7 change scoped to concurrency.
+
+### 17.7 Independent re-corroboration ([R77], resumed session)
+A fresh live probe on Tutorial/NSLPK3/NAXOS_eCK/RYY (port 3100, server stopped after)
+re-confirmed §17.1–§17.3 with my own hands, not the [R70]–[R76] logs: a 5-way burst
+during an in-flight autoprove all returned 200 in 0.02–0.34s (incl. a read of the
+same theory being proved); an autoprove that STARTED first COMMITTED last and took the
+HIGHER index; and a ~1.5s NAXOS autoprove's index (8) was absent from every poll across
+its compute window, appearing only at the first post-commit poll (contiguous, no skip).

@@ -342,3 +342,29 @@ atomicity, retention, in-place mutation, snapshot isolation) is the documented c
 7 dispatch6 + **2 dispatch7** + 23 parity); `cargo clippy --tests --examples` clean;
 `dispatch7` verified non-flaky over 20 consecutive runs. All prior byte-parity tests
 stay green (the state reshape is behind `Server::new`/`InMemoryState`, unchanged output).
+
+### Round 7 — verification pass (resumed session)
+
+The round-7 snapshot → compute → commit dispatch (above) was re-verified end-to-end in a
+fresh session and independently re-corroborated against the live reference (my own probe,
+`QUERIES.log` [R77]), not relying on the prior [R70]–[R76] logs:
+
+- **Implementation matches the contract.** `Server::dispatch(&self)`; `StateOps` is an
+  interior-mutability `&self` trait (`snapshot`/`indices`; `insert_new`/`replace`/`remove`);
+  `InMemoryState<T>` is a `Mutex<BTreeMap + counter>` holding the lock only for the
+  map/counter op; every handler runs get-snapshot → lock-free `ProverOps` compute →
+  atomic commit. No state lock is held across any `ProverOps` call.
+- **Tests.** `cargo test` → **104 passing** (26 unit + 15 dispatch + 17 dispatch4 + 14
+  dispatch5 + 7 dispatch6 + 2 dispatch7 + 23 parity); `cargo clippy --tests --examples`
+  clean (rc 0); `dispatch7` **non-flaky over 30 consecutive runs**. All byte-parity tests
+  stay green.
+- **Live re-corroboration ([R77]).** On a fresh reference server (Tutorial/NSLPK3/
+  NAXOS_eCK/RYY): (a) non-blocking — a 5-way burst during an in-flight autoprove all
+  returned 200 in 0.02–0.34s, incl. a read of the same theory being proved; (b) commit-
+  order allocation — the autoprove that STARTED first COMMITTED last and took the HIGHER
+  index; (c) invisible-until-commit — a ~1.5s NAXOS autoprove's index (8) was absent from
+  every poll during its compute and appeared only at the first post-commit poll,
+  contiguous with no skip. All live servers stopped; 3100–3199 clear.
+
+No file under `/home/kamilner/tamarin-rs/` was read this session; the only tamarin-rs
+touch was EXECUTING the sanctioned reference binary for live probing.

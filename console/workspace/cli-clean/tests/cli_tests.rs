@@ -1123,3 +1123,110 @@ fn diff_summary_line_bytes_are_exact() {
     );
     assert!(block.contains(expected_body), "block was: {block:?}");
 }
+
+// ---- Round 6 (cont.): projected RHS/LHS non-verified verdicts ------------------
+//
+// Every earlier diff capture showed the projected RHS/LHS lines only as
+// `verified`. These fixtures drive the projected lines into their remaining
+// terminal states, proving the projected form carries the SAME kind-dependent
+// verdict phrases as a whole-theory lemma and that the two sides are computed
+// independently (not mirrored).
+
+#[test]
+fn diff_summary_projected_falsified_both_kinds() {
+    // --diff --prove where both projected systems falsify the ordinary lemmas: an
+    // all-traces lemma reads `falsified - found trace`, an exists-trace lemma reads
+    // `falsified - no trace found`, on BOTH the RHS and LHS lines. (The
+    // obs-equivalence DiffLemma is independently verified.)
+    let out_cap = include_str!("fixtures/r6_diff_false.out.txt");
+    assert_diff_summary(
+        out_cap,
+        None,
+        vec![
+            rhs("leaked", TraceKind::AllTraces, LemmaResult::Falsified, 3),
+            lhs("leaked", TraceKind::AllTraces, LemmaResult::Falsified, 3),
+            rhs("impossible", TraceKind::ExistsTrace, LemmaResult::Falsified, 2),
+            lhs("impossible", TraceKind::ExistsTrace, LemmaResult::Falsified, 2),
+            diff_lemma("Observational_equivalence", LemmaResult::Verified, 67),
+        ],
+    );
+}
+
+#[test]
+fn diff_summary_projected_incomplete_without_prove() {
+    // --diff without --prove: the projected RHS/LHS lines of an ordinary lemma read
+    // `analysis incomplete`, exactly like the trailing DiffLemma.
+    let out_cap = include_str!("fixtures/r6_diff_lemma_noprove.out.txt");
+    assert_diff_summary(
+        out_cap,
+        None,
+        vec![
+            rhs("sent_secret", TraceKind::AllTraces, LemmaResult::AnalysisIncomplete, 1),
+            lhs("sent_secret", TraceKind::AllTraces, LemmaResult::AnalysisIncomplete, 1),
+            diff_lemma("Observational_equivalence", LemmaResult::AnalysisIncomplete, 1),
+        ],
+    );
+}
+
+#[test]
+fn diff_summary_projected_sides_are_independent() {
+    // --diff --prove of a theory whose two projected systems genuinely differ: the
+    // ordinary lemma is verified on the RHS but falsified on the LHS, so the two
+    // projected lines carry DIFFERENT verdicts. Confirms the sides are not mirrored.
+    let out_cap = include_str!("fixtures/r6_diff_asym.out.txt");
+    assert_diff_summary(
+        out_cap,
+        None,
+        vec![
+            rhs("secret", TraceKind::AllTraces, LemmaResult::Verified, 3),
+            lhs("secret", TraceKind::AllTraces, LemmaResult::Falsified, 3),
+            diff_lemma("Observational_equivalence", LemmaResult::Verified, 44),
+        ],
+    );
+}
+
+#[test]
+fn frame_batch_multi_warn_then_two_lemmas_reproduces_both_streams() {
+    // Re-verify per-lemma / warning-block interleaving in a multi-lemma,
+    // multi-theory run: theory 1 is a warn+lemma theory (warning section with the
+    // --prove advisory, `  ` separator, then its single lemma line); theory 2
+    // carries two lemmas in declaration order. Between-theory join is a blank line
+    // before each `analyzed:`; stderr is the preamble once then each theory's five
+    // phases (neither tiny theory emits saturating-sources progress).
+    let out_cap = include_str!("fixtures/r6_multi_warn_two.out.txt");
+    let err_cap = include_str!("fixtures/r6_multi_warn_two.err.txt");
+    let cut = summary_start(out_cap);
+    let payload_region = &out_cap[..cut];
+    let split = payload_region.find("theory TwoLemma").expect("second theory");
+    let blocks = slots(&out_cap[cut..]);
+    let t1 = BatchTheory {
+        name: s("WarnAndLemma"),
+        payload: Some(payload_region[..split].to_string()),
+        extra_progress: String::new(),
+        summary: Summary {
+            analyzed: blocks[0].0.clone(),
+            output: blocks[0].1.clone(),
+            processing_time: blocks[0].2,
+            warnings: warn(1, true),
+            lemmas: vec![lemma("trivial_true", TraceKind::AllTraces, LemmaResult::Verified, 2)],
+        },
+    };
+    let t2 = BatchTheory {
+        name: s("TwoLemma"),
+        payload: Some(payload_region[split..].to_string()),
+        extra_progress: String::new(),
+        summary: Summary {
+            analyzed: blocks[1].0.clone(),
+            output: blocks[1].1.clone(),
+            processing_time: blocks[1].2,
+            warnings: None,
+            lemmas: vec![
+                lemma("first", TraceKind::AllTraces, LemmaResult::Verified, 2),
+                lemma("second", TraceKind::ExistsTrace, LemmaResult::Verified, 2),
+            ],
+        },
+    };
+    let streams = frame_batch(&MaudeInfo::default(), &[t1, t2]);
+    assert_eq!(streams.out, out_cap);
+    assert_eq!(streams.err, err_cap);
+}

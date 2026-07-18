@@ -1,0 +1,18 @@
+theory TwoLemma
+begin
+
+// A plain (non-diff) theory with two ordinary lemmas, to probe whether
+// --lemma=<name> FILTERS the other lemma out of the summary entirely (a
+// "skipped" terminal state = no summary line) versus listing it as
+// analysis-incomplete.
+rule A:
+  [ Fr(~x) ] --[ P(~x) ]-> [ Out(~x) ]
+
+lemma first:
+  "All x #i. P(x) @ i ==> Ex #j. P(x) @ j"
+
+lemma second:
+  exists-trace
+  "Ex x #i. P(x) @ i"
+
+end

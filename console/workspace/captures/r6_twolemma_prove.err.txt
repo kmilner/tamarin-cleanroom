@@ -1,0 +1,8 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory TwoLemma] Theory loaded
+[Theory TwoLemma] Theory translated
+[Theory TwoLemma] Derivation checks started
+[Theory TwoLemma] Derivation checks ended
+[Theory TwoLemma] Theory closed

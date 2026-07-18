@@ -1,0 +1,60 @@
+theory DiffWithLemma
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, sdec/2, senc/2, snd/1
+equations:
+    fst(<x.1, x.2>) = x.1,
+    sdec(senc(x.1, x.2), x.2) = x.1,
+    snd(<x.1, x.2>) = x.2
+
+rule (modulo E) Send:
+   [ Fr( ~k ), Fr( ~m ) ]
+  --[ Sent( ~m ) ]->
+   [ Out( senc(diff(~m, ~m), ~k) ) ]
+
+lemma sent_secret [right]:
+  all-traces "∀ m #i. (Sent( m ) @ #i) ⇒ (¬(∃ #j. K( m ) @ #j))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ m #i. (Sent( m ) @ #i) ∧ ∃ #j. (K( m ) @ #j)"
+*/
+by sorry
+
+lemma sent_secret [left]:
+  all-traces "∀ m #i. (Sent( m ) @ #i) ⇒ (¬(∃ #j. K( m ) @ #j))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ m #i. (Sent( m ) @ #i) ∧ ∃ #j. (K( m ) @ #j)"
+*/
+by sorry
+
+diffLemma Observational_equivalence:
+by sorry
+
+/* All wellformedness checks were successful. */
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: probes/round6/diff_with_lemma.spthy
+
+  processing time: 0.08s
+  
+  RHS :  sent_secret (all-traces): analysis incomplete (1 steps)
+  LHS :  sent_secret (all-traces): analysis incomplete (1 steps)
+  DiffLemma:  Observational_equivalence : analysis incomplete (1 steps)
+
+==============================================================================

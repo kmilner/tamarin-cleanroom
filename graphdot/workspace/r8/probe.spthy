@@ -1,0 +1,566 @@
+theory GroupShareProbe
+begin
+
+builtins: hashing
+
+rule R_8_1:
+  [ Fr(~n0), In(<aa, ab, ac, ad, ae, af, ag, ah>) ]
+  --[ Fire0() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah>), Sib('a0') ]
+
+rule R_8_3:
+  [ Fr(~n1), In(<aa, ab, ac, ad, ae, af, ag, ah>) ]
+  --[ Fire1() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah>), Sib('aaa1') ]
+
+rule R_8_5:
+  [ Fr(~n2), In(<aa, ab, ac, ad, ae, af, ag, ah>) ]
+  --[ Fire2() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah>), Sib('aaaaa2') ]
+
+rule R_8_8:
+  [ Fr(~n3), In(<aa, ab, ac, ad, ae, af, ag, ah>) ]
+  --[ Fire3() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah>), Sib('aaaaaaaa3') ]
+
+rule R_8_10:
+  [ Fr(~n4), In(<aa, ab, ac, ad, ae, af, ag, ah>) ]
+  --[ Fire4() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah>), Sib('aaaaaaaaaa4') ]
+
+rule R_8_12:
+  [ Fr(~n5), In(<aa, ab, ac, ad, ae, af, ag, ah>) ]
+  --[ Fire5() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah>), Sib('aaaaaaaaaaaa5') ]
+
+rule R_8_15:
+  [ Fr(~n6), In(<aa, ab, ac, ad, ae, af, ag, ah>) ]
+  --[ Fire6() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah>), Sib('aaaaaaaaaaaaaaa6') ]
+
+rule R_8_18:
+  [ Fr(~n7), In(<aa, ab, ac, ad, ae, af, ag, ah>) ]
+  --[ Fire7() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah>), Sib('aaaaaaaaaaaaaaaaaa7') ]
+
+rule R_8_20:
+  [ Fr(~n8), In(<aa, ab, ac, ad, ae, af, ag, ah>) ]
+  --[ Fire8() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah>), Sib('aaaaaaaaaaaaaaaaaaaa8') ]
+
+rule R_8_25:
+  [ Fr(~n9), In(<aa, ab, ac, ad, ae, af, ag, ah>) ]
+  --[ Fire9() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaa9') ]
+
+rule R_8_30:
+  [ Fr(~n10), In(<aa, ab, ac, ad, ae, af, ag, ah>) ]
+  --[ Fire10() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa10') ]
+
+rule R_8_40:
+  [ Fr(~n11), In(<aa, ab, ac, ad, ae, af, ag, ah>) ]
+  --[ Fire11() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa11') ]
+
+rule R_8_50:
+  [ Fr(~n12), In(<aa, ab, ac, ad, ae, af, ag, ah>) ]
+  --[ Fire12() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa12') ]
+
+rule R_8_60:
+  [ Fr(~n13), In(<aa, ab, ac, ad, ae, af, ag, ah>) ]
+  --[ Fire13() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa13') ]
+
+rule R_10_1:
+  [ Fr(~n14), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>) ]
+  --[ Fire14() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>), Sib('a14') ]
+
+rule R_10_3:
+  [ Fr(~n15), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>) ]
+  --[ Fire15() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>), Sib('aaa15') ]
+
+rule R_10_5:
+  [ Fr(~n16), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>) ]
+  --[ Fire16() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>), Sib('aaaaa16') ]
+
+rule R_10_8:
+  [ Fr(~n17), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>) ]
+  --[ Fire17() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>), Sib('aaaaaaaa17') ]
+
+rule R_10_10:
+  [ Fr(~n18), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>) ]
+  --[ Fire18() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>), Sib('aaaaaaaaaa18') ]
+
+rule R_10_12:
+  [ Fr(~n19), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>) ]
+  --[ Fire19() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>), Sib('aaaaaaaaaaaa19') ]
+
+rule R_10_15:
+  [ Fr(~n20), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>) ]
+  --[ Fire20() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>), Sib('aaaaaaaaaaaaaaa20') ]
+
+rule R_10_18:
+  [ Fr(~n21), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>) ]
+  --[ Fire21() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>), Sib('aaaaaaaaaaaaaaaaaa21') ]
+
+rule R_10_20:
+  [ Fr(~n22), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>) ]
+  --[ Fire22() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>), Sib('aaaaaaaaaaaaaaaaaaaa22') ]
+
+rule R_10_25:
+  [ Fr(~n23), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>) ]
+  --[ Fire23() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaa23') ]
+
+rule R_10_30:
+  [ Fr(~n24), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>) ]
+  --[ Fire24() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa24') ]
+
+rule R_10_40:
+  [ Fr(~n25), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>) ]
+  --[ Fire25() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa25') ]
+
+rule R_10_50:
+  [ Fr(~n26), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>) ]
+  --[ Fire26() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa26') ]
+
+rule R_10_60:
+  [ Fr(~n27), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>) ]
+  --[ Fire27() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa27') ]
+
+rule R_12_1:
+  [ Fr(~n28), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>) ]
+  --[ Fire28() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>), Sib('a28') ]
+
+rule R_12_3:
+  [ Fr(~n29), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>) ]
+  --[ Fire29() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>), Sib('aaa29') ]
+
+rule R_12_5:
+  [ Fr(~n30), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>) ]
+  --[ Fire30() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>), Sib('aaaaa30') ]
+
+rule R_12_8:
+  [ Fr(~n31), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>) ]
+  --[ Fire31() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>), Sib('aaaaaaaa31') ]
+
+rule R_12_10:
+  [ Fr(~n32), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>) ]
+  --[ Fire32() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>), Sib('aaaaaaaaaa32') ]
+
+rule R_12_12:
+  [ Fr(~n33), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>) ]
+  --[ Fire33() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>), Sib('aaaaaaaaaaaa33') ]
+
+rule R_12_15:
+  [ Fr(~n34), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>) ]
+  --[ Fire34() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>), Sib('aaaaaaaaaaaaaaa34') ]
+
+rule R_12_18:
+  [ Fr(~n35), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>) ]
+  --[ Fire35() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>), Sib('aaaaaaaaaaaaaaaaaa35') ]
+
+rule R_12_20:
+  [ Fr(~n36), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>) ]
+  --[ Fire36() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>), Sib('aaaaaaaaaaaaaaaaaaaa36') ]
+
+rule R_12_25:
+  [ Fr(~n37), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>) ]
+  --[ Fire37() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaa37') ]
+
+rule R_12_30:
+  [ Fr(~n38), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>) ]
+  --[ Fire38() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa38') ]
+
+rule R_12_40:
+  [ Fr(~n39), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>) ]
+  --[ Fire39() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa39') ]
+
+rule R_12_50:
+  [ Fr(~n40), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>) ]
+  --[ Fire40() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa40') ]
+
+rule R_12_60:
+  [ Fr(~n41), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>) ]
+  --[ Fire41() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa41') ]
+
+rule R_16_1:
+  [ Fr(~n42), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>) ]
+  --[ Fire42() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>), Sib('a42') ]
+
+rule R_16_3:
+  [ Fr(~n43), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>) ]
+  --[ Fire43() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>), Sib('aaa43') ]
+
+rule R_16_5:
+  [ Fr(~n44), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>) ]
+  --[ Fire44() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>), Sib('aaaaa44') ]
+
+rule R_16_8:
+  [ Fr(~n45), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>) ]
+  --[ Fire45() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>), Sib('aaaaaaaa45') ]
+
+rule R_16_10:
+  [ Fr(~n46), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>) ]
+  --[ Fire46() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>), Sib('aaaaaaaaaa46') ]
+
+rule R_16_12:
+  [ Fr(~n47), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>) ]
+  --[ Fire47() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>), Sib('aaaaaaaaaaaa47') ]
+
+rule R_16_15:
+  [ Fr(~n48), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>) ]
+  --[ Fire48() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>), Sib('aaaaaaaaaaaaaaa48') ]
+
+rule R_16_18:
+  [ Fr(~n49), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>) ]
+  --[ Fire49() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>), Sib('aaaaaaaaaaaaaaaaaa49') ]
+
+rule R_16_20:
+  [ Fr(~n50), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>) ]
+  --[ Fire50() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>), Sib('aaaaaaaaaaaaaaaaaaaa50') ]
+
+rule R_16_25:
+  [ Fr(~n51), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>) ]
+  --[ Fire51() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaa51') ]
+
+rule R_16_30:
+  [ Fr(~n52), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>) ]
+  --[ Fire52() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa52') ]
+
+rule R_16_40:
+  [ Fr(~n53), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>) ]
+  --[ Fire53() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa53') ]
+
+rule R_16_50:
+  [ Fr(~n54), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>) ]
+  --[ Fire54() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa54') ]
+
+rule R_16_60:
+  [ Fr(~n55), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>) ]
+  --[ Fire55() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa55') ]
+
+rule R_20_1:
+  [ Fr(~n56), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>) ]
+  --[ Fire56() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>), Sib('a56') ]
+
+rule R_20_3:
+  [ Fr(~n57), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>) ]
+  --[ Fire57() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>), Sib('aaa57') ]
+
+rule R_20_5:
+  [ Fr(~n58), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>) ]
+  --[ Fire58() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>), Sib('aaaaa58') ]
+
+rule R_20_8:
+  [ Fr(~n59), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>) ]
+  --[ Fire59() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>), Sib('aaaaaaaa59') ]
+
+rule R_20_10:
+  [ Fr(~n60), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>) ]
+  --[ Fire60() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>), Sib('aaaaaaaaaa60') ]
+
+rule R_20_12:
+  [ Fr(~n61), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>) ]
+  --[ Fire61() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>), Sib('aaaaaaaaaaaa61') ]
+
+rule R_20_15:
+  [ Fr(~n62), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>) ]
+  --[ Fire62() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>), Sib('aaaaaaaaaaaaaaa62') ]
+
+rule R_20_18:
+  [ Fr(~n63), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>) ]
+  --[ Fire63() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>), Sib('aaaaaaaaaaaaaaaaaa63') ]
+
+rule R_20_20:
+  [ Fr(~n64), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>) ]
+  --[ Fire64() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>), Sib('aaaaaaaaaaaaaaaaaaaa64') ]
+
+rule R_20_25:
+  [ Fr(~n65), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>) ]
+  --[ Fire65() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaa65') ]
+
+rule R_20_30:
+  [ Fr(~n66), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>) ]
+  --[ Fire66() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa66') ]
+
+rule R_20_40:
+  [ Fr(~n67), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>) ]
+  --[ Fire67() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa67') ]
+
+rule R_20_50:
+  [ Fr(~n68), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>) ]
+  --[ Fire68() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa68') ]
+
+rule R_20_60:
+  [ Fr(~n69), In(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>) ]
+  --[ Fire69() ]->
+  [ Big(<aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at>), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa69') ]
+
+lemma l_R_8_1:
+  exists-trace "Ex #i. Fire0() @ #i"
+
+lemma l_R_8_3:
+  exists-trace "Ex #i. Fire1() @ #i"
+
+lemma l_R_8_5:
+  exists-trace "Ex #i. Fire2() @ #i"
+
+lemma l_R_8_8:
+  exists-trace "Ex #i. Fire3() @ #i"
+
+lemma l_R_8_10:
+  exists-trace "Ex #i. Fire4() @ #i"
+
+lemma l_R_8_12:
+  exists-trace "Ex #i. Fire5() @ #i"
+
+lemma l_R_8_15:
+  exists-trace "Ex #i. Fire6() @ #i"
+
+lemma l_R_8_18:
+  exists-trace "Ex #i. Fire7() @ #i"
+
+lemma l_R_8_20:
+  exists-trace "Ex #i. Fire8() @ #i"
+
+lemma l_R_8_25:
+  exists-trace "Ex #i. Fire9() @ #i"
+
+lemma l_R_8_30:
+  exists-trace "Ex #i. Fire10() @ #i"
+
+lemma l_R_8_40:
+  exists-trace "Ex #i. Fire11() @ #i"
+
+lemma l_R_8_50:
+  exists-trace "Ex #i. Fire12() @ #i"
+
+lemma l_R_8_60:
+  exists-trace "Ex #i. Fire13() @ #i"
+
+lemma l_R_10_1:
+  exists-trace "Ex #i. Fire14() @ #i"
+
+lemma l_R_10_3:
+  exists-trace "Ex #i. Fire15() @ #i"
+
+lemma l_R_10_5:
+  exists-trace "Ex #i. Fire16() @ #i"
+
+lemma l_R_10_8:
+  exists-trace "Ex #i. Fire17() @ #i"
+
+lemma l_R_10_10:
+  exists-trace "Ex #i. Fire18() @ #i"
+
+lemma l_R_10_12:
+  exists-trace "Ex #i. Fire19() @ #i"
+
+lemma l_R_10_15:
+  exists-trace "Ex #i. Fire20() @ #i"
+
+lemma l_R_10_18:
+  exists-trace "Ex #i. Fire21() @ #i"
+
+lemma l_R_10_20:
+  exists-trace "Ex #i. Fire22() @ #i"
+
+lemma l_R_10_25:
+  exists-trace "Ex #i. Fire23() @ #i"
+
+lemma l_R_10_30:
+  exists-trace "Ex #i. Fire24() @ #i"
+
+lemma l_R_10_40:
+  exists-trace "Ex #i. Fire25() @ #i"
+
+lemma l_R_10_50:
+  exists-trace "Ex #i. Fire26() @ #i"
+
+lemma l_R_10_60:
+  exists-trace "Ex #i. Fire27() @ #i"
+
+lemma l_R_12_1:
+  exists-trace "Ex #i. Fire28() @ #i"
+
+lemma l_R_12_3:
+  exists-trace "Ex #i. Fire29() @ #i"
+
+lemma l_R_12_5:
+  exists-trace "Ex #i. Fire30() @ #i"
+
+lemma l_R_12_8:
+  exists-trace "Ex #i. Fire31() @ #i"
+
+lemma l_R_12_10:
+  exists-trace "Ex #i. Fire32() @ #i"
+
+lemma l_R_12_12:
+  exists-trace "Ex #i. Fire33() @ #i"
+
+lemma l_R_12_15:
+  exists-trace "Ex #i. Fire34() @ #i"
+
+lemma l_R_12_18:
+  exists-trace "Ex #i. Fire35() @ #i"
+
+lemma l_R_12_20:
+  exists-trace "Ex #i. Fire36() @ #i"
+
+lemma l_R_12_25:
+  exists-trace "Ex #i. Fire37() @ #i"
+
+lemma l_R_12_30:
+  exists-trace "Ex #i. Fire38() @ #i"
+
+lemma l_R_12_40:
+  exists-trace "Ex #i. Fire39() @ #i"
+
+lemma l_R_12_50:
+  exists-trace "Ex #i. Fire40() @ #i"
+
+lemma l_R_12_60:
+  exists-trace "Ex #i. Fire41() @ #i"
+
+lemma l_R_16_1:
+  exists-trace "Ex #i. Fire42() @ #i"
+
+lemma l_R_16_3:
+  exists-trace "Ex #i. Fire43() @ #i"
+
+lemma l_R_16_5:
+  exists-trace "Ex #i. Fire44() @ #i"
+
+lemma l_R_16_8:
+  exists-trace "Ex #i. Fire45() @ #i"
+
+lemma l_R_16_10:
+  exists-trace "Ex #i. Fire46() @ #i"
+
+lemma l_R_16_12:
+  exists-trace "Ex #i. Fire47() @ #i"
+
+lemma l_R_16_15:
+  exists-trace "Ex #i. Fire48() @ #i"
+
+lemma l_R_16_18:
+  exists-trace "Ex #i. Fire49() @ #i"
+
+lemma l_R_16_20:
+  exists-trace "Ex #i. Fire50() @ #i"
+
+lemma l_R_16_25:
+  exists-trace "Ex #i. Fire51() @ #i"
+
+lemma l_R_16_30:
+  exists-trace "Ex #i. Fire52() @ #i"
+
+lemma l_R_16_40:
+  exists-trace "Ex #i. Fire53() @ #i"
+
+lemma l_R_16_50:
+  exists-trace "Ex #i. Fire54() @ #i"
+
+lemma l_R_16_60:
+  exists-trace "Ex #i. Fire55() @ #i"
+
+lemma l_R_20_1:
+  exists-trace "Ex #i. Fire56() @ #i"
+
+lemma l_R_20_3:
+  exists-trace "Ex #i. Fire57() @ #i"
+
+lemma l_R_20_5:
+  exists-trace "Ex #i. Fire58() @ #i"
+
+lemma l_R_20_8:
+  exists-trace "Ex #i. Fire59() @ #i"
+
+lemma l_R_20_10:
+  exists-trace "Ex #i. Fire60() @ #i"
+
+lemma l_R_20_12:
+  exists-trace "Ex #i. Fire61() @ #i"
+
+lemma l_R_20_15:
+  exists-trace "Ex #i. Fire62() @ #i"
+
+lemma l_R_20_18:
+  exists-trace "Ex #i. Fire63() @ #i"
+
+lemma l_R_20_20:
+  exists-trace "Ex #i. Fire64() @ #i"
+
+lemma l_R_20_25:
+  exists-trace "Ex #i. Fire65() @ #i"
+
+lemma l_R_20_30:
+  exists-trace "Ex #i. Fire66() @ #i"
+
+lemma l_R_20_40:
+  exists-trace "Ex #i. Fire67() @ #i"
+
+lemma l_R_20_50:
+  exists-trace "Ex #i. Fire68() @ #i"
+
+lemma l_R_20_60:
+  exists-trace "Ex #i. Fire69() @ #i"
+
+end

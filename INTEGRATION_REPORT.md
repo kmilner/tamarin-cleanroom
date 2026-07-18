@@ -2058,3 +2058,178 @@ over the >=20-fixture corpus. graph_clean corpus serializer roundtrip 400/400
 byte-exact (sample). `gen_license_headers.py` --check 0 stale (133 headers). Live
 oracle: fresh `Wide` graph captured at `interactive-graph-def/cases/raw/1/1` and the
 actual RawRule seam driven against it (B).
+
+================================================================================
+# Dirty-room integration report — round-7, unit D (console/CLI) run-driver swap
+#   framing re-sync + verdict-taxonomy blocker RE-CONFIRMED with corpus evidence
+
+Date: 2026-07-18. Integrator: dirty-room (adapters + extraction only; no logic
+transplanted from replaced files into clean code). Repo: `/home/kamilner/tamarin-rs`.
+Same protocol/precedent. Rebased on the current tree (header count inherited at
+133). Task scope: perform the run-driver swap on the premise that "round-6 closed
+the verdict taxonomy."
+
+Outcome: **the round-6 clean framing (the `--diff` verdict taxonomy) is now
+RE-SYNCED into the repo and pinned by 10 new byte-parity tests; the run-driver
+SUMMARY/FRAMING swap and the coupled parse/error-contract swap stay KEPT.** A
+fresh live-oracle corpus gate DISPROVES the task's premise: round-6 closed the
+`--diff` (RHS/LHS/DiffLemma) taxonomy, NOT the non-diff verdict gap (blocker 4).
+The batch-summary swap is still blocked by the `Unfinishable`/`Undetermined`/
+`Invalidated` verdicts the clean `LemmaResult` cannot express — and I demonstrate
+`Unfinishable` is BATCH-REACHABLE on a real corpus theory, so the swap would be a
+silent byte regression, not a latent-only one. No headered file deleted → header
+count unchanged (133 → 133).
+
+--------------------------------------------------------------------------------
+## D.0 Round-6 clean framing RE-SYNCED — DONE (headerless, byte-verified)
+
+`crates/tamarin-prover/src/cli/framing.rs` <- round-6 workspace `framing.rs`
+(mechanical `crate::` -> `super::` only; now byte-identical to the workspace after
+that transform, verified by diff). The round-6 delta is the `--diff` lemma-verdict
+taxonomy: NEW `LemmaSide` enum (`Whole`|`Rhs`|`Lhs`|`Diff`), the `LemmaOutcome`
+constructors `whole`/`projected`/`diff_lemma`, the `side` field, and the free
+`verdict_phrase(result, kind)` (extracted from the round-5 `result_text` method).
+`LemmaOutcome::line` now renders the `RHS :  `/`LHS :  ` projected prefixes and the
+`DiffLemma:  <name> : <verdict> (<N> steps)` observational-equivalence form. All
+nine clean cli modules are now in sync with the round-6 workspace (framing/emit/
+args/modes/parse/stream byte-identical after `crate::`->`super::`; errors/version/
+help differ only by the previously-sanctioned `.hs` `concat!` split + `include_str!`
+path fixes). framing.rs stays HEADERLESS (tripwire: `gen_license_headers.py` adds
+no header).
+
+Test + fixtures re-synced: `tests/console_split_parity.rs` regenerated from the
+round-6 clean `tests/cli_tests.rs` (import paths `cli_clean::`->`tamarin_prover::
+cli::`, fixture dir `fixtures/`->`console_fixtures/`, repo doc-header preserved).
+The round-5 struct-literal `LemmaOutcome { name, kind, result, steps }` became
+`LemmaOutcome::whole(...)`; the four round-6 `diff_summary_*` tests +
+`frame_batch_multi_warn_then_two_lemmas_reproduces_both_streams` were added; 10 new
+r6 golden captures copied (`r6_diff_{asym,default,false,lemma_noprove,n5n6,
+two_lemmas,warn,with_lemma}.out.txt`, `r6_multi_warn_two.{out,err}.txt`). Suite grew
+**45 -> 55**, all green. This pins the diff verdict-taxonomy surface byte-exactly so
+none of the re-synced framing is dead code.
+
+--------------------------------------------------------------------------------
+## D.1 Run-driver SUMMARY/FRAMING swap — KEPT; blocker 4 RE-CONFIRMED HARD
+
+Per protocol ("never force a swap; keep-and-report anything that still blocks"), the
+ported summary path is KEPT intact (headers untouched): `run.rs`
+`print_overall_summary` / `format_lemma_summary_line` / the `LemmaVerdict` enum, and
+`run.rs`'s streaming progress/payload emission.
+
+**The task's premise is factually wrong for THIS swap.** Round 6 closed the `--diff`
+verdict taxonomy (audit "Round 6" / "Round 6 (cont.)", VERDICT: pass) — the
+side-prefixed projected lines and the `DiffLemma:` line. It did NOT add the non-diff
+`Unfinishable`/`Undetermined`/`Invalidated` verdicts. Direct evidence from the
+current (latest committed, no uncommitted delta) clean workspace:
+`cli-clean/src/framing.rs` `LemmaResult` = `{Verified, Falsified, AnalysisIncomplete}`
+(3 variants); `verdict_phrase` emits exactly 4 strings; a full-tree grep of
+`cli-clean/src/` for `cannot be finished` / `analysis undetermined` / `proof has been
+invalidated` / `Unfinishable` / `Undetermined` / `Invalidated` returns EMPTY. The
+round-6-cont audit itself states these "remain absent from the clean … the fingerprint
+of reconstruction." So the clean framing carries the DIFF taxonomy, not the "full
+verdict taxonomy."
+
+**Fresh live-oracle proof that the gap is BATCH-REACHABLE (not latent-only).**
+`examples/csf23-subterms/YellowTest.spthy` (in the tamarin corpus) drives two lemmas
+to `UnfinishableProof` in plain batch `--prove`. HS v1.13.0 (linuxbrew) and the RS
+ported binary emit BYTE-IDENTICAL lemma verdict lines:
+
+    GreenYellow (exists-trace): verified (3 steps)
+    RedYellow (all-traces): falsified - found trace (3 steps)
+    YellowRed (exists-trace): analysis cannot be finished (reducible operators in subterms) (4 steps)
+    YellowGreen (all-traces): analysis cannot be finished (reducible operators in subterms) (4 steps)
+
+HS `showProofStatus _ UnfinishableProof` (Proof.hs:1109) is produced whenever
+`null ogs && not stFinished` (ProofMethod.hs:510: no open goals but the subterm store
+has reducible operators on top) — a batch-reachable `Finished Unfinishable` step, NOT
+an interactive-only state. RS's solver mirrors this exactly
+(`proof_method.rs`: `no_open_goals && !sub_finished => Result::Unfinishable`), and the
+KEPT `format_lemma_summary_line` renders it faithfully. Routing this through the clean
+`render_summary`/`frame_batch`/`emit` would map both lemmas to `AnalysisIncomplete`
+("analysis incomplete") — a **silent byte regression against the oracle on a real
+corpus theory**, caught by no diff-only or 4-phrase gate. The dirty room MAY NOT add
+`analysis cannot be finished (reducible operators in subterms)` (verbatim GPL
+`showProofStatus` expression) to the headerless clean framing — that would taint its
+provenance. Closing blocker 4 remains a CLEAN-SIDE round: the clean crate must add the
+`Unfinishable`/`Undetermined`/`Invalidated` verdicts to `LemmaResult`/`verdict_phrase`
+from a probe of a subterm-reducible theory (e.g. a YellowTest-shaped self-authored
+input) before the summary swap can go byte-green.
+
+--------------------------------------------------------------------------------
+## D.2 Verdict-taxonomy corpus gate — BUILT + RUN (ported path byte-faithful)
+
+Built `verdict_corpus_gate.sh`: HS reference vs RS binary, SPLIT streams, comparing
+the per-lemma verdict lines of the `summary of summaries:` block (build-metadata and
+the orthogonal unit-C wf-warning line excluded — they are not the unit-D framing
+surface). Curated set = the console cluster's round-6/round-5 self-authored probe
+inputs (verified / falsified-both-kinds / wf-warning / multi-theory) + the
+`Unfinishable` witness YellowTest + a bounded-prove case.
+
+Result: **5 verdict classes byte-IDENTICAL HS==RS, including `Unfinishable`.** Two
+non-unit-D notes: `nolemma_clean` has no lemma lines (empty-match gate artifact); the
+`--bound=1` case diverges because RS's SOLVER does not yet honor `--bound` (documented
+gap in `run.rs`: "the Rust solver does not yet honor" — a unit-B/prove issue, not the
+summary framing — HS cuts all four lemmas to `analysis incomplete (2 steps)` while RS
+runs unbounded). Neither touches the summary-framing contract. The gate confirms the
+CURRENT ported summary path is byte-faithful on every batch-reachable verdict class,
+and pins YellowTest as the blocker-4 witness the clean framing cannot reproduce.
+
+The `--diff` taxonomy round-6 DID close is unreachable end-to-end through RS's driver
+(`run_batch` errors: "--diff … is not yet ported"), so it is exercised only at the
+unit level — precisely by the 10 new `console_split_parity` tests added in D.0.
+
+--------------------------------------------------------------------------------
+## D.3 Parse / error-contract swap (blockers 1-3 + typed-args routing) — KEPT
+
+Kept ported (headers intact): `cli/mod.rs` `parse_args`/`Args`/validation, `main.rs`
+error contract. Step 5 bundles the parse-body deletion WITH the summary-body deletion
+under one "when green" gate (the corpus byte-parity gate). Since the summary cannot go
+green (D.1), the bundled deletion does not fire. Independently, the routing is coupled:
+- Blocker 1 (value-validation ORDERING): the clean `args::build_args` validates the
+  eight numeric/enum flags EAGERLY at parse time; HS defers, forcing them AFTER the
+  maude preamble (`split_err_bound.err` = preamble THEN `tamarin-prover: bound: invalid
+  bound given`). Faithful routing means using clean `parse::parse` for tokenization +
+  structural errors but DEFERRING `build_args` into the run driver after the preamble —
+  which forces the `main.rs` runtime-error contract to change too (blocker 2).
+- Blocker 2 (structural-error stream taxonomy): clean `parse`+`errors` already
+  reproduce the faithful split (bare `Unknown flag:` -> stderr; `error: no input files
+  given` + full help -> STDOUT), proven in `console_split_parity`. Wiring them replaces
+  `main.rs`'s single `error: <msg>\n\n<help> -> stderr` contract — and `cli_e2e` PINS
+  the current non-faithful contract, so those gates change together.
+- Blocker 3 (stop-on-trace absent/present): the ported `Args` ALREADY models this
+  correctly (`Option<StopOnTrace>`, `None` = absent -> in-file `configuration:` block).
+  It only needs the `Options::is_set` re-parse recovery IF we switch to the clean
+  `args::Args`, which flattens it to `StopOnTrace::Dfs`. Not a defect in the kept path.
+
+Doing this error-contract rewrite while the summary stays ported yields a HYBRID driver
+whose faithfulness spans the whole parse/validation/file-open error surface and can only
+be validated by the full example-corpus byte-parity gate; forcing it half-validated
+would risk exactly the silent regressions the protocol forbids. Kept intact.
+
+--------------------------------------------------------------------------------
+## Summary (round-7, unit D) — deleted / kept / header delta
+
+* D.0 RE-SYNCED (round-6 `framing.rs` diff verdict taxonomy, headerless) + test
+  regenerated (`console_split_parity` 45 -> 55) + 10 r6 fixtures. Deleted: none.
+* D.1 KEPT ported summary/framing — blocker 4 RE-CONFIRMED HARD, batch-reachable
+  (YellowTest `analysis cannot be finished`, HS==RS byte-identical); clean framing
+  provably lacks the verdict; dirty room may not author it. Task premise refuted.
+* D.2 Corpus gate BUILT + RUN: ported path byte-faithful on all verdict classes.
+* D.3 KEPT ported parse/error-contract swap — coupled to the (blocked) summary
+  deletion under step 5's green gate; blockers 1-2 land together, blocker 3 already
+  correct in the kept path.
+
+Header-count delta: **133 -> 133 (net 0).** No headered file added or deleted; no
+clean/adapter file acquired a GPL header (framing.rs + console_split_parity.rs + the
+10 fixtures all headerless, tripwire verified). No author citation disappeared —
+nothing GPL-headered was removed; `gen_license_headers.py` updates 0 files, `--check`
+0 stale (133 headers).
+
+Validation (all green): `cargo build --workspace` 0 errors; `cargo test -p
+tamarin-parser` = lib 67 + wellformedness 2; `-p tamarin-theory` = lib 489 (+1
+ignored) + oracle_solver 19 (+9 ignored) + wf_formula_terms 5; `-p tamarin-prover` =
+lib 61 + cli_e2e 7 + console_split_parity **55**; `-p tamarin-server` = lib 110 +
+routes (autoprove 6 / basic 19 / graph 4 / proof_step 3 / static 3 / stubs 15 /
+upload 3). wf fixture suite 2/2 over the >=20-fixture corpus. `gen_license_headers.py`
+--check 0 stale (133 headers). Live oracle: verdict-taxonomy corpus gate (HS v1.13.0
+vs RS release) — 5 verdict classes byte-identical incl. `Unfinishable`.

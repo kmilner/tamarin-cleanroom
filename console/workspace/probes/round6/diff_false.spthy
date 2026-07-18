@@ -1,0 +1,24 @@
+theory DiffFalse
+begin
+
+builtins: symmetric-encryption
+
+// Diff theory whose ordinary lemmas are FALSE on both projected systems, to
+// capture the projected RHS/LHS *falsified* verdict phrases. Every prior diff
+// capture only showed 'verified' projected lines, so the falsified projected
+// forms (all-traces "falsified - found trace", exists-trace
+// "falsified - no trace found") were unobserved until this probe.
+rule Leak:
+  [ Fr(~k), Fr(~m) ] --[ Sent(~m) ]-> [ Out(~m), Out(senc(diff(~m, ~m), ~k)) ]
+
+// all-traces secrecy claim that is FALSE: ~m is Out() in the clear.
+lemma leaked:
+  "All m #i. Sent(m) @ i ==> not (Ex #j. K(m) @ j)"
+
+// exists-trace claim that is UNSATISFIABLE: the same fresh m cannot be Sent
+// twice, so no witnessing trace exists.
+lemma impossible:
+  exists-trace
+  "Ex m #i #j. Sent(m) @ i & Sent(m) @ j & not(#i = #j)"
+
+end

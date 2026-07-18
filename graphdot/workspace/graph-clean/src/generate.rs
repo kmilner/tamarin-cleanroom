@@ -24,7 +24,7 @@
 //!     intruder deduction (red dashed), message (gray30), temporal order (blue3 /
 //!     black dashed), etc. — the finite observed style vocabulary (§3c);
 //!   * `n<K>` ids come from [`crate::alloc`]; record-cell text is wrapped/escaped
-//!     by [`crate::render::wrap_cell`]; the header is inferred by role (§4).
+//!     by [`crate::doclayout::wrap_cell_dot`]; the header is inferred by role (§4).
 //!
 //! Two cell-content input paths, both flowing through the same wrap/escape
 //! pipeline: [`RuleInstance`] carries [`Fact`]s (this crate renders + wraps them),
@@ -134,9 +134,9 @@ impl RuleInstance {
 /// A rule instance whose cells are supplied as **pre-rendered flat strings**
 /// (BEHAVIOR.md interop, round 5). The consumer renders fact/term text with its own
 /// printer — including any abbreviation — and this crate's wrap + escape pipeline
-/// ([`wrap_cell`]) applies to those strings exactly as it does to a [`RuleInstance`]'s
-/// rendered facts. `info` is the whole info-cell text (`#t : Rule[…]`); `premises`
-/// and `conclusions` are one flat fact string per cell.
+/// ([`crate::doclayout::wrap_cell_dot`]) applies to those strings exactly as it does
+/// to a [`RuleInstance`]'s rendered facts. `info` is the whole info-cell text
+/// (`#t : Rule[…]`); `premises` and `conclusions` are one flat fact string per cell.
 #[derive(Clone, Debug, Default)]
 pub struct RawRule {
     pub premises: Vec<String>,
@@ -467,11 +467,10 @@ pub fn generate(sys: &System) -> Graph {
 
 /// Assemble a record node's model from a [`RecordSpec`] and its allocated ports.
 /// Empty premise / conclusion groups are dropped; the info group is always kept
-/// (matches the observed group structure). Each group's cells share the record
-/// wrap budget: within a premise or conclusion group a cell wraps when its flat
-/// width exceeds `max(87 − Σ other cell flats, 20)` (BEHAVIOR.md §3f); the info
-/// cell is its own single-cell group (budget 87). Cell text is wrapped and escaped
-/// by [`wrap_cell_budget`].
+/// (matches the observed group structure). Each prem/concl group's cells share the
+/// record wrap budget by the proportional allocation [`group_widths`]; the info
+/// cell is its own single-cell group (budget 87). Cell text is wrapped (ragged
+/// HughesPJ `fill`) and escaped by [`crate::doclayout::wrap_cell_dot`].
 fn build_record(spec: &RecordSpec, ports_prem: &[String], port_info: &str, ports_concl: &[String]) -> Record {
     let mut columns: Vec<Vec<Cell>> = Vec::new();
     if !spec.premises.is_empty() {
@@ -491,39 +490,47 @@ fn build_record(spec: &RecordSpec, ports_prem: &[String], port_info: &str, ports
     }
 }
 
-/// The per-cell line widths of one record group (all premises together, or all
+/// The per-cell fit **budgets** of one record group (all premises together, or all
 /// conclusions together): the cells share the group's [`FILL_WIDTH`] budget
-/// (BEHAVIOR.md §3f), and each cell is then laid out INDEPENDENTLY at its width by
-/// the faithful pretty-printer ([`crate::doclayout`]).
+/// (BEHAVIOR.md §3f), and each cell is then laid out INDEPENDENTLY at its budget by
+/// the faithful pretty-printer ([`crate::doclayout`]). A single budget per cell
+/// (the exact engine turns it into the wrap decision AND the ragged fill packing —
+/// no separate trigger/fill split is needed once the fitting is faithful).
 ///
-/// A single width per cell (the exact engine turns it into the wrap decision AND
-/// the fill packing — no separate trigger/fill split is needed once the fitting is
-/// faithful). The width comes from a **smallest-flat-first** allocation that
-/// reproduces the greedy pretty-printer's coupling: process cells in increasing
-/// flat width; each cell's width is `max(87 − Σ others' occupancy, 20)`, where an
-/// already-processed sibling occupies `min(flat, its own width)` (a wrapping
-/// sibling takes only the width it was allocated) and an un-processed (wider)
-/// sibling still occupies its full flat width. So the narrow cells pack tight
-/// first and the widest cell expands into the room their allocations leave — e.g.
-/// the Wide-rule conclusion group `[Ack 25, Big 68, Out 11]`: `Out` fits (11 ≤ 20
-/// floor); `Ack`, seen while `Big` is still at flat 68, is squeezed to 20 and
-/// wraps; `Big`, placed last, sees `Ack`'s occupancy 20 and gets `87 − 20 − 11 =
-/// 56` → eight tuple elements on its first line, `Out` stays flat. The `20` floor
-/// is the observed per-cell minimum (a cell of flat ≤ 20 never wraps).
+/// The budgets are a **proportional** allocation of the group's [`FILL_WIDTH`]:
+/// cell *i* gets `round(87 · flat_i / T)` where `T = Σ flat_j` is the group's flat
+/// width, floored at [`MIN_CELL_BUDGET`]. This distributes the shared row width in
+/// proportion to each cell's content — the model the corpus census selects (81 %
+/// of wrapping cells byte-exact; 94.7 % of single-cell groups, whose budget is 87
+/// since `T = flat`). Consequences:
+///   * a group whose total fits (`T ≤ 87`) gives every cell `≥ flat_i` → nothing
+///     wraps;
+///   * the Wide-rule conclusion group `[Ack 25, Big 68, Out 11]` (`T = 104`):
+///     `Ack` gets `round(87·25/104) = 21` (wraps), `Big` `round(87·68/104) = 57`
+///     (eight tuple elements on line 0), `Out` `round(87·11/104) = 9 → 20` (fits);
+///   * the `20` floor is the observed per-cell minimum (a cell of flat ≤ 20 never
+///     wraps).
+///
+/// Residual (honest): the true per-cell coupling is the reference pretty-printer's
+/// own `fits` over the whole group, which proportional approximates to within a
+/// few columns; the ~20 % of multi-cell wrapping cells that miss are that ±few-
+/// column bucket boundary plus cells whose wrap is decided on their un-abbreviated
+/// width (BEHAVIOR.md §3f) — beyond a rendering crate that receives post-
+/// abbreviation cell text.
 pub fn group_widths(widths: &[usize]) -> Vec<usize> {
-    let n = widths.len();
-    let mut order: Vec<usize> = (0..n).collect();
-    order.sort_by_key(|&i| widths[i]); // stable: ties keep group order
-    let mut occ = widths.to_vec();
-    let mut out = vec![0usize; n];
-    let full = FILL_WIDTH as usize;
-    for &i in &order {
-        let others: usize = (0..n).filter(|&j| j != i).map(|j| occ[j]).sum();
-        let budget = full.saturating_sub(others).max(MIN_CELL_BUDGET);
-        out[i] = budget;
-        occ[i] = widths[i].min(budget);
+    let t: usize = widths.iter().sum();
+    if t == 0 {
+        return vec![FILL_WIDTH as usize; widths.len()];
     }
-    out
+    let full = FILL_WIDTH as usize;
+    widths
+        .iter()
+        .map(|&f| {
+            // round(87 * f / T)
+            let b = (full * f + t / 2) / t;
+            b.max(MIN_CELL_BUDGET)
+        })
+        .collect()
 }
 
 /// Wrap every cell of one record group, sharing the group [`FILL_WIDTH`] via

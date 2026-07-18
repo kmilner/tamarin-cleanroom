@@ -23,21 +23,40 @@
 //!     per line) wrapped in `[ … ]`; with two or more actions it is therefore
 //!     always vertical, and a lone action fills only when the cell overflows.
 //!
-//! The line WIDTH a cell is laid out at is [`crate::pretty::render_page`]'s line
-//! length; for a lone cell it is [`FILL_WIDTH`] (= 87, the probed flat-fit
-//! boundary). How the cells of one record group share that width is a separate,
-//! probe-derived allocation and lives in [`crate::generate`].
+//! The fit **budget** a cell is laid out at is the HughesPJ *ribbon*; for a lone
+//! cell it is [`FILL_WIDTH`] (= 87, the probed flat-fit boundary). The line length
+//! is `1.5 ×` the ribbon ([`RIBBONS`] = 1.5, the HughesPJ default), and that gap
+//! is what makes `fill` produce *ragged* paragraph fills — a physical line may be
+//! shorter than a later one (e.g. two arguments then four wider ones) — which a
+//! greedy fill can never do and which the reference's output requires (see
+//! [`budget_line_len`] and the `ragged_fill_line0_shorter_than_line1` test). How
+//! the cells of one record group share the budget is a separate, probe-derived
+//! proportional allocation and lives in [`crate::generate::group_widths`].
 
 use crate::pretty::{beside_op, char as pchar, fcat, fsep, nest, render_page, sep, text, vcat, Doc};
 
-/// Line length the reference lays a lone record cell out at (BEHAVIOR.md §3f): a
-/// fact whose flat rendering is `≤ 87` columns stays on one line, `88` breaks.
+/// The fit **budget** (ribbon) the reference lays a lone record cell out at
+/// (BEHAVIOR.md §3f): a fact whose flat rendering is `≤ 87` columns stays on one
+/// line, `88` breaks. A record group shares this budget among its cells
+/// (`crate::generate`); this is the per-cell budget of a *lone* cell.
 pub const FILL_WIDTH: isize = 87;
 
-/// Ribbons-per-line the reference uses for cell layout. The probed boundary is a
-/// single absolute column budget measured from column 0, i.e. `min(lineLength,
-/// ribbon) == lineLength`, so ribbon does not bind — modelled as `1.0`.
-pub const RIBBONS: f64 = 1.0;
+/// Ribbons-per-line the reference uses for cell layout (HughesPJ default). The
+/// probed flat-fit boundary is the **ribbon** (content width excluding
+/// indentation), and the line length is `1.5 ×` the ribbon — a gap that is what
+/// makes HughesPJ `fill` produce *ragged* paragraph fills (a physical line may be
+/// shorter than a later one, e.g. `2` args then `4` wider args), the reference's
+/// observed behavior. A cell's budget `B` is its ribbon; it is rendered at line
+/// length [`budget_line_len`]`(B)` so `round(lineLen / 1.5) == B`.
+pub const RIBBONS: f64 = 1.5;
+
+/// The HughesPJ line length that yields ribbon (= fit budget) `budget` at
+/// [`RIBBONS`] = 1.5: `lineLen = ⌊3·budget / 2⌋`, so `round(lineLen / 1.5) ==
+/// budget`. Content still fits in `budget` columns, but the wider line length
+/// gives `fill` room to look ahead and produce ragged fills.
+pub fn budget_line_len(budget: isize) -> isize {
+    3 * budget / 2
+}
 
 /// Split `s` at top-level `", "` separators, honoring `()`/`<>`/`[]` nesting and
 /// `'…'` quotes. Returns the comma-separated pieces (each un-trimmed).
@@ -239,12 +258,22 @@ pub fn cell_doc(flat: &str) -> Doc {
 }
 
 /// Render a cell's flat text to physical lines `(indent, content)` at the given
-/// line width, via the layout engine. `indent` is the count of leading spaces the
-/// engine emitted (→ `&nbsp;` in the record label); `content` is the line with
-/// that indentation stripped, still un-escaped.
-pub fn layout_lines(flat: &str, width: isize) -> Vec<(usize, String)> {
+/// fit **budget** (ribbon), via the layout engine. `indent` is the count of
+/// leading spaces the engine emitted (→ `&nbsp;` in the record label); `content`
+/// is the line with that indentation stripped, still un-escaped. The cell fits on
+/// one line iff its flat width ≤ `budget`; the line length is
+/// [`budget_line_len`]`(budget)` (= 1.5·budget) so wrapping is ragged (§3f).
+pub fn layout_lines(flat: &str, budget: isize) -> Vec<(usize, String)> {
+    layout_lines_lr(flat, budget_line_len(budget), RIBBONS)
+}
+
+/// Like [`layout_lines`] but with an explicit `line_len` and `ribbons_per_line`
+/// (ribbon = round(line_len / ribbons_per_line)). When `line_len` exceeds the
+/// ribbon, HughesPJ `fill` produces ragged paragraph fills (a physical line may
+/// be shorter than a later one), the reference's observed behavior.
+pub fn layout_lines_lr(flat: &str, line_len: isize, ribbons_per_line: f64) -> Vec<(usize, String)> {
     let doc = cell_doc(flat);
-    let rendered = render_page(width, RIBBONS, &doc);
+    let rendered = render_page(line_len, ribbons_per_line, &doc);
     rendered
         .split('\n')
         .map(|line| {
@@ -254,14 +283,30 @@ pub fn layout_lines(flat: &str, width: isize) -> Vec<(usize, String)> {
         .collect()
 }
 
+/// Like [`wrap_cell_dot`] but with an explicit line length and ribbons-per-line.
+pub fn wrap_cell_dot_lr(flat: &str, line_len: isize, ribbons_per_line: f64) -> String {
+    let lines = layout_lines_lr(flat, line_len, ribbons_per_line);
+    if lines.len() == 1 && lines[0].0 == 0 {
+        return crate::render::escape_record(&lines[0].1);
+    }
+    let mut out = String::new();
+    for (indent, content) in &lines {
+        out.push_str(&"&nbsp;".repeat(*indent));
+        out.push_str(&crate::render::escape_record(content));
+        out.push_str("\\l");
+    }
+    out
+}
+
 /// Render a cell's flat text into the exact graphviz record-label bytes at the
-/// given line width: a single escaped line when it fits, otherwise each physical
-/// line prefixed by its `&nbsp;` indent, escaped, and terminated by `\l`
-/// (trailing `\l` included), per BEHAVIOR.md §3f. The layout is computed on the
-/// UN-escaped text (so `<`/`>` count one column each, matching the reference),
-/// and escaping is applied afterwards.
-pub fn wrap_cell_dot(flat: &str, width: isize) -> String {
-    let lines = layout_lines(flat, width);
+/// given fit **budget** (ribbon): a single escaped line when the flat width ≤
+/// `budget`, otherwise each physical line prefixed by its `&nbsp;` indent,
+/// escaped, and terminated by `\l` (trailing `\l` included), per BEHAVIOR.md §3f.
+/// The layout is computed on the UN-escaped text (so `<`/`>` count one column
+/// each, matching the reference), and escaping is applied afterwards. Wrapping is
+/// ragged (line length = 1.5·budget; see [`RIBBONS`]).
+pub fn wrap_cell_dot(flat: &str, budget: isize) -> String {
+    let lines = layout_lines(flat, budget);
     if lines.len() == 1 && lines[0].0 == 0 {
         return crate::render::escape_record(&lines[0].1);
     }
@@ -317,6 +362,21 @@ mod tests {
             "a".repeat(74)
         );
         assert_eq!(to_record(&flat, 87), want);
+    }
+
+    #[test]
+    fn ragged_fill_line0_shorter_than_line1() {
+        // The RAGGED fill (ribbonsPerLine = 1.5): a fact whose arguments wrap with
+        // a physical line0 SHORTER than a later line — impossible for a greedy
+        // fill. Corpus cell (`St_1_gNB`, e.g. `00664cc78ede5046.dot`): line0 holds
+        // 2 args, line1 holds 4 WIDER args aligned under the `(`, then `)`. The
+        // budget (25) is the cell's proportional share of its group's 87.
+        let flat = "St_1_gNB( ~gNB_ID, KD8, KD1, '0', AM2, GN1 )";
+        let want = "St_1_gNB( ~gNB_ID, KD8,\\l\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;KD1, '0', AM2, GN1\\l)\\l";
+        assert_eq!(to_record(flat, 25), want);
+        // The continuation aligns to the `(` column (10 = width of "St_1_gNB( ").
+        assert_eq!("St_1_gNB( ".chars().count(), 10);
     }
 
     #[test]

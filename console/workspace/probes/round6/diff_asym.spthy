@@ -1,0 +1,17 @@
+theory DiffAsym
+begin
+
+builtins: symmetric-encryption
+
+// Diff theory whose two projected systems genuinely DIFFER, so one ordinary
+// lemma is verified on one side and falsified on the other. Left branch of
+// diff() outputs ~m in the clear (secrecy FALSE); right branch outputs it
+// encrypted under a secret key (secrecy TRUE). Confirms the RHS/LHS projected
+// verdicts are computed independently (not mirrored).
+rule Send:
+  [ Fr(~k), Fr(~m) ] --[ Sent(~m) ]-> [ Out(diff(~m, senc(~m, ~k))) ]
+
+lemma secret:
+  "All m #i. Sent(m) @ i ==> not (Ex #j. K(m) @ j)"
+
+end

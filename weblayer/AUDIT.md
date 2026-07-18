@@ -891,3 +891,105 @@ protectable expression and requires no redo. Findings that survive filtration: 0
 instructions issued.
 
 VERDICT: pass
+
+## Round 7-V — both-sides similarity audit (weblayer delta: verification-only re-corroboration, [R77] resumed session)
+
+### What the round changes (abstraction)
+
+`git status`/`git diff HEAD` restricted to `weblayer/` shows the entire delta is **three
+workspace documents** — `workspace/BEHAVIOR.md` (+8), `workspace/QUERIES.log` (+19),
+`workspace/REPORT.md` (+26). **Zero source, test, fixture, or `Cargo.*` files changed.** Every
+`.rs` under `web-clean/` is byte-identical to HEAD (`git status` lists none as modified; the
+Round-7 dispatch code — `dispatch.rs`, `dispatch7.rs` — was landed and audited in the prior
+`## Round 7` section and is untouched here). This is a *verification* round: a fresh session
+re-ran a live black-box probe and wrote up the corroboration, adding no code.
+
+The three additions all encode the same thing — an independent live re-confirmation, logged as
+`QUERIES.log [R77]`, of the §17.1–§17.3 concurrency contract that Round 7's dispatch already
+implements:
+
+* **QUERIES.log [R77]** — the probe log: reference `tamarin-prover` interactive on `scratch/r7/
+  served` (idx1 Tutorial / idx2 NSLPK3 / idx3 NAXOS_eCK / idx4 RYY), port 3100, driven by
+  `scratch/r7/probe_verify.sh`. Three observations with concrete timings — (a) non-blocking 5-way
+  burst during an in-flight RYY autoprove (all `200`, 0.02–0.34s), (b) commit-order index
+  allocation (start-first RYY committed last → higher index), (c) invisible-until-commit (a ~1.5s
+  NAXOS autoprove's index absent from every poll across its compute window, appearing only
+  post-commit, contiguous).
+* **BEHAVIOR.md §17.7** — the same three facts restated as behaviour, explicitly flagged "my own
+  hands, not the [R70]–[R76] logs."
+* **REPORT.md "Round 7 — verification pass"** — restates the implementation contract in the
+  clean-room's own vocabulary and cross-links the [R77] evidence; closes with "No file under
+  `/home/kamilner/tamarin-rs/` was read this session; the only tamarin-rs touch was EXECUTING the
+  sanctioned reference binary for live probing."
+
+### Provenance cross-check — the added prose is probe-derived, not source-derived
+
+The probe is real and black-box. `scratch/r7/probe_verify.sh` is present and is pure `curl` HTTP
+against the running reference server (`B=http://127.0.0.1:3100`): it backgrounds one long
+autoprove (`GET /thy/trace/4/.../proof/key_secrecy_PFS`), fires a concurrent burst of reads /
+one method op / one `POST /` upload ~0.4s in, and polls `GET /` for version visibility on a
+0.6s cadence, recording per-request start/end offsets and HTTP codes. The served corpus
+(`served/{Tutorial,NSLPK3,NAXOS_eCK,RYY_PFS}.spthy`) matches the index map in [R77]. Every fact
+in the three added blocks is an emergent *runtime* property — where the commit sits relative to
+compute, visibility timing, non-blocking under load — exactly the class of property NOT legible
+from reading `Handler.hs` and correctly obtained by observation. Timings (0.004/0.427/0.634/
+1.536/1.564 s) and indices (5/6/7/8) are probe *outputs*, not constants lifted from source.
+
+### Filtration — nothing added carries protectable expression
+
+* **The behavioural claims are the observed contract, not upstream text.** Non-blocking under a
+  long op, commit-time index allocation, invisible-until-commit — these are the same
+  merger/scenes-à-faire runtime constraints filtered in the `## Round 7` Filtration section, here
+  merely re-observed. No new design element is introduced.
+* **Every identifier the prose names is the clean-room's own.** REPORT.md re-states
+  `Server::dispatch(&self)`, `StateOps` (`snapshot`/`indices`; `insert_new`/`replace`/`remove`),
+  `InMemoryState<T>` = `Mutex<BTreeMap + counter>`, `ProverOps`. Grepped against the live tree:
+  all are defined in `web-clean/src/dispatch.rs` (`trait ProverOps` L233; `trait StateOps` L349
+  with `snapshot`/`insert_new`/`replace`/`remove`/`indices`; `struct InMemoryState` L375 over
+  `Mutex<StateInner{ versions, next_index }>`; `fn dispatch(&self)` L470) — so the narrative
+  describes clean-room code truthfully, and the stored `next_index` (starts 1, never rewinds)
+  remains the affirmative divergence from upstream's stateless `fst (M.findMax theories) + 1`
+  (`Handler.hs` 352/374). None of these mirror upstream's `theoryVar`/`TheoryMap`/`TheoryIdx`/
+  `getTheory`/`putTheory`/`replaceTheory`/`delTheory`/`WebUI` vocabulary.
+* **The URL/form tokens in the probe are the observable wire boundary.** `/thy/trace/<i>/
+  overview/help`, `/thy/trace/1/main/method/Client_auth/1`, `.../autoprove/idfs/0/False/proof/
+  <lemma>`, `uploadedTheory=…` — the HTTP route grammar and form-field name a client necessarily
+  hits, audited as boundary content in Rounds 4/5. Theory/lemma names (Tutorial, NSLPK3,
+  NAXOS_eCK, RYY, `key_secrecy_PFS`, `eCK_same_key`) are example-corpus probe *inputs* (test
+  fixtures), consistent with [R70]–[R76]; not web-layer source identifiers.
+
+### Comparison — affirmative signals of independent, observation-only construction
+
+* **Identifier constellation: still zero overlap.** A scan of the full added text finds no
+  upstream state/thread/type name (`theoryVar`, `threadVar`, `TheoryMap`, `ThreadMap`,
+  `TheoryIdx`, `getTheory`, `putTheory`, `replaceTheory`, `delTheory`, `modifyMVar`, `withMVar`,
+  `MVar`, `findMax`, `WebUI`, `evalInThread`, `killThread`, `forkIO`). Upstream's distinctive
+  cancellable-thread subsystem (`threadVar`/`evalInThread`/`/kill`→`killThread`) is neither
+  reproduced nor referenced — the [R77] probe exercises only the snapshot/compute/commit subset.
+* **No comment lineage.** The added prose is workspace documentation in the clean-room's own
+  terms; no Haddock string is echoed (upstream's `-- | Load a theory given an index.` /
+  `-- | Store a theory, return index.` have no counterpart here).
+* **Explicit non-access affirmation.** REPORT.md records that no `/home/kamilner/tamarin-rs/`
+  file was read this session and the only reference touch was *executing* the sanctioned binary
+  for live probing — the correct clean-room posture, and consistent with the doc-only diff.
+
+### Non-blocking note (NOT a similarity finding, no redo, does not bear on the verdict)
+
+The `## Round 7` audit carried a hygiene note that shipped `dispatch.rs`/`page.rs` doc comments
+had accreted `BEHAVIOR.md §`/`[R]` process narration. This round touches **no** shipped source,
+so it neither worsens nor addresses that note; the newly added `§17`/`[R77]` cross-references all
+live in the workspace docs (BEHAVIOR/QUERIES/REPORT), where provenance narration belongs. Recorded
+only for continuity; no effect on the verdict.
+
+### VIOLATIONS (Round 7-V)
+
+None. The delta is documentation-only — a live black-box re-corroboration ([R77], `probe_verify.sh`
+present) of the already-audited §17.1–§17.3 concurrency contract, adding no code. Behavioural
+claims are probe-derived runtime properties (merger/scenes-à-faire, not legible from `Handler.hs`);
+every identifier named is the clean-room's own (verified defined in `dispatch.rs`), with the stored
+`next_index` counter still affirmatively diverging from upstream's `findMax + 1`; wire/URL tokens
+and theory names are boundary/corpus content; no upstream state/thread vocabulary, structure beyond
+behaviour, non-boundary magic constant, or comment lineage appears. Identifier-constellation overlap
+with `Handler.hs`/`Types.hs`: none. Findings that survive filtration: 0. No redo instructions issued.
+
+VERDICT: pass
