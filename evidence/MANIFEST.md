@@ -9,8 +9,10 @@ those transcripts are collected here verbatim. `SHA256SUMS` covers all files.
 
 These agents were REQUIRED to work only from black-box oracles and captured
 program output (see ../PROTOCOL.md). Their transcripts prove non-access.
-Final audit (audit/cleanroom_audit_results.txt): 30 transcripts, 2437 tool
-calls, 0 forbidden accesses, 0 web accesses. Audit-rule note (2026-07-18):
+Final audit (audit/cleanroom_audit_results.txt): 36 transcripts, 2837 tool
+calls, 0 forbidden accesses, 0 web accesses (wave-4's six implementer
+transcripts — including the crash-orphaned first B8 attempt and the two
+post-resume verification re-runs — audited 2026-07-18). Audit-rule note (2026-07-18):
 the checker now classifies reads of `.spthy` example theories via the raw
 submodule path as sanctioned input (they always were under PROTOCOL.md; only
 symlinked access was whitelisted before), and gained a stricter override that
