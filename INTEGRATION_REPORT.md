@@ -3455,3 +3455,259 @@ override regression tests); serializer roundtrip 12 022/12 022 byte-exact;
 / stubs 15 / upload 3); GRAPHCLEAN_CORPUS occupancy census run over all 12 022
 payloads (baseline / occ-only / occ+bonus+fill + trigger-accuracy +
 fixed/broken delta).
+
+
+================================================================================
+# Open-side integration report — graph round-11 (default-path re-sync + whole-
+#   payload census)
+#   graph_clean RE-SYNCED to the round-11 layout engine (five new allocation
+#   laws + relief second pass + tuple-opener hang). Measured on the full 12 022-
+#   payload GRAPHCLEAN_CORPUS with the DEFAULT display-text path (NO width
+#   overrides — round-10's internal-width occupancy hypothesis was REFUTED
+#   sealed-side and is NOT wired). Round-11 improves every metric; whole-payload
+#   byte-exactness 52.58 % -> 63.28 %. Still far from byte-green, no route-
+#   covering 100 % subset -> KEEP-AND-REPORT. Header count 133 -> 133.
+
+Date: 2026-07-18. Integrator: open side (mechanical re-sync + measurement only;
+no logic transplanted into clean files). Repo: `/home/kamilner/tamarin-rs`.
+Rebased on the round-10 vendored graph_clean + the current tree. Outcome:
+**round-11 is RE-SYNCED (byte-faithful, headerless); the corpus was re-measured
+on the DEFAULT path (no overrides) at cell, record, AND whole-payload
+granularity; the layout engine improved substantially (whole-payload 52.58 % ->
+63.28 %) but is nowhere near byte-green and no precisely-characterizable subset
+covering the live routes reaches 100 %, so the live DOT serialization stays on
+the byte-faithful ported `handlers/dot::render_balanced`.** No headered file
+added or deleted (133 -> 133).
+
+--------------------------------------------------------------------------------
+## B.0 Re-sync graph_clean <- round-11 workspace — DONE (clean, headerless)
+
+`crates/tamarin-server/src/graph_clean/` <- graphdot round-11 workspace
+(`graph-clean/src/`, committed at `48d7326`). Only TWO files changed vs the
+round-10 vendored copy: `generate.rs` (810 -> 963 lines: the five new allocation
+laws — half-DOWN ribbon rounding, recursive tuple/union occupancy
+`rec_sur`/`rec_sur7`, cap-7 fill numerator, last-argument bonus gate, and the
+`trigger_width` self-width override) and `doclayout.rs` (634 -> 641 lines: the
+tuple-opener hang in the ragged HughesPJ fill). `pretty.rs` is BYTE-IDENTICAL to
+round-10 (its mtime moved but content did not); the other nine files
+(`abbrev,alloc,dot,model,options,render,term` + `mod`) are byte-stable.
+
+Recipe (same as round-8/round-10 re-sync sections): mechanical `crate::` ->
+`super::` only. Forward transform verified: applying `crate::`->`super::` to each
+round-11 workspace file reproduces the eight UNCHANGED vendored files
+byte-for-byte, so only `generate.rs`+`doclayout.rs` carry new content. Reverse-
+transform byte-identity holds — `super::`->`crate::` of each re-synced file
+diffs the workspace source with ZERO non-artifact lines; the only residual diffs
+are the pre-existing `use super::*;` test-module lines (2 in `alloc`, `options`,
+`render`, `pretty`; 4 in `doclayout`; 0 elsewhere), exactly as documented.
+`mod.rs` = round-11 `lib.rs` modulo the single ` ```ignore ` doctest fence
+(round-11 did not touch `lib.rs`, so `mod.rs` needed no change). Tripwire:
+`gen_license_headers.py --check` -> **0 stale header(s)**; all re-synced files
+start with `//!` doc comments and stay headerless.
+
+Gates: `cargo build -p tamarin-server` 0 errors; `cargo test -p tamarin-server`
+lib **111** (109 + 2 ignored) + routes (autoprove 6 / basic 19 / graph 4 /
+proof_step 3 / static 3 / stubs 15 / upload 3) all green. Workspace graph-clean
+suite: lib 22 (+2 ignored) + abbrev 16 + alloc_corpus 2 + generate_tests **25**
+(incl. the three override regression tests — `supplied_cell_widths_override_
+estimates`, `raw_rule_supplied_widths_reach_cells`, and the NEW round-11
+`supplied_trigger_width_overrides_self_width`) + roundtrip 14. Serializer
+roundtrip **12 022/12 022 byte-exact** (the re-sync touched no `dot.rs`/
+`model.rs`).
+
+--------------------------------------------------------------------------------
+## B.1 Whole-payload census harness — default path, NO overrides
+
+Round-10's occupancy adapter is NOT used: the round-11 sealed probes (INTERFACE.md
+round-11 rewrite; commit `48d7326` "families 2/4 dissolved — ?unabbreviate=
+twins refute internal-width layout") REFUTED the belief that the reference wraps
+on un-abbreviated internal widths — the reference lays out the POST-abbreviation
+DISPLAY text everywhere probed. So the adapter passes **no overrides at all** and
+the census runs the pure display-text path (`generate::group_widths` +
+`doclayout::wrap_cell_dot`).
+
+The measurement is an OPEN-side harness (`scratchpad/payload_census`, a
+standalone crate path-depending on the workspace graph-clean) that, for every
+`.dot` payload, parses each record label, DEWRAPS each cell to flat text, re-lays
+the premise/conclusion groups through `group_widths` and each cell through
+`wrap_cell_dot` (info cells at budget 87), then RECONSTRUCTS the whole label
+(ports, group braces, pipe separators preserved) and diffs it byte-for-byte
+against the reference. It computes INPUTS/measurements only; no clean render
+logic was reimplemented. Cross-validation is exact at both engines: on the
+round-11 engine the harness reproduces the sealed `census.rs` numbers to the
+digit (98.794 % / 95.596 % / 97.541 % / 94.171 %), and on the round-10 engine
+(recovered from workspace commit `9408f99`) it reproduces the round-10 report's
+B.2 numbers to the digit (96.580 % / 86.261 % / 97.541 % / 89.828 %), and its
+reconstruction is a proven identity (`struct-artifacts`, i.e. all-cells-match
+records whose rebuild differs from the original = **0**; 0 unparsed records).
+
+--------------------------------------------------------------------------------
+## B.2 GRAPHCLEAN_CORPUS gate — round-10 (before) vs round-11 (after)
+
+Full corpus (12 022 DOT payloads; 615 850 prem/concl cells, 142 540 wrapping,
+160 409 records/info cells). Default display-text path, no overrides:
+
+    metric                         | round-10 (before)  | round-11 (after)
+    -------------------------------|--------------------|-------------------
+    (a) ALL prem/concl cells exact | 594789/615850      | 608422/615850
+                                   |   = 96.580 %       |   = 98.794 %
+        wrapping prem/concl cells  | 122957/142540      | 136262/142540
+                                   |   = 86.261 %       |   = 95.596 %
+        info cells                 | 156464/160409      | 156464/160409
+                                   |   = 97.541 %       |   = 97.541 % (flat)
+    (b) RECORDS all-cells-exact    | 144092/160409      | 151058/160409
+                                   |   = 89.828 %       |   = 94.171 %
+    (c) WHOLE-PAYLOAD byte-exact   |   6321/12022       |   7607/12022
+                                   |   = 52.579 %       |   = 63.276 %
+
+(round-10 (a)/(b) = the round-10 report's B.2 baseline column, reproduced
+exactly; (c) was not measured in round-10 — computed here on the recovered
+round-10 engine for a fair before.) Every wrap metric improves; the five new
+allocation laws + relief second pass moved wrapping-cell exactness +9.3 pp and
+whole-payload +10.7 pp. Info cells are untouched by the prem/concl width laws
+(flat at 97.541 %). Strict == lenient for (c): every one of the 160 409 records
+parses, so no unparsed-record caveat applies.
+
+--------------------------------------------------------------------------------
+## B.3 Residual families (ranked) — the B12 targets
+
+Total diverging cells fell 25 006 (round-10) -> 11 373 (round-11), −54.5 %.
+Counts are cell-level from the round-11 default-path gate; the harness's
+ABBREV flag is a token-based "cell contains a legend alias" test (internally
+consistent r10<->r11, but NOT the round-10 report's semantic legend-expansion
+split — with the internal-width hypothesis refuted the flag is now incidental).
+Witnesses are real corpus cells; `first-diverge-byte` is the first byte at which
+`wrap_cell_dot` output and the reference cell differ.
+
+FILL / WRAP families (the whole-payload divergence drivers — everything the cell
+census sees):
+
+1. **FILL-allocation divergence — DOMINANT: 8 564 cells (75.3 %)** (round-10:
+   21 374). Both HS and clean WRAP; they break at a DIFFERENT tuple element. This
+   is the fill-ribbon allocator (clean `group_widths` proportional 87/20 vs HS
+   `renderBalanced`), NOT an abbreviation problem (round-11 refuted internal-
+   width layout). Alias-bearing 7 182 / alias-free 1 382 — note the round-10
+   report's "dominant NON-abbreviated ~14 954" has largely CLOSED (the new laws
+   fixed most alias-free fill; the alias-flagged remainder are short aliases such
+   as `KD2` that render at ~display width, so the break is still an allocator
+   choice). Witness (alias, prem/concl):
+   `!Handover_Session( KD2, <~AMF_ID, ~MME_ID, ~gNB_ID, ~eNB_ID, ~SUPI> )` —
+   first-diverge byte 159: HS packs the tuple through `~gNB_ID,` before the fill
+   break, clean breaks one element earlier after `~MME_ID,`. Info-cell fill
+   witness: `#i : gnb_rcv_ho_complete_snd_ho_notify[Commit( ~gNB_ID, ~SUPI,
+   <'gNB', 'UE', KG1, KD1> ...` first-diverge byte 88.
+2. **TRIGGER false-negative (clean FLAT, HS wraps) — 1 659 cells (14.6 %)**
+   (round-10: 2 154). Clean's wrap trigger under-fires, usually on the closing
+   `)`/`>`-peel of a last tuple argument. Witness (alias, prem/concl):
+   `SndS( ~cid_S1, ~MME_ID, ~eNB_ID, <'ho_cmd', EN1> )` — first-diverge byte 50:
+   HS peels the trailing `)` onto its own `\l` line, clean keeps it flat. This
+   subsumes the round-10 "lone-abbreviated-cell false-negative" (family 4) plus
+   info-cell cases (`#vr.52 : eventAsk...` byte 87).
+3. **TRIGGER false-positive (clean WRAPS, HS flat) — 1 150 cells (10.1 %)**
+   (round-10: 1 478; the round-11 relief second pass cut ~330). Clean over-fires
+   the trigger; the coupled-`fits` relief (a wide sibling that itself wraps
+   occupies only its allocated width) is now modeled but still incomplete.
+   Witness: `Resp_1( $I, $R, ~ltkR, ~ekR, 'g'^~ekI )` — first-diverge byte 37:
+   clean peels the `)`, HS stays flat. Alias witness:
+   `In( <$R.2, $I.1, EX2, SI3, mac(EX1, SI3)> )` byte 43.
+
+NON-fill families the census structurally CANNOT see (the harness re-lays ONLY
+cell content and copies ids/ports/clustering/legend/edges/header VERBATIM from
+the reference, so these contribute 0 to the measured divergence — but they gate
+any FULL-generate routing):
+
+* **global node/port id allocation** (`<n_k>` numbering) — driven by
+  `generate::alloc`, not exercised (reference ids reused).
+* **role clustering / header selection** (compact vs `digraph "G"`; `infer_header`)
+  — reference header reused.
+* **legend table construction + ordering** (the `NAME = EXPANSION` HTML table) —
+  reused verbatim.
+* **edge ordering** (`n_a -> n_b`, invis edges) — reused verbatim.
+* **header / dialect + attribute defaults** — the clean serializer's dialect
+  matches the HS corpus (`digraph "G" {`, global `<n_k>` ports, `{{..}|{..}}`),
+  but the in-repo `routes_graph::dot_output_for_a_simple_system` test pins the
+  PORTED dialect and there is no in-repo byte oracle for a dialect switch
+  (round-8 finding, unchanged).
+* **abbrev engine ~7 % AC/DH residual** — the harness feeds reference-abbreviated
+  cells, so `graph_clean::abbrev` is not exercised here.
+
+These require driving the full clean `generate::System` from `LNTerm`s, which
+needs the `LNTerm -> graph_clean::Term` adapter — a standing blocker (rounds 2/5:
+`graph_clean::Term` cannot represent AC/DH/multiset operators). The 63.276 %
+whole-payload is therefore a CEILING for any cell-layout-only routing and an
+upper bound the full-generate path cannot exceed.
+
+**Round-12 targets.** Family 1 (dominant) is the fill allocator: a clean-side
+`group_widths`/`renderBalanced` ribbon question, independent of any interface
+surface. Families 2/3 are the trigger's tuple-closer-peel + coupled-`fits` relief
+edge cases (self-width trigger and allocated-width sibling charging — the
+`trigger_width` override landed in round-11 but the census default path does not
+route it). No new open-side interface is required; the residual is entirely
+inside the clean layout engine.
+
+--------------------------------------------------------------------------------
+## B.4 Adoption — NOT PERFORMED (keep-and-report)
+
+No byte-green adoption surface exists, full or subset:
+* Whole-payload byte-exactness is **63.276 %** overall — routing the live DOT
+  serialization through clean cell-layout would silently regress the other
+  **4 415 payloads** (36.7 %), the forbidden class (round-8 established the
+  ported `render_balanced` is byte-faithful to HS on exactly these cells).
+* No precisely-characterizable subset covering the live routes' actual usage
+  reaches 100 %: the routes serve arbitrary loaded theories, every non-trivial
+  graph carries wrapping cells, and the exact payloads are just the ones that
+  happened to match — not a route-shaped invariant. Partial adoption with known
+  byte regressions is explicitly disallowed.
+* Full-generate routing (which WOULD regenerate ids/ports/clustering/legend/
+  edges) is not buildable — the `LNTerm -> graph_clean::Term` adapter blocker
+  stands — and would additionally hit the unmeasured structural families + the
+  dialect/no-oracle blocker.
+
+Because the "if" condition (100 % on a route-covering subset) fails, the adoption
+gate battery (live HS spot probes on 3200–3299, `web_parity.sh`) was NOT run: the
+re-sync changed only the vendored-but-unwired `graph_clean` module; the live DOT
+route (`handlers/dot.rs`) and every other serving path are byte-unchanged, so web
+parity is unaffected by construction.
+
+KEPT intact (headers untouched): `handlers/dot.rs` (byte-faithful
+`render_balanced` + DotBuilder — 22-author header), `graph/{abbreviation,repr,
+simplify,options,render_system}.rs`. `routes_graph` UNCHANGED. `graph_clean` NOT
+renamed. Deleted: none.
+
+--------------------------------------------------------------------------------
+## Summary (round-11, unit B) — deleted / kept / header delta
+
+* B.0 RE-SYNCED (`graph_clean/{generate,doclayout}.rs` round-11, headerless;
+  `pretty.rs` byte-identical, other 9 files byte-stable). `crate::`->`super::`
+  verified byte-exact (forward reproduces 8 unchanged files; reverse residual =
+  pre-existing `use super::*;` only). Tripwire `--check` = 0 stale.
+* B.1 Whole-payload harness BUILT (open-side `scratchpad/payload_census`;
+  dewrap -> re-lay -> reconstruct -> byte-diff). DEFAULT path, no overrides
+  (round-10 internal-width occupancy REFUTED sealed-side, NOT wired).
+  Cross-validated exact vs sealed census on both engines; reconstruction identity
+  proven (0 struct-artifacts, 0 unparsed records).
+* B.2 Corpus gate RUN before/after: (a) all-cells 96.580 % -> 98.794 %, wrapping
+  86.261 % -> 95.596 %; (b) records 89.828 % -> 94.171 %; (c) whole-payload
+  52.579 % -> 63.276 %. Every wrap metric improves.
+* B.3 Residual re-pinned + ranked: fill-allocation 8 564 (dominant, −60 % vs
+  round-10), trigger false-neg 1 659, trigger false-pos 1 150; total diverging
+  cells 25 006 -> 11 373. Non-fill structural families (id/port/clustering/
+  legend/edge/dialect + abbrev AC/DH) enumerated as census-invisible + adapter-
+  blocked.
+* B.4 Adoption NOT PERFORMED — 63.276 % whole-payload, no route-covering 100 %
+  subset, partial adoption forbidden, full-generate adapter blocked. KEPT ported
+  `handlers/dot.rs` + `graph/*`. Deleted: none.
+
+Header-count delta: **133 -> 133 (net 0).** No headered file added or deleted;
+the two re-synced clean files stayed headerless (tripwire verified). No author
+citation disappeared — the swap that would remove `handlers/dot.rs` stays
+blocked.
+
+Validation (all green): workspace graph-clean suite (lib 22 +2 ign / abbrev 16 /
+alloc_corpus 2 / generate_tests 25 incl. the new `supplied_trigger_width_
+overrides_self_width` / roundtrip 14); serializer roundtrip 12 022/12 022
+byte-exact; `cargo build -p tamarin-server` 0 errors; `cargo test -p
+tamarin-server` lib 111 (+2 ignored) + all route suites; GRAPHCLEAN_CORPUS
+whole-payload census over all 12 022 payloads on both the round-10 and round-11
+engines (cell / record / whole-payload + ranked families); `gen_license_headers.py
+--check` 0 stale.
