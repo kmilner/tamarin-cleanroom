@@ -1,0 +1,4 @@
+theory p begin
+rule R1: [ ] --[ ]-> [ !Foo('a'), !Bar('a') ]
+rule R2: [ ] --[ ]-> [ Foo('a'), Bar('a') ]
+end

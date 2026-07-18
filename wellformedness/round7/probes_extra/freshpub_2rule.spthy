@@ -1,0 +1,4 @@
+theory p begin
+rule R1: [ ] --[ ]-> [ Out(~'a') ]
+rule R2: [ ] --[ ]-> [ Out(~'b') ]
+end

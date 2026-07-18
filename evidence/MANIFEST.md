@@ -28,7 +28,8 @@ producers round-2 implementer (wf_910e7687-413) audited — 103 tool calls, 0/0;
 graphdot round-11 implementer (wf_6c1add5e-f10) audited — 149 tool calls, 0/0;
 producers round-3 implementer (wf_e914d4ec-17f) audited — 131 tool calls, 0/0;
 pretty round-2 implementer (wf_a5ef3578-648) audited — 105 tool calls, 0/0;
-46 sealed transcripts total.
+wf round-7 implementer (wf_bf6a23fd-437) audited — 77 tool calls, 0/0;
+47 sealed transcripts total.
 
 | Path | Agent | Role |
 |------|-------|------|
@@ -73,6 +74,7 @@ pretty round-2 implementer (wf_a5ef3578-648) audited — 105 tool calls, 0/0;
 | workflows/wf_6c1add5e-f10/agent-a5c3c235083120633.jsonl | round 11 (unit B) | five allocation laws (half-DOWN, recursive occupancy, cap-7 numerator, last-arg bonus gate, tuple-opener hang) + relief pass; families 2/4 dissolved by ?unabbreviate= twins; wrapping 86.3→95.6%, single-cell 100% |
 | workflows/wf_e914d4ec-17f/agent-a47c900ac52dd2fdf.jsonl | producers round 3 | R3 proof-tree HTML (case=CHILD/next-qed=PARENT status law, hl_superfluous replayed mode; 478/478 sweep upgraded w/ proof lines produced, live replays 4/4) + R4 welcome/housekeeping (6/6 live byte replays); producer surface R1–R5 complete |
 | workflows/wf_a5ef3578-648/agent-a6c440b2693c9355d.jsonl | pretty round 2 | equation-order law (structural, 13 probes refuting shortlex/arity-first) + wide-tuple hang; 12-file signature parity; R2 rule rendering 72/72 blocks byte-identical |
+| workflows/wf_bf6a23fd-437/agent-a22a5781796e057ae.jsonl | round 7 (unit C) | per-finding report granularity: full per-topic counting law oracle-pinned (whole-topic/per-rule/per-side/per-fact/per-item/per-lemma; MDC=1/theory); 5 corpus footers reconcile exactly (dir also holds the two session-limit-killed wf_c7ddbc35-082 attempts, empty) |
 
 Corresponding workspaces (../wellformedness, ../graphdot, ../weblayer) hold
 each agent's QUERIES.log, BEHAVIOR.md, REPORT*.md and code — cross-reference
@@ -102,6 +104,7 @@ the transcripts against those logs.
 | workflows/wf_6c1add5e-f10/agent-aa34eecb3a83aa639.jsonl | graphdot round-11 delta audit (pass, 0 violations; half-DOWN diverges from source's half-even; structural divergence WIDENED — two-pass/shape-terms vs single-pass/shape-blind; every law probe-traced) |
 | workflows/wf_e914d4ec-17f/agent-aa69aa0d5168094f4.jsonl | producers round-3 delta audit (pass, 0 similarity; pointed omission of upstream vestiges a copier would carry; hardest laws corpus-refuted then live-forced; hygiene clean). agent-a3655b013a80004f3 = first audit attempt, killed by session limit (empty) |
 | workflows/wf_a5ef3578-648/agent-ad4db13353b8f69dd.jsonl | pretty round-2 delta audit (pass; ordering law diverges from source Ord in every non-observable slot — omits idx-sort-name and position tiebreak, invents PairTail; AC ops pointedly not unified onto one helper). agent-a42415d79a2b4cfbd = first audit attempt, killed by session limit (empty) |
+| workflows/wf_bf6a23fd-437/agent-a8f291ecb5218b5d7.jsonl | wf round-7 delta audit (pass; granularity = merger — footer N is boundary-observable; disjoint identifiers; affirmative divergence: preamble carried in first finding's body vs reference's Topic string) |
 
 Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUDIT.md,
 ../console/AUDIT.md, ../macros/AUDIT.md, ../injective/AUDIT.md, ../derivcheck/AUDIT.md.
@@ -123,6 +126,7 @@ Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUD
 | workflows/wf_cdfa493d-262/agent-a281e419853d7d5f5.jsonl | open-side integrator: pretty R1 vendored (crates/tamarin-theory/src/pretty_clean/, headerless, reverse-transform byte-identical) + adapter; both adoptions kept ported with byte-precision blockers (trial signature swap 401/403; equation order + tuple wrap); all gates green, header delta 0 |
 | workflows/wf_c87ee431-f2d/agent-aea2058e09b9ed188.jsonl | open-side integrator: graph round-10 occupancy adapter — REFUTED at corpus scale (internal widths regress the gate: wrapping 86.26%→83.9%, FIXED 372/BROKEN 5635); display-flat trigger 99.63% accurate; 4 ranked round-11 families with first-diverging-byte examples; kept ported, header delta 0 |
 | workflows/wf_7081ec9f-f00/agent-*.jsonl | open-side integrator: graph round-11 re-sync + measurement — whole-payload 52.58%→63.28%, records 89.83%→94.17%, diverging cells −54.5%; 3 ranked fill families remain; 63.3% is the CEILING for cell-layout-only routing (full-generate blocked on LNTerm adapter + dialect oracle); kept ported |
+| workflows/wf_bf6a23fd-437/(gate agent).jsonl | open-side integrator: wf round-7 re-sync (checks/report) + 7 header-less topic registrations w/ empty preamble; wf_gate 419/0 unchanged, footer gate 5/5 MATCH (3/14/14/5/6) — wellformedness unit at FULL-OUTPUT parity (block + footer) under --prove corpus-wide |
 | workflows/wf_53f48d60-3ef/ | licensing research (GPL doctrine/precedent/feasibility/literal-copy) |
 | workflows/wf_8b8fd87b-72e/ | uncited-file derivation audit + institutional-ownership research |
 | workflows/wf_5ec90b24-b26/ | tail-author affiliations, triviality classification, rewrite scoping |

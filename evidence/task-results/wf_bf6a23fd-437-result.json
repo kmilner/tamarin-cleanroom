@@ -1,0 +1,93 @@
+{
+  "summary": "Sealed wf round 7: per-finding report granularity so the batch footer count matches (5 corpus files); audit; integrator re-sync + footer gate",
+  "agentCount": 3,
+  "logs": [],
+  "result": {
+    "impl": "Everything is clean and complete. Here is my summary.\n\n## Round 7 — per-finding entry count: DONE\n\n**The observable, pinned.** The batch footer `  WARNING: <N> wellformedness check failed!` is `N = length of the report list` = the number of `(topic, doc)` pairs the checker emits, **not** the number of numbered items in a block. I probed this against the oracle for every topic (footers read directly from `wf_oracle.sh`).\n\n**The per-topic counting law (all oracle-observed):**\n- **WHOLE-TOPIC = 1 finding:** Public-constants-cap, Fact-capitalization, Fact-arity, Fact-multiplicity, lhs-not-rhs, Subterm-convergence (`fcap_2grp`, `arity_2grp`, `pub_2grp`, `mult_2grp`, `lhs_2`, `subterm_2eq` all footer-contribute 1).\n- **PER RULE:** Unbound (`deriv_2rule`=2, `deriv_2var`=1), mismatching-sorts (`sort_2rule`=2, `sort_2grp_1rule`=1), Fresh-public-constants (`freshpub_2rule`=2), Multiplication-restriction (`multrestrict_2rule_dh`=2).\n- **PER (rule, side):** Reserved names (`reserved_2fact_1side`), Special facts (`special_2fact_1side`, and issue515 test2 = 2).\n- **PER offending fact:** Fr facts (`fr_2fact_1rule`=2).\n- **PER formula item:** Quantifier-sorts (`qs_2lem`=2), Formula-terms (`ft_2lem`=2).\n- **PER lemma:** Formula-guardedness (`guard_2lem`=2), Lemma-annotations (`lemanno_2lem`=2).\n- **Out-of-scope but footer-counted (caller-added):** Message Derivation Checks = **1 per theory** regardless of rule count.\n\n**Five corpus files reconcile exactly** (oracle footer = in-scope `check_theory` + MsgDeriv), all confirmed by running the oracle: stateverif → 3 (2+1), issue515 → 14 (14+0), issue527 → 14 (13+1), CertificateTransparency → 5 (4+1), OCSPS → 6 (5+1).\n\n**Implementation** (only under `workspace/wf-clean/`):\n- `src/checks.rs`: each grouped-list check now returns **one `WfError` per finding** via new helper `per_finding`; `mismatching_sorts` carries the \"Possible reasons:\" preamble on its first rule's finding; `formula_reports` emits per-item (removed `merge_consecutive`).\n- `src/report.rs`: `render_report` now regroups **consecutive** same-topic findings into one block, joining bodies with `FINDING_SEP` = `\"\\n  \\n\"` (the separator every grouped-list topic already used) — so every rendered BLOCK is byte-identical, and the interleaved QS/FT/QS bundle still renders as three blocks.\n\n**Acceptance met:**\n- All 109 pre-existing tests green, unchanged (block fixtures byte-identical, corpus5 pin silent, round5/6 pass).\n- New `tests/round7_tests.rs` (27 tests): per-topic e",
+    "audit": "Round-7 both-sides similarity audit complete. Appended the round-7 section to `/home/kamilner/tamarin-cleanroom/wellformedness/AUDIT.md`.\n\nFindings:\n- Delta scope confirmed: `checks.rs` (+`per_finding`, per-check granularity split, `mismatching_sorts` preamble-on-first-rule, `formula_reports` de-merge), `report.rs` (+`FINDING_SEP`, `group_findings`, `render_block(topic,message)` split), BEHAVIOR.md +94, QUERIES.log +26, new `round7_tests.rs` (596 lines), plus `round7/` probes and `scratchpad/r7_*` logged outputs.\n- Granularity match is merger: the batch footer `N` (= `checkWellformedness` list length, Wellformedness.hs:1270-1286) is boundary-observable; the sealed `check_theory` returning one `WfError` per finding to hit `N`, with a render-time regroup, is interoperability, not a violation.\n- No copied protectable expression: disjoint identifier constellation (sealed `per_finding`/`group_findings`/`FINDING_SEP` vs reference `prettyWfErrorReport`/`groupOn fst`/`ppTopic`/`msum`); independent control structure (imperative fold vs `groupOn`); affirmative divergence in `mismatching_sorts` (sealed carries `Possible reasons:` in the first finding's body; reference carries it in the Topic string); no non-observable constants; no comment lineage (grep clean except the observable topic string \"Reserved names\").\n- Provenance solid: re-extracted footers from all 30 probe `.out` files + 5 corpus `.out` files; every one matches its BEHAVIOR.md/QUERIES.log claim, including the granularity-d",
+    "passed": true,
+    "gate": "All steps complete and verified. Here is the plain-text summary.\n\nROUND-7 WELLFORMEDNESS RE-SYNC (unit C) — COMPLETE, ALL GATES GREEN\n\nRE-SYNC (mechanical, recipe: crate::{pretty,report,formula,checks}->super::; crate::ast kept):\n- wf/report.rs <- sealed report.rs: adds FINDING_SEP=\"\\n  \\n\" + group_findings (merges CONSECUTIVE same-topic findings at render time). CHANGED.\n- wf/checks.rs <- sealed checks.rs: grouped-list checks now emit one WfError per finding (per_finding); formula_reports dropped merge_consecutive and emits QS/FT/GUARD per-item. CHANGED.\n- wf/formula.rs, wf/pretty.rs, wf/mod.rs: reverse-transform BYTE-IDENTICAL to sealed round-7 (unchanged).\n- Preserved wf/order.rs + its `pub mod order; pub use order::*;` lines. All six wf/ files headerless (0 .hs citations).\n- Fidelity: `sed 's/super::/crate::/g'` on each re-synced file reverse-maps byte-identical to the sealed source (checks + report confirmed).\n\nOPEN-SIDE ADJUSTMENT (mine, documented): pretty_theory::wf_headerless_preamble.\n- Corpus-exercised per-finding topics are all already registered in wf_headerless_preamble; the open renderer's existing by-topic all-together grouping + \"\\n  \\n\" join reproduces the byte-exact block, so NO change was needed there — the block is byte-stable and only the count becomes per-finding.\n- Registered 7 header-less topics that fell through the default path (Fr facts / Fresh public constants / Nat Sorts / Multiplication restriction of rules / Reserved prefixes / Left rule / Right rule) with an EMPTY preamble, so their per-finding bodies rejoin with \"\\n  \\n\" instead of a plain \"\\n\" — restoring round-6 block bytes. Verified on a 2-rule fresh-pub probe: block byte-identical to round-6, footer count 1->2.\n\nSTEP 2 — build + tests (all green, 0 failures):\n- cargo build --release: 0 errors (3m29s).\n- tamarin-parser: lib 67 + wellformedness 2.\n- tamarin-theory: lib 495 (+1 ign) + oracle_solver 19 (+9 ign) + wf_formula_terms 5.\n- tamarin-prover: lib 60 + cli_e2e 7 + console_split_parity 59.\n- tamarin-server: lib 109 (+2 ign) + routes (autoprove 6 / basic 19 / graph 4 / proof_step 3 / static 3 / stubs 15 / upload 3) + 1 doctest ign.\n\nSTEP 3 — full wf gate (scripts/wf_gate_round7.tsv, JOBS=6): 419 MATCH / 0 DIFF / 0 SKIP. Identical to round-6; every rendered block byte-stable.\n\nSTEP 4 — footer gate (scripts/corpus_diff_r7_footer.tsv, JOBS=4, FILE_TIMEOUT=600): 5 MATCH / 0 DIFF. Footer counts confirmed 3 / 14 / 14 / 5 / 6 (stateverif_left_right / issue515 / issue527 / Ce"
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Implement"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "Audit"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 3,
+      "title": "Gate"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "seal:wf-r7",
+      "phaseIndex": 1,
+      "phaseTitle": "Implement",
+      "agentId": "a22a5781796e057ae",
+      "model": "claude-opus-4-8[1m]",
+      "state": "done",
+      "startedAt": 1784396435726,
+      "queuedAt": 1784396435725,
+      "attempt": 1,
+      "lastToolName": "Bash",
+      "lastToolSummary": "cd /home/kamilner/tamarin-cleanroom/wellformedness/workspac…",
+      "promptPreview": "You are a SEALED implementer under the barrier protocol at /home/kamilner/tamarin-cleanroom/PROTOCOL.md — read it first and comply strictly.\nACCESS RULES: You must NOT read any file under /home/kamilner/tamarin-rs/crates/, and NOT read any Haskell source of tamarin-prover anywhere on disk (notably /home/kamilner/tamarin-rs/tamarin-prover/{lib,src}/ and /home/kamilner/tamarin-rs/tamarin-prover-test…",
+      "lastProgressAt": 1784398122797,
+      "tokens": 271059,
+      "toolCalls": 77,
+      "durationMs": 1687071,
+      "resultPreview": "Everything is clean and complete. Here is my summary.\n\n## Round 7 — per-finding entry count: DONE\n\n**The observable, pinned.** The batch footer `  WARNING: <N> wellformedness check failed!` is `N = length of the report list` = the number of `(topic, doc)` pairs the checker emits, **not** the number of numbered items in a block. I probed this against the oracle for every topic (footers read directl…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "audit:wf-r7",
+      "phaseIndex": 2,
+      "phaseTitle": "Audit",
+      "agentId": "a8f291ecb5218b5d7",
+      "model": "claude-opus-4-8[1m]",
+      "state": "done",
+      "startedAt": 1784398122808,
+      "queuedAt": 1784398122804,
+      "attempt": 1,
+      "lastToolName": "Edit",
+      "lastToolSummary": "/home/kamilner/tamarin-cleanroom/wellformedness/AUDIT.md",
+      "promptPreview": "You are a BOTH-SIDES similarity auditor for the tamarin-rs sealed relicensing campaign (exempt from barrier access rules; you may read everything). Audit ONLY this round's delta: /home/kamilner/tamarin-cleanroom HEAD (5f6ff68) predates it — git -C /home/kamilner/tamarin-cleanroom status/diff restricted to wellformedness/ shows the round-7 delta (report-entry granularity restructure, block renderin…",
+      "lastProgressAt": 1784398583723,
+      "tokens": 97591,
+      "toolCalls": 23,
+      "durationMs": 460915,
+      "resultPreview": "Round-7 both-sides similarity audit complete. Appended the round-7 section to `/home/kamilner/tamarin-cleanroom/wellformedness/AUDIT.md`.\n\nFindings:\n- Delta scope confirmed: `checks.rs` (+`per_finding`, per-check granularity split, `mismatching_sorts` preamble-on-first-rule, `formula_reports` de-merge), `report.rs` (+`FINDING_SEP`, `group_findings`, `render_block(topic,message)` split), BEHAVIOR.m…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 3,
+      "label": "gate:wf-r7",
+      "phaseIndex": 3,
+      "phaseTitle": "Gate",
+      "agentId": "a2eef5cb71e66a52e",
+      "model": "claude-opus-4-8[1m]",
+      "state": "done",
+      "startedAt": 1784398583733,
+      "queuedAt": 1784398583730,
+      "attempt": 1,
+      "lastToolName": "Bash",
+      "lastToolSummary": "cd /home/kamilner/tamarin-rs echo \"=== HEAD unchanged (no c…",
+      "promptPreview": "You are the OPEN-SIDE integrator for the tamarin-rs sealed relicensing campaign, working in /home/kamilner/tamarin-rs. Read the wellformedness sections of /home/kamilner/tamarin-cleanroom/INTEGRATION_REPORT.md (round-6 recipe) and PROTOCOL.md first.\nRound 7 restructured the sealed wf checker's report-entry granularity (per-finding, so the batch footer \"WARNING: N wellformedness check failed!\" coun…",
+      "lastProgressAt": 1784401156870,
+      "tokens": 185650,
+      "toolCalls": 60,
+      "durationMs": 2573137,
+      "resultPreview": "All steps complete and verified. Here is the plain-text summary.\n\nROUND-7 WELLFORMEDNESS RE-SYNC (unit C) — COMPLETE, ALL GATES GREEN\n\nRE-SYNC (mechanical, recipe: crate::{pretty,report,formula,checks}->super::; crate::ast kept):\n- wf/report.rs <- sealed report.rs: adds FINDING_SEP=\"\\n  \\n\" + group_findings (merges CONSECUTIVE same-topic findings at render time). CHANGED.\n- wf/checks.rs <- sealed …"
+    }
+  ],
+  "totalTokens": 554300,
+  "totalToolCalls": 160
+}

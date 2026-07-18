@@ -260,3 +260,29 @@ round6/probes/lhs3.spthy :: purpose: pin whether an RHS occurrence of a fact ide
 round6/probes/pc1.spthy :: purpose: pin pubcap same-rule collapse+order ('c' then 'C' both in rule Init) -> "1. rule \"Init\":  name 'C', 'c'" (ASCII sort C<c, collapsed to one rule); byte-identical to CentralizedMonitor target
 round6/probes/pc2.spthy :: purpose: pin pubcap group-sort + cross-rule attribution + numbering ('Bird'@R1,'bird'@R2 ; 'apple'/'Apple'@R3) -> "1. rule \"R3\":  name 'Apple', 'apple'" then "2. rule \"R1\":  name 'Bird', rule \"R2\":  name 'bird'"; groups sorted by lowercased key (apple<bird), same-rule collapse, cross-rule split, ASCII spelling sort, "  " (2-space) separator line between entries
 round6 target diffs (no new probe) :: ble lhs-not-rhs expects 10 entries (one per (rule,factName)); CentralizedMonitor pubcap = pc1 shape; issue527 sealed body byte-identical to target except one join blank before the out-of-scope Maude "Message Derivation Checks" block; Axioms lemanno header+body emitted by sealed render; SAPIC blank1 files = single join blank, sealed render emits it
+
+# ===== ROUND 7 (per-finding entry count / batch footer "WARNING: <N> ...") =====
+# The oracle prints, in "summary of summaries", a trailing
+#   "  WARNING: <N> wellformedness check failed!"
+# where N = length of the report list = number of (topic, doc) pairs the checker
+# emits (NOT the number of numbered items inside a block). Purpose of round-7
+# probes: pin the per-topic granularity of that pair count. All footers below
+# read directly from wf_oracle.sh output.
+round7/probes/fcap_1grp,fcap_1grp_3occ,fcap_2grp :: Fact capitalization -> footer 1 for one group, one group 3 occurrences, and two groups: WHOLE-TOPIC = one finding
+round7/probes/arity_1grp,arity_2grp :: Fact arity -> footer 1 for one and two groups: WHOLE-TOPIC = one finding
+round7/probes/pub_1grp,pub_2grp :: Public constants mismatching cap -> footer 1 for one and two groups: WHOLE-TOPIC = one finding
+round7/probes/lhs_1,lhs_2 :: lhs-not-rhs -> footer 1 for one and two items: WHOLE-TOPIC = one finding (block still lists both numbered items)
+round7/probes/sort_1rule,sort_2grp_1rule,sort_2rule :: mismatching sorts -> 1,1,2: one finding PER RULE (two variant groups in one rule still 1; two rules 2). "Possible reasons:" preamble is a topic heading shown once.
+round7/probes/reserved_2fact_1side :: [K,KU] on one side -> footer 2 = Reserved 1 (one (rule,side) block covers both facts) + lhs-not-rhs 1 (K premise). Reserved = one finding PER (rule,side).
+round7/probes/special_2fact_1side :: [Fr(~x)]->[In(~x),Out(x)] -> footer 4 = Unbound 1 (msg x) + Sort 1 (~x vs x) + Special 1 (In on RHS) + MsgDeriv 1. Special = one finding PER (rule,side).
+round7/probes/deriv_1,deriv_2var,deriv_2rule :: Unbound -> footers 2,2,3 = Unbound{1,1,2}+MsgDeriv 1. Unbound = one finding PER RULE (two unbound vars in one rule still 1). Message Derivation Checks = ONE pair for the whole theory regardless of rule count (out of scope for check_theory).
+round7/probes/qs_1lem,qs_2lem :: Quantifier sorts -> footer 1,2: one finding PER FORMULA ITEM.
+round7/probes_extra/fr_2fact_1rule,fr_2rule :: Fr facts -> footer 2,2: one finding PER offending Fr FACT occurrence.
+round7/probes_extra/freshpub_2rule,freshpub_2const_1rule :: Fresh public constants -> footer 2,1: one finding PER RULE.
+round7/probes_extra/mult_2grp :: Fact multiplicity two groups -> footer 1: WHOLE-TOPIC = one finding.
+round7/probes_extra/lemanno_2lem :: Lemma annotations, two reuse exists-trace lemmas -> footer 2: one finding PER LEMMA.
+round7/probes_extra/ft_2lem :: Formula terms, two lemmas w/ free var -> footer 2: one finding PER FORMULA ITEM (the two free-var occurrences inside one lemma stay in one finding's list).
+round7/probes_extra/guard_2lem :: Formula guardedness, two unguarded lemmas -> footer 2: one finding PER LEMMA.
+round7/probes_extra/subterm_2eq :: Subterm convergence, two bad equations -> footer 1: WHOLE-TOPIC = one finding.
+round7/probes_extra/multrestrict_2rule_dh :: Multiplication restriction (DH *), two rules -> footer 2: one finding PER RULE. (multrestrict_2rule with multiset + was silent: `+` is union, not the `*` this check targets.)
+corpus footers (wf_oracle.sh full runs) :: issue515 -> 14 (Reserved 12 + Special 2; MsgDeriv 0). issue527 -> 14 (Unbound 3 + Pub 1 + Sort 2 + Reserved 4 + FactCap 1 + Arity 1 + lhs 1 = 13 in-scope + MsgDeriv 1). stateverif_left_right -> 3 (Unbound 2 + MsgDeriv 1). CertificateTransparency -> 5 (Unbound 4 + MsgDeriv 1). OCSPS -> 6 (Unbound 4 + lhs 1 = 5 in-scope + MsgDeriv 1). check_theory in-scope entry counts: 14,13,2,4,5 respectively.

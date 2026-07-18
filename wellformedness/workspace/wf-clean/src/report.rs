@@ -38,17 +38,46 @@ pub fn topics(report: &WfReport) -> BTreeSet<String> {
 }
 
 /// Render one topic block: header + underline + blank line + body.
-fn render_block(e: &WfError) -> String {
-    format!("{}\n\n{}", underline_topic(&e.topic), e.message)
+fn render_block(topic: &str, message: &str) -> String {
+    format!("{}\n\n{}", underline_topic(topic), message)
+}
+
+/// Separator between two individual findings that share a topic block. Every
+/// grouped-list topic the checker emits uses this separator (a blank line whose
+/// only content is two spaces), so the block layer can rejoin per-finding
+/// entries into the byte-exact bundled body.
+pub const FINDING_SEP: &str = "\n  \n";
+
+/// Merge CONSECUTIVE same-topic findings into one `(topic, body)` block,
+/// joining their bodies with [`FINDING_SEP`]. The report holds one entry PER
+/// FINDING (so `report.len()` is the oracle's finding count); a topic that
+/// recurs after an intervening different topic starts a fresh block (this is
+/// what the interleaved formula-check bundle relies on).
+fn group_findings(report: &WfReport) -> Vec<(String, String)> {
+    let mut out: Vec<(String, String)> = Vec::new();
+    for e in report {
+        match out.last_mut() {
+            Some((topic, body)) if *topic == e.topic => {
+                body.push_str(FINDING_SEP);
+                body.push_str(&e.message);
+            }
+            _ => out.push((e.topic.clone(), e.message.clone())),
+        }
+    }
+    out
 }
 
 /// Render a full report as the oracle's WARNING comment (byte-identical), or
-/// the success line for an empty report.
+/// the success line for an empty report. Per-finding entries sharing a topic
+/// are grouped into a single block (see [`group_findings`]).
 pub fn render_report(report: &WfReport) -> String {
     if report.is_empty() {
         return SUCCESS_LINE.to_string();
     }
-    let blocks: Vec<String> = report.iter().map(render_block).collect();
+    let blocks: Vec<String> = group_findings(report)
+        .iter()
+        .map(|(t, m)| render_block(t, m))
+        .collect();
     let inner = format!(
         "WARNING: the following wellformedness checks failed!\n\n{}",
         blocks.join("\n\n")

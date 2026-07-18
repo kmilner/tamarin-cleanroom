@@ -1,0 +1,3 @@
+theory p begin
+rule R: [ K(x), KU(x) ] --[ ]-> [ Out(x) ]
+end

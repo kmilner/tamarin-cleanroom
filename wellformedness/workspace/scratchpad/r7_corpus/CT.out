@@ -1,0 +1,1301 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory CertificateTransparency] Theory loaded
+[Theory CertificateTransparency] Theory translated
+[Theory CertificateTransparency] Derivation checks started
+[Theory CertificateTransparency] Derivation checks ended
+[Theory CertificateTransparency] Theory closed
+theory CertificateTransparency
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: check_rep/2, fst/1, get_rep/1, pair/2, pk/1, read/1,
+           rep/2[private,constructor], sign/2, skca/1[private,constructor], snd/1,
+           true/0, verify/3
+equations:
+    check_rep(rep(m, loc), loc) = m,
+    fst(<x.1, x.2>) = x.1,
+    get_rep(rep(m, loc)) = m,
+    read(sign(sk, m)) = m,
+    snd(<x.1, x.2>) = x.2,
+    verify(sign(sk, m), m, pk(sk)) = true
+
+heuristic: p
+
+rule (modulo E) Init_:
+   [ ] --[ Init( ) ]-> [ State_( ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Par_:
+   [ State_( ) ] --> [ State_1( ), State_2( ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Par_1[color=#569dc0]:
+   [ State_1( ) ] --> [ State_11( ), State_12( ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Par_11[color=#569dc0]:
+   [ State_11( ) ] --> [ State_111( ), State_112( ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Par_111[color=#569dc0]:
+   [ State_111( ) ] --> [ State_1111( ), State_1112( ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Par_1111[color=#569dc0]:
+   [ State_1111( ) ] --> [ State_11111( ), State_11112( ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) out_pkskca_CA__11111[color=#2cd719]:
+   [ State_11111( ) ] --> [ State_111111( ), Out( pk(skca('CA')) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Rep_0_111111[color=#2cd719]:
+   [ State_111111( ) ] --> [ !Semistate_1111111( ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Rep_1_111111[color=#2cd719]:
+   [ !Semistate_1111111( ) ] --> [ State_1111111( ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) in_S_CA__1111111[color=#2cd719]:
+   [ State_1111111( ), In( <S, 'CA'> ) ] --> [ State_11111111( S ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) new_sk_S_11111111[color=#2cd719]:
+   [ State_11111111( S ), Fr( sk_S ) ] --> [ State_111111111( S, sk_S ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) event_HonestRegisterS_CA_pksk_S_111111111[color=#2cd719]:
+   [ State_111111111( S, sk_S ) ]
+  --[ HonestRegister( S, 'CA', pk(sk_S) ) ]->
+   [ State_1111111111( S, sk_S ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) insert_proofOfID_S_pksk_S_yes__1111111111[color=#2cd719]:
+   [ State_1111111111( S, sk_S ) ]
+  --[ Insert( <'proofOfID', S, pk(sk_S)>, 'yes' ) ]->
+   [ State_11111111111( S, sk_S ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) out_pksk_S_11111111111[color=#2cd719]:
+   [ State_11111111111( S, sk_S ) ]
+  -->
+   [ State_111111111111( S, sk_S ), Out( pk(sk_S) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) out_signskca_CA__pksk_S_S__111111111111[color=#2cd719]:
+   [ State_111111111111( S, sk_S ) ]
+  -->
+   [ State_1111111111111( S, sk_S ), Out( sign(skca('CA'), <pk(sk_S), S>) )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Zero_1111111111111[color=#2cd719]:
+   [ State_1111111111111( S, sk_S ) ] --> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) in_signskca_CA__pk_S__11112[color=#11ec28]:
+   [ State_11112( ), In( sign(skca('CA'), <pk, S>) ) ]
+  -->
+   [ State_111121( S, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Par_111121[color=#11ec28]:
+   [ State_111121( S, pk ) ]
+  -->
+   [ State_1111211( S, pk ), State_1111212( S, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Rep_0_1111211[color=#11ec28]:
+   [ State_1111211( S, pk ) ] --> [ !Semistate_11112111( S, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Rep_1_1111211[color=#11ec28]:
+   [ !Semistate_11112111( S, pk ) ] --> [ State_11112111( S, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) lock_log__11112111[color=#11ec28]:
+   [ State_11112111( S, pk ), Fr( ~lock7 ) ]
+  --[ Lock( $7, ~lock7, 'log' ), Lock_7( $7, ~lock7, 'log' ) ]->
+   [ State_111121111( ~lock7, S, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) event_HonestLogpk_111121111[color=#11ec28]:
+   [ State_111121111( ~lock7, S, pk ) ]
+  --[ HonestLog( pk ) ]->
+   [ State_1111211111( ~lock7, S, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) insert_log_LA_S_pk_c1_yes__1111211111[color=#11ec28]:
+   [ State_1111211111( ~lock7, S, pk ) ]
+  --[ Insert( <'log', 'LA', S, pk, 'c1'>, 'yes' ) ]->
+   [ State_11112111111( ~lock7, S, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) insert_log_LA_S_pk_s1_yes__11112111111[color=#11ec28]:
+   [ State_11112111111( ~lock7, S, pk ) ]
+  --[ Insert( <'log', 'LA', S, pk, 's1'>, 'yes' ) ]->
+   [ State_111121111111( ~lock7, S, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) insert_log_LA_S_pk_i_yes__111121111111[color=#11ec28]:
+   [ State_111121111111( ~lock7, S, pk ) ]
+  --[ Insert( <'log', 'LA', S, pk, 'i'>, 'yes' ) ]->
+   [ State_1111211111111( ~lock7, S, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) unlock_log__1111211111111[color=#11ec28]:
+   [ State_1111211111111( ~lock7, S, pk ) ]
+  --[ Unlock( $7, ~lock7, 'log' ), Unlock_7( $7, ~lock7, 'log' ) ]->
+   [ State_11112111111111( ~lock7, S, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Zero_11112111111111[color=#11ec28]:
+   [ State_11112111111111( ~lock7, S, pk ) ] --> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Rep_0_1111212[color=#11ec28]:
+   [ State_1111212( S, pk ) ] --> [ !Semistate_11112121( S, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Rep_1_1111212[color=#11ec28]:
+   [ !Semistate_11112121( S, pk ) ] --> [ State_11112121( S, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) lock_log__11112121[color=#11ec28]:
+   [ State_11112121( S, pk ), Fr( ~lock6 ) ]
+  --[ Lock( $6, ~lock6, 'log' ), Lock_6( $6, ~lock6, 'log' ) ]->
+   [ State_111121211( ~lock6, S, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) event_Corrupted_LA__111121211[color=#11ec28]:
+   [ State_111121211( ~lock6, S, pk ) ]
+  --[ Corrupted( 'LA' ) ]->
+   [ State_1111212111( ~lock6, S, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) insert_log_LA_S_pk_s1_yes__1111212111[color=#11ec28]:
+   [ State_1111212111( ~lock6, S, pk ) ]
+  --[ Insert( <'log', 'LA', S, pk, 's1'>, 'yes' ) ]->
+   [ State_11112121111( ~lock6, S, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) insert_log_LA_S_pk_i_yes__11112121111[color=#11ec28]:
+   [ State_11112121111( ~lock6, S, pk ) ]
+  --[ Insert( <'log', 'LA', S, pk, 'i'>, 'yes' ) ]->
+   [ State_111121211111( ~lock6, S, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) unlock_log__111121211111[color=#11ec28]:
+   [ State_111121211111( ~lock6, S, pk ) ]
+  --[ Unlock( $6, ~lock6, 'log' ), Unlock_6( $6, ~lock6, 'log' ) ]->
+   [ State_1111212111111( ~lock6, S, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Zero_1111212111111[color=#11ec28]:
+   [ State_1111212111111( ~lock6, S, pk ) ] --> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) lock_testCA__1112[color=#45d1e2]:
+   [ State_1112( ), Fr( ~lock7 ) ]
+  --[ Lock( $7, ~lock7, 'testCA' ), Lock_7( $7, ~lock7, 'testCA' ) ]->
+   [ State_11121( ~lock7 ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) in_signskca_CA__pk_S__11121[color=#45d1e2]:
+   [ State_11121( ~lock7 ), In( sign(skca('CA'), <pk, S>) ) ]
+  -->
+   [ State_111211( ~lock7, S, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) lookup_proofOfID_S_pk_as_ignored_0_111211[color=#45d1e2]:
+   [ State_111211( ~lock7, S, pk ) ]
+  --[ IsIn( <'proofOfID', S, pk>, ignored ) ]->
+   [ State_1112111( ~lock7, S, ignored, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) lookup_proofOfID_S_pk_as_ignored_1_111211[color=#45d1e2]:
+   [ State_111211( ~lock7, S, pk ) ]
+  --[ IsNotSet( <'proofOfID', S, pk> ) ]->
+   [ State_1112112( ~lock7, S, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) event_HonestCA_1112111[color=#45d1e2]:
+   [ State_1112111( ~lock7, S, ignored, pk ) ]
+  --[ HonestCA( ) ]->
+   [ State_11121111( ~lock7, S, ignored, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) event_TestCAS_pk_11121111[color=#45d1e2]:
+   [ State_11121111( ~lock7, S, ignored, pk ) ]
+  --[ TestCA( S, pk ) ]->
+   [ State_111211111( ~lock7, S, ignored, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) unlock_testCA__111211111[color=#45d1e2]:
+   [ State_111211111( ~lock7, S, ignored, pk ) ]
+  --[ Unlock( $7, ~lock7, 'testCA' ), Unlock_7( $7, ~lock7, 'testCA' ) ]->
+   [ State_1112111111( ~lock7, S, ignored, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Zero_1112111111[color=#45d1e2]:
+   [ State_1112111111( ~lock7, S, ignored, pk ) ] --> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) event_DishonestCA_1112112[color=#45d1e2]:
+   [ State_1112112( ~lock7, S, pk ) ]
+  --[ DishonestCA( ) ]->
+   [ State_11121121( ~lock7, S, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) event_TestCAS_pk_11121121[color=#45d1e2]:
+   [ State_11121121( ~lock7, S, pk ) ]
+  --[ TestCA( S, pk ) ]->
+   [ State_111211211( ~lock7, S, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) unlock_testCA__111211211[color=#45d1e2]:
+   [ State_111211211( ~lock7, S, pk ) ]
+  --[ Unlock( $7, ~lock7, 'testCA' ), Unlock_7( $7, ~lock7, 'testCA' ) ]->
+   [ State_1112112111( ~lock7, S, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Zero_1112112111[color=#45d1e2]:
+   [ State_1112112111( ~lock7, S, pk ) ] --> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) lock_log__112[color=#9f76cd]:
+   [ State_112( ), Fr( ~lock8 ) ]
+  --[ Lock( $8, ~lock8, 'log' ), Lock_8( $8, ~lock8, 'log' ) ]->
+   [ State_1121( ~lock8 ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) in_c1_s1_S_pk__1121[color=#9f76cd]:
+   [ State_1121( ~lock8 ), In( <'c1', 's1', S, pk> ) ]
+  -->
+   [ State_11211( ~lock8, S, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) lookup_log_LA_S_pk_c1_as_x1_0_11211[color=#9f76cd]:
+   [ State_11211( ~lock8, S, pk ) ]
+  --[ IsIn( <'log', 'LA', S, pk, 'c1'>, x1 ) ]->
+   [ State_112111( ~lock8, S, pk, x1 ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) lookup_log_LA_S_pk_c1_as_x1_1_11211[color=#9f76cd]:
+   [ State_11211( ~lock8, S, pk ) ]
+  --[ IsNotSet( <'log', 'LA', S, pk, 'c1'> ) ]->
+   [ State_112112( ~lock8, S, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) lookup_log_LA_S_pk_s1_as_x2_0_112111[color=#9f76cd]:
+   [ State_112111( ~lock8, S, pk, x1 ) ]
+  --[ IsIn( <'log', 'LA', S, pk, 's1'>, x2 ) ]->
+   [ State_1121111( ~lock8, S, pk, x1, x2 ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) lookup_log_LA_S_pk_s1_as_x2_1_112111[color=#9f76cd]:
+   [ State_112111( ~lock8, S, pk, x1 ) ]
+  --[ IsNotSet( <'log', 'LA', S, pk, 's1'> ) ]->
+   [ State_1121112( ~lock8, S, pk, x1 ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) event_HonestLA_1121111[color=#9f76cd]:
+   [ State_1121111( ~lock8, S, pk, x1, x2 ) ]
+  --[ HonestLA( ) ]->
+   [ State_11211111( ~lock8, S, pk, x1, x2 ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) event_TestLApk_11211111[color=#9f76cd]:
+   [ State_11211111( ~lock8, S, pk, x1, x2 ) ]
+  --[ TestLA( pk ) ]->
+   [ State_112111111( ~lock8, S, pk, x1, x2 ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) unlock_log__112111111[color=#9f76cd]:
+   [ State_112111111( ~lock8, S, pk, x1, x2 ) ]
+  --[ Unlock( $8, ~lock8, 'log' ), Unlock_8( $8, ~lock8, 'log' ) ]->
+   [ State_1121111111( ~lock8, S, pk, x1, x2 ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Zero_1121111111[color=#9f76cd]:
+   [ State_1121111111( ~lock8, S, pk, x1, x2 ) ] --> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) event_DishonestLA_1121112[color=#9f76cd]:
+   [ State_1121112( ~lock8, S, pk, x1 ) ]
+  --[ DishonestLA( ) ]->
+   [ State_11211121( ~lock8, S, pk, x1 ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) event_TestLApk_11211121[color=#9f76cd]:
+   [ State_11211121( ~lock8, S, pk, x1 ) ]
+  --[ TestLA( pk ) ]->
+   [ State_112111211( ~lock8, S, pk, x1 ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) unlock_log__112111211[color=#9f76cd]:
+   [ State_112111211( ~lock8, S, pk, x1 ) ]
+  --[ Unlock( $8, ~lock8, 'log' ), Unlock_8( $8, ~lock8, 'log' ) ]->
+   [ State_1121112111( ~lock8, S, pk, x1 ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Zero_1121112111[color=#9f76cd]:
+   [ State_1121112111( ~lock8, S, pk, x1 ) ] --> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) lookup_log_LA_S_pk_s1_as_x2_0_112112[color=#9f76cd]:
+   [ State_112112( ~lock8, S, pk ) ]
+  --[ IsIn( <'log', 'LA', S, pk, 's1'>, x2 ) ]->
+   [ State_1121121( ~lock8, S, pk, x2 ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) lookup_log_LA_S_pk_s1_as_x2_1_112112[color=#9f76cd]:
+   [ State_112112( ~lock8, S, pk ) ]
+  --[ IsNotSet( <'log', 'LA', S, pk, 's1'> ) ]->
+   [ State_1121122( ~lock8, S, pk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) event_DishonestLA_1121121[color=#9f76cd]:
+   [ State_1121121( ~lock8, S, pk, x2 ) ]
+  --[ DishonestLA( ) ]->
+   [ State_11211211( ~lock8, S, pk, x2 ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) event_TestLApk_11211211[color=#9f76cd]:
+   [ State_11211211( ~lock8, S, pk, x2 ) ]
+  --[ TestLA( pk ) ]->
+   [ State_112112111( ~lock8, S, pk, x2 ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) unlock_log__112112111[color=#9f76cd]:
+   [ State_112112111( ~lock8, S, pk, x2 ) ]
+  --[ Unlock( $8, ~lock8, 'log' ), Unlock_8( $8, ~lock8, 'log' ) ]->
+   [ State_1121121111( ~lock8, S, pk, x2 ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Zero_1121121111[color=#9f76cd]:
+   [ State_1121121111( ~lock8, S, pk, x2 ) ] --> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Zero_1121122[color=#9f76cd]:
+   [ State_1121122( ~lock8, S, pk ) ] --> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) lock_testCA__12[color=#ee415c]:
+   [ State_12( ), Fr( ~lock4 ) ]
+  --[ Lock( $4, ~lock4, 'testCA' ), Lock_4( $4, ~lock4, 'testCA' ) ]->
+   [ State_121( ~lock4 ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) lock_log__121[color=#ee415c]:
+   [ State_121( ~lock4 ), Fr( ~lock3 ) ]
+  --[ Lock( $3, ~lock3, 'log' ), Lock_3( $3, ~lock3, 'log' ) ]->
+   [ State_1211( ~lock3, ~lock4 ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) event_Terminate_1211[color=#ee415c]:
+   [ State_1211( ~lock3, ~lock4 ) ]
+  --[ Terminate( ) ]->
+   [ State_12111( ~lock3, ~lock4 ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Zero_12111[color=#ee415c]:
+   [ State_12111( ~lock3, ~lock4 ) ] --> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Rep_0_2:
+   [ State_2( ) ] --> [ !Semistate_21( ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Rep_1_2:
+   [ !Semistate_21( ) ] --> [ State_21( ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) in_c_CAcorrupt_id_0_21:
+   [ State_21( ), In( <'c', 'CAcorrupt', $id> ) ]
+  --[ ChannelInEvent( <'c', 'CAcorrupt', $id> ) ]->
+   [ State_211( $id ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) in_c_CAcorrupt_id_1_21:
+   [ State_21( ), Message( 'c', <'CAcorrupt', $id> ) ]
+  -->
+   [ Ack( 'c', <'CAcorrupt', $id> ), State_211( $id ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) event_Corrupted_id_211:
+   [ State_211( $id ) ] --[ Corrupted( $id ) ]-> [ State_2111( $id ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) out_c_skca_id_0_2111:
+   [ State_2111( $id ), In( 'c' ) ]
+  --[ ChannelInEvent( 'c' ) ]->
+   [ Out( skca($id) ), State_21111( $id ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) out_c_skca_id_1_2111:
+   [ State_2111( $id ) ]
+  -->
+   [ Semistate_2111( $id ), Message( 'c', skca($id) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) out_c_skca_id_2_2111:
+   [ Semistate_2111( $id ), Ack( 'c', skca($id) ) ]
+  -->
+   [ State_21111( $id ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Zero_21111:
+   [ State_21111( $id ) ] --> [ ]
+
+  /* has exactly the trivial AC variant */
+
+restriction set_in:
+  "∀ #t3 x y.
+    (IsIn( x, y ) @ #t3) ⇒
+    (∃ #t2.
+      (Insert( x, y ) @ #t2) ∧
+      ((#t2 < #t3) ∧
+       (∀ #t1 yp.
+         (Insert( x, yp ) @ #t1) ⇒ ((#t1 < #t2) ∨ ((#t1 = #t2) ∨ (#t3 < #t1))))))"
+
+  /*
+  expanded formula:
+  "∀ #t3 x y.
+    (IsIn( x, y ) @ #t3) ⇒
+    (∃ #t2.
+      (Insert( x, y ) @ #t2) ∧
+      ((#t2 < #t3) ∧
+       (∀ #t1 yp.
+         (Insert( x, yp ) @ #t1) ⇒ ((#t1 < #t2) ∨ ((#t1 = #t2) ∨ (#t3 < #t1))))))"
+  */
+
+restriction set_notin:
+  "∀ #t3 x.
+    (IsNotSet( x ) @ #t3) ⇒ (∀ #t1 y. (Insert( x, y ) @ #t1) ⇒ (#t3 < #t1))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ #t3 x.
+    (IsNotSet( x ) @ #t3) ⇒ (∀ #t1 y. (Insert( x, y ) @ #t1) ⇒ (#t3 < #t1))"
+  */
+
+restriction locking_7:
+  "∀ #t1 #t3 l lp p pp x.
+    ((Lock_7( p, l, x ) @ #t1) ∧ (Lock( pp, lp, x ) @ #t3)) ⇒
+    (((#t1 < #t3) ∧
+      (∃ #t2.
+        (Unlock_7( p, l, x ) @ #t2) ∧
+        ((#t1 < #t2) ∧
+         ((#t2 < #t3) ∧
+          ((∀ #t0 pp.1. (Unlock( pp.1, l, x ) @ #t0) ⇒ (#t0 = #t2)) ∧
+           ((∀ #t0 lpp pp.1.
+              (Lock( pp.1, lpp, x ) @ #t0) ⇒
+              ((#t0 < #t1) ∨ ((#t0 = #t1) ∨ (#t2 < #t0)))) ∧
+            (∀ #t0 lpp pp.1.
+              (Unlock( pp.1, lpp, x ) @ #t0) ⇒
+              ((#t0 < #t1) ∨ ((#t2 < #t0) ∨ (#t2 = #t0)))))))))) ∨
+     ((#t3 < #t1) ∨ (#t1 = #t3)))"
+
+  /*
+  expanded formula:
+  "∀ #t1 #t3 l lp p pp x.
+    ((Lock_7( p, l, x ) @ #t1) ∧ (Lock( pp, lp, x ) @ #t3)) ⇒
+    (((#t1 < #t3) ∧
+      (∃ #t2.
+        (Unlock_7( p, l, x ) @ #t2) ∧
+        ((#t1 < #t2) ∧
+         ((#t2 < #t3) ∧
+          ((∀ #t0 pp.1. (Unlock( pp.1, l, x ) @ #t0) ⇒ (#t0 = #t2)) ∧
+           ((∀ #t0 lpp pp.1.
+              (Lock( pp.1, lpp, x ) @ #t0) ⇒
+              ((#t0 < #t1) ∨ ((#t0 = #t1) ∨ (#t2 < #t0)))) ∧
+            (∀ #t0 lpp pp.1.
+              (Unlock( pp.1, lpp, x ) @ #t0) ⇒
+              ((#t0 < #t1) ∨ ((#t2 < #t0) ∨ (#t2 = #t0)))))))))) ∨
+     ((#t3 < #t1) ∨ (#t1 = #t3)))"
+  */
+
+restriction locking_6:
+  "∀ #t1 #t3 l lp p pp x.
+    ((Lock_6( p, l, x ) @ #t1) ∧ (Lock( pp, lp, x ) @ #t3)) ⇒
+    (((#t1 < #t3) ∧
+      (∃ #t2.
+        (Unlock_6( p, l, x ) @ #t2) ∧
+        ((#t1 < #t2) ∧
+         ((#t2 < #t3) ∧
+          ((∀ #t0 pp.1. (Unlock( pp.1, l, x ) @ #t0) ⇒ (#t0 = #t2)) ∧
+           ((∀ #t0 lpp pp.1.
+              (Lock( pp.1, lpp, x ) @ #t0) ⇒
+              ((#t0 < #t1) ∨ ((#t0 = #t1) ∨ (#t2 < #t0)))) ∧
+            (∀ #t0 lpp pp.1.
+              (Unlock( pp.1, lpp, x ) @ #t0) ⇒
+              ((#t0 < #t1) ∨ ((#t2 < #t0) ∨ (#t2 = #t0)))))))))) ∨
+     ((#t3 < #t1) ∨ (#t1 = #t3)))"
+
+  /*
+  expanded formula:
+  "∀ #t1 #t3 l lp p pp x.
+    ((Lock_6( p, l, x ) @ #t1) ∧ (Lock( pp, lp, x ) @ #t3)) ⇒
+    (((#t1 < #t3) ∧
+      (∃ #t2.
+        (Unlock_6( p, l, x ) @ #t2) ∧
+        ((#t1 < #t2) ∧
+         ((#t2 < #t3) ∧
+          ((∀ #t0 pp.1. (Unlock( pp.1, l, x ) @ #t0) ⇒ (#t0 = #t2)) ∧
+           ((∀ #t0 lpp pp.1.
+              (Lock( pp.1, lpp, x ) @ #t0) ⇒
+              ((#t0 < #t1) ∨ ((#t0 = #t1) ∨ (#t2 < #t0)))) ∧
+            (∀ #t0 lpp pp.1.
+              (Unlock( pp.1, lpp, x ) @ #t0) ⇒
+              ((#t0 < #t1) ∨ ((#t2 < #t0) ∨ (#t2 = #t0)))))))))) ∨
+     ((#t3 < #t1) ∨ (#t1 = #t3)))"
+  */
+
+restriction locking_8:
+  "∀ #t1 #t3 l lp p pp x.
+    ((Lock_8( p, l, x ) @ #t1) ∧ (Lock( pp, lp, x ) @ #t3)) ⇒
+    (((#t1 < #t3) ∧
+      (∃ #t2.
+        (Unlock_8( p, l, x ) @ #t2) ∧
+        ((#t1 < #t2) ∧
+         ((#t2 < #t3) ∧
+          ((∀ #t0 pp.1. (Unlock( pp.1, l, x ) @ #t0) ⇒ (#t0 = #t2)) ∧
+           ((∀ #t0 lpp pp.1.
+              (Lock( pp.1, lpp, x ) @ #t0) ⇒
+              ((#t0 < #t1) ∨ ((#t0 = #t1) ∨ (#t2 < #t0)))) ∧
+            (∀ #t0 lpp pp.1.
+              (Unlock( pp.1, lpp, x ) @ #t0) ⇒
+              ((#t0 < #t1) ∨ ((#t2 < #t0) ∨ (#t2 = #t0)))))))))) ∨
+     ((#t3 < #t1) ∨ (#t1 = #t3)))"
+
+  /*
+  expanded formula:
+  "∀ #t1 #t3 l lp p pp x.
+    ((Lock_8( p, l, x ) @ #t1) ∧ (Lock( pp, lp, x ) @ #t3)) ⇒
+    (((#t1 < #t3) ∧
+      (∃ #t2.
+        (Unlock_8( p, l, x ) @ #t2) ∧
+        ((#t1 < #t2) ∧
+         ((#t2 < #t3) ∧
+          ((∀ #t0 pp.1. (Unlock( pp.1, l, x ) @ #t0) ⇒ (#t0 = #t2)) ∧
+           ((∀ #t0 lpp pp.1.
+              (Lock( pp.1, lpp, x ) @ #t0) ⇒
+              ((#t0 < #t1) ∨ ((#t0 = #t1) ∨ (#t2 < #t0)))) ∧
+            (∀ #t0 lpp pp.1.
+              (Unlock( pp.1, lpp, x ) @ #t0) ⇒
+              ((#t0 < #t1) ∨ ((#t2 < #t0) ∨ (#t2 = #t0)))))))))) ∨
+     ((#t3 < #t1) ∨ (#t1 = #t3)))"
+  */
+
+restriction locking_4:
+  "∀ #t1 #t3 l lp p pp x.
+    ((Lock_4( p, l, x ) @ #t1) ∧ (Lock( pp, lp, x ) @ #t3)) ⇒
+    (((#t1 < #t3) ∧
+      (∃ #t2.
+        (Unlock_4( p, l, x ) @ #t2) ∧
+        ((#t1 < #t2) ∧
+         ((#t2 < #t3) ∧
+          ((∀ #t0 pp.1. (Unlock( pp.1, l, x ) @ #t0) ⇒ (#t0 = #t2)) ∧
+           ((∀ #t0 lpp pp.1.
+              (Lock( pp.1, lpp, x ) @ #t0) ⇒
+              ((#t0 < #t1) ∨ ((#t0 = #t1) ∨ (#t2 < #t0)))) ∧
+            (∀ #t0 lpp pp.1.
+              (Unlock( pp.1, lpp, x ) @ #t0) ⇒
+              ((#t0 < #t1) ∨ ((#t2 < #t0) ∨ (#t2 = #t0)))))))))) ∨
+     ((#t3 < #t1) ∨ (#t1 = #t3)))"
+
+  /*
+  expanded formula:
+  "∀ #t1 #t3 l lp p pp x.
+    ((Lock_4( p, l, x ) @ #t1) ∧ (Lock( pp, lp, x ) @ #t3)) ⇒
+    (((#t1 < #t3) ∧
+      (∃ #t2.
+        (Unlock_4( p, l, x ) @ #t2) ∧
+        ((#t1 < #t2) ∧
+         ((#t2 < #t3) ∧
+          ((∀ #t0 pp.1. (Unlock( pp.1, l, x ) @ #t0) ⇒ (#t0 = #t2)) ∧
+           ((∀ #t0 lpp pp.1.
+              (Lock( pp.1, lpp, x ) @ #t0) ⇒
+              ((#t0 < #t1) ∨ ((#t0 = #t1) ∨ (#t2 < #t0)))) ∧
+            (∀ #t0 lpp pp.1.
+              (Unlock( pp.1, lpp, x ) @ #t0) ⇒
+              ((#t0 < #t1) ∨ ((#t2 < #t0) ∨ (#t2 = #t0)))))))))) ∨
+     ((#t3 < #t1) ∨ (#t1 = #t3)))"
+  */
+
+restriction locking_3:
+  "∀ #t1 #t3 l lp p pp x.
+    ((Lock_3( p, l, x ) @ #t1) ∧ (Lock( pp, lp, x ) @ #t3)) ⇒
+    (((#t1 < #t3) ∧
+      (∃ #t2.
+        (Unlock_3( p, l, x ) @ #t2) ∧
+        ((#t1 < #t2) ∧
+         ((#t2 < #t3) ∧
+          ((∀ #t0 pp.1. (Unlock( pp.1, l, x ) @ #t0) ⇒ (#t0 = #t2)) ∧
+           ((∀ #t0 lpp pp.1.
+              (Lock( pp.1, lpp, x ) @ #t0) ⇒
+              ((#t0 < #t1) ∨ ((#t0 = #t1) ∨ (#t2 < #t0)))) ∧
+            (∀ #t0 lpp pp.1.
+              (Unlock( pp.1, lpp, x ) @ #t0) ⇒
+              ((#t0 < #t1) ∨ ((#t2 < #t0) ∨ (#t2 = #t0)))))))))) ∨
+     ((#t3 < #t1) ∨ (#t1 = #t3)))"
+
+  /*
+  expanded formula:
+  "∀ #t1 #t3 l lp p pp x.
+    ((Lock_3( p, l, x ) @ #t1) ∧ (Lock( pp, lp, x ) @ #t3)) ⇒
+    (((#t1 < #t3) ∧
+      (∃ #t2.
+        (Unlock_3( p, l, x ) @ #t2) ∧
+        ((#t1 < #t2) ∧
+         ((#t2 < #t3) ∧
+          ((∀ #t0 pp.1. (Unlock( pp.1, l, x ) @ #t0) ⇒ (#t0 = #t2)) ∧
+           ((∀ #t0 lpp pp.1.
+              (Lock( pp.1, lpp, x ) @ #t0) ⇒
+              ((#t0 < #t1) ∨ ((#t0 = #t1) ∨ (#t2 < #t0)))) ∧
+            (∀ #t0 lpp pp.1.
+              (Unlock( pp.1, lpp, x ) @ #t0) ⇒
+              ((#t0 < #t1) ∨ ((#t2 < #t0) ∨ (#t2 = #t0)))))))))) ∨
+     ((#t3 < #t1) ∨ (#t1 = #t3)))"
+  */
+
+restriction single_session:
+  "∀ #i #j. ((Init( ) @ #i) ∧ (Init( ) @ #j)) ⇒ (#i = #j)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ #i #j. ((Init( ) @ #i) ∧ (Init( ) @ #j)) ⇒ (#i = #j)"
+  */
+
+restriction terminate:
+  "∃ #t. Terminate( ) @ #t"
+
+  /*
+  expanded formula:
+  "∃ #t. Terminate( ) @ #t"
+  */
+
+lemma acc_ca_excl_0_1:
+  all-traces
+  "¬((∃ #i. DishonestCA( ) @ #i) ∧ (¬(∃ #i. DishonestCA( ) @ #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"(∃ #i. (DishonestCA( ) @ #i)) ∧ (∀ #i. (DishonestCA( ) @ #i) ⇒ ⊥)"
+*/
+by sorry
+
+lemma acc_ca_exh:
+  all-traces "(∃ #i. DishonestCA( ) @ #i) ∨ (¬(∃ #i. DishonestCA( ) @ #i))"
+/*
+guarded formula characterizing all counter-examples:
+"(∀ #i. (DishonestCA( ) @ #i) ⇒ ⊥) ∧ (∃ #i. (DishonestCA( ) @ #i))"
+*/
+by sorry
+
+lemma acc_ca_suf_0_0:
+  exists-trace
+  "((∀ #c1. (Corrupted( 'LA' ) @ #c1) ⇒ (⊥)) ∧
+    ((∃ #c0. Corrupted( 'CA' ) @ #c0) ∧ (⊤))) ∧
+   (¬(∀ #i S pk.
+       (TestCA( S, pk ) @ #i) ⇒ (∃ #j. HonestRegister( S, 'CA', pk ) @ #j)))"
+/*
+guarded formula characterizing all satisfying traces:
+"(∀ #c1. (Corrupted( 'LA' ) @ #c1) ⇒ ⊥) ∧
+ (∃ #c0. (Corrupted( 'CA' ) @ #c0)) ∧
+ (∃ #i S pk.
+   (TestCA( S, pk ) @ #i) ∧ ∀ #j. (HonestRegister( S, 'CA', pk ) @ #j) ⇒ ⊥)"
+*/
+by sorry
+
+lemma acc_ca_ver_empty_1:
+  all-traces
+  "(¬(∃ #i. DishonestCA( ) @ #i)) ⇒
+   (∀ #i S pk.
+     (TestCA( S, pk ) @ #i) ⇒ (∃ #j. HonestRegister( S, 'CA', pk ) @ #j))"
+/*
+guarded formula characterizing all counter-examples:
+"(∀ #i. (DishonestCA( ) @ #i) ⇒ ⊥) ∧
+ (∃ #i S pk.
+   (TestCA( S, pk ) @ #i) ∧ ∀ #j. (HonestRegister( S, 'CA', pk ) @ #j) ⇒ ⊥)"
+*/
+by sorry
+
+lemma acc_ca_ver_nonempty_0:
+  all-traces
+  "(∃ #i. DishonestCA( ) @ #i) ⇒
+   (¬(∀ #i S pk.
+       (TestCA( S, pk ) @ #i) ⇒ (∃ #j. HonestRegister( S, 'CA', pk ) @ #j)))"
+/*
+guarded formula characterizing all counter-examples:
+"(∃ #i. (DishonestCA( ) @ #i)) ∧
+ (∀ #i S pk.
+   (TestCA( S, pk ) @ #i) ⇒ ∃ #j. (HonestRegister( S, 'CA', pk ) @ #j))"
+*/
+by sorry
+
+lemma acc_ca_min_0_0_0:
+  all-traces
+  "¬((¬(∀ #i S pk.
+         (TestCA( S, pk ) @ #i) ⇒ (∃ #j. HonestRegister( S, 'CA', pk ) @ #j))) ∧
+     ((∀ #c1. (Corrupted( 'LA' ) @ #c1) ⇒ (⊥)) ∧
+      ((∀ #c0. (Corrupted( 'CA' ) @ #c0) ⇒ (⊥)) ∧ (⊤))))"
+/*
+guarded formula characterizing all counter-examples:
+"(∃ #i S pk.
+   (TestCA( S, pk ) @ #i)
+  ∧
+   ∀ #j. (HonestRegister( S, 'CA', pk ) @ #j) ⇒ ⊥) ∧
+ (∀ #c1. (Corrupted( 'LA' ) @ #c1) ⇒ ⊥) ∧
+ (∀ #c0. (Corrupted( 'CA' ) @ #c0) ⇒ ⊥)"
+*/
+by sorry
+
+lemma acc_ca_uniq_0:
+  all-traces
+  "(∃ #i. DishonestCA( ) @ #i) ⇒ (∃ #c0. (Corrupted( 'CA' ) @ #c0) ∧ (⊤))"
+/*
+guarded formula characterizing all counter-examples:
+"(∃ #i. (DishonestCA( ) @ #i)) ∧ (∀ #c0. (Corrupted( 'CA' ) @ #c0) ⇒ ⊥)"
+*/
+by sorry
+
+lemma acc_la_excl_0_1:
+  all-traces
+  "¬((∃ #i. DishonestLA( ) @ #i) ∧ (¬(∃ #i. DishonestLA( ) @ #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"(∃ #i. (DishonestLA( ) @ #i)) ∧ (∀ #i. (DishonestLA( ) @ #i) ⇒ ⊥)"
+*/
+by sorry
+
+lemma acc_la_exh:
+  all-traces "(∃ #i. DishonestLA( ) @ #i) ∨ (¬(∃ #i. DishonestLA( ) @ #i))"
+/*
+guarded formula characterizing all counter-examples:
+"(∀ #i. (DishonestLA( ) @ #i) ⇒ ⊥) ∧ (∃ #i. (DishonestLA( ) @ #i))"
+*/
+by sorry
+
+lemma acc_la_suf_0_0:
+  exists-trace
+  "((∃ #c1. Corrupted( 'LA' ) @ #c1) ∧
+    ((∀ #c0. (Corrupted( 'CA' ) @ #c0) ⇒ (⊥)) ∧ (⊤))) ∧
+   (¬(∀ #i pk.
+       (TestLA( pk ) @ #i) ⇒ (∃ #j. (HonestLog( pk ) @ #j) ∧ (#j < #i))))"
+/*
+guarded formula characterizing all satisfying traces:
+"(∃ #c1. (Corrupted( 'LA' ) @ #c1)) ∧
+ (∀ #c0. (Corrupted( 'CA' ) @ #c0) ⇒ ⊥) ∧
+ (∃ #i pk.
+   (TestLA( pk ) @ #i) ∧ ∀ #j. (HonestLog( pk ) @ #j) ⇒ ¬(#j < #i))"
+*/
+by sorry
+
+lemma acc_la_ver_empty_1:
+  all-traces
+  "(¬(∃ #i. DishonestLA( ) @ #i)) ⇒
+   (∀ #i pk.
+     (TestLA( pk ) @ #i) ⇒ (∃ #j. (HonestLog( pk ) @ #j) ∧ (#j < #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"(∀ #i. (DishonestLA( ) @ #i) ⇒ ⊥) ∧
+ (∃ #i pk.
+   (TestLA( pk ) @ #i) ∧ ∀ #j. (HonestLog( pk ) @ #j) ⇒ ¬(#j < #i))"
+*/
+by sorry
+
+lemma acc_la_ver_nonempty_0:
+  all-traces
+  "(∃ #i. DishonestLA( ) @ #i) ⇒
+   (¬(∀ #i pk.
+       (TestLA( pk ) @ #i) ⇒ (∃ #j. (HonestLog( pk ) @ #j) ∧ (#j < #i))))"
+/*
+guarded formula characterizing all counter-examples:
+"(∃ #i. (DishonestLA( ) @ #i)) ∧
+ (∀ #i pk. (TestLA( pk ) @ #i) ⇒ ∃ #j. (HonestLog( pk ) @ #j) ∧ #j < #i)"
+*/
+by sorry
+
+lemma acc_la_min_0_0_0:
+  all-traces
+  "¬((¬(∀ #i pk.
+         (TestLA( pk ) @ #i) ⇒ (∃ #j. (HonestLog( pk ) @ #j) ∧ (#j < #i)))) ∧
+     ((∀ #c1. (Corrupted( 'LA' ) @ #c1) ⇒ (⊥)) ∧
+      ((∀ #c0. (Corrupted( 'CA' ) @ #c0) ⇒ (⊥)) ∧ (⊤))))"
+/*
+guarded formula characterizing all counter-examples:
+"(∃ #i pk.
+   (TestLA( pk ) @ #i) ∧ ∀ #j. (HonestLog( pk ) @ #j) ⇒ ¬(#j < #i)) ∧
+ (∀ #c1. (Corrupted( 'LA' ) @ #c1) ⇒ ⊥) ∧
+ (∀ #c0. (Corrupted( 'CA' ) @ #c0) ⇒ ⊥)"
+*/
+by sorry
+
+lemma acc_la_uniq_0:
+  all-traces
+  "(∃ #i. DishonestLA( ) @ #i) ⇒ (∃ #c0. (Corrupted( 'LA' ) @ #c0) ∧ (⊤))"
+/*
+guarded formula characterizing all counter-examples:
+"(∃ #i. (DishonestLA( ) @ #i)) ∧ (∀ #c0. (Corrupted( 'LA' ) @ #c0) ⇒ ⊥)"
+*/
+by sorry
+
+lemma acc_excl_0_1:
+  all-traces
+  "¬(((∃ #i. DishonestCA( ) @ #i) ∧ (¬(∃ #i. DishonestLA( ) @ #i))) ∧
+     ((¬(∃ #i. DishonestCA( ) @ #i)) ∧ (∃ #i. DishonestLA( ) @ #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"(∃ #i. (DishonestCA( ) @ #i)) ∧
+ (∀ #i. (DishonestLA( ) @ #i) ⇒ ⊥) ∧
+ (∀ #i. (DishonestCA( ) @ #i) ⇒ ⊥) ∧
+ (∃ #i. (DishonestLA( ) @ #i))"
+*/
+by sorry
+
+lemma acc_excl_0_2:
+  all-traces
+  "¬(((∃ #i. DishonestCA( ) @ #i) ∧ (¬(∃ #i. DishonestLA( ) @ #i))) ∧
+     ((∃ #i. DishonestCA( ) @ #i) ∧ (∃ #i. DishonestLA( ) @ #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"(∃ #i. (DishonestCA( ) @ #i)) ∧
+ (∀ #i. (DishonestLA( ) @ #i) ⇒ ⊥) ∧
+ (∃ #i. (DishonestLA( ) @ #i))"
+*/
+by sorry
+
+lemma acc_excl_0_3:
+  all-traces
+  "¬(((∃ #i. DishonestCA( ) @ #i) ∧ (¬(∃ #i. DishonestLA( ) @ #i))) ∧
+     (¬(((∃ #i. DishonestCA( ) @ #i) ∧ (∃ #i. DishonestLA( ) @ #i)) ∨
+        (((¬(∃ #i. DishonestCA( ) @ #i)) ∧ (∃ #i. DishonestLA( ) @ #i)) ∨
+         ((∃ #i. DishonestCA( ) @ #i) ∧ (¬(∃ #i. DishonestLA( ) @ #i)))))))"
+/*
+guarded formula characterizing all counter-examples:
+"(∃ #i. (DishonestCA( ) @ #i)) ∧
+ (∀ #i. (DishonestLA( ) @ #i) ⇒ ⊥) ∧
+ (((∀ #i. (DishonestCA( ) @ #i) ⇒ ⊥) ∨
+   (∀ #i. (DishonestLA( ) @ #i) ⇒ ⊥))) ∧
+ (((∃ #i. (DishonestCA( ) @ #i)) ∨ (∀ #i. (DishonestLA( ) @ #i) ⇒ ⊥))) ∧
+ (((∀ #i. (DishonestCA( ) @ #i) ⇒ ⊥) ∨ (∃ #i. (DishonestLA( ) @ #i))))"
+*/
+by sorry
+
+lemma acc_excl_1_2:
+  all-traces
+  "¬(((¬(∃ #i. DishonestCA( ) @ #i)) ∧ (∃ #i. DishonestLA( ) @ #i)) ∧
+     ((∃ #i. DishonestCA( ) @ #i) ∧ (∃ #i. DishonestLA( ) @ #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"(∀ #i. (DishonestCA( ) @ #i) ⇒ ⊥) ∧
+ (∃ #i. (DishonestLA( ) @ #i)) ∧
+ (∃ #i. (DishonestCA( ) @ #i))"
+*/
+by sorry
+
+lemma acc_excl_1_3:
+  all-traces
+  "¬(((¬(∃ #i. DishonestCA( ) @ #i)) ∧ (∃ #i. DishonestLA( ) @ #i)) ∧
+     (¬(((∃ #i. DishonestCA( ) @ #i) ∧ (∃ #i. DishonestLA( ) @ #i)) ∨
+        (((¬(∃ #i. DishonestCA( ) @ #i)) ∧ (∃ #i. DishonestLA( ) @ #i)) ∨
+         ((∃ #i. DishonestCA( ) @ #i) ∧ (¬(∃ #i. DishonestLA( ) @ #i)))))))"
+/*
+guarded formula characterizing all counter-examples:
+"(∀ #i. (DishonestCA( ) @ #i) ⇒ ⊥) ∧
+ (∃ #i. (DishonestLA( ) @ #i)) ∧
+ (((∀ #i. (DishonestCA( ) @ #i) ⇒ ⊥) ∨
+   (∀ #i. (DishonestLA( ) @ #i) ⇒ ⊥))) ∧
+ (((∃ #i. (DishonestCA( ) @ #i)) ∨ (∀ #i. (DishonestLA( ) @ #i) ⇒ ⊥))) ∧
+ (((∀ #i. (DishonestCA( ) @ #i) ⇒ ⊥) ∨ (∃ #i. (DishonestLA( ) @ #i))))"
+*/
+by sorry
+
+lemma acc_excl_2_3:
+  all-traces
+  "¬(((∃ #i. DishonestCA( ) @ #i) ∧ (∃ #i. DishonestLA( ) @ #i)) ∧
+     (¬(((∃ #i. DishonestCA( ) @ #i) ∧ (∃ #i. DishonestLA( ) @ #i)) ∨
+        (((¬(∃ #i. DishonestCA( ) @ #i)) ∧ (∃ #i. DishonestLA( ) @ #i)) ∨
+         ((∃ #i. DishonestCA( ) @ #i) ∧ (¬(∃ #i. DishonestLA( ) @ #i)))))))"
+/*
+guarded formula characterizing all counter-examples:
+"(∃ #i. (DishonestCA( ) @ #i)) ∧
+ (∃ #i. (DishonestLA( ) @ #i)) ∧
+ (((∀ #i. (DishonestCA( ) @ #i) ⇒ ⊥) ∨
+   (∀ #i. (DishonestLA( ) @ #i) ⇒ ⊥))) ∧
+ (((∃ #i. (DishonestCA( ) @ #i)) ∨ (∀ #i. (DishonestLA( ) @ #i) ⇒ ⊥))) ∧
+ (((∀ #i. (DishonestCA( ) @ #i) ⇒ ⊥) ∨ (∃ #i. (DishonestLA( ) @ #i))))"
+*/
+by sorry
+
+lemma acc_exh:
+  all-traces
+  "((∃ #i. DishonestCA( ) @ #i) ∧ (¬(∃ #i. DishonestLA( ) @ #i))) ∨
+   (((¬(∃ #i. DishonestCA( ) @ #i)) ∧ (∃ #i. DishonestLA( ) @ #i)) ∨
+    (((∃ #i. DishonestCA( ) @ #i) ∧ (∃ #i. DishonestLA( ) @ #i)) ∨
+     (¬(((∃ #i. DishonestCA( ) @ #i) ∧ (∃ #i. DishonestLA( ) @ #i)) ∨
+        (((¬(∃ #i. DishonestCA( ) @ #i)) ∧ (∃ #i. DishonestLA( ) @ #i)) ∨
+         ((∃ #i. DishonestCA( ) @ #i) ∧ (¬(∃ #i. DishonestLA( ) @ #i))))))))"
+/*
+guarded formula characterizing all counter-examples:
+"(((∀ #i. (DishonestCA( ) @ #i) ⇒ ⊥) ∨ (∃ #i. (DishonestLA( ) @ #i)))) ∧
+ (((∃ #i. (DishonestCA( ) @ #i)) ∨ (∀ #i. (DishonestLA( ) @ #i) ⇒ ⊥))) ∧
+ (((∀ #i. (DishonestCA( ) @ #i) ⇒ ⊥) ∨
+   (∀ #i. (DishonestLA( ) @ #i) ⇒ ⊥))) ∧
+ ((((∃ #i. (DishonestCA( ) @ #i)) ∧ (∃ #i. (DishonestLA( ) @ #i))) ∨
+   ((∀ #i. (DishonestCA( ) @ #i) ⇒ ⊥) ∧ (∃ #i. (DishonestLA( ) @ #i))) ∨
+   ((∃ #i. (DishonestCA( ) @ #i)) ∧ (∀ #i. (DishonestLA( ) @ #i) ⇒ ⊥))))"
+*/
+by sorry
+
+lemma acc_suf_0:
+  exists-trace
+  "((∃ #i. DishonestCA( ) @ #i) ∧ (¬(∃ #i. DishonestLA( ) @ #i))) ∧
+   (((∀ #c1. (Corrupted( 'LA' ) @ #c1) ⇒ (⊥)) ∧
+     ((∃ #c0. Corrupted( 'CA' ) @ #c0) ∧ (⊤))) ∧
+    (¬((∀ #i pk.
+         (TestLA( pk ) @ #i) ⇒ (∃ #j. (HonestLog( pk ) @ #j) ∧ (#j < #i))) ∧
+       (∀ #i S pk.
+         (TestCA( S, pk ) @ #i) ⇒ (∃ #j. HonestRegister( S, 'CA', pk ) @ #j)))))"
+/*
+guarded formula characterizing all satisfying traces:
+"(∃ #i. (DishonestCA( ) @ #i)) ∧
+ (∀ #i. (DishonestLA( ) @ #i) ⇒ ⊥) ∧
+ (∀ #c1. (Corrupted( 'LA' ) @ #c1) ⇒ ⊥) ∧
+ (∃ #c0. (Corrupted( 'CA' ) @ #c0)) ∧
+ (((∃ #i pk.
+     (TestLA( pk ) @ #i) ∧ ∀ #j. (HonestLog( pk ) @ #j) ⇒ ¬(#j < #i)) ∨
+   (∃ #i S pk.
+     (TestCA( S, pk ) @ #i)
+    ∧
+     ∀ #j. (HonestRegister( S, 'CA', pk ) @ #j) ⇒ ⊥)))"
+*/
+by sorry
+
+lemma acc_suf_1:
+  exists-trace
+  "((¬(∃ #i. DishonestCA( ) @ #i)) ∧ (∃ #i. DishonestLA( ) @ #i)) ∧
+   (((∃ #c1. Corrupted( 'LA' ) @ #c1) ∧
+     ((∀ #c0. (Corrupted( 'CA' ) @ #c0) ⇒ (⊥)) ∧ (⊤))) ∧
+    (¬((∀ #i pk.
+         (TestLA( pk ) @ #i) ⇒ (∃ #j. (HonestLog( pk ) @ #j) ∧ (#j < #i))) ∧
+       (∀ #i S pk.
+         (TestCA( S, pk ) @ #i) ⇒ (∃ #j. HonestRegister( S, 'CA', pk ) @ #j)))))"
+/*
+guarded formula characterizing all satisfying traces:
+"(∀ #i. (DishonestCA( ) @ #i) ⇒ ⊥) ∧
+ (∃ #i. (DishonestLA( ) @ #i)) ∧
+ (∃ #c1. (Corrupted( 'LA' ) @ #c1)) ∧
+ (∀ #c0. (Corrupted( 'CA' ) @ #c0) ⇒ ⊥) ∧
+ (((∃ #i pk.
+     (TestLA( pk ) @ #i) ∧ ∀ #j. (HonestLog( pk ) @ #j) ⇒ ¬(#j < #i)) ∨
+   (∃ #i S pk.
+     (TestCA( S, pk ) @ #i)
+    ∧
+     ∀ #j. (HonestRegister( S, 'CA', pk ) @ #j) ⇒ ⊥)))"
+*/
+by sorry
+
+lemma acc_ver_empty_3:
+  all-traces
+  "(¬(((∃ #i. DishonestCA( ) @ #i) ∧ (∃ #i. DishonestLA( ) @ #i)) ∨
+      (((¬(∃ #i. DishonestCA( ) @ #i)) ∧ (∃ #i. DishonestLA( ) @ #i)) ∨
+       ((∃ #i. DishonestCA( ) @ #i) ∧ (¬(∃ #i. DishonestLA( ) @ #i)))))) ⇒
+   ((∀ #i pk.
+      (TestLA( pk ) @ #i) ⇒ (∃ #j. (HonestLog( pk ) @ #j) ∧ (#j < #i))) ∧
+    (∀ #i S pk.
+      (TestCA( S, pk ) @ #i) ⇒ (∃ #j. HonestRegister( S, 'CA', pk ) @ #j)))"
+/*
+guarded formula characterizing all counter-examples:
+"(((∀ #i. (DishonestCA( ) @ #i) ⇒ ⊥) ∨
+   (∀ #i. (DishonestLA( ) @ #i) ⇒ ⊥))) ∧
+ (((∃ #i. (DishonestCA( ) @ #i)) ∨ (∀ #i. (DishonestLA( ) @ #i) ⇒ ⊥))) ∧
+ (((∀ #i. (DishonestCA( ) @ #i) ⇒ ⊥) ∨ (∃ #i. (DishonestLA( ) @ #i)))) ∧
+ (((∃ #i pk.
+     (TestLA( pk ) @ #i) ∧ ∀ #j. (HonestLog( pk ) @ #j) ⇒ ¬(#j < #i)) ∨
+   (∃ #i S pk.
+     (TestCA( S, pk ) @ #i)
+    ∧
+     ∀ #j. (HonestRegister( S, 'CA', pk ) @ #j) ⇒ ⊥)))"
+*/
+by sorry
+
+lemma acc_ver_nonempty_0:
+  all-traces
+  "((∃ #i. DishonestCA( ) @ #i) ∧ (¬(∃ #i. DishonestLA( ) @ #i))) ⇒
+   (¬((∀ #i pk.
+        (TestLA( pk ) @ #i) ⇒ (∃ #j. (HonestLog( pk ) @ #j) ∧ (#j < #i))) ∧
+      (∀ #i S pk.
+        (TestCA( S, pk ) @ #i) ⇒ (∃ #j. HonestRegister( S, 'CA', pk ) @ #j))))"
+/*
+guarded formula characterizing all counter-examples:
+"(∃ #i. (DishonestCA( ) @ #i)) ∧
+ (∀ #i. (DishonestLA( ) @ #i) ⇒ ⊥) ∧
+ (∀ #i pk. (TestLA( pk ) @ #i) ⇒ ∃ #j. (HonestLog( pk ) @ #j) ∧ #j < #i) ∧
+ (∀ #i S pk.
+   (TestCA( S, pk ) @ #i) ⇒ ∃ #j. (HonestRegister( S, 'CA', pk ) @ #j))"
+*/
+by sorry
+
+lemma acc_ver_nonempty_1:
+  all-traces
+  "((¬(∃ #i. DishonestCA( ) @ #i)) ∧ (∃ #i. DishonestLA( ) @ #i)) ⇒
+   (¬((∀ #i pk.
+        (TestLA( pk ) @ #i) ⇒ (∃ #j. (HonestLog( pk ) @ #j) ∧ (#j < #i))) ∧
+      (∀ #i S pk.
+        (TestCA( S, pk ) @ #i) ⇒ (∃ #j. HonestRegister( S, 'CA', pk ) @ #j))))"
+/*
+guarded formula characterizing all counter-examples:
+"(∀ #i. (DishonestCA( ) @ #i) ⇒ ⊥) ∧
+ (∃ #i. (DishonestLA( ) @ #i)) ∧
+ (∀ #i pk. (TestLA( pk ) @ #i) ⇒ ∃ #j. (HonestLog( pk ) @ #j) ∧ #j < #i) ∧
+ (∀ #i S pk.
+   (TestCA( S, pk ) @ #i) ⇒ ∃ #j. (HonestRegister( S, 'CA', pk ) @ #j))"
+*/
+by sorry
+
+lemma acc_ver_nonempty_2:
+  all-traces
+  "((∃ #i. DishonestCA( ) @ #i) ∧ (∃ #i. DishonestLA( ) @ #i)) ⇒
+   (¬((∀ #i pk.
+        (TestLA( pk ) @ #i) ⇒ (∃ #j. (HonestLog( pk ) @ #j) ∧ (#j < #i))) ∧
+      (∀ #i S pk.
+        (TestCA( S, pk ) @ #i) ⇒ (∃ #j. HonestRegister( S, 'CA', pk ) @ #j))))"
+/*
+guarded formula characterizing all counter-examples:
+"(∃ #i. (DishonestCA( ) @ #i)) ∧
+ (∃ #i. (DishonestLA( ) @ #i)) ∧
+ (∀ #i pk. (TestLA( pk ) @ #i) ⇒ ∃ #j. (HonestLog( pk ) @ #j) ∧ #j < #i) ∧
+ (∀ #i S pk.
+   (TestCA( S, pk ) @ #i) ⇒ ∃ #j. (HonestRegister( S, 'CA', pk ) @ #j))"
+*/
+by sorry
+
+lemma acc_min_0_0:
+  all-traces
+  "¬(((∃ #i. DishonestCA( ) @ #i) ∧ (¬(∃ #i. DishonestLA( ) @ #i))) ∧
+     ((∀ #c1. (Corrupted( 'LA' ) @ #c1) ⇒ (⊥)) ∧
+      ((∀ #c0. (Corrupted( 'CA' ) @ #c0) ⇒ (⊥)) ∧ (⊤))))"
+/*
+guarded formula characterizing all counter-examples:
+"(∃ #i. (DishonestCA( ) @ #i)) ∧
+ (∀ #i. (DishonestLA( ) @ #i) ⇒ ⊥) ∧
+ (∀ #c1. (Corrupted( 'LA' ) @ #c1) ⇒ ⊥) ∧
+ (∀ #c0. (Corrupted( 'CA' ) @ #c0) ⇒ ⊥)"
+*/
+by sorry
+
+lemma acc_min_1_0:
+  all-traces
+  "¬(((¬(∃ #i. DishonestCA( ) @ #i)) ∧ (∃ #i. DishonestLA( ) @ #i)) ∧
+     ((∀ #c1. (Corrupted( 'LA' ) @ #c1) ⇒ (⊥)) ∧
+      ((∀ #c0. (Corrupted( 'CA' ) @ #c0) ⇒ (⊥)) ∧ (⊤))))"
+/*
+guarded formula characterizing all counter-examples:
+"(∀ #i. (DishonestCA( ) @ #i) ⇒ ⊥) ∧
+ (∃ #i. (DishonestLA( ) @ #i)) ∧
+ (∀ #c1. (Corrupted( 'LA' ) @ #c1) ⇒ ⊥) ∧
+ (∀ #c0. (Corrupted( 'CA' ) @ #c0) ⇒ ⊥)"
+*/
+by sorry
+
+lemma acc_uniq_sing_0:
+  all-traces
+  "((∃ #i. DishonestCA( ) @ #i) ∧ (¬(∃ #i. DishonestLA( ) @ #i))) ⇒
+   (∃ #c0. (Corrupted( 'CA' ) @ #c0) ∧ (⊤))"
+/*
+guarded formula characterizing all counter-examples:
+"(∃ #i. (DishonestCA( ) @ #i)) ∧
+ (∀ #i. (DishonestLA( ) @ #i) ⇒ ⊥) ∧
+ (∀ #c0. (Corrupted( 'CA' ) @ #c0) ⇒ ⊥)"
+*/
+by sorry
+
+lemma acc_uniq_sing_1:
+  all-traces
+  "((¬(∃ #i. DishonestCA( ) @ #i)) ∧ (∃ #i. DishonestLA( ) @ #i)) ⇒
+   (∃ #c0. (Corrupted( 'LA' ) @ #c0) ∧ (⊤))"
+/*
+guarded formula characterizing all counter-examples:
+"(∀ #i. (DishonestCA( ) @ #i) ⇒ ⊥) ∧
+ (∃ #i. (DishonestLA( ) @ #i)) ∧
+ (∀ #c0. (Corrupted( 'LA' ) @ #c0) ⇒ ⊥)"
+*/
+by sorry
+
+/*
+WARNING: the following wellformedness checks failed!
+
+Unbound variables
+=================
+
+  rule `lookup_proofOfID_S_pk_as_ignored_0_111211' has unbound variables: 
+    ignored
+  
+  rule `lookup_log_LA_S_pk_c1_as_x1_0_11211' has unbound variables: 
+    x1
+  
+  rule `lookup_log_LA_S_pk_s1_as_x2_0_112111' has unbound variables: 
+    x2
+  
+  rule `lookup_log_LA_S_pk_s1_as_x2_0_112112' has unbound variables: 
+    x2
+
+Message Derivation Checks
+=========================
+
+  The variables of the following rule(s) are not derivable from their premises, you may be performing unintended pattern matching.
+
+Rule lookup_proofOfID_S_pk_as_ignored_0_111211: 
+Failed to derive Variable(s): ignored
+
+Rule lookup_log_LA_S_pk_c1_as_x1_0_11211: 
+Failed to derive Variable(s): x1
+
+Rule lookup_log_LA_S_pk_s1_as_x2_0_112111: 
+Failed to derive Variable(s): x2
+
+Rule lookup_log_LA_S_pk_s1_as_x2_0_112112: 
+Failed to derive Variable(s): x2
+*/
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: /home/kamilner/tamarin-rs/tamarin-prover/examples/sapic/deprecated/accountability-old/CertificateTransparency.spthy
+
+  processing time: 1.36s
+  
+  WARNING: 5 wellformedness check failed!
+  
+  acc_ca_excl_0_1 (all-traces): analysis incomplete (1 steps)
+  acc_ca_exh (all-traces): analysis incomplete (1 steps)
+  acc_ca_suf_0_0 (exists-trace): analysis incomplete (1 steps)
+  acc_ca_ver_empty_1 (all-traces): analysis incomplete (1 steps)
+  acc_ca_ver_nonempty_0 (all-traces): analysis incomplete (1 steps)
+  acc_ca_min_0_0_0 (all-traces): analysis incomplete (1 steps)
+  acc_ca_uniq_0 (all-traces): analysis incomplete (1 steps)
+  acc_la_excl_0_1 (all-traces): analysis incomplete (1 steps)
+  acc_la_exh (all-traces): analysis incomplete (1 steps)
+  acc_la_suf_0_0 (exists-trace): analysis incomplete (1 steps)
+  acc_la_ver_empty_1 (all-traces): analysis incomplete (1 steps)
+  acc_la_ver_nonempty_0 (all-traces): analysis incomplete (1 steps)
+  acc_la_min_0_0_0 (all-traces): analysis incomplete (1 steps)
+  acc_la_uniq_0 (all-traces): analysis incomplete (1 steps)
+  acc_excl_0_1 (all-traces): analysis incomplete (1 steps)
+  acc_excl_0_2 (all-traces): analysis incomplete (1 steps)
+  acc_excl_0_3 (all-traces): analysis incomplete (1 steps)
+  acc_excl_1_2 (all-traces): analysis incomplete (1 steps)
+  acc_excl_1_3 (all-traces): analysis incomplete (1 steps)
+  acc_excl_2_3 (all-traces): analysis incomplete (1 steps)
+  acc_exh (all-traces): analysis incomplete (1 steps)
+  acc_suf_0 (exists-trace): analysis incomplete (1 steps)
+  acc_suf_1 (exists-trace): analysis incomplete (1 steps)
+  acc_ver_empty_3 (all-traces): analysis incomplete (1 steps)
+  acc_ver_nonempty_0 (all-traces): analysis incomplete (1 steps)
+  acc_ver_nonempty_1 (all-traces): analysis incomplete (1 steps)
+  acc_ver_nonempty_2 (all-traces): analysis incomplete (1 steps)
+  acc_min_0_0 (all-traces): analysis incomplete (1 steps)
+  acc_min_1_0 (all-traces): analysis incomplete (1 steps)
+  acc_uniq_sing_0 (all-traces): analysis incomplete (1 steps)
+  acc_uniq_sing_1 (all-traces): analysis incomplete (1 steps)
+
+==============================================================================

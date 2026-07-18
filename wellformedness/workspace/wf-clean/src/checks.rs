@@ -250,6 +250,19 @@ fn dedup_vars(mut vs: Vec<VarSpec>) -> Vec<VarSpec> {
     vs
 }
 
+/// Wrap each already-formatted per-finding entry as its own `WfError` for
+/// `topic`, preserving order. `check_theory` returns ONE `WfError` per
+/// INDIVIDUAL finding so the caller's list length equals the oracle's trailing
+/// "<N> wellformedness check failed!" count; the render layer regroups
+/// consecutive same-topic findings into the byte-exact block. See BEHAVIOR.md
+/// "Per-topic finding-count law" for the granularity of each topic.
+fn per_finding(topic: &'static str, entries: Vec<String>) -> Vec<WfError> {
+    entries
+        .into_iter()
+        .map(|e| WfError::new(topic, e))
+        .collect()
+}
+
 // ---------------------------------------------------------------------------
 // 1. Unbound variables
 // ---------------------------------------------------------------------------
@@ -292,11 +305,9 @@ pub fn unbound_variables(thy: &Theory) -> Vec<WfError> {
             ));
         }
     }
-    if entries.is_empty() {
-        vec![]
-    } else {
-        vec![WfError::new(T_UNBOUND, entries.join("\n  \n"))]
-    }
+    // One finding per rule with unbound variables (probes deriv_2var: two
+    // unbound vars in one rule -> one finding; deriv_2rule: two rules -> two).
+    per_finding(T_UNBOUND, entries)
 }
 
 // ---------------------------------------------------------------------------
@@ -360,9 +371,24 @@ pub fn mismatching_sorts(thy: &Theory) -> Vec<WfError> {
     if rule_entries.is_empty() {
         return vec![];
     }
+    // One finding per conflicting rule (probe sort_2rule: two rules -> two;
+    // sort_2grp_1rule: two variant groups in one rule -> one). The fixed
+    // "Possible reasons:" preamble is a topic-level heading, so it rides on the
+    // FIRST rule's finding; the render layer joins the per-rule findings with
+    // the standard finding separator, reproducing the single-preamble body.
     let header = "Possible reasons:\n1. Identifiers are case sensitive, i.e.,'x' and 'X' are considered to be different.\n2. The same holds for sorts:, i.e., '$x', 'x', and '~x' are considered to be different.\n";
-    let msg = format!("{}\n{}", header, rule_entries.join("\n  \n"));
-    vec![WfError::new(T_SORTS, msg)]
+    rule_entries
+        .into_iter()
+        .enumerate()
+        .map(|(i, body)| {
+            let msg = if i == 0 {
+                format!("{}\n{}", header, body)
+            } else {
+                body
+            };
+            WfError::new(T_SORTS, msg)
+        })
+        .collect()
 }
 
 /// Report-order rank of a sort class in the variant listing: `$x, ~x, x, %x`
@@ -426,11 +452,10 @@ pub fn reserved_names(thy: &Theory) -> Vec<WfError> {
             ));
         }
     }
-    if entries.is_empty() {
-        vec![]
-    } else {
-        vec![WfError::new(T_RESERVED, entries.join("\n  \n"))]
-    }
+    // One finding per (rule, position) block (probe reserved_2fact_1side: two
+    // reserved facts on one side -> one finding; issue515: 12 rule-side blocks
+    // -> 12 findings).
+    per_finding(T_RESERVED, entries)
 }
 
 // ---------------------------------------------------------------------------
@@ -456,11 +481,9 @@ pub fn fr_facts(thy: &Theory) -> Vec<WfError> {
             }
         }
     }
-    if entries.is_empty() {
-        vec![]
-    } else {
-        vec![WfError::new(T_FR, entries.join("\n  \n"))]
-    }
+    // One finding per offending Fr fact occurrence (probe fr_2fact_1rule: two
+    // bad Fr facts in one rule -> two findings).
+    per_finding(T_FR, entries)
 }
 
 // ---------------------------------------------------------------------------
@@ -501,11 +524,9 @@ pub fn special_facts(thy: &Theory) -> Vec<WfError> {
             ));
         }
     }
-    if entries.is_empty() {
-        vec![]
-    } else {
-        vec![WfError::new(T_SPECIAL, entries.join("\n  \n"))]
-    }
+    // One finding per (rule, side) block (probe special_2fact_1side + issue515:
+    // test2's disallowed Out on the left and In on the right are two findings).
+    per_finding(T_SPECIAL, entries)
 }
 
 // ---------------------------------------------------------------------------
@@ -1592,46 +1613,33 @@ fn formula_items(thy: &Theory) -> Vec<(&'static str, &str, &Formula, bool)> {
     out
 }
 
-/// Merge a sequence of `(topic, entry)` pairs, joining only CONSECUTIVE
-/// same-topic entries (separator `"\n  \n"`) into one `WfError` block.
-fn merge_consecutive(seq: Vec<(&'static str, String)>) -> Vec<WfError> {
-    let mut out: Vec<WfError> = Vec::new();
-    for (topic, entry) in seq {
-        if let Some(last) = out.last_mut() {
-            if last.topic == topic {
-                last.message.push_str("\n  \n");
-                last.message.push_str(&entry);
-                continue;
-            }
-        }
-        out.push(WfError::new(topic, entry));
-    }
-    out
-}
-
 /// Run the Quantifier-sorts / Formula-terms / Formula-guardedness bundle over
-/// all lemmas and restrictions, producing the merged topic blocks in report
-/// order.
+/// all lemmas and restrictions, producing ONE `WfError` per emitted finding in
+/// report order (per formula item for Quantifier sorts and Formula terms, per
+/// lemma for Formula guardedness - probes qs_2lem / ft_2lem / guard_2lem, each
+/// two items -> two findings). The render layer merges CONSECUTIVE same-topic
+/// findings back into one block, so an interleaved sequence such as QS, FT, QS
+/// still renders as three separate blocks.
 pub fn formula_reports(
     thy: &Theory,
     reducible: &std::collections::BTreeSet<String>,
 ) -> Vec<WfError> {
-    let mut seq: Vec<(&'static str, String)> = Vec::new();
+    let mut out: Vec<WfError> = Vec::new();
     for (entity, name, formula, is_lemma) in formula_items(thy) {
         if let Some(e) = quantifier_sorts_entry(entity, name, formula) {
-            seq.push((T_QUANT_SORTS, e));
+            out.push(WfError::new(T_QUANT_SORTS, e));
         }
         let terms = ill_terms(formula, reducible);
         if !terms.is_empty() {
-            seq.push((T_FORMULA_TERMS, formula_terms_entry(entity, name, &terms)));
+            out.push(WfError::new(T_FORMULA_TERMS, formula_terms_entry(entity, name, &terms)));
         }
         if is_lemma {
             if let Some(e) = guardedness_entry(name, formula) {
-                seq.push((T_GUARD, e));
+                out.push(WfError::new(T_GUARD, e));
             }
         }
     }
-    merge_consecutive(seq)
+    out
 }
 
 // ---------------------------------------------------------------------------
@@ -1649,11 +1657,9 @@ pub fn nat_sorts(thy: &Theory) -> Vec<WfError> {
             }
         }
     }
-    if entries.is_empty() {
-        vec![]
-    } else {
-        vec![WfError::new(T_NAT, entries.join("\n  \n"))]
-    }
+    // One finding per distinct non-nat-in-nat-context entry (kept per-entry to
+    // mirror the grouped-list topics; not directly probed - see BEHAVIOR.md).
+    per_finding(T_NAT, entries)
 }
 
 fn collect_nat_issues(t: &Term, out: &mut Vec<String>) {
@@ -1771,11 +1777,10 @@ pub fn fresh_public_constants(thy: &Theory) -> Vec<WfError> {
         );
         entries.push(fill_after_prefix(&prefix, &lits, 4, FILL_WIDTH));
     }
-    if entries.is_empty() {
-        vec![]
-    } else {
-        vec![WfError::new(T_FRESH_PUB, entries.join("\n  \n"))]
-    }
+    // One finding per rule that uses fresh public constants (probe
+    // freshpub_2rule: two rules -> two; freshpub_2const_1rule: two constants in
+    // one rule -> one).
+    per_finding(T_FRESH_PUB, entries)
 }
 
 // ---------------------------------------------------------------------------
@@ -1819,11 +1824,8 @@ pub fn reserved_prefixes(thy: &Theory) -> Vec<WfError> {
             .collect();
         entries.push(format!("{}\n  \n{}", header, blocks.join("\n  \n")));
     }
-    if entries.is_empty() {
-        vec![]
-    } else {
-        vec![WfError::new(T_RESERVED_PREFIX, entries.join("\n  \n"))]
-    }
+    // One finding per rule with reserved-prefix facts (diff mode only).
+    per_finding(T_RESERVED_PREFIX, entries)
 }
 
 fn reserved_prefix_header_words(rule: &str) -> Vec<String> {
@@ -1869,13 +1871,10 @@ pub fn diff_left_right(thy: &Theory) -> Vec<WfError> {
             }
         }
     }
-    let mut out = Vec::new();
-    if !left_entries.is_empty() {
-        out.push(WfError::new(T_LEFT, left_entries.join("\n  \n")));
-    }
-    if !right_entries.is_empty() {
-        out.push(WfError::new(T_RIGHT, right_entries.join("\n  \n")));
-    }
+    // One finding per inconsistent rule on each side (diff mode only); the
+    // Left-rule findings precede the Right-rule findings.
+    let mut out = per_finding(T_LEFT, left_entries);
+    out.extend(per_finding(T_RIGHT, right_entries));
     out
 }
 
@@ -1953,11 +1952,9 @@ pub fn lemma_annotations(thy: &Theory) -> Vec<WfError> {
             }
         }
     }
-    if entries.is_empty() {
-        vec![]
-    } else {
-        vec![WfError::new(T_LEMMA_ANNOT, entries.join("\n  \n"))]
-    }
+    // One finding per offending lemma (probe lemanno_2lem: two reuse
+    // exists-trace lemmas -> two findings).
+    per_finding(T_LEMMA_ANNOT, entries)
 }
 
 // ---------------------------------------------------------------------------
@@ -1986,11 +1983,9 @@ pub fn multiplication_restriction(thy: &Theory) -> Vec<WfError> {
             terms = mult_terms.join(", ")
         ));
     }
-    if entries.is_empty() {
-        vec![]
-    } else {
-        vec![WfError::new(T_MULRESTRICT, entries.join("\n  \n"))]
-    }
+    // One finding per non-multiplication-restricted rule (probe
+    // multrestrict_2rule_dh: two rules -> two findings).
+    per_finding(T_MULRESTRICT, entries)
 }
 
 // ---------------------------------------------------------------------------

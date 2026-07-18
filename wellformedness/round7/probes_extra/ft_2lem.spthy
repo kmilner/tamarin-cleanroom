@@ -1,0 +1,5 @@
+theory p begin
+rule R: [ In(x) ] --[ A(x) ]-> [ Out(x) ]
+lemma L1: all-traces "All #i. (A(y) @ #i ==> A(y) @ #i)"
+lemma L2: all-traces "All #j. (A(z) @ #j ==> A(z) @ #j)"
+end

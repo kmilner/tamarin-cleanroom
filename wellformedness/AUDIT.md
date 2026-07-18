@@ -1027,3 +1027,128 @@ re-verified probe or a byte-matched target, never to Wellformedness.hs.
 **PASS.**
 
 VERDICT: pass
+
+---
+
+## Round 7 — per-finding entry-count restructure (both-sides similarity audit)
+
+Scope: the delta at `/home/kamilner/tamarin-cleanroom` HEAD (5f6ff68 predates
+it). `git status/diff` restricted to `wellformedness/` is the whole round:
+`workspace/wf-clean/src/checks.rs` (+`per_finding`, per-check granularity
+split, `mismatching_sorts` preamble-on-first-rule, `formula_reports` de-merge),
+`workspace/wf-clean/src/report.rs` (+`FINDING_SEP`, `group_findings`,
+`render_block(topic,message)` signature), `workspace/BEHAVIOR.md` (+94, the
+per-topic finding-count law), `workspace/QUERIES.log` (+26, ROUND 7 probes),
+`tests/round7_tests.rs` (new, 596 lines), and the probe/corpus/log assets under
+`round7/` + `scratchpad/r7_*`. Reference: `check_theory`'s report-list length
+against `checkWellformedness`'s `concatMap ($ thy)` list length
+(Wellformedness.hs:1270-1286).
+
+### The change, and why the granularity match is merger (not a violation)
+The reference report type is `WfErrorReport = [WfError] = [(Topic, Doc)]`
+(Wellformedness.hs:112-114); `checkWellformedness` is `concatMap ($ thy)` over
+the check list, and the batch footer `WARNING: <N> wellformedness check
+failed!` prints `N = length` of that list. `N` is therefore
+**boundary-observable**, and each check's per-finding granularity (how many
+`(topic, doc)` pairs it contributes) is a decomposition of that observable
+count. Per the audit charter, matching `N` is merger / interoperability. The
+round-7 change makes the sealed `check_theory` return ONE `WfError` per
+individual finding at exactly this granularity, and adds a render-time
+`group_findings` pass that rejoins consecutive same-topic findings with
+`FINDING_SEP = "\n  \n"` so every rendered block stays byte-identical (block
+rendering unchanged — confirmed below).
+
+### Abstraction–filtration–comparison of protectable expression
+* **Identifier constellation — disjoint.** The new sealed identifiers
+  (`per_finding`, `group_findings`, `FINDING_SEP`, the `render_block(topic,
+  message)` split) have no counterpart names in the reference. The reference
+  render path is `prettyWfErrorReport` / `groupOn fst` / `ppTopic`
+  (Wellformedness.hs:118-125); none of `groupOn`, `msum`, `return`,
+  `underlineTopic`, `numbered'`, `clashesOn` appears in the delta. Grep of the
+  `+` lines for reference identifiers and comment phrases (`most similar`,
+  `minimual editing distance`, `between between`, `slightly more lenient`,
+  `Consistently abstract`, `no variants`, `cannot reuse`) is clean — the sole
+  hit is the rendered topic string `Reserved names`, a boundary-observable
+  header, not comment lineage.
+* **Control structure — independent.** `group_findings` is an imperative fold
+  that peeks `out.last_mut()` and compares topic; the reference achieves the
+  same consecutive-grouping with `groupOn fst`. The consecutive-only semantics
+  (an interleaved QS/FT/QS formula bundle rendering as THREE blocks, not a
+  topic-merged two) is itself observable in the rendered output, so matching it
+  is merger; the expression is a distinct construct. `per_finding` maps an
+  already-built `Vec<String>` of formatted entries into per-entry `WfError`s —
+  the reference instead interleaves per-rule via the list monad (`do ru <-
+  rules; return …`). Same observable count, different construction.
+* **Affirmative divergence — `mismatching_sorts` preamble.** The reference
+  carries the `Possible reasons:` heading inside the **Topic string**
+  (`topic++reason`, Wellformedness.hs:262-271), so `groupOn fst` prints it once
+  per topic group. The sealed side keeps the topic bare (`T_SORTS`) and rides
+  the preamble on the FIRST rule's message body (`i == 0`). Two genuinely
+  different mechanisms reaching the same byte-exact block — evidence of
+  reimplementation, not transcription.
+* **Non-observable magic constants — none introduced.**
+* **Comment lineage — none.** Every new source comment states current behavior
+  and cites a probe (`deriv_2var`, `sort_2rule`, `fr_2fact_1rule`, …) or the
+  observable; none narrates the change or echoes reference comment phrasing.
+  The three granularities not pinned by a corpus-visible footer (`Nat Sorts`
+  per-entry, diff-only `Reserved prefixes`, diff-only `Left rule`/`Right rule`)
+  are explicitly flagged in-source as unprobed defaults / low-confidence rather
+  than asserted — the correct posture for a gap, and the opposite of silent
+  reference-matching.
+
+### Provenance cross-check (claims → logged probe, never Wellformedness.hs)
+All 30 probes + 5 corpus files were run through the sanctioned black-box oracle;
+the `.out` files are archived under `scratchpad/r7_out{,_extra}` and
+`scratchpad/r7_corpus`. I re-extracted the trailing footer from every `.out`
+and confirmed each matches its BEHAVIOR.md / QUERIES.log claim exactly:
+- granularity-distinguishing pairs land as claimed — `deriv_2var 2` vs
+  `deriv_2rule 3` (per-rule, not whole-topic/per-var); `sort_2grp_1rule 1` vs
+  `sort_2rule 2` (per-rule, not per-group); `freshpub_2const_1rule 1` vs
+  `freshpub_2rule 2`; `qs_1lem 1` vs `qs_2lem 2`; `special_2fact_1side 4`
+  (Unbound+Sort+Special+MsgDeriv, pinning Special per-(rule,side));
+  `fr_2fact_1rule 2` (per-fact); `reserved_2fact_1side 2`; `subterm_2eq 1`,
+  `mult_2grp 1`, all `fcap_*/arity_*/pub_*/lhs_* = 1` (whole-topic).
+- negative control `multrestrict_2rule` emits **no** footer (multiset `+` is
+  union, not the DH `*` the check targets) — a genuine black-box discrimination,
+  logged, distinguishing it from `multrestrict_2rule_dh 2`.
+- corpus footers reconcile as documented: `stateverif 3` (Unbound 2 +MsgDeriv),
+  `issue515 14` (Reserved 12 + Special 2, no MsgDeriv), `issue527 14`
+  (13 in-scope + MsgDeriv), `CT 5` (Unbound 4 +MsgDeriv), `OCSPS 6`
+  (Unbound 4 + lhs 1 +MsgDeriv). The out-of-scope `Message Derivation Checks`
+  is correctly attributed to the caller, not `check_theory` (one pair per
+  theory regardless of rule count — matches `deriv_2rule` footer 3 = Unbound 2
+  + 1). No claim traces to a reading of Wellformedness.hs.
+
+The per-check granularities the sealed side reproduces (unbound per-rule =
+:516; sorts per-rule = :276; reserved/special per-(rule,side) via `msum` =
+:548/:565; Fr per-fact = :570-576; fact cap/arity/mult + lhs whole-topic =
+:644-676/:214-218; formula QS/FT per-item, guard/annot per-lemma = :999-1005,
+:924-932; mult-restriction per-rule = :1047) each coincide with the reference's
+list-monad structure — but every corpus-observable one is independently pinned
+by a footer probe above, so the coincidence is the forced consequence of the
+observable `N`, not transcription.
+
+### Tests / block-rendering invariance
+`round7_tests.rs` builds probe/corpus ASTs with abstract builders and asserts
+the per-topic finding **multiset** (`expect_counts` → `r.len()` = footer minus
+MsgDeriv). It embeds no reference source; the two byte-exact assertions
+(`issue515`, `issue527`) reuse the already-permitted round-5 captured-oracle
+fixtures (`fixtures/t5_issue515.txt`, `t5_issue527.txt`), guarding that the
+count restructure did not perturb the rendered block. Block rendering is thus
+verified unchanged by re-running the prior fixtures through the new
+split+regroup path.
+
+### Round-7 verdict
+No copied protectable expression. The per-finding entry-count restructure
+reproduces the reference's boundary-observable batch-footer count
+(merger / interoperability), with independent expression: disjoint identifier
+constellation, distinct control structure, an affirmatively divergent
+`mismatching_sorts` preamble mechanism, no non-observable constants, and no
+comment lineage. Every round-7 BEHAVIOR.md / QUERIES.log claim traces to a
+re-verified logged oracle `.out` (30 probes + 5 corpus, footers byte-checked;
+`multrestrict_2rule` silent negative control included), never to
+Wellformedness.hs; the three non-corpus-observable granularities are honestly
+flagged as unprobed defaults. Block rendering is unchanged (round-5 fixtures
+re-pinned). **PASS.**
+
+VERDICT: pass

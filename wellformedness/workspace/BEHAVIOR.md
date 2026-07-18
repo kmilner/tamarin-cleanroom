@@ -666,3 +666,97 @@ Already implemented in public_names_report; round6 pins it independently:
   topic underline and render_report joins topics with one blank line; the
   sealed render carries the blank the open side is said to drop. No
   contradiction with the stated split.
+
+---
+
+## Round 7 — per-topic finding-count law (the batch footer `<N>`)
+
+Provenance: probes `round7/probes/*` and `round7/probes_extra/*` plus the five
+whole-file oracle runs (all logged in QUERIES.log under "ROUND 7"). Every
+number below is read directly from the oracle's trailing summary line.
+
+### The observable
+After proving, `wf_oracle.sh` prints in "summary of summaries":
+
+    WARNING: <N> wellformedness check failed!
+
+`N` is the LENGTH of the report list — the number of `(topic, doc)` pairs the
+checker emits — NOT the number of numbered items rendered inside a block. Two
+findings can share a topic block (rendered under one underlined header) yet
+count as two. Conversely a block that lists many numbered items can be a single
+finding (e.g. lhs-not-rhs). The integrated caller computes `N` as the length of
+the report list (`check_theory(thy)` entries plus the caller-appended
+out-of-scope findings), so `check_theory` must return ONE entry per finding at
+exactly this granularity.
+
+### Per-topic granularity (what counts as one finding)
+
+WHOLE-TOPIC — one finding for the entire topic no matter how many groups/items:
+  - `Public constants with mismatching capitalization` (pub_1grp/pub_2grp = 1)
+  - `Fact capitalization issues` (fcap_1grp/fcap_1grp_3occ/fcap_2grp = 1)
+  - `Fact arity issues` (arity_1grp/arity_2grp = 1)
+  - `Fact multiplicity issues` (mult_2grp = 1)
+  - `Facts occur in the left-hand-side but not in any right-hand-side ` (lhs_1/lhs_2 = 1;
+    the block still lists every numbered item)
+  - `Subterm Convergence Warning` (subterm_2eq = 1)
+
+PER RULE — one finding per protocol rule that trips the check:
+  - `Unbound variables` (deriv_2var one rule/two vars = 1; deriv_2rule = 2)
+  - `Variable with mismatching sorts or capitalization` (sort_2grp_1rule = 1;
+    sort_2rule = 2). The fixed "Possible reasons:" preamble is a topic heading
+    shown once — carried on the FIRST rule's finding.
+  - `Fresh public constants` (freshpub_2const_1rule = 1; freshpub_2rule = 2)
+  - `Multiplication restriction of rules` (multrestrict_2rule_dh = 2)
+  - `Reserved prefixes` (diff only; kept per-rule, unprobed)
+
+PER (rule, side) — one finding per rule×position block:
+  - `Reserved names` (reserved_2fact_1side: both facts on the left = 1;
+    issue515 = 12 rule-side blocks). Positions: left-hand-side / the middle /
+    the right-hand-side.
+  - `Special facts` (special_2fact_1side In-on-RHS = 1; issue515 test2 = 2:
+    Out on the left + In on the right).
+  - `Left rule` / `Right rule` (diff only; per inconsistent rule, unprobed)
+
+PER offending FACT occurrence:
+  - `Fr facts must only use a fresh- or a msg-variable` (fr_2fact_1rule = 2)
+
+PER FORMULA ITEM (each lemma/restriction the check visits):
+  - `Quantifier sorts` (qs_2lem = 2)
+  - `Formula terms` (ft_2lem = 2; the several free-var occurrences inside one
+    lemma stay inside that item's single finding)
+
+PER LEMMA:
+  - ` Formula guardedness` (guard_2lem = 2)
+  - `Lemma annotations` (lemanno_2lem = 2)
+
+`Nat Sorts` was not probed for count; it is emitted per distinct entry (same
+"\n  \n"-joined shape as the grouped-list topics) — a reasonable default, flagged
+as low-confidence.
+
+OUT OF SCOPE but COUNTED by the footer (added by the caller, not by
+`check_theory`): `Message Derivation Checks` is ONE pair for the whole theory
+regardless of how many rules it lists (deriv_2rule lists two rules in the block
+but adds only 1 to the footer).
+
+### Five corpus files — reconciliation (oracle footer = in-scope + MsgDeriv)
+
+| file | footer | in-scope `check_theory` multiset | +MsgDeriv |
+|---|---|---|---|
+| stateverif_left_right | 3 | Unbound 2 | +1 |
+| issue515 | 14 | Reserved 12, Special 2 | +0 (no MsgDeriv block) |
+| issue527 | 14 | Unbound 3, Pub 1, Sort 2, Reserved 4, FactCap 1, Arity 1, lhs 1 (=13) | +1 |
+| CertificateTransparency | 5 | Unbound 4 | +1 |
+| OCSPS | 6 | Unbound 4, lhs 1 (=5) | +1 |
+
+### Implementation
+
+`check_theory` now returns ONE `WfError` per individual finding (helper
+`checks::per_finding` for the grouped-list topics; `formula_reports` emits per
+item; `mismatching_sorts` carries the preamble on its first rule). The render
+layer regroups CONSECUTIVE same-topic findings into one block, joining their
+bodies with `report::FINDING_SEP` = "\n  \n" — the separator every grouped-list
+topic already used — so the rendered block stays byte-identical (the interleaved
+formula bundle QS/FT/guard still renders QS,FT,QS as three blocks because the
+merge is consecutive-only). Pinned by `tests/round7_tests.rs` (per-topic count
+probes + the five corpus multisets; issue515/issue527 also re-assert the
+byte-exact block).

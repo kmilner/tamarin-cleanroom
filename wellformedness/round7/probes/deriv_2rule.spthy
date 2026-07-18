@@ -1,0 +1,4 @@
+theory p begin
+rule R1: [ ] --[ A(x) ]-> [ Out(x) ]
+rule R2: [ ] --[ B(y) ]-> [ Out(y) ]
+end

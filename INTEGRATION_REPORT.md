@@ -3711,3 +3711,115 @@ tamarin-server` lib 111 (+2 ignored) + all route suites; GRAPHCLEAN_CORPUS
 whole-payload census over all 12 022 payloads on both the round-10 and round-11
 engines (cell / record / whole-payload + ranked families); `gen_license_headers.py
 --check` 0 stale.
+
+================================================================================
+# Open-side integration report — round-7 wellformedness re-sync, unit C
+#   per-finding report granularity (batch WARNING count now HS-faithful)
+
+Date: 2026-07-18. Integrator: open-side wf integrator (mechanical re-sync +
+open-side assembly adjustment only; no logic transplanted, no hand-edit of the
+sealed checker). Round 7 restructured the sealed wf-clean report-entry
+granularity so the checker returns ONE `WfError` per INDIVIDUAL finding (rather
+than one bundled `WfError` per topic block). This makes `wf_report.len()` — and
+therefore the batch footer `WARNING: <N> wellformedness check failed!` — equal
+the oracle's per-finding count, WITHOUT changing any rendered block byte.
+
+## C.1 Re-sync of the round-7 clean sources — DONE
+Re-applied the established mechanical recipe (`crate::{pretty,report,formula,
+checks}` -> `super::…`; `crate::ast` kept — resolves to the real tamarin-parser
+AST) to the round-7 `wf-clean/src`. TWO files changed vs the tree:
+* `wf/report.rs` <- wf-clean/src/report.rs. New: `FINDING_SEP = "\n  \n"` and
+  `group_findings`, which merge CONSECUTIVE same-topic findings into one
+  `(topic, body)` block before rendering; `render_report` now groups first, so
+  `report.len()` is the finding count while the rendered blocks stay byte-stable.
+* `wf/checks.rs` <- wf-clean/src/checks.rs. The grouped-list checks switched
+  from one bundled `WfError` (`entries.join("\n  \n")`) to `per_finding(topic,
+  entries)` = one `WfError` per entry, and `formula_reports` dropped its
+  `merge_consecutive` helper to emit the QS/FT/GUARD bundle per-item. Affected
+  topics: Unbound variables, mismatching sorts (the "Possible reasons:" preamble
+  rides the FIRST finding), Reserved names, Fr facts, Special facts, Nat Sorts,
+  Fresh public constants, Reserved prefixes, Left/Right rule, Lemma annotations,
+  Multiplication restriction, and the Quantifier-sorts / Formula-terms /
+  Formula-guardedness bundle.
+* `wf/formula.rs`, `wf/pretty.rs`, `wf/mod.rs` — reverse-transform BYTE-IDENTICAL
+  to the round-7 sealed sources (unchanged since round-6).
+PRESERVED workspace lines `pub mod order; pub use order::*;` + `wf/order.rs`
+untouched. Fidelity: `sed 's/super::/crate::/g' <vendored>` reverse-maps
+byte-identical to each sealed source (checks/formula/pretty/report). All six
+`wf/` files remain headerless (0 `.hs` citations; tripwire clean).
+
+## C.2 Open-side adjustment — pretty_theory::wf_headerless_preamble
+The open side does NOT render via the sealed `report::render_report`; it renders
+via `pretty_theory::format_wf_block` -> `render_wf_error_report`, which groups
+the report by TOPIC (all same-topic entries together, first-appearance order)
+and, for the header-less topics, joins their per-finding bodies with `"\n  \n"`.
+That existing all-together grouping already reproduces the byte-exact block for
+every per-finding topic registered in `wf_headerless_preamble` — i.e. every
+corpus-exercised topic (Unbound variables, mismatching sorts, Reserved names,
+Special facts, Quantifier sorts, Formula terms, Formula guardedness, Lemma
+annotations). So NO change was needed for the gated topics: the granularity
+change is byte-inert there and the footer count simply becomes per-finding.
+
+ONE adjustment WAS required for seven header-less topics that were NOT registered
+in `wf_headerless_preamble` and so fell through to the default (per-message
+concatenation) path: `Fr facts must only use a fresh- or a msg-variable`,
+`Fresh public constants`, `Nat Sorts`, `Multiplication restriction of rules`,
+`Reserved prefixes`, `Left rule`, `Right rule`. Round-6 emitted each as ONE
+bundled `WfError`, so the default path rendered it as a single body; round-7
+emits N per-finding `WfError`s, which the default path would concatenate with a
+plain `\n` (dropping the `"\n  \n"` finding separator) — a byte change on any
+theory with >=2 findings in one of these topics. Registered the seven in
+`wf_headerless_preamble` returning an EMPTY preamble, so their per-finding bodies
+take the same `"\n  \n"` join path as the other header-less topics. Verified
+byte-identical to the round-6 render on a 2-rule fresh-public-constants probe
+(block unchanged; footer count 1 -> 2).
+
+KEEP-AND-REPORT (pre-existing, NOT introduced this round): these same seven
+topics carry NO underline header in the RS render (round-6 already emitted the
+body with no `underlineTopic` line; the HS oracle DOES underline them, per the
+`r5_freshpub_prove` / `round2_multiplication_in_rule_lhs` framing captures).
+NONE of the seven appears in the 419-file wf corpus (verified: 0 files each), so
+the gate never exercised the gap and could not this round either. The
+empty-preamble registration deliberately preserves the round-6 bytes (no header)
+rather than inventing one, since the exact HS header format is unverifiable
+through the gate for five of the seven (only fresh-pub and mult-restriction have
+a captured reference). Flagged for a future sealed round to emit the header.
+
+## C.3 Full-corpus wf gate — 419 MATCH / 0 DIFF (0 regressions)
+`RESULTS_TSV=scripts/wf_gate_round7.tsv JOBS=6 bash scripts/wf_gate.sh`, RS =
+fresh `--release` build vs the HS 1.13.0 reference cache:
+* AFTER (`scripts/wf_gate_round7.tsv`): **419 MATCH / 0 DIFF / 0 SKIP** (419 rows).
+Identical to round-6 — the granularity restructure left every rendered wf block
+byte-stable.
+
+## C.4 Footer gate — 5 MATCH / 0 DIFF (per-finding counts confirmed)
+`ALLOWLIST=/tmp/wf_r7_allow.txt RESULTS_TSV=scripts/corpus_diff_r7_footer.tsv
+JOBS=4 FILE_TIMEOUT=600 bash scripts/corpus_file_diff.sh` — the full `--prove`
+byte diff (footer included):
+* stateverif_left_right, issue515, issue527, CertificateTransparency, OCSPS —
+  **5 MATCH / 0 DIFF**. HS/RS footer counts confirmed = **3 / 14 / 14 / 5 / 6**
+  (matches the expected). Spot-check of 3 previously-MATCH warning-carriers'
+  footers: `boundonce2` = 1, `Axioms_and_Induction` = 1, `CentralizedMonitor` = 2
+  (multi-finding) — all RS == HS.
+
+## C.5 Regression guard — all green
+* `cargo build --release`: 0 errors (3m29s).
+* `cargo test`: `-p tamarin-parser` lib **67** + wellformedness **2**;
+  `-p tamarin-theory` lib **495** (+1 ignored) + oracle_solver **19** (+9 ignored)
+  + wf_formula_terms **5**; `-p tamarin-prover` lib **60** + cli_e2e **7** +
+  console_split_parity **59**; `-p tamarin-server` lib **109** (+2 ignored) +
+  routes (autoprove 6 / basic 19 / graph 4 / proof_step 3 / static 3 / stubs 15 /
+  upload 3) + doctest 1 ignored. 0 failures.
+* `gen_license_headers.py --check`: **0 stale** (exit 0). No `wf/` file gained a
+  header — all six headerless (0 `.hs` citations). `pretty_theory.rs` keeps its
+  existing header (the added block carries no `.hs` citation). Header delta: **0**.
+
+## Summary (round-7, unit C) — deleted / kept / header delta
+* C RE-SYNCED (round-7 `wf/checks.rs` + `wf/report.rs`; formula/pretty/mod
+  byte-identical). Open-side adjustment: `pretty_theory::wf_headerless_preamble`
+  registers the seven un-underlined header-less topics on the finding-separator
+  join path (empty preamble), preserving the round-6 block bytes while
+  `wf_report.len()` becomes the per-finding count. Deleted: none. Header delta:
+  **0**. Gate: **419 MATCH / 0 DIFF** (byte-stable) + footer **5 MATCH**
+  (per-finding counts HS-faithful). KEEP-AND-REPORT: the seven topics' missing
+  HS underline header (pre-existing, 0 corpus coverage) for a future sealed round.

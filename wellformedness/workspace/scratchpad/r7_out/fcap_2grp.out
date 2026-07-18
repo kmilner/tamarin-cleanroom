@@ -1,0 +1,75 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory p] Theory loaded
+[Theory p] Theory translated
+[Theory p] Derivation checks started
+[Theory p] Derivation checks ended
+[Theory p] Theory closed
+theory p
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) R1:
+   [ ] --> [ Send( 'a' ), Recv( 'a' ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) R2:
+   [ ] --> [ SEND( 'a' ), RECV( 'a' ) ]
+
+  /* has exactly the trivial AC variant */
+
+/*
+WARNING: the following wellformedness checks failed!
+
+Fact capitalization issues
+==========================
+
+Fact names are case-sensitive, different capitalizations are considered as different facts, i.e., Fact() is different from FAct(). 
+Check the capitalization of your fact names.
+  
+
+  Fact `recv':
+
+    1. Rule `R1', capitalization "Recv"
+         Recv( 'a' )
+    
+    2. Rule `R2', capitalization "RECV"
+         RECV( 'a' )
+  
+  Fact `send':
+
+    1. Rule `R1', capitalization "Send"
+         Send( 'a' )
+    
+    2. Rule `R2', capitalization "SEND"
+         SEND( 'a' )
+  
+*/
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: /home/kamilner/tamarin-cleanroom/wellformedness/round7/probes/fcap_2grp.spthy
+
+  processing time: 0.06s
+  
+  WARNING: 1 wellformedness check failed!
+
+==============================================================================

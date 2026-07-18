@@ -1,0 +1,4 @@
+theory p begin
+rule R:
+  [ Fr(~x), In(x) ] --[ ]-> [ Out(x) ]
+end

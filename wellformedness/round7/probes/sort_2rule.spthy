@@ -1,0 +1,4 @@
+theory p begin
+rule R1: [ Fr(~x), In(x) ] --[ ]-> [ Out(x) ]
+rule R2: [ Fr(~y), In(y) ] --[ ]-> [ Out(y) ]
+end

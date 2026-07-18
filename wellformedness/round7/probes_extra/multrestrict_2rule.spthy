@@ -1,0 +1,5 @@
+theory p begin
+builtins: multiset
+rule R1: [ In(x), In(y) ] --[ ]-> [ Out((x+y)) ]
+rule R2: [ In(a), In(b) ] --[ ]-> [ Out((a+b)) ]
+end

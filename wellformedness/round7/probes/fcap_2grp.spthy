@@ -1,0 +1,4 @@
+theory p begin
+rule R1: [ ] --[ ]-> [ Send('a'), Recv('a') ]
+rule R2: [ ] --[ ]-> [ SEND('a'), RECV('a') ]
+end

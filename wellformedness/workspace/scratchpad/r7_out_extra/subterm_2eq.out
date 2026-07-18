@@ -1,0 +1,63 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory p] Theory loaded
+[Theory p] Theory translated
+[Theory p] Derivation checks started
+[Theory p] Derivation checks ended
+[Theory p] Theory closed
+theory p
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: f/1, fst/1, g/1, h/2, pair/2, snd/1
+equations:
+    f(x) = h(x, x),
+    fst(<x.1, x.2>) = x.1,
+    g(y) = h(y, y),
+    snd(<x.1, x.2>) = x.2
+
+rule (modulo E) R:
+   [ In( x ) ] --> [ Out( f(x) ) ]
+
+  /*
+  rule (modulo AC) R:
+     [ In( x ) ] --> [ Out( h(x, x) ) ]
+  */
+
+/*
+WARNING: the following wellformedness checks failed!
+
+Subterm Convergence Warning
+===========================
+
+  User-defined equations must be convergent and have the finite variant property. The following equations are not subterm convergent. If you are sure that the set of equations is nevertheless convergent and has the finite variant property, you can ignore this warning and continue 
+
+    f(x) = h(x, x)
+    g(y) = h(y, y)
+   
+ For more information, please refer to the manual : https://tamarin-prover.com/manual/master/book/010_modeling-issues.html 
+*/
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: /home/kamilner/tamarin-cleanroom/wellformedness/round7/probes_extra/subterm_2eq.spthy
+
+  processing time: 0.07s
+  
+  WARNING: 1 wellformedness check failed!
+
+==============================================================================

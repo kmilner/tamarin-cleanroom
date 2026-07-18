@@ -1,0 +1,75 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory p] Theory loaded
+[Theory p] Theory translated
+[Theory p] Derivation checks started
+[Theory p] Derivation checks ended
+[Theory p] Theory closed
+theory p
+
+begin
+
+// Function signature and definition of the equational theory E
+
+builtins: diffie-hellman
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) R1:
+   [ In( x ), In( y ) ] --> [ Out( (x*y) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) R2:
+   [ In( a ), In( b ) ] --> [ Out( (a*b) ) ]
+
+  /* has exactly the trivial AC variant */
+
+/*
+WARNING: the following wellformedness checks failed!
+
+Multiplication restriction of rules
+===================================
+
+  The following rule is not multiplication restricted:
+    rule (modulo E) R1:
+       [ In( x ), In( y ) ] --> [ Out( (x*y) ) ]
+  
+  After replacing reducible function symbols in lhs with variables:
+    rule (modulo E) R1:
+       [ In( x ), In( y ) ] --> [ Out( (x*y) ) ]
+  
+    Terms with multiplication:  (x*y)
+  
+  The following rule is not multiplication restricted:
+    rule (modulo E) R2:
+       [ In( a ), In( b ) ] --> [ Out( (a*b) ) ]
+  
+  After replacing reducible function symbols in lhs with variables:
+    rule (modulo E) R2:
+       [ In( a ), In( b ) ] --> [ Out( (a*b) ) ]
+  
+    Terms with multiplication:  (a*b)
+*/
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: /home/kamilner/tamarin-cleanroom/wellformedness/round7/probes_extra/multrestrict_2rule_dh.spthy
+
+  processing time: 0.11s
+  
+  WARNING: 2 wellformedness check failed!
+
+==============================================================================

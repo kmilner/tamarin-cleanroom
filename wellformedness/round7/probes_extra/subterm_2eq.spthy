@@ -1,0 +1,5 @@
+theory p begin
+functions: f/1, g/1, h/2
+equations: f(x) = h(x, x), g(y) = h(y, y)
+rule R: [ In(x) ] --[ ]-> [ Out(f(x)) ]
+end
