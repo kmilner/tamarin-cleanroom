@@ -1,0 +1,168 @@
+digraph "G" {
+nodesep="0.8";
+ranksep="0.8";
+sep="4";
+splines="true";
+overlap="false";
+pack="true";
+packmode="cluster";
+concentrate="true";
+compound="true";
+remincross="true";
+mclimit="10";
+nslimit="20";
+nslimit1="20";
+ordering="out";
+rankdir="TB";
+showboxes="false";
+clusterrank="local";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2",margin="0.05,0.05",shape="ellipse"];
+edge[fontsize="8",fontname="Helvetica",penwidth="1.5",arrowsize="0.5",color="black",style="solid",weight="8"];
+n0[label="#vf : isend",shape="ellipse"];
+n1[label="#vk : coerce[!KU( RH1 )]",shape="ellipse"];
+n2[label="#vk.1 : coerce[!KU( LH1 )]",shape="ellipse"];
+n3[label="#vf.2 : isend",shape="ellipse"];
+n4[label="#vk.2 : c_xor[!KU( (~r2⊕x) )]",shape="ellipse"];
+n5[label="#vf.5 : isend",shape="ellipse"];
+n6[label="#vf.8 : isend",shape="ellipse"];
+n7[label="!KU( r2.2 ) @ #vk.4",shape="ellipse",color="gray"];
+n8[label="!KU( r1.1 ) @ #vk.5",shape="ellipse",color="gray"];
+n9[label="!KU( x ) @ #vk.6",shape="ellipse",color="gray"];
+n10[label="!KU( ~r2 ) @ #vk.7",shape="ellipse",color="gray"];
+subgraph "cluster_Process_Session_1" {
+nodesep="0.6";
+ranksep="0.6";
+label="Process_Session_1";
+style="filled";
+color="#36A5D84C";
+penwidth="2";
+fillcolor="#36A5D84C";
+overlap="false";
+sep="4";
+n15[shape="record",label="{{<n11> State_1111( ~id, ~k )}|{<n12> #vr.9 : p}|{<n13> State_11111( ~id, ~k )|<n14> State_11112( ~id, ~k )}}",fillcolor="#ffffff",style="filled",fontcolor="black",role="Process"];
+n19[shape="record",label="{{<n16> State_111( ~id, ~k )}|{<n17> #vr.11 : p}|{<n18> !Semistate_1111( ~id, ~k )}}",fillcolor="#ffffff",style="filled",fontcolor="black",role="Process"];
+n24[shape="record",label="{{<n20> State_11( ~k )|<n21> Fr( ~id )}|{<n22> #vr.12 : ν id}|{<n23> State_111( ~id, ~k )}}",fillcolor="#ffffff",style="filled",fontcolor="black",role="Process"];
+n29[shape="record",label="{{<n25> State_1( )|<n26> Fr( ~k )}|{<n27> #vr.13 : ν k}|{<n28> State_11( ~k )}}",fillcolor="#ffffff",style="filled",fontcolor="black",role="Process"];
+n32[shape="record",label="{{<n30> #vr.16 : Init[Init( )]}|{<n31> State_( )}}",fillcolor="#ffffff",style="filled",fontcolor="black",role="Process"];
+n37[shape="record",label="{{<n33> State_1111( ~id, ~k )}|{<n34> #vr.28 : p}|{<n35> State_11111( ~id, ~k )|<n36> State_11112( ~id, ~k )}}",fillcolor="#ffffff",style="filled",fontcolor="black",role="Process"];
+n42[shape="record",label="{{<n38> State_1111( ~id, ~k )}|{<n39> #vr.38 : p}|{<n40> State_11111( ~id, ~k )|<n41> State_11112( ~id, ~k )}}",fillcolor="#ffffff",style="filled",fontcolor="black",role="Process"];
+
+}
+subgraph "cluster_Reader_Session_1" {
+nodesep="0.6";
+ranksep="0.6";
+label="Reader_Session_1";
+style="filled";
+color="#D864364C";
+penwidth="2";
+fillcolor="#D864364C";
+overlap="false";
+sep="4";
+n47[shape="record",label="{{<n43> State_111111111111111( ~id, ~k, ~r1, r2.2, LH1 )}|{<n44> #vr.17 : outrhhkrrrotidhkrr}|{<n45> State_1111111111111111( ~id, ~k, ~r1, r2.2, LH1 )|<n46> Out( RH1 )}}",fillcolor="#404480",style="filled",fontcolor="white",role="Reader"];
+n51[shape="record",label="{{<n48> State_11111111111111( ~id, ~k, ~r1, r2.2, LH1 )}|{<n49> #vr.18 : eventCommitRTkrr[Commit( \<'R', 'T', z\> )]}|{<n50> State_111111111111111( ~id, ~k, ~r1, r2.2, LH1 )}}",fillcolor="#404480",style="filled",fontcolor="white",role="Reader"];
+n55[shape="record",label="{{<n52> State_1111111111111( ~id, ~k, ~r1, r2.2, LH1 )}|{<n53> #vr.19 : eventRunningTRkrr[Running( \<'T', 'R', z.1\> )]}|{<n54> State_11111111111111( ~id, ~k, ~r1, r2.2, LH1 )}}",fillcolor="#404480",style="filled",fontcolor="white",role="Reader"];
+n59[shape="record",label="{{<n56> State_111111111111( ~id, ~k, ~r1, r2.2, LH1 )}|{<n57> #vr.20 : eventResponsekReader[Response( ~k, 'Reader' )]}|{<n58> State_1111111111111( ~id, ~k, ~r1, r2.2, LH1 )}}",fillcolor="#404480",style="filled",fontcolor="white",role="Reader"];
+n63[shape="record",label="{{<n60> State_11111111111( ~id, ~k, ~r1, r2.2, LH1 )}|{<n61> #vr.21 : eventAlivekTag[Alive( ~k, 'Tag' )]}|{<n62> State_111111111111( ~id, ~k, ~r1, r2.2, LH1 )}}",fillcolor="#404480",style="filled",fontcolor="white",role="Reader"];
+n67[shape="record",label="{{<n64> State_1111111111( ~id, ~k, ~r1, r2.2, LH1 )}|{<n65> #vr.22 : ifxlhhkrrrotidhkrr[Pred_Eq( LH1, LH1 )]}|{<n66> State_11111111111( ~id, ~k, ~r1, r2.2, LH1 )}}",fillcolor="#404480",style="filled",fontcolor="white",role="Reader"];
+n72[shape="record",label="{{<n68> State_111111111( ~id, ~k, ~r1 )|<n69> In( \<r2.2, LH1\> )}|{<n70> #vr.23 : inrx}|{<n71> State_1111111111( ~id, ~k, ~r1, r2.2, LH1 )}}",fillcolor="#404480",style="filled",fontcolor="white",role="Reader"];
+n77[shape="record",label="{{<n73> State_11111111( ~id, ~k, ~r1 )}|{<n74> #vr.24 : outr}|{<n75> State_111111111( ~id, ~k, ~r1 )|<n76> Out( ~r1 )}}",fillcolor="#404480",style="filled",fontcolor="white",role="Reader"];
+n81[shape="record",label="{{<n78> State_1111111( ~id, ~k, ~r1 )}|{<n79> #vr.25 : eventChallengerReader[Challenge( ~r1, 'Reader' )]}|{<n80> State_11111111( ~id, ~k, ~r1 )}}",fillcolor="#404480",style="filled",fontcolor="white",role="Reader"];
+n86[shape="record",label="{{<n82> State_111111( ~id, ~k )|<n83> Fr( ~r1 )}|{<n84> #vr.26 : ν r}|{<n85> State_1111111( ~id, ~k, ~r1 )}}",fillcolor="#404480",style="filled",fontcolor="white",role="Reader"];
+
+}
+subgraph "cluster_Tag_Session_1" {
+nodesep="0.6";
+ranksep="0.6";
+label="Tag_Session_1";
+style="filled";
+color="#5CD8364C";
+penwidth="2";
+fillcolor="#5CD8364C";
+overlap="false";
+sep="4";
+n91[shape="record",label="{{<n87> State_11112111111( ~id, ~k, ~r2.1, r1.1 )}|{<n88> #vr.30 : outrlhhkrrrotidhkrr}|{<n89> State_111121111111( ~id, ~k, ~r2.1, r1.1 )|<n90> Out( \<~r2.1, LH1\> )}}",fillcolor="#40807c",style="filled",fontcolor="white",role="Tag"];
+n95[shape="record",label="{{<n92> State_1111211111( ~id, ~k, ~r2.1, r1.1 )}|{<n93> #vr.32 : eventRunningRTkrr[Running( \<'R', 'T', z.2\> )]}|{<n94> State_11112111111( ~id, ~k, ~r2.1, r1.1 )}}",fillcolor="#40807c",style="filled",fontcolor="white",role="Tag"];
+n99[shape="record",label="{{<n96> State_111121111( ~id, ~k, ~r2.1, r1.1 )}|{<n97> #vr.33 : eventChallengerTag[Challenge( ~r2.1, 'Tag' )]}|{<n98> State_1111211111( ~id, ~k, ~r2.1, r1.1 )}}",fillcolor="#40807c",style="filled",fontcolor="white",role="Tag"];
+n103[shape="record",label="{{<n100> State_11112111( ~id, ~k, ~r2.1, r1.1 )}|{<n101> #vr.34 : eventResponsekTag[Response( ~k, 'Tag' )]}|{<n102> State_111121111( ~id, ~k, ~r2.1, r1.1 )}}",fillcolor="#40807c",style="filled",fontcolor="white",role="Tag"];
+n108[shape="record",label="{{<n104> State_1111211( ~id, ~k, r1.1 )|<n105> Fr( ~r2.1 )}|{<n106> #vr.35 : ν r}|{<n107> State_11112111( ~id, ~k, ~r2.1, r1.1 )}}",fillcolor="#40807c",style="filled",fontcolor="white",role="Tag"];
+n113[shape="record",label="{{<n109> State_111121( ~id, ~k )|<n110> In( r1.1 )}|{<n111> #vr.36 : inr}|{<n112> State_1111211( ~id, ~k, r1.1 )}}",fillcolor="#40807c",style="filled",fontcolor="white",role="Tag"];
+
+}
+subgraph "cluster_Tag_Session_2" {
+nodesep="0.6";
+ranksep="0.6";
+label="Tag_Session_2";
+style="filled";
+color="#5CD8364C";
+penwidth="2";
+fillcolor="#5CD8364C";
+overlap="false";
+sep="4";
+n117[shape="record",label="{{<n114> State_11112111111111( ~id, ~k, ~r2, (~r2⊕x) )}|{<n115> #i : eventCommitTRkrr[Commit( \<'T', 'R', (~k⊕x)\> )]}|{<n116> State_111121111111111( ~id, ~k, ~r2, (~r2⊕x) )}}",fillcolor="#40807c",style="filled",fontcolor="white",role="Tag"];
+n121[shape="record",label="{{<n118> State_1111211111111( ~id, ~k, ~r2, (~r2⊕x) )}|{<n119> #vr : eventAlivekReader[Alive( ~k, 'Reader' )]}|{<n120> State_11112111111111( ~id, ~k, ~r2, (~r2⊕x) )}}",fillcolor="#40807c",style="filled",fontcolor="white",role="Tag"];
+n126[shape="record",label="{{<n122> State_111121111111( ~id, ~k, ~r2, (~r2⊕x) )|<n123> In( RH1 )}|{<n124> #vr.1 : inrhhkrrrotidhkrr}|{<n125> State_1111211111111( ~id, ~k, ~r2, (~r2⊕x) )}}",fillcolor="#40807c",style="filled",fontcolor="white",role="Tag"];
+n131[shape="record",label="{{<n127> State_11112111111( ~id, ~k, ~r2, (~r2⊕x) )}|{<n128> #vr.2 : outrlhhkrrrotidhkrr}|{<n129> State_111121111111( ~id, ~k, ~r2, (~r2⊕x) )|<n130> Out( \<~r2, lh(XO2)\> )}}",fillcolor="#40807c",style="filled",fontcolor="white",role="Tag"];
+n135[shape="record",label="{{<n132> State_1111211111( ~id, ~k, ~r2, (~r2⊕x) )}|{<n133> #vr.3 : eventRunningRTkrr[Running( \<'R', 'T', (~k⊕x)\> )]}|{<n134> State_11112111111( ~id, ~k, ~r2, (~r2⊕x) )}}",fillcolor="#40807c",style="filled",fontcolor="white",role="Tag"];
+n139[shape="record",label="{{<n136> State_111121111( ~id, ~k, ~r2, (~r2⊕x) )}|{<n137> #vr.4 : eventChallengerTag[Challenge( ~r2, 'Tag' )]}|{<n138> State_1111211111( ~id, ~k, ~r2, (~r2⊕x) )}}",fillcolor="#40807c",style="filled",fontcolor="white",role="Tag"];
+n143[shape="record",label="{{<n140> State_11112111( ~id, ~k, ~r2, (~r2⊕x) )}|{<n141> #vr.5 : eventResponsekTag[Response( ~k, 'Tag' )]}|{<n142> State_111121111( ~id, ~k, ~r2, (~r2⊕x) )}}",fillcolor="#40807c",style="filled",fontcolor="white",role="Tag"];
+n148[shape="record",label="{{<n144> State_1111211( ~id, ~k, (~r2⊕x) )|<n145> Fr( ~r2 )}|{<n146> #vr.6 : ν r}|{<n147> State_11112111( ~id, ~k, ~r2, (~r2⊕x) )}}",fillcolor="#40807c",style="filled",fontcolor="white",role="Tag"];
+n153[shape="record",label="{{<n149> State_111121( ~id, ~k )|<n150> In( (~r2⊕x) )}|{<n151> #vr.7 : inr}|{<n152> State_1111211( ~id, ~k, (~r2⊕x) )}}",fillcolor="#40807c",style="filled",fontcolor="white",role="Tag"];
+
+}
+n0 -> n126:n123[color="gray30"];
+n3 -> n153:n150[color="gray30"];
+n5 -> n72:n69[color="gray30"];
+n6 -> n113:n110[color="gray30"];
+n15:n14 -> n153:n149[style="bold",weight="10.0"];
+n47:n46 -> n1[color="orangered2"];
+n37:n35 -> n86:n82[style="bold",weight="10.0"];
+n91:n90 -> n2[color="orangered2"];
+n42:n41 -> n113:n109[style="bold",weight="10.0"];
+n1 -> n0[color="red",style="dashed"];
+n2 -> n5[color="red",style="dashed"];
+n4 -> n3[color="red",style="dashed"];
+n131:n128 -> n4[color="blue3",style="dashed"];
+n7 -> n5[color="red",style="dashed"];
+n8 -> n6[color="red",style="dashed"];
+n9 -> n4[color="red",style="dashed"];
+n148:n146 -> n4[color="blue3",style="dashed"];
+n10 -> n4[color="red",style="dashed"];
+n19:n18 -> n15:n11[style="bold",weight="10.0",color="gray50"];
+n19:n18 -> n37:n33[style="bold",weight="10.0",color="gray50"];
+n19:n18 -> n42:n38[style="bold",weight="10.0",color="gray50"];
+n24:n23 -> n19:n16[style="bold",weight="10.0"];
+n29:n28 -> n24:n20[style="bold",weight="10.0"];
+n32:n31 -> n29:n25[style="bold",weight="10.0"];
+n51:n50 -> n47:n43[style="bold",weight="10.0"];
+n55:n54 -> n51:n48[style="bold",weight="10.0"];
+n59:n58 -> n55:n52[style="bold",weight="10.0"];
+n63:n62 -> n59:n56[style="bold",weight="10.0"];
+n67:n66 -> n63:n60[style="bold",weight="10.0"];
+n72:n71 -> n67:n64[style="bold",weight="10.0"];
+n77:n75 -> n72:n68[style="bold",weight="10.0"];
+n81:n80 -> n77:n73[style="bold",weight="10.0"];
+n86:n85 -> n81:n78[style="bold",weight="10.0"];
+n95:n94 -> n91:n87[style="bold",weight="10.0"];
+n99:n98 -> n95:n92[style="bold",weight="10.0"];
+n103:n102 -> n99:n96[style="bold",weight="10.0"];
+n108:n107 -> n103:n100[style="bold",weight="10.0"];
+n113:n112 -> n108:n104[style="bold",weight="10.0"];
+n121:n120 -> n117:n114[style="bold",weight="10.0"];
+n126:n125 -> n121:n118[style="bold",weight="10.0"];
+n131:n129 -> n126:n122[style="bold",weight="10.0"];
+n135:n134 -> n131:n127[style="bold",weight="10.0"];
+n139:n138 -> n135:n132[style="bold",weight="10.0"];
+n143:n142 -> n139:n136[style="bold",weight="10.0"];
+n148:n147 -> n143:n140[style="bold",weight="10.0"];
+n153:n152 -> n148:n144[style="bold",weight="10.0"];
+{
+rank="sink";
+n154[shape="plain",label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="3" CELLPADDING="1"><TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">XO1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">(h(x.1)⊕rot(~id, h(x.1)))</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">LH1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">lh(XO1)</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">XO2</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">(h((~k⊕x))⊕rot(~id, h((~k⊕x))))</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">RH1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">rh(XO2)</TD></TR></TABLE>>];
+
+}
+n117:n115 -> n154[style="invis"];
+
+}

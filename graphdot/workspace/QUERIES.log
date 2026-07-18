@@ -743,3 +743,54 @@ across siblings collide -> occ>=2 -> ABBREVIATED, which corrupted the first
   the session; ports 3200-3299 verified clear (ss scan). BEHAVIOR.md §3f
   Session-12 bullet + §8 + round-12 report written; INTERFACE.md rewritten
   (round-12 laws + terminal-residue guidance). No forbidden paths read.
+
+================================================================================
+SESSION 13 — edge-style completion + record info-port anchor (corpus mining)
+================================================================================
+No LIVE oracle server was used this round; all facts are from the captured
+OUTPUT corpus oracle/dot_corpus/ (12 022 .dot payloads). Ports 3200-3299 left
+untouched. Provenance commands (run under ulimit -v guard):
+
+[Q13.1] Full edge-bracket census (the (color,style) vocabulary is exactly 11):
+  grep -hoE '\->[^;]*\[[^]]*\]' oracle/dot_corpus/*.dot \
+    | grep -oE '\[[^]]*\]' | sort | uniq -c | sort -rn
+  => red/dashed 147937, bold 86531, bold+gray50 86298, gray30 50359,
+     blue3/dashed 37726, orangered2 29917, invis 25271, black/dashed 6909,
+     purple/dashed 2416, dotted/green 2394, darkorange3/dashed 1553
+     (sum 477311 == every edge line; zero attribute-free edges).
+  KEY: dotted/green is the ONLY set whose bytes are style-before-color:
+     [style="dotted",color="green"]; purple & darkorange3 are color,style.
+
+[Q13.2] New-style port behavior:
+  green & darkorange3 edges: 0 ported endpoints (always plain->plain).
+  Witness 01c5db0a7030e664 line: n12 -> n33[color="darkorange3",style="dashed"];
+
+[Q13.3] Port-class census (r13/port_census.py): parse each record's columns,
+  classify every ported edge endpoint as prem/info/concl (info = middle group,
+  the cell whose text starts with '#'):
+  FILES with >=1 info-source edge: 11322/12022 (94.2%).
+  info-SOURCE edges 58206; info-TARGET edges 18888 (both ends use the info port).
+  info-source by style: blue3/dashed 36694, invis 13354, black/dashed 5752,
+    purple/dashed 2405, red/dashed 1.
+  info-target by style: blue3/dashed 11525, black/dashed 4950, purple/dashed 2413.
+  Structural bold: src=concl port, dst=prem port (86531/86531). gray50 dst=prem
+    86246 + 52 NOPORT (target is an ellipse). Never info.
+  Witness 00082e1d6a47b5af: n131:n128 -> n4[color="blue3",style="dashed"];
+    record n131 = {{<n127> State..}|{<n128> #vr.2 : ..}|{<n129> ..|<n130> Out..}}
+    => info port n128 = node 131 - conclusions 2 - 1. Verified n148->146, n117->115.
+  Lone red/dashed info-source: 1d4a080feaef2b99 n10:n8 -> n2 (record n10 info
+    cell <n8> #i : eventSeck[..]) — legitimate, not a mis-detection.
+
+[Q13.4] Fixture selection (r13/pick_fixtures.py): 26 diverse captures copied to
+  tests/fixtures/regen/ (45 KB), covering all 11 styles, clusters, legends,
+  blue3/black/purple/green/darkorange3, src+dst info ports.
+
+[Q13.5] Acceptance runs (RS build = workspace/graph-clean):
+  cargo test                                   -> all suites green (88 tests).
+  GRAPHCLEAN_CORPUS=oracle/dot_corpus cargo test --test roundtrip roundtrip_corpus_dir
+    -> corpus round-trip: 12022/12022 byte-exact.
+  ... --test alloc_corpus alloc_corpus_dir     -> allocator: 12022/12022.
+  ... --test regen_edges regenerate_corpus_dir -> edge-section regeneration:
+    12022/12022 byte-exact (structured SysEdge rebuild; map_style panics on any
+    un-modeled bracket, so the pass proves the 11-set is the complete vocabulary).
+No forbidden paths read.

@@ -1,0 +1,41 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n3[shape="record",label="{{<n0> Step1( ~tid, $A, $B, ~x )|<n1> In( \<g^~x.1, MA1\> )}|{<n2> #i : Step2[Accept( ~tid, EX1 )]}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+n4[label="#j : isend[K( EX1 )]",shape="ellipse"];
+n5[label="#vf : isend",shape="ellipse"];
+n6[label="#vk : coerce[!KU( MA1 )]",shape="ellipse"];
+n7[label="#vl : irecv",shape="ellipse"];
+n13[shape="record",label="{{<n8> Fr( ~tid )|<n9> Fr( ~x )}|{<n10> #vr : Step1}|{<n11> Out( \<g^~x, mac(shk, \<g^~x, $A, $B\>)\> )|<n12> Step1( ~tid, $A, $B, ~x )}}",fillcolor="#acdc9a",style="filled",fontcolor="black",role="Undefined"];
+n14[label="#vk.1 : coerce[!KU( EX1 )]",shape="ellipse"];
+n20[shape="record",label="{{<n15> Fr( ~tid.1 )|<n16> Fr( ~x.1 )}|{<n17> #vr.1 : Step1}|{<n18> Out( \<g^~x.1, MA1\> )|<n19> Step1( ~tid.1, $B, $A, ~x.1 )}}",fillcolor="#acdc9a",style="filled",fontcolor="black",role="Undefined"];
+n21[label="#vr.3 : d_0_fst",shape="ellipse"];
+n22[label="#vr.4 : d_exp",shape="ellipse"];
+n23[label="!KU( g^~x.1 ) @ #vk.3",shape="ellipse",color="gray"];
+n24[label="!KU( ~x ) @ #vk.4",shape="ellipse",color="gray"];
+n5 -> n3:n1[color="gray30"];
+n7 -> n6[color="orangered2"];
+n7 -> n21[color="orangered2"];
+n13:n12 -> n3:n0[style="bold",weight="10.0"];
+n20:n18 -> n7[color="gray30"];
+n21 -> n22[color="orangered2"];
+n22 -> n14[color="orangered2"];
+n6 -> n5[color="red",style="dashed"];
+n7 -> n5[color="red",style="dashed"];
+n13:n10 -> n22[color="blue3",style="dashed"];
+n14 -> n4[color="red",style="dashed"];
+n23 -> n5[color="red",style="dashed"];
+n21 -> n23[color="darkorange3",style="dashed"];
+n24 -> n22[color="red",style="dashed"];
+{
+rank="sink";
+n25[shape="plain",label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="3" CELLPADDING="1"><TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">EX1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">g^(~x*~x.1)</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">MA1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">mac(shk, &lt;g^~x.1, $B, $A&gt;)</TD></TR></TABLE>>];
+
+}
+n3:n2 -> n25[style="invis"];
+n4 -> n25[style="invis"];
+
+}

@@ -1,0 +1,10 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n0[label="Session( 'R', pks, data ) @ #t0",shape="ellipse",color="darkblue"];
+n1[label="Session( 'I', pks, data ) @ #t1",shape="ellipse",color="darkblue"];
+n0 -> n1[color="black",style="dashed"];
+
+}

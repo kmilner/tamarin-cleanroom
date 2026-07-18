@@ -1,0 +1,11 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n0[label="PCR_Read( x ) @ #i",shape="ellipse",color="darkblue"];
+n1[label="PCR_Write( x ) @ #j",shape="ellipse",color="darkblue"];
+n2[label="#last",shape="ellipse"];
+n1 -> n2[color="black",style="dashed"];
+
+}

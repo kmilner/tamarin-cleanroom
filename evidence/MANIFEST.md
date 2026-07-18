@@ -32,7 +32,8 @@ wf round-7 implementer (wf_bf6a23fd-437) audited — 77 tool calls, 0/0;
 graphdot round-12 implementer (wf_8ba08a93-8eb) audited — 115 tool calls, 0/0;
 pretty round-3 implementer (wf_1c3b9e54-e0c) audited — 143 tool calls, 0/0 (2 file_flags.tsv reads sanctioned by the dated rule refinement; all 49 audited transcripts re-validate at 0 under it);
 pretty round-4 implementer (wf_e752c3f6-6f4) audited — 131 tool calls, 0/0;
-50 sealed transcripts total.
+graphdot round-13 implementer (wf_92d2ed53-daf) audited — 69 tool calls, 0/0;
+51 sealed transcripts total.
 
 | Path | Agent | Role |
 |------|-------|------|
@@ -81,6 +82,7 @@ pretty round-4 implementer (wf_e752c3f6-6f4) audited — 131 tool calls, 0/0;
 | workflows/wf_8ba08a93-8eb/agent-a4e016ab960f7a20a.jsonl | round 12 (unit B) | slack law ⌈e/2⌉−1 any-position (retracts round-11 last-gated bonus as relief artifact), ftup occupancy, relief charge min(hd(q+1/3),C); wrapping 95.6→96.45%; ΣC=88 zone PROVEN non-closed-form (terminal) |
 | workflows/wf_1c3b9e54-e0c/agent-a67c8657acbf2eb3a.jsonl | pretty round 3 | formula rendering: glyph/paren/binder/wrap laws probe-pinned, safety classifier, restriction+lemma wrappers, guarded-comment frame; 84 restriction + 139 lemma blocks byte-identical over 20 files; R1 AC-op law corrected by corpus witness |
 | workflows/wf_e752c3f6-6f4/agent-a76c533bec1fe9206.jsonl | pretty round 4 | process=\"…\" attribute law (round-2 "dropped" belief refuted — SAPIC-free corpus artifact); >)-case proven already-fixed by R3 + app-join probe; stack overflow fixed by iterative Doc-engine rewrite (byte-neutral, 8MB-stack deep-file parity); unit R1–R4 COMPLETE |
+| workflows/wf_92d2ed53-daf/agent-ae03098e391b35ba6.jsonl | round 13 (unit B) | edge-layer completion: 11/11 (color,style) vocabulary (census-total, panic-on-unknown = totality proof), EndRef::Info both-ends anchor (port id = node_id − concl − 1, capture-verified); edge-section regeneration 12,022/12,022 byte-exact corpus-wide |
 
 Corresponding workspaces (../wellformedness, ../graphdot, ../weblayer) hold
 each agent's QUERIES.log, BEHAVIOR.md, REPORT*.md and code — cross-reference
@@ -114,6 +116,7 @@ the transcripts against those logs.
 | workflows/wf_8ba08a93-8eb/agent-ae5198dea2befef01.jsonl | graphdot round-12 delta audit (pass, 0 violations; 1/3 constant OUTPUT-derived within the byte-pinned window, absent from source; divergence widened; the honest false-wrap regression into the proven-terminal zone = evidence against copying) |
 | workflows/wf_1c3b9e54-e0c/agent-adf2b133dc2654170.jsonl | pretty round-3 delta audit (pass; upstream has NO precedence table — always-parens matched via genuine discriminator probe; binder allocation divergent from de-Bruijn machinery; helper decomposition divergent; 5 non-blocking advisories) |
 | workflows/wf_e752c3f6-6f4/agent-a815108459a348d7e.jsonl | pretty round-4 delta audit (pass; process attr byte-forced by probe capture, clean prints verbatim snippet vs upstream re-render machinery; stack fix = explicit-stack iteration on the BSD engine — GPL wrapper has no recursion to copy; owned-teardown Drop exists on neither side) |
+| workflows/wf_92d2ed53-daf/agent-a35e46f330272a8d9.jsonl | graphdot round-13 delta audit (pass; census independently reproduced to the count; style-first byte order of green/dotted = capture-forced merger; source has no edge-style enum; "info" is sealed coinage — source keys the cell Nothing) |
 
 Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUDIT.md,
 ../console/AUDIT.md, ../macros/AUDIT.md, ../injective/AUDIT.md, ../derivcheck/AUDIT.md.

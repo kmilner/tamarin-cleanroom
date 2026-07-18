@@ -1,0 +1,12 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n3[shape="record",label="{{<n0> Fr( ~n )}|{<n1> #i : Create[Create( ~n )]}|{<n2> Object( ~n )}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+n6[shape="record",label="{{<n4> Object( ~n )}|{<n5> #j : Destroy[Destroy( ~n )]}}",fillcolor="#badb99",style="filled",fontcolor="black",role="Undefined"];
+n7[label="#last",shape="ellipse"];
+n3:n1 -> n6:n5[color="blue3",style="dashed"];
+n3:n1 -> n7[color="black",style="dashed"];
+
+}

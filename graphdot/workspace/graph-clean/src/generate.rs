@@ -330,6 +330,12 @@ pub enum EndRef {
     Conclusion(usize, usize),
     /// Premise `p` of rule node `n` (→ its premise port).
     Premise(usize, usize),
+    /// The interior info cell of rule node `n` (→ its info port, the record's
+    /// middle single-cell group). Observed as the anchor of dashed temporal-order
+    /// edges (`blue3`/`black`/`purple`) at either end and of the legend `invis`
+    /// edge's source when it starts from a rule instance — e.g. `n131:n128 -> n4`
+    /// (§3c). The info port id is `node_id − conclusions − 1`.
+    Info(usize),
 }
 
 /// The finite observed edge-style vocabulary (BEHAVIOR.md §3c). Each maps to a
@@ -351,6 +357,17 @@ pub enum EdgeStyle {
     /// `color="black",style="dashed"` — before / less-than temporal edge (e.g. into
     /// the `#last` node).
     TemporalBlack,
+    /// `color="purple",style="dashed"` — a further temporal-order variant. Observed
+    /// almost always anchoring both ends at record info ports (rule-instance
+    /// timepoints), like the other dashed temporal edges (§3c census).
+    PurpleDashed,
+    /// `style="dotted",color="green"` — observed only between plain ellipse nodes
+    /// (never ported). NOTE the attribute order: `style` precedes `color` here,
+    /// unlike every other style, so the bytes are `[style="dotted",color="green"]`.
+    GreenDotted,
+    /// `color="darkorange3",style="dashed"` — observed only between plain ellipse
+    /// nodes (never ported).
+    DarkorangeDashed,
     /// `style="invis"` — ranking edge to the legend.
     Invis,
 }
@@ -368,6 +385,9 @@ impl EdgeStyle {
             EdgeStyle::Deduction => &[("color", "orangered2")],
             EdgeStyle::TemporalBlue => &[("color", "blue3"), ("style", "dashed")],
             EdgeStyle::TemporalBlack => &[("color", "black"), ("style", "dashed")],
+            EdgeStyle::PurpleDashed => &[("color", "purple"), ("style", "dashed")],
+            EdgeStyle::GreenDotted => &[("style", "dotted"), ("color", "green")],
+            EdgeStyle::DarkorangeDashed => &[("color", "darkorange3"), ("style", "dashed")],
             EdgeStyle::Invis => &[("style", "invis")],
         };
         raw.iter().map(|(k, v)| (k.to_string(), v.to_string())).collect()
@@ -404,8 +424,9 @@ pub struct System {
 
 /// Resolved ids for one system node.
 enum Resolved {
-    // The info port is never an edge endpoint, so it is not retained here.
-    Record { ports_prem: Vec<String>, ports_concl: Vec<String>, node: String },
+    // `port_info` is the middle-group cell's port; dashed temporal edges and the
+    // legend invis edge anchor there (via [`EndRef::Info`]).
+    Record { ports_prem: Vec<String>, port_info: String, ports_concl: Vec<String>, node: String },
     Node(String),
 }
 
@@ -456,7 +477,7 @@ pub fn generate(sys: &System) -> Graph {
                 }
                 None => free.push(stmt),
             }
-            resolved.push(Resolved::Record { ports_prem, ports_concl, node: ids.node });
+            resolved.push(Resolved::Record { ports_prem, port_info, ports_concl, node: ids.node });
             continue;
         }
         let id = alloc.node();
@@ -1042,6 +1063,13 @@ fn endpoint(resolved: &[Resolved], r: EndRef) -> EndPoint {
         EndRef::Premise(n, p) => {
             if let Resolved::Record { node, ports_prem, .. } = &resolved[n] {
                 EndPoint::port(node.clone(), ports_prem[p].clone())
+            } else {
+                EndPoint::node(resolved[n].node_id().to_string())
+            }
+        }
+        EndRef::Info(n) => {
+            if let Resolved::Record { node, port_info, .. } = &resolved[n] {
+                EndPoint::port(node.clone(), port_info.clone())
             } else {
                 EndPoint::node(resolved[n].node_id().to_string())
             }

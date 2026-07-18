@@ -1,0 +1,14 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n3[shape="record",label="{{<n0> AgSt_H2( $H, \<$D, $BB, $v, b\> )|<n1> In_A( $BB, \<'b', UN1\> )}|{<n2> #j : H_3[Verify( $H, b, UN1 )]}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+{
+rank="sink";
+n4[shape="plain",label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="3" CELLPADDING="1"><TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">UN1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">(b++bOther)</TD></TR></TABLE>>];
+
+}
+n3:n2 -> n4[style="invis"];
+
+}

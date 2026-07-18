@@ -1,0 +1,35 @@
+digraph "G" {
+nodesep="0.8";
+ranksep="0.8";
+sep="4";
+splines="true";
+overlap="false";
+pack="true";
+packmode="cluster";
+concentrate="true";
+compound="true";
+remincross="true";
+mclimit="10";
+nslimit="20";
+nslimit1="20";
+ordering="out";
+rankdir="TB";
+showboxes="false";
+clusterrank="local";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2",margin="0.05,0.05",shape="ellipse"];
+edge[fontsize="8",fontname="Helvetica",penwidth="1.5",arrowsize="0.5",color="black",style="solid",weight="8"];
+subgraph "cluster_Tag_Session_1" {
+nodesep="0.6";
+ranksep="0.6";
+label="Tag_Session_1";
+style="filled";
+color="#5CD8364C";
+penwidth="2";
+fillcolor="#5CD8364C";
+overlap="false";
+sep="4";
+n3[shape="record",label="{{<n0> State_1111211111111( ~id, ~k, ~r2, r1 )}|{<n1> #i : eventAlivekReader[Alive( ~k, 'Reader' )]}|{<n2> State_11112111111111( ~id, ~k, ~r2, r1 )}}",fillcolor="#40807c",style="filled",fontcolor="white",role="Tag"];
+
+}
+
+}

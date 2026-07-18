@@ -1,0 +1,37 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n6[shape="record",label="{{<n0> Fr( ~ey )|<n1> !LTK( $B, pmult(~n, hp($B)) )|<n2> In( 'g'^x )}|{<n3> #i1 : Resp_1[Accept( ~ey, KD1 ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sid( ~ey, \<$B, $A, 'g'^~ey, 'g'^x, 'Resp'\> )]\l}|{<n4> Out( 'g'^~ey )|<n5> !Sessk( ~ey, KD1 )}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+n7[label="#i2 : isend[K( KD1 )]",shape="ellipse"];
+n8[label="#vk : c_kdf[!KU( KD1 )]",shape="ellipse"];
+n9[label="#vl : irecv",shape="ellipse"];
+n10[label="#vf.1 : isend",shape="ellipse"];
+n11[label="#vk.1 : coerce[!KU( EX1 )]",shape="ellipse"];
+n12[label="#vr.2 : d_exp",shape="ellipse"];
+n13[label="!KU( 'g'^x ) @ #vk.2",shape="ellipse",color="gray"];
+n14[label="!KU( em(hp($A), hp($B))^~n ) @ #vk.7",shape="ellipse",color="gray"];
+n15[label="!KU( 'g'^~ey ) @ #vk.11",shape="ellipse",color="gray"];
+n16[label="!KU( x ) @ #vk.12",shape="ellipse",color="gray"];
+n6:n4 -> n9[color="gray30"];
+n9 -> n12[color="orangered2"];
+n10 -> n6:n2[color="gray30"];
+n12 -> n11[color="orangered2"];
+n8 -> n7[color="red",style="dashed"];
+n9 -> n15[color="darkorange3",style="dashed"];
+n11 -> n8[color="red",style="dashed"];
+n13 -> n8[color="red",style="dashed"];
+n13 -> n10[color="red",style="dashed"];
+n14 -> n8[color="red",style="dashed"];
+n15 -> n8[color="red",style="dashed"];
+n16 -> n12[color="red",style="dashed"];
+{
+rank="sink";
+n17[shape="plain",label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="3" CELLPADDING="1"><TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">EX1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">'g'^(~ey*x)</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">KD1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">kdf(&lt;EX1, em(hp($A), hp($B))^~n, $A, $B, 'g'^x, 'g'^~ey&gt;)</TD></TR></TABLE>>];
+
+}
+n7 -> n17[style="invis"];
+
+}

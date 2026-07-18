@@ -131,19 +131,73 @@ n<ID>[label="<text>",shape="ellipse",color="<c>"];
 n<S>[:<sport>] -> n<D>[:<dport>][<attrs>];
 ```
 Endpoints optionally carry a `:port` (record port). `<attrs>` is a
-comma-separated attribute list, in observed key order. Frequent styles:
+comma-separated attribute list, in observed key order. **The full observed
+(color, style) vocabulary is exactly these eleven attribute sets** — census over
+the entire 12 022-file corpus (477 311 edges, every one carries an attribute
+bracket; no attribute-free edge exists), counts in the last column:
 
-| attrs | meaning (inferred from context) |
-|---|---|
-| `color="red",style="dashed"` | intruder-deduction / `!KU` edge |
-| `style="bold",weight="10.0",color="gray50"` | structural premise/conclusion edge |
-| `style="bold",weight="10.0"` | structural edge (uncolored) |
-| `color="gray30"` | message/std edge |
-| `color="blue3",style="dashed"` | temporal-order edge |
-| `color="orangered2"` | (deduction variant) |
-| `color="black",style="dashed"` | before/less-than temporal edge |
-| `style="invis"` | ranking edge to the legend node |
-| `color="green",style="dotted"` / `purple`/`darkorange3` dashed | other goal edges |
+| attrs (verbatim bytes, observed key order) | meaning (inferred from context) | count |
+|---|---|---|
+| `[color="red",style="dashed"]` | intruder-deduction / `!KU` edge | 147937 |
+| `[style="bold",weight="10.0"]` | structural edge (uncolored) | 86531 |
+| `[style="bold",weight="10.0",color="gray50"]` | structural premise/conclusion edge | 86298 |
+| `[color="gray30"]` | message/std edge | 50359 |
+| `[color="blue3",style="dashed"]` | temporal-order edge | 37726 |
+| `[color="orangered2"]` | deduction variant | 29917 |
+| `[style="invis"]` | ranking edge to the legend node | 25271 |
+| `[color="black",style="dashed"]` | before/less-than temporal edge (e.g. into `#last`) | 6909 |
+| `[color="purple",style="dashed"]` | temporal-order variant | 2416 |
+| `[style="dotted",color="green"]` | plain-node goal edge | 2394 |
+| `[color="darkorange3",style="dashed"]` | plain-node goal edge | 1553 |
+
+**Byte trap:** the `dotted`/`green` set is the ONLY one whose bytes put `style`
+before `color` — `[style="dotted",color="green"]` (every other set leads with
+`color`). See §3h for the round-13 details on the last three (previously dropped)
+and the info-port anchor.
+
+### 3h. Edge-style completion + record info-port anchor (Session 13) — byte-verified over 12 022
+Two capture-observable model gaps, both surfaced only by whole-graph
+regeneration (the opaque round-trip preserves parsed edges verbatim and so
+masks them). Primary source: the `oracle/dot_corpus/` census (captured OUTPUT).
+
+**(1) Three previously-dropped styles.** The 8-of-11 vocabulary was completed
+with `purple`/`dashed` (2416), `dotted`/`green` (2394, the reversed-key set),
+and `darkorange3`/`dashed` (1553). `green`/`dotted` and `darkorange3`/`dashed`
+are observed ONLY between plain ellipse nodes (never ported); `purple`/`dashed`
+behaves like the other dashed temporal edges (info↔info, below). Witness
+`01c5db0a7030e664` carries the dropped `n12 -> n33[color="darkorange3",style="dashed"]`.
+
+**(2) The record info-port anchor.** An edge endpoint can anchor at a record's
+interior **info cell** (the middle single-cell group holding `#tvar : rule`),
+e.g. `n131:n128 -> n4` — witness `00082e1d6a47b5af` (record `n131`'s info cell
+is `<n128> #vr.2 : …`). Port-class census of every ported endpoint (classifying
+each port as prem / info / concl of its record):
+
+- **94.2 %** of graphs (11 322 / 12 022) contain ≥ 1 info-source edge;
+  58 206 info-source edges, 18 888 info-target edges corpus-wide.
+- The info port is used at **both** ends, not source-only. Info-**source** by
+  style: `blue3`/`dashed` 36694, `invis` 13354 (legend), `black`/`dashed` 5752,
+  `purple`/`dashed` 2405, `red`/`dashed` 1 (a lone legitimate case, record `n10`
+  in `1d4a080feaef2b99`). Info-**target** by style: `blue3`/`dashed` 11525,
+  `black`/`dashed` 4950, `purple`/`dashed` 2413. So the dashed temporal edges
+  (`blue3`/`black`/`purple`) anchor at the info port whenever the endpoint is a
+  rule record, and at the whole node (NOPORT) when it is an ellipse timepoint;
+  the legend `invis` edge anchors its **source** at the info port when it starts
+  from a rule record.
+- Structural bold edges are unchanged: **source = a conclusion port, target = a
+  premise port** (never info). Message/`gray30`: source ellipse (NOPORT) or a
+  conclusion port, target a premise port or ellipse. `orangered2`: conclusion
+  port or ellipse → ellipse.
+- **Port-id relation (same NodeIdAllocator id space, §3e):** for a record with
+  node id `N`, `P` premise cells, one info cell, `C` conclusion cells, the info
+  port is `N − C − 1` (ports are `N−(P+1+C) … N−1`, allocated prem, info, concl;
+  empty prem/concl groups are dropped but the info group is always present).
+  Verified: `n131` (C=2 → 131−3=128), `n148` (C=1 → 146), `n117` (C=1 → 115).
+
+Model change: added `EndRef::Info(n)` (resolves to `n<node>:n<info-port>`) and
+the three `EdgeStyle` variants; the info port is now retained in the resolver.
+The edge-section of all 12 022 graphs regenerates byte-exact from structured
+`SysEdge`s (`tests/regen_edges.rs`, corpus-gated).
 
 ### 3d. Node shapes (§ Round-3 item 2)
 Corpus census (all 12 022 dot + 81 manifests): only `record`, `ellipse`, `plain`.
@@ -823,9 +877,14 @@ Reproduced & byte-tested against captured/live payloads:
 - **System → graph GENERATION** (§4, §6): `generate` over the independent `System`
   model — free/ellipse/record/invtrapezium nodes, **role clusters** (`subgraph
   cluster_…`, free-then-cluster id/emission order), the **`#last`/bare-timepoint**
-  ellipse, the finite edge vocabulary, id/port allocation, and the wired record-cell
-  wrap. Byte-exact on live + corpus fixtures (invtrap, single/multi cluster,
-  `#last`, wrap sweep) in `tests/generate_tests.rs`.
+  ellipse, the **complete 11-style edge vocabulary** (§3c, incl. the round-13
+  `purple`/`green`/`darkorange3` sets), the **record info-port anchor**
+  (`EndRef::Info`, §3h), id/port allocation, and the wired record-cell wrap.
+  Byte-exact on live + corpus fixtures (invtrap, single/multi cluster, `#last`,
+  wrap sweep) in `tests/generate_tests.rs`. The whole edge section of all
+  **12 022/12 022** corpus graphs regenerates byte-exact from structured
+  `SysEdge`s — `tests/regen_edges.rs` (edge-vocabulary census, 26 committed
+  fixtures, corpus-gated bulk check).
 - **Pre-rendered-cell interop** (§ round 5): `RawRule` / `GraphNode::RawRule` accept
   already-rendered cell strings and run them through the same wrap/escape pipeline,
   byte-identical to the Term-based path (`raw_rule_matches_term_path_byte_exact`).
@@ -1175,3 +1234,47 @@ by the zone's row population.
 
 **Probes logged** in QUERIES.log Session 12 (probeL-O on ports 3200-3203, all
 servers stopped, ports 3200-3299 verified clear). No forbidden paths read.
+
+## Round 13 report — edge-style completion + record info-port anchor (folded here per protocol)
+
+Two capture-observable edge-layer model gaps, both masked by the opaque
+round-trip (it preserves parsed edge attributes/ports verbatim) and surfaced
+only by whole-graph regeneration. Primary material: the `oracle/dot_corpus/`
+census (captured OUTPUT; no live server was probed this round). Full detail in
+§3c / §3h.
+
+**GAP 1 — edge-style vocabulary.** Census of every edge attribute bracket over
+all 12 022 files: exactly **eleven** (color, style) sets, all 477 311 edges
+bracketed. The model covered 8; the three missing were `[color="purple",
+style="dashed"]` (2416), `[style="dotted",color="green"]` (2394),
+`[color="darkorange3",style="dashed"]` (1553). Added as `EdgeStyle::PurpleDashed
+/ GreenDotted / DarkorangeDashed`. **Byte trap:** `green`/`dotted` is the sole
+set whose bytes lead with `style`, not `color`. `green`/`dotted` and
+`darkorange3`/`dashed` are only ever plain-node→plain-node (never ported);
+`purple`/`dashed` behaves like the other dashed temporal edges.
+
+**GAP 2 — record info-port anchor.** Edges can anchor at a record's interior
+**info cell** port (the middle single-cell group, `#tvar : rule`), e.g.
+`n131:n128 -> n4`. Port-class census (each ported endpoint classified prem /
+info / concl of its record): **94.2 %** of graphs carry ≥ 1 info-source edge;
+58 206 info-source + 18 888 info-target edges corpus-wide. The info port is used
+at **both** ends (not source-only): the dashed temporal edges
+(`blue3`/`black`/`purple`) anchor at the info port when the endpoint is a rule
+record and at the whole node when it is an ellipse timepoint; the legend `invis`
+edge anchors its **source** at the info port from a rule record. Structural bold
+edges are unchanged (source = conclusion port, target = premise port). Info port
+id = `node_id − conclusions − 1`, drawn from the same `NodeIdAllocator` id space
+(§3e; ports allocated prem, info, concl before the node id). Added
+`EndRef::Info(n)`; the resolver now retains the info port (previously dropped).
+
+**Gates (round 13):** 87 tests green (5 new in `tests/regen_edges.rs`, 82→87).
+Corpus
+round-trip **12 022/12 022** and alloc_corpus **12 022/12 022** unchanged.
+NEW edge-section regeneration from structured `SysEdge`s: **12 022/12 022**
+byte-exact (corpus-gated) and 26 committed diverse fixtures always-on (covering
+all 11 styles, clusters, legends, info-ports). Edge-vocabulary census test
+asserts all 11 sets render byte-exact and the corpus uses only those 11
+(`map_style` panics on any un-modeled bracket → the 12 022/12 022 pass proves
+the set is complete). Absent-feature behavior (trapezium dual, `Shaped`,
+width overrides) unchanged. No live server used; ports 3200-3299 untouched.
+No forbidden paths read.

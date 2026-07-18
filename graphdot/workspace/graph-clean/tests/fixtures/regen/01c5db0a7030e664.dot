@@ -1,0 +1,51 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n8[shape="record",label="{{<n0> In( 'g'^x )|<n1> Fr( ~ekR )|<n2> !Ltk( $R, ~lkR )|<n3> !Pk( $I, 'g'^~x.1 )}|{<n4> #i1 : Resp_1[SidR_1( ~ekR, $I, $R, 'g'^x, 'g'^~ekR, H1 )]}|{<n5> Out( 'g'^~ekR )|<n6> !Ephk( ~ekR )|<n7> !Sessk( ~ekR, H1 )}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+n9[label="#i2 : isend[K( H1 )]",shape="ellipse"];
+n10[label="#vf : isend",shape="ellipse"];
+n11[label="#vk : c_h[!KU( H1 )]",shape="ellipse"];
+n12[label="#vl : irecv",shape="ellipse"];
+n18[shape="record",label="{{<n13> Fr( ~lkR )}|{<n14> #vr : generate_ltk}|{<n15> !Ltk( $R, ~lkR )|<n16> !Pk( $R, 'g'^~lkR )|<n17> Out( 'g'^~lkR )}}",fillcolor="#b1dc9a",style="filled",fontcolor="black",role="Undefined"];
+n19[label="#vk.1 : coerce[!KU( EX1 )]",shape="ellipse"];
+n25[shape="record",label="{{<n20> Fr( ~x.1 )}|{<n21> #vr.1 : generate_ltk}|{<n22> !Ltk( $I, ~x.1 )|<n23> !Pk( $I, 'g'^~x.1 )|<n24> Out( 'g'^~x.1 )}}",fillcolor="#b1dc9a",style="filled",fontcolor="black",role="Undefined"];
+n26[label="#vk.2 : c_exp[!KU( 'g'^MU1 )]",shape="ellipse"];
+n27[label="#vr.2 : d_exp",shape="ellipse"];
+n28[label="#vk.3 : coerce[!KU( ~lkR )]",shape="ellipse"];
+n32[shape="record",label="{{<n29> !Ltk( $R, ~lkR )}|{<n30> #vr.3 : Ltk_reveal[LtkRev( $R )]}|{<n31> Out( ~lkR )}}",fillcolor="#a7dd9a",style="filled",fontcolor="black",role="Undefined"];
+n33[label="!KU( 'g'^~ekR ) @ #vk.4",shape="ellipse",color="gray"];
+n34[label="!KU( 'g'^x ) @ #vk.7",shape="ellipse",color="gray"];
+n35[label="!KU( x ) @ #vk.13",shape="ellipse",color="gray"];
+n36[label="!KU( MU1 ) @ #vk.15",shape="ellipse",color="gray"];
+n37[label="!KU( ~x.1 ) @ #vk.16",shape="ellipse",color="gray"];
+n8:n5 -> n12[color="gray30"];
+n10 -> n8:n0[color="gray30"];
+n12 -> n27[color="orangered2"];
+n18:n15 -> n8:n2[style="bold",weight="10.0",color="gray50"];
+n18:n15 -> n32:n29[style="bold",weight="10.0",color="gray50"];
+n25:n23 -> n8:n3[style="bold",weight="10.0",color="gray50"];
+n27 -> n19[color="orangered2"];
+n32:n31 -> n28[color="orangered2"];
+n11 -> n9[color="red",style="dashed"];
+n12 -> n33[color="darkorange3",style="dashed"];
+n19 -> n11[color="red",style="dashed"];
+n26 -> n11[color="red",style="dashed"];
+n28 -> n36[color="red",style="dashed"];
+n33 -> n11[color="red",style="dashed"];
+n34 -> n10[color="red",style="dashed"];
+n34 -> n11[color="red",style="dashed"];
+n35 -> n27[color="red",style="dashed"];
+n36 -> n26[color="red",style="dashed"];
+n37 -> n36[color="red",style="dashed"];
+{
+rank="sink";
+n38[shape="plain",label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="3" CELLPADDING="1"><TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">EX1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">'g'^(~ekR*x)</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">MU1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">(~lkR*~x.1)</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">H1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">h(&lt;$I, $R, 'g'^x, 'g'^~ekR, EX1, 'g'^MU1&gt;)</TD></TR></TABLE>>];
+
+}
+n9 -> n38[style="invis"];
+
+}

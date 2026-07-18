@@ -1,0 +1,13 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n3[shape="record",label="{{<n0> Fr( ~n )}|{<n1> #i : Start[Start( ~n )]}|{<n2> A( ~n )}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+n7[shape="record",label="{{<n4> A( ~n )}|{<n5> #j : Loop[Loop( ~n )]}|{<n6> A( ~n )}}",fillcolor="#b1dc9a",style="filled",fontcolor="black",role="Undefined"];
+n11[shape="record",label="{{<n8> A( ~n )}|{<n9> #vr : Loop[Loop( ~n )]}|{<n10> A( ~n )}}",fillcolor="#b1dc9a",style="filled",fontcolor="black",role="Undefined"];
+n12[label="#j",shape="ellipse"];
+n11:n10 -> n7:n4[style="bold",weight="10.0"];
+n3:n1 -> n11:n9[color="purple",style="dashed"];
+
+}

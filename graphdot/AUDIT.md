@@ -1392,3 +1392,116 @@ shape-blind, relief-free, plain-length `renderBalanced`. No source identifier co
 non-observable constant, no structural transcription, no comment lineage. No redo instructions are
 issued.
 VERDICT: pass
+
+## Round 13 incremental audit — edge-style vocabulary completion (`purple`/`green`/`darkorange3` sets) + record info-port endpoint anchor (`EndRef::Info`)
+
+Scope: the round-13 working-tree delta over `422b379`, restricted to `graphdot/` —
+`git -C /home/kamilner/tamarin-cleanroom diff -- graphdot/` plus the untracked round-13 files:
+`workspace/graph-clean/src/generate.rs` (three new `EdgeStyle` variants + their attribute bytes,
+`EndRef::Info(usize)` and its resolver arm, `Resolved::Record` gains `port_info`),
+`workspace/graph-clean/tests/regen_edges.rs` (new, 5 tests + corpus-gated bulk check),
+`workspace/graph-clean/tests/fixtures/regen/` (26 committed captures, 45 KB),
+`workspace/r13/{port_census.py,pick_fixtures.py}`, and the BEHAVIOR.md §3c/§3h/§6 + QUERIES.log
+Session-13 prose. Audited against `lib/theory/src/Theory/Constraint/System/Dot.hs` — the edge-emission
+machinery (`dotEdge`, `dotGenEdge`, `dotLessEdge`, `mergeLessEdges`/`toColor`, `generateLegend`) and
+the record/port machinery (`dotNodeCompact`, `mkNode`, `D.record`, `dsNodes`/`dsPrems`/`dsConcs`).
+
+### What this round is: a black-box completion of the observed edge layer, not a source port
+
+Every addition is capture-forced merger — the bytes and the port syntax are fixed by the observed
+OUTPUT, verified this round against the `oracle/dot_corpus/` census (12 022 payloads, captured
+output; no live server was probed, ports 3200-3299 untouched). Independently re-run during this audit:
+
+- **Edge-bracket census (Q13.1) reproduces exactly.** `grep -hoE '\->[^;]*\[[^]]*\]' … | uniq -c`
+  yields precisely the eleven (color, style) sets with the claimed counts — `red/dashed 147937,
+  bold 86531, bold+gray50 86298, gray30 50359, blue3/dashed 37726, orangered2 29917, invis 25271,
+  black/dashed 6909, purple/dashed 2416, dotted/green 2394, darkorange3/dashed 1553` (Σ 477 311 =
+  every edge line; no attribute-free edge). The three added sets are the tail of an exhaustive
+  census, not a selection.
+- **The `[style="dotted",color="green"]` byte order is observed, not transcribed.** It is the sole
+  set whose bytes lead with `style`; the census confirms this ordering appears verbatim in output.
+  That the source's `dotGenEdge [("style","dotted"),("color","green")]` (UnsolvedChain arm) happens
+  to seed the same order is the *definition* of capture-forced merger — the output byte sequence is
+  what any faithful reproduction must emit, and it was recovered from output (with a count the source
+  cannot contain), not copied from the source list. `purple`/`darkorange3` render `color` before
+  `style`, likewise matching output.
+- **Port behavior is output-observed, hedged empirically.** Re-verified: `green`/`dotted` and
+  `darkorange3`/`dashed` have **0** ported endpoints across the corpus (always plain→plain);
+  `purple`/`dashed` is ported info↔info (`n26:n24 -> n33:n30`, …). The §3h/§3c wording ("observed
+  only between plain ellipse nodes", "behaves like the other dashed temporal edges") is stated as a
+  corpus observation, not a structural claim — correctly so, since these are census facts about which
+  graphs occur, addressable only from output.
+
+### The info-port anchor — output-derived, and named independently of the source
+
+`EndRef::Info(n)` resolves an endpoint to a record's middle single-cell (info) port
+`n<node>:n<info-port>`. Provenance verified end-to-end from output:
+
+- **Witness `00082e1d6a47b5af` reproduces the pinned anchor.** Record `n131`'s label is
+  `{{<n127> State…}|{<n128> #vr.2 : …}|{<n129> …|<n130> Out…}}`; the edge `n131:n128 -> n4` is
+  present with `[color="blue3",style="dashed"]`. The info cell is the middle group whose text starts
+  with the temporal `#` sigil — a purely observable discriminator (facts never do). C=2 conclusions
+  (n129, n130) ⇒ info port `131 − 2 − 1 = 128`, matching the byte; the arithmetic re-verifies on the
+  claimed `n148` (146) and `n117` (115) as well.
+- **The `node_id − conclusions − 1` relation is an output invariant, not a source constant.** Dot.hs
+  assigns these ids implicitly via `D.record`/`D.nextId` in prem/as/concl row order; it computes no
+  such formula. The sealed relation is the arithmetic consequence of the round-established §3e
+  allocator (ports laid prem, info, concl before the node id) and is *checkable from the emitted port
+  ids alone*. No non-observable constant is imported.
+- **"info" is the sealed side's own coinage.** The source keys this cell `Nothing` (the `as`/`asM`/
+  `ruleLabelM` rule-label row) and caches it in `dsNodes` via `lookup Nothing ids`; it reserves
+  "info" (`rInfo`, `rInfoVal`, `ProtoInfo`) for rule metadata, never for this cell. The sealed side
+  named the cell for its *observable content* (the `#t : rule` timepoint), not after any source
+  identifier — the opposite of identifier transcription. It likewise did not adopt the source's
+  `Nothing`-key framing.
+
+### Byte-exact regeneration confirms the merger defense (re-run this audit)
+
+The claim that the edge layer is entirely output-forced was re-executed, not taken on trust:
+`GRAPHCLEAN_CORPUS=…/oracle/dot_corpus cargo test --test regen_edges regenerate_corpus_dir` →
+**`edge-section regeneration: 12022/12022 byte-exact`** (23 s). The five default `regen_edges` tests
+pass. Because `map_style` **panics** on any un-modeled bracket, the 12 022/12 022 pass is a proof that
+the eleven-set vocabulary is complete and the info-port model is total over the corpus — i.e. the new
+bytes/ports are precisely those the observed output demands, nothing added, nothing missing.
+
+### Structural divergence, not convergence
+
+The source has **no edge-style enum**: `dotEdge` inlines attribute lists behind `check isProtoFact`/
+`isKFact` guards, `dotGenEdge` hard-codes the UnsolvedChain green/dotted list, and dashed temporal
+colors come from a `toColor :: Reason -> String` map (`Adversary→red`, `Formula→black`,
+`Fresh→blue3`, `InjectiveFacts→purple`, `NormalForm→darkorange3`) wrapped by `dotLessEdge` /
+`mergeLessEdges`. The sealed model is a flat, closed **observed-vocabulary** enum whose variants are
+named by their rendered attributes (`PurpleDashed`, `GreenDotted`, `DarkorangeDashed`), carrying no
+trace of the source's reason/less-edge/chain framing. Endpoint resolution is likewise a data enum
+(`EndRef::{Whole,Conclusion,Premise,Info}`) over a precomputed port index, versus the source's
+stateful `dsNodes`/`dsPrems`/`dsConcs` cache lookups. The delta widens this structural gap (a fourth
+endpoint class + three vocabulary entries), and introduces no shape shared with the source.
+
+### Grep / provenance sweep (this round's files)
+
+Across the entire round-13 delta (generate.rs added lines, `regen_edges.rs`, `r13/*.py`, BEHAVIOR.md
+and QUERIES.log added lines): **zero** occurrences of `dotEdge`/`dotGenEdge`/`dotLessEdge`/
+`mergeLessEdges`/`toColor`/`Reason`/`Adversary`/`Formula`/`InjectiveFacts`/`NormalForm`/
+`UnsolvedChain`/`LessEdge`/`laSmaller`/`laLarger`/`dsNodes`/`dsPrems`/`dsConcs`, and no echo of the
+source's comment lines. New identifiers (`EndRef::Info`, `port_info`, `PurpleDashed`/`GreenDotted`/
+`DarkorangeDashed`, `PortRole`, `NodeInfo`, `Foot`, `map_style`, `rebuild`, `regen_fixtures`) share
+nothing with the source constellation; the color/style string literals are the census bytes
+themselves (merger). The two `r13/` scripts read only `oracle/dot_corpus/*.dot` (captured output) and
+reference no source constant. Two documentation phrasings were scrutinized and cleared: the
+meaning-column "before/less-than temporal edge (e.g. into `#last`)" (black/dashed) and "plain-node
+goal edge" (green/darkorange3) are hedged "(inferred from context)" semantic labels grounded in
+observable structure (edges into the `#last` node; edges between plain ellipse nodes) using generic
+Tamarin proof vocabulary — not the code identifiers `LessEdge`/`UnsolvedChain`, not load-bearing on
+any byte, and the black/dashed row's meaning predates this round.
+
+### Findings surviving filtration (Round 13)
+
+Dot.hs-resemblance violations: **0**. The three completed edge-style sets (`purple`/`dashed`,
+`dotted`/`green` with its style-first byte trap, `darkorange3`/`dashed`) and the record info-port
+endpoint anchor (`EndRef::Info`, `n<node>:n<node−C−1>`) each trace to the re-reproduced
+`oracle/dot_corpus/` census (Q13.1 bracket census, Q13.3 port-class census, the `00082e1d6a47b5af` /
+`01c5db0a7030e664` witnesses) and are byte-verified by 12 022/12 022 edge-section regeneration — every
+addition is capture-forced merger. No source identifier constellation, no non-observable constant, no
+structural transcription (the source has no style enum; the sealed side names the info cell
+independently), no comment lineage. No redo instructions are issued.
+VERDICT: pass
