@@ -1,0 +1,111 @@
+# QUERIES.log — web PRODUCER surface. One line per oracle interaction + purpose.
+#
+# Permitted oracle sources (PROTOCOL.md):
+#   A) oracle/captured_responses/*.hs.json — 81 captured crawl manifests
+#      (captured program OUTPUT), reached only via the cluster-local path.
+#   B) oracle/hs_server.sh + oracle/extract_fragments.py — live probing / capture
+#      slicing of the sanctioned binary. Ports 3100-3199.
+#   C) oracle/examples/*.spthy — GPL example theories used ONLY as observation
+#      INPUTS to the live server.
+# No file under /home/kamilner/tamarin-rs/ is READ (only the sanctioned binary
+# is EXECUTED via the oracle, and captured_responses/ is captured OUTPUT).
+
+## Corpus orientation (source A) — seeded by the scaffold
+[S01] extract_fragments.py families | fragment URL families + kinds across all 81
+      manifests: main/message,main/rules,main/tactic,main/help = 81 each (json);
+      overview = 473 (html); source/message = 81 (text). proof/method/intdot/
+      interactive-graph-def dominate but are solver/graph = out of scope.
+[S02] extract_fragments.py extract main/{message,rules,tactic,help} → round1/targets/
+      | materialized the 11 curated round-1 labels' four center fragments as the
+      exact response bytes to reproduce (44 files).
+
+## Round-1 target reading (source A) — center section fragments
+[S03] targets/issue515__*_message.html | minimal signature pane: title "Message
+      theory"; three always-present <h2> sections (Signature / Construction Rules
+      / Deconstruction Rules); per-line <br/>\n; leading spaces → &nbsp;; body
+      entity-escaped (&lt; &gt;) with hl_keyword/hl_operator/hl_comment spans.
+[S04] targets/issue515__*_tactic.html | simplest fragment: title "Tactics"; one
+      always-present <h2>Tactic(s)</h2> + empty <p class="monospace rules"></p>;
+      body empty ⇒ empty paragraph kept.
+[S05] targets/issue515__*_rules.html vs CH07__*_rules.html | rules pane: leading
+      <br/> slot; <h2>Fact Symbols with Injective Instances</h2> body "None" or a
+      value; <h2>Multiset Rewriting Rules</h2>; <h2>Restrictions of the Set of
+      Traces</h2> present only when the theory has restrictions; title carries
+      " and restrictions" iff restrictions present.
+[S06] targets/issue515__*_help.html | help pane: single-line ($newline-never)
+      body, NO <br/> postprocess; title "Theory: <name>"; env line "Theory: NAME
+      (Loaded at TIME from ORIGIN) <wf-warning banner>" + a fixed static block.
+
+## Live-oracle validation (sources B+C)
+[L01] hs_server.sh smoke oracle/examples/Tutorial.spthy 3120 | wrapper boots
+      (readiness poll), serves overview + main/message; port freed on stop.
+[L02] hs_server.sh start oracle/examples/issue515.spthy 3131 ; curl main/message
+      | live html field == captured target byte-identical → targets trustworthy,
+      oracle reproduces the corpus. (End-to-end round-1 loop confirmed.)
+
+## Round-1 implementation probes (this session)
+[S07] python sweep over captured_responses (all 81) | envelope key inventory:
+      {html,title} x16838 (html key FIRST; body matches ^{"html":"..","title":".."}$),
+      {redirect} x1157, alert absent from corpus. Titles: main/message="Message
+      theory" x81; main/rules="Multiset rewriting rules and restrictions" x81 —
+      CONSTANT even for the 43 no-restriction theories (REFUTES the seeded §5
+      titles-vary claim); main/tactic="Tactics" x81; main/help="Theory: <name>".
+      main/rules html always starts "<br/>\n" (x81). h2 vocab rules: Fact Symbols
+      with Injective Instances x81, Multiset Rewriting Rules x81, Restrictions of
+      the Set of Traces x38, Macros x0 (never in corpus). message: Signature/
+      Construction Rules/Deconstruction Rules x81 each. Injective-facts body is
+      the single line "None" x62 else a short value line.
+[S08] raw body of issue515 main/tactic (undecoded) | exact envelope bytes:
+      {"html":"<h2>Tactic(s)</h2><br/>\n<p class=\"monospace rules\"></p><br/>\n","title":"Tactics"}
+[S09] python sweep | raw JSON escapes across ALL json bodies: only \n \" \t \\
+      (no \uXXXX, no \/). &amp; appears in html (restriction formulas, overview).
+      main/tactic non-empty in 12 captures — same skin, body = tactic text lines
+      (hl_keyword spans, &quot; &#39; regex text). Help STATIC block identical
+      across all 81; env line = <p>Theory: NAME (Loaded at HH:MM:SS from Local
+      &quot;PATH&quot;) BANNER</p>; BANNER = "" (x32, giving ") </p>") or
+      <div class="wf-warning">..</div> (x49).
+[S10] python sweep | R1 fragment heads/tails: message starts <h2>Signature</h2>
+      x81; tactic starts <h2>Tactic(s)</h2> x81; rules starts <br/>\n x81;
+      message/rules/tactic all END "</p><br/>\n"; help ends "</table></div></p>"
+      (NO trailing <br/> or newline). No tabs in any R1 fragment. class= vocab:
+      monospace rules / hl_keyword / hl_operator / hl_comment / wf-warning /
+      warning / tamarin / keys. Entities seen: &nbsp; &lt; &gt; &quot; &#39; &amp;.
+[S11] python sweep | bytes before <h2>Restrictions of the Set of Traces</h2>:
+      always "</span></p><br/>\n" (x38) — restrictions follows the MSR block
+      directly, NO blank line at the junction.
+[S12] python sweep | envelope first key is always html|redirect (no other order);
+      no "<a " inside any R1 center fragment (they carry no links).
+[L03] hs_server.sh start examples/features/macros/MacroGlobalVarNSPK3.spthy 3131;
+      probe /thy/trace/1/main/rules | WITH macros the pane starts DIRECTLY with
+      <h2>Macros</h2><br/>\n<p class="monospace rules">..macros text..</p><br/>\n
+      then <h2>Fact Symbols..> — NO leading <br/>. So the corpus-wide leading
+      <br/> is the EMPTY-MACROS SLOT (blank line), not a fixed leading blank.
+      Title unchanged. (Input: GPL example used solely as observation input.)
+[L04] probe 3131 /thy/trace/1/del/path/help | alert envelope live:
+      {"alert":"Can't delete the given theory path!"} (compact, single key).
+[L05] probe 3131 /thy/trace/1/main/help | no-warnings banner variant: env line
+      ends ") </p>" (empty banner between the space and </p>).
+[L06] wrote OWN minimal theory (scratchpad, my own text: theory EscProbe / one
+      rule) to a metachar FILENAME esc&"<>'probe.spthy; served on 3131; probe
+      main/help | producer-side HTML escaping forced through the env line:
+      & -> &amp;  " -> &quot;  < -> &lt;  > -> &gt;  ' -> &#39;; backslash NOT
+      html-escaped (raw \ in html, \\ in JSON). probe main/tactic on this
+      lemma-less theory | identical empty-tactic bytes to the corpus form.
+[S13] tools/extract_r1_raw.py (own tool, corpus-only) | materialized the RAW
+      envelope bodies of all four center-fragment families across all 81
+      manifests into workspace/r1_raw/ (324 files) — the byte targets
+      tests/corpus_sweep.rs replays (slice opaque content out, re-render,
+      byte-compare the whole response body, envelope included).
+[L07] probe 3131 main/{message,rules,tactic,help} on EscProbe (own theory,
+      metachar filename) and again after restarting with
+      examples/features/macros/MacroGlobalVarNSPK3.spthy | captured to
+      workspace/r1_live/ (8 raw bodies) and replayed by the live_probe_replays
+      test: reconstruction -> render matches the live bytes exactly, incl. the
+      macros-present rules pane (8125 B) never seen in the crawl corpus.
+      Server STOPPED after capture (port 3131 freed; 3100-3199 scan clean).
+
+## Validation status (round 1 close)
+cargo test: 14 tests green, zero warnings. corpus_sweep_all_manifests = 324/324
+byte-identical; round1_materialized_targets = 44/44; live_probe_replays = 8/8.
+Mutation check: doctoring the break marker to "<br />" makes the sweep FAIL
+(the gate is not vacuous); reverted.

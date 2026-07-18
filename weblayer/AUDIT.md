@@ -993,3 +993,163 @@ behaviour, non-boundary magic constant, or comment lineage appears. Identifier-c
 with `Handler.hs`/`Types.hs`: none. Findings that survive filtration: 0. No redo instructions issued.
 
 VERDICT: pass
+
+---
+
+# PRODUCERS cluster — Round 1 — dual audit (barrier hygiene + similarity)
+
+New sub-cluster `weblayer/producers/` (untracked; repo HEAD `b4fb110` predates it). The
+scaffold (`SPEC.md`, `README.md`, `interface/`, `oracle/`, `round1/`) is OPEN-side-authored;
+the sealed side is `workspace/producers-clean/` + `workspace/{BEHAVIOR.md,QUERIES.log}`. R1
+(center section fragments + shared HTML skin) is the only implemented surface; R2–R5 are
+pure `unimplemented!()` stubs. Two audits, both run.
+
+Upstream consulted (auditor privilege): `src/Web/Theory.hs`
+(`messageSnippet`/`rulesSnippet`/`tacticSnippet`/`ppSection`/`ppWithHeader`,
+`htmlThyPath`/`pp`, `helpHtml`, `titleThyPath`), `lib/utils/src/Text/PrettyPrint/Html.hs`
+(`postprocessHtmlDoc`/`escapeHtmlEntities`/`withTag`), `src/Web/Handler.hs`
+(`responseToJson`). Method: for audit 2, abstraction–filtration–comparison, every behavioural
+claim cross-checked to a `QUERIES.log` probe or a `round1/` capture.
+
+## AUDIT 1 — Barrier hygiene of the open-authored scaffold
+
+**Interface files are CLEAN (the precedent vector).** The round-precedent (a `required_api.md`
+that leaked splice-anchor names) does **not** recur: `interface/required_api.md` names only
+indicative API entry points and states explicitly "none are specified in this file"; the fn
+names (`render_content_pane`/`escape_text`/`postprocess_lines`/`html_envelope`/…) are behaviour
+descriptive and share nothing with upstream internals. `interface/fragment_inputs.rs` carries an
+expression-stripped header ("not a transcription of any existing data model") and names every
+type/field for observable behaviour. `round1/{families.tsv,fetch_targets.sh}` and
+`oracle/{extract_fragments.py,hs_server.sh}` operate on captured OUTPUT only — feature tags,
+URL skeletons, capture hashes; no upstream identifier, no port seam, no `.hs` citation. A scan
+of the whole scaffold for ~35 upstream Haskell *function* identifiers (`theoryIndex`,
+`linkToPath`, `markStatus`, `postprocessHtmlDoc`, `escapeHtmlEntities`, `withTag`,
+`caseEmptyDoc`, `titleThyPath`, `responseToJson`, `JsonHtml`, …) returns **zero** — no
+expression-bearing upstream name reaches sealed-readable material.
+
+**FINDING PH-1 (barrier hygiene — scaffold rewrite required).** `SPEC.md` cites upstream
+Haskell **source-file paths** in sealed-readable text: the sub-target table's "HS citation it
+advances" column and the "Author topology" paragraph name `src/Web/Theory.hs`,
+`src/Web/Hamlet.hs`, `src/Web/Handler.hs`, `src/Web/Types.hs`, and `Text/PrettyPrint/Html.hs`
+(and `README.md` repeats the glob `src/Web/*.hs`). This **diverges from the established
+sibling norm**: `pretty/SPEC.md`, `graphdot/SPEC.md`, and `wellformedness/SPEC.md` cite **zero**
+upstream source files, conveying the identical citation-yield / author-topology purely through
+the *ported* `.rs` files that get deleted plus the per-file author lists. The leak here is
+file-level licensing bookkeeping — no function name, no decomposition, no anchor, no expression
+— and the pristine `interface/` contract the implementer compiles against is unaffected; but it
+is an avoidable over-share that points the sealed reader straight at the upstream files and
+weakens the black-box posture.
+*Rewrite instruction (scaffold, `SPEC.md` + `README.md`):* recast the "HS citation it advances"
+column and the Author-topology text in terms of the **ported `.rs` files** that carry those
+citations (`handlers/theory_html.rs`, `proof_tree.rs`, `root.rs`, `path_parse.rs`, plus the
+already-clean dispatch shells) exactly as `pretty/SPEC.md` does, and delete every
+`src/Web/*.hs` / `Text/PrettyPrint/Html.hs` string from sealed-readable text. Keep the author
+usernames and the port-seam file names (those are within norm).
+
+**Within-norm (recorded, NOT findings).** (a) `SPEC.md` naming port-seam files + port-internal
+fn names (`handlers/theory_html.rs`, `proof_tree.rs::render_proof_tree_html`, `root.rs`,
+`path_parse.rs`, `proof_state`, `web_clean::proofscript`) and the pseudonymous authors
+(Kanakanajm/YannColomb/Schoop) matches `pretty/SPEC.md` verbatim in kind (which names
+`render_signature`/`render_ac_variants_block`/`rule_attributes_doc` etc. + per-file author
+lists and passed audit). Advisory only: the two *function*-level names could be dropped to
+file-level for extra margin, but they leak no upstream expression. (b) `SPEC.md` line 85's
+"`withHeader` framing" is a **phantom** — no such identifier exists anywhere in the upstream
+tree; it is a coined term, harmless, though its Haskell-ish look could be tidied.
+
+## AUDIT 2 — Similarity of the sealed crate (abstraction–filtration–comparison)
+
+**Abstraction.** R1 renders three panes (`main/message`/`rules`/`tactic`) as a headed-block
+document — `<h2>HEADING</h2>` + `<p class="monospace rules">BODY</p>` per block — through a
+shared skin (`html.rs`: entity-escape, per-line `&nbsp;`/`<br/>` postprocess, the
+`{html,title}`/`{redirect}`/`{alert}` envelopes) and wraps `main/help` as a single-line env
+line + a fixed static block. Upstream produces the same fragments via `messageSnippet`/
+`rulesSnippet`/`tacticSnippet` (`ppSection`/`ppWithHeader` = `withTag "h2"` `$$` `withTag "p"
+[("class","monospace rules")]`), `postprocessHtmlDoc`, `escapeHtmlEntities`, `helpHtml`, and
+`titleThyPath`, enveloped by `responseToJson`.
+
+**Filtration — every shared element is observable served output (merger / compatibility).**
+The tag skeleton (`<h2>`, `<p class="monospace rules">`, `<br/>`, `&nbsp;`, the 5-entity escape
+set, the `{html,title}` compact JSON with `html` key first), the fixed heading vocabulary
+(Signature / Construction Rules / Deconstruction Rules; Macros / Fact Symbols with Injective
+Instances / Multiset Rewriting Rules / Restrictions of the Set of Traces; Tactic(s)), the pane
+titles ("Message theory" / "Multiset rewriting rules and restrictions" / "Tactics" / "Theory:
+NAME"), the help env line `<p>Theory: NAME (Loaded at TIME from ORIGIN) BANNER</p>`, and the
+verbatim static help block are all present in the captured response bodies and pinned by the
+corpus sweep (324/324 raw-byte reassembly across 81 manifests) + fixture tests. Byte-forced
+wire content; a faithful reimplementation has no freedom here. The `(Loaded at …)` parenthetical
+and the highlight `hl_*` spans are additionally normalized away by the semantic acceptance gate,
+i.e. not even on the bar.
+
+**Comparison — affirmative evidence of independent, observation-only construction.**
+- **Materially different postprocess expression.** Upstream `postprocessHtmlDoc = unlines . map
+  (addBreak . indent) . lines` with `indent = … (first $ concatMap (const "&nbsp;")) . span
+  isSpace` (whitespace incl. **tabs** via `isSpace`; `lines`/`unlines` drop the final empty
+  segment). The clean `postprocess_lines` uses `split('\n')` + `trim_start_matches(' ')` +
+  byte-length counting — **spaces only** (tabs pass through, documented as unobserved
+  [S10]) and different trailing-newline semantics. Same observable bytes, divergent code.
+- **Different empty-body decomposition.** Upstream mixes two mechanisms: `caseEmptyDoc emptyDoc
+  (h2 $$ p) body` for vanish-when-empty and a separate `if null … then text empty` for the
+  macros blank slot, and plain `ppSection` (no guard) for always-keep. The clean side unifies
+  all three into one 3-variant `EmptyRender { Keep, BlankLine, Omit }` enum — its own
+  abstraction, not upstream's control-flow split.
+- **Different envelope expression.** `html_envelope` hand-builds the JSON with a manual
+  `json_escape_into` string pass — unlike Aeson's `object ["html" .= …, "title" .= …]` and
+  unlike the sibling `web-clean` crate's `serde_json`. Escape-arm order also differs from
+  upstream's `escapeHtmlEntities` (`&`-first vs `<`-first).
+- **Zero upstream-internal identifier overlap.** Grep of `src/` + `tests/` for the upstream
+  constellation (`messageSnippet`/`rulesSnippet`/`tacticSnippet`/`ppSection`/`ppWithHeader`/
+  `htmlThyPath`/`postprocessHtmlDoc`/`escapeHtmlEntities`/`withTag`/`caseEmptyDoc`/`helpHtml`/
+  `titleThyPath`/`renderHtmlDoc`/`preEscapedToMarkup`/`errorsHtml`/`GenericTheoryInfo`/…)
+  returns nothing. Clean names (`render_pane`/`render_help_pane`/`HeadedBlock`/`EmptyRender`/
+  `ContentPane`/`HelpPane`) are all behaviour-descriptive.
+- **No comment lineage.** Upstream comments ("Build the Html document showing the message
+  theory", "converts the line-breaks of cs to `<br>` tags", "Copied from `blaze-html`") have no
+  clean echo; grep for `blaze`/`Build the Html`/`converts the line-breaks` in `src/` is empty.
+- **Source-only branches not reproduced.** Upstream's `pp` empty-string guard ("Trying to render
+  document yielded empty string. This is a bug.") and its inline `if null injFacts then text
+  "None"` fallback are **not** reimplemented — the clean side holds `None` as opaque adapter
+  input (honestly logged as unobservable-at-boundary, BEHAVIOR §6). Rendered-byte artifacts that
+  do **not** exist in the Hamlet source (the stray `</span>` after the Tamarin span) are
+  reproduced byte-exactly — proof of capture-derivation, not source-reading.
+- **Reproduced only what the captures exercise.** Full support for the two observed envelopes +
+  the live-forced `{alert}`; the solver `monospace cases` pane is absent; R2–R5 are stubs.
+
+**Provenance cross-check of the hardest-to-guess behavior (DISPOSITIVE).** `titleThyPath`
+(Theory.hs 1589) makes the rules title an **unconditional constant** `"Multiset rewriting rules
+and restrictions"` — it says "and restrictions" even for the 43 theories with zero restrictions.
+`BEHAVIOR.md` §6 records that the sealed room **seeded the natural wrong hypothesis** (" and
+restrictions" is *conditional*) and then **REFUTED it by observing all 81 captures** ([S07]).
+Reading the source would have shown the constant immediately and no false hypothesis would ever
+have been seeded; the refuted-hypothesis provenance is affirmative proof of black-box derivation.
+The help title ("Theory: NAME", 1588), the "Tactic(s)" heading vs "Tactics" title distinction
+(1591), and the `<p>Theory: NAME (Loaded at TIME from ORIGIN) BANNER</p>` env line (helpHtml
+1187–1194) all match observable output; `QUERIES.log` [S01]–[S13] (corpus sweeps) + [L01]–[L07]
+(live oracle, incl. an **own-authored** `EscProbe` theory + a metachar filename for the escape
+set) carry no source-tree read.
+
+## Non-blocking note (NOT a similarity finding; no redo; does not bear on the verdict)
+Shipped-comment provenance narration — `src/html.rs`/`section.rs`/`model.rs` doc comments carry
+inline probe citations (`[S07]`, `[L03]`, `BEHAVIOR.md §2`, …). This is the clean-room's own
+provenance, the *opposite* of copied expression, so it has no similarity effect — but it
+continues the Round-6/Round-7 hygiene note (the campaign's "comments describe current state only"
+standard). Team may move the `[S..]`/`[L..]`/`§`-references into BEHAVIOR/QUERIES and leave the
+shipped comments to describe current behaviour only.
+
+## VIOLATIONS (Producers Round 1)
+**Similarity: 0.** Every R1 resemblance to `Theory.hs`/`Html.hs`/`Handler.hs` reduces to
+observable served output (tag skeleton, heading/title vocabulary, envelope, static help block,
+help env line) — merger/compatibility content pinned by the 324/324 corpus sweep — while the
+skin's *expression* (postprocess, empty-body modelling, envelope building, escape) is materially
+divergent, the identifier constellation and comment lineage overlap is nil, source-only branches
+are pointedly not reproduced, and the hardest behaviour carries refuted-hypothesis black-box
+provenance. R2–R5 are `unimplemented!()` stubs with observable-behaviour doc comments only.
+
+**Barrier hygiene: 1 finding (PH-1) — scaffold rewrite, non-contaminating.** `SPEC.md`/`README.md`
+cite upstream `src/Web/*.hs` / `Text/PrettyPrint/Html.hs` file paths in sealed-readable text,
+diverging from the sibling-SPEC norm; the rewrite instruction above recasts them onto the ported
+`.rs` seams. The leak is file-level bookkeeping only — no function name, decomposition, anchor, or
+expression crossed the barrier (verified scan), the `interface/` contract is pristine, and the
+sealed crate is affirmatively, independently derived — so the barrier held where it counts and the
+finding is a scaffold cleanup, not a contamination of the sealed work.
+
+VERDICT: pass

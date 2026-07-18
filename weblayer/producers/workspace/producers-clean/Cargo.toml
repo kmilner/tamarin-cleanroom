@@ -1,0 +1,17 @@
+[package]
+name = "producers-clean"
+version = "0.1.0"
+edition = "2021"
+
+# Clean-room reimplementation of the tamarin-prover interactive web UI's
+# fragment PRODUCERS — the code that renders pre-computed prover values into the
+# HTML/JSON response-body content served by the (already clean-roomed) dispatch
+# layer. Derived purely from black-box observation of captured responses + the
+# live oracle (see ../../SPEC.md). std-only: no serde, no external crates — the
+# `{html,title}` envelope and all escaping are hand-rolled from observed bytes.
+
+[lib]
+name = "producers_clean"
+path = "src/lib.rs"
+
+[dependencies]

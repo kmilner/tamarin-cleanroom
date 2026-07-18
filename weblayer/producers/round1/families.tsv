@@ -1,0 +1,22 @@
+# Round-1 byte targets — sub-target R1 (theory-view CENTER section fragments:
+# the `main/message`, `main/rules`, `main/tactic`, `main/help` JSON envelopes).
+#
+# Curated capture labels spanning the section-fragment variety (signature
+# shapes, xor/multiset/nat, with/without restrictions, minimal→large). Each
+# label is <theory-name>__<8-char capture-hash> so collision names (Joux,
+# Scott, …) stay pinned to ONE capture. All four center fragments per label are
+# materialized by fetch_targets.sh into targets/. These are the exact response
+# bodies (JSON `{html,title}` envelope, decoded) a producer must reproduce.
+#
+# Format: <feature tags><TAB><label = name__hash8><TAB><note>
+destr, fst/pair/snd, no-builtins-line	issue515__2b3b83d2	baseline: minimal signature, no builtins:, no restrictions
+asym-enc, classic	NSPK3__642774eb	classic public-key: aenc/adec/pk/sign signature
+bilinear, pmult/em	Joux__09829201	bilinear-pairing signature block
+exp/dh	NAXOS_eCK__24416782	Diffie-Hellman exp signature
+multiset, nat, subterm, xor	NumberSubtermTests__07246be7	%+ nat / multiset / subterm terms in the signature
+xor, restrictions	CH07__09fc30cc	richest: xor signature + Restrictions section
+xor, restrictions	CRXOR__e62b397a	xor + restrictions, compact
+restrictions, aead/siv	PKCS11_siv__51ca69e4	restrictions + destructor-heavy signature
+mac, signing	STS_MAC__1c375a9a	MAC + signing signature
+restriction-only, counter	AC_counter__7f660677	no builtins: line, restrictions present, counter theory
+large-signature, restrictions	WireGuard__2ad04d3b	large functions/equations block + restrictions

@@ -20,7 +20,8 @@ flags direct `.hs`/`crates/` path use even alongside allowed substrings. The
 full historical set re-validates at 0 violations under the stricter rule.
 2026-07-18 (later): wf round-5 implementer (wf_b6a947c0-a82) audited — 153
 tool calls, 0 forbidden accesses, 0 web accesses; graphdot round-9 implementer
-(wf_6b16799d-1c9) audited — 156 tool calls, 0/0; 38 sealed transcripts total.
+(wf_6b16799d-1c9) audited — 156 tool calls, 0/0; producers round-1 implementer
+(wf_f9696b2b-75e) audited — 72 tool calls, 0/0; 39 sealed transcripts total.
 
 | Path | Agent | Role |
 |------|-------|------|
@@ -57,6 +58,7 @@ tool calls, 0 forbidden accesses, 0 web accesses; graphdot round-9 implementer
 | workflows/wf_a43edc65-4dc/agent-ab519587162798c8b.jsonl | round 7 (unit D, overlapped) | non-diff verdict family (AnalysisCannotBeFinished) |
 | workflows/wf_b6a947c0-a82/agent-aac83361400743475.jsonl | round 5 (unit C) | wf corpus-divergence closure: equality-guards + quantifier fusion, sort-clash keying, tail (full gate 71→8 DIFF) |
 | workflows/wf_6b16799d-1c9/agent-a6d5afeb848c42e89.jsonl | round 9 (unit B) | fill-width allocation: two-layer trigger/fill model probe-exact 343/343, engine laziness fix, residue characterized (abbreviation-width = caller-input gap) |
+| workflows/wf_f9696b2b-75e/agent-abaf7a3894e2dccc3.jsonl | producers round 1 | web producer surface R1: shared HTML skin + center section fragments (324/324 corpus fragments byte-identical incl. envelope; live-probe replays 8/8) |
 
 Corresponding workspaces (../wellformedness, ../graphdot, ../weblayer) hold
 each agent's QUERIES.log, BEHAVIOR.md, REPORT*.md and code — cross-reference
@@ -78,6 +80,7 @@ the transcripts against those logs.
 | workflows/wf_a3b4feac-a25/agent-{a9df6213a26883a9d,a49c583ac48623111,a1250a539cbe74da9,aab79db7bb6b49c3c}.jsonl | round-5/6/7 delta audits: E / D / A / B (all pass, 0 findings) |
 | workflows/wf_b6a947c0-a82/agent-a351c5451327cd399.jsonl | wf round-5 delta audit (pass, 0 findings; closes the round-4 equality-guard advisory — clean side previously under-claimed vs the source, reached parity by probing) |
 | workflows/wf_6b16799d-1c9/agent-aef2578a65838b522.jsonl | graphdot round-9 delta audit (pass, 0 Dot.hs-resemblance findings; laziness = sanctioned BSD semantics; every fitted constant probe-traced, disjoint from source's 100/1.3/130/30; one non-blocking behavioral redo: reconcile sqa correction magnitude/placement) |
+| workflows/wf_f9696b2b-75e/agent-aad7d84bc51151972.jsonl | producers round-1 dual audit (pass; similarity: 0 violations, expression diverges materially from upstream; hygiene: finding PH-1 — scaffold SPEC/README cited upstream file paths, rewrite applied open-side, no contamination of sealed work) |
 
 Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUDIT.md,
 ../console/AUDIT.md, ../macros/AUDIT.md, ../injective/AUDIT.md, ../derivcheck/AUDIT.md.
@@ -94,6 +97,7 @@ Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUD
 | workflows/wf_60530b15-4b6/agent-{aba0d9334e4c1f215,ae21d5199beeba498,a59a476a912c12eee,ab0787ce52d9ab2af}.jsonl | wave-2 dirty room: G swap COMPLETE (deriv_check.rs deleted, 10/10 byte gate); D partial (version-stream swap; parse/framing blocked); E+B integrator (both kept, blockers refined to byte-precision); A integrator (del/verify re-synced; adoption blocked on origin-shell + async-state) |
 | workflows/wf_a3b4feac-a25/agent-{a66029e08d55564f9,acb62e977f9aaf9c3}.jsonl | wave-3 integrators: E SWAPPED (ported macro-expansion driver deleted, live byte-verified vs HS); D summary/emitter landed, driver swap kept (9-verdict taxonomy gap); B kept (fill is fillSep/fits — Ack cell diverges at byte 318); A kept (async-serialization design conflict, code-evidenced) |
 | workflows/wf_b6a947c0-a82/agent-ac6e3390a695e1a84.jsonl | open-side integrator: wf round-5 re-sync (checks.rs/pretty.rs, mechanical recipe), full wf_gate 348 MATCH/71 DIFF → 411/8, 0 regressions, all suites green |
+| workflows/wf_f9696b2b-75e/agent-ab36f0d758d273636.jsonl | open-side scaffolder: weblayer/producers/ cluster (SPEC R1–R5 decomposition, oracle wrapper fixing the stock hs_server.sh --port bug, expression-stripped interface, 44 round-1 byte targets) |
 | workflows/wf_53f48d60-3ef/ | licensing research (GPL doctrine/precedent/feasibility/literal-copy) |
 | workflows/wf_8b8fd87b-72e/ | uncited-file derivation audit + institutional-ownership research |
 | workflows/wf_5ec90b24-b26/ | tail-author affiliations, triviality classification, rewrite scoping |

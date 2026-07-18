@@ -1,0 +1,93 @@
+{
+  "summary": "Web producer surface cluster: open-side scaffold (SPEC/oracle/interface/targets), sealed round-1 implementation (Fable), both-sides audit. Integration deferred to the serialized queue.",
+  "agentCount": 3,
+  "logs": [],
+  "result": {
+    "scaffold": "All deliverables built, verified, and clean. Here is the plain-text summary.\n\n---\n\n# WEB PRODUCER SURFACE — sealed-round scaffold complete\n\nLocation: `/home/kamilner/tamarin-cleanroom/weblayer/producers/`\nModeled on the `pretty/` scaffold. All deliverables present; stub crate compiles (`cargo test`: 1 pass + 2 ignored round-1 tests); oracle harness smoke-tested (start/probe/stop, port freed); round-1 loop validated byte-identically end-to-end.\n\n## Target set (exact) — the ported PRODUCER files + their citations\nDetermined by `grep` over `crates/tamarin-server/src/` + reading each header's citation list:\n\n| ported file | LOC | HS citation | header-blamed authors | in producer scope |\n|---|---|---|---|---|\n| `handlers/theory_html.rs` | 1012 | `Web/Theory.hs`, `Web/Hamlet.hs`, `Text/PrettyPrint/Html.hs` | meiersi, arcz, cascremers, felixlinker, beschmi, rsasse, jdreier, BTom-GH | R1+R2 |\n| `handlers/proof_tree.rs` | 1311 | `Web/Theory.hs` | jdreier, meiersi, racoucho1u, beschmi, charlie-j, rkunnema, felixlinker, rsasse, yavivanov, PhilipLukertWork, kevinmorio, arcz, BTom-GH, Nick Moore, ValentinYuri, addap, katrielalex, felixonmars | R3 |\n| `handlers/root.rs` | 216 | `Web/Hamlet.hs`, `Web/Handler.hs`, `Web/Types.hs` | meiersi, cascremers, arcz, jdreier, rsasse | R4 |\n| `handlers/path_parse.rs` | 241 | `Web/Types.hs` | meiersi, jdreier, arcz, **Kanakanajm**, rsasse, beschmi, felixlinker, addap | R5 |\n\n**Surprising / load-bearing finding on the pseudonymous authors:** the target files `theory_html.rs`/`proof_tree.rs`/`root.rs` do NOT carry Kanakanajm/YannColomb/Esslingen in their own headers — those three live on the DISPATCH shells `theory.rs`, `state.rs`, `lib.rs` (which the clean `web_clean` already covers but cannot delete). Only `path_parse.rs` carries a pseudonymous author (Kanakanajm, via `Web/Types.hs`) directly. Because `gen_license_headers.py` blames the shared `Web/{Types,Handler,Theory}.hs` sources cited across BOTH shells and producers, **no single producer ",
+    "impl": "ROUND 1 (R1: center section fragments + shared HTML skin) — COMPLETE, all gates green.\n\nIMPLEMENTED (all inside /home/kamilner/tamarin-cleanroom/weblayer/producers/workspace/):\n- producers-clean/src/html.rs — the shared skin: escape_text (&→&amp; <→&lt; >→&gt; \"→&quot; '→&#39;; backslash passes through — forced live via an own-authored theory served from the metachar filename esc&\"<>'probe.spthy); postprocess_lines (every logical line, first/last/empty alike, → text + <br/>\\n, leading space runs → &nbsp; runs, interior spaces untouched); the three envelopes {html,title} (compact, html key first), {redirect}, {alert}, with JSON escaping pinned to the full-corpus inventory (\\\" \\\\ \\n \\t only; other C0 unobserved, standard forms documented as arbitrary choice).\n- producers-clean/src/section.rs — render_pane (message/rules/tactic block skeleton: <h2>H</h2> line + <p class=\"monospace rules\"> glued to first body line, </p> to last; blocks adjacent with no blank line) and render_help_pane (env line + invariant static block, single-line, no postprocess, no trailing newline; title \"Theory: NAME\"). src/help_static.html = the byte-invariant-across-81 static block, verbatim captured output.\n- producers-clean/src/model.rs — added EmptyRender {Keep, BlankLine, Omit} (all three modes observed) and HelpPane; interface mapping documented.\n- tools/extract_r1_raw.py + r1_raw/ (324 raw envelope bodies) + r1_live/ (8 live-probed bodies).\n\nKEY BEHAVIORAL FINDINGS (BEHAVIOR.md §§2–9, QUERIES.log [S07]–[S13],[L03]–[L07]):\n1. The rules-pane title is the CONSTANT \"Multiset rewriting rules and restrictions\" across all 81 captures — the seeded BEHAVIOR.md claim that \" and restrictions\" is conditional is REFUTED and corrected.\n2. The corpus-wide leading <br/> in main/rules is the EMPTY MACROS SLOT: live probe on MacroGlobalVarNSPK3 (macros never occur in the corpus) shows the pane starting directly with <h2>Macros</h2>; absent macros leave exactly one blank line. Restrictions instead vanish without residue and join the MSR block with no blank.\n3. Empty body ⇒ empty <p></p> is the skin's behavior (tactic); the injective-facts \"None\" is therefore INPUT, not skin.\n4. {alert} is absent from the corpus; forced live via del/path/help ({\"alert\":\"Can't delete the given theory path!\"}).\n\nACCEPTANCE: cargo test = 14 tests green, zero warnings, std-only. corpus_sweep_all_manifests: 324/324 fragments (81 manifests × 4 families) byte-identical after slice-and-re-render, ENVELOPE INCLUDED; round1_materialized_targets: 44/44; live_probe_replays: 8/8 on two never-captured theories (incl. the only macros-present rules pane observed anywhere). Mutation check confirms the sweep fails on a doctored break marker (gate not vacuous).\n\nUNOBSERVABLES (recorded, choices documented): empty message-pane sections (Keep assumed by analogy with tactic); tabs/C0 controls beyond \\n in fragments; heading and NAME/TIME escaping (metachar-free vocabularies).\n\nDISCIPLINE: every oracle interaction logged in works",
+    "audit": "Both audits complete; the producers round-1 section is appended to `/home/kamilner/tamarin-cleanroom/weblayer/AUDIT.md`.\n\nAUDIT 1 — barrier hygiene of the open-authored scaffold:\n- The precedent vector is CLEAN: `interface/required_api.md` and `interface/fragment_inputs.rs` leak no upstream/port identifiers (indicative names only; explicit \"not a transcription\"). `round1/` + `oracle/` operate on captured OUTPUT only. A scan for ~35 upstream Haskell *function* identifiers across the whole scaffold returns zero — no expression-bearing name reaches sealed-readable text.\n- FINDING PH-1 (scaffold rewrite required): `SPEC.md` (and `README.md`) cite upstream source-file paths — `src/Web/{Theory,Hamlet,Handler,Types}.hs` and `Text/PrettyPrint/Html.hs` — in the \"HS citation it advances\" column and Author-topology text. This diverges from the sibling norm (`pretty`/`graphdot`/`wellformedness` SPECs cite zero upstream files, doing the same citation-yield/author-topology via the *ported* `.rs` seams + author lists). Rewrite: recast those onto `handlers/theory_html.rs`/`proof_tree.rs`/`root.rs`/`path_parse.rs` + the dispatch shells (as `pretty/SPEC.md` does) and delete every `src/Web/*.hs` string. It is file-level bookkeeping only — no function name, decomposition, anchor, or expression — so it does not repeat the splice-anchor precedent and did not contaminate the sealed work.\n- Within-norm (not findings): port-seam file/fn names (`render_proof_tree_html`, `proof_state`, `web_clean::proofscript`) + pseudonym topology match `pretty/SPEC.md`; `withHeader` (SPEC line 85) is a phantom (absent from the entire upstream tree), harmless.\n\nAUDIT 2 — similarity of the sealed crate (`workspace/producers-clean/`): 0 violations. R1 is the only implemented surface; R2–R5 are `unimplemented!()` stubs. All resemblance to `Theory.hs`/`Text/PrettyPrint/Html.hs`/`Handler.hs` is observable served output (tag skeleton, heading/title vocabulary, `{html,title}` envelope, verbatim help block, help env line) — merger/compatibility content pinned by the 324/324 corpus-sweep byte gate. The skin's *expression* diverges materially: `split('\\n')`+`trim_start_matches(' ')`+byte-count vs upstream `lines`/`unlines`+`span isSpace`+`concatMap` (spaces-only vs tab-inclusive); a unified 3-variant `EmptyRender` enum vs upstream's `caseEmptyDoc`/`if null … text empty`/plain-`ppSection` mix; a hand-rolled envelope+`json_escape_into` vs Aeson `object`. Zero upstream-internal identifier overlap; no comment li",
+    "passed": true
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Scaffold"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "Implement"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 3,
+      "title": "Audit"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "scaffold:producers",
+      "phaseIndex": 1,
+      "phaseTitle": "Scaffold",
+      "agentId": "ab36f0d758d273636",
+      "model": "claude-opus-4-8[1m]",
+      "state": "done",
+      "startedAt": 1784381920889,
+      "queuedAt": 1784381920885,
+      "attempt": 1,
+      "lastToolName": "Bash",
+      "lastToolSummary": "rm -f /tmp/producers_hs_* /tmp/hs_server_* /tmp/o.log /tmp/…",
+      "promptPreview": "You are an OPEN-SIDE scaffolding agent for the tamarin-rs sealed relicensing campaign (full read access everywhere; you are NOT sealed). Your job: build the sealed-round scaffold for a NEW cluster — the WEB PRODUCER SURFACE — at /home/kamilner/tamarin-cleanroom/weblayer/producers/. Model it on the existing high-quality scaffold at /home/kamilner/tamarin-cleanroom/pretty/ (read its SPEC.md/README.m…",
+      "lastProgressAt": 1784384069608,
+      "tokens": 264445,
+      "toolCalls": 99,
+      "durationMs": 2148719,
+      "resultPreview": "All deliverables built, verified, and clean. Here is the plain-text summary.\n\n---\n\n# WEB PRODUCER SURFACE — sealed-round scaffold complete\n\nLocation: `/home/kamilner/tamarin-cleanroom/weblayer/producers/`\nModeled on the `pretty/` scaffold. All deliverables present; stub crate compiles (`cargo test`: 1 pass + 2 ignored round-1 tests); oracle harness smoke-tested (start/probe/stop, port freed); roun…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "seal:producers-r1",
+      "phaseIndex": 2,
+      "phaseTitle": "Implement",
+      "agentId": "abaf7a3894e2dccc3",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1784384069609,
+      "queuedAt": 1784384069608,
+      "attempt": 1,
+      "lastToolName": "Bash",
+      "lastToolSummary": "cd /home/kamilner/tamarin-cleanroom/weblayer/producers/work…",
+      "promptPreview": "You are a SEALED implementer under the barrier protocol at /home/kamilner/tamarin-cleanroom/PROTOCOL.md — read it first and comply strictly.\nACCESS RULES: You must NOT read any file under /home/kamilner/tamarin-rs/crates/, and NOT read any Haskell source of tamarin-prover anywhere on disk (notably /home/kamilner/tamarin-rs/tamarin-prover/{lib,src}/ and /home/kamilner/tamarin-rs/tamarin-prover-test…",
+      "lastProgressAt": 1784385306884,
+      "tokens": 164792,
+      "toolCalls": 72,
+      "durationMs": 1237274,
+      "resultPreview": "ROUND 1 (R1: center section fragments + shared HTML skin) — COMPLETE, all gates green.\n\nIMPLEMENTED (all inside /home/kamilner/tamarin-cleanroom/weblayer/producers/workspace/):\n- producers-clean/src/html.rs — the shared skin: escape_text (&→&amp; <→&lt; >→&gt; \"→&quot; '→&#39;; backslash passes through — forced live via an own-authored theory served from the metachar filename esc&\"<>'probe.spthy);…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 3,
+      "label": "audit:producers-r1",
+      "phaseIndex": 3,
+      "phaseTitle": "Audit",
+      "agentId": "aad7d84bc51151972",
+      "model": "claude-opus-4-8[1m]",
+      "state": "done",
+      "startedAt": 1784385306894,
+      "queuedAt": 1784385306891,
+      "attempt": 1,
+      "lastToolName": "Edit",
+      "lastToolSummary": "/home/kamilner/tamarin-cleanroom/weblayer/AUDIT.md",
+      "promptPreview": "You are a BOTH-SIDES similarity auditor for the tamarin-rs sealed relicensing campaign (exempt from barrier access rules; you may read everything). Audit this round's delta: the NEW weblayer/producers/ cluster under /home/kamilner/tamarin-cleanroom (repo HEAD b4fb110 predates it — git status/diff restricted to weblayer/ shows both the open-side scaffold and the sealed round-1 delta; the scaffold (…",
+      "lastProgressAt": 1784386063879,
+      "tokens": 155279,
+      "toolCalls": 39,
+      "durationMs": 756985,
+      "resultPreview": "Both audits complete; the producers round-1 section is appended to `/home/kamilner/tamarin-cleanroom/weblayer/AUDIT.md`.\n\nAUDIT 1 — barrier hygiene of the open-authored scaffold:\n- The precedent vector is CLEAN: `interface/required_api.md` and `interface/fragment_inputs.rs` leak no upstream/port identifiers (indicative names only; explicit \"not a transcription\"). `round1/` + `oracle/` operate on c…"
+    }
+  ],
+  "totalTokens": 584516,
+  "totalToolCalls": 210
+}

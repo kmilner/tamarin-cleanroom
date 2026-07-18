@@ -36,3 +36,4 @@ workflows/wf_3b637271-f7f/agent-abe6c30af00b61512.jsonl: tool_calls=35 web=0 VIO
 workflows/wf_3b637271-f7f/agent-ab025bc419159eeca.jsonl: tool_calls=37 web=0 VIOLATIONS=0
 workflows/wf_b6a947c0-a82/agent-aac83361400743475.jsonl: tool_calls=153 web=0 VIOLATIONS=0
 workflows/wf_6b16799d-1c9/agent-a6d5afeb848c42e89.jsonl: tool_calls=156 web=0 VIOLATIONS=0
+workflows/wf_f9696b2b-75e/agent-abaf7a3894e2dccc3.jsonl: tool_calls=72 web=0 VIOLATIONS=0
