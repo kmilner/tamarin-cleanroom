@@ -744,6 +744,14 @@ impl<'a> P<'a> {
                         .collect();
                     self.pos += v.len();
                     attributes.push(RuleAttr::Color(v));
+                } else if self.eat("process=\"") {
+                    // The process snippet runs verbatim to the closing double
+                    // quote (no interior `"` occurs in the corpus — its string
+                    // constants are single-quoted); its internal spaces/commas
+                    // are part of the value, not token separators.
+                    let end = self.rest().find('"').expect("unterminated process=");
+                    attributes.push(RuleAttr::Process(self.rest()[..end].into()));
+                    self.pos += end + 1;
                 } else if self.eat("no_derivcheck") {
                     attributes.push(RuleAttr::NoDerivCheck);
                 } else if self.eat("issapicrule") {
@@ -852,10 +860,14 @@ fn parse_block(block: &str) -> (Rule, Option<AcVariants>) {
 
 #[test]
 fn parity_rule_blocks_match_captures() {
-    // The Doc engine recurses deeply on very large variant comments (Joux
-    // has a 160-variant block), so run on a wide stack.
+    // The curated set now includes the round-4 deep files whose `variants
+    // (modulo AC)` comments run to ~10 000 lines (C8, BP_IBS_2/3/4). The Doc
+    // engine's build / render / drop are all iterative (blocker 3 fix), so a
+    // production-sized 8 MB thread renders them without overflow — proving the
+    // fix, not papering over it with a 512 MB workaround. Parsing the giant
+    // comment is likewise iterative (the substitution loop is a `while`).
     std::thread::Builder::new()
-        .stack_size(512 * 1024 * 1024)
+        .stack_size(8 * 1024 * 1024)
         .spawn(parity_rule_blocks_impl)
         .unwrap()
         .join()

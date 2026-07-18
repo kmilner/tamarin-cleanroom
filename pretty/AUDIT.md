@@ -735,3 +735,152 @@ Non-blocking notes (advisory, do NOT gate this round):
    later round before diff-file parity is claimed.
 
 VERDICT: pass
+
+## Round 4 — three corpus-scale rule blockers (process attr, bracket-drop, deep-recursion)
+
+Delta audited: working tree vs committed HEAD `60bea3f` (rounds 1–3), restricted
+to `pretty/`. Source touch is exactly two files — `src/rule.rs` (SAPIC `process`
+attribute) and `src/doc.rs` (the deep-recursion fix); plus test-only additions
+(`tests/round4_blockers.rs`, deep-file fixtures in `round1_term_signature.rs`,
+a `process="` parse arm and an 8 MB-not-512 MB stack in `round2_rules.rs`),
+provenance notes (BEHAVIOR.md, QUERIES.log), and probe captures. The three
+"blockers" map to: **(1)** the SAPIC `process` attribute — byte-forced merger;
+**(2)** operator-specific closing-bracket drop — byte-forced merger, **zero
+source change** (round-3 fill fix already covers it, round-4 only pins it);
+**(3)** the deep-recursion stack-overflow fix — pure engineering on the
+BSD-derived engine. Whole suite green (47 + 9 + 9 + 6 = 71 tests), including the
+new deep-file parity on an 8 MB stack and a 12 000-group render on a 2 MB stack.
+
+### 1. SAPIC `process` attribute (rule.rs) — byte-forced merger, provenance verified
+
+The clean renders `process="<snippet>"` between `color` and `no_derivcheck`,
+DOUBLE-quoted, snippet verbatim, absent when the rule is not `issapicrule`.
+Every one of those observable facts is forced by a real oracle capture:
+
+* **Order + spelling + quoting** are read straight off `round2/targets/
+  probe_process.hs.txt` (the materialised `r4/probe_process.echo` oracle run):
+  `Init[color=#ffffff, process="in(x.1);", issapicrule, role='Process']:` — the
+  canonical order `color < process < no_derivcheck < issapicrule < role`, the
+  double quotes on `process` vs single quotes on `role`, and the between-color-
+  and-no_derivcheck slot are all directly visible. `target:ct`
+  (`r4/ct.echo`, 100+ snippets) and `target:running-example` (`r4/running-
+  example.echo`, the `process/no_derivcheck/issapicrule` witness) widen it.
+* Upstream (`Model/Rule.hs:1201` `prettyRuleAttribute`) emits the same order —
+  `color`, `ppProcess`, `no_derivcheck`, `issapicrule`, `role` — with
+  `ppProcess p = text "process=" <> text ("\"" ++ … ++ "\"")` (double quotes)
+  and `role=\'…\'` (single). The bytes agree, and they agree **because the
+  probe forces them**, not because the clean lifted the table: this is the
+  merger point, provenance-pinned, exactly the round-2/round-3 discipline.
+* **Structural divergence confirms non-transcription.** Upstream re-renders the
+  process AST with `prettySapicTopLevel'` (a whole SAPIC pretty-printer) and
+  wraps the result. The clean carries `RuleAttr::Process(String)` — the already-
+  textual snippet parsed off the source — and prints it verbatim with no
+  re-rendering and no escaping. Different mechanism, same bytes. `ppProcess`,
+  `ruleProcess`, `prettySapicTopLevel'`, `catMaybes`, `preferRight` do **not**
+  appear in the clean. The comment stays in observable-token space (`process=`,
+  `role='…'`, provenance tags), naming no upstream source symbol.
+* **Escaping honestly flagged UNOBSERVABLE.** Both sides emit the snippet with
+  no `"`/`\` escaping; the corpus never puts a `"`/`\` in a process (constants
+  are single-quoted), so escaping is unpinnable. The clean registers this in
+  BEHAVIOR.md rather than guessing a pinned rule — correct discipline. (Note:
+  upstream would also not escape, so no divergence is being masked.)
+* Canonical "last color/process/role wins" matches upstream's `preferRight`
+  merge on `RuleAttributes`; a reasonable, upstream-consistent canonicalisation.
+
+### 2. Operator-specific closing-bracket drop (blocker 2) — byte-forced, zero source change
+
+The multiset-union `)` drops to its own line at the `(` column when the last
+union element is a multi-line tuple, while an application `)` stays JOINED as
+`>)`. Both are read off real captures — `round2/targets/probe_uniondrop.hs.txt`
+(union → `…>` and `…)` on separate lines) and `probe_appdrop.hs.txt` (app →
+`…dd>)`), materialised from `r4/probe_uniondrop.echo` / `probe_appdrop.echo`
+and cross-checked against the five ake/dh blocker-2 files (`UM_three_pass`,
+`UM_combined{,_fixed}`, `DHKEA{,_keyreg}`). Crucially there is **no round-4
+change to the term/fact printer** — the diff touches only rule.rs and doc.rs.
+The behaviour is the round-3 `fcat`/fill-item fix (`)` droppable for AC
+operators/pairs, plain beside for application); round-4 only adds the pinning
+tests `blocker2_union_paren_drops_below_tuple` / `_application_paren_stays_joined`.
+Byte-forced merger, provenance verified, nothing new to transcribe.
+
+### 3. Deep-recursion stack-overflow fix (doc.rs) — pure engineering, NON-transcription (special scrutiny)
+
+This is the round's flagged item: it has **no upstream counterpart forced by
+the boundary**, so it must not be a transcription of upstream's recursion. It
+is not, on every axis checked:
+
+* **It operates on BSD-derived code, not the GPL surface.** Round 1 §2 already
+  established doc.rs is the sanctioned `pretty-1.1.3.6` (BSD, Copyright S. Meier
+  et al.) HughesPJ port; the layout algorithm — `reduceDoc`/`reduceHoriz`/
+  `reduceVert`/`lay` — lives ONLY in the BSD library, and the GPL wrapper
+  (`Text.PrettyPrint.Class`) is a thin delegating newtype containing none of
+  it. So the pre-existing `reduce_doc`/`reduce_horiz`/`reduce_vert`/`lay` names
+  and the `"display lay2 …"` panic strings are **licensed BSD resemblance**,
+  not a GPL carry, and there is no GPL upstream recursion to transcribe here.
+* **Structure diverges from the recursion it replaces.** Upstream is recursive:
+  `reduceDoc (Beside p g q) = beside p g (reduceDoc q)` (Annotated/HughesPJ.hs
+  490), likewise `reduceHoriz`/`reduceVert` (554/558) and the mutually-recursive
+  display `lay`/`lay1`/`lay2` (1036–1071). The clean's round-4 forms unroll the
+  right spine onto a heap `Vec<Frame>` / `Vec<(Doc,bool)>` and fold it back, and
+  fuse `lay`/`lay1`/`lay2` into one `loop` driven by a `mid_line` state flag —
+  explicit-stack iteration, the deliberate opposite of the recursion. Fold order
+  and `beside`/`above`/`eliminate_empty` applications are preserved, so it is
+  byte-neutral (the whole R1/R2/R3 suite is unchanged and the deep files
+  byte-match on an 8 MB stack) — but the control structure is original.
+* **The `Drop` impl has no counterpart on either side.** Haskell is GC'd; the
+  BSD `pretty` `Doc` is immutable and never explicitly torn down. The
+  explicit-stack `Drop` (placeholder-swap via `EMPTY_DOC`/`EMPTY_LAZY`,
+  `detach_children`, drain loop) is a standard Rust idiom for dismantling a deep
+  owned chain and is wholly novel to the clean.
+* **No upstream identifiers introduced by the delta.** Every new name is
+  Rust-engineering vocabulary — `detach_children`, `take`, `empty_doc_placeholder`,
+  `empty_lazy_placeholder`, `EMPTY_DOC`, `EMPTY_LAZY`, `Frame`, `mid_line`. The
+  merge of `lay1`/`lay2` into one `lay` actually **removes** two BSD-derived
+  helper names. Net count of the `"display lay …"` panic strings is unchanged
+  (10 in HEAD, 10 in the working tree): the fix relocates the pre-existing,
+  sanctioned-BSD, unobservable invariant-violation strings, it does not add any.
+
+### Findings
+
+No violations. The two byte-forced surfaces (the `process` attribute order/
+quoting/slot; the operator-specific `)`-drop columns) each resolve to a real
+oracle capture (`r4/*.echo` → `round2/targets/*.hs.txt`), so the bytes that
+equal GPL upstream are merger, not lift — and where the clean could have lifted
+(the process value) it instead diverges structurally (verbatim snippet vs
+`prettySapicTopLevel'` re-render). The stack-overflow fix is the round's
+engineering centre and is clean on every requested axis: it sits on the
+BSD-licensed engine, replaces recursion with explicit-stack iteration (a
+divergence, not a copy, of the recursive form), adds an owned-teardown `Drop`
+that exists on neither side, and introduces zero upstream identifiers while
+shedding two (`lay1`/`lay2`). Identifier, string-constant, comment, and test
+scans over the delta are clean. Suite green at 71/71.
+
+Non-blocking notes (advisory, do NOT gate this round):
+1. *Byte-neutrality of the iterative engine rests on the test suite, not a
+   proof.* `reduce_doc`/`reduce_horiz`/`reduce_vert`/`lay` are asserted
+   equivalent to their recursive forms via the full R1–R4 parity corpus (deep
+   files on 8 MB, 12 000-group on 2 MB, all prior blocks unchanged). This is
+   strong behavioural evidence and is a correctness property, not a similarity
+   one — indeed the divergent control flow is itself the non-transcription
+   evidence. Any future change to `beside`/`above`/`eliminate_empty` must re-run
+   the deep-file parity, since the fold order is the load-bearing invariant.
+2. *Engine comments narrate the rewrite ("iterative rewrite of the recursive
+   form", "exactly as the recursive form did", "the recursive form was in").*
+   Per the standing "comments describe current state only" directive this is
+   mild history-narration and could be trimmed to state the current iterative
+   invariant (spine-unroll + fold; `mid_line` = start-of-line vs mid-line state)
+   without the "was recursive" framing. It is not a similarity issue: the
+   referenced "recursive form" is the clean's OWN prior-round BSD-derived code,
+   names no GPL symbol, and serves a legitimate byte-neutrality rationale for a
+   perf refactor. Advisory only.
+3. *Escaping of `"`/`\` in a process snippet remains UNOBSERVABLE* (carried in
+   BEHAVIOR.md): no corpus process contains either character (constants are
+   single-quoted), so the no-escaping render is unpinned. A process carrying a
+   literal `"`/`\` would be needed to pin it; both sides currently emit verbatim,
+   so no divergence is hidden. Correct to flag rather than claim.
+4. *Blocker-2 is pinned, not implemented, this round.* The `)`-drop behaviour is
+   the round-3 fill-item fix; round-4 adds only tests. Should the term printer be
+   revisited, `app_doc` must keep the application `)` as a plain beside (NOT a
+   fill item) or the `>)` witnesses (probe:appdrop / the ake-dh MAC applications)
+   break. Interface caveat, not a similarity finding.
+
+VERDICT: pass

@@ -1,0 +1,40 @@
+theory ProbeAppDrop2
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: firstf/1, fst/1, gg/1, hashf/1, macf/2, pair/2, singleop/1,
+           snd/1, twoop/2
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) ProbeSingle:
+   [ In( <aa, bb, cc, dd, ee, ff> ) ]
+  -->
+   [
+   FactAAAAAAAAAAAAAAAAAAAAAAAAAAA( singleop(<'2', dd, 
+                                              macf(firstf(hashf(<aa, bb, cc, dd, ee, ff>)),
+                                                   <'lbl', aa, bb, cccccccc, dd>)
+                                             >)
+   )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ProbeNested:
+   [ In( <aa, bb, cc, dd, ee, ff> ) ]
+  -->
+   [
+   FactBBB( twoop(shortarg,
+                  gg(<'2', dd, 
+                      macf(firstf(hashf(<aa, bb, cc, dd, ee, ff>)),
+                           <'lbl', aa, bb, cccccccc, dd>)
+                     >))
+   )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+
+
+end

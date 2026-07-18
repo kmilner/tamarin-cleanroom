@@ -1,0 +1,9 @@
+theory ProcProbe
+begin
+
+functions: f/1
+
+process:
+  in(x); event Ev(x); out(<x, 'lbl'>); 0
+
+end

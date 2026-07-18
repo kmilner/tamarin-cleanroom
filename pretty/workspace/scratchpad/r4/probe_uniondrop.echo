@@ -1,0 +1,28 @@
+theory ProbeUnionDrop
+
+begin
+
+// Function signature and definition of the equational theory E
+
+builtins: multiset
+functions: firstf/1, fst/1, hashf/1, macf/2, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) PU:
+   [ In( <aa, bb, cc, dd, ee, ff> ) ]
+  -->
+   [
+   FactUUUUUUUUUUUUUU( (<'1', shortval111>++
+                        <'2', dd, 
+                         macf(firstf(hashf(<aa, bb, cc, dd, ee, ff>)),
+                              <'lbl', aa, bb, cccccccc, dd>)
+                        >
+                       )
+   )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+
+
+end

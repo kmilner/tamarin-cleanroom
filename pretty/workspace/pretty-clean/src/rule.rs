@@ -91,26 +91,40 @@ fn header_doc(rule: &Rule) -> Doc {
     }
 }
 
-/// Canonical attribute list: color, no_derivcheck, issapicrule, role — the
-/// last color/role declaration wins; `process=…` and external attributes are
-/// dropped (probe:p_rattr, target:issue713).
+/// Canonical attribute list: color, process, no_derivcheck, issapicrule, role
+/// — the last color/process/role declaration wins; external attributes are
+/// dropped (probe:p_rattr, target:issue713; target:ct pins the SAPIC
+/// `process` attribute).
+///
+/// The SAPIC `process="…"` attribute (target:ct, probe:p_process) renders
+/// DOUBLE-quoted (unlike `role='…'`), between `color` and `no_derivcheck`, and
+/// carries the process snippet VERBATIM: no escaping is applied and none is
+/// observable (its text uses single-quoted string constants — `'proofOfID'` —
+/// so no `"`/`\` ever appears; spaces, commas, `<>`, `()`, `;` all sit inside
+/// the quotes as one unbreakable text token). Absent when the rule is not
+/// SAPIC-generated (no `RuleAttr::Process`).
 fn attr_items(attrs: &[RuleAttr]) -> Vec<String> {
     let mut color = None;
+    let mut process = None;
     let mut no_derivcheck = false;
     let mut issapicrule = false;
     let mut role = None;
     for a in attrs {
         match a {
             RuleAttr::Color(c) => color = Some(c.clone()),
+            RuleAttr::Process(p) => process = Some(p.clone()),
             RuleAttr::NoDerivCheck => no_derivcheck = true,
             RuleAttr::IsSapicRule => issapicrule = true,
             RuleAttr::Role(r) => role = Some(r.clone()),
-            RuleAttr::Process(_) | RuleAttr::External(..) => {}
+            RuleAttr::External(..) => {}
         }
     }
     let mut items = Vec::new();
     if let Some(c) = color {
         items.push(format!("color=#{c}"));
+    }
+    if let Some(p) = process {
+        items.push(format!("process=\"{p}\""));
     }
     if no_derivcheck {
         items.push("no_derivcheck".into());

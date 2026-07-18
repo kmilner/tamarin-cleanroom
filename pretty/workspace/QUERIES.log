@@ -86,3 +86,19 @@ scratchpad/5g.echo (corpus 5G_AKA) -- lemma attr list = fill after "lemma NAME [
 scratchpad/alethea.echo, cronto.echo, ns.echo, gdh.echo, c8 (corpus) -- curation survey; C8 exceeds 60s oracle timeout (dropped); GDH lemmas behind -Dsecure (never echoed bare); axiom files echo restriction
 round3/fetch_hs_targets.sh (14 curated files, families in round3/families.tsv) -- materialize the round-3 formula-parity byte targets
 round3/fetch_hs_targets.sh (validation extension: ble, OIDC_Implicit, HPagree, OCSPS, aletheaD_vot_HE_SmHh, contract) -- widen round-3 parity to 84 restriction / 139 lemma blocks; timing pre-checked (all <6s)
+# ── R4 (three corpus-scale rule-rendering blockers) probes ──
+# BLOCKER 1: SAPIC process attribute
+r4/ct.echo (corpus accountability/csf21-acc-unbounded/previous/ct.spthy) -- witness: rule headers carry process="…" between color and issapicrule (DOUBLE quotes, unlike role='…'); 100+ process snippets (|, !, 0, in(...), event ...( ), out(<...>), insert <...>,'yes';); NO interior "/\ observed
+r4/running-example.echo (corpus sapic/fast/basic/running-example.spthy) -- pins full canonical attr order color<process<no_derivcheck<issapicrule<role: process="lookup <'att', h.3> as a.1", no_derivcheck, issapicrule
+r4/channels1.echo, AKE.echo, replication.echo (corpus sapic) -- additional process-attr witnesses (parallel |, replication !, channel in/out snippets)
+r4/probe_process.spthy -- self-contained SAPIC probe: process="in(x.1);" / "event Ev( x.1 );" / "out(<x.1, 'lbl'>);" / "0"; value verbatim incl single-quotes/spaces/commas/<>; one unbreakable text token; position after color
+grep sapic examples for interior double-quote in process -- NONE (constants are single-quoted); process "/\ escaping is UNOBSERVABLE, rendered verbatim (flagged)
+# BLOCKER 2: enclosing-delimiter drop is operator-specific (union ) drops, application ) stays joined)
+r4/UM_three_pass.echo + DHKEA{,_keyreg}.echo + UM_combined{,_fixed}.echo (corpus ake/dh, the 5 blocker-2 files) -- whole-rule-block byte-parity PASSES: my crate already drops the multiset-union ) below a multi-line tuple's > (UM I_Complete/Sid actions, echo lines ~54-55); the round-3 AC-operator fcat fix already covers it
+r4/probe_uniondrop.spthy -- minimal union whose last element is a multi-line tuple: > drops to <-column AND ) drops BELOW it to (-column, on SEPARATE lines (fcat with ) as fill item)
+r4/probe_appdrop.spthy, probe_appdrop2.spthy -- CONTRAST: the SAME multi-line tuple as the LAST ARG of an application keeps the application ) JOINED as >) (single/nested: >), >)) ); app_doc's beside ) is CORRECT — must NOT be changed to drop
+# BLOCKER 3: stack overflow on huge variants blocks (byte-neutral engine fix)
+r4/C8.echo (corpus fm24-cardpayments/onlineAuthorized/C8.spthy, ORACLE_TIMEOUT=300) -- deep witness: Terminal_Receives_Records_LocalAuth_C8 has a 9886-line variants block; full echo materialized (11452 lines)
+r4/BP_IBS_2.echo, BP_IBS_3.echo, BP_IBS_4.echo (corpus idbased, ORACLE_TIMEOUT=300) -- deep witnesses: ~5-6k-line variants blocks; full echoes materialized
+diagnosis (crate-internal, no oracle) -- overflow is eager depth-N recursion in reduceVert/reduceDoc (build), lay (display), and recursive Drop of the Rc<Doc> chain; all made iterative (heap Vec + explicit-stack Drop); byte-neutral (whole suite unchanged), 12000-group block renders on a 2MB stack
+round2/round3/round1 targets extended -- ct, UM_three_pass(+family), C8, BP_IBS_2/3/4, running-example, probe_{process,uniondrop,appdrop,appdrop2} added as byte-parity targets; deep-file signature fixtures added to round1; round-2 parity now runs on 8MB (not 512MB), proving the blocker-3 fix

@@ -1,0 +1,11 @@
+theory ProbeAppDrop
+begin
+
+functions: someop/2, macf/2, firstf/1, hashf/1
+
+rule Probe:
+  [ In(<aa, bb, cc, dd, ee, ff>) ]
+  -->
+  [ MyFactLongName( someop(<'1', longvariablename111>, <'2', dd, macf(firstf(hashf(<aa, bb, cc, dd, ee, ff>)), <'lbl', aa, bb, cccccccc, dd>)>) ) ]
+
+end

@@ -85,6 +85,104 @@ impl std::fmt::Debug for LazyDoc {
 
 use Doc::*;
 
+// ---------------------------------------------------------------------------
+// Iterative Drop
+//
+// A rendered document is a per-LINE linked chain — `NilAbove`/`TextBeside`/
+// `Nest` interleaved with `Lazy(Forced(..))` thunks (the memoised `best`
+// output) — as deep as the theory has lines. A huge `variants (modulo AC)`
+// block (C8 / BP_IBS: ~10 000 lines) makes that chain ~10 000 deep, and the
+// compiler-generated recursive `Drop` of nested `Rc<Doc>` overflows the stack
+// on it. This explicit-stack `Drop` dismantles the chain iteratively: each
+// node's children are detached (swapped for a shared `Empty` placeholder so
+// the automatic field-drop bottoms out at once) and pushed onto a heap `Vec`,
+// which is then drained. It never changes rendered output — it only bounds the
+// drop recursion.
+
+thread_local! {
+    static EMPTY_DOC: Rc<Doc> = Rc::new(Empty);
+    static EMPTY_LAZY: Rc<LazyDoc> = Rc::new(LazyDoc(RefCell::new(LazyState::Forced(Empty))));
+}
+
+fn empty_doc_placeholder() -> Rc<Doc> {
+    // `try_with` guards the (unreached-in-practice) case of a `Doc` dropping
+    // during thread-local teardown; a fresh `Empty` is an equally valid shared
+    // placeholder.
+    EMPTY_DOC.try_with(|e| e.clone()).unwrap_or_else(|_| Rc::new(Empty))
+}
+
+fn empty_lazy_placeholder() -> Rc<LazyDoc> {
+    EMPTY_LAZY
+        .try_with(|e| e.clone())
+        .unwrap_or_else(|_| Rc::new(LazyDoc(RefCell::new(LazyState::Forced(Empty)))))
+}
+
+/// Detach `d`'s direct children onto `stack`, replacing each with a shared
+/// placeholder so `d`'s own field-drop is O(1). A uniquely-owned child yields
+/// an owned `Doc` (pushed); a shared child (`try_unwrap`/`get_mut` fails) is
+/// dropped in place — a decrement only, never a deep recursion, since the
+/// placeholders are always shared and so are never descended into.
+fn detach_children(d: &mut Doc, stack: &mut Vec<Doc>) {
+    fn take(p: &mut Rc<Doc>, stack: &mut Vec<Doc>) {
+        // A leaf child has no children of its own, so its natural drop is O(1)
+        // and cannot recurse — leave it in place (this keeps the common
+        // shallow-document drop allocation-free).
+        if matches!(**p, Empty | NoDoc) {
+            return;
+        }
+        let child = std::mem::replace(p, empty_doc_placeholder());
+        if let Ok(owned) = Rc::try_unwrap(child) {
+            stack.push(owned);
+        }
+    }
+    match d {
+        NilAbove(p) => take(p, stack),
+        TextBeside(_, _, p) => take(p, stack),
+        Nest(_, p) => take(p, stack),
+        Union(a, b) => {
+            take(a, stack);
+            take(b, stack);
+        }
+        Beside(a, _, b) => {
+            take(a, stack);
+            take(b, stack);
+        }
+        Above(a, _, b) => {
+            take(a, stack);
+            take(b, stack);
+        }
+        Lazy(l) => {
+            let taken = std::mem::replace(l, empty_lazy_placeholder());
+            if let Ok(ld) = Rc::try_unwrap(taken) {
+                if let LazyState::Forced(inner) = ld.0.into_inner() {
+                    stack.push(inner);
+                }
+                // Pending: its boxed closure drops with `ld`; the closure's
+                // captured continuations are shallow (the deep chains are the
+                // Forced output path handled above).
+            }
+        }
+        Empty | NoDoc => {}
+    }
+}
+
+impl Drop for Doc {
+    fn drop(&mut self) {
+        // Fast path: leaves and already-detached placeholders carry no owned
+        // children, so there is nothing to dismantle.
+        if matches!(self, Empty | NoDoc) {
+            return;
+        }
+        let mut stack: Vec<Doc> = Vec::new();
+        detach_children(self, &mut stack);
+        while let Some(mut node) = stack.pop() {
+            // `node`'s children are detached onto the stack; `node` then drops
+            // with only placeholder children, so its re-entrant `Drop` is O(1).
+            detach_children(&mut node, &mut stack);
+        }
+    }
+}
+
 fn rc(d: Doc) -> Rc<Doc> {
     Rc::new(d)
 }
@@ -170,12 +268,45 @@ fn union_(a: Rc<Doc>, b: Rc<Doc>) -> Doc {
 }
 
 /// `reduceDoc`: push `Beside`/`Above` down into reduced form (RDoc).
+///
+/// Iterative rewrite of the recursive `beside(p,g,&reduce_doc(q))` /
+/// `above(p,g,&reduce_doc(q))`: the right spine of a `Beside`/`Above` tree can
+/// be thousands deep (the wide `vcat` of a huge `variants (modulo AC)` block —
+/// C8 / BP_IBS), so the spine is unrolled onto a heap `Vec` and folded back,
+/// keeping the recursion off the call stack. The fold order and the
+/// `beside`/`above` applications are identical to the recursive form, so the
+/// resulting RDoc — and every rendered byte — is unchanged.
 pub fn reduce_doc(d: &Doc) -> Doc {
-    match d {
-        Beside(p, g, q) => beside(p, *g, &reduce_doc(q)),
-        Above(p, g, q) => above(p, *g, &reduce_doc(q)),
-        other => other.clone(),
+    enum Frame {
+        Beside(Doc, bool),
+        Above(Doc, bool),
     }
+    let mut frames: Vec<Frame> = Vec::new();
+    // `Doc` implements `Drop`, so spine nodes are inspected by reference and
+    // their children shallow-cloned (an `Rc` bump each) rather than moved out.
+    let mut cur = d.clone();
+    loop {
+        let next = match &cur {
+            Doc::Beside(p, g, q) => {
+                frames.push(Frame::Beside((**p).clone(), *g));
+                (**q).clone()
+            }
+            Doc::Above(p, g, q) => {
+                frames.push(Frame::Above((**p).clone(), *g));
+                (**q).clone()
+            }
+            _ => break,
+        };
+        cur = next;
+    }
+    let mut acc = cur;
+    for frame in frames.into_iter().rev() {
+        acc = match frame {
+            Frame::Beside(p, g) => beside(&p, g, &acc),
+            Frame::Above(p, g) => above(&p, g, &acc),
+        };
+    }
+    acc
 }
 
 // ---------------------------------------------------------------------------
@@ -376,24 +507,59 @@ enum IsEmpty {
     NotEmpty,
 }
 
+// `reduce_horiz`/`reduce_vert` fold a right-nested `Beside`/`Above` spine (the
+// list built by `hcat`/`hsep`/`vcat`) into reduced form. That spine is as long
+// as the list — thousands of rows for a huge `variants (modulo AC)` block — so
+// both walk the spine iteratively onto a heap `Vec` and fold it back with
+// `eliminate_empty`, exactly as the recursive form did, off the call stack.
+// The left component of each spine node (`p`) is a single list item and is
+// reduced recursively (bounded by that item's own depth).
+
+// The `loop { let next = match &cur {…}; cur = next }` idiom cannot become a
+// `while let` here: the arm reassigns `cur`, which is still borrowed by the
+// `while let` scrutinee.
+#[allow(clippy::while_let_loop)]
 fn reduce_horiz(d: &Doc) -> (IsEmpty, Doc) {
-    match d {
-        Beside(p, g, q) => {
-            let (_, pr) = reduce_horiz(p);
-            eliminate_empty(true, pr, *g, reduce_horiz(q))
-        }
-        _ => (IsEmpty::NotEmpty, d.clone()),
+    let mut lefts: Vec<(Doc, bool)> = Vec::new();
+    let mut cur = d.clone();
+    loop {
+        let next = match &cur {
+            Beside(p, g, q) => {
+                let (_, pr) = reduce_horiz(p);
+                lefts.push((pr, *g));
+                (**q).clone()
+            }
+            _ => break,
+        };
+        cur = next;
     }
+    let mut acc = (IsEmpty::NotEmpty, cur);
+    for (pr, g) in lefts.into_iter().rev() {
+        acc = eliminate_empty(true, pr, g, acc);
+    }
+    acc
 }
 
+#[allow(clippy::while_let_loop)] // see `reduce_horiz`: the arm reassigns `cur`.
 fn reduce_vert(d: &Doc) -> (IsEmpty, Doc) {
-    match d {
-        Above(p, g, q) => {
-            let (_, pr) = reduce_vert(p);
-            eliminate_empty(false, pr, *g, reduce_vert(q))
-        }
-        _ => (IsEmpty::NotEmpty, d.clone()),
+    let mut lefts: Vec<(Doc, bool)> = Vec::new();
+    let mut cur = d.clone();
+    loop {
+        let next = match &cur {
+            Above(p, g, q) => {
+                let (_, pr) = reduce_vert(p);
+                lefts.push((pr, *g));
+                (**q).clone()
+            }
+            _ => break,
+        };
+        cur = next;
     }
+    let mut acc = (IsEmpty::NotEmpty, cur);
+    for (pr, g) in lefts.into_iter().rev() {
+        acc = eliminate_empty(false, pr, g, acc);
+    }
+    acc
 }
 
 /// `beside_cons` = true builds `Beside`, false builds `Above`.
@@ -818,46 +984,65 @@ fn display_page(page_width: isize, ribbon_width: isize, doc: &Doc) -> String {
     out
 }
 
-fn lay(out: &mut String, k: isize, d: &Doc) {
-    match &force(d) {
-        Nest(k1, p) => lay(out, k + k1, p),
-        Empty => {}
-        NilAbove(p) => {
-            out.push('\n');
-            lay(out, k, p);
-        }
-        TextBeside(s, l, p) => lay1(out, k, s, *l, p),
-        Above(..) => panic!("display lay Above"),
-        Beside(..) => panic!("display lay Beside"),
-        NoDoc => panic!("display lay NoDoc"),
-        Union(..) => panic!("display lay Union"),
-        Lazy(_) => unreachable!("lay: forced doc"),
-    }
-}
-
-fn lay1(out: &mut String, k: isize, s: &str, l: usize, p: &Doc) {
-    out.push_str(&indent(k));
-    out.push_str(s);
-    lay2(out, k + l as isize, p);
-}
-
-fn lay2(out: &mut String, k: isize, d: &Doc) {
-    match &force(d) {
-        NilAbove(p) => {
-            out.push('\n');
-            lay(out, k, p);
-        }
-        TextBeside(s, l, p) => {
-            out.push_str(s);
-            lay2(out, k + *l as isize, p);
-        }
-        Nest(_, p) => lay2(out, k, p),
-        Empty => {}
-        Above(..) => panic!("display lay2 Above"),
-        Beside(..) => panic!("display lay2 Beside"),
-        NoDoc => panic!("display lay2 NoDoc"),
-        Union(..) => panic!("display lay2 Union"),
-        Lazy(_) => unreachable!("lay2: forced doc"),
+/// Iterative rewrite of the mutually-recursive `lay`/`lay1`/`lay2`. The
+/// display walk is tail-recursive and its depth follows the `NilAbove` chain,
+/// which is as deep as the document has lines (thousands for a huge variant
+/// block). `mid_line` mirrors which of `lay` (start-of-line: emit indent
+/// before text, accumulate `Nest` into the indent) / `lay2` (mid-line: text
+/// already indented, `Nest` values ignored) the recursive form was in. The
+/// `k` threading, indentation, and text emission are byte-for-byte identical.
+fn lay(out: &mut String, mut k: isize, d: &Doc) {
+    // `Doc` implements `Drop`, so nodes are inspected by reference and the tail
+    // re-`force`d rather than moved out.
+    let mut cur = force(d);
+    let mut mid_line = false;
+    loop {
+        let next = if !mid_line {
+            match &cur {
+                Nest(k1, p) => {
+                    k += *k1;
+                    force(p)
+                }
+                Empty => return,
+                NilAbove(p) => {
+                    out.push('\n');
+                    force(p)
+                }
+                TextBeside(s, l, p) => {
+                    out.push_str(&indent(k));
+                    out.push_str(s);
+                    k += *l as isize;
+                    mid_line = true;
+                    force(p)
+                }
+                Above(..) => panic!("display lay Above"),
+                Beside(..) => panic!("display lay Beside"),
+                NoDoc => panic!("display lay NoDoc"),
+                Union(..) => panic!("display lay Union"),
+                Lazy(_) => unreachable!("lay: forced doc"),
+            }
+        } else {
+            match &cur {
+                NilAbove(p) => {
+                    out.push('\n');
+                    mid_line = false;
+                    force(p)
+                }
+                TextBeside(s, l, p) => {
+                    out.push_str(s);
+                    k += *l as isize;
+                    force(p)
+                }
+                Nest(_, p) => force(p),
+                Empty => return,
+                Above(..) => panic!("display lay2 Above"),
+                Beside(..) => panic!("display lay2 Beside"),
+                NoDoc => panic!("display lay2 NoDoc"),
+                Union(..) => panic!("display lay2 Union"),
+                Lazy(_) => unreachable!("lay2: forced doc"),
+            }
+        };
+        cur = next;
     }
 }
 

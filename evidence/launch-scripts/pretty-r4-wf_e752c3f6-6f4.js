@@ -1,0 +1,28 @@
+export const meta = {
+  name: 'pretty-r4',
+  description: 'Sealed pretty round 4: close the three rule-route blockers (SAPIC process= attribute, closing-bracket wrap, deep-recursion stack overflow); both-sides audit',
+  phases: [
+    { title: 'Implement', detail: 'sealed blocker closure (Opus)' },
+    { title: 'Audit', detail: 'both-sides similarity audit of the round-4 delta' },
+  ],
+}
+
+const IMPL = `You are a SEALED implementer under the barrier protocol at /home/kamilner/tamarin-cleanroom/PROTOCOL.md — read it first and comply strictly.
+ACCESS RULES: You must NOT read any file under /home/kamilner/tamarin-rs/crates/, and NOT read any Haskell source of tamarin-prover anywhere on disk (notably /home/kamilner/tamarin-rs/tamarin-prover/{lib,src}/ and /home/kamilner/tamarin-rs/tamarin-prover-testing/{lib,src}/). The ONLY Haskell you may read is the SANCTIONED BSD library /home/kamilner/tamarin-cleanroom/graphdot/sanctioned/pretty-1.1.3.6/. Do NOT read /home/kamilner/tamarin-cleanroom/INTEGRATION_REPORT.md, and do NOT read any AUDIT.md anywhere in the cleanroom. No web access. You MAY read .spthy examples under /home/kamilner/tamarin-rs/tamarin-prover/examples/ and the sanctioned flags map /home/kamilner/tamarin-rs/scripts/file_flags.tsv. No git commits.
+DISCIPLINE: log every oracle interaction in workspace QUERIES.log; record behavioral facts in BEHAVIOR.md with provenance. Preserve OOM guards; at most 6 concurrent oracle invocations. Return a PLAIN-TEXT summary.
+
+Workspace: /home/kamilner/tamarin-cleanroom/pretty/ (read/write freely, except AUDIT.md). Crate: workspace/pretty-clean (R1 term+signature, R2 rules+macros, R3 formulas+wrappers all done). Re-read BEHAVIOR.md and QUERIES.log first. Oracle: oracle/pretty_oracle.sh <file.spthy> [flags].
+
+THE TASK — round 4: three corpus-scale rule-rendering divergences surfaced by an open-side full-corpus measurement (byte witnesses; the witness FILE LISTS are at round2/ — read the r3a/r3b/r3c list files there if present, else use the named witnesses):
+BLOCKER 1 (79 files): your rule-attribute rendering DROPS the SAPIC process attribute. The reference emits it between the color and derivcheck attributes, e.g. rule header '...[color=#ffffff, process=\"|\", issapicrule, role='Process']:' (witness: accountability/csf21-acc-unbounded/previous/ct.spthy echo line ~25). Probe SAPIC theories to pin the attribute's exact spelling, quoting/escaping of the process text (what characters appear, how are quotes/backslashes escaped?), position in the canonical attribute order, and when it is present vs absent. Extend your ast + attr rendering.
+BLOCKER 2 (5 files, ake/dh family): when a wide tuple is the last argument of an enclosing application and both must wrap, the reference drops the tuple's > AND the enclosing application's ) EACH onto its own line; your render keeps them joined as '>)' (witness: ake/dh/UM_three_pass.spthy echo lines ~54-55). Your round-3 AC-operator fcat correction is closely related — probe whether the application ')' follows the same drop-to-opener-column construction, pin the exact columns, and fix uniformly.
+BLOCKER 3 (4 files): your renderer STACK-OVERFLOWS (crash, not wrong bytes) on deeply-nested terms: fm24-cardpayments/onlineAuthorized/C8.spthy and idbased/BP_IBS_2/3/4.spthy. Diagnose the recursion (term construction and/or Doc evaluation), and fix structurally — iterative/heap-based traversal or an explicit-stack rewrite of the deep recursion. The fix must be byte-neutral on everything that already renders (your full test suite is the guard) and must render the 4 witness files completely (compare against fresh oracle targets for them).
+ACCEPTANCE: all existing suites green (R1/R2/R3, doc engine); new probe-pinned tests per blocker; whole-rule-block parity re-asserted on the round-2 curated set PLUS ct.spthy (SAPIC attrs), UM_three_pass.spthy, and the 4 deep files (materialize their echoes as targets — for the deep files assert full-echo rule+signature+formula surfaces you model). BEHAVIOR.md updated with each law. Do NOT edit anything outside /home/kamilner/tamarin-cleanroom/pretty/.`
+
+const AUDIT = `You are a BOTH-SIDES similarity auditor for the tamarin-rs sealed relicensing campaign (exempt from barrier access rules; you may read everything). Audit ONLY this round's delta: /home/kamilner/tamarin-cleanroom HEAD (60bea3f) contains pretty rounds 1-3 — git -C /home/kamilner/tamarin-cleanroom status/diff restricted to pretty/ shows the round-4 delta (SAPIC process attribute, closing-bracket wrap, stack-overflow fix).
+Audit against the upstream Haskell in /home/kamilner/tamarin-rs/tamarin-prover/ (the rule pretty-printer and attribute rendering; the term printer's bracket handling). The attribute spelling/order and bracket columns are byte-forced merger — verify probe provenance. The STACK-OVERFLOW FIX deserves special attention: it is pure engineering with no upstream counterpart forced by the boundary — verify its structure (explicit stack/iterative traversal) is NOT a transcription of upstream's recursion pattern and carries no upstream identifiers.
+Append a round-4 section to /home/kamilner/tamarin-cleanroom/pretty/AUDIT.md. Violations get BEHAVIORAL redo instructions. End with exactly one line: VERDICT: pass  — or —  VERDICT: fail`
+
+const impl = await agent(IMPL, { label: 'seal:pretty-r4', phase: 'Implement', model: 'opus' })
+const audit = await agent(AUDIT, { label: 'audit:pretty-r4', phase: 'Audit', model: 'opus' })
+return { impl: (impl || '').slice(0, 3000), audit: (audit || '').slice(0, 2500), passed: /VERDICT:\s*pass/i.test(audit || '') }

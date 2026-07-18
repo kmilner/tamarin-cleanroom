@@ -1,0 +1,18 @@
+theory ProbeAppDrop2
+begin
+
+functions: singleop/1, twoop/2, macf/2, firstf/1, hashf/1, gg/1
+
+// (a) single-arg application whose only arg is a multi-line tuple
+rule ProbeSingle:
+  [ In(<aa, bb, cc, dd, ee, ff>) ]
+  -->
+  [ FactAAAAAAAAAAAAAAAAAAAAAAAAAAA( singleop(<'2', dd, macf(firstf(hashf(<aa, bb, cc, dd, ee, ff>)), <'lbl', aa, bb, cccccccc, dd>)>) ) ]
+
+// (b) nested application: outer app whose last arg is an app whose last arg is a multi-line tuple
+rule ProbeNested:
+  [ In(<aa, bb, cc, dd, ee, ff>) ]
+  -->
+  [ FactBBB( twoop(shortarg, gg(<'2', dd, macf(firstf(hashf(<aa, bb, cc, dd, ee, ff>)), <'lbl', aa, bb, cccccccc, dd>)>)) ) ]
+
+end

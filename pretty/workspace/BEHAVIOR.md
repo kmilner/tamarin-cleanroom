@@ -24,6 +24,24 @@ settings). Key engine consequences confirmed against probes:
   from the nest, so lines up to 76 display columns appear at nest 3
   (probe:t_edge).
 
+* **Deep-structure robustness (R4 blocker 3, BYTE-NEUTRAL).** A rendered Doc is
+  a per-LINE linked chain (`NilAbove`/`TextBeside`/`Nest` interleaved with
+  memoised `Lazy(Forced)` thunks) as deep as the theory has lines. A huge
+  `variants (modulo AC)` block reaches ~10 000 lines (C8's
+  `Terminal_Receives_Records_LocalAuth_C8` is 9 886 lines; BP_IBS_2/3/4 ~5–6k),
+  so the naive recursive `reduceDoc`/`reduceVert`/`reduceHoriz` (build), the
+  display walk (`lay`), and — the last one to surface — the compiler-generated
+  recursive `Drop` of the nested `Rc<Doc>` all overflow a normal 8 MB stack
+  (measured: overflow between ~1 500 and ~2 000 two-line groups). The wide FILL
+  machinery is already lazy and does not overflow; only these eager `Above`/
+  spine/drop walks do. All four are rewritten to iterate over a heap `Vec`
+  (spine unrolled then folded; `lay` a loop; an explicit-stack `Drop` for
+  `Doc`) — a pure evaluation-order change, so every rendered byte is identical
+  (whole existing R1/R2/R3 suites unchanged) and the four deep witness files
+  render completely and byte-match the oracle. Proof: a 12 000-group block
+  renders on a 2 MB stack, and the round-2 curated set (now including the four
+  deep files) passes on a production 8 MB stack, not the former 512 MB one.
+
 ## Signature section
 
 Overall shape (all targets/probes):
@@ -183,6 +201,15 @@ Composite shapes:
   (probe:t_wide W2 — continuation line `ylongvariablename2,
   zlongvariablename3)`; probe:e_long). Nullary symbols render bare (`shk`,
   `zero`, `true`, `f` — targets + probes).
+  The application `)` is the plain BESIDE `<> ")"`, NOT a droppable fill item:
+  when the last argument is a multi-line tuple whose `>` drops to its own line,
+  the `)` STAYS JOINED to it as `>)` (probe:appdrop `someop(…, <…, macf(…)>)`
+  → `…dd>)`; probe:appdrop2 nested → `…>))`; the round-2 blocker-2 corpus —
+  ake/dh UM_three_pass etc. — has MAC applications with this exact shape). This
+  is the crux of R4 blocker 2: the enclosing-delimiter drop is operator-
+  specific — an AC-operator/pair `)`/`>` DROPS (fill item), an application `)`
+  does NOT (beside). Changing `app_doc` to drop the `)` would break these
+  witnesses; the fix is to leave it beside.
 * Pair: `<a, b, c>` — ONE fill (`fcat`) whose items are `<`, each element
   with its attached `", "` under `nest 1`, and `>`:
   `fcat ('<' : map (nest 1) (punctuate ", " elems) ++ ['>'])`. This single
@@ -226,6 +253,15 @@ Composite shapes:
   earlier R1 law (`"(" <> fcat … <> ")"`, `)` always attached) agreed with
   the true construction on every R1-observed shape but was falsified by the
   alethea witness.
+  The R4 blocker-2 corpus (ake/dh: UM_three_pass{,_combined,_combined_fixed},
+  DHKEA{,_keyreg}) exercises the OTHER `)`-drop sub-case: the LAST union element
+  is itself a multi-line tuple, so the tuple's `>` drops to its `<` column AND
+  the union's `)` drops BELOW it to the `(` column, on SEPARATE lines
+  (probe:uniondrop `(<'1', …>++<'2', dd, macf(…)>)` →
+  `…>` / `…)` on their own lines; UM_three_pass echo lines ~54–55, whole-block
+  byte-parity re-asserted). The alethea round-3 fix (`)` as a fill item)
+  already covers this; the round-2 curated set now re-asserts it across the
+  five ake/dh files. (Contrast the application `)` above, which stays `>)`.)
 * diff: `diff(x, y)` — application form (probe:t_diff, run with --diff).
 * mult inside exp exponent: `x.10^(x.11*inv(x.12))` (target:cav13) — normal
   AC-paren rule, no extra exp parens.
@@ -248,14 +284,31 @@ rule (modulo E) Name[attrs]:
 
 * `rule (modulo E) Name:` — the modulo annotation is input data (`E` on the
   closed rule, `AC` on the variant re-render inside the comment).
-* Attribute list attaches to the name: `Name[color=#abcdef, no_derivcheck,
-  issapicrule, role='r']:` — canonical order color < no_derivcheck <
-  issapicrule < role regardless of source order; the LAST color/role
-  declaration wins; `process='…'` and external `x-…` attributes are DROPPED
+* Attribute list attaches to the name: `Name[color=#abcdef, process="…",
+  no_derivcheck, issapicrule, role='r']:` — canonical order color < process <
+  no_derivcheck < issapicrule < role regardless of source order; the LAST
+  color/process/role declaration wins; external `x-…` attributes are DROPPED
   (probe:p_rattr, target:issue713). Spellings: `color=#<hex>` unquoted
-  (lowercased upstream: '#AbCdEf' → `#abcdef`), `role='…'` quoted.
+  (lowercased upstream: '#AbCdEf' → `#abcdef`), `role='…'` single-quoted.
   Fill-wrap aligned after the `[`, `]:`  attached to the last item
   (probe:p_rattr R3, target:issue713 bla).
+* **SAPIC `process` attribute** (R4 blocker-1 correction; probe:p_process,
+  target:ct — the earlier "process is DROPPED" law was WRONG, from a corpus
+  that had no `issapicrule` files in the round-2 set). It is present on every
+  SAPIC-generated (`issapicrule`) rule, ABSENT otherwise, and renders
+  `process="<snippet>"` — DOUBLE quotes (contrast `role='…'`), positioned
+  between `color` and `no_derivcheck`. The `<snippet>` is the translated
+  process step, carried VERBATIM as one unbreakable text token: `process="|"`
+  (parallel), `process="!"` (replication), `process="0"` (null),
+  `process="in(x.1);"`, `process="event Ev( x.1 );"`,
+  `process="out(<x.1, 'lbl'>);"`, `process="lookup <'att', h.3> as a.1"`,
+  `process="insert <$ca.2, 'proofOfID', $s.1, pk(skS.1)>,'yes';"`. Its interior
+  spaces, commas, `<>`, `()`, `;` and SINGLE-quoted string constants are part
+  of the value, NOT layout — the fill never breaks inside it (target:ct 100+
+  witnesses; probe:p_process). ESCAPING of `"`/`\` is UNOBSERVABLE: process
+  snippets quote their constants with `'…'`, so no `"`/`\`/control char ever
+  reaches the attribute; rendered with no escaping (flagged — a corpus with a
+  process containing `"`/`\` would be needed to pin it).
 
 ### Body
 

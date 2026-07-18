@@ -1,0 +1,12 @@
+theory ProbeUnionDrop
+begin
+
+builtins: multiset
+functions: macf/2, firstf/1, hashf/1
+
+rule PU:
+  [ In(<aa, bb, cc, dd, ee, ff>) ]
+  -->
+  [ FactUUUUUUUUUUUUUU( (<'1', shortval111> ++ <'2', dd, macf(firstf(hashf(<aa, bb, cc, dd, ee, ff>)), <'lbl', aa, bb, cccccccc, dd>)>) ) ]
+
+end

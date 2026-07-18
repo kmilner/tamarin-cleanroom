@@ -1027,7 +1027,82 @@ fn round1_fixtures() -> Vec<(&'static str, Signature)> {
             "esorics23-bluetooth_models_mesh.spthy.hs.txt",
             mesh_fixture(),
         ),
+        // ── round-4 deep files (blocker 3): their signature surfaces are
+        //    small; asserted here so "full-echo rule+signature+formula" holds
+        //    for each deep file (rules → round2, formulas → round3). ──
+        ("C8.hs.txt", c8_fixture()),
+        ("BP_IBS_2.hs.txt", bp_ibs_fixture()),
+        ("BP_IBS_3.hs.txt", bp_ibs_fixture()),
+        ("BP_IBS_4.hs.txt", bp_ibs_fixture()),
     ]
+}
+
+/// fm24-cardpayments/onlineAuthorized/C8.spthy — six builtins (only
+/// diffie-hellman/xor survive on the `builtins:` line; the rest expand into
+/// functions/equations) plus seven user function symbols, no user equations.
+fn c8_fixture() -> Signature {
+    sig(
+        &[
+            "signing",
+            "hashing",
+            "asymmetric-encryption",
+            "xor",
+            "symmetric-encryption",
+            "diffie-hellman",
+        ],
+        vec![
+            fdecl("f", 2, false, false),
+            fdecl("MAC", 2, false, false),
+            fdecl("MAC_arpc", 2, false, false),
+            fdecl("p8", 1, false, false),
+            fdecl("g", 0, false, false),
+            fdecl("KDF_SKc", 1, false, false),
+            fdecl("KDF_SKi", 1, false, false),
+        ],
+        vec![],
+    )
+}
+
+/// idbased/BP_IBS_{2,3,4}.spthy — identical signature: bilinear-pairing (which
+/// induces diffie-hellman on the `builtins:` line) plus seven functions and one
+/// wide user equation whose `idverify(…)` application fill-wraps and whose
+/// `= true` drops to (equation-indent − 2).
+fn bp_ibs_fixture() -> Signature {
+    sig(
+        &["bilinear-pairing"],
+        vec![
+            fdecl("idsign", 2, false, false),
+            fdecl("idverify", 3, false, false),
+            fdecl("IBPriv", 2, false, false),
+            fdecl("IBPub", 2, false, false),
+            fdecl("GetIBMasterPublicKey", 1, false, false),
+            fdecl("true", 0, false, false),
+            fdecl("KDF", 1, false, false),
+        ],
+        vec![equation(
+            app(
+                "idverify",
+                vec![
+                    app(
+                        "idsign",
+                        vec![
+                            msg("m"),
+                            app("IBPriv", vec![msg("A"), msg("IBMasterPrivateKey")]),
+                        ],
+                    ),
+                    msg("m"),
+                    app(
+                        "IBPub",
+                        vec![
+                            msg("A"),
+                            app("GetIBMasterPublicKey", vec![msg("IBMasterPrivateKey")]),
+                        ],
+                    ),
+                ],
+            ),
+            app("true", vec![]),
+        )],
+    )
 }
 
 /// sapic/fast/GJM-contract/contract.spthy — the equation-order

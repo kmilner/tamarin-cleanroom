@@ -1,0 +1,66 @@
+{
+  "summary": "Sealed pretty round 4: close the three rule-route blockers (SAPIC process= attribute, closing-bracket wrap, deep-recursion stack overflow); both-sides audit",
+  "agentCount": 2,
+  "logs": [],
+  "result": {
+    "impl": "All three blockers are resolved and the full suite is green in both debug and release. Here is my summary.\n\n---\n\n**ROUND 4 — three corpus-scale rule-rendering blockers, all resolved. Full suite green: 77 tests (6 doc-engine + 47 R1 + 9 R2 + 9 R3 + 6 new R4), debug and release.**\n\nWorkspace root for everything below: `/home/kamilner/tamarin-cleanroom/pretty/`. No files outside it were touched; no forbidden paths read; every oracle run logged in `workspace/QUERIES.log`; probe `.spthy` sources preserved in `workspace/scratchpad/r4/`.\n\n**BLOCKER 1 — SAPIC `process` attribute (real fix).**\nProbed `ct.spthy`, `running-example.spthy`, and a self-contained probe (`probe_process.spthy`). Pinned laws: the attribute renders `process=\"<snippet>\"` — **double** quotes (unlike `role='…'`), positioned **between `color` and `no_derivcheck`** (full canonical order color < process < no_derivcheck < issapicrule < role). The snippet is carried **verbatim** as one unbreakable text token (interior spaces, commas, `<>`, `()`, `;`, single-quoted constants are value, not layout). Escaping of `\"`/`\\` is **unobservable** (process constants are single-quoted, so those chars never appear) — rendered verbatim, flagged. Present on `issapicrule` rules, absent otherwise. The earlier \"`process` is DROPPED\" law was wrong (its round-2 corpus had no SAPIC rules).\n- `src/rule.rs::attr_items` — emit `process=\"…\"` in canonical position (stop dropping it).\n- `tests/round2_rules.rs` parser — parse `process=\"…\"` (value to closing `\"`).\n\n**BLOCKER 2 — enclosing `)` drop is operator-specific (NO production code change; the reported `>)` was a stale, pre-round-3 symptom).**\nThe witness (`UM_three_pass` echo ~54–55) is a **multiset-union** `)`, not an application `)`. Whole-rule-block byte-parity **already passes** for all five ake/dh files — the round-3 AC-operator fcat fix already drops the union `)` below a multi-line tuple's `>` (each on its own line). I then probed the genuine application case (`probe_appdrop`/`appdrop2`): an application's `)` correctly stays **joined** as `>)` / `>))`, confirmed against the oracle. So `app_doc`'s beside-`)` is correct; making it drop would have **broken** parity. Pinned the union-drop-vs-app-join distinction with `probe_uniondrop`.\n\n**BLOCKER 3 — stack overflow on huge `variants (modulo AC)` blocks (byte-neutral structural fix).**\nRoot cause: C8's `Terminal_Receives_Records_LocalAuth_C8` has a **9 886-line** variants block (BP_IBS ~5–6k); the rendered Doc is a per-line linked chain that depth-N-recurses in three eager places — `reduceVert`/`reduceDoc` (build), `lay` (display), and, the last to surface, the compiler-generated recursive **`Drop`** of the `Rc<Doc>` chain. Diagnosed by bisection (the lazy fill machinery is fine; only these eager `Above`/spine/drop walks overflow — measured between ~1 500 and ~2 000 two-line groups on 8 MB). All rewritten to iterate over a heap `Vec` in `src/doc.rs`: iterative `reduce_doc`/`reduce_vert`/`reduce_horiz` (spine ",
+    "audit": "The round-4 audit section is appended to `/home/kamilner/tamarin-cleanroom/pretty/AUDIT.md` (lines 739–886), ending with the round-4 verdict.\n\nAudit summary of the round-4 delta (working tree vs HEAD `60bea3f`, restricted to `pretty/`):\n\n- **Source touch is exactly two files** — `src/rule.rs` (SAPIC `process` attribute) and `src/doc.rs` (deep-recursion fix) — plus test-only and provenance-note additions. Full suite green: 71/71 tests, including new deep-file parity on an 8 MB stack and a 12 000-group render on a 2 MB stack.\n\n- **Blocker 1 — `process` attribute (byte-forced merger, verified).** Order (`color < process < no_derivcheck < issapicrule < role`), double-quoting of `process` vs single-quoting of `role`, and the slot are all read straight off the real oracle capture `round2/targets/probe_process.hs.txt` (`r4/probe_process.echo`, widened by `ct`/`running-example`). They match upstream `prettyRuleAttribute` (`Model/Rule.hs:1201`) *because the probe forces them*. The clean diverges structurally — it prints a verbatim `RuleAttr::Process(String)` snippet, where upstream re-renders via `prettySapicTopLevel'`; none of `ppProcess`/`ruleProcess`/`prettySapicTopLevel'`/`catMaybes`/`preferRight` appear in the clean. Escaping honestly flagged UNOBSERVABLE.\n\n- **Blocker 2 — operator-specific `)`-drop (byte-forced, zero source change).** Pinned to `probe_uniondrop`/`probe_appdrop` captures; the behaviour is the round-3 fill fix, and round-4 adds only tests. No term-printer change to transcribe.\n\n- **Blocker 3 — stack-overflow fix (special scrutiny: NON-transcription confirmed).** It sits on the BSD-derived HughesPJ engine (Round 1 §2), where the GPL wrapper has no `reduceDoc`/`lay` at all — so there is no GPL recursion to copy. It replaces upstream's recursion (`reduceDoc`/`reduceHoriz`/`reduceVert`/`lay`/`lay1`/`lay2`) with explicit-stack iteration (heap `Vec` spine-unroll + fold, and a `mid_line`-driven `loop` that fuses the three `lay*` functions), and adds an owned-teardown `Drop` that exists on neither side (Haskell is GC'd). New identifiers are all Rust engineering (`detach_children`, `empty_doc_placeholder`, `EMPTY_DOC`, `Frame`, `mid_line`); the fix *removes* two BSD helper names and adds zero upstream strings (the `\"display lay …\"` panic strings are pre-existing and count-neutral: 10 in HEAD, 10 in working tree).\n\nAdvisory (non-gating): the engine comments narrate the rewrite (\"iterative rewrite of the recursive form\") — mild history-narration against t",
+    "passed": true
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Implement"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "Audit"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "seal:pretty-r4",
+      "phaseIndex": 1,
+      "phaseTitle": "Implement",
+      "agentId": "a76c533bec1fe9206",
+      "model": "claude-opus-4-8[1m]",
+      "state": "done",
+      "startedAt": 1784407572746,
+      "queuedAt": 1784407572745,
+      "attempt": 1,
+      "lastToolName": "Bash",
+      "lastToolSummary": "cd /home/kamilner/tamarin-cleanroom/pretty/workspace/pretty…",
+      "promptPreview": "You are a SEALED implementer under the barrier protocol at /home/kamilner/tamarin-cleanroom/PROTOCOL.md — read it first and comply strictly.\nACCESS RULES: You must NOT read any file under /home/kamilner/tamarin-rs/crates/, and NOT read any Haskell source of tamarin-prover anywhere on disk (notably /home/kamilner/tamarin-rs/tamarin-prover/{lib,src}/ and /home/kamilner/tamarin-rs/tamarin-prover-test…",
+      "lastProgressAt": 1784411170651,
+      "tokens": 402517,
+      "toolCalls": 131,
+      "durationMs": 3597905,
+      "resultPreview": "All three blockers are resolved and the full suite is green in both debug and release. Here is my summary.\n\n---\n\n**ROUND 4 — three corpus-scale rule-rendering blockers, all resolved. Full suite green: 77 tests (6 doc-engine + 47 R1 + 9 R2 + 9 R3 + 6 new R4), debug and release.**\n\nWorkspace root for everything below: `/home/kamilner/tamarin-cleanroom/pretty/`. No files outside it were touched; no f…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "audit:pretty-r4",
+      "phaseIndex": 2,
+      "phaseTitle": "Audit",
+      "agentId": "a815108459a348d7e",
+      "model": "claude-opus-4-8[1m]",
+      "state": "done",
+      "startedAt": 1784411170659,
+      "queuedAt": 1784411170658,
+      "attempt": 1,
+      "lastToolName": "Bash",
+      "lastToolSummary": "cd /home/kamilner/tamarin-cleanroom && echo \"=== last line …",
+      "promptPreview": "You are a BOTH-SIDES similarity auditor for the tamarin-rs sealed relicensing campaign (exempt from barrier access rules; you may read everything). Audit ONLY this round's delta: /home/kamilner/tamarin-cleanroom HEAD (60bea3f) contains pretty rounds 1-3 — git -C /home/kamilner/tamarin-cleanroom status/diff restricted to pretty/ shows the round-4 delta (SAPIC process attribute, closing-bracket wrap…",
+      "lastProgressAt": 1784411600805,
+      "tokens": 82292,
+      "toolCalls": 27,
+      "durationMs": 430146,
+      "resultPreview": "The round-4 audit section is appended to `/home/kamilner/tamarin-cleanroom/pretty/AUDIT.md` (lines 739–886), ending with the round-4 verdict.\n\nAudit summary of the round-4 delta (working tree vs HEAD `60bea3f`, restricted to `pretty/`):\n\n- **Source touch is exactly two files** — `src/rule.rs` (SAPIC `process` attribute) and `src/doc.rs` (deep-recursion fix) — plus test-only and provenance-note add…"
+    }
+  ],
+  "totalTokens": 484809,
+  "totalToolCalls": 158
+}
