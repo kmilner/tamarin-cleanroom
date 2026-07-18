@@ -1,0 +1,33 @@
+theory Tedge
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fnAAAAAAAAAAAAAAAAAA/3, fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) V1:
+   [
+   In( aaaaaaaaaaaaaaa1 ), In( aaaaaaaaaaaaaaa2 ), In( aaaaaaaaaaaaaaa3 ),
+   In( bbbbbbbbbb )
+   ]
+  -->
+   [
+   Out( <aaaaaaaaaaaaaaa1, aaaaaaaaaaaaaaa2, aaaaaaaaaaaaaaa3, bbbbbbbbbb> )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) V2:
+   [ In( aaaaaaaaaaaaaaa1 ), In( aaaaaaaaaaaaaaa2 ), In( cccccccc ) ]
+  -->
+   [
+   Out( fnAAAAAAAAAAAAAAAAAA(aaaaaaaaaaaaaaa1, aaaaaaaaaaaaaaa2, cccccccc) )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+
+
+end

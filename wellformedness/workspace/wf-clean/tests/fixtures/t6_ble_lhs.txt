@@ -1,0 +1,22 @@
+Facts occur in the left-hand-side but not in any right-hand-side 
+=================================================================
+
+   1. in rule "Oracle_f4":  factName `LowEntropyf4' arity: 4 multiplicity: Linear
+  
+   2. in rule "Oracle_passkey":  factName `LowEntropy' arity: 1 multiplicity: Linear
+  
+   3. in rule "RespSelectKeysizeSS":  factName `RespChooseKeysize' arity: 2 multiplicity: Linear
+  
+   4. in rule "RespSelectKeysizeSW":  factName `RespChooseKeysize' arity: 2 multiplicity: Linear
+  
+   5. in rule "RespSelectKeysizeWS":  factName `RespChooseKeysize' arity: 2 multiplicity: Linear
+  
+   6. in rule "RespSelectKeysizeWW":  factName `RespChooseKeysize' arity: 2 multiplicity: Linear
+  
+   7. in rule "InitSelectKeysizeSS":  factName `InitChooseKeysize' arity: 2 multiplicity: Linear
+  
+   8. in rule "InitSelectKeysizeSW":  factName `InitChooseKeysize' arity: 2 multiplicity: Linear
+  
+   9. in rule "InitSelectKeysizeWS":  factName `InitChooseKeysize' arity: 2 multiplicity: Linear
+  
+  10. in rule "InitSelectKeysizeWW":  factName `InitChooseKeysize' arity: 2 multiplicity: Linear

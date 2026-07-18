@@ -1,0 +1,4 @@
+theory Prevealingsigning begin
+builtins: revealing-signing
+rule A: [ In(x) ] --> [ Out(x) ]
+end

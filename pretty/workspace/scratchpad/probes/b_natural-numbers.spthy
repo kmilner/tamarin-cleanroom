@@ -1,0 +1,4 @@
+theory Pnaturalnumbers begin
+builtins: natural-numbers
+rule A: [ In(x) ] --> [ Out(x) ]
+end

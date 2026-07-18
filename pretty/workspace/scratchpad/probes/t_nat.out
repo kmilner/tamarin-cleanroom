@@ -1,0 +1,38 @@
+theory Tnat
+
+begin
+
+// Function signature and definition of the equational theory E
+
+builtins: natural-numbers
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) N1:
+   [ In( %x ), In( %y ), In( %z ) ] --> [ Out( (%x%+%y%+%z) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) N2:
+   [ In( %x ), In( %y ), In( %z ) ] --> [ Out( (%x%+%y%+%z) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) N3:
+   [ In( %x ), In( %y ), In( %z ) ] --> [ Out( (%x%+%y%+%z) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) N4:
+   [ ] --> [ Out( %1 ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) N5:
+   [ ] --> [ Out( %1 ) ]
+
+  /* has exactly the trivial AC variant */
+
+
+
+end

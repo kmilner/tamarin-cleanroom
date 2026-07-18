@@ -1,0 +1,4 @@
+theory Pall begin
+builtins: xor, revealing-signing, natural-numbers, symmetric-encryption, multiset, signing, hashing, diffie-hellman, asymmetric-encryption, bilinear-pairing
+rule A: [ In(x) ] --> [ Out(x) ]
+end

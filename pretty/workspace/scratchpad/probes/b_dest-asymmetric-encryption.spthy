@@ -1,0 +1,4 @@
+theory Pdestasymmetricencryption begin
+builtins: dest-asymmetric-encryption
+rule A: [ In(x) ] --> [ Out(x) ]
+end

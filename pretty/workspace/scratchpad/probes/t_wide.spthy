@@ -1,0 +1,5 @@
+theory Twide begin
+functions: fnAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/3
+rule W1: [ In(xlongvariablename1), In(ylongvariablename2), In(zlongvariablename3) ] --> [ Out(<xlongvariablename1, ylongvariablename2, zlongvariablename3, xlongvariablename1, ylongvariablename2>) ]
+rule W2: [ In(xlongvariablename1), In(ylongvariablename2), In(zlongvariablename3) ] --> [ Out(fnAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA(xlongvariablename1, ylongvariablename2, zlongvariablename3)) ]
+end

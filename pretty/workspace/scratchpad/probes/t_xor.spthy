@@ -1,0 +1,7 @@
+theory Txor begin
+builtins: xor
+rule X1: [ In(x), In(y), In(z) ] --> [ Out(x XOR y XOR z) ]
+rule X2: [ In(x), In(y), In(z) ] --> [ Out((x XOR y) XOR z) ]
+rule X3: [ In(x), In(y), In(z) ] --> [ Out(x XOR (y XOR z)) ]
+rule X4: [ ] --> [ Out(zero) ]
+end

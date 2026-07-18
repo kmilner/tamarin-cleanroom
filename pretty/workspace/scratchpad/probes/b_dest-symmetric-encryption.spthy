@@ -1,0 +1,4 @@
+theory Pdestsymmetricencryption begin
+builtins: dest-symmetric-encryption
+rule A: [ In(x) ] --> [ Out(x) ]
+end

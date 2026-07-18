@@ -1,0 +1,5 @@
+theory Econv begin
+functions: enc/2, dec/2
+equations [convergent]: dec(enc(x, y), y) = x
+rule A: [ In(x) ] --> [ Out(x) ]
+end

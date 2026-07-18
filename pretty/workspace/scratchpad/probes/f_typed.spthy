@@ -1,0 +1,4 @@
+theory Ftyped begin
+functions: kdf(bitstring):skey, plain/2
+rule A: [ In(x) ] --> [ Out(x) ]
+end

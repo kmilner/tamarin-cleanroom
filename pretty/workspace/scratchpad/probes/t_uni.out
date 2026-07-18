@@ -1,0 +1,28 @@
+theory Tuni
+
+begin
+
+// Function signature and definition of the equational theory E
+
+builtins: multiset
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) U1:
+   [ In( x ), In( y ), In( z ) ] --> [ Out( (x++y++z) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) U2:
+   [ In( x ), In( y ), In( z ) ] --> [ Out( (x++y++z) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) U3:
+   [ In( x ), In( y ), In( z ) ] --> [ Out( (x++y++z) ) ]
+
+  /* has exactly the trivial AC variant */
+
+
+
+end

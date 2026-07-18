@@ -1,0 +1,6 @@
+theory Tmult2 begin
+builtins: diffie-hellman
+rule M1: [ Fr(~x), Fr(~y), Fr(~z) ] --> [ Out('g'^(~x*~y*~z)) ]
+rule M2: [ Fr(~x) ] --> [ Out('g'^inv(~x)) ]
+rule M3: [ Fr(~x), Fr(~y) ] --> [ Out('g'^(~x*inv(~y))) ]
+end

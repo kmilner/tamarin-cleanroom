@@ -1,0 +1,4 @@
+theory Tuniwide begin
+builtins: multiset
+rule U9: [ In(aaaaaaaaaaaaaaaaa1), In(aaaaaaaaaaaaaaaaa2), In(aaaaaaaaaaaaaaaaa3), In(aaaaaaaaaaaaaaaaa4) ] --> [ Out(aaaaaaaaaaaaaaaaa1++aaaaaaaaaaaaaaaaa2++aaaaaaaaaaaaaaaaa3++aaaaaaaaaaaaaaaaa4) ]
+end

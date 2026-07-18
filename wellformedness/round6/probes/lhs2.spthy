@@ -1,0 +1,10 @@
+theory lhs2
+begin
+
+rule D:
+  [ DD(x), DD(x) ] --> [ ]
+
+rule E:
+  [ EE(x), EE(x,y) ] --> [ ]
+
+end

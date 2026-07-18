@@ -1,0 +1,3 @@
+theory Tdiff begin
+rule D1: [ In(x), In(y) ] --> [ Out(diff(x, y)) ]
+end

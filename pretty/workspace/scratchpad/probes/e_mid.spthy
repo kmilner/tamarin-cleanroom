@@ -1,0 +1,5 @@
+theory Emid begin
+functions: pr/2, fa/1
+equations: fa(pr(x, y)) = x
+rule A: [ In(x) ] --> [ Out(x) ]
+end

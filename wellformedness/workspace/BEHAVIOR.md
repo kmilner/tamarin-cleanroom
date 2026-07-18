@@ -590,3 +590,79 @@ Round-5 report (REPORT5 folded here; .md creation blocked):
   are not expected to reach the checker; guard extraction treats them as
   non-guarding defensively.
 - Nat-sort inference / subterm-convergence decision: structural scaffolding only.
+
+---
+
+## Round 6 — final 8 corpus residuals (behavioral facts)
+
+Provenance: probes round6/probes/{lhs1,lhs2,lhs3,pc1,pc2}.spthy and the
+round6/targets reference blocks (ble, CentralizedMonitor, issue527, Axioms,
+issue515, OCSPS, CertificateTransparency, stateverif_left_right).
+
+### "Facts occur in the left-hand-side but not in any right-hand-side"
+- GRANULARITY (probes lhs1/lhs2/lhs3): the check emits ONE entry per premise
+  fact OCCURRENCE whose identity (name, arity, multiplicity) never appears on
+  ANY right-hand side. There is NO deduplication whatsoever:
+  * the same fact reused as an LHS-only premise across N rules -> N entries;
+  * a fact repeated inside a single rule's premises -> one entry per copy
+    (lhs2: `DD` twice in rule D -> two entries);
+  * different arities of the same name are different identities (lhs2: `EE`
+    arity 1 and arity 2 both listed).
+- ORDER: pure SOURCE ORDER of (rule, premise-position). NOT grouped by fact
+  name (lhs1: `AA`@A, `BB`@A, `CC`@B, `AA`@C -> the two `AA` entries are NOT
+  adjacent). ble reference confirms: Oracle_f4, Oracle_passkey, then
+  RespChooseKeysize x4 (its four contiguous rules), then InitChooseKeysize x4.
+- RHS EXCLUSION is by identity and per-occurrence: if a fact identity occurs on
+  any RHS, EVERY LHS occurrence of it is suppressed (lhs3: `AA` on RHS of rule
+  Z suppresses both LHS uses; only `BB` remains).
+- SUGGESTION unchanged: nearest RHS fact by name edit distance <= 3 appended as
+  ". Perhaps you want to use the fact <render>" (lhs3: `BB` -> `AA`, dist 2).
+- ALIGNMENT: index right-aligned to the widest index with a two-space margin
+  (ble 10 entries: "   1." three leading spaces ... "  10." two). Entries
+  separated by a line of exactly two spaces.
+- SEALED FIX: fact_lhs_occur_no_rhs previously deduplicated by identity
+  (name,arity,mult), collapsing ble's four RespChooseKeysize rules to one. The
+  dedup is removed; every occurrence is now emitted. Pinned by round6 tests
+  ble_lhs_not_rhs_per_rule_entries / lhs_not_rhs_no_dedup_source_order /
+  lhs_not_rhs_rhs_identity_suppresses_all_occurrences.
+
+### "Public constants with mismatching capitalization" (pubcap)
+Already implemented in public_names_report; round6 pins it independently:
+- Each DISTINCT spelling attributed to the rule of its FIRST occurrence.
+- Spellings grouped by ASCII-lowercased key; only groups with >=2 distinct
+  spellings are reported; groups sorted ascending by that key (pc2: apple<bird).
+- Within a group, spellings sorted ASCII ascending ('C'<'c', 'Bird'<'bird',
+  'Apple'<'apple', 'firSt'<'first', 'seconD'<'second').
+- Consecutive sorted spellings sharing their first-occurrence rule collapse to
+  one `rule "R":  name 'a', 'b'` segment; spellings whose first rules differ
+  keep separate `rule "R":  name 'x'` segments joined by ", " (pc2 entry 2:
+  `rule "R1":  name 'Bird', rule "R2":  name 'bird'`).
+- Entries numbered "  N. ", separated by a line of exactly two spaces.
+- CentralizedMonitor target = pc1 exactly: single translated rule "Init" with
+  'c'/'C' -> `  1. rule "Init":  name 'C', 'c'`.
+
+### issue527 "Variable with mismatching sorts or capitalization" — the seam
+- The sealed mismatching_sorts BODY (WfError.message) for T_SORTS begins with
+  the four-line preamble (exact bytes, `$` = LF):
+    Possible reasons:$
+    1. Identifiers are case sensitive, i.e.,'x' and 'X' are considered to be different.$
+    2. The same holds for sorts:, i.e., '$x', 'x', and '~x' are considered to be different.$
+    $
+  then the per-rule numbered groups. The sealed body is byte-identical to the
+  reference topic body (issue527_reference_block test). The open-side assembly
+  layer must NOT prepend its own "Possible reasons:" paragraph; the sealed
+  checker already emits the complete body (see round6/NOTES.md).
+
+### Confirmations for the OUT-OF-SCOPE (open-side) split
+- issue527 sealed topics are byte-identical to the target through the last
+  sealed topic; the only delta is a single join blank line the open side adds
+  before the Maude-computed "Message Derivation Checks" block (out of scope).
+- Axioms_and_Induction: the sealed render_report emits BOTH the "Lemma
+  annotations" header (via underline_topic) AND the body
+  `  Lemma `Exists_test': cannot reuse 'exists-trace' lemmas`. A missing header
+  on the open side is an assembly gap, not a sealed-logic gap; no contradiction.
+- SAPIC blank1 files (issue515, OCSPS, CertificateTransparency,
+  stateverif_left_right): render_block emits exactly one blank line after each
+  topic underline and render_report joins topics with one blank line; the
+  sealed render carries the blank the open side is said to drop. No
+  contradiction with the stated split.

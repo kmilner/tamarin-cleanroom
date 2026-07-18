@@ -912,3 +912,118 @@ equality-guard advisory is now correctly closed by probe-derived evidence.
 **PASS.**
 
 VERDICT: pass
+
+---
+
+## Round 6 — final-8 residual disposition (both-sides similarity audit)
+
+Scope audited: the round-6 delta only. `git diff HEAD -- wellformedness/`
+(HEAD = cbc511d wf-state, unchanged by the intervening b4fb110 graphdot
+commit) touches exactly three tracked files plus untracked round6 scaffolding:
+`workspace/wf-clean/src/checks.rs` (one hunk), `workspace/BEHAVIOR.md`,
+`workspace/QUERIES.log`, and the untracked `round6/{NOTES.md,families.tsv,
+fetch_hs_targets.sh,probes/*,targets/*}`, `workspace/wf-clean/tests/
+round6_tests.rs`, `tests/fixtures/t6_ble_lhs.txt`,
+`tests/fixtures/t6_centralizedmonitor_pubcap.txt`. Reference for comparison:
+`tamarin-prover/lib/theory/src/Theory/Tools/Wellformedness.hs`
+(`factLhsOccurNoRhs'`/`mostSimilarName`, `publicNamesReport'`,
+`sortsClashCheck`, and the fact-cap/arity reports).
+
+### The actual code change
+The sole source hunk deletes the `seen: Vec<(String,usize,bool)>` dedup vector
+from `fact_lhs_occur_no_rhs` so every LHS occurrence whose `(name,arity,mult)`
+identity is absent from every RHS is emitted once — per premise occurrence, no
+grouping, source order. The RHS-identity exclusion, the nearest-RHS suggestion,
+and the right-aligned numbering are unchanged. The stated round scope
+(pubcap check, fact-cap/fact-arity topics, right-alignment, sort-clash body)
+was already resident in `checks.rs` at HEAD; round 6 only *pins and documents*
+those via probes/targets/tests and reconciles the LHS-not-RHS granularity.
+Deleting code cannot be copying; the audit question is whether the resulting
+byte-parity and the round's documented claims rest on copied expression or on
+independently-derived observation.
+
+### Abstraction–filtration–comparison
+- **Filtered as merger / interoperability boundary (not protectable):** every
+  observable byte of the WARNING wf-block — topic headers, the `Possible
+  reasons:` / `Identifiers are case-sensitive…` / `Fact names are
+  case-sensitive…` paragraphs, `in rule "R":  factName `F' arity: N
+  multiplicity: Linear`, `. Perhaps you want to use the fact …`, `rule "R":
+  name 'C', 'c'`, the right-aligned `   1.`…`  10.` numbering and the two-space
+  separator line. These must be byte-identical to the HS oracle to pass the wf
+  gate; byte-parity here is compatibility, per the campaign rule.
+- **Filtered as standard algorithm:** `edit_distance` is a textbook two-row
+  Levenshtein DP; the `<= 3` suggestion threshold is observable (a suggestion
+  appears iff distance ≤ 3) and is *not* part of this round's delta.
+- **Compared (protectable expression that survives filtration):**
+  * *Internal identifier constellation* — the sealed names
+    (`fact_lhs_occur_no_rhs`, `nearest_rhs`, `edit_distance`, `FactId::ident`/
+    `render`, `rhs_idents`, `public_names_report_from_pairs`, `first_rule`,
+    `segs`, `locs`) do **not** mirror the Haskell internals
+    (`mostSimilarName`, `removeSame`, `regroup`, `minimalEdFact`,
+    `edDistances`, `ppRuleAndName`, `findClashes`, `clashesOn`,
+    `publicNamesReport'`). A grep of the whole delta (tracked hunk + untracked
+    docs) for those names, plus the Haskell typo tells `minimual` /
+    `between between` and internal combinators `universeBi`/`sortednubOn`/
+    `groupOn`, is **empty**.
+  * *Structure* — the LHS-not-RHS filter is a `HashSet<(name,arity,persistent)>`
+    membership test over a source-order scan; Haskell uses `filter (… notElem
+    rhsFacts)` over `regroup`ed occurrence lists. Pubcap is a first-occurrence
+    attribution + consecutive-same-rule segment merge; Haskell is
+    `clashesOn … · groupOn fst · ppRuleAndName`. Same observable output, distinct
+    construction — reimplementation, not transcription.
+  * *Non-observable magic constants* — none introduced this round.
+  * *Comment lineage* — the one new source comment describes current behavior
+    and cites probes `lhs1/lhs2/lhs3`; it carries none of the Haskell comment
+    phrasing (`most similar fact`, `minimual editing distance`, `between
+    between 1 and 3`). Grep clean.
+
+### Provenance cross-check (claims → probe/target, never Wellformedness.hs)
+Re-ran the sanctioned HS oracle (`oracle/wf_oracle.sh`, compiled binary) on all
+five round-6 probes and confirmed every BEHAVIOR.md / QUERIES.log claim is a
+genuine black-box observation, not a reading of the Haskell:
+- `lhs1` → 4 entries in pure source order `A/AA, A/BB, B/CC, C/AA` (the two `AA`
+  entries non-adjacent) — pins source-order, no name-grouping.
+- `lhs2` → `DD` twice + `EE` arity-1 then arity-2 — pins no within-rule dedup and
+  arity-distinct identities.
+- `lhs3` → both `AA` LHS uses suppressed by the rule-Z RHS `AA`; only `BB` listed
+  with suggestion `AA` (edit distance 2 ≤ 3) — pins per-occurrence RHS-identity
+  exclusion.
+- `pc1` → `1. rule "Init":  name 'C', 'c'` (ASCII C<c, same-rule collapse).
+- `pc2` → `1. rule "R3":  name 'Apple', 'apple'` then `2. rule "R1":  name
+  'Bird', rule "R2":  name 'bird'` — group-sort by lowercased key, same-rule
+  collapse, cross-rule split, ASCII spelling sort.
+Captured-target claims verified byte-for-byte: `t6_ble_lhs.txt` and
+`t6_centralizedmonitor_pubcap.txt` are identical to the corresponding blocks in
+`round6/targets/{esorics23-bluetooth…ble, …CentralizedMonitor}.hs.txt`; the
+issue527 sort-body block in `round6/targets/…issue527….hs.txt` matches the
+sealed `mismatching_sorts` body. `round6/{families.tsv,fetch_hs_targets.sh}`
+classify diffs and materialize references solely by observable-output family
+and the black-box HS binary on permitted corpus inputs. No claim traces to
+Wellformedness.hs.
+
+### Tests / regression
+`cargo test` in `wf-clean` is green: api_surface 1, checks_tests 74, corpus5
+acceptance 1, round5 29, round6 4 = **109 passing, 0 failing** — matching the
+NOTES.md claim. The four round-6 tests pin the FIX (per-occurrence entries,
+source order, RHS-identity suppression) and the pubcap block against the two
+target-derived fixtures.
+
+### Seam findings (documentation, not copyright — no redo)
+NOTES.md/BEHAVIOR.md correctly localize the remaining gate residue to the
+open-side assembly seam, not the sealed logic: the sortbody `Possible reasons:`
+preamble is emitted in full by the sealed `mismatching_sorts` body (open side
+must not prepend a copy), and the `blank1`/`lemanno` items are assembly gaps.
+These are integration instructions; they assert nothing about copied
+expression and require no behavioral redo.
+
+### Round-6 verdict
+No copied protectable expression. The LHS-not-RHS granularity change and the
+pinned pubcap/fact/sort topics reproduce reference BEHAVIOR (merger /
+interoperability) via logged black-box probes and captured HS targets, with
+independent expression: disjoint identifier constellation, distinct control
+structure, no non-observable magic constants, no comment lineage, and only
+boundary-observable strings. Every documented behavioral claim traces to a
+re-verified probe or a byte-matched target, never to Wellformedness.hs.
+**PASS.**
+
+VERDICT: pass

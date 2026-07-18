@@ -1,0 +1,17 @@
+theory Fsort
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: Bb/1, Zz/1, a1/2, aa/1, cA/0, fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) A:
+   [ In( x ) ] --> [ Out( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+
+
+end

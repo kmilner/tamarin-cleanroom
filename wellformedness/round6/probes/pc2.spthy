@@ -1,0 +1,13 @@
+theory pc2
+begin
+
+rule R1:
+  [ In(a) ] --[ M('Bird') ]-> [ Out(a) ]
+
+rule R2:
+  [ In(a) ] --[ M('bird') ]-> [ Out(a) ]
+
+rule R3:
+  [ In(a) ] --[ M('apple'), M('Apple') ]-> [ Out(a) ]
+
+end

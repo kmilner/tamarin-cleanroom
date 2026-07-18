@@ -1,0 +1,4 @@
+theory Eadedup begin
+equations: fst(<a, b>) = a
+rule A: [ In(x) ] --> [ Out(x) ]
+end

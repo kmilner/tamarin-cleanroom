@@ -1,0 +1,9 @@
+theory Tpair begin
+rule P1: [ In(x), In(y), In(z) ] --> [ Out(<x, y, z>) ]
+rule P2: [ In(x), In(y), In(z) ] --> [ Out(<<x, y>, z>) ]
+rule P3: [ In(x), In(y), In(z) ] --> [ Out(<x, <y, z>>) ]
+rule P4: [ In(x), In(y) ] --> [ Out(pair(x, y)) ]
+rule P5: [ In(x), In(y) ] --> [ Out(fst(pair(x, y))) ]
+rule P6: [ ] --> [ Out('c') ]
+rule P7: [ ] --> [ Out('hello_world') ]
+end

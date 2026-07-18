@@ -1,0 +1,4 @@
+theory Fattrs begin
+functions: a/1 [private], d/2 [destructor], b/1 [private, destructor], c/3
+rule A: [ In(x) ] --> [ Out(x) ]
+end

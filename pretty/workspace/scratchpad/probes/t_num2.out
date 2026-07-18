@@ -1,0 +1,23 @@
+theory Tnum2
+
+begin
+
+// Function signature and definition of the equational theory E
+
+builtins: natural-numbers
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) Q1:
+   [ ] --> [ Out( %2 ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Q2:
+   [ ] --> [ Out( (%1%+%1) ) ]
+
+  /* has exactly the trivial AC variant */
+
+
+
+end

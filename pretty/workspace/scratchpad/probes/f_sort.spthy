@@ -1,0 +1,4 @@
+theory Fsort begin
+functions: Bb/1, aa/1, Zz/1, a1/2, cA/0
+rule A: [ In(x) ] --> [ Out(x) ]
+end

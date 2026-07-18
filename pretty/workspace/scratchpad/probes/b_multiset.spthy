@@ -1,0 +1,4 @@
+theory Pmultiset begin
+builtins: multiset
+rule A: [ In(x) ] --> [ Out(x) ]
+end

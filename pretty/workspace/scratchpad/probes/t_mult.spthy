@@ -1,0 +1,8 @@
+theory Tmult begin
+builtins: diffie-hellman
+rule M1: [ In(x), In(y), In(z) ] --> [ Out(x*y*z) ]
+rule M2: [ In(x), In(y), In(z) ] --> [ Out((x*y)*z) ]
+rule M3: [ In(x), In(y), In(z) ] --> [ Out(x*(y*z)) ]
+rule M4: [ In(x) ] --> [ Out(inv(x)) ]
+rule M5: [ In(x), In(y), In(z) ] --> [ Out(x^(y*z)) ]
+end

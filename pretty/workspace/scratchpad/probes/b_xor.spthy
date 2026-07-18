@@ -1,0 +1,4 @@
+theory Pxor begin
+builtins: xor
+rule A: [ In(x) ] --> [ Out(x) ]
+end

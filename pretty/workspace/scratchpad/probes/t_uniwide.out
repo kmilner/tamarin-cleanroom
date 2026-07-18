@@ -1,0 +1,27 @@
+theory Tuniwide
+
+begin
+
+// Function signature and definition of the equational theory E
+
+builtins: multiset
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) U9:
+   [
+   In( aaaaaaaaaaaaaaaaa1 ), In( aaaaaaaaaaaaaaaaa2 ),
+   In( aaaaaaaaaaaaaaaaa3 ), In( aaaaaaaaaaaaaaaaa4 )
+   ]
+  -->
+   [
+   Out( (aaaaaaaaaaaaaaaaa1++aaaaaaaaaaaaaaaaa2++aaaaaaaaaaaaaaaaa3++
+         aaaaaaaaaaaaaaaaa4)
+   )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+
+
+end

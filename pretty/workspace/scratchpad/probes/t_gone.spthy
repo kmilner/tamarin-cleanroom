@@ -1,0 +1,5 @@
+theory Tgone begin
+builtins: diffie-hellman
+rule G1: [ ] --> [ Out('g'^1) ]
+rule G2: [ ] --> [ Out(DH_neutral) ]
+end

@@ -1,0 +1,36 @@
+# Oracle interaction log — pretty cluster, R1 (term core + signature block).
+# One line per oracle interaction: <probe file or input> -- <purpose>
+round1/fetch_hs_targets.sh outputs (targets/*.hs.txt, pre-materialized) -- baseline byte targets for the 10 R1 files; correlated against their .spthy sources to seed BEHAVIOR.md (builtin reordering/expansion, base pairing sig, wrap shapes)
+probes/b_{hashing,asymmetric-encryption,signing,symmetric-encryption,revealing-signing,none}.spthy -- per-builtin signature expansion + base fst/pair/snd signature; functions-line wrap shape (revealing-signing)
+probes/b_{diffie-hellman,bilinear-pairing,multiset,natural-numbers,xor}.spthy -- which builtins keep a builtins: line; bilinear-pairing induces diffie-hellman
+probes/b_all.spthy -- canonical builtins order; cross-builtin function/equation dedup (pk,true); functions+equations wrap layout at scale
+probes/f_attrs.spthy -- attribute spellings: [private,constructor] / [private,destructor] / [destructor] / (none)
+probes/f_sort.spthy -- function list sort is ASCII case-sensitive
+probes/f_dedup.spthy -- user-vs-builtin and user-vs-user function dedup
+probes/e_mid.spthy -- equations one-line boundary: exactly 73 cols still one line
+probes/e_conv.spthy -- equations [convergent] header preserved; broken block is one-eq-per-line even when they would fit joined at indent 4 (sep semantics)
+probes/e_sort.spthy -- equations sorted (v before w) regardless of source order
+probes/t_exp.spthy t_mult.spthy -- FAILED (timeout): generic msg-var exp/mult variant explosion; rewritten with fresh vars
+probes/t_xor.spthy -- xor glyph/flattening: (x⊕y⊕z) all nestings; zero renders bare
+probes/t_uni.spthy -- multiset ++ flattening all nestings
+probes/t_nat.spthy -- nat %+ flattening; %1; 1:nat renders %1
+probes/t_pair.spthy -- pair flattening right-nested; <<x, y>, z> keeps left nest; pair(x,y)-><x, y>; 'c' quoting
+probes/t_exp2.spthy -- exp renders flat a^b^c for BOTH left- and right-nested exp trees
+probes/t_mult2.spthy -- mult always parenthesized (a*b*c), flattened; inv(x) plain App; g^inv, g^(x*inv(y))
+probes/t_one.spthy -- literal 1 in DH theory renders one
+probes/t_diff.spthy (--diff) -- diff(x, y) renders App-style with comma-space
+probes/t_num2.spthy -- 2:nat renders %2; %1%+%1 stays (%1%+%1)
+probes/t_frlit.spthy -- fresh literal renders ~'n'
+probes/t_gone.spthy -- 'g'^one; DH_neutral renders bare
+probes/e_samehead.spthy -- FAILED (parse: pub consts in equations rejected); same-head order pinned by e_adedup instead
+probes/e_adedup.spthy -- NO alpha-dedup of user-vs-builtin equations; same-head equations sorted by rendered string (fst(<a,... < fst(<x....)
+probes/e_long.spthy -- long equation break: "= rhs" on own line at eq-indent minus 2; App arg wrap aligns after open paren
+probes/t_wide.spthy -- pair fill-wrap carries trailing ", " (fcat + ", " elements); App args wrap with "," only + fill space (fsep); continuation ribbon measured from alignment indent
+probes/b_locrep.spthy -- locations-report expansion (check_rep/get_rep destructors, rep private, report/1); no builtins line
+probes/f_typed.spthy -- typed function decls erase to name/arity in echo
+probes/t_uniwide.spthy -- union wide-wrap: break after ++ attached to preceding element, continuation aligned after (, ) attached to last element
+probes/t_edge.spthy -- pair/App one-liners survive to display col 76 under rule nest 3 (ribbon measured within nesting)
+probes/e_dup.spthy -- exact duplicate user equations dedup
+probes/b_dupline.spthy -- duplicate builtins dedup + canonical order (multiset before xor)
+probes/t_xorwide.spthy -- FAILED (4-way xor variant computation exceeds 500s timeout)
+probes/t_xorwide3.spthy -- xor wide-wrap: same fcat construction as union (break after ⊕, continuation after open paren)

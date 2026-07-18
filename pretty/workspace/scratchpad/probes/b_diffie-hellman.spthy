@@ -1,0 +1,4 @@
+theory Pdiffiehellman begin
+builtins: diffie-hellman
+rule A: [ In(x) ] --> [ Out(x) ]
+end

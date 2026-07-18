@@ -1,0 +1,5 @@
+theory Tedge begin
+functions: fnAAAAAAAAAAAAAAAAAA/3
+rule V1: [ In(aaaaaaaaaaaaaaa1), In(aaaaaaaaaaaaaaa2), In(aaaaaaaaaaaaaaa3), In(bbbbbbbbbb) ] --> [ Out(<aaaaaaaaaaaaaaa1, aaaaaaaaaaaaaaa2, aaaaaaaaaaaaaaa3, bbbbbbbbbb>) ]
+rule V2: [ In(aaaaaaaaaaaaaaa1), In(aaaaaaaaaaaaaaa2), In(cccccccc) ] --> [ Out(fnAAAAAAAAAAAAAAAAAA(aaaaaaaaaaaaaaa1, aaaaaaaaaaaaaaa2, cccccccc)) ]
+end

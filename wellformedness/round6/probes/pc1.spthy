@@ -1,0 +1,7 @@
+theory pc1
+begin
+
+rule Init:
+  [ In(a) ] --[ M('c'), M('C') ]-> [ Out(a) ]
+
+end

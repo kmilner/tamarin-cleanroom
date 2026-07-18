@@ -1,0 +1,13 @@
+theory lhs3
+begin
+
+rule Z:
+  [ Fr(~s) ] --> [ AA(~s) ]
+
+rule A:
+  [ AA(x), BB(x) ] --> [ ]
+
+rule C:
+  [ AA(y) ] --> [ ]
+
+end

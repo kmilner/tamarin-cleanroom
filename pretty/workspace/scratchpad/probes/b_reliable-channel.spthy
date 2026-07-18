@@ -1,0 +1,4 @@
+theory Preliablechannel begin
+builtins: reliable-channel
+rule A: [ In(x) ] --> [ Out(x) ]
+end

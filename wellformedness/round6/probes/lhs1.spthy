@@ -1,0 +1,16 @@
+theory lhs1
+begin
+
+rule A:
+  [ Fr(~s), AA(x), BB(x) ] --> [ Used(~s) ]
+
+rule B:
+  [ CC(x) ] --> [ ]
+
+rule C:
+  [ AA(y) ] --> [ ]
+
+rule Consume:
+  [ Used(~s) ] --> [ ]
+
+end

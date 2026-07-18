@@ -1,0 +1,22 @@
+theory Prevealingsigning
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, getMessage/1, pair/2, pk/1, revealSign/2,
+           revealVerify/3, snd/1, true/0
+equations:
+    fst(<x.1, x.2>) = x.1,
+    getMessage(revealSign(x.1, x.2)) = x.1,
+    revealVerify(revealSign(x.1, x.2), x.1, pk(x.2)) = true,
+    snd(<x.1, x.2>) = x.2
+
+rule (modulo E) A:
+   [ In( x ) ] --> [ Out( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+
+
+end

@@ -1,0 +1,4 @@
+theory Txorwide begin
+builtins: xor
+rule X9: [ In(aaaaaaaaaaaaaaaaa1), In(aaaaaaaaaaaaaaaaa2), In(aaaaaaaaaaaaaaaaa3), In(aaaaaaaaaaaaaaaaa4) ] --> [ Out(aaaaaaaaaaaaaaaaa1 XOR aaaaaaaaaaaaaaaaa2 XOR aaaaaaaaaaaaaaaaa3 XOR aaaaaaaaaaaaaaaaa4) ]
+end

@@ -1,0 +1,492 @@
+theory Txorwide3
+
+begin
+
+// Function signature and definition of the equational theory E
+
+builtins: xor
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) X9:
+   [
+   In( aaaaaaaaaaaaaaaaaaaaaaa1 ), In( aaaaaaaaaaaaaaaaaaaaaaa2 ),
+   In( aaaaaaaaaaaaaaaaaaaaaaa3 )
+   ]
+  -->
+   [
+   Out( (aaaaaaaaaaaaaaaaaaaaaaa1⊕aaaaaaaaaaaaaaaaaaaaaaa2⊕
+         aaaaaaaaaaaaaaaaaaaaaaa3)
+   )
+   ]
+
+  /*
+  rule (modulo AC) X9:
+     [
+     In( aaaaaaaaaaaaaaaaaaaaaaa1 ), In( aaaaaaaaaaaaaaaaaaaaaaa2 ),
+     In( aaaaaaaaaaaaaaaaaaaaaaa3 )
+     ]
+    -->
+     [ Out( z ) ]
+    variants (modulo AC)
+     1. aaaaaaaaaaaaaaaaaaaaaaa1
+              = aaaaaaaaaaaaaaaaaaaaaaa1.5
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = aaaaaaaaaaaaaaaaaaaaaaa2.5
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = aaaaaaaaaaaaaaaaaaaaaaa3.5
+        z     = (aaaaaaaaaaaaaaaaaaaaaaa1.5⊕aaaaaaaaaaaaaaaaaaaaaaa2.5⊕
+                 aaaaaaaaaaaaaaaaaaaaaaa3.5)
+    
+     2. aaaaaaaaaaaaaaaaaaaaaaa1
+              = aaaaaaaaaaaaaaaaaaaaaaa1.5
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = aaaaaaaaaaaaaaaaaaaaaaa2.5
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = zero
+        z     = (aaaaaaaaaaaaaaaaaaaaaaa1.5⊕aaaaaaaaaaaaaaaaaaaaaaa2.5)
+    
+     3. aaaaaaaaaaaaaaaaaaaaaaa1
+              = aaaaaaaaaaaaaaaaaaaaaaa1.5
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = zero
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = aaaaaaaaaaaaaaaaaaaaaaa3.5
+        z     = (aaaaaaaaaaaaaaaaaaaaaaa1.5⊕aaaaaaaaaaaaaaaaaaaaaaa3.5)
+    
+     4. aaaaaaaaaaaaaaaaaaaaaaa1
+              = x.5
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = x.5
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = aaaaaaaaaaaaaaaaaaaaaaa3.6
+        z     = aaaaaaaaaaaaaaaaaaaaaaa3.6
+    
+     5. aaaaaaaaaaaaaaaaaaaaaaa1
+              = x.5
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = aaaaaaaaaaaaaaaaaaaaaaa2.6
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = x.5
+        z     = aaaaaaaaaaaaaaaaaaaaaaa2.6
+    
+     6. aaaaaaaaaaaaaaaaaaaaaaa1
+              = x.5
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = x.6
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.5⊕x.6)
+        z     = zero
+    
+     7. aaaaaaaaaaaaaaaaaaaaaaa1
+              = x.5
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = x.6
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.5⊕x.6⊕x.7)
+        z     = x.7
+    
+     8. aaaaaaaaaaaaaaaaaaaaaaa1
+              = x.5
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = aaaaaaaaaaaaaaaaaaaaaaa2.8
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.5⊕x.7)
+        z     = (x.7⊕aaaaaaaaaaaaaaaaaaaaaaa2.8)
+    
+     9. aaaaaaaaaaaaaaaaaaaaaaa1
+              = x.5
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = zero
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.5⊕x.6)
+        z     = x.6
+    
+    10. aaaaaaaaaaaaaaaaaaaaaaa1
+              = x.5
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = x.6
+        z     = zero
+    
+    11. aaaaaaaaaaaaaaaaaaaaaaa1
+              = x.5
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = aaaaaaaaaaaaaaaaaaaaaaa3.7
+        z     = (x.6⊕aaaaaaaaaaaaaaaaaaaaaaa3.7)
+    
+    12. aaaaaaaaaaaaaaaaaaaaaaa1
+              = x.5
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = zero
+        z     = x.6
+    
+    13. aaaaaaaaaaaaaaaaaaaaaaa1
+              = x.5
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.6⊕x.7)
+        z     = x.7
+    
+    14. aaaaaaaaaaaaaaaaaaaaaaa1
+              = x.5
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.5⊕x.6⊕x.7)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = x.7
+        z     = x.6
+    
+    15. aaaaaaaaaaaaaaaaaaaaaaa1
+              = x.5
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.5⊕x.6⊕x.7)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.6⊕x.8)
+        z     = (x.7⊕x.8)
+    
+    16. aaaaaaaaaaaaaaaaaaaaaaa1
+              = x.5
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.6⊕x.7)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.5⊕x.6⊕x.8)
+        z     = (x.7⊕x.8)
+    
+    17. aaaaaaaaaaaaaaaaaaaaaaa1
+              = x.5
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.6⊕x.7)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.5⊕x.7)
+        z     = x.6
+    
+    18. aaaaaaaaaaaaaaaaaaaaaaa1
+              = aaaaaaaaaaaaaaaaaaaaaaa1.6
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = x.5
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = x.5
+        z     = aaaaaaaaaaaaaaaaaaaaaaa1.6
+    
+    19. aaaaaaaaaaaaaaaaaaaaaaa1
+              = aaaaaaaaaaaaaaaaaaaaaaa1.7
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = x.5
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.5⊕x.6)
+        z     = (x.6⊕aaaaaaaaaaaaaaaaaaaaaaa1.7)
+    
+    20. aaaaaaaaaaaaaaaaaaaaaaa1
+              = aaaaaaaaaaaaaaaaaaaaaaa1.7
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = x.5
+        z     = (x.6⊕aaaaaaaaaaaaaaaaaaaaaaa1.7)
+    
+    21. aaaaaaaaaaaaaaaaaaaaaaa1
+              = aaaaaaaaaaaaaaaaaaaaaaa1.8
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.5⊕x.7)
+        z     = (x.6⊕x.7⊕aaaaaaaaaaaaaaaaaaaaaaa1.8)
+    
+    22. aaaaaaaaaaaaaaaaaaaaaaa1
+              = zero
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = aaaaaaaaaaaaaaaaaaaaaaa2.5
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = aaaaaaaaaaaaaaaaaaaaaaa3.5
+        z     = (aaaaaaaaaaaaaaaaaaaaaaa2.5⊕aaaaaaaaaaaaaaaaaaaaaaa3.5)
+    
+    23. aaaaaaaaaaaaaaaaaaaaaaa1
+              = zero
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = x.5
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.5⊕x.6)
+        z     = x.6
+    
+    24. aaaaaaaaaaaaaaaaaaaaaaa1
+              = zero
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = x.5
+        z     = x.6
+    
+    25. aaaaaaaaaaaaaaaaaaaaaaa1
+              = zero
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.5⊕x.7)
+        z     = (x.6⊕x.7)
+    
+    26. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = x.5
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = x.6
+        z     = zero
+    
+    27. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = x.5
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = aaaaaaaaaaaaaaaaaaaaaaa3.7
+        z     = (x.6⊕aaaaaaaaaaaaaaaaaaaaaaa3.7)
+    
+    28. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = x.5
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = zero
+        z     = x.6
+    
+    29. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = x.5
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.6⊕x.7)
+        z     = x.7
+    
+    30. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = aaaaaaaaaaaaaaaaaaaaaaa2.7
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = x.5
+        z     = (x.6⊕aaaaaaaaaaaaaaaaaaaaaaa2.7)
+    
+    31. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = x.7
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.5⊕x.7)
+        z     = x.6
+    
+    32. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = x.7
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.5⊕x.7⊕x.8)
+        z     = (x.6⊕x.8)
+    
+    33. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = aaaaaaaaaaaaaaaaaaaaaaa2.9
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.5⊕x.8)
+        z     = (x.6⊕x.8⊕aaaaaaaaaaaaaaaaaaaaaaa2.9)
+    
+    34. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = zero
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = x.5
+        z     = x.6
+    
+    35. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = zero
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.5⊕x.7)
+        z     = (x.6⊕x.7)
+    
+    36. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.5⊕x.7)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = x.6
+        z     = x.7
+    
+    37. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.5⊕x.7)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = x.7
+        z     = x.6
+    
+    38. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.5⊕x.7)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = aaaaaaaaaaaaaaaaaaaaaaa3.8
+        z     = (x.6⊕x.7⊕aaaaaaaaaaaaaaaaaaaaaaa3.8)
+    
+    39. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.5⊕x.7)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = zero
+        z     = (x.6⊕x.7)
+    
+    40. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.5⊕x.7)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.6⊕x.7)
+        z     = zero
+    
+    41. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.5⊕x.7)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.6⊕x.7⊕x.8)
+        z     = x.8
+    
+    42. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.5⊕x.7)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.6⊕x.8)
+        z     = (x.7⊕x.8)
+    
+    43. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.5⊕x.7)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.7⊕x.8)
+        z     = (x.6⊕x.8)
+    
+    44. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.5⊕x.7⊕x.8)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = x.7
+        z     = (x.6⊕x.8)
+    
+    45. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.5⊕x.7⊕x.8)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.6⊕x.7⊕x.9)
+        z     = (x.8⊕x.9)
+    
+    46. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.5⊕x.7⊕x.8)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.6⊕x.8)
+        z     = x.7
+    
+    47. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.5⊕x.7⊕x.8)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.7⊕x.9)
+        z     = (x.6⊕x.8⊕x.9)
+    
+    48. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.7⊕x.8)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.5⊕x.7)
+        z     = (x.6⊕x.8)
+    
+    49. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.7⊕x.8)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.5⊕x.7⊕x.9)
+        z     = (x.6⊕x.8⊕x.9)
+    
+    50. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6⊕x.7)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = x.6
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = x.7
+        z     = x.5
+    
+    51. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6⊕x.7)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = x.6
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.5⊕x.8)
+        z     = (x.7⊕x.8)
+    
+    52. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6⊕x.7)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.5⊕x.8)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = x.6
+        z     = (x.7⊕x.8)
+    
+    53. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6⊕x.7)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.6⊕x.8)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.5⊕x.8)
+        z     = x.7
+    
+    54. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6⊕x.7)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.6⊕x.8)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.5⊕x.8⊕x.9)
+        z     = (x.7⊕x.9)
+    
+    55. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6⊕x.7)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.6⊕x.8)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.5⊕x.9)
+        z     = (x.7⊕x.8⊕x.9)
+    
+    56. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6⊕x.7)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.6⊕x.8⊕x.9)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.5⊕x.8)
+        z     = (x.7⊕x.9)
+    
+    57. aaaaaaaaaaaaaaaaaaaaaaa1
+              = (x.5⊕x.6⊕x.7)
+        aaaaaaaaaaaaaaaaaaaaaaa2
+              = (x.6⊕x.8⊕x.9)
+        aaaaaaaaaaaaaaaaaaaaaaa3
+              = (x.5⊕x.8⊕x.10)
+        z     = (x.7⊕x.9⊕x.10)
+  */
+
+
+
+end

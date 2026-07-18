@@ -1,0 +1,26 @@
+theory Tgone
+
+begin
+
+// Function signature and definition of the equational theory E
+
+builtins: diffie-hellman
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) G1:
+   [ ] --> [ Out( 'g'^one ) ]
+
+  /*
+  rule (modulo AC) G1:
+     [ ] --> [ Out( 'g' ) ]
+  */
+
+rule (modulo E) G2:
+   [ ] --> [ Out( DH_neutral ) ]
+
+  /* has exactly the trivial AC variant */
+
+
+
+end

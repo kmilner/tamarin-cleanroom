@@ -1,0 +1,4 @@
+theory Phashing begin
+builtins: hashing
+rule A: [ In(x) ] --> [ Out(x) ]
+end

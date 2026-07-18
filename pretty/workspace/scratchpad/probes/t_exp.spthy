@@ -1,0 +1,6 @@
+theory Texp begin
+builtins: diffie-hellman
+rule E1: [ In(x), In(y), In(z) ] --> [ Out(x^y^z) ]
+rule E2: [ In(x), In(y), In(z) ] --> [ Out((x^y)^z) ]
+rule E3: [ In(x), In(y), In(z) ] --> [ Out(x^(y^z)) ]
+end

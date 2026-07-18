@@ -1,0 +1,22 @@
+theory Blocrep
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: check_rep/2[destructor], fst/1, get_rep/1[destructor], pair/2,
+           rep/2[private,constructor], report/1, snd/1
+equations:
+    check_rep(rep(x.1, x.2), x.2) = x.1,
+    fst(<x.1, x.2>) = x.1,
+    get_rep(rep(x.1, x.2)) = x.1,
+    snd(<x.1, x.2>) = x.2
+
+rule (modulo E) A:
+   [ In( x ) ] --> [ Out( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+
+
+end

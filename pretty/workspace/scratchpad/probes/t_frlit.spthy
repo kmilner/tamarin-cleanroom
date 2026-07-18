@@ -1,0 +1,3 @@
+theory Tfrlit begin
+rule F1: [ ] --> [ Out(~'n') ]
+end

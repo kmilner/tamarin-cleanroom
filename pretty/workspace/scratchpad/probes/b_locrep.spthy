@@ -1,0 +1,4 @@
+theory Blocrep begin
+builtins: locations-report
+rule A: [ In(x) ] --> [ Out(x) ]
+end

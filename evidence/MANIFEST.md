@@ -22,7 +22,9 @@ full historical set re-validates at 0 violations under the stricter rule.
 tool calls, 0 forbidden accesses, 0 web accesses; graphdot round-9 implementer
 (wf_6b16799d-1c9) audited — 156 tool calls, 0/0; producers round-1 implementer
 (wf_f9696b2b-75e) audited — 72 tool calls, 0/0; graphdot round-10 implementer
-(wf_58b2a176-d66) audited — 148 tool calls, 0/0; 40 sealed transcripts total.
+(wf_58b2a176-d66) audited — 148 tool calls, 0/0; wf round-6 + pretty round-1
+implementers (wf_cdfa493d-262) audited — 49 + 88 tool calls, 0/0;
+42 sealed transcripts total.
 
 | Path | Agent | Role |
 |------|-------|------|
@@ -61,6 +63,8 @@ tool calls, 0 forbidden accesses, 0 web accesses; graphdot round-9 implementer
 | workflows/wf_6b16799d-1c9/agent-a6d5afeb848c42e89.jsonl | round 9 (unit B) | fill-width allocation: two-layer trigger/fill model probe-exact 343/343, engine laziness fix, residue characterized (abbreviation-width = caller-input gap) |
 | workflows/wf_f9696b2b-75e/agent-abaf7a3894e2dccc3.jsonl | producers round 1 | web producer surface R1: shared HTML skin + center section fragments (324/324 corpus fragments byte-identical incl. envelope; live-probe replays 8/8) |
 | workflows/wf_58b2a176-d66/agent-ab3a750508a830592.jsonl | round 10 (unit B) | fill-width laws corrected by probe (sqa=none, C=flat+Σ(elems+1), bonus=⌊n/2⌋+2 cap 4), band-NONE 10.3%→5.83%, CellWidths override interface (probe byte-exactness 525/547) |
+| workflows/wf_cdfa493d-262/agent-aebcd06acb5de46a7.jsonl | round 6 (unit C) | wf residual closure: ble list dedup removed (one entry per premise occurrence, source order); pubcap/fact-cap/fact-arity pinned as already-correct; open-side split confirmed via probes |
+| workflows/wf_cdfa493d-262/agent-a57fc416f110972cf.jsonl | pretty round 1 | term core + signature block: Doc-based renderer at 110/73, builtin expansion tables oracle-learned, 41 tests, whole-block parity on all 10 round-1 files |
 
 Corresponding workspaces (../wellformedness, ../graphdot, ../weblayer) hold
 each agent's QUERIES.log, BEHAVIOR.md, REPORT*.md and code — cross-reference
@@ -84,6 +88,8 @@ the transcripts against those logs.
 | workflows/wf_6b16799d-1c9/agent-aef2578a65838b522.jsonl | graphdot round-9 delta audit (pass, 0 Dot.hs-resemblance findings; laziness = sanctioned BSD semantics; every fitted constant probe-traced, disjoint from source's 100/1.3/130/30; one non-blocking behavioral redo: reconcile sqa correction magnitude/placement) |
 | workflows/wf_f9696b2b-75e/agent-aad7d84bc51151972.jsonl | producers round-1 dual audit (pass; similarity: 0 violations, expression diverges materially from upstream; hygiene: finding PH-1 — scaffold SPEC/README cited upstream file paths, rewrite applied open-side, no contamination of sealed work) |
 | workflows/wf_58b2a176-d66/agent-abc902c75185add51.jsonl | graphdot round-10 delta audit (pass; round-9 sqa advisory resolved consistently, evidence-backed; size laws probe-traced to the column, refuting round-9's own 2n−4; no Dot.hs convergence) |
+| workflows/wf_cdfa493d-262/agent-a6d3c6533fd3d2c31.jsonl | wf round-6 delta audit (pass; identifier constellation disjoint from the Haskell; boundary bytes = merger) |
+| workflows/wf_cdfa493d-262/agent-a5fb0254d4385f4a6.jsonl | pretty round-1 delta audit (pass; doc.rs byte-identical to the audited BSD port — GPL wrapper only delegates; term core brackets from the outside, no copied expression) |
 
 Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUDIT.md,
 ../console/AUDIT.md, ../macros/AUDIT.md, ../injective/AUDIT.md, ../derivcheck/AUDIT.md.
@@ -101,6 +107,8 @@ Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUD
 | workflows/wf_a3b4feac-a25/agent-{a66029e08d55564f9,acb62e977f9aaf9c3}.jsonl | wave-3 integrators: E SWAPPED (ported macro-expansion driver deleted, live byte-verified vs HS); D summary/emitter landed, driver swap kept (9-verdict taxonomy gap); B kept (fill is fillSep/fits — Ack cell diverges at byte 318); A kept (async-serialization design conflict, code-evidenced) |
 | workflows/wf_b6a947c0-a82/agent-ac6e3390a695e1a84.jsonl | open-side integrator: wf round-5 re-sync (checks.rs/pretty.rs, mechanical recipe), full wf_gate 348 MATCH/71 DIFF → 411/8, 0 regressions, all suites green |
 | workflows/wf_f9696b2b-75e/agent-ab36f0d758d273636.jsonl | open-side scaffolder: weblayer/producers/ cluster (SPEC R1–R5 decomposition, oracle wrapper fixing the stock hs_server.sh --port bug, expression-stripped interface, 44 round-1 byte targets) |
+| workflows/wf_cdfa493d-262/agent-aaf0e68eb9e4e9a0a.jsonl | open-side integrator: wf round-6 closure — re-sync + preamble-map fixes + sapic_public_names_report tuple-order bugfix; full wf_gate 419 MATCH / 0 DIFF (unit at full-corpus zero) |
+| workflows/wf_cdfa493d-262/agent-a281e419853d7d5f5.jsonl | open-side integrator: pretty R1 vendored (crates/tamarin-theory/src/pretty_clean/, headerless, reverse-transform byte-identical) + adapter; both adoptions kept ported with byte-precision blockers (trial signature swap 401/403; equation order + tuple wrap); all gates green, header delta 0 |
 | workflows/wf_53f48d60-3ef/ | licensing research (GPL doctrine/precedent/feasibility/literal-copy) |
 | workflows/wf_8b8fd87b-72e/ | uncited-file derivation audit + institutional-ownership research |
 | workflows/wf_5ec90b24-b26/ | tail-author affiliations, triviality classification, rewrite scoping |

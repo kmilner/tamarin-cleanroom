@@ -1,0 +1,8 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory Texp] Theory loaded
+[Theory Texp] Theory translated
+[Theory Texp] Derivation checks started
+[Theory Texp] Derivation checks ended
+[Theory Texp] Theory closed

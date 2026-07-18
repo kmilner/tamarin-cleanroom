@@ -1,0 +1,3 @@
+theory Pnone begin
+rule A: [ In(x) ] --> [ Out(x) ]
+end

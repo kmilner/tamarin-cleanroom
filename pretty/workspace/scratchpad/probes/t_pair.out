@@ -1,0 +1,50 @@
+theory Tpair
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) P1:
+   [ In( x ), In( y ), In( z ) ] --> [ Out( <x, y, z> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) P2:
+   [ In( x ), In( y ), In( z ) ] --> [ Out( <<x, y>, z> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) P3:
+   [ In( x ), In( y ), In( z ) ] --> [ Out( <x, y, z> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) P4:
+   [ In( x ), In( y ) ] --> [ Out( <x, y> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) P5:
+   [ In( x ), In( y ) ] --> [ Out( fst(<x, y>) ) ]
+
+  /*
+  rule (modulo AC) P5:
+     [ In( x ), In( y ) ] --> [ Out( x ) ]
+  */
+
+rule (modulo E) P6:
+   [ ] --> [ Out( 'c' ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) P7:
+   [ ] --> [ Out( 'hello_world' ) ]
+
+  /* has exactly the trivial AC variant */
+
+
+
+end

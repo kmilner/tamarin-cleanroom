@@ -1,0 +1,5 @@
+theory Esamehead begin
+functions: sel/2, mk1/1, mk2/1
+equations: sel(mk2(x), 'b') = x, sel(mk1(x), 'a') = x
+rule A: [ In(x) ] --> [ Out(x) ]
+end

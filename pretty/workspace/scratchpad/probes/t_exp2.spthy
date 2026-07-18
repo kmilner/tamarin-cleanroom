@@ -1,0 +1,6 @@
+theory Texp2 begin
+builtins: diffie-hellman
+rule E1: [ Fr(~x), Fr(~y) ] --> [ Out(('g'^~x)^~y) ]
+rule E2: [ Fr(~x), Fr(~y) ] --> [ Out('g'^(~x^~y)) ]
+rule E3: [ Fr(~x), Fr(~y) ] --> [ Out('g'^~x^~y) ]
+end

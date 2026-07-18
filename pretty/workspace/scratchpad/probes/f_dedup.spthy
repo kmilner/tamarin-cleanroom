@@ -1,0 +1,5 @@
+theory Fdedup begin
+builtins: hashing
+functions: h/1, k/1, k/1
+rule A: [ In(x) ] --> [ Out(x) ]
+end

@@ -1,0 +1,5 @@
+theory Esort begin
+functions: c/2, w/1, v/1
+equations: w(c(x, y)) = x, v(c(x, y)) = y
+rule A: [ In(x) ] --> [ Out(x) ]
+end

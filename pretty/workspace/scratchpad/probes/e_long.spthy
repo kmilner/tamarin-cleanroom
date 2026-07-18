@@ -1,0 +1,5 @@
+theory Elong begin
+functions: unwrapAAAAAAAAAAAAAAAAAAAA/1, wrapAAAAAAAAAAAAAAAAAAAAAA/2
+equations: unwrapAAAAAAAAAAAAAAAAAAAA(wrapAAAAAAAAAAAAAAAAAAAAAA(xlongvariablename1, ylongvariablename2)) = xlongvariablename1
+rule A: [ In(x) ] --> [ Out(x) ]
+end

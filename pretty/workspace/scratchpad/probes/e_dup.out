@@ -1,0 +1,17 @@
+theory Edup
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fa/1, fst/1, pair/2, pr/2, snd/1
+equations: fa(pr(x, y)) = x, fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) A:
+   [ In( x ) ] --> [ Out( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+
+
+end

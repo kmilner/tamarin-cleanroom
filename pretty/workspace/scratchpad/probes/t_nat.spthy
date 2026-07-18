@@ -1,0 +1,8 @@
+theory Tnat begin
+builtins: natural-numbers
+rule N1: [ In(%x), In(%y), In(%z) ] --> [ Out(%x %+ %y %+ %z) ]
+rule N2: [ In(%x), In(%y), In(%z) ] --> [ Out((%x %+ %y) %+ %z) ]
+rule N3: [ In(%x), In(%y), In(%z) ] --> [ Out(%x %+ (%y %+ %z)) ]
+rule N4: [ ] --> [ Out(%1) ]
+rule N5: [ ] --> [ Out(1:nat) ]
+end

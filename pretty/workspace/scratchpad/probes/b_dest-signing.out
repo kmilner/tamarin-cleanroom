@@ -1,0 +1,21 @@
+theory Pdestsigning
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, pk/1, sign/2, snd/1, true/0,
+           verify/3[destructor]
+equations:
+    fst(<x.1, x.2>) = x.1,
+    snd(<x.1, x.2>) = x.2,
+    verify(sign(x.1, x.2), x.1, pk(x.2)) = true
+
+rule (modulo E) A:
+   [ In( x ) ] --> [ Out( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+
+
+end

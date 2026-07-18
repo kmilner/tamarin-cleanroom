@@ -1,0 +1,4 @@
+theory Pasymmetricencryption begin
+builtins: asymmetric-encryption
+rule A: [ In(x) ] --> [ Out(x) ]
+end

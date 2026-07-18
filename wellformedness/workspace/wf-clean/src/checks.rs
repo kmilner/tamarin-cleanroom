@@ -854,14 +854,16 @@ pub fn fact_lhs_occur_no_rhs(thy: &Theory) -> Vec<WfError> {
     let rhs_idents: std::collections::HashSet<(String, usize, bool)> =
         rhs.iter().map(|f| f.ident()).collect();
 
-    // LHS-only identities, first occurrence, in source order.
-    let mut seen: Vec<(String, usize, bool)> = Vec::new();
+    // Every LHS occurrence whose fact identity (name, arity, multiplicity) is
+    // absent from every RHS is listed, in source order, WITHOUT deduplication:
+    // one entry per premise occurrence, so a fact repeated in a single rule and
+    // the same fact reused across several rules each contribute their own entry
+    // (probes lhs1/lhs2/lhs3).
     let mut entries: Vec<String> = Vec::new();
     for f in &lhs {
-        if rhs_idents.contains(&f.ident()) || seen.contains(&f.ident()) {
+        if rhs_idents.contains(&f.ident()) {
             continue;
         }
-        seen.push(f.ident());
         let mut line = f.render();
         if let Some(sugg) = nearest_rhs(&f.name, &rhs) {
             line.push_str(&format!(". Perhaps you want to use the fact {}", sugg.render()));

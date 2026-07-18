@@ -1,0 +1,4 @@
+theory Bdupline begin
+builtins: xor, xor, multiset
+rule A: [ In(x) ] --> [ Out(x) ]
+end

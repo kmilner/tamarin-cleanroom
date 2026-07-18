@@ -1,0 +1,23 @@
+theory Elong
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1, unwrapAAAAAAAAAAAAAAAAAAAA/1,
+           wrapAAAAAAAAAAAAAAAAAAAAAA/2
+equations:
+    fst(<x.1, x.2>) = x.1,
+    snd(<x.1, x.2>) = x.2,
+    unwrapAAAAAAAAAAAAAAAAAAAA(wrapAAAAAAAAAAAAAAAAAAAAAA(xlongvariablename1,
+                                                          ylongvariablename2))
+  = xlongvariablename1
+
+rule (modulo E) A:
+   [ In( x ) ] --> [ Out( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+
+
+end

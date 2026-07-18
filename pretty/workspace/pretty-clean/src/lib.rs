@@ -31,3 +31,15 @@ pub use ast::*;
 pub fn render_theory(thy: &ast::Theory, sig: &ast::Signature) -> String {
     theory::render(thy, sig)
 }
+
+/// R1: the signature section — header comment, blank line, then the
+/// `builtins:` / `functions:` / `equations:` declarations. See
+/// `signature::render`.
+pub fn render_signature_block(sig: &ast::Signature) -> String {
+    signature::render(sig)
+}
+
+/// R1: one term, rendered at the echo's layout parameters. See `term::render`.
+pub fn render_term(term: &ast::Term) -> String {
+    term::render(term)
+}

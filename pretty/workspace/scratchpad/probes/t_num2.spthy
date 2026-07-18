@@ -1,0 +1,5 @@
+theory Tnum2 begin
+builtins: natural-numbers
+rule Q1: [ ] --> [ Out(2:nat) ]
+rule Q2: [ ] --> [ Out(%1 %+ %1) ]
+end

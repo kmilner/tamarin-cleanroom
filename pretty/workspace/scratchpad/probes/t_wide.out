@@ -1,0 +1,40 @@
+theory Twide
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fnAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/3, fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) W1:
+   [
+   In( xlongvariablename1 ), In( ylongvariablename2 ),
+   In( zlongvariablename3 )
+   ]
+  -->
+   [
+   Out( <xlongvariablename1, ylongvariablename2, zlongvariablename3, 
+         xlongvariablename1, ylongvariablename2>
+   )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) W2:
+   [
+   In( xlongvariablename1 ), In( ylongvariablename2 ),
+   In( zlongvariablename3 )
+   ]
+  -->
+   [
+   Out( fnAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA(xlongvariablename1,
+                                         ylongvariablename2, zlongvariablename3)
+   )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+
+
+end

@@ -1,0 +1,6 @@
+theory Tuni begin
+builtins: multiset
+rule U1: [ In(x), In(y), In(z) ] --> [ Out(x++y++z) ]
+rule U2: [ In(x), In(y), In(z) ] --> [ Out((x++y)++z) ]
+rule U3: [ In(x), In(y), In(z) ] --> [ Out(x++(y++z)) ]
+end

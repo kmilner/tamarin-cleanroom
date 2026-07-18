@@ -1,0 +1,39 @@
+theory Tmult2
+
+begin
+
+// Function signature and definition of the equational theory E
+
+builtins: diffie-hellman
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) M1:
+   [ Fr( ~x ), Fr( ~y ), Fr( ~z ) ] --> [ Out( 'g'^(~x*~y*~z) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) M2:
+   [ Fr( ~x ) ] --> [ Out( 'g'^inv(~x) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) M3:
+   [ Fr( ~x ), Fr( ~y ) ] --> [ Out( 'g'^(~x*inv(~y)) ) ]
+
+  /*
+  rule (modulo AC) M3:
+     [ Fr( ~x ), Fr( ~y ) ] --> [ Out( z ) ]
+    variants (modulo AC)
+    1. ~x    = ~x.4
+       ~y    = ~x.4
+       z     = 'g'
+    
+    2. ~x    = ~x.4
+       ~y    = ~y.4
+       z     = 'g'^(~x.4*inv(~y.4))
+  */
+
+
+
+end
