@@ -4477,3 +4477,183 @@ Validation (all green): `cargo test --workspace` 1195 passed / 0 failed;
 `gen_license_headers.py --check` **0 stale** (graph_clean files headerless).
 Live servers on 3210/3201 stopped; OOM guards (oom_score_adj + ulimit -v)
 preserved in every boot.
+
+================================================================================
+# Open-side integration report — pretty round-3+4 (ENDGAME: rules + lemmas)
+
+Date: 2026-07-19. Integrator: open side (mechanical re-sync + value adapters +
+a ported sort-resolution pre-pass; no logic transplanted INTO the clean crate).
+Repo: `/home/kamilner/tamarin-rs`. Builds on "pretty round-1/round-2" above.
+Sealed rounds 3+4 delivered R3 (formula/lemma/restriction) and the R4 blocker
+fixes (SAPIC `process=` attribute, tuple/application `>)` own-line wrap, and the
+STACK-OVERFLOW fix via a NEW iterative `doc.rs` engine). Outcome: the **rule**
+and **lemma** batch-echo routes are ADOPTED (byte-green); **restriction**,
+**macros**, the **theory-frame** assembly, and the **web signature pane** are
+kept ported with concrete sealed-side witnesses; and DELETION is **NET-ZERO**
+— the interactive web panes retain a live caller on every ported renderer.
+
+--------------------------------------------------------------------------------
+## 0. Re-sync of the round-3+4 clean sources — DONE (headerless)
+
+Re-applied the round-1/2 mechanical recipe (`crate::` -> `super::`; `lib.rs` ->
+`mod.rs`) from `pretty/workspace/pretty-clean/src` into
+`crates/tamarin-theory/src/pretty_clean/`. Reverse-transform byte-identity
+(`sed 's/super::/crate::/g'`) verified for all nine `crate::`-carrying files;
+`doc.rs` byte-identical verbatim (its pre-existing `use super::*;` test import
+means it carries no `crate::` — the round-1 exception). CHANGED by R3+R4:
+`ast.rs` (R3 formula/atom/lemma/restriction/guarded types), `formula.rs` (NEW),
+`lemma.rs` (NEW), `doc.rs` (R4 iterative engine, 28.9 KB -> 36.7 KB),
+`rule.rs`/`term.rs` (R4 wrap fixes), `mod.rs` (R3 render entry points). Only
+`.hs` citation across the tree is `HughesPJ.hs` in `doc.rs` (EXTERNAL skip-set);
+0 clean files headered. Pretty gate after re-sync alone: **403 MATCH / 16 DIFF**
+(unchanged — the new iterative `doc.rs` reproduces the signature block exactly).
+
+--------------------------------------------------------------------------------
+## 1. Adapters — headerless, workspace-authored (value translation only)
+
+`pretty_clean_adapt.rs` gained: `fact`/`rule_attr` (1:1 structural, color
+`#`-strip+lowercase), `rule_section` + `AcVariantsInput` (builds the clean
+`Rule`+`AcVariants` from the ported closure DATA), `formula`/`atom` (1:1),
+`lemma_section` + `GuardedInput` + `lemma_attr`/`trace_quantifier`. Every render
+byte comes out of the clean crate; all transforms stay ported.
+
+A ported sort-resolution pre-pass **`pretty_formula::resolve_formula_sorts`**
+(new, headered) was required: the clean formula renderer is sort-LITERAL (it
+prints sigils from `VarSpec.sort`), whereas the ported printer resolves a
+reference's sort from its binder via scope (timepoints -> Node, Untagged msg
+refs -> binder sort) and collapses consecutive same-kind quantifiers. The
+pre-pass reuses the EXISTING scope machinery (`open_formula_prefix`,
+`allocate_formula_binders_refs`, `resolved_sort_pos`, `lookup_display`,
+`PreciseFreshState`) and emits a resolved `p::Formula`. Without it every
+restriction/lemma `@ tp` printed `tp` instead of `#tp` (206 DIFFs -> after the
+pre-pass, 0 except the macro witnesses below).
+
+--------------------------------------------------------------------------------
+## 2. RULE ROUTE (2a) — ADOPTED (byte-green; R4 closed all three R2 witnesses)
+
+`render_rule`'s BATCH assembly now builds the clean `Rule` (modulo E) +
+`Option<AcVariants>` from the ported DATA (desugared + arity1 + AC-canonicalised
+E facts; abstracted AC rule; residual `variant_substs`; gated outer + in-comment
+loop-breaker indices) and calls `pretty_clean::render_rule`. Gate
+(`pretty_gate_final_1.tsv`): **403 MATCH / 16 DIFF**, ZERO new divergence — the
+round-2 rule route's 88 DIFFs (R3-a `process=`, R3-b tuple/app wrap, R3-c stack
+overflow) are ALL closed. Verified MATCH: `accountability/csf21-acc-unbounded/
+previous/ct.spthy` (process=), all five `ake/dh/{UM_three_pass*,DHKEA_NAXOS_C_
+eCK_PFS*_partially_matching}.spthy` (tuple wrap), and the four previously-
+crashing deep files `fm24-cardpayments/onlineAuthorized/C8.spthy`, `idbased/
+BP_IBS_{2,3,4}.spthy`.
+
+## 3. LEMMA ROUTE (2b) — ADOPTED (byte-green)
+
+`render_parsed_lemma`'s BATCH assembly routes through `pretty_clean::
+render_lemma`: header (`lemma name [attrs]:`), the `all-traces|exists-trace
+"formula"` statement (clean formula renderer over the sort-resolved statement
+formula), the guarded-formula comment FRAME (guarded text supplied opaque from
+the ported `pretty_guarded_doublequoted` + `gnot`), and the proof tail. The
+`heuristic=` value is fed ALREADY oracle-expanded (file-dependent
+`prettyGoalRankings` stays ported). Gate (`pretty_gate_final_2.tsv`): **403
+MATCH / 16 DIFF**, ZERO new divergence. `--prove` byte spot-check
+(`corpus_file_diff.sh`): `Tutorial` 250/250 MATCH, `ake/dh/UM_three_pass`
+13899/13899 MATCH, `features/private_function_symbols/NAXOS_eCK_PFS_private`
+316/316 MATCH — the proof-tail framing is byte-faithful under `--prove` too.
+
+## 4. RESTRICTION (2b) — BLOCKED, REVERTED (1 witness)
+
+The clean `Restriction` carries a SINGLE `formula` and `restriction_doc` renders
+it for BOTH the top-line statement AND the `/* expanded formula: … */` comment.
+HS shows the ORIGINAL (macro-form) on top and the macro-EXPANDED formula in the
+comment, which differ under macros: `features/macros/MacroInLemmasAndRestrictions
+.spthy` — top `A( m(m3(x)) )` vs comment `A( x )` — gated 402/17. Reverted.
+**Sealed-side target:** the `Restriction` type needs a separate expanded-formula
+field. Every non-macro restriction (401) rendered byte-green via the clean route
+before the revert, so the blocker is exactly the single-formula limitation.
+
+## 5. MACROS (2c) — BLOCKED, REVERTED (1 witness)
+
+The clean `macros::macros_doc` joins the block with `sep` (ONE line when it fits
+the width), but HS uses `keyword_ "macros:" $$ nest 4 (vcat …)`: the first macro
+sits beside `macros: ` and EVERY subsequent macro drops to its own 8-indented
+line regardless of fit. Witness `MacroInLemmasAndRestrictions.spthy` (three short
+macros that fit but HS still stacks) — gated 402/17. Reverted. **Sealed-side
+target:** `macros_doc` must use the `$$`/vcat layout, not `sep`.
+
+## 6. THEORY-FRAME assembly (2d) — BLOCKED
+
+Clean `theory::render` is still `unimplemented!()` (the top-level assembly was
+never sealed), so the echo frame/section-ordering cannot be routed. Not attempted.
+
+## 7. WEB SIGNATURE PANE (3) — BLOCKED
+
+Not routable: the clean `render_signature_block` is PLAIN-TEXT, FIXED-WIDTH
+(110/73), and emits the `// Function signature …` header; the web message pane
+renders under `HtmlDocGuard` (entity escaping + `hl_*` highlight spans) at
+`WEB_LINE_LENGTH=100` with NO header. `render_signature`/`web_signature_block`
+stay ported. **Sealed-side target:** an HtmlDoc-capable, width-parameterised
+clean signature API.
+
+--------------------------------------------------------------------------------
+## 8. WIDTH/HTML discovery + the batch-width gate (load-bearing)
+
+The clean crate hardcodes width 110/73 and is plain-text. The interactive server
+calls `set_display_width(100, 67)` process-wide and renders the message/rules
+pane under `HtmlDocGuard`. So the clean routes are correct ONLY at the batch echo
+width. First adoption broke `web_parity` (2 Tutorial DIFFs: the source-view lemma
+wrapped at 110 not 100). Fix: added `pretty_hpj::display_line_length()` (getter)
+and gated `render_rule` + `render_parsed_lemma` on `batch_echo_width()` (==110)
+— batch echo -> clean; the web source view (width 100) and message/rules pane
+(HtmlDoc) -> the ported width-/HTML-aware printers (`render_parsed_lemma_ported`,
+`render_rule`'s ported branch). `web_parity` restored to **158/0**.
+
+--------------------------------------------------------------------------------
+## 9. DELETION ANALYSIS — NET-ZERO (per-unit blocker: the web panes stay ported)
+
+With the rule + lemma batch routes live, the compiler reports **0 dead
+functions** in `pretty_theory.rs` / `pretty_formula.rs` (`cargo build` warnings
+= none; call-graph grep confirms). Reason: `render_rule` and
+`render_parsed_lemma` are reached at BOTH the batch width (CLI echo -> clean) AND
+the web width (interactive `/thy/trace/#/source` + `/message` source view ->
+ported fallback), and the web message/rules pane (`web_proto_rules` ->
+`render_rule`, under `HtmlDocGuard`) is HTML-mode — so every ported renderer
+(`render_rule_body`, `render_ac_variants_block`, `rule_attributes_doc`,
+`render_variant_substs_block`, `variant_subst_doc`, `render_loop_breakers_line`,
+`lemma_attr_docs`, `render_guarded_block`, `quantifier_keyword`, and
+`pretty_formula::lemma_header_line`/`formula_to_doc`/`pp_*`) retains a LIVE web
+caller. The clean route ADDS the batch path; it does not remove the web path.
+
+* Functions deleted: **0** (LOC deleted: **0**).
+* Header delta: **0** (133 -> 133 GPL-headered `.rs`; `gen_license_headers.py`
+  regenerate updated 0 files; `--check` = 0 stale).
+* Per-author delta on `pretty_theory.rs`: **0** — all ~25 authors remain (the
+  web message/source panes keep `render_rule` + helpers and
+  `render_parsed_lemma_ported` + helpers alive via surviving cited ranges
+  `ClosedTheory.hs`, `OpenTheory.hs`, `Rule.hs`, `Lemma.hs`, `SubstVFresh.hs`,
+  `TheoryObject.hs`).
+* Per-author delta on `pretty_formula.rs`: **0** — all 9 authors (meiersi,
+  beschmi, jdreier, PhilipLukertWork, rkunnema, rsasse, BTom-GH, charlie-j, arcz)
+  remain (the ported lemma statement, restriction, guarded, and
+  intruder-variant paths keep `Formula.hs`/`Guarded.hs`/`Atom.hs`/`Term.hs`
+  cited ranges live).
+
+This matches the campaign's documented NET-ZERO pattern: the batch echo now
+routes rule + lemma + signature through the sealed clean crate byte-identically,
+but deletion is gated on a future round clean-rooming the WEB layer (a
+width-parameterised, HtmlDoc-capable clean renderer) so the web callers drop.
+
+--------------------------------------------------------------------------------
+## 10. Full gates — all green
+
+* `cargo build --release` — 0 errors.
+* `cargo test --workspace` — all suites pass, 0 failed; `console_split_parity`
+  **59 passed / 0 failed**.
+* pretty_gate (`pretty_gate_final.tsv`, JOBS=6) — **403 MATCH / 16 DIFF / 0
+  SKIP** (the 16 = `features/auto-sources/spore/*` closure gap, unchanged).
+* wf_gate (`wf_gate_after_pretty_final.tsv`, JOBS=6) — **419 MATCH / 0 DIFF**,
+  rows `diff`-identical to `scripts/wf_gate_round7.tsv`.
+* web_parity (`web_parity_final.tsv`, Tutorial seed) — **158 MATCH / 0 DIFF**.
+* `--prove` byte spot-check (`corpus_file_diff.sh`) — Tutorial / UM_three_pass /
+  NAXOS_eCK_PFS_private all MATCH (rule + lemma routes byte-faithful under prove).
+* `gen_license_headers.py` + `--check` — **0 stale**, **133** headered, delta 0.
+
+Deleted: none. **Header delta: 0 (133 -> 133).** Adopted: rule + lemma batch
+routes (byte-green). Kept ported with witnesses: restriction, macros,
+theory-frame, web signature. Blocker to deletion: the interactive web panes.
