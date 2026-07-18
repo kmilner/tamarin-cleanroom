@@ -1,0 +1,10 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory InductionProbe] Theory loaded
+[Theory InductionProbe] Theory translated
+[Theory InductionProbe] Derivation checks started
+[Theory InductionProbe] Derivation checks ended
+[Theory InductionProbe] Theory closed
+[Saturating Sources] Step 1 (Max 5)
+[Saturating Sources] Done

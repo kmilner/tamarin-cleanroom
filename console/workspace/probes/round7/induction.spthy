@@ -1,0 +1,16 @@
+theory InductionProbe
+begin
+
+// A lemma marked [use_induction] whose shape does not yield to induction, to
+// probe whether a non-inductible induction attempt yields a distinct summary
+// verdict phrase or aborts / warns instead.
+rule Emit:
+  [ Fr(~n) ] --[ Emit(~n) ]-> [ Out(~n) ]
+
+lemma exists_use_induction [use_induction]: exists-trace
+  "Ex n #i. Emit(n) @ i"
+
+lemma all_use_induction [use_induction]:
+  "All n #i. Emit(n) @ i ==> Ex #j. K(n) @ j"
+
+end

@@ -1,0 +1,9 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory YellowTest] Theory loaded
+[Theory YellowTest] Theory translated
+[Theory YellowTest] Derivation checks started
+[Theory YellowTest] Derivation checks ended
+[Theory YellowTest] Theory closed
+[Saturating Sources] Done

@@ -2233,3 +2233,421 @@ routes (autoprove 6 / basic 19 / graph 4 / proof_step 3 / static 3 / stubs 15 /
 upload 3). wf fixture suite 2/2 over the >=20-fixture corpus. `gen_license_headers.py`
 --check 0 stale (133 headers). Live oracle: verdict-taxonomy corpus gate (HS v1.13.0
 vs RS release) — 5 verdict classes byte-identical incl. `Unfinishable`.
+
+================================================================================
+# Dirty-room integration report — round-8, unit B (graph serialization swap)
+#   graph_clean RE-SYNCED to the round-8 HughesPJ layout engine; live byte gate
+#   REBUILT; the fill-ENGINE blocker (round-7 `Ack` cell) is CLOSED, but the swap
+#   stays KEPT — a fresh corpus census pins the residual precisely at the fill
+#   ALLOCATION (`group_widths`), not the engine.
+
+Date: 2026-07-18. Integrator: dirty-room (adapters + extraction only; no logic
+transplanted from replaced files into clean code). Repo: `/home/kamilner/tamarin-rs`.
+Same protocol/precedent. Rebased on the CURRENT tree AFTER the round-7 unit-D run
+(header count inherited at 133; `cli/mod.rs` rename + framing re-sync already in the
+tree). Task scope: re-sync graph_clean to round-8; rebuild the live byte gate driving
+the RawRule seam; if green, route `system_to_dot*`/`render_svg_or_dot_with` through
+clean `generate`, retarget `routes_graph::dot_output_for_a_simple_system` to the
+reference dialect, and DELETE `handlers/dot.rs` + `graph/abbreviation.rs` iff the clean
+abbrev engine serves the route end-to-end.
+
+Outcome: **round-8 is RE-SYNCED and the live byte gate is REBUILT and RUN. Round-8's
+HughesPJ-faithful `doclayout`/`pretty` engine CLOSES the round-7 blocker — the fresh
+`Wide` capture's `Ack` cell (and a purpose-built large-sibling `R16_10` probe) are now
+byte-identical HS==clean through the actual RawRule seam. The serialization swap stays
+KEPT-blocked.** A fresh round-8 corpus census (the crate's own `fill_census` over the
+12 022-dot oracle corpus, re-confirmed by an in-repo scan of the re-synced module)
+re-characterises the residual EXACTLY: round-8 fixed the fill *engine* (how a cell packs
+at a given budget) but the fill *allocation* (`generate::group_widths`, the per-cell
+budget split) is still a provenance-safe probe-derived proportional approximation that
+reproduces only **79.90 % of multi-cell wrapping cells** (104 764/131 121; 25 114
+`fillErr` cells where both HS and clean wrap but break at a DIFFERENT element). The
+ported `handlers/dot::render_balanced` is the byte-faithful `renderBalanced 100 (max 30
+. round . (*1.3))` + HughesPJ printer, so routing the route through clean `generate`
+would silently regress ~20 % of multi-cell wrapping records — the campaign's forbidden
+class. No headered file deleted → header count unchanged (133 → 133).
+
+--------------------------------------------------------------------------------
+## B.0 Re-sync graph_clean <- round-8 workspace — DONE (clean, headerless)
+
+`crates/tamarin-server/src/graph_clean/` <- graphdot round-8 workspace
+(`graph-clean/src/`). Mechanical `crate::` -> `super::` only (the established module
+transform); `mod.rs` = workspace `lib.rs` modulo the one ` ```ignore ` doctest fence
+(it uses `graph_clean::…` as an extern-crate path that does not exist once vendored as
+a module). The round-8 delta, verified byte-exact after the transform:
+
+* **NEW `doclayout.rs`** (425 lines) + **NEW `pretty.rs`** (798 lines): a faithful Rust
+  port of the Hughes/Peyton-Jones pretty-printer (`pretty.rs`) plus the record-cell
+  driver (`doclayout::wrap_cell_dot`, ribbon `1.5`, `budget_line_len(b)=⌊3b/2⌋`). This is
+  the "HughesPJ-faithful layout engine" the round-8 audit cleared (AUDIT.md "Round 8 …
+  VERDICT: pass"): the ragged `fill` (lineLength > ribbon lets a physical line break
+  early) that the round-4…7 bespoke greedy loop could not express.
+* **`render.rs` gutted** 795 -> 126 lines: the whole round-4…7 greedy-fill apparatus
+  (`wrap_cell`/`wrap_cell_budget`/`cell_budget`/`layout_fact`/`layout_tuple`/`layout_info`/
+  `run_layout`/`fill`/`paragraph_fill`/`FILL_WIDTH`/`MIN_CELL_BUDGET` + tests) is DELETED;
+  the module now emits only flat cell text + record escaping.
+* **`generate.rs`**: `group_widths` rewritten smallest-flat-first -> **proportional**
+  `round(87·flat_i/T)` floored at 20; fill now flows through `doclayout::wrap_cell_dot`.
+* **`mod.rs`**: `pub mod doclayout; pub mod pretty;` added; `pub use render::wrap_cell;`
+  dropped (the seam no longer re-exports it).
+* The other seven files (`abbrev`,`alloc`,`dot`,`model`,`options`,`term` + `mod`) are
+  byte-stable after the transform (`dot.rs`/`model.rs` — the byte-exact SERIALIZER — are
+  byte-identical, so the corpus serializer roundtrip is untouched).
+
+Nothing outside the module references `graph_clean::` (grep clean), so the re-sync is
+self-contained. Tripwire: `gen_license_headers.py` updates **0** files and no
+graph_clean file acquired a GPL header (all start with `//!` doc comments; `doclayout.rs`
+/`pretty.rs` are headerless clean sources). graph_clean lib tests 20 passed + 2 ignored
+(the two ignored are the census/width probes), matching the workspace exactly.
+
+--------------------------------------------------------------------------------
+## B.1 Live byte gate REBUILT + RUN (drives the ACTUAL RawRule seam) — round-7 Ack CLOSED
+
+Reference server recipe (unchanged): 1.13.0 stack binary, PATH
+`/home/linuxbrew/.linuxbrew/bin`, `interactive <dir> --port=3211` (**equals-form** — the
+oracle's space-form makes cmdargs misread the port), maude/dot on the linuxbrew PATH.
+Fresh captures pulled at `…/interactive-graph-def/cases/raw/1/1` (HTTP 200):
+
+* **`Wide` probe** (`Fr(~n)`, 10-tuple `In` premise, conclusions `[Ack, Big, Out]`):
+  the `n6` record captured fresh (1 770 bytes). Driving the ACTUAL re-synced seam — a
+  `graph_clean::generate::System` with one `GraphNode::RawRule` carrying the flat cells
+  (`Fr( ~n.4 )`, `In( <x1.4…x10.4> )`, info `#vr.3 : Wide[Made( ~n.4 )]`, conclusions
+  `Ack( ~n.4, <x1.4, x2.4> )` / `Big( <x1.4…x10.4> )` / `Out( h(~n.4) )`, `#d5d897`),
+  then `to_dot(generate(&sys))` — the record label is **byte-identical to HS**, incl. the
+  `Ack` cell `Ack( ~n.4,\l&nbsp;×5\<x1.4, x2.4\>\l)\l` and the `Big` 8-on-line-0 fill.
+  This is the exact cell the **round-7 gate DIVERGED on** (round-7 "DIVERGES at byte 318
+  — inside the `Ack` conclusion cell"). Round-8 **CLOSES it.**
+* **`R16_10` large-sibling probe** (conclusion group `[Big(<16 vars>), Sib('a×10 0')]`,
+  the census's worst-case shape): fresh HS capture (2 425 bytes) driven through the same
+  seam — **byte-identical HS==clean** (both break `Big` after `ak.3,`, 11 elements on
+  line 0). The round-8 proportional allocation reproduces the large-sibling squeeze the
+  round-7 smallest-flat-first allocation got wrong.
+
+Both drove ported term-printer-shaped flat cells (`Name( a, b )` fact padding, `<a, b>`
+tuples, `#t : Rule[acts]` info) into the clean `generate` seam; byte-equality holds on
+every probe. The gate scratch harness was run in-repo (`tamarin_server::graph_clean::
+{generate,to_dot}`) and removed after capture (scratch, not a durable test).
+
+--------------------------------------------------------------------------------
+## B.2 Corpus census — the residual is now the fill ALLOCATION, not the engine
+
+Because the two isolated probes pass, the swap decision turns on corpus-wide fidelity.
+Round-8 `fill_census` (crate test) over the 12 022-dot oracle corpus, and an independent
+in-repo scan through the RE-SYNCED module (`group_widths` + `doclayout::wrap_cell_dot`
+per cell, fed the DEWRAPPED post-abbreviation flat text so the abbreviation info-loss is
+factored OUT), agree:
+
+    proportional(87)  multi-cell wrapping  104 764 / 131 121 = 79.90 % byte-exact
+                      (falseNeg 1 843, fillErr 25 114); single-cell 94.75 %; all 81.09 %
+    in-repo scan (40 002-cell prefix)      20.51 % multi-cell MISS  (matches)
+
+`fillErr` = both HS and clean wrap the cell but place the break at a DIFFERENT element —
+a pure fill-allocation divergence, independent of abbreviation. Four concrete,
+route-reachable examples from real corpus theories (the documented residual classes —
+deep nesting, `++`-unions, wide multi-arg facts):
+
+* `065c1820e71d7a38.dot` — `In( <MH.1, SH.1, senc(<seq.1, ~n.5, pad.1, MA2>, ~n.8)> )`
+  (group flats `[9,64,57,19]`, budget 33): HS breaks the nested `senc(…)` across two more
+  physical lines; clean keeps it on one. (Deep nesting.)
+* `065c1820e71d7a38.dot` — `State_111112111( ~prog_1, PR3, ~n, ~n.1, ~n.2, ~n.3, ~n.4 )`
+  (budget 48): HS breaks after `~n.1,`; clean after `~n.2,`. (Wide multi-arg fact.)
+* `6bfeb28f2d1c384d.dot` — `I_Comp( <'UM3',$A,$B,(<'1','g'^~ex>++<'2','g'^~ey,MA1>++<'3',
+  MA2>)> )` and the sibling `!SessionKey( … )` (group flats `[76,10,90]`): HS splits the
+  `++` multiset union across lines; clean keeps the union flat. (`++`-unions.)
+
+The ported `handlers/dot::render_balanced` is the FAITHFUL `renderBalanced 100 (max 30 .
+round . (*1.3))` (per-field proportional lineLength + ribbon `round(w/1.5)`) driving the
+`tamarin_theory::pretty_hpj` HughesPJ printer — it reproduces every one of these HS cells
+byte-for-byte (round-7 established the ported side is byte-identical to HS). So routing
+the route through clean `generate` is a **silent byte regression on ~20 % of multi-cell
+wrapping records** (25 114 corpus cells), caught by no isolated probe. Per the campaign's
+"silent regressions must not be forced" precedent (round-6 A2, wave-2 D4, round-7 B), the
+swap is KEPT-blocked.
+
+Why this is a CLEAN-SIDE residual, not a dirty-side one: the divergence is that
+`group_widths` computes a provenance-safe proportional budget (probe-pinned `87`/`20`,
+audit-sanctioned specifically because it AVOIDS the source's protectable `100/1.3/30`
+constants — AUDIT.md Round 8 "the clean model reaches at only ~81 %… approximating from
+probe constants is the signature of black-box derivation"). Byte-completeness would
+require the clean side to carry HS's exact per-cell `renderBalanced 100/1.3/30` coupling —
+a clean-room change, which the dirty room may not author into the headerless module.
+
+--------------------------------------------------------------------------------
+## B.3 Swap NOT PERFORMED — kept / abbrev end-to-end / dialect
+
+KEPT intact (headers untouched): `handlers/dot.rs` (the byte-faithful `render_balanced`
+serializer + DotBuilder — 22-author header), `graph/{abbreviation,repr,simplify,options}
+.rs`. The task keeps `repr`/`simplify`/`options` by construction (solver-side content).
+
+`graph/abbreviation.rs` also stays, on the task's OWN condition ("delete … iff the clean
+abbreviation engine serves the route end-to-end"): it does NOT. The clean
+`graph_clean::abbrev` engine carries a ~7 % AC/DH residual (established rounds ago), and —
+independently — the RawRule seam takes POST-abbreviation cell text, so it structurally
+cannot reproduce the corpus cells whose HS wrap is decided on the UN-abbreviated width
+(the census `falseNeg` bucket; QUERIES.log Session 7 `vc_expand`: 65 % of false-negatives
+trace to unabbreviated width). The ported abbreviation engine (`compute_abbreviations` +
+`apply_abbreviations_fact`) produces the byte-correct abbreviations feeding both the record
+cells and the legend, so it is load-bearing and kept.
+
+`routes_graph::dot_output_for_a_simple_system` UNCHANGED — it still pins the ported
+`digraph G {` dialect; retargeting it to the reference `digraph "G" {` dialect belongs to
+the blocked swap (a route through clean `generate` would emit the reference dialect, but
+that route regresses the fill, above). `graph_clean` NOT renamed to `graph`. Deleted: none.
+
+GRAPHCLEAN_CORPUS stays green: the SERIALIZER (`dot.rs`/`model.rs`) is byte-identical to
+the pre-round-8 copy, so the serializer roundtrip is 12 022/12 022 byte-exact (workspace
+`roundtrip` 14/14; the round-8 changes are all in the fill engine, not `to_dot`).
+
+--------------------------------------------------------------------------------
+## Summary (round-8, unit B) — deleted / kept / header delta
+
+* B.0 RE-SYNCED (`graph_clean` round-8, headerless): NEW `doclayout.rs`+`pretty.rs`
+  (HughesPJ engine), `render.rs` gutted 795->126, `generate::group_widths` -> proportional,
+  `mod.rs` updated. `crate::`->`super::` transform verified byte-exact; tripwire clean.
+* B.1 Live byte gate REBUILT + RUN: fresh HS captures (`Wide`, `R16_10`) driven through
+  the ACTUAL RawRule seam — byte-identical HS==clean. **Round-7's `Ack`-cell blocker
+  (the fill ENGINE) is CLOSED by round-8's faithful HughesPJ `doclayout`/`pretty`.**
+* B.2 Corpus census: clean `group_widths` = **79.90 % multi-cell wrapping** byte-exact
+  (25 114 `fillErr` divergences; concrete named examples). Ported `render_balanced` is
+  byte-faithful → the swap silently regresses ~20 % → KEPT-blocked. Residual re-pinned:
+  the fill ALLOCATION (a clean-side round: `group_widths` must carry HS `renderBalanced
+  100/1.3/30`), NOT the engine.
+* B.3 KEPT ported `handlers/dot.rs` + `graph/{abbreviation,repr,simplify,options}.rs`;
+  `routes_graph` dialect UNCHANGED; `graph_clean` NOT renamed. Deleted: none.
+
+Header-count delta: **133 -> 133 (net 0).** No headered FILE added or deleted, so **no
+upstream author's citation disappeared** — the swap that would have removed
+`handlers/dot.rs` (22 cited authors: meiersi, jdreier, addap, … kevinmorio, charlie-j)
+stays blocked. The re-synced/NEW clean files (`doclayout.rs`, `pretty.rs`,
+`generate.rs`, `render.rs`, `mod.rs`) are all headerless (`gen_license_headers.py` adds
+0; tripwire verified none acquired a GPL header). `--check`: 0 stale (133 headers).
+
+Validation (all green): `cargo build --workspace` 0 errors; `cargo test -p tamarin-parser`
+= lib 67 + wellformedness 2; `-p tamarin-theory` = lib 489 (+1 ignored) + oracle_solver 19
+(+9 ignored) + wf_formula_terms 5; `-p tamarin-prover` = lib 61 + cli_e2e 7 +
+console_split_parity 55; `-p tamarin-server` = lib **107 (+2 ignored)** + routes (autoprove
+6 / basic 19 / graph 4 / proof_step 3 / static 3 / stubs 15 / upload 3). The server-lib
+110 -> 107 (+2 ignored) shift is the round-8 source faithfully reflected: the bespoke
+`render.rs` greedy-fill tests were deleted and the `doclayout`/`pretty` engine tests added
+(2 census/width probes are `#[ignore]`). wf fixture suite 2/2 over the >=20-fixture corpus.
+`gen_license_headers.py` --check 0 stale (133 headers). Live oracle: fresh `Wide` + `R16_10`
+graphs captured at `interactive-graph-def/cases/raw/1/1`, the actual re-synced RawRule seam
+driven byte-exact against them; round-8 `fill_census` over the 12 022-dot corpus (79.90 %
+multi-cell) pins the KEPT residual.
+
+================================================================================
+# Dirty-room integration report — round-9, unit A (web) FULL Server adoption
+#   web_clean RE-SYNCED to the round-7 snapshot->compute->commit dispatch (the
+#   concurrency stop-trigger is CLOSED on the clean side). FULL adoption + the
+#   routes.rs/state.rs deletion stays KEPT — but the blocker is no longer
+#   concurrency: it is the author-citation TOPOLOGY (the pseudonymous web
+#   authors live on the KEPT producer surface, not the dispatch shells) plus a
+#   Rust-only route (proof-step) the HS-derived clean dispatch cannot host.
+
+Date: 2026-07-18. Integrator: dirty-room (adapters + extraction only; no logic
+transplanted from replaced files into clean code). Repo: `/home/kamilner/tamarin-rs`.
+Rebased on the CURRENT tree (D and B integrators ran before; header count inherited
+at 133). No headered file added or deleted → header count unchanged (133 -> 133).
+
+--------------------------------------------------------------------------------
+## A.0 Re-sync web_clean <- round-7 workspace — DONE (clean, headerless)
+
+`crates/tamarin-server/src/web_clean/` <- `weblayer/workspace/web-clean/src/`.
+Diffed all 13 modules against the vendored (round-6) copy: **only `dispatch.rs`
+carries a real content change**; `errors.rs`/`forms.rs`/`page.rs` differ from the
+workspace ONLY by the `crate::`->`super::` module-path rewrite (already applied in
+the vendored tree, i.e. already at round-7 content), and `assets`/`envelope`/
+`escape`/`intdot`/`proofscript`/`route`/`shell_template`/`text`/`mod`(=`lib`) are
+byte-identical. The re-sync was the mechanical `sed 's/crate::/super::/g'` transform
+of the workspace `dispatch.rs` (four `use crate::…` import lines -> `super::`; no
+other `crate` token in the file). Result: 45 615 bytes, no `crate::` remaining.
+
+The round-7 delta is the concurrency redesign the task names ("snapshot -> compute
+-> commit with per-request concurrency semantics"):
+* `Server::dispatch(&self)` — was `&mut self` (round-6). One `Server` is now shared
+  across concurrent requests.
+* `StateOps` reshaped to an interior-mutability `&self` facade: `snapshot(index) ->
+  Option<Theory>` (owned clone; replaces the round-6 borrow-returning `get`),
+  `insert_new(&self, theory) -> u64` (commit-time monotonic allocation),
+  `replace(&self, index, theory)`, `remove`, `indices() -> Vec<u64>`.
+* `InMemoryState<T>` is now a `Mutex<BTreeMap + counter>` holding the lock only for
+  the map/counter op, never across a `ProverOps` compute.
+* Every handler runs get-snapshot (lock released) -> lock-free `ProverOps` compute
+  -> atomic `StateOps` commit.
+
+Provenance: `gen_license_headers.py` (apply) updates 0 files; `web_clean/` stays
+headerless (tripwire: `grep -rl "Currently GPL" web_clean/` = empty); `--check` 0
+stale (133). The re-synced `dispatch.rs` is untracked working-tree state (as the
+whole campaign is); it carries no inline `#[cfg(test)]` tests (round-6 had none
+either), so the server lib count is unchanged by the swap.
+
+--------------------------------------------------------------------------------
+## A.1 The concurrency stop-trigger is CLOSED on the clean side (task premise CONFIRMED)
+
+The round-6 HARD blocker (report §"wave-2 round-7/6 A", lines ~1955-2009) was the
+synchronous `&mut self` `Server` forcing a single global lock across a multi-second
+autoprove — "serialization concerns under concurrent proof search", the task's named
+stop trigger. Round-7 resolves it, and the resolution maps cleanly onto the ported
+store (this is task step 2, verified by inspection — the mapping is a thin adapter,
+not a transplant):
+
+    StateOps (clean, &self)          ported TheoryStore (state.rs)
+    ------------------------          -----------------------------
+    snapshot(i) -> Option<Theory>  <- get(i) -> Option<TheoryEntry>   (clones the
+                                       entry out from behind the parking_lot::Mutex —
+                                       exactly "clone-on-read"; the Arc<ProofState>
+                                       is shared cheaply)
+    insert_new(thy) -> u64         <- insert(entry) via next_free_idx (BTreeMap
+                                       max-key + 1; empty -> 1) — "commit-allocates"
+    replace(i, thy)                <- replace_at(i, entry)   (in-place; counter
+                                       untouched)
+    remove(i)                      <- remove(i)
+    indices() -> Vec<u64>          <- by_idx.keys()
+    (compute step, no lock held)   <- the spawn_blocking autoprove offload
+                                       (theory.rs:596-608): store Mutex released
+                                       across the search, ProofState mutated through
+                                       an Arc (graft_at_path)
+
+So the round-6 "STOP: async bridge behaviorally unsafe" condition NO LONGER holds:
+the clean `Server` is `&self`, `StateOps::get`'s round-6 borrow-return (which a
+mutex-cloning store could not satisfy — round-6 blocker #4) is gone (`snapshot`
+returns an owned clone), and the round-6 `&mut self`-global-lock serialization
+(blocker #2) is gone. The clean-room's own `tests/dispatch7.rs` proves the contract
+(a gated slow op is non-blocking, commits last, allocates its index at commit) and
+is re-corroborated live ([R77]). **The task's escape hatch "if the concurrency
+contract still cannot be honored, stop" is therefore NOT the operative blocker this
+round.** The remaining blocker is different, and structural.
+
+--------------------------------------------------------------------------------
+## A.2 FULL adoption + routes.rs/state.rs deletion — NOT PERFORMED (precise blockers)
+
+The task's headline win is stated as: "deleting routes.rs/state.rs dispatch erases
+the last pseudonymous web authors." Two independent, code-grounded facts show that
+win is unreachable this round, and that forcing a partial adoption buys byte-parity
+risk for ZERO header removal.
+
+### Blocker 1 — the pseudonymous web authors live on the KEPT PRODUCER surface
+
+`gen_license_headers.py` derives a file's author list by blaming the HS sources named
+in that Rust file's `// Ported from upstream tamarin-prover sources:` citation (script
+lines 72-180). An author citation disappears ONLY if every Rust file citing its HS
+source is deleted. The pseudonymous set the task wants gone —
+`jdreier, kevinmorio, meiersi, arcz, felixlinker, beschmi, rsasse, cascremers, …` —
+is cited **identically** on the dispatch shells AND on the pure producers the clean
+dispatch must call and structurally cannot replace:
+
+    state.rs                    arcz,beschmi,cascremers,felixlinker,jdreier,kevinmorio,meiersi,rsasse
+    handlers/theory.rs          arcz,beschmi,cascremers,felixlinker,jdreier,kevinmorio,meiersi,rsasse
+    handlers/theory_html.rs     arcz,beschmi,cascremers,felixlinker,jdreier,kevinmorio,meiersi,rsasse   [KEPT producer]
+    handlers/root.rs            arcz,beschmi,cascremers,felixlinker,jdreier,        meiersi,rsasse       [KEPT producer]
+    handlers/path_parse.rs      arcz,beschmi,          felixlinker,jdreier,        meiersi,rsasse       [KEPT producer]
+    handlers/proof_tree.rs      arcz,beschmi,cascremers,felixlinker,jdreier,kevinmorio,meiersi,rsasse   [KEPT producer]
+
+`theory_html.rs` (cites `src/Web/Theory.hs`, `src/Web/Hamlet.hs`) is the
+`overview_page`/`path_html` producer the clean dispatch consumes as
+`ProverOps::{main_content,west_pane}`; `root.rs` (cites `src/Web/Handler.hs`,
+`src/Web/Types.hs`, `src/Web/Hamlet.hs`) is the index-row producer consumed as
+`ProverOps::{meta,root_meta}`; `path_parse.rs` (cites `src/Web/Types.hs`) is the
+theory-path grammar; `proof_tree.rs` is the proof-tree HTML. These emit exactly the
+prover-specific content the clean room treats as OPAQUE by protocol ("Prover
+fragments, by design out of scope" — weblayer REPORT.md), so the clean dispatch can
+never replace them. **Therefore deleting routes.rs (headerless anyway) + state.rs +
+theory.rs removes ZERO author citations campaign-wide: the same `Web/Theory.hs` /
+`Web/Handler.hs` / `Web/Types.hs` authors survive on the kept producers.** The
+task's premise ("erases the last pseudonymous web authors") is falsified by the
+citation topology, not by concurrency.
+
+### Blocker 2 — three route-tested routes have no clean-dispatch home
+
+"Route ALL routes through the clean dispatch" cannot be met literally. The clean
+`route.rs` (an HS-faithful grammar) has no arm for three routes the ported router
+serves and the route suites exercise, so each falls to `Handler::Other` /
+`Toplevel::Other` -> 404:
+
+* `/thy/trace/:idx/proof-step/*path` — a **Rust-only** progressive-UI route with no
+  HS counterpart (`lib.rs`: "one Rust-specific addition … which has no counterpart
+  in Haskell's route table"). The clean room, being black-box HS-derived, never saw
+  it and structurally cannot model it. Tested (routes_proof_step, 3 tests).
+* `/thy/trace/:idx/graph/*path` — server-side `dot -Tsvg` image rendering
+  (`image/svg+xml`). The clean dispatch models only `interactive-graph-def` (raw DOT
+  the frontend renders client-side); non-empty DOT/SVG is an out-of-scope prover
+  fragment per the weblayer report. Tested (routes_graph, incl. `graph/help`,
+  `graph/lemma/debug`).
+* `/thy/trace/:idx/unload` — version removal + redirect to `/`. Unmodeled by the
+  clean dispatch (`/kill` is the only cancel-shaped top-level route it carries).
+
+So >=3 ported axum routes + ported handlers (`handlers::theory::{proof_step,graph,
+unload}`) must remain -> `routes.rs` and `theory.rs` survive regardless.
+
+### Blocker 3 — extraction RELOCATES the header, it cannot eliminate it
+
+The load-bearing ported logic that WOULD have to leave state.rs/theory.rs is
+producer/orchestration logic, not scaffolding the clean code replaces:
+`state.rs::ensure_proof_state` (lazy Maude boot + double-checked ProofState cache),
+`clone_at_new_idx_forking_proof_state` (proof-tree deep-copy fork), and in theory.rs
+the autoprove/apply-method orchestration, `title_for`, `render_theory_source`, and
+the next/prev smart traversal. Extracting it produces a Rust file that still cites
+`src/Web/Handler.hs`/`src/Web/Theory.hs` -> `gen_license_headers.py` re-headers it
+with the SAME authors (relocation, header count unchanged, possibly +1 file).
+Moving it into the headerless `web_clean/` instead would be a **provenance
+violation** (a clean file acquiring GPL logic), which the task forbids ("NEVER
+transplant ported logic into clean (headerless) files … stop and report").
+
+### Consequence — a partial adoption is a NET-ZERO-header, positive-risk change
+
+Routing only the clean-covered subset through `Server::dispatch` (deleting the
+covered handler shells) leaves theory.rs/state.rs/root.rs/theory_html.rs/path_parse.rs/
+proof_tree.rs all present -> removes zero headers (Blocker 1) -> while it would put
+~20 route-test bodies + the captured-HS parity fixtures (routes_stubs del/path +
+verify, autoprove redirects, overview shells, main envelopes) at byte-parity risk
+across a wholesale request-path rewrite. Per the campaign's "silent regressions must
+not be forced" precedent (round-6 A2, wave-2 D4, round-7 B, round-8 B), that trade
+is refused. **KEPT** the ported router (`routes.rs`), state (`state.rs`), handlers,
+and producers (headers untouched). `web_clean` NOT renamed to `web`. Deleted: none.
+
+The origin-aware-shell follow-up the wave-3 report flagged (route `overview_page`'s
+non-local branch through `web_clean::page::render_page` + delete the ported inline
+overview template, gated on a captured uploaded-overview parity fixture) is contingent
+on the full adoption and is therefore also NOT taken; the fixture was not captured.
+
+--------------------------------------------------------------------------------
+## A.3 What a future close now requires (scope note for the cluster owner)
+
+The blocker has moved from the dispatch state machine (SOLVED clean-side by round-7)
+to the PRODUCER surface. To actually retire the pseudonymous web authors, the clean
+room would have to reimplement the `theory_html`/`root`/`path_parse`/`proof_tree`/
+`dot` producers (the `Web/Theory.hs`/`Web/Handler.hs`/`Web/Types.hs`/`Web/Hamlet.hs`
+citations) — the pretty-printed proof-script pane, applicable-proof-method center
+bodies, proof-tree HTML, and graph DOT — which the current weblayer cluster
+explicitly scopes OUT as opaque prover fragments (PROTOCOL "Prover fragments, by
+design out of scope"). That is a materially larger clean-room mandate than the web
+state machine, and it must land BEFORE any dispatch-shell deletion can drop a header.
+The Rust-only `proof-step` route additionally always needs a ported axum entry.
+
+--------------------------------------------------------------------------------
+## Round-9 (A) — deleted / kept / header delta
+
+* A  RE-SYNCED (`web_clean/dispatch.rs` round-7 snapshot->compute->commit, headerless;
+     mechanical `crate::`->`super::`). FULL Server adoption NOT PERFORMED — NOT the
+     concurrency contract (round-7 CLOSES that; StateOps maps onto TheoryStore's
+     clone-on-read `get` / counter `insert` / `replace_at` + the spawn_blocking
+     offload). Blocked instead by (1) the pseudonymous web authors being cited on the
+     KEPT producers (theory_html/root/path_parse/proof_tree), so deleting the dispatch
+     shells removes zero citations; (2) proof-step (Rust-only) + graph-SVG + unload
+     having no clean-dispatch home; (3) extraction relocating — not eliminating — the
+     Web/*.hs header. kept: `routes.rs`, `state.rs`, `handlers/*`. deleted: none.
+     rename: none.
+
+Header-count delta: **133 -> 133 (net 0).** No headered file added or deleted; **no
+upstream author's citation disappeared** campaign-wide. The re-synced
+`web_clean/dispatch.rs` stays headerless (`gen_license_headers.py` apply updates 0;
+tripwire verified — it did not acquire a GPL header). `--check`: 0 stale (133 headers,
+identities cached 64).
+
+Validation (all green): `cargo build --workspace` 0 errors; `cargo test -p tamarin-parser`
+= lib 67 + wellformedness 2; `-p tamarin-theory` = lib 489 (+1 ignored) + oracle_solver 19
+(+9 ignored) + wf_formula_terms 5; `-p tamarin-prover` = lib 61 + cli_e2e 7 +
+console_split_parity 55; `-p tamarin-server` = lib 107 (+2 ignored) + routes (autoprove
+6 / basic 19 / graph 4 / proof_step 3 / static 3 / stubs 15 incl. the captured-HS del/path
++ verify parity fixtures / upload 3). wf fixture suite 2/2. `gen_license_headers.py`
+--check 0 stale (133 headers); `web_clean/` headerless.

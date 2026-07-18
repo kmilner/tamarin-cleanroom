@@ -597,3 +597,103 @@ projected-incomplete, `r6_diff_asym` independent-sides) +
 `diff_summary_line_bytes_are_exact`, and
 `frame_batch_multi_warn_then_two_lemmas_reproduces_both_streams` re-verifies the
 multi-lemma/multi-theory warning-vs-lemma interleaving (`r6_multi_warn_two`).
+
+## 15. A fourth non-diff verdict phrase (Round 7)  [r7_* captures]
+
+Rounds 5–6 recorded the non-diff verdict set as exactly three phrases (verified /
+falsified-{found trace|no trace found} / analysis incomplete). Round 7 found a
+FOURTH, driven out with the GPL example `csf23-subterms/YellowTest.spthy`
+(observation input only; a subterm theory whose proofs reach a terminal
+`UNFINISHABLE` step). Probe theories self-authored in `probes/round7/*.spthy`;
+split-stream captures via `probes/split_probe.sh` → `captures/r7_*.{out,err}.txt`,
+copied to `tests/fixtures/`.
+
+### 15a. `analysis cannot be finished (reducible operators in subterms)`
+`--prove` on YellowTest reports two of its lemmas as
+`[r7_yellow_prove]`:
+
+    YellowRed (exists-trace): analysis cannot be finished (reducible operators in subterms) (4 steps)
+    YellowGreen (all-traces): analysis cannot be finished (reducible operators in subterms) (4 steps)
+
+(the other two lemmas of the same theory close normally: `GreenYellow
+(exists-trace): verified (3 steps)` and `RedYellow (all-traces): falsified - found
+trace (3 steps)`). Properties of this fourth phrase:
+- It is UNIFORM across trace-kinds — both an `exists-trace` and an `all-traces`
+  lemma print the identical string with NO falsified-style `- found trace` /
+  `- no trace found` suffix (like `verified` and `analysis incomplete`, unlike
+  `falsified`). The phrase is a fixed canned string; the parenthetical reason
+  `(reducible operators in subterms)` did not vary across the observed lemmas
+  (stays plural regardless of count, matching the singular-"check" convention of
+  the WARNING count line, §12b). No OTHER `analysis cannot be finished (<reason>)`
+  variant surfaced — the only feature that produced it in the whole example
+  corpus is `csf23-subterms` (four files); FreshOrderingTest / ParserTests only
+  ever `verified`, and it is the theory pretty-print's `by UNFINISHABLE //
+  reducible operator in subterm` proof step surfacing in the summary.
+- It carries NO accompanying warning or advisory: the YellowTest `--prove`
+  summary has no WARNING section and no `The analysis results might be wrong!`
+  line, and stderr is the plain 5 phases + `[Saturating Sources] Done`
+  `[r7_yellow_prove.err]`. So this state does not feed the might-be-wrong advisory
+  of §12b (that advisory tracks a wellformedness-check failure under `--prove`,
+  not proof incompleteness).
+- It is a PROVEN-terminal state: it appears only when the lemma is actually
+  proved. A DEFAULT (no `--prove`) run of the same theory reports all four lemmas
+  as `analysis incomplete (1 steps)` `[r7_yellow_default]` — the phrase requires
+  the proof to run and hit the wall.
+
+### 15b. Bound exhaustion is DISTINCT (still `analysis incomplete`)
+`--prove --bound=2` on the SAME theory cuts every proof short BEFORE it reaches
+the `UNFINISHABLE` step, so all four lemmas read `analysis incomplete (4 steps)`
+`[r7_yellow_bound]` — never the reducible-operators phrase. This directly answers
+the Round-7 question: a bounded/unfinished-by-bound analysis and a
+reducible-operators wall are DIFFERENT verdicts even for the identical lemmas
+(the bound one reuses the existing `analysis incomplete`, §12c). `--stop-on-trace=
+SORRY` does NOT change the phrasing: it still shows the reducible-operators phrase
+for the wall lemmas and verified/falsified for the rest `[r7_yellow_sotsorry]`
+(consistent with §14a `r6_sot_*`).
+
+### 15c. It composes with the `--diff` side prefixes and both kinds
+`--diff --prove` on `csf23-subterms/YellowDiffTest.spthy` (whose `diff(...)`
+makes only the LHS projection reducible) yields `[r7_yellowdiff_prove]`:
+
+    RHS :  GreenYellow (exists-trace): verified (3 steps)
+    LHS :  GreenYellow (exists-trace): analysis cannot be finished (reducible operators in subterms) (3 steps)
+    RHS :  RedYellow (all-traces): falsified - found trace (3 steps)
+    LHS :  RedYellow (all-traces): analysis cannot be finished (reducible operators in subterms) (3 steps)
+    RHS :  YellowRed (exists-trace): falsified - no trace found (3 steps)
+    LHS :  YellowRed (exists-trace): analysis cannot be finished (reducible operators in subterms) (3 steps)
+    RHS :  YellowGreen (all-traces): verified (3 steps)
+    LHS :  YellowGreen (all-traces): analysis cannot be finished (reducible operators in subterms) (3 steps)
+    DiffLemma:  Observational_equivalence : falsified - found trace (9 steps)
+
+So the phrase is rendered by the SAME shared verdict path (§14f `verdict_phrase`)
+as a whole-theory lemma: it slots behind the `RHS :  `/`LHS :  ` prefix
+unchanged, for both trace-kinds, exactly like every other verdict; the sides are
+independent (RHS closes, LHS hits the wall).
+
+### 15d. Other candidate states re-confirmed to add NO new phrase
+- `[sources]`/typing lemmas: with `--auto-sources`, the auto-generated
+  `AUTO_typing (all-traces): verified (12 steps)` renders as a plain lemma line —
+  no special "sources" summary line `[r7_openchains_autosrc]`. A theory whose
+  partial deconstructions never resolve just proof-searches forever under a plain
+  `--prove` (killed by timeout, exit 124, empty stdout — a resource condition, not
+  a summary phrase) `[r7_openchains_prove]`. Confirms §14a: partial
+  deconstructions / open chains add no summary-of-summaries line.
+- Induction: a lemma marked `[use_induction]` (exists-trace or all-traces) proves
+  normally to `verified`/`falsified` with no distinct phrase and no error
+  `[r7_induction_prove]`.
+- Lemma errors / solver failures / `--prove=<pattern>` non-match: unchanged from
+  §14e / §12b — they abort with a runtime stderr line or feed the WARNING
+  count-line slot, never a per-lemma verdict.
+
+### 15e. Clean-crate model
+`framing::LemmaResult` gains a fourth variant `AnalysisCannotBeFinished`;
+`verdict_phrase` maps it to the canned
+`analysis cannot be finished (reducible operators in subterms)` for both kinds, so
+`Whole`/`Rhs`/`Lhs`/`Diff` rendering picks it up automatically (no per-side code).
+Byte-parity tests: `summary_reducible_operators_whole_theory_both_kinds`
+(split-stream, both kinds, `r7_yellow_prove`),
+`summary_bound_exhaustion_is_incomplete_not_unfinishable` (the distinct bound case,
+`r7_yellow_bound`), `diff_summary_projected_reducible_operators_both_sides_and_kinds`
+(`r7_yellowdiff_prove`), and `reducible_operators_line_bytes_are_exact` (capture-
+independent phrase bytes, whole + projected). All prior fixtures/tests stay green
+(59 total).

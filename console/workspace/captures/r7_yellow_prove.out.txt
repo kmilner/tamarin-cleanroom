@@ -1,0 +1,112 @@
+theory YellowTest
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) Start:
+   [ Fr( ~s ) ] --[ Start( ~s, <~s, ~s> ) ]-> [ State( ~s, <~s, ~s> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Start2:
+   [ Fr( ~s ) ] --[ Start( ~s, fst(~s) ) ]-> [ State( ~s, ~s ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) End:
+   [ State( s, t ) ] --[ End( s, t ) ]-> [ ]
+
+  /* has exactly the trivial AC variant */
+
+restriction Start2Complication:
+  "∀ s t #i. (Start( s, t ) @ #i) ⇒ (s ⊏ t)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ s t #i. (Start( s, t ) @ #i) ⇒ (s ⊏ t)"
+  */
+
+lemma GreenYellow:
+  exists-trace "∃ s t #i. End( s, t ) @ #i"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ s t #i. (End( s, t ) @ #i)"
+*/
+simplify
+solve( State( s, t ) ▶₀ #i )
+  case Start
+  SOLVED // trace found
+qed
+
+lemma RedYellow:
+  all-traces "¬(∃ s t #i. End( s, t ) @ #i)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ s t #i. (End( s, t ) @ #i)"
+*/
+simplify
+solve( State( s, t ) ▶₀ #i )
+  case Start
+  SOLVED // trace found
+qed
+
+lemma YellowRed:
+  exists-trace "¬(∀ s t #i. (End( s, t ) @ #i) ⇒ (<s, s> = t))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ s t #i. (End( s, t ) @ #i) ∧ ¬(<s, s> = t)"
+*/
+simplify
+solve( State( s, t ) ▶₀ #i )
+  case Start
+  by contradiction /* from formulas */
+next
+  case Start2
+  by UNFINISHABLE // reducible operator in subterm
+qed
+
+lemma YellowGreen:
+  all-traces "∀ s t #i. (End( s, t ) @ #i) ⇒ (<s, s> = t)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ s t #i. (End( s, t ) @ #i) ∧ ¬(<s, s> = t)"
+*/
+simplify
+solve( State( s, t ) ▶₀ #i )
+  case Start
+  by contradiction /* from formulas */
+next
+  case Start2
+  by UNFINISHABLE // reducible operator in subterm
+qed
+
+/* All wellformedness checks were successful. */
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: /home/kamilner/tamarin-rs/tamarin-prover/examples/csf23-subterms/YellowTest.spthy
+
+  processing time: 0.11s
+  
+  GreenYellow (exists-trace): verified (3 steps)
+  RedYellow (all-traces): falsified - found trace (3 steps)
+  YellowRed (exists-trace): analysis cannot be finished (reducible operators in subterms) (4 steps)
+  YellowGreen (all-traces): analysis cannot be finished (reducible operators in subterms) (4 steps)
+
+==============================================================================

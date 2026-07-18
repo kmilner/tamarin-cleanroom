@@ -1,0 +1,219 @@
+theory ParserTests
+
+begin
+
+// Function signature and definition of the equational theory E
+
+builtins: diffie-hellman, bilinear-pairing, multiset, natural-numbers,
+          xor
+functions: fst/1, h/1, myfst/1, mypair/2, mysnd/1, pair/2, snd/1
+equations:
+    fst(<x.1, x.2>) = x.1,
+    myfst(mypair(a, b)) = a,
+    mysnd(mypair(a, b)) = b,
+    snd(<x.1, x.2>) = x.2
+
+/* looping facts with injective instances: Counter/2 */
+
+rule (modulo E) Create:
+   [ Fr( ~s ) ] --[ Start( ~s ) ]-> [ Counter( ~s, %1 ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Inc:
+   [ In( %x ), Counter( s, %x ) ]
+  --[ Number( %x ) ]->
+   [ Counter( s, (%x%+%1) ) ]
+
+  // loop breaker: [1]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) AttackerMsg:
+   [ In( x ) ] --[ Value( x ) ]-> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) AttackerPub:
+   [ In( $x ) ] --[ PubValue( $x ) ]-> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) AttackerNat:
+   [ In( x ), Counter( ~s, x ) ] --[ NatValue( x ) ]-> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) InOut:
+   [ In( %x ), In( (%x%+%1%+%1%+%1) ) ]
+  --[ Out( <(%x%+%1%+%1), %1, %1, %x, (%x%+%1), (%x%+%1)> ) ]->
+   [ ]
+
+  /* has exactly the trivial AC variant */
+
+lemma SnatChain:
+  all-traces
+  "∀ %a %b #i #j.
+    ((Number( %a ) @ #i) ∧ (Number( %b ) @ #j)) ⇒
+    ((%a ⊏ %b) ∨ (%b ⊏ (%a%+%1)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ %a %b #i #j.
+  (Number( %a ) @ #i) ∧ (Number( %b ) @ #j)
+ ∧
+  (¬(%a ⊏ %b)) ∧ (¬(%b ⊏ (%a%+%1)))"
+*/
+simplify
+by contradiction /* contradictory subterm store */
+
+lemma SnegRecurse:
+  all-traces "∀ a #i. (Value( a ) @ #i) ⇒ (a ⊏ <a, a>)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a #i. (Value( a ) @ #i) ∧ ¬(a ⊏ <a, a>)"
+*/
+simplify
+by contradiction /* contradictory subterm store */
+
+lemma SnegACRecurse:
+  all-traces "∀ a #i. (Value( a ) @ #i) ⇒ (a ⊏ (a++a))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a #i. (Value( a ) @ #i) ∧ ¬(a ⊏ (a++a))"
+*/
+simplify
+by contradiction /* contradictory subterm store */
+
+lemma Sneg:
+  all-traces
+  "∀ a b #i #j.
+    ((Value( a ) @ #i) ∧ (Value( b ) @ #j)) ⇒ ((¬(<a, a> ⊏ b)) ∨ (a ⊏ b))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a b #i #j.
+  (Value( a ) @ #i) ∧ (Value( b ) @ #j) ∧ (<a, a> ⊏ b) ∧ (¬(a ⊏ b))"
+*/
+simplify
+by contradiction /* contradictory subterm store */
+
+lemma Sinvalid:
+  all-traces
+  "∀ a b #i #j. ((PubValue( a ) @ #i) ∧ (Value( b ) @ #j)) ⇒ (¬(b ⊏ a))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a b #i #j. (PubValue( a ) @ #i) ∧ (Value( b ) @ #j) ∧ b ⊏ a"
+*/
+simplify
+by contradiction /* contradictory subterm store */
+
+lemma Schain:
+  all-traces
+  "∀ a b #i #j.
+    ((Value( a ) @ #i) ∧ (Value( b ) @ #j)) ⇒ (¬((<a, a> ⊏ b) ∧ (b ⊏ a)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a b #i #j.
+  (Value( a ) @ #i) ∧ (Value( b ) @ #j) ∧ (<a, a> ⊏ b) ∧ (b ⊏ a)"
+*/
+simplify
+by contradiction /* contradictory subterm store */
+
+lemma SRecurse:
+  all-traces "∀ a #i. (Value( a ) @ #i) ⇒ (¬(<a, a, a> ⊏ <a, a>))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a #i. (Value( a ) @ #i) ∧ <a, a, a> ⊏ <a, a>"
+*/
+simplify
+by contradiction /* contradictory subterm store */
+
+lemma SACRecurse:
+  all-traces "∀ a #i. (Value( a ) @ #i) ⇒ (¬((a++a++a) ⊏ (a++a)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a #i. (Value( a ) @ #i) ∧ (a++a++a) ⊏ (a++a)"
+*/
+simplify
+by contradiction /* contradictory subterm store */
+
+lemma testEqual:
+  all-traces "∀ a #i. (Value( a ) @ #i) ⇒ (¬(a ⊏ a))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a #i. (Value( a ) @ #i) ∧ a ⊏ a"
+*/
+simplify
+by contradiction /* contradictory subterm store */
+
+lemma arityOneDeduction:
+  all-traces
+  "∀ a b #i #j.
+    ((Value( a ) @ #i) ∧ (Value( b ) @ #j)) ⇒
+    (¬(((¬(a ⊏ b)) ∧ (a ⊏ h(b))) ∧ (¬(a = b))))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a b #i #j.
+  (Value( a ) @ #i) ∧ (Value( b ) @ #j)
+ ∧
+  (¬(a ⊏ b)) ∧ (a ⊏ h(b)) ∧ (¬(a = b))"
+*/
+simplify
+by contradiction /* from formulas */
+
+lemma antiCharlie:
+  all-traces
+  "∀ %a %b #i #j.
+    ((Number( %a ) @ #i) ∧ (Number( %b ) @ #j)) ⇒
+    (¬(((%a ⊏ (%b%+%1)) ∧ (%b ⊏ (%a%+%1))) ∧ (¬(%a = %b))))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ %a %b #i #j.
+  (Number( %a ) @ #i) ∧ (Number( %b ) @ #j)
+ ∧
+  (%a ⊏ (%b%+%1)) ∧ (%b ⊏ (%a%+%1)) ∧ (¬(%a = %b))"
+*/
+simplify
+by contradiction /* from formulas */
+
+/*
+WARNING: the following wellformedness checks failed!
+
+Reserved names
+==============
+
+  Rule `InOut' contains facts with reserved names on the middle:
+    Out( <(%x%+%1%+%1), %1, %1, %x, (%x%+%1), (%x%+%1)> )
+*/
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: /home/kamilner/tamarin-rs/tamarin-prover/examples/csf23-subterms/ParserTests.spthy
+
+  processing time: 0.23s
+  
+  WARNING: 1 wellformedness check failed!
+           The analysis results might be wrong!
+  
+  SnatChain (all-traces): verified (2 steps)
+  SnegRecurse (all-traces): verified (2 steps)
+  SnegACRecurse (all-traces): verified (2 steps)
+  Sneg (all-traces): verified (2 steps)
+  Sinvalid (all-traces): verified (2 steps)
+  Schain (all-traces): verified (2 steps)
+  SRecurse (all-traces): verified (2 steps)
+  SACRecurse (all-traces): verified (2 steps)
+  testEqual (all-traces): verified (2 steps)
+  arityOneDeduction (all-traces): verified (2 steps)
+  antiCharlie (all-traces): verified (2 steps)
+
+==============================================================================

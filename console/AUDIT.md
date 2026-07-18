@@ -492,3 +492,117 @@ ClosedTheory.hs's comprehensions are, as before, not echoed). Nothing in the del
 copied protectable expression.
 
 VERDICT: pass
+
+## Round 7 audit
+
+Delta audited: the **working-tree changes** in `console/` on top of committed HEAD
+`d1ada4b` (all prior sections landed). Scope, from
+`git -C /home/kamilner/tamarin-cleanroom status/diff -- console/`:
+
+- **`cli-clean/src/framing.rs`** (the round's only production-source change): a
+  fourth `LemmaResult` variant `AnalysisCannotBeFinished`, its `verdict_phrase`
+  arm, and updated doc comments on `LemmaResult`/`verdict_phrase`.
+- **`cli-clean/tests/cli_tests.rs`** (+116): four new tests —
+  `summary_reducible_operators_whole_theory_both_kinds`,
+  `summary_bound_exhaustion_is_incomplete_not_unfinishable`,
+  `diff_summary_projected_reducible_operators_both_sides_and_kinds`,
+  `reducible_operators_line_bytes_are_exact`.
+- **`workspace/BEHAVIOR.md`** (+100): new §15 (a–e) — the fourth non-diff phrase,
+  bound-exhaustion distinction, diff composition, re-confirmed non-phrases, clean model.
+- **`workspace/QUERIES.log`** (+13): Round-7 probe log `15:05–15:14`.
+- **New self-authored probe** `probes/round7/induction.spthy`; new captures
+  `r7_{yellow_prove,yellow_bound,yellow_default,yellow_sotsorry,yellowdiff_prove,
+  freshorder_prove,parsertests_bound,induction_prove,openchains_autosrc,openchains_prove}`;
+  fixtures `r7_yellow_prove.{out,err}`, `r7_yellow_bound.{out,err}`, `r7_yellowdiff_prove.out`.
+
+Both-sides comparison ran against `lib/theory/src/Theory/Proof.hs`
+(`showProofStatus`/`showDiffProofStatus` 1104–1121; the `ProofStatus`/`UnfinishableProof`
+type + `proofStepStatus` 404–440), `lib/theory/src/Theory/Constraint/Solver/ProofMethod.hs`
+(`Unfinishable`/`DiffUnfinishable` 200–222, the `UNFINISHABLE // reducible operator in
+subterm` pretty step 1179/1194), and `src/Main/Mode/Batch.hs` / `ClosedTheory.hs`
+(summary render, unchanged from earlier rounds). Findings:
+
+- **The single new interop token is a boundary observation, not a lift.** The added
+  string `"analysis cannot be finished (reducible operators in subterms)"` is verbatim
+  `showProofStatus`/`showDiffProofStatus` output (Proof.hs 1109/1118) — the exact status
+  the Round-6-cont section flagged as *still absent* from the clean and predicted would
+  only enter by probe. It now enters having been **observed in captured tool stdout**:
+  it appears in the `summary of summaries` block of `r7_yellow_prove.out.txt`,
+  `r7_yellow_sotsorry.out.txt`, and (behind `LHS :  `) `r7_yellowdiff_prove.out.txt`,
+  all copied verbatim to fixtures and logged at `QUERIES.log 15:05:00`/`15:09:00`. It is
+  a byte-exact output token the console exists to reproduce (interop/merger), obtained by
+  black-box observation of the oracle, not transcribed from Proof.hs. Filtered.
+
+- **Structure is reconstruction, not the source's status functions.** `verdict_phrase`
+  matches on the clean's own four-value `LemmaResult` (`Verified`/`Falsified`/
+  `AnalysisIncomplete`/`AnalysisCannotBeFinished`) — the states the console actually
+  emits — keying only the falsified suffix on the clean's own `TraceKind`. It does **not**
+  transcribe upstream's dual `(SystemTraceQuantifier, ProofStatus)` shape (an 8-arm
+  `showProofStatus` + 6-arm `showDiffProofStatus` pair). Decisively, the two still-unprobed
+  statuses `"analysis undetermined"` and `"proof has been invalidated"` (Proof.hs
+  1111–1112 / 1120–1121) remain **absent** from the clean; reproducing only the probed
+  subset off one shared reused phrase map is the fingerprint of reconstruction. The new
+  variant is named `AnalysisCannotBeFinished`, not upstream's `UnfinishableProof`; no
+  upstream identifier (`UnfinishableProof`, `Unfinishable`, `DiffUnfinishable`,
+  `proofStepStatus`) is carried in. Filtered.
+
+- **Doc comments paraphrase, referencing observable tokens only.** The `LemmaResult`
+  Haddock (`/// The proof reached a terminal \`UNFINISHABLE\` step and could not continue`)
+  and the `AnalysisCannotBeFinished` note describe the state in the author's own words
+  and cite output-surface tokens (`UNFINISHABLE`, the summary phrase). Upstream's own
+  Haddock `"The proof cannot be finished (due to reducible operators in subterms)"`
+  (Proof.hs 404 / ProofMethod.hs 201) is **not** echoed verbatim — different wording,
+  "in subterms" vs the source's "due to reducible operators in subterms". No comment
+  lineage. Filtered.
+
+- **`by UNFINISHABLE // reducible operator in subterm` in BEHAVIOR §15a is captured
+  output, not source.** That singular-"subterm" step string is upstream's pretty step
+  (ProofMethod.hs 1179), but it is surfaced in tamarin's own emitted proof body — it
+  appears verbatim in the `r7_yellow_prove.out.txt` proof block the clean captured — so
+  the §15a mention is a boundary observation in a prose note, present in **no** clean
+  source file. (The clean correctly uses the plural summary form
+  `(reducible operators in subterms)`, i.e. the observed *summary* bytes, distinct from
+  this internal singular step comment.) Filtered.
+
+- **Bound-vs-wall distinction is an observed fact.** §15b's claim that `--bound=2` reads
+  `analysis incomplete` (never the reducible phrase) for the identical lemmas is read
+  straight off `r7_yellow_bound.out.txt` (four `analysis incomplete (4 steps)` lines, no
+  `cannot be finished`), logged at `15:07:00`; the test
+  `summary_bound_exhaustion_is_incomplete_not_unfinishable` pins it and asserts the phrase
+  is absent. Behavioural, from the oracle. Filtered.
+
+- **Probes self-authored; GPL examples are observation INPUT only.** `induction.spthy`
+  carries own names (`exists_use_induction`/`all_use_induction`). The YellowTest /
+  YellowDiffTest / FreshOrderingTest / ParserTests theories are GPL
+  `examples/csf23-subterms/` files, but they are referenced only by their absolute
+  `.../tamarin-prover/examples/...` path in the `analyzed:` line and are **not vendored**
+  into the clean tree (`grep -rl` over `console/**/*.spthy` for those names / `csf23-subterms`
+  returns nothing). Used to drive the oracle, then discarded — a permitted observation
+  input, not copied material. Filtered.
+
+- **Fixtures are oracle golden bytes; the clean path reproduces them.** All five r7
+  fixtures are byte-identical to their `captures/` counterparts (`diff -q`: identical),
+  each carrying the full HS proof body + `Generated from: Tamarin version 1.13.0 … Git
+  revision 0234f6a1…` trailer + `summary of summaries:` block — the reference prover's own
+  emitted bytes, not authored expression. The four new tests reproduce these bytes through
+  the **unchanged** render path and pass (ran `cargo test --test cli_tests`: **59 passed,
+  0 failed**).
+
+Provenance cross-check: every §15 claim traces to a logged Round-7 probe
+(`QUERIES.log 15:05:00–15:14:00`) and a capture, and each capture was inspected to back
+its claim — `r7_yellow_prove` (new phrase, both kinds, no warning/advisory, plain stderr),
+`r7_yellow_default` (proven-terminal: default = `analysis incomplete (1 steps)`),
+`r7_yellow_bound` (bound = incomplete, distinct), `r7_yellow_sotsorry` (SORRY unchanged),
+`r7_yellowdiff_prove` (LHS/RHS composition + independent DiffLemma), and the four
+no-new-phrase confirmations (`r7_freshorder_prove` all verified, `r7_parsertests_bound`
+11× verified + WARNING, `r7_induction_prove` verified/falsified, `r7_openchains_autosrc`
+plain AUTO_typing line, `r7_openchains_prove` empty stdout / timeout resource condition).
+No claim lacks logged provenance.
+
+The delta introduces exactly one new interop token — observed at the oracle boundary and
+reproduced through an enum/render structure that is a behavioural reconstruction, not a
+transcription of the source's status functions — plus tests, one self-authored probe,
+oracle golden fixtures, and paraphrased prose. No upstream identifier, no combinator/type
+lineage, no verbatim comment. Nothing in the delta is a copied protectable expression.
+
+VERDICT: pass

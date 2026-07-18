@@ -1,0 +1,8 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory ParserTests] Theory loaded
+[Theory ParserTests] Theory translated
+[Theory ParserTests] Derivation checks started
+[Theory ParserTests] Derivation checks ended
+[Theory ParserTests] Theory closed

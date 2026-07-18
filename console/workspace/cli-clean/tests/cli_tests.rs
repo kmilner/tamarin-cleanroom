@@ -1230,3 +1230,116 @@ fn frame_batch_multi_warn_then_two_lemmas_reproduces_both_streams() {
     assert_eq!(streams.out, out_cap);
     assert_eq!(streams.err, err_cap);
 }
+
+// ---- Round 7: the non-diff "analysis cannot be finished" verdict ---------------
+//
+// A `--prove` run of a theory whose proof reaches a terminal UNFINISHABLE step
+// (observed for reducible operators inside subterm goals) reports that lemma as
+//   `<name> (<kind>): analysis cannot be finished (reducible operators in subterms) (<N> steps)`
+// This is a fourth non-diff verdict phrase distinct from verified / falsified /
+// analysis incomplete. It renders uniformly for both trace-kinds (no falsified
+// suffix) and carries NO accompanying warning/advisory line. Captured from the
+// GPL example csf23-subterms/YellowTest.spthy (used only as an observation input).
+
+#[test]
+fn summary_reducible_operators_whole_theory_both_kinds() {
+    // YellowTest --prove: two lemmas close normally (verified exists-trace,
+    // falsified all-traces) and two hit the reducible-operators wall — one
+    // exists-trace, one all-traces — both printing the identical uniform phrase.
+    // No warning section, so no advisory line accompanies the unfinishable state.
+    let out_cap = include_str!("fixtures/r7_yellow_prove.out.txt");
+    let err_cap = include_str!("fixtures/r7_yellow_prove.err.txt");
+    let streams = frame_single(
+        out_cap,
+        err_cap,
+        "YellowTest",
+        None,
+        vec![
+            lemma("GreenYellow", TraceKind::ExistsTrace, LemmaResult::Verified, 3),
+            lemma("RedYellow", TraceKind::AllTraces, LemmaResult::Falsified, 3),
+            lemma("YellowRed", TraceKind::ExistsTrace, LemmaResult::AnalysisCannotBeFinished, 4),
+            lemma("YellowGreen", TraceKind::AllTraces, LemmaResult::AnalysisCannotBeFinished, 4),
+        ],
+    );
+    assert_eq!(streams.out, out_cap);
+    assert_eq!(streams.err, err_cap);
+}
+
+#[test]
+fn summary_bound_exhaustion_is_incomplete_not_unfinishable() {
+    // The SAME theory under `--prove --bound=2`: the bound cuts every proof short
+    // BEFORE it can reach the UNFINISHABLE step, so every lemma reads
+    // `analysis incomplete (<N> steps)` — never the reducible-operators phrase.
+    // Pins that a bounded cutoff and a reducible-operators wall are distinct
+    // verdicts even for the identical lemmas.
+    let out_cap = include_str!("fixtures/r7_yellow_bound.out.txt");
+    let err_cap = include_str!("fixtures/r7_yellow_bound.err.txt");
+    let streams = frame_single(
+        out_cap,
+        err_cap,
+        "YellowTest",
+        None,
+        vec![
+            lemma("GreenYellow", TraceKind::ExistsTrace, LemmaResult::AnalysisIncomplete, 4),
+            lemma("RedYellow", TraceKind::AllTraces, LemmaResult::AnalysisIncomplete, 4),
+            lemma("YellowRed", TraceKind::ExistsTrace, LemmaResult::AnalysisIncomplete, 4),
+            lemma("YellowGreen", TraceKind::AllTraces, LemmaResult::AnalysisIncomplete, 4),
+        ],
+    );
+    assert_eq!(streams.out, out_cap);
+    assert_eq!(streams.err, err_cap);
+    // And the reducible-operators phrase must NOT appear anywhere in the bounded run.
+    assert!(!streams.out.contains("cannot be finished"), "bounded run must be plain incomplete");
+}
+
+#[test]
+fn diff_summary_projected_reducible_operators_both_sides_and_kinds() {
+    // YellowDiffTest --diff --prove: the reducible-operators verdict composes with
+    // the projected `LHS`/`RHS` prefixes and both trace-kinds. Here every LHS
+    // projection hits the wall while the RHS projections close (verified/falsified),
+    // proving the phrase is rendered by the same shared verdict path as a
+    // whole-theory lemma, with the DiffLemma independently falsified.
+    let out_cap = include_str!("fixtures/r7_yellowdiff_prove.out.txt");
+    assert_diff_summary(
+        out_cap,
+        None,
+        vec![
+            rhs("GreenYellow", TraceKind::ExistsTrace, LemmaResult::Verified, 3),
+            lhs("GreenYellow", TraceKind::ExistsTrace, LemmaResult::AnalysisCannotBeFinished, 3),
+            rhs("RedYellow", TraceKind::AllTraces, LemmaResult::Falsified, 3),
+            lhs("RedYellow", TraceKind::AllTraces, LemmaResult::AnalysisCannotBeFinished, 3),
+            rhs("YellowRed", TraceKind::ExistsTrace, LemmaResult::Falsified, 3),
+            lhs("YellowRed", TraceKind::ExistsTrace, LemmaResult::AnalysisCannotBeFinished, 3),
+            rhs("YellowGreen", TraceKind::AllTraces, LemmaResult::Verified, 3),
+            lhs("YellowGreen", TraceKind::AllTraces, LemmaResult::AnalysisCannotBeFinished, 3),
+            diff_lemma("Observational_equivalence", LemmaResult::Falsified, 9),
+        ],
+    );
+}
+
+#[test]
+fn reducible_operators_line_bytes_are_exact() {
+    // Pin the exact reducible-operators phrase independent of any capture: it is
+    // byte-identical for exists-trace and all-traces (no falsified-style suffix),
+    // and composes unchanged behind a `LHS :  ` projected prefix.
+    let summary = Summary {
+        analyzed: s("U.spthy"),
+        output: None,
+        processing_time: 0.04,
+        warnings: None,
+        lemmas: vec![
+            lemma("a", TraceKind::ExistsTrace, LemmaResult::AnalysisCannotBeFinished, 4),
+            lemma("b", TraceKind::AllTraces, LemmaResult::AnalysisCannotBeFinished, 4),
+            lhs("c", TraceKind::AllTraces, LemmaResult::AnalysisCannotBeFinished, 3),
+        ],
+    };
+    let block = render_summary(std::slice::from_ref(&summary));
+    let expected_body = concat!(
+        "  processing time: 0.04s\n",
+        "  \n",
+        "  a (exists-trace): analysis cannot be finished (reducible operators in subterms) (4 steps)\n",
+        "  b (all-traces): analysis cannot be finished (reducible operators in subterms) (4 steps)\n",
+        "  LHS :  c (all-traces): analysis cannot be finished (reducible operators in subterms) (3 steps)\n",
+    );
+    assert!(block.contains(expected_body), "block was: {block:?}");
+}

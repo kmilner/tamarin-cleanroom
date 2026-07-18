@@ -9,8 +9,13 @@ those transcripts are collected here verbatim. `SHA256SUMS` covers all files.
 
 These agents were REQUIRED to work only from black-box oracles and captured
 program output (see ../PROTOCOL.md). Their transcripts prove non-access.
-Final audit (audit/cleanroom_audit_results.txt): 29 transcripts, 2393 tool
-calls, 0 forbidden accesses, 0 web accesses.
+Final audit (audit/cleanroom_audit_results.txt): 30 transcripts, 2437 tool
+calls, 0 forbidden accesses, 0 web accesses. Audit-rule note (2026-07-18):
+the checker now classifies reads of `.spthy` example theories via the raw
+submodule path as sanctioned input (they always were under PROTOCOL.md; only
+symlinked access was whitelisted before), and gained a stricter override that
+flags direct `.hs`/`crates/` path use even alongside allowed substrings. The
+full historical set re-validates at 0 violations under the stricter rule.
 
 | Path | Agent | Role |
 |------|-------|------|
@@ -43,6 +48,8 @@ calls, 0 forbidden accesses, 0 web accesses.
 | workflows/wf_a3b4feac-a25/agent-af2c6e9e0d378f62e.jsonl | round 5 (unit D) | summary content + incremental emitter |
 | workflows/wf_a3b4feac-a25/agent-a861412dfce110af9.jsonl | round 6 (unit A) | origin-aware shell + StateOps trait |
 | workflows/wf_a3b4feac-a25/agent-a7981ceb299f1dfa5.jsonl | round 7 (unit B) | trigger/fill budget split, greedy allocation |
+| workflows/wf_3b637271-f7f/agent-*.jsonl (implementers among 14+) | wave 4: B8 (HughesPJ-faithful engine from sanctioned BSD source), A7 (concurrency contract + snapshot/commit dispatch), D6 (diff verdict taxonomy) |
+| workflows/wf_a43edc65-4dc/agent-ab519587162798c8b.jsonl | round 7 (unit D, overlapped) | non-diff verdict family (AnalysisCannotBeFinished) |
 
 Corresponding workspaces (../wellformedness, ../graphdot, ../weblayer) hold
 each agent's QUERIES.log, BEHAVIOR.md, REPORT*.md and code — cross-reference

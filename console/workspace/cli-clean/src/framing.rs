@@ -73,13 +73,28 @@ impl TraceKind {
 }
 
 /// Per-lemma verdict. The printed text of a falsified verdict depends on the
-/// lemma's [`TraceKind`] (see [`verdict_phrase`]); verified and incomplete
-/// verdicts print the same for both kinds.
+/// lemma's [`TraceKind`] (see [`verdict_phrase`]); the verified, incomplete, and
+/// cannot-be-finished verdicts print the same for both kinds.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LemmaResult {
+    /// The proof closed: `verified`.
     Verified,
+    /// A trace was found (all-traces) / no trace exists (exists-trace); the
+    /// printed phrase is kind-dependent (see [`verdict_phrase`]).
     Falsified,
+    /// The proof was not driven to a terminal state — a lemma not selected for
+    /// proving, a `--prove`/`--lemma` pattern that matched nothing, or a proof cut
+    /// short by `--bound`: `analysis incomplete`. The `(<N> steps)` count is the
+    /// explored depth, and a bounded cutoff adds no other marker.
     AnalysisIncomplete,
+    /// The proof reached a terminal `UNFINISHABLE` step and could not continue:
+    /// `analysis cannot be finished (reducible operators in subterms)`. Observed
+    /// only for reducible operators appearing inside subterm goals; renders
+    /// uniformly for both trace-kinds (no falsified-style suffix) and composes with
+    /// the `--diff` side prefixes exactly like any other verdict. Distinct from
+    /// [`AnalysisIncomplete`](Self::AnalysisIncomplete): a `--bound` cutoff of the
+    /// same lemma prints `analysis incomplete`, not this phrase.
+    AnalysisCannotBeFinished,
 }
 
 /// Which system a summary line describes. A non-diff run reports every lemma as
@@ -97,15 +112,19 @@ pub enum LemmaSide {
     Diff,
 }
 
-/// The verdict phrase for a `<result>` under a given [`TraceKind`]. `verified`
-/// and `analysis incomplete` read the same for both kinds; a `falsified` verdict
-/// carries a kind-dependent suffix: `- found trace` for an all-traces lemma (a
+/// The verdict phrase for a `<result>` under a given [`TraceKind`]. `verified`,
+/// `analysis incomplete`, and `analysis cannot be finished (reducible operators in
+/// subterms)` read the same for both kinds; a `falsified` verdict carries a
+/// kind-dependent suffix: `- found trace` for an all-traces lemma (a
 /// counter-example trace was produced) and `- no trace found` for an exists-trace
 /// lemma (no witnessing trace exists).
 fn verdict_phrase(result: LemmaResult, kind: TraceKind) -> &'static str {
     match result {
         LemmaResult::Verified => "verified",
         LemmaResult::AnalysisIncomplete => "analysis incomplete",
+        LemmaResult::AnalysisCannotBeFinished => {
+            "analysis cannot be finished (reducible operators in subterms)"
+        }
         LemmaResult::Falsified => match kind {
             TraceKind::AllTraces => "falsified - found trace",
             TraceKind::ExistsTrace => "falsified - no trace found",

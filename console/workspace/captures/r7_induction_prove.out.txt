@@ -1,0 +1,62 @@
+theory InductionProbe
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) Emit:
+   [ Fr( ~n ) ] --[ Emit( ~n ) ]-> [ Out( ~n ) ]
+
+  /* has exactly the trivial AC variant */
+
+lemma exists_use_induction [use_induction]:
+  exists-trace "∃ n #i. Emit( n ) @ #i"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ n #i. (Emit( n ) @ #i)"
+*/
+induction
+  case non_empty_trace
+  SOLVED // trace found
+qed
+
+lemma all_use_induction [use_induction]:
+  all-traces "∀ n #i. (Emit( n ) @ #i) ⇒ (∃ #j. K( n ) @ #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ n #i. (Emit( n ) @ #i) ∧ ∀ #j. (K( n ) @ #j) ⇒ ⊥"
+*/
+induction
+  case non_empty_trace
+  solve( (last(#i))  ∥ (∃ #j. (K( ~n ) @ #j) ∧ ¬(last(#j))) )
+    case case_1
+    SOLVED // trace found
+  qed
+qed
+
+/* All wellformedness checks were successful. */
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: probes/round7/induction.spthy
+
+  processing time: 0.08s
+  
+  exists_use_induction (exists-trace): verified (2 steps)
+  all_use_induction (all-traces): falsified - found trace (3 steps)
+
+==============================================================================

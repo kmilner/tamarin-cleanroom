@@ -1,0 +1,10 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory FreshOrderingTest] Theory loaded
+[Theory FreshOrderingTest] Theory translated
+[Theory FreshOrderingTest] Derivation checks started
+[Theory FreshOrderingTest] Derivation checks ended
+[Theory FreshOrderingTest] Theory closed
+[Saturating Sources] Step 1 (Max 5)
+[Saturating Sources] Done
