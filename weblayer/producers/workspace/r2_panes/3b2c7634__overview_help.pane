@@ -1,0 +1,108 @@
+<span class="hl_keyword">theory</span> <a class="internal-link help" href="/thy/trace/1/main/help">mixvote_ShHm</a> <span class="hl_keyword">begin</span><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/message"><strong>Message theory</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/rules"><strong>Multiset rewriting rules and restrictions</strong> (23)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/tactic"><strong>Tactic(s)</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/cases/raw/0/0"><strong>Raw sources</strong> (36 cases, 78 partial deconstructions left)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/cases/refined/0/0"><strong>Refined sources </strong> (36 cases, 78 partial deconstructions left)</a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/%3Cfirst%3E">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> onlyonce5 [reuse]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#i #j<span class="hl_operator">.</span> <span class="hl_operator">(</span><span class="hl_operator">(</span>P1( ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>P1( ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span>#i <span class="hl_operator">=</span> #j<span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/onlyonce5">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/onlyonce5">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/onlyonce5"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/onlyonce5">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> onlyonce6 [reuse]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#i #j<span class="hl_operator">.</span> <span class="hl_operator">(</span><span class="hl_operator">(</span>P2( ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>P2( ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span>#i <span class="hl_operator">=</span> #j<span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/onlyonce6">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/onlyonce6">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/onlyonce6"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/onlyonce6">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> onlyonce7 [reuse]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#i #j<span class="hl_operator">.</span> <span class="hl_operator">(</span><span class="hl_operator">(</span>D1( ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>D1( ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span>#i <span class="hl_operator">=</span> #j<span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/onlyonce7">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/onlyonce7">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/onlyonce7"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/onlyonce7">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> onlyonce8 [reuse]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#i #j<span class="hl_operator">.</span> <span class="hl_operator">(</span><span class="hl_operator">(</span>S1( ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>S1( ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span>#i <span class="hl_operator">=</span> #j<span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/onlyonce8">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/onlyonce8">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/onlyonce8"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/onlyonce8">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> onlyonce9 [reuse]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#i #j<span class="hl_operator">.</span> <span class="hl_operator">(</span><span class="hl_operator">(</span>End( ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>End( ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span>#i <span class="hl_operator">=</span> #j<span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/onlyonce9">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/onlyonce9">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/onlyonce9"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/onlyonce9">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> onlyonce10 [reuse]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#i #j<span class="hl_operator">.</span> <span class="hl_operator">(</span><span class="hl_operator">(</span>A1( ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>A1( ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span>#i <span class="hl_operator">=</span> #j<span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/onlyonce10">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/onlyonce10">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/onlyonce10"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/onlyonce10">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> functional:<br/>
+&nbsp;&nbsp;exists-trace<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∃ </span>H1 #d b P #p S #s c #p2 #k v #l BB #i2 A pr bPrimea pkS #o<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>D1( ) <span class="hl_operator">@</span> #d<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Receive_R_HP( H1, P, b ) <span class="hl_operator">@</span> #p<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Receive_R_PS( P, S, b ) <span class="hl_operator">@</span> #s<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Send_R_SP( S, P, c ) <span class="hl_operator">@</span> #s<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Receive_R_SP( S, P, c ) <span class="hl_operator">@</span> #p2<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Send_R_PH( P, H1, c ) <span class="hl_operator">@</span> #p2<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Evidence( b, c ) <span class="hl_operator">@</span> #i2<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_rec( BB, &lt;&#39;b&#39;, b&gt; ) <span class="hl_operator">@</span> #k<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_tal( BB, &lt;&#39;v&#39;, v&gt; ) <span class="hl_operator">@</span> #l<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>VerifyA2( A, verzkp(pr, bPrimea, v, pkS) ) <span class="hl_operator">@</span> #o<span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/functional">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/functional">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/functional"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/functional">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> AuthP [heuristic={AuthP}]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>S #i<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Honest( S ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span><span class="hl_operator">∃ </span>b BB skS #k #l #m ba<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>BB_rec( BB, &lt;&#39;b&#39;, ba&gt; ) <span class="hl_operator">@</span> #k<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>b <span class="hl_operator">=</span> ba<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Evidence( b, sg(b, skS) ) <span class="hl_operator">@</span> #l<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_pkS( BB, &lt;&#39;spkS&#39;, pk(skS)&gt; ) <span class="hl_operator">@</span> #m<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span><span class="hl_operator">∃ </span>BB ba bPrimea sskDa #k #l #m<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>BB_rec( BB, &lt;&#39;b&#39;, ba&gt; ) <span class="hl_operator">@</span> #k<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_woS( BB, &lt;&#39;bPrime&#39;, bPrimea&gt; ) <span class="hl_operator">@</span> #l<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_pskDs( BB, &lt;&#39;spkD&#39;, pk(sskDa)&gt; ) <span class="hl_operator">@</span> #m<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>ba <span class="hl_operator">=</span> sg(bPrimea, sskDa)<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/AuthP">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/AuthP">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/AuthP"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/AuthP">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> secretSskD [heuristic={secretSskD}, reuse]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>sskD #i<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>SecretKeyD( sskD ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span><span class="hl_operator">∃ </span>#j<span class="hl_operator">.</span> K( sskD ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/secretSskD">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/secretSskD">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/secretSskD"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/secretSskD">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">end</span><br/>
+ 

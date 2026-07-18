@@ -1,0 +1,59 @@
+<span class="hl_keyword">theory</span> <a class="internal-link help" href="/thy/trace/1/main/help">Tutorial</a> <span class="hl_keyword">begin</span><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/message"><strong>Message theory</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/rules"><strong>Multiset rewriting rules and restrictions</strong> (8)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/tactic"><strong>Tactic(s)</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/cases/raw/0/0"><strong>Raw sources</strong> (10 cases, deconstructions complete)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/cases/refined/0/0"><strong>Refined sources </strong> (10 cases, deconstructions complete)</a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/%3Cfirst%3E">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Client_session_key_secrecy:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">¬</span><span class="hl_operator">(</span><span class="hl_operator">∃ </span>S k #i #j<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>SessKeyC( S, k ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>K( k ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span><span class="hl_operator">∃ </span>#r<span class="hl_operator">.</span> LtkReveal( S ) <span class="hl_operator">@</span> #r<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Client_session_key_secrecy">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Client_session_key_secrecy">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Client_session_key_secrecy"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Client_session_key_secrecy">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Client_auth:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>S k #i<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>SessKeyC( S, k ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">∃ </span>#a<span class="hl_operator">.</span> AnswerRequest( S, k ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span> <span class="hl_operator">∨</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#r<span class="hl_operator">.</span> <span class="hl_operator">(</span>LtkReveal( S ) <span class="hl_operator">@</span> #r<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>#r <span class="hl_operator">&lt;</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Client_auth">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Client_auth">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Client_auth"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Client_auth">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Client_auth_injective:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>S k #i<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>SessKeyC( S, k ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">∃ </span>#a<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>AnswerRequest( S, k ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∀ </span>#j<span class="hl_operator">.</span> <span class="hl_operator">(</span>SessKeyC( S, k ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span>#i <span class="hl_operator">=</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∨</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#r<span class="hl_operator">.</span> <span class="hl_operator">(</span>LtkReveal( S ) <span class="hl_operator">@</span> #r<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>#r <span class="hl_operator">&lt;</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Client_auth_injective">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Client_auth_injective">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Client_auth_injective"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Client_auth_injective">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Client_session_key_honest_setup:<br/>
+&nbsp;&nbsp;exists-trace<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∃ </span>S k #i<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>SessKeyC( S, k ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span><span class="hl_operator">∃ </span>#r<span class="hl_operator">.</span> LtkReveal( S ) <span class="hl_operator">@</span> #r<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Client_session_key_honest_setup">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Client_session_key_honest_setup">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Client_session_key_honest_setup"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Client_session_key_honest_setup">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">end</span><br/>
+ 

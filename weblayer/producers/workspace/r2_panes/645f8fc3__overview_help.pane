@@ -1,0 +1,185 @@
+<span class="hl_keyword">theory</span> <a class="internal-link help" href="/thy/trace/1/main/help">commitment_example</a> <span class="hl_keyword">begin</span><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/message"><strong>Message theory</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/rules"><strong>Multiset rewriting rules and restrictions</strong> (11)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/tactic"><strong>Tactic(s)</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/cases/raw/0/0"><strong>Raw sources</strong> (11 cases, deconstructions complete)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/cases/refined/0/0"><strong>Refined sources </strong> (11 cases, deconstructions complete)</a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/%3Cfirst%3E">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> invariant_sources [sources]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">(</span><span class="hl_operator">∀ </span>id ka kb #i<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Invariant_I( id, ka, kb ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#j<span class="hl_operator">.</span> <span class="hl_operator">(</span>InvariantSource_I( id, ka, kb ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>#j <span class="hl_operator">&lt;</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∀ </span>id ka kb #i<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Invariant_R( id, ka, kb ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#j<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>InvariantSource_R( id, ka, kb ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>#j <span class="hl_operator">&lt;</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/invariant_sources">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/invariant_sources">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/invariant_sources"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/invariant_sources">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> commit_unique [reuse]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>id1 id2 com #i #j<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>Commit( id1, com ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Commit( id2, com ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>#i <span class="hl_operator">=</span> #j<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>id1 <span class="hl_operator">=</span> id2<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/commit_unique">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/commit_unique">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/commit_unique"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/commit_unique">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> token_compromise_source [reuse]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>pks tok #i<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>CompromiseToken( pks, tok ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#j<span class="hl_operator">.</span> <span class="hl_operator">(</span>#j <span class="hl_operator">&lt;</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Token( tok ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/token_compromise_source">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/token_compromise_source">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/token_compromise_source"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/token_compromise_source">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> force_nonce_ordering [reuse]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>role keys ni data #i #j<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>Session( role, keys, &lt;ni, data&gt; ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Gen( ni ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>#j <span class="hl_operator">&lt;</span> #i<span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/force_nonce_ordering">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/force_nonce_ordering">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/force_nonce_ordering"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/force_nonce_ordering">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> exists_session:<br/>
+&nbsp;&nbsp;exists-trace<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∃ </span>pks data #t0 #t1<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>#t0 <span class="hl_operator">&lt;</span> #t1<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Session( &#39;R&#39;, pks, data ) <span class="hl_operator">@</span> #t0<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Session( &#39;I&#39;, pks, data ) <span class="hl_operator">@</span> #t1<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span><span class="hl_operator">∃ </span>#k key<span class="hl_operator">.</span> Compromise( key ) <span class="hl_operator">@</span> #k<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span><span class="hl_operator">∃ </span>#k<span class="hl_operator">.</span> Detect( pks ) <span class="hl_operator">@</span> #k<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/exists_session">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/exists_session">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/exists_session"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/exists_session">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> exists_second_session:<br/>
+&nbsp;&nbsp;exists-trace<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∃ </span>pks data data2 #t0 #t1 #t2 #t3<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>#t0 <span class="hl_operator">&lt;</span> #t2<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>#t1 <span class="hl_operator">&lt;</span> #t3<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Session( &#39;R&#39;, pks, data ) <span class="hl_operator">@</span> #t0<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Session( &#39;I&#39;, pks, data ) <span class="hl_operator">@</span> #t1<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Session( &#39;R&#39;, pks, data2 ) <span class="hl_operator">@</span> #t2<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Session( &#39;I&#39;, pks, data2 ) <span class="hl_operator">@</span> #t3<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span><span class="hl_operator">∃ </span>#k key<span class="hl_operator">.</span> Compromise( key ) <span class="hl_operator">@</span> #k<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span><span class="hl_operator">∃ </span>#k<span class="hl_operator">.</span> Detect( pks ) <span class="hl_operator">@</span> #k<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/exists_second_session">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/exists_second_session">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/exists_second_session"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/exists_second_session">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> exists_detect_no_I_compromise:<br/>
+&nbsp;&nbsp;exists-trace<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∃ </span>ki kr #i<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Detect( &lt;ki, kr&gt; ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span><span class="hl_operator">∃ </span>#j<span class="hl_operator">.</span> Compromise( ki ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/exists_detect_no_I_compromise">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/exists_detect_no_I_compromise">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/exists_detect_no_I_compromise"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/exists_detect_no_I_compromise">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> detect_sound:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>ki kr #t1<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Detect( &lt;ki, kr&gt; ) <span class="hl_operator">@</span> #t1<span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#t0<span class="hl_operator">.</span> <span class="hl_operator">(</span>#t0 <span class="hl_operator">&lt;</span> #t1<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Compromise( kr ) <span class="hl_operator">@</span> #t0<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/detect_sound">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/detect_sound">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/detect_sound"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/detect_sound">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> correct_dolevyao:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>pks data #t1<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>Session( &#39;I&#39;, pks, data ) <span class="hl_operator">@</span> #t1<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span><span class="hl_operator">∃ </span>k #tc<span class="hl_operator">.</span> Compromise( k ) <span class="hl_operator">@</span> #tc<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#t0<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>#t0 <span class="hl_operator">&lt;</span> #t1<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Session( &#39;R&#39;, pks, data ) <span class="hl_operator">@</span> #t0<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/correct_dolevyao">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/correct_dolevyao">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/correct_dolevyao"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/correct_dolevyao">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> matching_detects_prior_misuse [use_induction]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>pks data data2 #t1 #t2 #t3<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>#t1 <span class="hl_operator">&lt;</span> #t2<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>#t2 <span class="hl_operator">&lt;</span> #t3<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Session( &#39;I&#39;, pks, data2 ) <span class="hl_operator">@</span> #t2<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Session( &#39;R&#39;, pks, data2 ) <span class="hl_operator">@</span> #t3<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>Detect( pks ) <span class="hl_operator">@</span> #t3<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Session( &#39;R&#39;, pks, data ) <span class="hl_operator">@</span> #t1<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">∃ </span>#t0<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>#t0 <span class="hl_operator">&lt;</span> #t1<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Session( &#39;I&#39;, pks, data ) <span class="hl_operator">@</span> #t0<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∨</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>i r #tc #tc2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>pks <span class="hl_operator">=</span> &lt;i, r&gt;<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Compromise( i ) <span class="hl_operator">@</span> #tc<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Compromise( r ) <span class="hl_operator">@</span> #tc2<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/matching_detects_prior_misuse">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/matching_detects_prior_misuse">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/matching_detects_prior_misuse"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/matching_detects_prior_misuse">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> sent_commit_implies_generated [reuse]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>pks pks2 n c data #t0 #t1<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>Session( &#39;R&#39;, pks, &lt;n, c, data&gt; ) <span class="hl_operator">@</span> #t1<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Commit( pks2, c ) <span class="hl_operator">@</span> #t0<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>pks <span class="hl_operator">=</span> pks2<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>#t0 <span class="hl_operator">&lt;</span> #t1<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/sent_commit_implies_generated">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/sent_commit_implies_generated">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/sent_commit_implies_generated"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/sent_commit_implies_generated">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> sessions_injective [reuse, use_induction]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">(</span><span class="hl_operator">∀ </span>role pks n2 c2 data data2 #t0 #t1 #t2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>#t0 <span class="hl_operator">&lt;</span> #t2<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Session( role, pks, data2 ) <span class="hl_operator">@</span> #t0<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Session( role, pks, &lt;n2, c2, data&gt; ) <span class="hl_operator">@</span> #t2<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Begin( role, pks, n2, c2 ) <span class="hl_operator">@</span> #t1<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>#t0 <span class="hl_operator">&lt;</span> #t1<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∀ </span>role pks n c data n2 data2 #t0 #t1 #t2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>#t0 <span class="hl_operator">&lt;</span> #t2<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Begin( role, pks, n, c ) <span class="hl_operator">@</span> #t0<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Session( role, pks, &lt;n, c, data&gt; ) <span class="hl_operator">@</span> #t1<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Session( role, pks, &lt;n2, data2&gt; ) <span class="hl_operator">@</span> #t2<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>n <span class="hl_operator">=</span> n2<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>#t1 <span class="hl_operator">&lt;</span> #t2<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/sessions_injective">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/sessions_injective">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/sessions_injective"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/sessions_injective">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> matching_detects_later_misuse [use_induction]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>pks data data2 #t0 #t1 #t3<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>#t0 <span class="hl_operator">&lt;</span> #t1<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>#t1 <span class="hl_operator">&lt;</span> #t3<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Session( &#39;R&#39;, pks, data ) <span class="hl_operator">@</span> #t0<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Session( &#39;I&#39;, pks, data ) <span class="hl_operator">@</span> #t1<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Session( &#39;I&#39;, pks, data2 ) <span class="hl_operator">@</span> #t3<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>Detect( pks ) <span class="hl_operator">@</span> #t3<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span><span class="hl_operator">∃ </span>#tc tok3<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>#tc <span class="hl_operator">&lt;</span> #t3<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>#t0 <span class="hl_operator">&lt;</span> #tc<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>CompromiseToken( pks, tok3 ) <span class="hl_operator">@</span> #tc<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#t2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>#t2 <span class="hl_operator">&lt;</span> #t3<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Session( &#39;R&#39;, pks, data2 ) <span class="hl_operator">@</span> #t2<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/matching_detects_later_misuse">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/matching_detects_later_misuse">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/matching_detects_later_misuse"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/matching_detects_later_misuse">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">end</span><br/>
+ 

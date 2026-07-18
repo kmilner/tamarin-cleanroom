@@ -1,0 +1,273 @@
+<span class="hl_keyword">theory</span> <a class="internal-link help" href="/thy/trace/1/main/help">WProbe</a> <span class="hl_keyword">begin</span><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/message"><strong>Message theory</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/rules"><strong>Multiset rewriting rules</strong> (3)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/tactic"><strong>Tactic(s)</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/cases/raw/0/0"><strong>Raw sources</strong> (3 cases, deconstructions complete)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/cases/refined/0/0"><strong>Refined sources </strong> (3 cases, deconstructions complete)</a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/%3Cfirst%3E">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> a63:<br/>
+&nbsp;&nbsp;all-traces &quot;<span class="hl_operator">∀ </span>x #i<span class="hl_operator">.</span> Naaaaaaaaaaaaaaaaaaa( x ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/a63">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/a63">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/a63"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/a63">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> a64:<br/>
+&nbsp;&nbsp;all-traces &quot;<span class="hl_operator">∀ </span>x #i<span class="hl_operator">.</span> Naaaaaaaaaaaaaaaaaaaa( x ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/a64">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/a64">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/a64"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/a64">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> a65:<br/>
+&nbsp;&nbsp;all-traces &quot;<span class="hl_operator">∀ </span>x #i<span class="hl_operator">.</span> Naaaaaaaaaaaaaaaaaaaaa( x ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/a65">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/a65">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/a65"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/a65">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> a66:<br/>
+&nbsp;&nbsp;all-traces &quot;<span class="hl_operator">∀ </span>x #i<span class="hl_operator">.</span> Naaaaaaaaaaaaaaaaaaaaaa( x ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/a66">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/a66">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/a66"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/a66">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> a67:<br/>
+&nbsp;&nbsp;all-traces &quot;<span class="hl_operator">∀ </span>x #i<span class="hl_operator">.</span> Naaaaaaaaaaaaaaaaaaaaaaa( x ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/a67">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/a67">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/a67"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/a67">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> a68:<br/>
+&nbsp;&nbsp;all-traces &quot;<span class="hl_operator">∀ </span>x #i<span class="hl_operator">.</span> Naaaaaaaaaaaaaaaaaaaaaaaa( x ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/a68">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/a68">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/a68"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/a68">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> a69:<br/>
+&nbsp;&nbsp;all-traces &quot;<span class="hl_operator">∀ </span>x #i<span class="hl_operator">.</span> Naaaaaaaaaaaaaaaaaaaaaaaaa( x ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/a69">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/a69">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/a69"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/a69">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> a70:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>x #i<span class="hl_operator">.</span> Naaaaaaaaaaaaaaaaaaaaaaaaaa( x ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/a70">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/a70">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/a70"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/a70">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> a71:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>x #i<span class="hl_operator">.</span> Naaaaaaaaaaaaaaaaaaaaaaaaaaa( x ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/a71">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/a71">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/a71"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/a71">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> a72:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>x #i<span class="hl_operator">.</span> Naaaaaaaaaaaaaaaaaaaaaaaaaaaa( x ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/a72">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/a72">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/a72"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/a72">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> x63:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∃ </span>x #i<span class="hl_operator">.</span> Xbbbbbbbbbbbbbbbbb( x ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/x63">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/x63">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/x63"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/x63">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> x64:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∃ </span>x #i<span class="hl_operator">.</span> Xbbbbbbbbbbbbbbbbbb( x ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/x64">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/x64">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/x64"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/x64">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> x65:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∃ </span>x #i<span class="hl_operator">.</span> Xbbbbbbbbbbbbbbbbbbb( x ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/x65">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/x65">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/x65"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/x65">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> x66:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∃ </span>x #i<span class="hl_operator">.</span> Xbbbbbbbbbbbbbbbbbbbb( x ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/x66">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/x66">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/x66"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/x66">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> x67:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∃ </span>x #i<span class="hl_operator">.</span> Xbbbbbbbbbbbbbbbbbbbbb( x ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/x67">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/x67">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/x67"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/x67">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> x68:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∃ </span>x #i<span class="hl_operator">.</span> Xbbbbbbbbbbbbbbbbbbbbbb( x ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/x68">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/x68">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/x68"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/x68">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> x69:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∃ </span>x #i<span class="hl_operator">.</span> Xbbbbbbbbbbbbbbbbbbbbbbb( x ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/x69">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/x69">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/x69"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/x69">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> x70:<br/>
+&nbsp;&nbsp;exists-trace<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∃ </span>x #i<span class="hl_operator">.</span> Xbbbbbbbbbbbbbbbbbbbbbbbb( x ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/x70">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/x70">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/x70"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/x70">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> x71:<br/>
+&nbsp;&nbsp;exists-trace<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∃ </span>x #i<span class="hl_operator">.</span> Xbbbbbbbbbbbbbbbbbbbbbbbbb( x ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/x71">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/x71">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/x71"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/x71">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> x72:<br/>
+&nbsp;&nbsp;exists-trace<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∃ </span>x #i<span class="hl_operator">.</span> Xbbbbbbbbbbbbbbbbbbbbbbbbbb( x ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/x72">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/x72">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/x72"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/x72">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> d68:<br/>
+&nbsp;&nbsp;all-traces &quot;<span class="hl_operator">∀ </span>x #i<span class="hl_operator">.</span> <span class="hl_operator">(</span>Dc( x ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span><span class="hl_operator">∃ </span>#j<span class="hl_operator">.</span> E( x ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/d68">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/d68">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/d68"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/d68">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> d69:<br/>
+&nbsp;&nbsp;all-traces &quot;<span class="hl_operator">∀ </span>x #i<span class="hl_operator">.</span> <span class="hl_operator">(</span>Dc( x ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span><span class="hl_operator">∃ </span>#j<span class="hl_operator">.</span> E( x ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/d69">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/d69">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/d69"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/d69">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> d70:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>x #i<span class="hl_operator">.</span> <span class="hl_operator">(</span>Dcc( x ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span><span class="hl_operator">∃ </span>#j<span class="hl_operator">.</span> E( x ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/d70">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/d70">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/d70"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/d70">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> d71:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>x #i<span class="hl_operator">.</span> <span class="hl_operator">(</span>Dcc( x ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span><span class="hl_operator">∃ </span>#j<span class="hl_operator">.</span> Ed( x ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/d71">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/d71">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/d71"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/d71">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> d72:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>x #i<span class="hl_operator">.</span> <span class="hl_operator">(</span>Dccc( x ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span><span class="hl_operator">∃ </span>#j<span class="hl_operator">.</span> Ed( x ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/d72">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/d72">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/d72"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/d72">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> e63:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∃ </span>x #i<span class="hl_operator">.</span> Peeeeee( &lt;x, x&gt; ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/e63">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/e63">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/e63"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/e63">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> e64:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∃ </span>x #i<span class="hl_operator">.</span> Peeeeeee( &lt;x, x&gt; ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/e64">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/e64">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/e64"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/e64">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> e65:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∃ </span>x #i<span class="hl_operator">.</span> Peeeeeeee( &lt;x, x&gt; ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/e65">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/e65">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/e65"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/e65">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> e66:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∃ </span>x #i<span class="hl_operator">.</span> Peeeeeeeee( &lt;x, x&gt; ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/e66">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/e66">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/e66"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/e66">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> e67:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∃ </span>x #i<span class="hl_operator">.</span> Peeeeeeeeee( &lt;x, x&gt; ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/e67">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/e67">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/e67"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/e67">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> e68:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∃ </span>x #i<span class="hl_operator">.</span> Peeeeeeeeeee( &lt;x, x&gt; ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/e68">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/e68">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/e68"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/e68">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> e69:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∃ </span>x #i<span class="hl_operator">.</span> Peeeeeeeeeeee( &lt;x, x&gt; ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/e69">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/e69">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/e69"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/e69">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> e70:<br/>
+&nbsp;&nbsp;exists-trace<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∃ </span>x #i<span class="hl_operator">.</span> Peeeeeeeeeeeee( &lt;x, x&gt; ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/e70">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/e70">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/e70"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/e70">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> e71:<br/>
+&nbsp;&nbsp;exists-trace<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∃ </span>x #i<span class="hl_operator">.</span> Peeeeeeeeeeeeee( &lt;x, x&gt; ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/e71">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/e71">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/e71"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/e71">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> e72:<br/>
+&nbsp;&nbsp;exists-trace<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∃ </span>x #i<span class="hl_operator">.</span> Peeeeeeeeeeeeeee( &lt;x, x&gt; ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/e72">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/e72">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/e72"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/e72">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">end</span><br/>
+ 

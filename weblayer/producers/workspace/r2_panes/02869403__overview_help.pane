@@ -1,0 +1,43 @@
+<span class="hl_keyword">theory</span> <a class="internal-link help" href="/thy/trace/1/main/help">AttestedComputation</a> <span class="hl_keyword">begin</span><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/message"><strong>Message theory</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/rules"><strong>Multiset rewriting rules and restrictions</strong> (46)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/tactic"><strong>Tactic(s)</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/cases/raw/0/0"><strong>Raw sources</strong> (52 cases, deconstructions complete)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/cases/refined/0/0"><strong>Refined sources </strong> (52 cases, deconstructions complete)</a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/%3Cfirst%3E">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> can_run_v:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∃ </span>#i m<span class="hl_operator">.</span> Local( m, &#39;loc&#39; ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/can_run_v">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/can_run_v">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/can_run_v"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/can_run_v">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> simp [reuse]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#i m<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>!KU( rep(m, &#39;loc&#39;) ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#j<span class="hl_operator">.</span> Remote( m, &#39;loc&#39; ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/simp">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/simp">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/simp"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/simp">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> attested_comput:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#i m<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Local( m, &#39;loc&#39; ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#j<span class="hl_operator">.</span> Remote( m, &#39;loc&#39; ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/attested_comput">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/attested_comput">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/attested_comput"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/attested_comput">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">end</span><br/>
+ 

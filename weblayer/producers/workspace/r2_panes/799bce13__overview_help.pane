@@ -1,0 +1,129 @@
+<span class="hl_keyword">theory</span> <a class="internal-link help" href="/thy/trace/1/main/help">YubikeyHSMmultiset</a> <span class="hl_keyword">begin</span><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/message"><strong>Message theory</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/rules"><strong>Multiset rewriting rules and restrictions</strong> (15)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/tactic"><strong>Tactic(s)</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/cases/raw/0/0"><strong>Raw sources</strong> (26 cases, 13 partial deconstructions left)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/cases/refined/0/0"><strong>Refined sources </strong> (26 cases, 13 partial deconstructions left)</a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/%3Cfirst%3E">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> transitivity:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#t1 #t2 a b c<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>Smaller( a, b ) <span class="hl_operator">@</span> #t1<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Smaller( b, c ) <span class="hl_operator">@</span> #t2<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>z<span class="hl_operator">.</span> (a++z) <span class="hl_operator">=</span> c<span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/transitivity">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/transitivity">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/transitivity"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/transitivity">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> otp_decode_does_not_help_adv_use_induction [reuse,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;use_induction]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#t3 k2 k m sc enc mac<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>OtpDecode( k2, k, m, sc, enc, mac ) <span class="hl_operator">@</span> #t3<span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#t1 pid<span class="hl_operator">.</span> <span class="hl_operator">(</span>YubiPress( pid, sc ) <span class="hl_operator">@</span> #t1<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>#t1 <span class="hl_operator">&lt;</span> #t3<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/otp_decode_does_not_help_adv_use_induction">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/otp_decode_does_not_help_adv_use_induction">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/otp_decode_does_not_help_adv_use_induction"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/otp_decode_does_not_help_adv_use_induction">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> neither_k_nor_k2_are_ever_leaked_inv [use_induction, reuse]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span><span class="hl_operator">∃ </span>#t1 #t2 k<span class="hl_operator">.</span> <span class="hl_operator">(</span>MasterKey( k ) <span class="hl_operator">@</span> #t1<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>!KU( k ) <span class="hl_operator">@</span> #t2<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span><span class="hl_operator">∃ </span>#t5 #t6 k6 pid<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Init( pid, k6 ) <span class="hl_operator">@</span> #t5<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>!KU( k6 ) <span class="hl_operator">@</span> #t6<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/neither_k_nor_k2_are_ever_leaked_inv">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/neither_k_nor_k2_are_ever_leaked_inv">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/neither_k_nor_k2_are_ever_leaked_inv"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/neither_k_nor_k2_are_ever_leaked_inv">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> slightly_weaker_invariant [reuse, use_induction]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>pid otc1 tc1 otc2 tc2 #t1 #t2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>LoginCounter( pid, otc1, tc1 ) <span class="hl_operator">@</span> #t1<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>LoginCounter( pid, otc2, tc2 ) <span class="hl_operator">@</span> #t2<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>#t1 <span class="hl_operator">&lt;</span> #t2<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span><span class="hl_operator">∃ </span>z<span class="hl_operator">.</span> tc2 <span class="hl_operator">=</span> (tc1++z)<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∨</span> <span class="hl_operator">(</span>#t2 <span class="hl_operator">&lt;</span> #t1<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∨</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>#t1 <span class="hl_operator">=</span> #t2<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/slightly_weaker_invariant">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/slightly_weaker_invariant">delete lemma</a><br/>
+<a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/slightly_weaker_invariant"><span class="hl_keyword">induction</span></a><a class="internal-link remove-step" href="/thy/trace/1/main/proof/slightly_weaker_invariant"></a><br/>
+&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">case</span> empty_trace</span><br/>
+&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">by</span> </span><a class="internal-link proof-step hl_good" href="/thy/trace/1/main/proof/slightly_weaker_invariant/empty_trace"><span class="hl_keyword">contradiction</span></a><a class="internal-link remove-step" href="/thy/trace/1/main/proof/slightly_weaker_invariant/empty_trace"></a><br/>
+<span class="hl_keyword">next</span><br/>
+&nbsp;&nbsp;<span class="hl_keyword">case</span> non_empty_trace<br/>
+&nbsp;&nbsp;<a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/slightly_weaker_invariant/non_empty_trace"><span class="hl_keyword">solve(</span> (<span class="hl_operator">¬</span><span class="hl_operator">(</span>#t1 <span class="hl_operator">&lt;</span> #t2<span class="hl_operator">)</span>)<span class="hl_operator">  ∥</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="hl_operator">∀</span> z.2<span class="hl_operator">.</span> <span class="hl_operator">(</span>(otc2++z.1) <span class="hl_operator">=</span> (otc1++z++z.2)<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">⊥</span>) <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/1/main/proof/slightly_weaker_invariant/non_empty_trace"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">case</span> case_1</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="internal-link proof-step hl_good" href="/thy/trace/1/main/proof/slightly_weaker_invariant/non_empty_trace/case_1"><span class="hl_keyword">solve(</span> (#t2 <span class="hl_operator">=</span> #t1)<span class="hl_operator">  ∥</span> (#t1 <span class="hl_operator">&lt;</span> #t2) <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/1/main/proof/slightly_weaker_invariant/non_empty_trace/case_1"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">case</span> case_1</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">by</span> </span><a class="internal-link proof-step hl_good" href="/thy/trace/1/main/proof/slightly_weaker_invariant/non_empty_trace/case_1/case_1"><span class="hl_keyword">contradiction</span></a><a class="internal-link remove-step" href="/thy/trace/1/main/proof/slightly_weaker_invariant/non_empty_trace/case_1/case_1"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">next</span></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">case</span> case_2</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">by</span> </span><a class="internal-link proof-step hl_good" href="/thy/trace/1/main/proof/slightly_weaker_invariant/non_empty_trace/case_1/case_2"><span class="hl_keyword">contradiction</span></a><a class="internal-link remove-step" href="/thy/trace/1/main/proof/slightly_weaker_invariant/non_empty_trace/case_1/case_2"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">qed</span></span><br/>
+&nbsp;&nbsp;<span class="hl_keyword">next</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_keyword">case</span> case_2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/slightly_weaker_invariant/non_empty_trace/case_2"><span class="hl_keyword">solve(</span> (#t2 <span class="hl_operator">=</span> #t1)<span class="hl_operator">  ∥</span> (#t1 <span class="hl_operator">&lt;</span> #t2) <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/1/main/proof/slightly_weaker_invariant/non_empty_trace/case_2"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">case</span> case_1</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">by</span> </span><a class="internal-link proof-step hl_good" href="/thy/trace/1/main/proof/slightly_weaker_invariant/non_empty_trace/case_2/case_1"><span class="hl_keyword">contradiction</span></a><a class="internal-link remove-step" href="/thy/trace/1/main/proof/slightly_weaker_invariant/non_empty_trace/case_2/case_1"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_keyword">next</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_keyword">case</span> case_2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/slightly_weaker_invariant/non_empty_trace/case_2/case_2"><span class="hl_keyword">solve(</span> S_Counter( pid, otc2 ) ▶₃ #t2 <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/1/main/proof/slightly_weaker_invariant/non_empty_trace/case_2/case_2"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_keyword">case</span> BuyANewYubikey<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/slightly_weaker_invariant/non_empty_trace/case_2/case_2/BuyANewYubikey"><span class="hl_keyword">sorry</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_keyword">next</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_keyword">case</span> Server_ReceiveOTP_NewSession_case_1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/slightly_weaker_invariant/non_empty_trace/case_2/case_2/Server_ReceiveOTP_NewSession_case_1"><span class="hl_keyword">sorry</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_keyword">next</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_keyword">case</span> Server_ReceiveOTP_NewSession_case_2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/slightly_weaker_invariant/non_empty_trace/case_2/case_2/Server_ReceiveOTP_NewSession_case_2"><span class="hl_keyword">sorry</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_keyword">qed</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_keyword">qed</span><br/>
+&nbsp;&nbsp;<span class="hl_keyword">qed</span><br/>
+<span class="hl_keyword">qed</span><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/slightly_weaker_invariant">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> no_replay:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">¬</span><span class="hl_operator">(</span><span class="hl_operator">∃ </span>#i #j pid sid x otp1 otp2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>Login( pid, sid, x, otp1 ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Login( pid, sid, x, otp2 ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>#i <span class="hl_operator">=</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/no_replay">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/no_replay">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/no_replay"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/no_replay">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> injective_correspondance:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>pid sid x otp #t2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Login( pid, sid, x, otp ) <span class="hl_operator">@</span> #t2<span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#t1<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>YubiPress( pid, x ) <span class="hl_operator">@</span> #t1<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>#t1 <span class="hl_operator">&lt;</span> #t2<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∀ </span>otp2 #t3<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Login( pid, sid, x, otp2 ) <span class="hl_operator">@</span> #t3<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span>#t3 <span class="hl_operator">=</span> #t2<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/injective_correspondance">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/injective_correspondance">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/injective_correspondance"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/injective_correspondance">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Login_invalidates_smaller_counters:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>pid otc1 tc1 otc2 tc2 #t1 #t2 z<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>LoginCounter( pid, otc1, tc1 ) <span class="hl_operator">@</span> #t1<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>LoginCounter( pid, otc2, tc2 ) <span class="hl_operator">@</span> #t2<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>tc2 <span class="hl_operator">=</span> (tc1++z)<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>#t1 <span class="hl_operator">&lt;</span> #t2<span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Login_invalidates_smaller_counters">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Login_invalidates_smaller_counters">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Login_invalidates_smaller_counters"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Login_invalidates_smaller_counters">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">end</span><br/>
+ 

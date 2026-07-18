@@ -201,18 +201,149 @@ The R1 spec above is implemented in `producers-clean` (`src/html.rs` skin +
 A mutation check (break marker doctored to `<br />`) makes the sweep fail —
 the byte gate is live, not vacuous.
 
-## 10. Open questions (R2–R5) + unobservables
+## 10. Round-1 unobservables (recorded per protocol)
 
-- UNOBSERVABLE (recorded per protocol, arbitrary-but-documented choices):
-  - empty Signature/Construction/Deconstruction bodies never occur → keep-mode
-    assumed by analogy with tactic;
-  - tabs and C0 controls other than `\n` in fragment text (none in corpus) →
-    passed through / standard JSON escapes;
-  - heading text is a fixed metachar-free vocabulary → escaping of headings
-    unobservable (clean impl escapes them uniformly);
-  - NAME/TIME escaping in the help env line (identifiers/clock text carry no
-    metachars) → escaped uniformly like ORIGIN.
-- The `overview` west pane assembly (R2): item labels/annotations, lemma
-  declaration framing, the fresh `by sorry` line, edit/delete/add link shapes.
-- Proof-tree indentation + by/case/next/qed grammar (R3).
-- Index-page frame + row shape + banners (R4); path grammar + escaping (R5).
+- empty Signature/Construction/Deconstruction bodies never occur → keep-mode
+  assumed by analogy with tactic;
+- tabs and C0 controls other than `\n` in fragment text (none in corpus) →
+  passed through / standard JSON escapes;
+- heading text is a fixed metachar-free vocabulary → escaping of headings
+  unobservable (clean impl escapes them uniformly);
+- NAME/TIME escaping in the help env line (identifiers/clock text carry no
+  metachars) → escaped uniformly like ORIGIN.
+
+---
+
+## 11. R5 — the theory-path grammar (`src/path.rs`)
+
+The wildcard tail after `/thy/trace/<idx>/main/` (the same grammar `del/path/…`
+and `verify/…` take [L11]). Pinned from BOTH sides: the corpus href inventory
+[S14][S15] (render) and the live acceptance batteries [L08]–[L13] (parse).
+
+**Segment model.** Split the raw tail on `/` FIRST, then percent-decode each
+segment independently: `me%73sage` reaches `message`; an encoded `%2F` does NOT
+split (`proof/foo%2F_` names lemma `foo/_`) [L09]. Decoding: valid `%XX` → the
+byte, byte string read as UTF-8 with U+FFFD replacement (`caf%C3%A9`→café,
+`a%FFb`→`a�b`); INVALID sequences stay literal (`a%zzb`, `a%`, `a%2`, `a%G1b`);
+`+` is NOT a space [L12]. Heads match exactly and case-sensitively (`MESSAGE`,
+`cases/RAW` → 404) [L08][L09].
+
+**Acceptance.** Heads: `help` `message` `rules` `tactic` (no args) ·
+`cases/{raw|refined}/{i}/{j}` · `lemma/{name}` · `proof/{lemma}[/seg…]` ·
+`edit/{name}` `add/{pos}` `delete/{name}`. Extra segments after a complete
+match are IGNORED (`help/extra`, `message/`, `cases/raw/0/0/extra` accepted);
+missing required args reject (`proof`, `cases/raw/1` → 404); name args accept
+ANY decoded text including empty (`edit/`, `proof//_` parse); lemma EXISTENCE
+is resolution, not parse (`proof/nonexistent` → 200 "No such lemma or proof
+path") [L08][L11]. `sources` is NOT a head; `method/{lemma}/{n}[/…]` is
+server-accepted but outside the producer link vocabulary (no ThyPath
+constructor → `parse` returns None; documented interface scope).
+
+**Numeric segments** (the two `cases` indices) parse as a Haskell-`reads`-shaped
+integer prefix [L10]: optional whitespace, balanced parens, optional `-` (space
+allowed after), one integer lexeme — decimal / `0x` `0o` `0b` any case — then
+arbitrary junk IGNORED at top level (`1abc`, `1_`, `(1)x` accept) but not inside
+parens (`(1x)` rejects); a decimal lexeme continuing as a FLOAT rejects (`1.0`,
+`1e2`); a LEADING underscore rejects (`_1` lexes as an identifier — the
+underscore-prefix quirk) while interior/trailing ones are junk (`1_0`, `0x_1`).
+`+1` and `--1` reject. The VALUE is behaviorally inert (bodies for 0/0, 0/1,
+1/0, 9/9, -1/0 are byte-identical [L10]) — which index is source vs case is
+UNOBSERVABLE; clean impl clamps out-of-usize values (documented choice). The
+VERSION-index segment before the handler is a different, stricter grammar
+(`01`,`+1` accepted; `0x1`, spaces rejected [L10]) and is out of R5 (producers
+render it as plain decimal — all hrefs carry plain decimals [S14]).
+
+**Render.** Corpus-wide, rendered segments contain only `[A-Za-z0-9_.]` raw
+plus the single escape pair `%3C`/`%3E` in `add/%3Cfirst%3E` (946 corpus + live
+hrefs). Encoding of any OTHER byte is UNOBSERVABLE — the metachar-filename
+channel collapsed (download/get_and_append URLs derive from the theory NAME,
+not the filename [L13]) — clean impl: RFC3986 unreserved raw, everything else
+uppercase `%XX` per UTF-8 byte (reproduces every observed href byte; gated by
+the 40037-distinct-tail corpus round-trip [S15]).
+
+## 12. R2 — the west (proof-script) pane frame (`src/proofscript.rs`)
+
+The pane is the content of the page's proof-script container: logical lines
+each emitted as `TEXT<br/>\n` (leading spaces → `&nbsp;`, i.e. the §3
+postprocess) plus ONE trailing space — all 478 overview captures (82 help +
+396 proof views; the SPEC's 473 undercounts) [S16]. Element order [S16]:
+
+1. `theory NAME begin` (keyword spans; NAME is a `main/help` link);
+2. per nav item: blank, then
+   `<a class="internal-link" href="…/main/TAIL"><strong>LABEL</strong> ANN</a>`
+   — exactly five, fixed order message / rules / tactic / cases/raw/0/0 /
+   cases/refined/0/0. LABEL+ANN are opaque input: `Message theory`/`Tactic(s)`
+   with empty ANN (leaving `</strong> </a>`), rules `Multiset rewriting rules`
+   ± ` and restrictions` (varies with the theory, unlike the R1 title) with
+   `(count)`, `Raw sources`/`Refined sources ` (trailing space in the label)
+   with the cases description;
+3. blank + the `add lemma` link for `add/%3Cfirst%3E`;
+4. per lemma: blank · declaration (§13) · the quantifier/formula block (§13) ·
+   `<a … edit/NAME>edit lemma</a>  or  <a … delete/NAME>delete lemma</a>`
+   (two spaces around `or`) · the proof display · blank ·
+   `add lemma` → `add/NAME`;
+5. blank + `end`. ZERO lemmas leave TWO blanks before `end` (both lemma-less
+   corpus panes).
+
+**Proof display.** Unproven: the single line `by <a class="internal-link
+proof-step sorry-step" href="…/main/proof/NAME">sorry</a>` (keyword spans), no
+header wrapper. Proved/disproved: the lemma HEADER (declaration through the
+delete anchor) is wrapped in ONE status span — `hl_good` ×3192 / `hl_bad` ×146
+— opening before the declaration and closing right after the delete anchor;
+the proof lines follow UNWRAPPED and are opaque R2 input (R3 will structure
+them). An INCOMPLETE proof (root step `sorry-step`, e.g. a half-done
+induction) leaves the header unwrapped like sorry [S16]. Every href is
+`/thy/trace/{idx}/main/` + an R5-rendered path.
+
+## 13. R2 — lemma declaration + formula layout
+
+Declaration: `lemma NAME{ATTRS}:` — ATTRS empty or starting `" ["` (observed
+vocabulary: reuse / use_induction / sources / heuristic={…} / hide_lemma=… and
+combinations), and possibly MULTI-LINE (46 corpus declarations wrap long
+heuristic lists; the continuation indent is baked into the opaque ATTRS text)
+[S17]. The `:` ends the declaration.
+
+Quantifier/formula block at indent 2. A SINGLE-line formula inlines onto the
+quantifier line (`  all-traces &quot;F&quot;`) iff the assembled line's
+ESCAPED width is ≤ 69, where escaped width = character count with tags
+stripped and entities counted at their escaped length (`&lt;` = 4, `&quot;` =
+6, unicode operators 1 each). Otherwise the quantifier stands alone and each
+formula line follows at 2 + its own relative indent. Provenance: visible
+chars/bytes DO NOT separate the corpus (minimal pair at 55 visible: `(a++a)`
+inline vs `<a, a>` vertical [S18]); escaped chars separate (65 vs 71), and the
+live WProbe bisection pinned the boundary to exactly 69/70 on four formula
+families, ruling out a byte-based metric [L14]. Quantifier vocabulary observed:
+`all-traces` / `exists-trace`.
+
+## 14. Round-2 validation status
+
+R5 is `path.rs` (`parse`/`render`), R2 is `proofscript.rs` (`render_index`,
+links via R5), validated by:
+- `tests/r5_path_grammar.rs` — live acceptance battery replay (68 accepted +
+  27 rejected probes [L08]–[L12]), decode-echo fixtures, parse⇄render
+  round-trip, and the corpus sweep: all 40037 distinct `main/*` href tails
+  re-render byte-identically (497 `method/` tails asserted out-of-vocabulary).
+- `tests/r2_west_pane.rs` — `corpus_sweep_all_overview_panes`: all 478 pane
+  bodies sliced (strict inversion asserting every frame byte) and re-rendered
+  byte-identically; `live_probe_pane_replays`: 3 panes from never-captured
+  theories (PathProbe fresh; WProbe, the 35-lemma width-boundary theory;
+  PathProbe v2 after a LIVE autoprove — proved `hl_good` tree) [L15]; fixtures
+  pinning the frame + zero-lemma spacing.
+- Mutation checks (all observed to fail, then reverted): `  or  `→` or `
+  breaks corpus+live+fixtures; width 69→68 breaks the corpus sweep while
+  69→70 breaks ONLY the live WProbe replay (the live bisection pins what the
+  corpus cannot); uppercase→lowercase `%XX` breaks the R5 byte tests.
+- `cargo test`: 24 green; `cargo clippy --all-targets`: zero warnings.
+
+## 15. Open questions (R3–R4) + round-2 unobservables
+
+- UNOBSERVABLE (documented choices): href %-encoding beyond `%3C/%3E` (§11);
+  which cases index is source vs case (§11); escaping of nav-item
+  labels/annotations and attribute text (metachar-free in all observations —
+  passed through opaque; lemma/theory NAMES escaped uniformly like R1);
+  formula layout for a single-line formula at widths the corpus/live probes
+  cannot reach is fixed by the ≤69 rule [L14].
+- Proof-tree structure: indentation + by/case/next/qed grammar, per-node
+  proof-step/remove-step links, status classes (R3 — R2 carries the lines
+  opaque; the prior sealed dispatch round documented the line grammar).
+- Index-page frame + row shape + banners (R4).

@@ -1,0 +1,432 @@
+<span class="hl_keyword">theory</span> <a class="internal-link help" href="/thy/trace/1/main/help">alethea_votingphase_malS</a> <span class="hl_keyword">begin</span><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/message"><strong>Message theory</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/rules"><strong>Multiset rewriting rules and restrictions</strong> (14)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/tactic"><strong>Tactic(s)</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/cases/raw/0/0"><strong>Raw sources</strong> (29 cases, 30 partial deconstructions left)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/cases/refined/0/0"><strong>Refined sources </strong> (29 cases, 30 partial deconstructions left)</a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/%3Cfirst%3E">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> functional [heuristic={functional}]:<br/>
+&nbsp;&nbsp;exists-trace<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∃ </span>#i #j #k H1 H2 S BB vote1 vote2 fstcode1 sndcode1 fstcode2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sndcode2 skS hV1 hV2 y1 y2 hY1 hY2 A #a #l #m #s<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>H1 <span class="hl_operator">=</span> H2<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>vote1 <span class="hl_operator">=</span> vote2<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Comm_H_C( H1, S, &lt;fstcode1, sndcode1&gt; ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Comm_H_V( H1, S, vote1 ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Comm_H_C( H2, S, &lt;fstcode2, sndcode2&gt; ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Comm_H_V( H2, S, vote2 ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>HV( &#39;1&#39;, hV1 ) <span class="hl_operator">@</span> #s<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>V( &#39;1&#39;, vote1 ) <span class="hl_operator">@</span> #s<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>HV( &#39;2&#39;, hV2 ) <span class="hl_operator">@</span> #s<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>V( &#39;2&#39;, vote2 ) <span class="hl_operator">@</span> #s<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>HY( &#39;1&#39;, hY1 ) <span class="hl_operator">@</span> #s<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>HY( &#39;2&#39;, hY2 ) <span class="hl_operator">@</span> #s<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_C( &#39;1&#39;, BB, &lt;fstcode1, sndcode1&gt; ) <span class="hl_operator">@</span> #k<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_C( &#39;2&#39;, BB, &lt;fstcode2, sndcode2&gt; ) <span class="hl_operator">@</span> #k<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_V( &#39;1&#39;, BB, vote1 ) <span class="hl_operator">@</span> #k<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_V( &#39;2&#39;, BB, vote2 ) <span class="hl_operator">@</span> #k<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_pV( &#39;1&#39;, BB, &lt;vote1, hV1&gt; ) <span class="hl_operator">@</span> #k<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_pV( &#39;2&#39;, BB, &lt;vote2, hV2&gt; ) <span class="hl_operator">@</span> #k<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_proofV( BB,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PeqPVote(&lt;fstcode1, fstcode2&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;&lt;vote1, hV1&gt;, vote2, hV2&gt;, skS)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="hl_operator">@</span> #k<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_pY( &#39;1&#39;, BB, &lt;y1, hY1&gt; ) <span class="hl_operator">@</span> #k<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_pY( &#39;2&#39;, BB, &lt;y2, hY2&gt; ) <span class="hl_operator">@</span> #k<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_proofY( BB,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PeqPY(&lt;sndcode1, sndcode2&gt;, &lt;&lt;y1, hY1&gt;, y2, hY2&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;skS)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="hl_operator">@</span> #k<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Learn_H_C( H1, S, &lt;fstcode1, sndcode1&gt; ) <span class="hl_operator">@</span> #l<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Learn_H_C( H2, S, &lt;fstcode2, sndcode2&gt; ) <span class="hl_operator">@</span> #m<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>VerProofV( A, BB,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PeqPVote(&lt;fstcode1, fstcode2&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;&lt;vote1, hV1&gt;, vote2, hV2&gt;, skS),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;fstcode1, fstcode2&gt;, &lt;&lt;vote1, hV1&gt;, vote2, hV2&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>VerProofY( A, BB,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PeqPY(&lt;sndcode1, sndcode2&gt;, &lt;&lt;y1, hY1&gt;, y2, hY2&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;skS),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;sndcode1, sndcode2&gt;, &lt;&lt;y1, hY1&gt;, y2, hY2&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/functional">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/functional">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/functional"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/functional">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> indivVerif [heuristic={indivVerif}]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>H S vote fstcode sndcode #i2 #i #j<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>Vote( H, vote ) <span class="hl_operator">@</span> #i2<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>MyCode( H, &lt;fstcode, sndcode&gt; ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Learn_H_C( H, S, &lt;fstcode, sndcode&gt; ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>BB #k hV pkS codeOther<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_Cs( BB,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;&#39;codes&#39;, (codeOther++&lt;fstcode, sndcode&gt;)&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="hl_operator">@</span> #k<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>fstcode <span class="hl_operator">=</span> cp(&lt;vote, hV&gt;, pkS)<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/indivVerif">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/indivVerif">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/indivVerif"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/indivVerif">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Universal_VerProofV_v1 [heuristic={Universal_VerProofV_v1}]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>S A x1 x2 skS #a #i BB v1 v2 codes<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>Learn_A_Vs( S, A, &lt;&#39;votes&#39;, (v1++v2)&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Learn_A_Cs( S, A, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>VerProofV( A, BB,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PeqPVote(&lt;cp(x1, pk(skS)), cp(x2, pk(skS))&gt;, &lt;x1, x2&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;skS),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cp(x1, pk(skS)), cp(x2, pk(skS))&gt;, &lt;x1, x2&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#b hV1 hV2 sndcode1 sndcode2 n1 n2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>BB_Cs( BB, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_V( n1, BB, v1 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_V( n2, BB, v2 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>codes <span class="hl_operator">=</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;cp(&lt;v1, hV1&gt;, pk(skS)), sndcode1&gt;++<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cp(&lt;v2, hV2&gt;, pk(skS)), sndcode2&gt;)<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Universal_VerProofV_v1">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Universal_VerProofV_v1">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Universal_VerProofV_v1"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Universal_VerProofV_v1">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Universal_VerProofV_v2 [heuristic={Universal_VerProofV_v2}]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>S A x1 x2 skS #a #i BB v1 v2 codes<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>Learn_A_Vs( S, A, &lt;&#39;votes&#39;, (v1++v2)&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Learn_A_Cs( S, A, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>VerProofV( A, BB,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PeqPVote(&lt;cp(x1, pk(skS)), cp(x2, pk(skS))&gt;, &lt;x1, x2&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;skS),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cp(x1, pk(skS)), cp(x2, pk(skS))&gt;, &lt;x2, x1&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#b hV1 hV2 sndcode1 sndcode2 n1 n2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>BB_Cs( BB, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_V( n1, BB, v1 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_V( n2, BB, v2 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>codes <span class="hl_operator">=</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;cp(&lt;v1, hV1&gt;, pk(skS)), sndcode1&gt;++<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cp(&lt;v2, hV2&gt;, pk(skS)), sndcode2&gt;)<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Universal_VerProofV_v2">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Universal_VerProofV_v2">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Universal_VerProofV_v2"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Universal_VerProofV_v2">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Universal_VerProofV_v3 [heuristic={Universal_VerProofV_v3}]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>S A x1 x2 skS #a #i BB v1 v2 codes<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>Learn_A_Vs( S, A, &lt;&#39;votes&#39;, (v1++v2)&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Learn_A_Cs( S, A, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>VerProofV( A, BB,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PeqPVote(&lt;cp(x1, pk(skS)), cp(x2, pk(skS))&gt;, &lt;x1, x2&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;skS),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cp(x2, pk(skS)), cp(x1, pk(skS))&gt;, &lt;x1, x2&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#b hV1 hV2 sndcode1 sndcode2 n1 n2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>BB_Cs( BB, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_V( n1, BB, v1 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_V( n2, BB, v2 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>codes <span class="hl_operator">=</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;cp(&lt;v1, hV1&gt;, pk(skS)), sndcode1&gt;++<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cp(&lt;v2, hV2&gt;, pk(skS)), sndcode2&gt;)<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Universal_VerProofV_v3">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Universal_VerProofV_v3">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Universal_VerProofV_v3"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Universal_VerProofV_v3">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Universal_VerProofV_v4 [heuristic={Universal_VerProofV_v4}]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>S A x1 x2 skS #a #i BB v1 v2 codes<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>Learn_A_Vs( S, A, &lt;&#39;votes&#39;, (v1++v2)&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Learn_A_Cs( S, A, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>VerProofV( A, BB,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PeqPVote(&lt;cp(x1, pk(skS)), cp(x2, pk(skS))&gt;, &lt;x1, x2&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;skS),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cp(x2, pk(skS)), cp(x1, pk(skS))&gt;, &lt;x2, x1&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#b hV1 hV2 sndcode1 sndcode2 n1 n2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>BB_Cs( BB, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_V( n1, BB, v1 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_V( n2, BB, v2 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>codes <span class="hl_operator">=</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;cp(&lt;v1, hV1&gt;, pk(skS)), sndcode1&gt;++<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cp(&lt;v2, hV2&gt;, pk(skS)), sndcode2&gt;)<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Universal_VerProofV_v4">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Universal_VerProofV_v4">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Universal_VerProofV_v4"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Universal_VerProofV_v4">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Universal_VerProofV_v5 [heuristic={Universal_VerProofV_v5}]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>S A x1 x2 skS #a #i BB v1 v2 codes<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>Learn_A_Vs( S, A, &lt;&#39;votes&#39;, (v1++v2)&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Learn_A_Cs( S, A, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>VerProofV( A, BB,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PeqPVote(&lt;cp(x1, pk(skS)), cp(x2, pk(skS))&gt;, &lt;x2, x1&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;skS),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cp(x1, pk(skS)), cp(x2, pk(skS))&gt;, &lt;x1, x2&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#b hV1 hV2 sndcode1 sndcode2 n1 n2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>BB_Cs( BB, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_V( n1, BB, v1 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_V( n2, BB, v2 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>codes <span class="hl_operator">=</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;cp(&lt;v1, hV1&gt;, pk(skS)), sndcode1&gt;++<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cp(&lt;v2, hV2&gt;, pk(skS)), sndcode2&gt;)<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Universal_VerProofV_v5">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Universal_VerProofV_v5">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Universal_VerProofV_v5"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Universal_VerProofV_v5">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Universal_VerProofV_v6 [heuristic={Universal_VerProofV_v6}]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>S A x1 x2 skS #a #i BB v1 v2 codes<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>Learn_A_Vs( S, A, &lt;&#39;votes&#39;, (v1++v2)&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Learn_A_Cs( S, A, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>VerProofV( A, BB,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PeqPVote(&lt;cp(x1, pk(skS)), cp(x2, pk(skS))&gt;, &lt;x2, x1&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;skS),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cp(x1, pk(skS)), cp(x2, pk(skS))&gt;, &lt;x2, x1&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#b hV1 hV2 sndcode1 sndcode2 n1 n2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>BB_Cs( BB, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_V( n1, BB, v1 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_V( n2, BB, v2 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>codes <span class="hl_operator">=</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;cp(&lt;v1, hV1&gt;, pk(skS)), sndcode1&gt;++<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cp(&lt;v2, hV2&gt;, pk(skS)), sndcode2&gt;)<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Universal_VerProofV_v6">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Universal_VerProofV_v6">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Universal_VerProofV_v6"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Universal_VerProofV_v6">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Universal_VerProofV_v7 [heuristic={Universal_VerProofV_v7}]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>S A x1 x2 skS #a #i BB v1 v2 codes<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>Learn_A_Vs( S, A, &lt;&#39;votes&#39;, (v1++v2)&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Learn_A_Cs( S, A, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>VerProofV( A, BB,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PeqPVote(&lt;cp(x1, pk(skS)), cp(x2, pk(skS))&gt;, &lt;x2, x1&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;skS),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cp(x2, pk(skS)), cp(x1, pk(skS))&gt;, &lt;x1, x2&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#b hV1 hV2 sndcode1 sndcode2 n1 n2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>BB_Cs( BB, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_V( n1, BB, v1 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_V( n2, BB, v2 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>codes <span class="hl_operator">=</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;cp(&lt;v1, hV1&gt;, pk(skS)), sndcode1&gt;++<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cp(&lt;v2, hV2&gt;, pk(skS)), sndcode2&gt;)<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Universal_VerProofV_v7">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Universal_VerProofV_v7">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Universal_VerProofV_v7"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Universal_VerProofV_v7">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Universal_VerProofV_v8 [heuristic={Universal_VerProofV_v8}]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>S A x1 x2 skS #a #i BB v1 v2 codes<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>Learn_A_Vs( S, A, &lt;&#39;votes&#39;, (v1++v2)&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Learn_A_Cs( S, A, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>VerProofV( A, BB,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PeqPVote(&lt;cp(x1, pk(skS)), cp(x2, pk(skS))&gt;, &lt;x2, x1&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;skS),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cp(x2, pk(skS)), cp(x1, pk(skS))&gt;, &lt;x2, x1&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#b hV1 hV2 sndcode1 sndcode2 n1 n2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>BB_Cs( BB, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_V( n1, BB, v1 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_V( n2, BB, v2 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>codes <span class="hl_operator">=</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;cp(&lt;v1, hV1&gt;, pk(skS)), sndcode1&gt;++<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cp(&lt;v2, hV2&gt;, pk(skS)), sndcode2&gt;)<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Universal_VerProofV_v8">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Universal_VerProofV_v8">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Universal_VerProofV_v8"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Universal_VerProofV_v8">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Universal_VerProofY_v1 [heuristic={Universal_VerProofY_v1}]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>A x1 x2 skS #i BB codes #a S y1 y2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>Learn_A_YSGs( S, A, &lt;&#39;ySG&#39;, (y1++y2)&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Learn_A_Cs( S, A, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>VerProofY( A, BB,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PeqPY(&lt;cp(x1, pk(skS)), cp(x2, pk(skS))&gt;, &lt;x1, x2&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;skS),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cp(x1, pk(skS)), cp(x2, pk(skS))&gt;, &lt;x1, x2&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#b hY1 hY2 fstcode1 fstcode2 n1 n2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>BB_Cs( BB, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_yPrime( n1, BB, y1 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_yPrime( n2, BB, y2 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>codes <span class="hl_operator">=</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;fstcode1, cp(&lt;y1, hY1&gt;, pk(skS))&gt;++<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;fstcode2, cp(&lt;y2, hY2&gt;, pk(skS))&gt;)<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Universal_VerProofY_v1">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Universal_VerProofY_v1">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Universal_VerProofY_v1"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Universal_VerProofY_v1">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Universal_VerProofY_v2 [heuristic={Universal_VerProofY_v2}]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>A x1 x2 skS #i BB codes #a S y1 y2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>Learn_A_YSGs( S, A, &lt;&#39;ySG&#39;, (y1++y2)&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Learn_A_Cs( S, A, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>VerProofY( A, BB,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PeqPY(&lt;cp(x1, pk(skS)), cp(x2, pk(skS))&gt;, &lt;x1, x2&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;skS),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cp(x1, pk(skS)), cp(x2, pk(skS))&gt;, &lt;x2, x1&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#b hY1 hY2 fstcode1 fstcode2 n1 n2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>BB_Cs( BB, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_yPrime( n1, BB, y1 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_yPrime( n2, BB, y2 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>codes <span class="hl_operator">=</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;fstcode1, cp(&lt;y1, hY1&gt;, pk(skS))&gt;++<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;fstcode2, cp(&lt;y2, hY2&gt;, pk(skS))&gt;)<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Universal_VerProofY_v2">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Universal_VerProofY_v2">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Universal_VerProofY_v2"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Universal_VerProofY_v2">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Universal_VerProofY_v3 [heuristic={Universal_VerProofY_v3}]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>A x1 x2 skS #i BB codes #a S y1 y2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>Learn_A_YSGs( S, A, &lt;&#39;ySG&#39;, (y1++y2)&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Learn_A_Cs( S, A, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>VerProofY( A, BB,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PeqPY(&lt;cp(x1, pk(skS)), cp(x2, pk(skS))&gt;, &lt;x1, x2&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;skS),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cp(x2, pk(skS)), cp(x1, pk(skS))&gt;, &lt;x1, x2&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#b hY1 hY2 fstcode1 fstcode2 n1 n2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>BB_Cs( BB, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_yPrime( n1, BB, y1 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_yPrime( n2, BB, y2 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>codes <span class="hl_operator">=</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;fstcode1, cp(&lt;y1, hY1&gt;, pk(skS))&gt;++<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;fstcode2, cp(&lt;y2, hY2&gt;, pk(skS))&gt;)<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Universal_VerProofY_v3">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Universal_VerProofY_v3">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Universal_VerProofY_v3"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Universal_VerProofY_v3">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Universal_VerProofY_v4 [heuristic={Universal_VerProofY_v4}]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>A x1 x2 skS #i BB codes #a S y1 y2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>Learn_A_YSGs( S, A, &lt;&#39;ySG&#39;, (y1++y2)&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Learn_A_Cs( S, A, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>VerProofY( A, BB,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PeqPY(&lt;cp(x1, pk(skS)), cp(x2, pk(skS))&gt;, &lt;x1, x2&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;skS),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cp(x2, pk(skS)), cp(x1, pk(skS))&gt;, &lt;x2, x1&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#b hY1 hY2 fstcode1 fstcode2 n1 n2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>BB_Cs( BB, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_yPrime( n1, BB, y1 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_yPrime( n2, BB, y2 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>codes <span class="hl_operator">=</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;fstcode1, cp(&lt;y1, hY1&gt;, pk(skS))&gt;++<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;fstcode2, cp(&lt;y2, hY2&gt;, pk(skS))&gt;)<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Universal_VerProofY_v4">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Universal_VerProofY_v4">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Universal_VerProofY_v4"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Universal_VerProofY_v4">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Universal_VerProofY_v5 [heuristic={Universal_VerProofY_v5}]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>A x1 x2 skS #i BB codes #a S y1 y2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>Learn_A_YSGs( S, A, &lt;&#39;ySG&#39;, (y1++y2)&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Learn_A_Cs( S, A, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>VerProofY( A, BB,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PeqPY(&lt;cp(x1, pk(skS)), cp(x2, pk(skS))&gt;, &lt;x2, x1&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;skS),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cp(x1, pk(skS)), cp(x2, pk(skS))&gt;, &lt;x1, x2&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#b hY1 hY2 fstcode1 fstcode2 n1 n2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>BB_Cs( BB, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_yPrime( n1, BB, y1 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_yPrime( n2, BB, y2 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>codes <span class="hl_operator">=</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;fstcode1, cp(&lt;y1, hY1&gt;, pk(skS))&gt;++<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;fstcode2, cp(&lt;y2, hY2&gt;, pk(skS))&gt;)<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Universal_VerProofY_v5">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Universal_VerProofY_v5">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Universal_VerProofY_v5"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Universal_VerProofY_v5">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Universal_VerProofY_v6 [heuristic={Universal_VerProofY_v6}]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>A x1 x2 skS #i BB codes #a S y1 y2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>Learn_A_YSGs( S, A, &lt;&#39;ySG&#39;, (y1++y2)&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Learn_A_Cs( S, A, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>VerProofY( A, BB,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PeqPY(&lt;cp(x1, pk(skS)), cp(x2, pk(skS))&gt;, &lt;x2, x1&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;skS),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cp(x1, pk(skS)), cp(x2, pk(skS))&gt;, &lt;x2, x1&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#b hY1 hY2 fstcode1 fstcode2 n1 n2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>BB_Cs( BB, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_yPrime( n1, BB, y1 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_yPrime( n2, BB, y2 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>codes <span class="hl_operator">=</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;fstcode1, cp(&lt;y1, hY1&gt;, pk(skS))&gt;++<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;fstcode2, cp(&lt;y2, hY2&gt;, pk(skS))&gt;)<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Universal_VerProofY_v6">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Universal_VerProofY_v6">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Universal_VerProofY_v6"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Universal_VerProofY_v6">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Universal_VerProofY_v7 [heuristic={Universal_VerProofY_v7}]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>A x1 x2 skS #i BB codes #a S y1 y2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>Learn_A_YSGs( S, A, &lt;&#39;ySG&#39;, (y1++y2)&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Learn_A_Cs( S, A, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>VerProofY( A, BB,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PeqPY(&lt;cp(x1, pk(skS)), cp(x2, pk(skS))&gt;, &lt;x2, x1&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;skS),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cp(x2, pk(skS)), cp(x1, pk(skS))&gt;, &lt;x1, x2&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#b hY1 hY2 fstcode1 fstcode2 n1 n2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>BB_Cs( BB, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_yPrime( n1, BB, y1 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_yPrime( n2, BB, y2 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>codes <span class="hl_operator">=</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;fstcode1, cp(&lt;y1, hY1&gt;, pk(skS))&gt;++<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;fstcode2, cp(&lt;y2, hY2&gt;, pk(skS))&gt;)<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Universal_VerProofY_v7">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Universal_VerProofY_v7">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Universal_VerProofY_v7"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Universal_VerProofY_v7">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Universal_VerProofY_v8 [heuristic={Universal_VerProofY_v8}]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>A x1 x2 skS #i BB codes #a S y1 y2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>Learn_A_YSGs( S, A, &lt;&#39;ySG&#39;, (y1++y2)&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Learn_A_Cs( S, A, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #a<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>VerProofY( A, BB,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PeqPY(&lt;cp(x1, pk(skS)), cp(x2, pk(skS))&gt;, &lt;x2, x1&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;skS),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cp(x2, pk(skS)), cp(x1, pk(skS))&gt;, &lt;x2, x1&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#b hY1 hY2 fstcode1 fstcode2 n1 n2<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>BB_Cs( BB, &lt;&#39;codes&#39;, codes&gt; ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_yPrime( n1, BB, y1 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>BB_yPrime( n2, BB, y2 ) <span class="hl_operator">@</span> #b<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>codes <span class="hl_operator">=</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;fstcode1, cp(&lt;y1, hY1&gt;, pk(skS))&gt;++<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;fstcode2, cp(&lt;y2, hY2&gt;, pk(skS))&gt;)<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Universal_VerProofY_v8">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Universal_VerProofY_v8">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Universal_VerProofY_v8"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Universal_VerProofY_v8">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">end</span><br/>
+ 

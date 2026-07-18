@@ -1,0 +1,53 @@
+<span class="hl_keyword">theory</span> <a class="internal-link help" href="/thy/trace/4/main/help">AttestedComputation</a> <span class="hl_keyword">begin</span><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/4/main/message"><strong>Message theory</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/4/main/rules"><strong>Multiset rewriting rules and restrictions</strong> (46)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/4/main/tactic"><strong>Tactic(s)</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/4/main/cases/raw/0/0"><strong>Raw sources</strong> (52 cases, deconstructions complete)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/4/main/cases/refined/0/0"><strong>Refined sources </strong> (52 cases, deconstructions complete)</a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/4/main/add/%3Cfirst%3E">add lemma</a><br/>
+<br/>
+<span class="hl_bad"><span class="hl_keyword">lemma</span> can_run_v:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∃ </span>#i m<span class="hl_operator">.</span> Local( m, &#39;loc&#39; ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/4/main/edit/can_run_v">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/4/main/delete/can_run_v">delete lemma</a></span><br/>
+<a class="internal-link proof-step hl_bad" href="/thy/trace/4/main/proof/can_run_v"><span class="hl_keyword">simplify</span></a><a class="internal-link remove-step" href="/thy/trace/4/main/proof/can_run_v"></a><br/>
+<span class="hl_bad"><span class="hl_keyword">by</span> </span><a class="internal-link proof-step hl_bad" href="/thy/trace/4/main/proof/can_run_v/_"><span class="hl_keyword">solve(</span> State_1211111111111( StateChannel, lock, state2, i.1,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lio, o, r<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) ▶₀ #i <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/4/main/proof/can_run_v/_"></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/4/main/add/can_run_v">add lemma</a><br/>
+<br/>
+<span class="hl_good"><span class="hl_keyword">lemma</span> simp [reuse]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#i m<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>!KU( rep(m, &#39;loc&#39;) ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#j<span class="hl_operator">.</span> Remote( m, &#39;loc&#39; ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/4/main/edit/simp">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/4/main/delete/simp">delete lemma</a></span><br/>
+<a class="internal-link proof-step hl_good" href="/thy/trace/4/main/proof/simp"><span class="hl_keyword">simplify</span></a><a class="internal-link remove-step" href="/thy/trace/4/main/proof/simp"></a><br/>
+<a class="internal-link proof-step hl_good" href="/thy/trace/4/main/proof/simp/_"><span class="hl_keyword">solve(</span> !KU( rep(m, &#39;loc&#39;) ) <span class="hl_operator">@</span> #i <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/4/main/proof/simp/_"></a><br/>
+&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">case</span> ReportRule</span><br/>
+&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">by</span> </span><a class="internal-link proof-step hl_good" href="/thy/trace/4/main/proof/simp/_/ReportRule"><span class="hl_keyword">contradiction</span> <span class="hl_comment">/* from formulas */</span></a><a class="internal-link remove-step" href="/thy/trace/4/main/proof/simp/_/ReportRule"></a><br/>
+<span class="hl_good"><span class="hl_keyword">qed</span></span><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/4/main/add/simp">add lemma</a><br/>
+<br/>
+<span class="hl_good"><span class="hl_keyword">lemma</span> attested_comput:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#i m<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Local( m, &#39;loc&#39; ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#j<span class="hl_operator">.</span> Remote( m, &#39;loc&#39; ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/4/main/edit/attested_comput">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/4/main/delete/attested_comput">delete lemma</a></span><br/>
+<a class="internal-link proof-step hl_good" href="/thy/trace/4/main/proof/attested_comput"><span class="hl_keyword">simplify</span></a><a class="internal-link remove-step" href="/thy/trace/4/main/proof/attested_comput"></a><br/>
+<span class="hl_good"><span class="hl_keyword">by</span> </span><a class="internal-link proof-step hl_good" href="/thy/trace/4/main/proof/attested_comput/_"><span class="hl_keyword">solve(</span> State_1211111111111( StateChannel, lock, state2, i.1,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lio, o, r<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) ▶₀ #i <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/4/main/proof/attested_comput/_"></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/4/main/add/attested_comput">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">end</span><br/>
+ 

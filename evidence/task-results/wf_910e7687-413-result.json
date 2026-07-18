@@ -1,0 +1,66 @@
+{
+  "summary": "Sealed producers round 2: R5 theory-path grammar + R2 proof-script west pane assembly (Fable), then both-sides audit",
+  "agentCount": 2,
+  "logs": [],
+  "result": {
+    "impl": "ROUND 2 COMPLETE — R5 (theory-path grammar) + R2 (proof-script west pane) both implemented, gated, and documented. All servers stopped (3131/3132/3133; full 3100-3199 scan clean). No git commits; nothing outside /home/kamilner/tamarin-cleanroom/weblayer/ modified.\n\nR5 — theory-path grammar (/home/kamilner/tamarin-cleanroom/weblayer/producers/workspace/producers-clean/src/path.rs)\n- Render side from the full corpus href harvest (923,498 URLs, own tool tools/harvest_hrefs.py): segment bytes are [A-Za-z0-9_.] raw plus exactly one escape pair ever — add/%3Cfirst%3E (uppercase hex). main/lemma never appears in any href.\n- Parse side from live batteries against own-authored theories (PathProbe, EncProbe2): split on raw '/' THEN percent-decode per segment (%2F does not split; invalid %-sequences stay literal; UTF-8 with U+FFFD replacement; '+' not a space); heads exact and case-sensitive; extra segments after a complete match ignored; empty names parse; lemma existence is resolution, not parse.\n- The numeric cases-segments are a Haskell-reads-shaped integer prefix: accepts 0x/0o/0b any case, parens, \"- 1\", trailing junk (1abc, 1_, (1)x); rejects +1, floats (1.0, 1e2), and the underscore-prefix quirk _1 (lexes as identifier). The two index values are byte-inert (bodies identical for 0/0 vs 9/9 vs -1/0) — source-vs-case mapping recorded UNOBSERVABLE. Hoped-for arbitrary-byte encoding channel via metachar filename COLLAPSED (download/get_and_append URLs derive from the theory name) — encoding beyond %3C/%3E recorded UNOBSERVABLE with documented RFC3986-unreserved choice.\n- Tests: live acceptance replay (68 accept + 27 reject probes), decode-echo fixtures, parse⇄render round-trip, and a corpus sweep round-tripping all 40,037 distinct main/* href tails byte-identically (497 method/ tails asserted out-of-vocabulary per the interface enum).\n\nR2 — west pane assembly (src/proofscript.rs, links constructed through R5, skin through R1's postprocess)\n- Corpus is 478 overview panes (82 help + 396 proof; SPEC's 473 undercounts by 5). Frame: lines + final space; 5 fixed nav items; add-first; per-lemma decl/edit-or-delete/proof/add; two blanks before end when lemma-less; proved headers wrapped in one status span (hl_good x3192, hl_bad x146), incomplete proofs unwrapped; proof lines opaque R2 input (R3 later).\n- Key discovery: the quantifier/formula inline-vs-vertical layout is decided on ESCAPED width (entities at escaped length; visible chars/bytes provably do not separate — minimal corpus pair at 55 visible), and a live 35-lemma bisection theory (WProbe, 4 formula families) pinned the boundary to exactly <=69 inline / >=70 vertical, chars not bytes.\n- Acceptance: corpus_sweep_all_overview_panes = 478/478 slice-and-re-render byte-identity with every frame byte asserted during strict inversion; live replays 3/3 on never-captured theories (PathProbe fresh, WProbe, PathProbe v2 after a live autoprove = proved hl_good tree). Mutation checks all observed to fail then rever",
+    "audit": "Producers Round 2 audit complete. Appended a full both-sides section to `/home/kamilner/tamarin-cleanroom/weblayer/AUDIT.md` (now 1329 lines; ends `VERDICT: pass`).\n\nSummary of what I verified in the round-2 delta (R5 `path.rs` + R2 `proofscript.rs`, against upstream `Types.hs` `parseTheoryPath`/`renderTheoryPath` and `Theory.hs` `theoryIndex`/`lemmaIndex`/`proofIndex`):\n\n- Every grammar rule (§11) and pane-assembly rule (§12–§13) in BEHAVIOR.md traces to a logged probe/capture — mapped each to [S14]–[S18]/[L08]–[L15]. The five tools read only captured OUTPUT or drive the live oracle over curl; none reads a source tree. Re-ran the suite: 24 tests green.\n- MERGER (byte-forced, correctly reproduced): the R5 URL-token grammar (pinned by [S14]/[L08]–[L13] + the 40037-tail round-trip) and the R2 west-pane frame (pinned by the 478/478 slice-and-re-render sweep).\n- Affirmative non-copying: the numeric grammar reconstructs GHC-`reads` behavior from the [L10] battery (upstream has no such code — it calls Prelude `safeRead`, so there is no tamarin expression to copy); `prefixWithUnderscore`/`unprefixUnderscore` pointedly absent; `ThyPath` coarser than `TheoryPath` (omits `Method`); R2 holds nav vocabulary/formula/rules-label opaque where upstream computes them; layout is a probe-bisected `≤69` escaped-width special-case over a flat `Vec<String>` rather than HughesPJ `nest 2 (sep …)`. Zero identifier-constellation overlap, no comment lineage.\n- Tests are live byte gates (strict inversion asserting every frame byte + the inline/vertical width witness; three documented mutation checks that fail-then-revert).\n\nPH-1 confirmed resolved: SPEC.md/README.md now cite only ported `.rs` seams (`theory_html.rs`/`proof_tree.rs`/`root.rs`/`path_parse.rs`) plus pseudonymous usernames, matching the sibling-SPEC norm; a full sealed-readable scan (scaffold + workspace + round-2 files) finds zero `src/Web/*.hs` / `Text/PrettyPrint/Html.hs` paths, and nothing in the delta re-introduced a citation.\n\nThree non-blocking notes (not findings, no redo): continued shipped-comment provenance narration plus two stale refs in `proofscript.rs` (\"473\"→478; \"§11\"→§12); render-side `prefixWithUnderscore` omission (latent fidelity edge for `_`-prefixed lemma names, but affirmatively non-copying and corpus-unobservable); and `-`/`~` kept raw in `encode_segment` beyond the observed `[A-Za-z0-9_.]` set (scenes-à-faire, honestly flagged UNOBSERVABLE).\n\nVERDICT: pass",
+    "passed": true
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Implement"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "Audit"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "seal:producers-r2",
+      "phaseIndex": 1,
+      "phaseTitle": "Implement",
+      "agentId": "a4262551b04e2c696",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1784386289428,
+      "queuedAt": 1784386289425,
+      "attempt": 1,
+      "lastToolName": "Bash",
+      "lastToolSummary": "cd /home/kamilner/tamarin-cleanroom/weblayer/producers/work…",
+      "promptPreview": "You are a SEALED implementer under the barrier protocol at /home/kamilner/tamarin-cleanroom/PROTOCOL.md — read it first and comply strictly.\nACCESS RULES: You must NOT read any file under /home/kamilner/tamarin-rs/crates/, and NOT read any Haskell source of tamarin-prover anywhere on disk (notably /home/kamilner/tamarin-rs/tamarin-prover/{lib,src}/ and /home/kamilner/tamarin-rs/tamarin-prover-test…",
+      "lastProgressAt": 1784388753003,
+      "tokens": 253111,
+      "toolCalls": 103,
+      "durationMs": 2463575,
+      "resultPreview": "ROUND 2 COMPLETE — R5 (theory-path grammar) + R2 (proof-script west pane) both implemented, gated, and documented. All servers stopped (3131/3132/3133; full 3100-3199 scan clean). No git commits; nothing outside /home/kamilner/tamarin-cleanroom/weblayer/ modified.\n\nR5 — theory-path grammar (/home/kamilner/tamarin-cleanroom/weblayer/producers/workspace/producers-clean/src/path.rs)\n- Render side fro…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "audit:producers-r2",
+      "phaseIndex": 2,
+      "phaseTitle": "Audit",
+      "agentId": "a627c1987001ec5ff",
+      "model": "claude-opus-4-8[1m]",
+      "state": "done",
+      "startedAt": 1784388753007,
+      "queuedAt": 1784388753004,
+      "attempt": 1,
+      "lastToolName": "Bash",
+      "lastToolSummary": "cd /home/kamilner/tamarin-cleanroom && tail -2 weblayer/AUD…",
+      "promptPreview": "You are a BOTH-SIDES similarity auditor for the tamarin-rs sealed relicensing campaign (exempt from barrier access rules; you may read everything). Audit ONLY this round's delta: /home/kamilner/tamarin-cleanroom is a git repo whose HEAD (b4810fe) contains producers round 1 — git -C /home/kamilner/tamarin-cleanroom status/diff restricted to weblayer/ shows the round-2 delta (R5 path grammar + R2 we…",
+      "lastProgressAt": 1784389288325,
+      "tokens": 148556,
+      "toolCalls": 27,
+      "durationMs": 535318,
+      "resultPreview": "Producers Round 2 audit complete. Appended a full both-sides section to `/home/kamilner/tamarin-cleanroom/weblayer/AUDIT.md` (now 1329 lines; ends `VERDICT: pass`).\n\nSummary of what I verified in the round-2 delta (R5 `path.rs` + R2 `proofscript.rs`, against upstream `Types.hs` `parseTheoryPath`/`renderTheoryPath` and `Theory.hs` `theoryIndex`/`lemmaIndex`/`proofIndex`):\n\n- Every grammar rule (§11…"
+    }
+  ],
+  "totalTokens": 401667,
+  "totalToolCalls": 130
+}

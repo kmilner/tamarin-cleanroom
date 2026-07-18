@@ -1,0 +1,32 @@
+<span class="hl_keyword">theory</span> <a class="internal-link help" href="/thy/trace/2/main/help">PathProbe</a> <span class="hl_keyword">begin</span><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/2/main/message"><strong>Message theory</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/2/main/rules"><strong>Multiset rewriting rules</strong> (3)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/2/main/tactic"><strong>Tactic(s)</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/2/main/cases/raw/0/0"><strong>Raw sources</strong> (3 cases, deconstructions complete)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/2/main/cases/refined/0/0"><strong>Refined sources </strong> (3 cases, deconstructions complete)</a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/2/main/add/%3Cfirst%3E">add lemma</a><br/>
+<br/>
+<span class="hl_good"><span class="hl_keyword">lemma</span> foo:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∃ </span>x #i<span class="hl_operator">.</span> Made( x ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/2/main/edit/foo">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/2/main/delete/foo">delete lemma</a></span><br/>
+<a class="internal-link proof-step hl_good" href="/thy/trace/2/main/proof/foo"><span class="hl_keyword">simplify</span></a><a class="internal-link remove-step" href="/thy/trace/2/main/proof/foo"></a><br/>
+<a class="internal-link proof-step hl_good" href="/thy/trace/2/main/proof/foo/_"><span class="hl_keyword">SOLVED</span> <span class="hl_comment">// trace found</span></a><a class="internal-link remove-step" href="/thy/trace/2/main/proof/foo/_"></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/2/main/add/foo">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> bar:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>x #i<span class="hl_operator">.</span> <span class="hl_operator">(</span>Made( x ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span><span class="hl_operator">∃ </span>#j<span class="hl_operator">.</span> Made( x ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/2/main/edit/bar">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/2/main/delete/bar">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/2/main/proof/bar"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/2/main/add/bar">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">end</span><br/>
+ 

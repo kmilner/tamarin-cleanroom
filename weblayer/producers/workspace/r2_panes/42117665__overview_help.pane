@@ -1,0 +1,56 @@
+<span class="hl_keyword">theory</span> <a class="internal-link help" href="/thy/trace/1/main/help">counter</a> <span class="hl_keyword">begin</span><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/message"><strong>Message theory</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/rules"><strong>Multiset rewriting rules</strong> (4)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/tactic"><strong>Tactic(s)</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/cases/raw/0/0"><strong>Raw sources</strong> (7 cases, deconstructions complete)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/cases/refined/0/0"><strong>Refined sources </strong> (7 cases, deconstructions complete)</a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/%3Cfirst%3E">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> counters_linear_order [reuse, use_induction]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>x y #i #j s<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>Counter( s, x ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Counter( s, y ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">∃ </span>z<span class="hl_operator">.</span> (x++z) <span class="hl_operator">=</span> y<span class="hl_operator">)</span> <span class="hl_operator">∨</span> <span class="hl_operator">(</span><span class="hl_operator">∃ </span>z<span class="hl_operator">.</span> (y++z) <span class="hl_operator">=</span> x<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∨</span> <span class="hl_operator">(</span>y <span class="hl_operator">=</span> x<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/counters_linear_order">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/counters_linear_order">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/counters_linear_order"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/counters_linear_order">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> counter_start [reuse, use_induction]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#i x s<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Counter( s, x ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#j<span class="hl_operator">.</span> <span class="hl_operator">(</span>Start( s ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>#j <span class="hl_operator">&lt;</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/counter_start">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/counter_start">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/counter_start"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/counter_start">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> counter_increases [reuse, use_induction]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>x y #i #j s<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>Counter( s, x ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Counter( s, y ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>#i <span class="hl_operator">&lt;</span> #j<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span><span class="hl_operator">∃ </span>z<span class="hl_operator">.</span> (x++z) <span class="hl_operator">=</span> y<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/counter_increases">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/counter_increases">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/counter_increases"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/counter_increases">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> lesser_senc_secret [use_induction]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>x y #i #j s<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>Counter( s, x ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>K( senc(h(y), s) ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>#i <span class="hl_operator">&lt;</span> #j<span class="hl_operator">)</span> <span class="hl_operator">∨</span> <span class="hl_operator">(</span><span class="hl_operator">∃ </span>z<span class="hl_operator">.</span> (y++z) <span class="hl_operator">=</span> x<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/lesser_senc_secret">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/lesser_senc_secret">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/lesser_senc_secret"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/lesser_senc_secret">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">end</span><br/>
+ 

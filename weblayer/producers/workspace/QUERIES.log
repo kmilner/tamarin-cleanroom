@@ -109,3 +109,128 @@ cargo test: 14 tests green, zero warnings. corpus_sweep_all_manifests = 324/324
 byte-identical; round1_materialized_targets = 44/44; live_probe_replays = 8/8.
 Mutation check: doctoring the break marker to "<br />" makes the sweep FAIL
 (the gate is not vacuous); reverted.
+
+## Round 2 (R5 theory-path grammar, then R2 west pane) — this session
+[S14] tools/harvest_hrefs.py (own tool, corpus-only) | href/action/dotsrc URL
+      inventory across all 81 manifests (923498 URLs): families = main/proof
+      868032, main/add 4285 (incl. add/%3Cfirst%3E x946 = the ONLY %-escape in
+      the whole corpus), main/edit+delete 3812 each, main/cases x1025 (tails
+      raw/0/0 + refined/0/0 ONLY), main/method 771 (L/1,L/2), main/help/message/
+      rules/tactic x473 each, autoprove/autoproveAll/reload/get_and_append/
+      interactive-graph-def; main/lemma NEVER appears in any href. Segment byte
+      inventory beyond alnum: '_' '.' '%' only. Proof-path sub-segments all
+      match [A-Za-z0-9_]+; root marker '_' at position 0 (x445518) and also
+      mid-path; case display names == href segments 1:1 (no rewriting).
+[L08] wrote OWN theory PathProbe (scratchpad; 1 rule, 2 lemmas foo/bar);
+      hs_server.sh start on 3131 | parse-side acceptance battery #1
+      (tools/probe_paths.sh): main/{help,message,rules,tactic} 200 json;
+      main/lemma/ANY 200 (even nonexistent — resolution is content-side);
+      main/proof/foo 200, main/proof/foo/_ 200 ("No such lemma or proof path",
+      title "Method: None" — parse OK, resolve fail), main/proof/nonexistent
+      200 (title "Lemma: nonexistent"), bare main/proof 404. cases numerics:
+      raw/0/0 + refined/0/0 200; 00, -1, 0x1 ACCEPTED (200); abc 404;
+      arity: cases/raw/1 404, cases/raw/0/0/extra 200 (extra IGNORED);
+      cases/bogus/... + cases/RAW/... 404 (heads case-sensitive, exact).
+[L09] probe 3131 battery #2 | percent-decoding: main/me%73sage == main/message
+      (decode BEFORE head match); %2F does NOT split (proof/foo%2F_ -> title
+      "Lemma: foo/_"); add/sp%20ace -> name "sp ace", add/pct%25enc -> "pct%enc"
+      (form-action echo channel); add/edit/delete accept ANY name incl.
+      nonexistent; trailing slash tolerated (message/ 200 = ["message",""],
+      extra ignored); main//message 404 (empty segment matches no head);
+      main/MESSAGE 404. main/message/extra 200 — extra segments ignored after
+      a complete match (also help/extra, add/foo/extra, lemma/foo/extra).
+[L10] probe 3131 battery #3+#4+#5 | the cases numeric-segment grammar is a
+      Haskell-read-shaped integer: ACCEPT 0o10 0b1 0X1 0O10 (1) ((1)) "- 1"
+      "( -1 )" %091%09 " 1" "1 " 1_ 1_0 0x_1 1abc 1- 1) (1)x 99999999999999999999
+      (prefix parse; junk after the lexeme ignored) — REJECT +1 _1 (leading
+      underscore lexes as identifier: the underscore-prefix quirk) 1.0 1e2
+      (float lexeme) --1 -(-1) (-1 (1x) "" and unicode. Both numeric args
+      byte-identical bodies for 0/0 vs 0/1 vs 1/0 vs 9/9 (len 4776): the two
+      indices do NOT change the pane bytes — which is source vs case index is
+      UNOBSERVABLE at this boundary. Version-index segment is a DIFFERENT
+      grammar: 01 + +1 accepted, -1/0x1/" 1"/"1 "/1x/#(%23) 404 (can't split
+      parse-vs-resolve 404 there; out of R5 scope — producers render idx as
+      plain decimal). /thy/equiv/... and /thy/TRACE/... 404 on a trace theory.
+[L11] probe 3131 battery #6 | del/path acceptance oracle (parse->alert,
+      no-parse->404): help/message/rules/tactic/cases/raw/0/0, method/foo/1,
+      add/x, edit/x, delete/x -> 200 alert "Can't delete the given theory
+      path!"; lemma/nonexistent -> 200 alert "Sorry, but removing lemmas did
+      not work!"; del/path/help/extra -> 200 (extra ignored here too);
+      sources + method/foo/abc -> 404. verify/help + verify/lemma/nonexistent
+      -> 200 {html} pane. Arity minima: main/{add,edit,delete,lemma,cases,
+      cases/raw,main alone} 404 without their arg; but EMPTY-STRING names parse
+      (edit/ , proof/ , proof// , lemma/ all 200).
+[L12] probe 3131 | decode edges via the add-form echo: '+' NOT decoded to
+      space (a+b -> "a+b"); %2B -> '+'; INVALID %-sequences pass through RAW
+      (a%zzb -> "a%zzb", a% -> "a%", a%2 -> "a%2", a%G1b -> "a%G1b");
+      caf%C3%A9 -> "café" (UTF-8); a%00b echoes "ab" (NUL dropped somewhere
+      downstream); a%FFb / a%C3b -> U+FFFD replacement (efbfbd) — decode %XX
+      to bytes then UTF-8-with-replacement.
+[L13] wrote OWN theory EncProbe2 served from metachar FILENAME
+      "enc probe &\"<>'%#?=+,;@[]()~$é.spthy" on 3132 | the hoped-for
+      arbitrary-byte href channel COLLAPSED: download + get_and_append URLs
+      derive from the THEORY NAME ("EncProbe2.spthy"), not the filename, so
+      href %-encoding beyond %3C/%3E (<first>) is UNOBSERVABLE — every other
+      rendered segment in corpus+live is [A-Za-z0-9_.]. Server 3132 STOPPED.
+[S15] tools/extract_r5_tails.py (own tool, corpus-only) | materialized the
+      40037 DISTINCT main/* href wildcard tails (883629 occurrences) into
+      workspace/r5_tails/tails.txt — the R5 byte targets
+      tests/r5_path_grammar.rs round-trips (parse -> render byte-identity;
+      the 497 method/ tails asserted out-of-vocabulary).
+[S16] tools/analyze_west.py + follow-up sweeps (corpus-only) | west-pane
+      element grammar over ALL overview captures (478 = 82 help + 396 proof
+      across the 81 manifests; the SPEC's "473" undercounts by 5): every pane
+      ends "<br/>\n " (trailing space); header line theory/NAME-link/begin;
+      exactly 5 item lines in fixed order message,rules,tactic,cases/raw/0/0,
+      cases/refined/0/0, each blank-separated, shape <a class="internal-link"
+      href=.../main/TAIL><strong>LABEL</strong> ANN</a> (ANN empty for message/
+      tactic -> "</strong> </a>"); rules label VARIES "Multiset rewriting
+      rules"[" and restrictions"] (180/293) though the R1 rules TITLE is
+      constant; add-first link add/%3Cfirst%3E; per lemma: blank, decl,
+      quantifier/formula block, edit--or--delete line (two spaces around
+      "or"), proof display, blank, add/<name>; blank + end; ZERO lemmas ->
+      TWO blanks before end (2 panes). Proved lemma header (decl + edit line)
+      wrapped in ONE status span: hl_good x3192, hl_bad x146; sorry x398 and
+      INCOMPLETE trees (root step sorry-step, e.g. partial induction) carry
+      NO wrapper. by-sorry line + edit/delete/add link shapes byte-uniform
+      given (idx, name).
+[S17] corpus | lemma declaration = "lemma NAME{ATTRS}:"; ATTRS starts " ["
+      or is empty; 46 declarations are MULTI-LINE (long heuristic lists wrap
+      at the pretty layer with &nbsp; continuation indents) -> ATTRS is
+      opaque possibly-multi-line text, terminated by the ":" line ending.
+      Attribute vocabulary: reuse, use_induction, sources, heuristic={..},
+      hide_lemma=.., combinations.
+[S18] corpus | the quantifier/formula layout: single-line formulas inline as
+      "  QUANT &quot;F&quot;", else vertical (quant alone, formula lines at
+      2+own indent). Candidate width metrics: visible chars and visible bytes
+      DO NOT separate inline from vertical (both overlap at 55/61 — minimal
+      pair SnegACRecurse inline vs SnegRecurse vertical differing only in
+      &lt;a, a&gt; vs (a++a)); the ESCAPED-text length (tags stripped,
+      entities at escaped length) separates: inline max 65 < vertical-single
+      min 71. Corpus bound: W in [65,70].
+[L14] wrote OWN theory WProbe (35 lemmas, 4 formula families A/X/D/E with
+      escaped-width 63..72: plain all-traces, exists-trace, 3-unicode-ops,
+      &lt;&gt;-escaping); served on 3133; overview west pane | the boundary is
+      EXACTLY <=69 inline / >=70 vertical on ALL four families: metric counts
+      escaped CHARS (unicode ops 1 each — a bytes metric would shift family D
+      by 4; entities at 4-6 chars each — family E confirms). Constant
+      INLINE_WIDTH_LIMIT=69.
+[L15] live captures -> workspace/r2_live/ (3 panes, replayed by
+      tests/r2_west_pane.rs::live_probe_pane_replays): PathProbe v1 (3131,
+      fresh 2-lemma), WProbe v1 (3133, the 35-lemma boundary theory), and
+      PathProbe v2 after LIVE autoprove/idfs/0/False/proof/foo (redirect to
+      /thy/trace/2/overview/proof/foo/_) — a proved hl_good tree pane never
+      seen in the corpus shape-for-shape. Servers 3131+3133 STOPPED; full
+      3100-3199 scan clean.
+
+## Validation status (round 2 close: R5 + R2)
+cargo test: 24 tests green (R1 14 + R5 6 + R2 4), cargo clippy --all-targets:
+zero warnings. R5: acceptance battery replay (68 accepted + 27 rejected probes)
++ parse<->render round-trip + 40037-tail corpus byte sweep. R2:
+corpus_sweep_all_overview_panes = 478/478 pane byte-identity (slice ->
+re-render, frame bytes asserted during inversion); live replays 3/3.
+Mutation checks (each observed to FAIL, then reverted, suite re-green):
+(1) edit-line "  or  " -> " or " breaks corpus sweep + fixtures + live;
+(2) width limit 69->68 breaks corpus sweep; 69->70 breaks ONLY the live
+    WProbe replay — the live bisection pins the boundary the corpus cannot;
+(3) R5 encode uppercase %XX -> lowercase breaks add/%3Cfirst%3E byte tests.

@@ -9,6 +9,7 @@
 //!      opaque content out of the observed block skeleton;
 //!   3. feeds the sliced content back through the producer and asserts the
 //!      re-rendered response equals the captured bytes EXACTLY.
+//!
 //! This exercises the frame + postprocess + envelope over the whole corpus
 //! without a prover. A second test replays the curated round-1 byte targets
 //! (producers/round1/targets/) the same way.

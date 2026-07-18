@@ -1,0 +1,59 @@
+<span class="hl_keyword">theory</span> <a class="internal-link help" href="/thy/trace/1/main/help">Minimal_Loop_Example</a> <span class="hl_keyword">begin</span><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/message"><strong>Message theory</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/rules"><strong>Multiset rewriting rules</strong> (5)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/tactic"><strong>Tactic(s)</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/cases/raw/0/0"><strong>Raw sources</strong> (4 cases, deconstructions complete)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/1/main/cases/refined/0/0"><strong>Refined sources </strong> (4 cases, deconstructions complete)</a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/%3Cfirst%3E">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Start_before_Loop [reuse, use_induction]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>x #j<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Loop( x ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span><span class="hl_operator">∃ </span>#i<span class="hl_operator">.</span> <span class="hl_operator">(</span>Start( x ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>#i <span class="hl_operator">&lt;</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Start_before_Loop">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Start_before_Loop">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Start_before_Loop"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Start_before_Loop">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Start_before_Stop:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>x #j<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Stop( x ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span><span class="hl_operator">∃ </span>#i<span class="hl_operator">.</span> <span class="hl_operator">(</span>Start( x ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>#i <span class="hl_operator">&lt;</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Start_before_Stop">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Start_before_Stop">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Start_before_Stop"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Start_before_Stop">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Loop_before_Stop [reuse, use_induction]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>x #i #j<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>Stop( x ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Loop( x ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span>#i <span class="hl_operator">&lt;</span> #j<span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Loop_before_Stop">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Loop_before_Stop">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Loop_before_Stop"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Loop_before_Stop">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Stop_unique [reuse]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>x #i #j<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>Stop( x ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Stop( x ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span>#i <span class="hl_operator">=</span> #j<span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Stop_unique">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Stop_unique">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Stop_unique"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Stop_unique">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">lemma</span> Satisfied_by_empty_trace_only [use_induction]:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∀ </span>x #j<span class="hl_operator">.</span> <span class="hl_operator">(</span>Loop( x ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span><span class="hl_operator">⊥</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/1/main/edit/Satisfied_by_empty_trace_only">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/1/main/delete/Satisfied_by_empty_trace_only">delete lemma</a><br/>
+<span class="hl_keyword">by</span> <a class="internal-link proof-step sorry-step" href="/thy/trace/1/main/proof/Satisfied_by_empty_trace_only"><span class="hl_keyword">sorry</span></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/1/main/add/Satisfied_by_empty_trace_only">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">end</span><br/>
+ 

@@ -101,23 +101,36 @@ pub struct ProofScriptPane {
 }
 
 /// One top-of-index navigation item.
+///
+/// The interface header carries the link target as a `section` string (the
+/// `main/<…>` wildcard tail); this crate-local model holds it as the R5
+/// [`ThyPath`] instead so the link is CONSTRUCTED through the theory-path
+/// grammar — the integration adapter maps the live value via `path::parse`.
 pub struct NavItem {
-    /// Which `main/<section>` route it links to.
-    pub section: String,
-    /// Bold label text.
+    /// The `main/<…>` route the item links to (rendered via R5).
+    pub target: ThyPath,
+    /// Bold label text (opaque pre-rendered input; the observed vocabulary is
+    /// fixed per slot — BEHAVIOR.md §12).
     pub label: String,
-    /// Trailing annotation text (a count / cases summary), possibly empty.
+    /// Trailing annotation text (a count / cases summary), possibly empty
+    /// (opaque pre-rendered input).
     pub annotation: String,
 }
 
 /// One lemma's index entry: its declaration plus how its proof displays.
 pub struct LemmaEntry {
     pub name: String,
-    /// Attribute list text (already assembled), e.g. `" [reuse]"` or empty.
+    /// Attribute list text (already assembled by the pretty side), e.g.
+    /// `" [reuse]"`, or empty. May span several logical lines (long heuristic
+    /// lists wrap, with the continuation indent baked into the text).
     pub attributes: String,
-    /// Trace-quantifier keyword (all-traces / exists-trace).
+    /// Trace-quantifier keyword (`all-traces` / `exists-trace`).
     pub quantifier: String,
-    /// Pre-rendered formula body (opaque prover text, line-structured).
+    /// Pre-rendered formula body (opaque prover text, line-structured), at
+    /// indents RELATIVE to the declaration body: the first line carries no
+    /// leading spaces, continuation lines their own deeper indent. The
+    /// renderer adds the 2-space block indent and decides the inline/vertical
+    /// quantifier layout (BEHAVIOR.md §13).
     pub formula: Content,
     pub proof: ProofDisplay,
 }
@@ -126,8 +139,16 @@ pub struct LemmaEntry {
 pub enum ProofDisplay {
     /// Unproven: a single trailing `by sorry` step (no status wrapper).
     Unproven,
-    /// A proof tree of steps/cases (each step carries pre-rendered method text
-    /// and a highlight status). See R3.
+    /// A proof carried as pre-rendered display lines (each already a complete
+    /// HTML logical line), plus the status class the lemma HEADER wrapper span
+    /// carries (`None` for an incomplete proof — no wrapper). This is the
+    /// R2-level opaque form; R3 structures the tree ([`ProofTree`]) and will
+    /// render into exactly these lines.
+    Rendered {
+        header_status: Option<String>,
+        lines: Vec<String>,
+    },
+    /// A structured proof tree (R3 — not yet rendered by this crate).
     Tree(ProofTree),
 }
 
@@ -193,6 +214,7 @@ pub struct TheoryRow {
 
 /// A theory-internal path parsed from / rendered to the wildcard URL segment
 /// after `/thy/trace/<idx>/<handler>/`.
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum ThyPath {
     Help,
     Message,

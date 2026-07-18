@@ -1153,3 +1153,177 @@ sealed crate is affirmatively, independently derived — so the barrier held whe
 finding is a scaffold cleanup, not a contamination of the sealed work.
 
 VERDICT: pass
+
+---
+
+# PRODUCERS cluster — Round 2 — both-sides similarity audit (R5 path grammar + R2 west-pane assembly)
+
+Auditor scope: this round's delta only (clean-room HEAD `b4810fe` predates it). Delta from
+`git status`/`git diff HEAD` restricted to `weblayer/producers/workspace/`: modified
+`producers-clean/src/{path.rs,proofscript.rs,model.rs,lib.rs}`, `tests/corpus_sweep.rs`
+(whitespace), `BEHAVIOR.md` (§§11–15 added), `QUERIES.log` ([S14]–[S18], [L08]–[L15]); new
+`tests/{r5_path_grammar.rs,r2_west_pane.rs}`, `r2_live/`, `r2_panes/`, `r5_tails/`, and five
+own tools (`harvest_hrefs.py`, `extract_r5_tails.py`, `extract_r2_panes.py`, `analyze_west.py`,
+`probe_paths.sh`). Two implemented surfaces: **R5** the theory-path grammar (`path.rs`:
+`parse`/`render`) and **R2** the proof-script west pane (`proofscript.rs`: `render_index`),
+which constructs every link through R5. Upstream consulted (auditor privilege):
+`src/Web/Types.hs` (`parseTheoryPath`/`renderTheoryPath` 360–456, `prefixWithUnderscore`/
+`unprefixUnderscore` 400–414, `safeRead`=`listToMaybe . map fst . reads` 436, the Yesod route
+table) and `src/Web/Theory.hs` (`theoryIndex` 371–416, `lemmaIndex` 296–329, `proofIndex`
+223–260, `linkToPath` 204–213, `overview`/`ruleLinkMsg`/`casesInfo`/`reqCasesLink` 408–416,
+`markStatus` 2148–2153). Method: abstraction–filtration–comparison; every grammar rule and
+pane-assembly rule cross-checked to a logged probe/capture, not to the source.
+
+## Provenance cross-check — every BEHAVIOR §11–§13 rule traces to a probe/capture
+
+| rule baked into the code | probe / capture |
+|---|---|
+| split on `/` first, then percent-decode each segment; `%2F` does not split | [L09] (`me%73sage`==`message`, `proof/foo%2F_`→lemma `foo/_`) |
+| decode: valid `%XX`→byte, UTF-8 w/ U+FFFD, invalid `%` literal, `+`≠space | [L12] (add-form echo channel) |
+| heads exact + case-sensitive; extra segments after a complete match ignored | [L08]/[L09] (`MESSAGE`,`cases/RAW` 404; `help/extra`,`message/`,`cases/raw/0/0/extra` 200) |
+| missing required arg rejects; name args accept any incl. empty; existence≠parse | [L08]/[L11] (`proof`,`cases/raw/1` 404; `edit/`,`proof//_` 200; `proof/nonexistent`→"No such…") |
+| numeric segment = Haskell-`reads`-shaped int (parens/signs+space/radix/float-guard/`_`-quirk) | [L10] (68-item accept/reject battery, replayed verbatim in `r5_path_grammar.rs`) |
+| numeric VALUE inert (0/0…9/9…-1/0 byte-identical); source-vs-case index unobservable | [L10] |
+| version-index is a different, stricter grammar (out of R5) | [L10] |
+| render: unreserved raw + uppercase `%XX`; only `[A-Za-z0-9_.]`+`%3C/%3E` observed | [S14]; [L13] (metachar-filename channel collapsed → beyond `%3C/%3E` UNOBSERVABLE) |
+| west pane = logical lines through the §3 skin + ONE trailing space; 478 panes | [S16] (`analyze_west.py`; "SPEC's 473 undercounts by 5") |
+| element order (header/5 items/add-first/lemmas/end); zero-lemma → TWO blanks | [S16] |
+| `  or  ` (two spaces); header status span `hl_good`×3192 / `hl_bad`×146; sorry/incomplete unwrapped | [S16] |
+| declaration `lemma NAME{ATTRS}:`, ATTRS opaque possibly multi-line | [S17] (46 multi-line decls) |
+| inline iff assembled ESCAPED width ≤ 69, else vertical; metric = escaped chars | [S18] (minimal pair rules out visible-chars/bytes) + [L14] (live bisection pins 69/70 on 4 families) |
+
+No claim in the delta lacks logged provenance. The five tools read only
+`oracle/captured_responses/*.hs.json` (captured OUTPUT) or drive the live oracle over `curl`
+(`probe_paths.sh`); none reads a source tree. Re-ran the suite: **24 tests green**
+(R1 14 + R5 6 + R2 4), matching the QUERIES.log close.
+
+## Filtration — every shared element is observable wire output (merger / compatibility)
+
+* **R5 grammar tokens** (`help`·`message`·`rules`·`tactic`·`cases/{raw|refined}/i/j`·`lemma`·
+  `proof`·`edit`·`add`·`delete`; the numeric leniency; `<first>`→`%3Cfirst%3E`) are the exact
+  path strings the client sends / the server emits — the wire interface, individually probed
+  ([L08]–[L13]) and pinned by the 40037-distinct-tail corpus round-trip ([S15]). Byte-forced.
+* **R2 frame** (`theory NAME begin`/`end` keyword spans, `<a class="internal-link …">`,
+  `<strong>LABEL</strong> ANN`, `proof-step sorry-step`, `add`/`edit`/`delete` class suffixes,
+  the status wrapper `<span class="hl_good|hl_bad">`, `  or  `, the trailing space) is present
+  byte-for-byte in the captured overview panes ([S16]) and pinned by the 478/478 slice-and-
+  re-render sweep. A faithful reproduction has no freedom here.
+
+## Comparison — affirmative evidence of independent, observation-only construction
+
+* **The numeric grammar has NO upstream expression to copy.** Upstream `parseCases` merely calls
+  `safeRead = listToMaybe . map fst . reads` — the parens/leading-`-`-with-space/`0x`·`0o`·`0b`/
+  float-rejection/underscore-prefix quirks all live in GHC's Prelude `Read Int`, not in
+  `Types.hs`. The clean side hand-rolls that behaviour (`parse_numeric`/`parse_int_item`/
+  `parse_int_lexeme`/`skip_ws`) reconstructed entirely from the [L10] accept/reject battery.
+  Reading `Types.hs` would have shown only `safeRead` and taught nothing about the quirks; the
+  quirks are demonstrably probe-derived. This is the strongest independence signal of the round.
+* **No `prefixWithUnderscore`/`unprefixUnderscore`.** Upstream maps `unprefixUnderscore` over
+  every segment before parsing and `prefixWithUnderscore` over every segment when rendering
+  (`Types.hs` 400–414); the clean side treats each segment as a literal (`decode_segment`/
+  `encode_segment` only). The proof-path root marker `_` round-trips as the literal `_`
+  (clean: `sub=["_"]`; upstream: `path=[""]` + prefix) to the SAME observed bytes — a materially
+  different internal model reaching identical output. Same divergence the round-3/round-5 audits
+  logged as anti-copying; still present.
+* **Coarser type than the source.** `ThyPath` omits upstream's `TheoryMethod` (documented
+  out-of-vocabulary; `method/…` routed to `None`, asserted on 497 corpus tails), models sources
+  as `Sources { refined: bool, … }` rather than upstream's `TheorySource SourceKind i j`, and
+  uses named fields (`source_idx`/`case_idx`/`sub`/`pos`) where upstream is positional. The parse
+  match order (`help,message,rules,tactic,cases,lemma,proof,edit,add,delete`) diverges from
+  upstream's (`help,rules,message,tactic,lemma,cases,proof,method,edit,add,delete`).
+* **R2 holds MORE opaque than upstream computes.** Upstream `theoryIndex` computes the nav-item
+  vocabulary inline (`ruleLinkMsg` = "Multiset rewriting rules" ± " and restrictions";
+  `casesInfo`; `overview n info p`) and the formula via `prettyLNFormula`/`prettyTraceQuantifier`.
+  The clean `render_index` takes `NavItem { label, annotation, target }` and the formula lines as
+  OPAQUE adapter input — it reproduces none of that computation, and the `rules` label variation
+  ([S16]: "Multiset rewriting rules"[" and restrictions"] 180/293, unlike the constant R1 title)
+  is honestly recorded as opaque input, not reimplemented.
+* **Materially different layout expression.** Upstream lays the quantifier/formula out with
+  `nest 2 (sep [quantifier, doubleQuotes formula])` — HughesPJ's general fill algorithm at an
+  ambient page width; the clean side special-cases the single-formula-line inline decision
+  (`escaped_width(candidate) <= INLINE_WIDTH_LIMIT`, else vertical) with the boundary constant
+  **69** and the escaped-char metric both bisected live ([L14]) rather than lifted from `sep`.
+  The whole west pane is a flat `Vec<String>` + per-role helpers (`push_lemma`/`add_link`/
+  `keyword`/`href`/`escaped_width`) versus upstream's `$-$`/`vcat`/`intersperse`/`markStatus`/
+  `linkToPath`/`overview` combinator tower.
+* **Identifier constellation: zero overlap.** Clean names (`parse`/`render`/`decode_segment`/
+  `encode_segment`/`parse_numeric`/`parse_int_item`/`parse_int_lexeme`/`skip_ws`/`ThyPath`/
+  `render_index`/`push_lemma`/`add_link`/`keyword`/`href`/`escaped_width`/`INLINE_WIDTH_LIMIT`)
+  mirror none of upstream's (`parseTheoryPath`/`renderTheoryPath`/`prefixWithUnderscore`/
+  `unprefixUnderscore`/`safeRead`/`TheoryPath`/`theoryIndex`/`lemmaIndex`/`proofIndex`/
+  `linkToPath`/`markStatus`/`overview`/`ruleLinkMsg`/`casesInfo`/`reqCasesLink`). A grep of the
+  sealed round-2 files for that constellation and for `src/Web`/`Hamlet`/`Blaze`/`.hs` returns
+  nothing (the one `reads @Int` mention in `path.rs` names the OBSERVED integer shape, not a
+  tamarin source symbol; the one `.hs.json` in `QUERIES.log` is the capture-file extension).
+* **No comment lineage.** Upstream Haddock ("Render a theory path to a list of strings…",
+  "Parse a list of strings into a theory path.", "Render the theory index.") has no clean echo.
+
+## Tests are live byte gates, not vacuous
+`r5_path_grammar.rs` replays the [L08]–[L12] battery (68 accept + 27 reject), the decode-echo
+fixtures, parse⇄render round-trips, and the 40037-tail corpus sweep (497 `method/` asserted
+`None`). `r2_west_pane.rs` STRICTLY inverts each pane (asserting every frame byte on the way
+down, incl. the inline `≤69` / vertical `>69` witness) then re-renders and byte-compares
+478/478, plus 3 live replays (PathProbe fresh, WProbe 35-lemma boundary, PathProbe v2 after a
+live autoprove → proved `hl_good` tree) and the zero-lemma / minimal fixtures. QUERIES.log
+records the three mutation checks (`  or  `→` or `, 69→68 corpus / 69→70 live-WProbe-only,
+uppercase→lowercase `%XX`) each observed to FAIL then reverted — the gate is not vacuous.
+
+## Barrier hygiene / PH-1 — the scaffold rewrite LANDED
+
+The Producers-Round-1 finding **PH-1** (SPEC.md/README.md citing upstream `src/Web/*.hs` +
+`Text/PrettyPrint/Html.hs` file paths in sealed-readable text) is **resolved**. `SPEC.md`'s
+sub-target table now carries a "**ported file it retires**" column naming only ported `.rs`
+seams (`handlers/theory_html.rs`, `proof_tree.rs`, `root.rs`, `path_parse.rs`), and the
+"Author topology" section expresses citation-yield purely through those `.rs` files + the
+pseudonymous usernames — exactly the sibling-SPEC norm (`pretty/SPEC.md`) the rewrite
+instruction required. A scan of the ENTIRE sealed-readable tree (`SPEC.md`, `README.md`,
+`interface/`, `oracle/`, `round1/`, `workspace/**` incl. the round-2 `.rs`/`BEHAVIOR.md`/
+`QUERIES.log`/tools) for `src/Web`, `Text/PrettyPrint`, `Hamlet`, `Blaze`, and `*.hs`
+source-file paths returns **zero** (the only `.hs` hits are the `*.hs.json` capture-data
+extension). Nothing in the round-2 delta re-introduced an upstream citation. (Advisory,
+unchanged from R1 and not a finding: SPEC.md line 85's coined "`withHeader` framing" phantom
+and the R2 row's "473" undercount, both harmless and superseded by BEHAVIOR/[S16].)
+
+## Non-blocking notes (NOT similarity findings; no redo; do not bear on the verdict)
+
+1. **Shipped-comment provenance narration continues.** `path.rs`/`proofscript.rs`/`model.rs`
+   doc comments carry inline `[S..]`/`[L..]`/`BEHAVIOR.md §` references — the clean-room's own
+   provenance, the *opposite* of copied expression, so no verdict effect; it continues the
+   Round-6/7/Producers-R1 hygiene note against the campaign's "comments describe current state
+   only" standard. Two of the refs are additionally stale: `proofscript.rs` line 5 says "473"
+   where [S16]/BEHAVIOR §12 say 478, and line 6 cites "BEHAVIOR.md §11" for the west-pane
+   element order which lives in §12 (§11 is R5). Team may move the `[S..]`/`[L..]`/`§`-refs into
+   BEHAVIOR/QUERIES and fix the two stale numbers.
+2. **Render side omits `prefixWithUnderscore` — a latent byte-fidelity edge.** A lemma named
+   literally `_foo` (or an empty proof-path segment) would render `lemma/_foo`/absent where
+   upstream renders `lemma/__foo`/`_`. Unobservable in the corpus (the 40037-tail sweep is
+   byte-identical; the `_` root marker round-trips as the literal), affirmatively non-copying,
+   but a real divergence if `_`-prefixed identifiers ever occur. Non-blocking; if interop with
+   upstream-generated `_`-segment URLs matters, probe a `_`-prefixed lemma name and re-add the
+   prefix rule.
+3. **`encode_segment` keeps `-` and `~` raw** though the corpus segment inventory is only
+   `[A-Za-z0-9_.]` ([S14]) — an untraced generalization within the standard RFC3986 unreserved
+   set (scenes-à-faire, same posture as the R4 extra-MIME note), honestly flagged UNOBSERVABLE
+   in BEHAVIOR §11. Not copied protectable expression.
+
+## VIOLATIONS (Producers Round 2)
+
+**Similarity: 0.** Every R5/R2 resemblance to `Types.hs`/`Theory.hs` reduces to observable wire
+output — the URL-token grammar (merger, pinned by [S14]/[L08]–[L13] and the 40037-tail sweep)
+and the west-pane frame (byte-forced, pinned by the 478/478 sweep) — while the *expression* is
+materially divergent: the numeric grammar reconstructs GHC `reads` behaviour from the [L10]
+battery (upstream has no such code to copy), `prefixWithUnderscore`/`unprefixUnderscore` is
+pointedly not reproduced, `ThyPath` is coarser than `TheoryPath` (omits `Method`), R2 holds the
+nav vocabulary/formula/rules-label opaque where upstream computes them, and the layout is a
+probe-bisected `≤69` escaped-width special-case over a flat `Vec<String>` rather than HughesPJ
+`nest 2 (sep …)`. Identifier-constellation overlap: none. Comment lineage: none.
+
+**Barrier hygiene: 0 — PH-1 resolved.** SPEC.md/README.md now cite only ported `.rs` seams +
+usernames (sibling-SPEC norm); a full sealed-readable scan finds zero `src/Web/*.hs` /
+`Text/PrettyPrint/Html.hs` paths, and the round-2 delta introduced none.
+
+Three non-blocking notes recorded (shipped-comment provenance narration incl. two stale refs;
+render-side `prefixWithUnderscore` omission; speculative `-`/`~` in the encode set) — none is
+copied protectable expression and none requires redo. Findings that survive filtration: 0.
+
+VERDICT: pass

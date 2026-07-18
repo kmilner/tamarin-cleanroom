@@ -1,0 +1,105 @@
+<span class="hl_keyword">theory</span> <a class="internal-link help" href="/thy/trace/3/main/help">MPAuth_VC</a> <span class="hl_keyword">begin</span><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/3/main/message"><strong>Message theory</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/3/main/rules"><strong>Multiset rewriting rules and restrictions</strong> (27)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/3/main/tactic"><strong>Tactic(s)</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/3/main/cases/raw/0/0"><strong>Raw sources</strong> (31 cases, deconstructions complete)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/3/main/cases/refined/0/0"><strong>Refined sources </strong> (31 cases, deconstructions complete)</a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/3/main/add/%3Cfirst%3E">add lemma</a><br/>
+<br/>
+<span class="hl_good"><span class="hl_keyword">lemma</span> functional [heuristic={functional}]:<br/>
+&nbsp;&nbsp;exists-trace<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">(</span><span class="hl_operator">∀ </span>H1 H2 #i #j<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>Setup( H1 ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Setup( H2 ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span>#i <span class="hl_operator">=</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#k #n S m<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Dfin( ) <span class="hl_operator">@</span> #k<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Commit( S, &#39;Human&#39;, m ) <span class="hl_operator">@</span> #n<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/3/main/edit/functional">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/3/main/delete/functional">delete lemma</a></span><br/>
+<a class="internal-link proof-step hl_good" href="/thy/trace/3/main/proof/functional"><span class="hl_keyword">simplify</span></a><a class="internal-link remove-step" href="/thy/trace/3/main/proof/functional"></a><br/>
+<a class="internal-link proof-step hl_good" href="/thy/trace/3/main/proof/functional/_"><span class="hl_keyword">solve(</span> AgSt_D13( $D, &#39;D_13&#39;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;$H, $idH, pk(~skS), $idS, $S, ~rS, ~rD, m(~m), ~rS2, ~vc&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) ▶₀ #k <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/3/main/proof/functional/_"></a><br/>
+&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">case</span> D_12</span><br/>
+&nbsp;&nbsp;<a class="internal-link proof-step hl_good" href="/thy/trace/3/main/proof/functional/_/D_12"><span class="hl_keyword">solve(</span> AgSt_S11( $S.1, &#39;S_11&#39;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;~skS.1, &#39;Human&#39;, $idS.1, $idH.1, ~rS.1, ~rD.1, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m(~m.1), ~rS2.1&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) ▶₀ #n <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/3/main/proof/functional/_/D_12"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">case</span> S_10</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="internal-link proof-step hl_good" href="/thy/trace/3/main/proof/functional/_/D_12/S_10"><span class="hl_keyword">solve(</span> In_S( &#39;Human&#39;, $D, &#39;vc&#39;, ~vc ) ▶₁ #k <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/3/main/proof/functional/_/D_12/S_10"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">case</span> ChanIn_S_case_1</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="internal-link proof-step hl_good" href="/thy/trace/3/main/proof/functional/_/D_12/S_10/ChanIn_S_case_1"><span class="hl_keyword">solve(</span> !KU( senc(f(&lt;m(~m.1), ~rS2.1&gt;), f(&lt;~rS, ~rD&gt;))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="hl_operator">@</span> #vk <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/3/main/proof/functional/_/D_12/S_10/ChanIn_S_case_1"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">case</span> D_14</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="internal-link proof-step hl_good" href="/thy/trace/3/main/proof/functional/_/D_12/S_10/ChanIn_S_case_1/D_14"><span class="hl_keyword">solve(</span> !KU( senc(&lt;m(~m), ~rS2&gt;, f(&lt;~rS, ~rD&gt;))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="hl_operator">@</span> #vk.1 <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/3/main/proof/functional/_/D_12/S_10/ChanIn_S_case_1/D_14"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">case</span> S_10</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="internal-link proof-step hl_good" href="/thy/trace/3/main/proof/functional/_/D_12/S_10/ChanIn_S_case_1/D_14/S_10"><span class="hl_keyword">solve(</span> !KU( m(~m) ) <span class="hl_operator">@</span> #vk.2 <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/3/main/proof/functional/_/D_12/S_10/ChanIn_S_case_1/D_14/S_10"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">case</span> H_9</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="internal-link proof-step hl_good" href="/thy/trace/3/main/proof/functional/_/D_12/S_10/ChanIn_S_case_1/D_14/S_10/H_9"><span class="hl_keyword">solve(</span> !HK( &#39;Human&#39;, &#39;vc&#39;, ~vc ) ▶₀ #vr.6 <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/3/main/proof/functional/_/D_12/S_10/ChanIn_S_case_1/D_14/S_10/H_9"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">case</span> H_receive</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="internal-link proof-step hl_good" href="/thy/trace/3/main/proof/functional/_/D_12/S_10/ChanIn_S_case_1/D_14/S_10/H_9/H_receive"><span class="hl_keyword">solve(</span> !KU( ~vc ) <span class="hl_operator">@</span> #vk.5 <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/3/main/proof/functional/_/D_12/S_10/ChanIn_S_case_1/D_14/S_10/H_9/H_receive"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">case</span> H_send_case_2</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="internal-link proof-step hl_good" href="/thy/trace/3/main/proof/functional/_/D_12/S_10/ChanIn_S_case_1/D_14/S_10/H_9/H_receive/H_send_case_2"><span class="hl_keyword">SOLVED</span> <span class="hl_comment">// trace found</span></a><a class="internal-link remove-step" href="/thy/trace/3/main/proof/functional/_/D_12/S_10/ChanIn_S_case_1/D_14/S_10/H_9/H_receive/H_send_case_2"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">qed</span></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">qed</span></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">qed</span></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">qed</span></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">qed</span></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">qed</span></span><br/>
+&nbsp;&nbsp;<span class="hl_good"><span class="hl_keyword">qed</span></span><br/>
+<span class="hl_good"><span class="hl_keyword">qed</span></span><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/3/main/add/functional">add lemma</a><br/>
+<br/>
+<span class="hl_bad"><span class="hl_keyword">lemma</span> message_authentication [heuristic={message_authentication}]:<br/>
+&nbsp;&nbsp;all-traces<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>S m #k<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Commit( S, &#39;Human&#39;, m ) <span class="hl_operator">@</span> #k<span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>mn #i<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Send( &#39;Human&#39;, mn, m ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>#i <span class="hl_operator">&lt;</span> #k<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/3/main/edit/message_authentication">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/3/main/delete/message_authentication">delete lemma</a></span><br/>
+<a class="internal-link proof-step hl_bad" href="/thy/trace/3/main/proof/message_authentication"><span class="hl_keyword">simplify</span></a><a class="internal-link remove-step" href="/thy/trace/3/main/proof/message_authentication"></a><br/>
+<a class="internal-link proof-step hl_bad" href="/thy/trace/3/main/proof/message_authentication/_"><span class="hl_keyword">solve(</span> AgSt_S11( $S, &#39;S_11&#39;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;~skS, &#39;Human&#39;, $idS, $idH, ~rS, ~rD, m(~m), ~rS2&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) ▶₀ #k <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/3/main/proof/message_authentication/_"></a><br/>
+&nbsp;&nbsp;<span class="hl_bad"><span class="hl_keyword">case</span> S_10</span><br/>
+&nbsp;&nbsp;<a class="internal-link proof-step hl_bad" href="/thy/trace/3/main/proof/message_authentication/_/S_10"><span class="hl_keyword">solve(</span> !KU( senc(f(&lt;m(~m), ~rS2&gt;), f(&lt;~rS, ~rD&gt;))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="hl_operator">@</span> #vk <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/3/main/proof/message_authentication/_/S_10"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_bad"><span class="hl_keyword">case</span> D_14_case_1</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="internal-link proof-step hl_bad" href="/thy/trace/3/main/proof/message_authentication/_/S_10/D_14_case_1"><span class="hl_keyword">solve(</span> !KU( senc(&lt;m(~m), ~rS2&gt;, f(&lt;~rS, ~rD&gt;))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="hl_operator">@</span> #vk.2 <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/3/main/proof/message_authentication/_/S_10/D_14_case_1"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_bad"><span class="hl_keyword">case</span> S_10</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="internal-link proof-step hl_bad" href="/thy/trace/3/main/proof/message_authentication/_/S_10/D_14_case_1/S_10"><span class="hl_keyword">solve(</span> !HK( &#39;Human&#39;, &#39;vc&#39;, ~vc ) ▶₀ #vr.7 <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/3/main/proof/message_authentication/_/S_10/D_14_case_1/S_10"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_bad"><span class="hl_keyword">case</span> H_receive</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="internal-link proof-step hl_bad" href="/thy/trace/3/main/proof/message_authentication/_/S_10/D_14_case_1/S_10/H_receive"><span class="hl_keyword">solve(</span> !KU( ~vc ) <span class="hl_operator">@</span> #vk.5 <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/3/main/proof/message_authentication/_/S_10/D_14_case_1/S_10/H_receive"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_bad"><span class="hl_keyword">case</span> H_send_case_2</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="internal-link proof-step hl_bad" href="/thy/trace/3/main/proof/message_authentication/_/S_10/D_14_case_1/S_10/H_receive/H_send_case_2"><span class="hl_keyword">solve(</span> !Ltk( $S, ~skS ) ▶₀ #j <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/3/main/proof/message_authentication/_/S_10/D_14_case_1/S_10/H_receive/H_send_case_2"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_bad"><span class="hl_keyword">case</span> publickeyinfrastructure</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="internal-link proof-step hl_bad" href="/thy/trace/3/main/proof/message_authentication/_/S_10/D_14_case_1/S_10/H_receive/H_send_case_2/publickeyinfrastructure"><span class="hl_keyword">solve(</span> !Ltk( $S.2, ~skS.2 ) ▶₀ #j.1 <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/3/main/proof/message_authentication/_/S_10/D_14_case_1/S_10/H_receive/H_send_case_2/publickeyinfrastructure"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_bad"><span class="hl_keyword">case</span> publickeyinfrastructure</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="internal-link proof-step hl_bad" href="/thy/trace/3/main/proof/message_authentication/_/S_10/D_14_case_1/S_10/H_receive/H_send_case_2/publickeyinfrastructure/publickeyinfrastructure"><span class="hl_keyword">solve(</span> !Ltk( $S.3, ~skS.3 ) ▶₀ #j.2 <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/3/main/proof/message_authentication/_/S_10/D_14_case_1/S_10/H_receive/H_send_case_2/publickeyinfrastructure/publickeyinfrastructure"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_bad"><span class="hl_keyword">case</span> publickeyinfrastructure</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="internal-link proof-step hl_bad" href="/thy/trace/3/main/proof/message_authentication/_/S_10/D_14_case_1/S_10/H_receive/H_send_case_2/publickeyinfrastructure/publickeyinfrastructure/publickeyinfrastructure"><span class="hl_keyword">solve(</span> !Ltk( $S.4, ~skS.4 ) ▶₀ #j.3 <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/3/main/proof/message_authentication/_/S_10/D_14_case_1/S_10/H_receive/H_send_case_2/publickeyinfrastructure/publickeyinfrastructure/publickeyinfrastructure"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_bad"><span class="hl_keyword">case</span> publickeyinfrastructure</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="internal-link proof-step hl_bad" href="/thy/trace/3/main/proof/message_authentication/_/S_10/D_14_case_1/S_10/H_receive/H_send_case_2/publickeyinfrastructure/publickeyinfrastructure/publickeyinfrastructure/publickeyinfrastructure"><span class="hl_keyword">solve(</span> !KU( m(~m.1) ) <span class="hl_operator">@</span> #vk.4 <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/3/main/proof/message_authentication/_/S_10/D_14_case_1/S_10/H_receive/H_send_case_2/publickeyinfrastructure/publickeyinfrastructure/publickeyinfrastructure/publickeyinfrastructure"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_bad"><span class="hl_keyword">case</span> H_9</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="internal-link proof-step hl_bad" href="/thy/trace/3/main/proof/message_authentication/_/S_10/D_14_case_1/S_10/H_receive/H_send_case_2/publickeyinfrastructure/publickeyinfrastructure/publickeyinfrastructure/publickeyinfrastructure/H_9"><span class="hl_keyword">SOLVED</span> <span class="hl_comment">// trace found</span></a><a class="internal-link remove-step" href="/thy/trace/3/main/proof/message_authentication/_/S_10/D_14_case_1/S_10/H_receive/H_send_case_2/publickeyinfrastructure/publickeyinfrastructure/publickeyinfrastructure/publickeyinfrastructure/H_9"></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_bad"><span class="hl_keyword">qed</span></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_bad"><span class="hl_keyword">qed</span></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_bad"><span class="hl_keyword">qed</span></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_bad"><span class="hl_keyword">qed</span></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_bad"><span class="hl_keyword">qed</span></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_bad"><span class="hl_keyword">qed</span></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_bad"><span class="hl_keyword">qed</span></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_bad"><span class="hl_keyword">qed</span></span><br/>
+&nbsp;&nbsp;<span class="hl_bad"><span class="hl_keyword">qed</span></span><br/>
+<span class="hl_bad"><span class="hl_keyword">qed</span></span><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/3/main/add/message_authentication">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">end</span><br/>
+ 

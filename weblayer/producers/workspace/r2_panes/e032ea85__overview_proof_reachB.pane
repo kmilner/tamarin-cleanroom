@@ -1,0 +1,72 @@
+<span class="hl_keyword">theory</span> <a class="internal-link help" href="/thy/trace/8/main/help">define</a> <span class="hl_keyword">begin</span><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/8/main/message"><strong>Message theory</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/8/main/rules"><strong>Multiset rewriting rules</strong> (4)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/8/main/tactic"><strong>Tactic(s)</strong> </a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/8/main/cases/raw/0/0"><strong>Raw sources</strong> (3 cases, deconstructions complete)</a><br/>
+<br/>
+<a class="internal-link" href="/thy/trace/8/main/cases/refined/0/0"><strong>Refined sources </strong> (3 cases, deconstructions complete)</a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/8/main/add/%3Cfirst%3E">add lemma</a><br/>
+<br/>
+<span class="hl_bad"><span class="hl_keyword">lemma</span> reachA:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∃ </span>#i<span class="hl_operator">.</span> A( ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/8/main/edit/reachA">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/8/main/delete/reachA">delete lemma</a></span><br/>
+<a class="internal-link proof-step hl_bad" href="/thy/trace/8/main/proof/reachA"><span class="hl_keyword">simplify</span></a><a class="internal-link remove-step" href="/thy/trace/8/main/proof/reachA"></a><br/>
+<span class="hl_bad"><span class="hl_keyword">by</span> </span><a class="internal-link proof-step hl_bad" href="/thy/trace/8/main/proof/reachA/_"><span class="hl_keyword">solve(</span> A( ) <span class="hl_operator">@</span> #i <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/8/main/proof/reachA/_"></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/8/main/add/reachA">add lemma</a><br/>
+<br/>
+<span class="hl_good"><span class="hl_keyword">lemma</span> reachnoA:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∃ </span>#i<span class="hl_operator">.</span> NoA( ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/8/main/edit/reachnoA">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/8/main/delete/reachnoA">delete lemma</a></span><br/>
+<a class="internal-link proof-step hl_good" href="/thy/trace/8/main/proof/reachnoA"><span class="hl_keyword">simplify</span></a><a class="internal-link remove-step" href="/thy/trace/8/main/proof/reachnoA"></a><br/>
+<a class="internal-link proof-step hl_good" href="/thy/trace/8/main/proof/reachnoA/_"><span class="hl_keyword">SOLVED</span> <span class="hl_comment">// trace found</span></a><a class="internal-link remove-step" href="/thy/trace/8/main/proof/reachnoA/_"></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/8/main/add/reachnoA">add lemma</a><br/>
+<br/>
+<span class="hl_bad"><span class="hl_keyword">lemma</span> reachB:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∃ </span>#i<span class="hl_operator">.</span> B( ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/8/main/edit/reachB">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/8/main/delete/reachB">delete lemma</a></span><br/>
+<a class="internal-link proof-step hl_bad" href="/thy/trace/8/main/proof/reachB"><span class="hl_keyword">simplify</span></a><a class="internal-link remove-step" href="/thy/trace/8/main/proof/reachB"></a><br/>
+<span class="hl_bad"><span class="hl_keyword">by</span> </span><a class="internal-link proof-step hl_bad" href="/thy/trace/8/main/proof/reachB/_"><span class="hl_keyword">solve(</span> B( ) <span class="hl_operator">@</span> #i <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/8/main/proof/reachB/_"></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/8/main/add/reachB">add lemma</a><br/>
+<br/>
+<span class="hl_good"><span class="hl_keyword">lemma</span> reachnotB:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∃ </span>#i<span class="hl_operator">.</span> NoB( ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/8/main/edit/reachnotB">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/8/main/delete/reachnotB">delete lemma</a></span><br/>
+<a class="internal-link proof-step hl_good" href="/thy/trace/8/main/proof/reachnotB"><span class="hl_keyword">simplify</span></a><a class="internal-link remove-step" href="/thy/trace/8/main/proof/reachnotB"></a><br/>
+<a class="internal-link proof-step hl_good" href="/thy/trace/8/main/proof/reachnotB/_"><span class="hl_keyword">SOLVED</span> <span class="hl_comment">// trace found</span></a><a class="internal-link remove-step" href="/thy/trace/8/main/proof/reachnotB/_"></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/8/main/add/reachnotB">add lemma</a><br/>
+<br/>
+<span class="hl_bad"><span class="hl_keyword">lemma</span> reachC:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∃ </span>#i<span class="hl_operator">.</span> C( ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/8/main/edit/reachC">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/8/main/delete/reachC">delete lemma</a></span><br/>
+<a class="internal-link proof-step hl_bad" href="/thy/trace/8/main/proof/reachC"><span class="hl_keyword">simplify</span></a><a class="internal-link remove-step" href="/thy/trace/8/main/proof/reachC"></a><br/>
+<span class="hl_bad"><span class="hl_keyword">by</span> </span><a class="internal-link proof-step hl_bad" href="/thy/trace/8/main/proof/reachC/_"><span class="hl_keyword">solve(</span> C( ) <span class="hl_operator">@</span> #i <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/8/main/proof/reachC/_"></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/8/main/add/reachC">add lemma</a><br/>
+<br/>
+<span class="hl_bad"><span class="hl_keyword">lemma</span> reachDorC:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∃ </span>#i<span class="hl_operator">.</span> D( ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/8/main/edit/reachDorC">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/8/main/delete/reachDorC">delete lemma</a></span><br/>
+<a class="internal-link proof-step hl_bad" href="/thy/trace/8/main/proof/reachDorC"><span class="hl_keyword">simplify</span></a><a class="internal-link remove-step" href="/thy/trace/8/main/proof/reachDorC"></a><br/>
+<span class="hl_bad"><span class="hl_keyword">by</span> </span><a class="internal-link proof-step hl_bad" href="/thy/trace/8/main/proof/reachDorC/_"><span class="hl_keyword">solve(</span> D( ) <span class="hl_operator">@</span> #i <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/8/main/proof/reachDorC/_"></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/8/main/add/reachDorC">add lemma</a><br/>
+<br/>
+<span class="hl_bad"><span class="hl_keyword">lemma</span> reachDandC:<br/>
+&nbsp;&nbsp;exists-trace &quot;<span class="hl_operator">∃ </span>#i<span class="hl_operator">.</span> DC( ) <span class="hl_operator">@</span> #i&quot;<br/>
+<a class="internal-link edit" href="/thy/trace/8/main/edit/reachDandC">edit lemma</a>  or  <a class="internal-link delete" href="/thy/trace/8/main/delete/reachDandC">delete lemma</a></span><br/>
+<a class="internal-link proof-step hl_bad" href="/thy/trace/8/main/proof/reachDandC"><span class="hl_keyword">simplify</span></a><a class="internal-link remove-step" href="/thy/trace/8/main/proof/reachDandC"></a><br/>
+<span class="hl_bad"><span class="hl_keyword">by</span> </span><a class="internal-link proof-step hl_bad" href="/thy/trace/8/main/proof/reachDandC/_"><span class="hl_keyword">solve(</span> DC( ) <span class="hl_operator">@</span> #i <span class="hl_keyword">)</span></a><a class="internal-link remove-step" href="/thy/trace/8/main/proof/reachDandC/_"></a><br/>
+<br/>
+<a class="internal-link add" href="/thy/trace/8/main/add/reachDandC">add lemma</a><br/>
+<br/>
+<span class="hl_keyword">end</span><br/>
+ 
