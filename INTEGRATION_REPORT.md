@@ -2651,3 +2651,232 @@ console_split_parity 55; `-p tamarin-server` = lib 107 (+2 ignored) + routes (au
 6 / basic 19 / graph 4 / proof_step 3 / static 3 / stubs 15 incl. the captured-HS del/path
 + verify parity fixtures / upload 3). wf fixture suite 2/2. `gen_license_headers.py`
 --check 0 stale (133 headers); `web_clean/` headerless.
+
+================================================================================
+# Dirty-room integration report — round-9, unit D (console/CLI)
+#   framing RE-SYNCED to the round-7 completed taxonomy + batch SUMMARY/FRAMING
+#   SWAP LANDED (ported summary assembly DELETED, byte-verified); parse/error
+#   run-driver swap (blockers 1-3) KEPT with the exact remaining restructure named
+
+Date: 2026-07-18. Integrator: dirty-room (adapters + extraction only; no logic
+transplanted from replaced files into clean/headerless code). Repo:
+`/home/kamilner/tamarin-rs`. Same protocol/precedent. Rebased on the CURRENT tree
+(header count inherited at 133). Task scope: the round-7 unit-D blocker (the
+`Unfinishable` verdict absent from the clean framing) is now CLOSED by the console
+cluster's round-7 clean-side round; perform the batch summary/framing swap and,
+where verifiable, the coupled parse/error swap.
+
+Outcome: **the round-7 completed taxonomy is RE-SYNCED into the repo, and the batch
+`summary of summaries:` swap is LANDED — the ported `print_overall_summary` block
+assembly and the ported `format_lemma_summary_line` verdict phrases are DELETED, the
+driver now renders the summary + the `[Theory …]` progress markers through the clean
+`framing` module, and a fresh live-oracle corpus gate confirms byte-parity on the
+unit-D verdict surface (incl. the `analysis cannot be finished …` YellowTest witness
+that round-7 could not express).** The coupled parse/value-validation/error-stream
+swap (round-7 blockers 1-3) is KEPT — it is a run-driver *restructure* (deferred
+validation + stream re-routing + ~20 no-file inline-test rewrites) that does not
+reduce the header count and cannot be landed half-verified without violating the
+"never force a silent regression" precedent (round-6 A2, wave-2 D4, round-7 B/D).
+No headered file deleted → header count unchanged (133 → 133).
+
+--------------------------------------------------------------------------------
+## D.0 Round-7 clean framing RE-SYNCED — DONE (headerless, byte-verified)
+
+`crates/tamarin-prover/src/cli/framing.rs` <- clean workspace `framing.rs`
+(mechanical `crate::` -> `super::` only; byte-identical to the workspace after that
+transform, verified by diff). The delta over the repo's round-6 copy is the round-7
+`LemmaResult::AnalysisCannotBeFinished` variant + its `verdict_phrase` arm
+(`analysis cannot be finished (reducible operators in subterms)`, uniform across
+trace-kinds, no advisory line, composing with the `--diff` side prefixes). All ten
+clean cli modules are now in sync with the workspace (stream/errors/modes/parse/
+help/version/emit/framing/args byte-identical after `crate::`->`super::`, plus the
+previously-sanctioned `errors.rs` `concat!` `.hs` split and the `include_str!`
+fixture-path fixes in help.rs/version.rs). framing.rs stays HEADERLESS (tripwire:
+`gen_license_headers.py` adds no header; grep GPL = 0).
+
+Test + fixtures re-synced: `tests/console_split_parity.rs` grew **55 -> 59** — the
+four round-7 tests appended from the clean `tests/cli_tests.rs`
+(`summary_reducible_operators_whole_theory_both_kinds`,
+`summary_bound_exhaustion_is_incomplete_not_unfinishable`,
+`diff_summary_projected_reducible_operators_both_sides_and_kinds`,
+`reducible_operators_line_bytes_are_exact`) with the fixture dir adapted
+(`fixtures/`->`console_fixtures/`). Five r7 golden captures copied
+(`r7_yellow_{prove,bound}.{out,err}.txt`, `r7_yellowdiff_prove.out.txt`),
+headerless. This pins the fourth verdict phrase byte-exactly so none of the
+re-synced framing is dead code.
+
+--------------------------------------------------------------------------------
+## D.1 Batch SUMMARY/FRAMING swap — LANDED (ported assembly DELETED, byte-verified)
+
+The premise round-7 tested is now TRUE for this swap: with `AnalysisCannotBeFinished`
+in the clean `LemmaResult`, the clean framing can express every batch-reachable
+verdict, so routing the driver's summary through it is byte-neutral rather than a
+silent regression. DELETED from `run.rs` (headered file, deletion of ported
+expression is allowed):
+
+* `print_overall_summary`'s hand-rolled block assembly — the `=`x78 rule,
+  `analyzed:`/`output:` column alignment, the `WARNING:` count/advisory block, the
+  `$--$` blank-line-gap logic, and the per-theory blank-line joins. It is REPLACED
+  by a call to the clean `framing::render_summary(&summaries)` over a
+  `Vec<framing::Summary>` mapped from the `FileResult`s (`to_clean_summary` /
+  `to_clean_outcome` adapters).
+* `format_lemma_summary_line` — the ported per-lemma verdict-phrase strings
+  (`verified` / `falsified - found trace` / `falsified - no trace found` /
+  `analysis incomplete` / `analysis cannot be finished (reducible operators in
+  subterms)`). Those phrases now live ONLY in the clean `framing::verdict_phrase`;
+  `run.rs` keeps only a `map_verdict` classifier (`LemmaVerdict` ->
+  `framing::LemmaResult`), no phrase text.
+* The `[Theory <name>] <phase>` progress-marker string assembly — the `marker`
+  closure now emits `framing::progress_line(&name, framing::Phase::…)` (all six call
+  sites map to a clean `Phase` variant), deleting the RS `"[Theory {}] {}"` format.
+
+Streaming contract: the `[Saturating Sources] …` lines are emitted deep inside
+`tamarin-theory::prove` during proving (not through the driver), so a full
+`emit::BatchEmitter` restructure of `run.rs` is infeasible without threading a
+`Sink` through the theory crate. The driver already streams progress/payload as
+produced; the only trailing block is the summary. `framing::render_summary` produces
+byte-for-byte the same stdout the incremental `emit::BatchEmitter::finish` would
+flush, and `framing::progress_line` is exactly `BatchEmitter::progress`'s per-marker
+output — so the driver emits the emitter's per-stream bytes with the consumer
+(`println!`/`eprint!`) controlling flush timing, satisfying step 2d for the
+driver-reachable surface. The `--diff` projections (`RHS`/`LHS`/`DiffLemma`) are
+present + pinned in the clean framing but UNREACHABLE through RS's driver
+(`run_batch` still errors "`--diff` … is not yet ported"), exactly as round-7 found;
+they are exercised only by the ten `console_split_parity` diff tests.
+
+Retired pin (task-sanctioned): the run.rs inline
+`lemma_summary_distinguishes_undetermined_and_invalidated` (+ its `mk_result`
+helper) asserted the RS-only render strings `analysis undetermined` /
+`proof has been invalidated` for `UndeterminedProof`/`InvalidatedProof`. The console
+cluster's round-7 systematic probe (BEHAVIOR.md §15d) established that NEITHER state
+is reachable from any batch run of the reference — no such phrase surfaced anywhere
+in the example corpus; lemma errors/solver failures abort with a runtime stderr line
+and never a per-lemma verdict. So the pin fixed invented behavior, not reference
+parity; retiring it does not weaken any byte assertion against the reference. The
+three batch-reachable verdicts it also touched are pinned byte-for-byte against
+oracle captures by the `console_split_parity` framing suite. `map_verdict` collapses
+the two batch-unreachable verdicts (and the RS-internal `Error`, which still
+escalates the exit code) to `AnalysisIncomplete` so the summary stays well-formed
+without authoring a non-reference phrase. (prover lib 61 -> 60.)
+
+--------------------------------------------------------------------------------
+## D.2 Live-oracle corpus gate — BUILT + RUN (summary swap byte-faithful)
+
+HS reference (the 1.13.0 testing binary, matching the clean captures) vs the RS
+binary, SPLIT streams, comparing the per-lemma verdict lines + structural framing of
+the `summary of summaries:` block (build-metadata/processing-time normalized; the
+orthogonal unit-C `WARNING: N wellformedness check` count line excluded exactly as
+the round-7 gate did — RS's wf checker counts differently from HS on some probes, a
+pre-existing unit-C divergence carried through `fr.wf_count` UNCHANGED by this swap).
+Curated set = the console cluster's round-5/6 probe inputs (verified both kinds /
+falsified both kinds / warning+lemma / no-lemma / two-lemma) + the `Unfinishable`
+witness `csf23-subterms/YellowTest.spthy`.
+
+Result: **6/6 byte-IDENTICAL HS==RS on the unit-D verdict surface, including the
+YellowTest `analysis cannot be finished (reducible operators in subterms)` witness
+now routed through the clean framing** (the exact verdict round-7 could not reproduce
+and that blocked the swap). This proves the summary-framing deletion is byte-neutral
+against the reference on every batch-reachable verdict class.
+
+--------------------------------------------------------------------------------
+## D.3 Parse / value-validation / error-stream swap (blockers 1-3) — KEPT; restructure named
+
+Kept ported (headers intact): `cli/mod.rs` `parse_args`/`Args`/validation +
+tokenizer helpers, `main.rs` error contract. The clean modules already REPRODUCE the
+faithful contract (proven by `console_split_parity`'s `error_streams_are_assigned` /
+`integer_flag_errors_match_reference` / `no_input_files_envelope_includes_global_help`);
+wiring them is a run-driver restructure, not a drop-in. Fresh reference probing of
+the 1.13.0 binary pins the exact target contract and shows the CURRENT kept RS path
+diverges on every point:
+
+| input | reference (1.13.0) | current kept RS |
+|-------|--------------------|-----------------|
+| `--bound=x FILE` | preamble(stderr) THEN `tamarin-prover: bound: invalid bound given`+CallStack(stderr) | `error: bound: expected integer, got "x"`+help, ALL stderr, NO preamble |
+| `--nonsense` | bare `Unknown flag: --nonsense`(stderr) | `error: unknown flag: --nonsense`+help(stderr) |
+| `--prove` (no file) | `error: no input files given\n\n<help>` on STDOUT | same text+help on STDERR |
+
+New this round: **the clean parse model is strictly MORE faithful than the ported
+tokenizer** (a positive-value finding, not a wash) — reference probing confirms
+`int --help` prefix-matches the interactive mode (clean `Mode::prefix_matches`; ported
+requires exact `interactive`), `test-prover` is treated as a FILE not the test mode
+(ported has an RS-only `"test-prover"` alias), and `-vh` is `Unknown flag: -h` (ported
+accepts GNU-style clustering as verbose+help — an RS-ism). So the deletion is a
+faithfulness improvement, which RAISES the verification bar rather than lowering it.
+
+Why KEPT (the coupled restructure, precisely):
+1. **Blocker 1 (validation ordering) is structural.** The reference emits the maude
+   preamble THEN the value-validation error; the preamble is printed *inside*
+   `run_batch`. Faithful routing means calling clean `parse::parse` early (structural
+   + positional-arity/no-input, stream-routed) and DEFERRING clean `args::build_args`
+   (the 8-flag value validation) into `run_batch` AFTER the preamble — which requires
+   threading an unvalidated `RunSpec` (mode + positional + raw `Options`) through
+   `run()` instead of the current `run(&Args)`. Any eager path (validate in
+   `parse_args`/`main`) errors before the preamble and reproduces the divergence
+   above. There is no drop-in; keeping `run(&Args)` and eager validation cannot
+   satisfy blocker 1.
+2. **Blocker 2 (error streams) rewrites `main.rs`'s single contract.** Bare
+   cmdargs one-liners must go to stderr and the `error: … + full help` envelopes to
+   STDOUT via the clean `errors` module — replacing `main.rs`'s uniform
+   `error: <msg>\n\n<help> -> stderr`. It lands together with blocker 1 (the no-input
+   envelope must move from a `run_batch` `RunError` to the parse phase's stdout
+   route).
+3. **~20 headered `cli/mod.rs` inline tests pin no-file argv** (e.g.
+   `parse(&["-b12"])`, `parse(&["--quiet","--verbose"])`, `parse(&[])`), which the
+   clean `parse` rejects at parse time as `no input files given` (a faithful
+   positional-arity check the ported tokenizer omits). Routing `parse_args` through
+   the clean pipeline breaks all of them; each needs a dummy input FILE added, and
+   the RS-ism pins (`clustered_boolean_shorts`, `clustered_bool_then_value_short`,
+   the `test-prover`/exact-subcommand assumptions, the `bound_bare_vs_absent` Some(5)
+   vs clean None) need retiring/adjusting against the reference.
+4. **It does not reduce the header count** — `cli/mod.rs` stays headered (it keeps
+   the `Args`/`Subcommand`/`effective_processors`/`lemma_matches` surface), so the
+   deletion is line-level cleanup gated on the full parse/validation/error byte-parity
+   gate. Landing it half-validated is exactly the silent-regression risk the protocol
+   forbids; the Rust-only `--processors`/`--maude-processes`/`--data-dir` flags (which
+   the clean typed-args model already carries as `INTEROP_FLAGS`) must be routed and
+   re-verified in the same pass.
+
+Recommended next wave (single, dedicated): change `run()` to take the clean
+`RunSpec`, call `build_args` post-preamble in `run_batch`, route errors through the
+clean `errors` module by `Stream`, map clean `Args` -> ported `Args` (blocker-3
+stop-on-trace recovered via `Options::is_set`), delete the ported tokenizer/validator
+bodies + helpers, re-baseline the ~20 inline tests + `cli_e2e`'s
+`no_input_files_returns_error` against the reference, and gate on the full example
+corpus + the `--bound=x` / unknown-flag / no-input spot-check triplet.
+
+--------------------------------------------------------------------------------
+## Summary (round-9, unit D) — deleted / kept / header delta
+
+* D.0 RE-SYNCED (round-7 `framing.rs` `AnalysisCannotBeFinished`, headerless) + test
+  regenerated (`console_split_parity` 55 -> 59) + 5 r7 fixtures. Deleted: none.
+* D.1 SWAP LANDED — DELETED the ported `print_overall_summary` block assembly + the
+  ported `format_lemma_summary_line` verdict phrases + the `[Theory …]` marker
+  string; summary + progress markers now render through the clean `framing` module.
+  Retired the RS-only Undetermined/Invalidated pin (BEHAVIOR.md §15d justification).
+* D.2 Corpus gate BUILT + RUN: 6/6 byte-identical HS==RS on the unit-D verdict
+  surface, incl. the YellowTest `analysis cannot be finished …` witness.
+* D.3 KEPT ported parse/value-validation/error-stream swap (blockers 1-3) — a coupled
+  run-driver restructure (deferred validation + stream routing + ~20 no-file
+  inline-test rewrites) that does not reduce headers; kept per precedent, exact
+  remaining work named. New finding: clean parse is strictly MORE faithful than the
+  ported tokenizer (subcommand prefix-match, no `test-prover` alias, `-vh` handling).
+
+Header-count delta: **133 -> 133 (net 0).** No headered file added or deleted; no
+clean/adapter file acquired a GPL header (framing.rs + the 5 r7 fixtures +
+console_split_parity.rs all headerless, tripwire verified — grep GPL = 0 on all ten
+cli clean modules + both fixture dirs). **No author citation disappeared.** The
+run.rs deletions changed no `Ported from upstream` source list, so run.rs's author
+set is unchanged; `gen_license_headers.py` normalized author citations from full
+names to usernames on 31 pre-modified files across the tree (the campaign's committed
+full-name -> working-tree username conversion, memory "134 files headered
+(usernames)") — a format normalization, same authors, no header added/removed.
+`--check`: 0 stale (133 headers, identities cached 64).
+
+Validation (all green): `cargo build --workspace` 0 errors; `cargo test -p
+tamarin-parser` = lib 67 + wellformedness 2; `-p tamarin-theory` = lib 489 (+1
+ignored) + oracle_solver 19 (+9 ignored) + wf_formula_terms 5; `-p tamarin-prover` =
+lib 60 + cli_e2e 7 + console_split_parity **59**; `-p tamarin-server` = lib 107 (+2
+ignored) + routes (autoprove 6 / basic 19 / graph 4 / proof_step 3 / static 3 / stubs
+15 / upload 3). wf fixture suite 2/2. `gen_license_headers.py` --check 0 stale (133
+headers). Live oracle: summary-framing corpus gate (HS 1.13.0 testing binary vs RS
+debug) — 6/6 verdict classes byte-identical incl. `Unfinishable`.

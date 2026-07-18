@@ -1,0 +1,28 @@
+export const meta = {
+  name: 'graph-allocation-b9',
+  description: 'Overlapped clean round B9 (Fable): crack the multi-cell fill-width allocation by inverting the corpus through the now-exact layout engine + audit',
+  phases: [
+    { title: 'Implement', detail: 'B9 allocation inversion + fit (Fable)' },
+    { title: 'Audit', detail: 'both-sides delta audit (baseline dca6334)' },
+  ],
+}
+
+const IMPL = `You are a CLEAN-ROOM implementer under the campaign protocol at /home/kamilner/tamarin-cleanroom/PROTOCOL.md — read it first and comply strictly.
+ACCESS RULES: You must NOT read any file under /home/kamilner/tamarin-rs/crates/, and NOT read any Haskell source (*.hs) of tamarin-prover anywhere on disk — EXCEPT the explicitly sanctioned BSD library at /home/kamilner/tamarin-cleanroom/graphdot/sanctioned/ (read its README.md). Do NOT read /home/kamilner/tamarin-cleanroom/INTEGRATION_REPORT.md. No web access. You MAY run the reference server via your cluster's oracle scripts (ports 3200-3299 only; PATH="$PATH:/home/linuxbrew/.linuxbrew/bin"; always under timeout; stop all servers when done), read .spthy example files (any path form), and read/write freely inside /home/kamilner/tamarin-cleanroom/graphdot/. No git commits.
+DISCIPLINE: log oracle interactions in workspace QUERIES.log; behavioral facts in BEHAVIOR.md with provenance; append a round section to a report file (fold into BEHAVIOR.md if blocked). Comments describe current behavior only. Return a PLAIN-TEXT summary.
+
+UNIT B (graph generation), round 9 — crack the multi-cell fill-width ALLOCATION. Your round-8 layout engine (doclayout/pretty, ribbon 1.5) is now proven faithful: with the right per-cell width, output is byte-exact (the Wide and R16_10 probes match byte-for-byte end to end, including the formerly-divergent Ack cell). The sole remaining gap is the allocation function group_widths: your proportional rule max(round(87*flat_i/T), 20) reproduces only ~79.9% of multi-cell wrapping cells (your own fill_census). Known route-reachable divergence families: deeply-nested senc(...) arguments, ++-union arguments (I_Comp / !SessionKey style), and wide multi-argument State_ facts — all break at a different element than the reference.
+
+METHOD — you now hold a decisive tool the earlier rounds lacked: an EXACT engine. Invert the corpus through it:
+1. For every multi-cell wrapping record in oracle/dot_corpus (and your captured probes), compute per cell the SET of widths at which your engine reproduces the observed line breaks exactly (a width band, possibly empty). You already built layout_at-style machinery for this in earlier rounds — generalize it into a mass constraint extractor.
+2. Collect (group composition -> per-cell width band) constraints across the whole corpus. Fit the allocation function against them: consider families beyond linear-proportional — a different total than 87 for allocation vs trigger, scaling factors applied to shares, different floors, rounding directions (floor/ceil/half-even), per-row vs per-group normalization, whether the record's rule-name/header line participates, whether shares renormalize after clamping at the floor (iterative redistribution), and whether allocation happens on a per-ROW basis (premises/conclusions each a row) with a row total. Let the CONSTRAINTS drive the family choice — with thousands of bands, the true formula should satisfy nearly all simultaneously; systematic disagreement patterns tell you which structural assumption is wrong.
+3. Where corpus constraints underdetermine a parameter, design live probes that split the candidates (you know how: controlled synthetic theories, autoprove, interactive-graph-def; bounded, under timeout).
+4. Implement the fitted allocation in generate::group_widths; re-run the full fill_census — target ~100% of multi-cell wrapping cells (report the exact number and characterize any residue honestly with concrete counter-records). GRAPHCLEAN_CORPUS round-trip must stay 12022/12022; all existing tests green.`
+
+const AUDIT = `You are a BOTH-SIDES similarity auditor for the tamarin-rs clean-room relicensing campaign (exempt from clean-room access rules). Audit ONLY this round's delta for unit B (graphdot).
+The clean-room repo /home/kamilner/tamarin-cleanroom is a git repository whose HEAD (dca6334) predates this round: run git -C /home/kamilner/tamarin-cleanroom status and diff, restricted to graphdot/, to see exactly what changed. Audit against the upstream Haskell sources under /home/kamilner/tamarin-rs/tamarin-prover/ — start from lib/theory/src/Theory/Constraint/System/Dot.hs (renderBalanced/scaleIndent/renderRow) and its HughesPJ usage. Remember the cluster's sanction: resemblance to the BSD pretty-1.1.3.6 library is fine; tamarin's own expression beyond it (the allocation constants/structure) must be probe-derived — check the fitted allocation's provenance especially hard: every constant and structural choice must trace to logged corpus-inversion constraints or live probes in QUERIES.log/BEHAVIOR.md, not to Dot.hs.
+Method: abstraction-filtration-comparison. Append a round section to /home/kamilner/tamarin-cleanroom/graphdot/AUDIT.md. Violations get BEHAVIORAL redo instructions (never patches). End with exactly one line: VERDICT: pass  — or —  VERDICT: fail`
+
+const impl = await agent(IMPL, { label: 'impl:B9', phase: 'Implement', model: 'fable' })
+const audit = await agent(AUDIT, { label: 'audit:B9', phase: 'Audit', model: 'opus' })
+return { impl: (impl || '').slice(0, 3000), audit: (audit || '').slice(0, 3000), passed: /VERDICT:\s*pass/i.test(audit || '') }
