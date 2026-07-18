@@ -1,0 +1,57 @@
+theory OpenChains
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, sdec/2, senc/2, snd/1
+equations:
+    fst(<x.1, x.2>) = x.1,
+    sdec(senc(x.1, x.2), x.2) = x.1,
+    snd(<x.1, x.2>) = x.2
+
+rule (modulo E) CreateKey:
+   [ Fr( ~k ) ] --> [ !Key( ~k ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Encrypt:
+   [ !Key( ~k ), In( m ) ] --> [ Out( senc(m, ~k) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Decrypt:
+   [ !Key( ~k ), In( senc(m, ~k) ) ] --[ Dec( m ) ]-> [ Out( m ) ]
+
+  /* has exactly the trivial AC variant */
+
+lemma dec_secret:
+  all-traces "∀ m #i. (Dec( m ) @ #i) ⇒ (∃ #j. K( m ) @ #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ m #i. (Dec( m ) @ #i) ∧ ∀ #j. (K( m ) @ #j) ⇒ ⊥"
+*/
+by sorry
+
+/* All wellformedness checks were successful. */
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: probes/round6/open_chains.spthy
+
+  processing time: 0.11s
+  
+  dec_secret (all-traces): analysis incomplete (1 steps)
+
+==============================================================================

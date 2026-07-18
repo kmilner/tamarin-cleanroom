@@ -35,8 +35,16 @@
 //! trigger for cells deep on a record line (BEHAVIOR.md §3f).
 
 use crate::alloc::NodeIdAllocator;
+use crate::doclayout::{wrap_cell_dot, FILL_WIDTH};
 use crate::model::*;
-use crate::render::{cell_budget, render_info, wrap_cell, wrap_cell_budget, Fact, FILL_WIDTH, MIN_CELL_BUDGET};
+use crate::render::{render_info, Fact};
+
+/// The per-cell minimum wrap budget (BEHAVIOR.md §3f): inside a record group a
+/// cell's shared budget never drops below this floor — a cell whose flat
+/// rendering is at most this many columns never wraps, however wide its siblings
+/// are (live probe: a sibling forced far past the budget still leaves the target
+/// fitting at flat ≤ 20, wrapping at 21).
+const MIN_CELL_BUDGET: usize = 20;
 
 /// A per-record cluster assignment (BEHAVIOR.md §4). `label` is the cluster label
 /// WITHOUT the `cluster_` prefix (e.g. `Initiator_Session_1`, observed always
@@ -469,7 +477,9 @@ fn build_record(spec: &RecordSpec, ports_prem: &[String], port_info: &str, ports
     if !spec.premises.is_empty() {
         columns.push(group_cells(&spec.premises, ports_prem));
     }
-    columns.push(vec![Cell::new(port_info, wrap_cell(&spec.info))]);
+    // The info cell is its own single-cell group (full width), fed through the
+    // faithful layout engine at [`FILL_WIDTH`].
+    columns.push(vec![Cell::new(port_info, wrap_cell_dot(&spec.info, FILL_WIDTH as isize))]);
     if !spec.conclusions.is_empty() {
         columns.push(group_cells(&spec.conclusions, ports_concl));
     }
@@ -481,64 +491,51 @@ fn build_record(spec: &RecordSpec, ports_prem: &[String], port_info: &str, ports
     }
 }
 
-/// Wrap every cell of one record group (all premises together, or all conclusions
-/// together), sharing the group's [`FILL_WIDTH`] budget (BEHAVIOR.md §3f).
+/// The per-cell line widths of one record group (all premises together, or all
+/// conclusions together): the cells share the group's [`FILL_WIDTH`] budget
+/// (BEHAVIOR.md §3f), and each cell is then laid out INDEPENDENTLY at its width by
+/// the faithful pretty-printer ([`crate::doclayout`]).
 ///
-/// Two budgets per cell, both derived only from the group's cell widths:
-///  * the **wrap TRIGGER** (does a cell break at all) is the flat-sum budget
-///    [`cell_budget`] = `max(87 − Σ other cells' flat widths, 20)`: a cell wraps
-///    iff its flat width exceeds this. Byte-exact away from the ±1 `fits` boundary
-///    (matches 99.5 % of corpus prem/concl cells).
-///  * the **FILL width** used *once* a cell wraps is wider than the flat-sum
-///    budget, because a sibling that itself wraps occupies only the width it is
-///    ALLOCATED, not its full flat width. So a wide cell packs more elements per
-///    line than the flat-sum budget predicts — the observed "one more element" in a
-///    group like `[Ack 25, Big 68, Out 11]`, where `Big`'s effective fill budget is
-///    `87 − 20 − 11 = 56` (`Ack` wraps and is allocated 20), not `87 − 25 − 11 = 51`.
-///
-/// The fill budgets come from a **smallest-flat-first** allocation that reproduces
-/// the greedy pretty-printer's coupling. Process cells in increasing flat width;
-/// each cell's fill budget is `max(87 − Σ others' allocations, 20)`, where an
-/// already-processed sibling contributes `min(flat, its own budget)` (a wrapping
-/// sibling occupies just its budget) and an un-processed (wider) sibling still
-/// contributes its full flat width. So the narrow cells are packed tight first and
-/// the widest cell expands into the room their allocations leave — e.g. `Ack`, seen
-/// before `Big` is placed, faces `Big`'s full flat 68 and is squeezed to 20, while
-/// `Big`, placed last, sees `Ack`'s allocation 20 and gets 56.
-fn group_cells(flat_cells: &[String], ports: &[String]) -> Vec<Cell> {
-    let widths: Vec<usize> = flat_cells.iter().map(|t| t.chars().count()).collect();
-    let n = flat_cells.len();
-    let trigger: Vec<usize> = (0..n).map(|i| cell_budget(&widths, i)).collect();
-
-    // Smallest-flat-first fill-budget allocation. `alloc[j]` starts at the flat
-    // width and becomes `min(flat, budget)` once cell j is processed.
+/// A single width per cell (the exact engine turns it into the wrap decision AND
+/// the fill packing — no separate trigger/fill split is needed once the fitting is
+/// faithful). The width comes from a **smallest-flat-first** allocation that
+/// reproduces the greedy pretty-printer's coupling: process cells in increasing
+/// flat width; each cell's width is `max(87 − Σ others' occupancy, 20)`, where an
+/// already-processed sibling occupies `min(flat, its own width)` (a wrapping
+/// sibling takes only the width it was allocated) and an un-processed (wider)
+/// sibling still occupies its full flat width. So the narrow cells pack tight
+/// first and the widest cell expands into the room their allocations leave — e.g.
+/// the Wide-rule conclusion group `[Ack 25, Big 68, Out 11]`: `Out` fits (11 ≤ 20
+/// floor); `Ack`, seen while `Big` is still at flat 68, is squeezed to 20 and
+/// wraps; `Big`, placed last, sees `Ack`'s occupancy 20 and gets `87 − 20 − 11 =
+/// 56` → eight tuple elements on its first line, `Out` stays flat. The `20` floor
+/// is the observed per-cell minimum (a cell of flat ≤ 20 never wraps).
+pub fn group_widths(widths: &[usize]) -> Vec<usize> {
+    let n = widths.len();
     let mut order: Vec<usize> = (0..n).collect();
     order.sort_by_key(|&i| widths[i]); // stable: ties keep group order
-    let mut alloc = widths.clone();
-    let mut fill = vec![0usize; n];
+    let mut occ = widths.to_vec();
+    let mut out = vec![0usize; n];
+    let full = FILL_WIDTH as usize;
     for &i in &order {
-        let others: usize = (0..n).filter(|&j| j != i).map(|j| alloc[j]).sum();
-        let budget = FILL_WIDTH.saturating_sub(others).max(MIN_CELL_BUDGET);
-        fill[i] = budget;
-        alloc[i] = widths[i].min(budget);
+        let others: usize = (0..n).filter(|&j| j != i).map(|j| occ[j]).sum();
+        let budget = full.saturating_sub(others).max(MIN_CELL_BUDGET);
+        out[i] = budget;
+        occ[i] = widths[i].min(budget);
     }
+    out
+}
 
+/// Wrap every cell of one record group, sharing the group [`FILL_WIDTH`] via
+/// [`group_widths`] and laying each cell out at its width with the faithful engine.
+fn group_cells(flat_cells: &[String], ports: &[String]) -> Vec<Cell> {
+    let widths: Vec<usize> = flat_cells.iter().map(|t| t.chars().count()).collect();
+    let fills = group_widths(&widths);
     flat_cells
         .iter()
         .zip(ports)
-        .enumerate()
-        .map(|(i, (text, p))| {
-            // The flat-sum trigger decides whether the cell breaks; the fill budget
-            // (≥ the trigger budget) governs how it packs once it does. Capping at
-            // `flat − 1` keeps a flat-sum-triggered break even in the rare case the
-            // wider fill budget alone would leave the cell on one line.
-            let budget = if widths[i] <= trigger[i] {
-                trigger[i]
-            } else {
-                fill[i].min(widths[i] - 1).max(trigger[i])
-            };
-            Cell::new(p.clone(), wrap_cell_budget(text, budget))
-        })
+        .zip(fills)
+        .map(|((text, p), w)| Cell::new(p.clone(), wrap_cell_dot(text, w as isize)))
         .collect()
 }
 

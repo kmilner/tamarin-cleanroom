@@ -277,3 +277,111 @@ no-new-oracle-facts internal API validated by byte-equivalence tests. Nothing in
 the delta is a copied protectable expression.
 
 Verdict: pass.
+
+## Round 6 audit
+
+Scope: this round's working-tree delta under `console/`, against clean-room HEAD
+`e76455a`. Sources changed: `framing.rs` (+94/-27 net), `lib.rs` (re-export),
+`cli-clean/tests/cli_tests.rs`, plus `BEHAVIOR.md` §14 / `QUERIES.log` Round-6
+block and the `probes/round6/*`, `captures/r6_*`, `tests/fixtures/r6_diff_*`
+artifacts. Behavioural theme: the `--diff` lemma-verdict taxonomy — the
+side-prefixed (`RHS`/`LHS`) projected-lemma lines and the trailing observational-
+equivalence (`DiffLemma:`) line, plus closure probes (sources/open-chains,
+stop-on-trace, oracle-error) that added NO new source. Upstream comparands:
+`prettyClosedDiffSummary` (`lib/theory/src/ClosedTheory.hs:492–545`),
+`showDiffProofStatus` (`Theory/Proof.hs:1115–1121`), `Side` (`Constraint/System.hs
+:329`), `unprovenDiffLemma "Observational_equivalence"` (`OpenTheory.hs:558–559`),
+`ppSummary` (`Main/Mode/Batch.hs:127–151`).
+
+- **`LemmaSide` enum + `LemmaOutcome` constructors** (`framing.rs`). The clean
+  crate collapses whole-run, projected-side and diff-lemma rows into ONE
+  `LemmaOutcome` carrying a `side: LemmaSide` (`Whole|Rhs|Lhs|Diff`), with three
+  named constructors (`whole`/`projected`/`diff_lemma`) and one `Vec<LemmaOutcome>`
+  ordered by the caller. This is NOT the source's decomposition: upstream renders
+  diff summaries from two distinct list-comprehensions inside
+  `prettyClosedDiffSummary` — `lemmaSummaries` over `EitherLemmaItem (s, lem)` and
+  `diffLemmaSummaries` over `DiffLemmaItem lem`, joined `(vcat …) $$ (vcat …)` — and
+  keeps non-diff rendering in an entirely separate `prettyClosedSummary`. The clean
+  invents a tagged-union abstraction that has no upstream analogue; `Whole`/`Diff`
+  are not source constructor names, and `Rhs`/`Lhs` are idiomatic Rust casing of the
+  behaviour token, not the source's all-caps `RHS`/`LHS` `Side` constructors. No
+  source identifier (`EitherLemmaItem`, `DiffLemmaItem`, `prettyClosedDiffSummary`,
+  `lDiffName`, `Side`) is carried. Original structure.
+
+- **`RHS :  ` / `LHS :  ` prefixes** (`LemmaOutcome::line`). The three-token layout
+  `"RHS" + " :  " + <normal row>` is a byte-exact interop constant, directly
+  captured (`BEHAVIOR.md` §14b; `QUERIES.log 00:43:00` r6_diff_with_lemma,
+  `00:44:00` r6_diff_two_lemmas; fixtures `r6_diff_with_lemma/two_lemmas/warn`).
+  The literal derives from upstream `text (show s) <-> text ": "` where
+  `show LHS/RHS` yields the tokens and `<->` inserts the interstitial space — but
+  the clean writes the observed bytes (`format!("RHS :  {core}")`) rather than
+  replaying the Pretty `<->`-spacing mechanics; bytes-first, not combinator-first,
+  same signature as the Round-5 body-layout reasoning. The projected remainder is
+  the pre-existing non-diff row (§12c), unchanged, `<kind>` rendering normally
+  including `exists-trace` (r6_diff_two_lemmas `can_send`). Merger token, filtered.
+
+- **`DiffLemma:  <name> : <verdict> (<N> steps)`** (`LemmaOutcome::line`, `Diff`
+  arm). Byte-exact interop line, captured (`BEHAVIOR.md` §14b; `QUERIES.log
+  00:40:00` r6_diff_n5n6, `00:41:00` r6_diff_equiv_true, `00:42:00` r6_diff_default;
+  fixtures). The `DiffLemma:  ` prefix (NO space before colon, two after) vs the
+  `RHS :  ` shape (space before colon) is an observed distinction, logged verbatim,
+  not inferred from source. Structurally the clean does NOT copy the source's split
+  into a second status function: upstream keys diff verdicts off `showDiffProofStatus`
+  (a separate 6-arm match: `TraceFound/CompleteProof/UnfinishableProof/IncompleteProof
+  /UndeterminedProof/InvalidatedProof`); the clean instead REUSES its own 3-value
+  `verdict_phrase(result, TraceKind::AllTraces)`, exploiting that a diff lemma has
+  no trace-kind and its `falsified` always reads `- found trace`. Reusing the
+  existing observed-only 3-arm phrase map (omitting the three un-probed statuses)
+  is the fingerprint of reconstruction, not transcription of the dual-function source.
+
+- **`verdict_phrase` extraction** (`framing.rs`). The `result_text` *method* became a
+  free `fn verdict_phrase(result, kind)` so the `Diff` arm can call it with a fixed
+  kind. The phrase strings themselves (`verified` / `analysis incomplete` /
+  `falsified - found trace` / `falsified - no trace found`) are UNCHANGED from
+  Round 5 — no new interop token is introduced by the extraction, and the doc-comment
+  cross-references were retargeted (`result_text` → `verdict_phrase`) with no source
+  comment carried. Internal refactor; carries no new provenance.
+
+- **`Observational_equivalence` name.** The auto-generated diff-lemma name is a
+  captured OUTPUT value (upstream `unprovenDiffLemma "Observational_equivalence" []`),
+  logged at `QUERIES.log 00:40:00` and asserted in `BEHAVIOR.md` §14b ("always
+  named `Observational_equivalence`"). It is NOT baked into `framing.rs` — the
+  `diff_lemma` constructor takes `name: impl Into<String>`, so the string appears
+  only as observed data in tests/fixtures, exactly like any lemma name flowing
+  through the crate. Boundary datum, filtered.
+
+- **Diff summary ordering** (§14c → single ordered `Vec`). The observed order —
+  per ordinary lemma its `RHS` then `LHS`, all pairs, then the single `DiffLemma`
+  last — is triangulated from captures (`QUERIES.log 00:44:00` r6_diff_two_lemmas
+  established the per-lemma grouping `RHS l1, LHS l1, RHS l2, LHS l2`; r6_diff_warn
+  confirmed warning-section-first). The clean encodes this as caller-supplied `Vec`
+  order printed in sequence by `render_block`, NOT as the source's
+  `(vcat lemmaSummaries) $$ (vcat diffLemmaSummaries)` with the RHS/LHS interleave
+  falling out of `EitherLemmaItem` item layout. Behaviour reproduced by a
+  port-original mechanism.
+
+- **No comment lineage.** Upstream's `prettyClosedDiffSummary` carries a long
+  `Just`-annotation-invariant note and the `TODO: The whole consruction seems a bit
+  hacky` block, repeated verbatim across all three comprehensions; none of that is
+  echoed. The clean's comments describe the observed byte layout and its own enum
+  only.
+
+- **Round-6 probes/fixtures.** `probes/round6/{diff_equiv_true,diff_with_lemma,
+  diff_two_lemmas,diff_warn,open_chains,partialdecon}.spthy` are self-authored (own
+  theory names `DiffTwoLemmas`/`DiffWarn`/… , own `diff(~m,~m)` / `diff(~k,~'foo')`
+  constructions), matching the §14 "own fixtures" claim. `r6_diff_lrmismatch` reuses
+  `round2/diff_left_right_mismatch.spthy` and `r6_analysed_reload` an eccDAA
+  `.analysed.spthy` as probe INPUT only; `tests/fixtures/r6_diff_*.out.txt` are the
+  reference program's own emitted bytes (golden oracle artifacts), not authored
+  expression in the clean crate. Probe-derived — filtered.
+
+Closure-only probes (r6_sot_*, r6_openchains_*, r6_partialdecon, r6_oracle_err,
+r6_analysed_reload) added NO summary-taxonomy line form — each logged a negative
+result (no new verdict phrase; `[sources]` invisible; partial-deconstruction adds no
+summary line; oracle failure is a §8c runtime-error abort, empty stdout) and touched
+no source. Every behavioural claim added this round traces to a logged Round-6 probe
+(`QUERIES.log 00:40:00–00:49:00`) or a captured fixture, and the only new source is a
+byte-exact reproduction of the `--diff` line forms via a tagged-union abstraction that
+does not exist upstream. Nothing in the delta is a copied protectable expression.
+
+VERDICT: pass

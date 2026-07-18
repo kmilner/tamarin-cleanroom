@@ -1,0 +1,15 @@
+theory DiffWithLemma
+begin
+
+builtins: symmetric-encryption
+
+// A diff theory that ALSO carries a regular (non-diff) lemma, to observe how
+// ordinary lemmas are reported in --diff mode (LHS/RHS projections) alongside
+// the auto-generated Observational_equivalence DiffLemma.
+rule Send:
+  [ Fr(~k), Fr(~m) ] --[ Sent(~m) ]-> [ Out(senc(diff(~m, ~m), ~k)) ]
+
+lemma sent_secret:
+  "All m #i. Sent(m) @ i ==> not (Ex #j. K(m) @ j)"
+
+end

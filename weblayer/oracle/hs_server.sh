@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# OOM guard: prover is the preferred kill target, capped at 24GB address space
+echo 1000 > /proc/self/oom_score_adj 2>/dev/null || true
+ulimit -v 25165824 2>/dev/null || true
 # Black-box oracle: serve a .spthy in the HS interactive web UI.
 # Usage: hs_server.sh start <file.spthy> <port>   (then curl http://127.0.0.1:<port>/...)
 #        hs_server.sh stop <port>

@@ -1,0 +1,13 @@
+theory DiffWarn
+begin
+
+// Diff theory that ALSO triggers a wellformedness warning (fresh public
+// constant ~'foo'), to observe the order of the WARNING section vs the
+// RHS/LHS/DiffLemma summary lines in --diff mode.
+rule Bad:
+  [ Fr(~k) ] --[ Ev() ]-> [ Out(diff(~k, ~'foo')) ]
+
+lemma happens:
+  "All #i. Ev() @ i ==> Ex #j. Ev() @ j"
+
+end

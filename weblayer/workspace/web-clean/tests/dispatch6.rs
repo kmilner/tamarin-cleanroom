@@ -131,7 +131,7 @@ const APPEND: &str = "Append modified lemmas to file";
 
 #[test]
 fn local_theory_overview_shows_reload_and_append() {
-    let mut s = Server::new(Fake, local_base());
+    let s = Server::new(Fake, local_base());
     let b = s.dispatch(&Request::get("/thy/trace/1/overview/help")).body;
     assert!(b.contains(RELOAD), "Local shell must show Reload file");
     assert!(b.contains(APPEND), "Local shell must show Append modified lemmas");
@@ -139,7 +139,7 @@ fn local_theory_overview_shows_reload_and_append() {
 
 #[test]
 fn uploaded_theory_overview_omits_reload_and_append() {
-    let mut s = Server::new(Fake, local_base());
+    let s = Server::new(Fake, local_base());
     // Upload a second theory (Upload origin) -> index 2.
     let form = vec![("uploadedTheory".to_string(), "theory NSLPK3 begin end".to_string())];
     s.dispatch(&Request::post("/", &form));
@@ -154,7 +154,7 @@ fn uploaded_theory_overview_omits_reload_and_append() {
 
 #[test]
 fn proof_derived_version_inherits_upload_origin() {
-    let mut s = Server::new(Fake, local_base());
+    let s = Server::new(Fake, local_base());
     let form = vec![("uploadedTheory".to_string(), "theory NSLPK3 begin end".to_string())];
     s.dispatch(&Request::post("/", &form)); // index 2, Upload
     // A proof op on the uploaded theory allocates index 3, inheriting Upload origin.
@@ -181,27 +181,27 @@ struct WrapState(InMemoryState<Thy>);
 
 impl StateOps for WrapState {
     type Theory = Thy;
-    fn insert_new(&mut self, theory: Thy) -> u64 {
+    fn snapshot(&self, index: u64) -> Option<Thy> {
+        self.0.snapshot(index)
+    }
+    fn insert_new(&self, theory: Thy) -> u64 {
         self.0.insert_new(theory)
     }
-    fn get(&self, index: u64) -> Option<&Thy> {
-        self.0.get(index)
-    }
-    fn replace(&mut self, index: u64, theory: Thy) {
+    fn replace(&self, index: u64, theory: Thy) {
         self.0.replace(index, theory);
     }
-    fn remove(&mut self, index: u64) -> Option<Thy> {
+    fn remove(&self, index: u64) -> Option<Thy> {
         self.0.remove(index)
     }
-    fn entries(&self) -> Vec<(u64, &Thy)> {
-        self.0.entries()
+    fn indices(&self) -> Vec<u64> {
+        self.0.indices()
     }
 }
 
 #[test]
 fn server_drives_a_custom_state_backend_identically() {
     // with_state injects a caller-owned backend (pre-seeded with the base at 1).
-    let mut s = Server::with_state(Fake, WrapState(InMemoryState::seeded(local_base())));
+    let s = Server::with_state(Fake, WrapState(InMemoryState::seeded(local_base())));
 
     // A proof op allocates a fresh version through insert_new.
     let r = s.dispatch(&Request::get("/thy/trace/1/main/method/secrecy/1"));
@@ -213,7 +213,7 @@ fn server_drives_a_custom_state_backend_identically() {
     assert_eq!(rl.body, r#"{"redirect":"/thy/trace/1/overview/help"}"#);
     assert_eq!(s.versions(), vec![1, 2]);
 
-    // Read views resolve through get and stay resolvable (retention).
+    // Read views resolve through snapshot and stay resolvable (retention).
     assert_eq!(s.dispatch(&Request::get("/thy/trace/1/overview/help")).status, 200);
     assert_eq!(s.dispatch(&Request::get("/thy/trace/2/overview/help")).status, 200);
     assert_eq!(s.dispatch(&Request::get("/thy/trace/99/overview/help")).status, 404);
@@ -225,38 +225,40 @@ fn server_drives_a_custom_state_backend_identically() {
 
 #[test]
 fn inmemory_state_allocation_is_monotonic_and_retains() {
-    let mut st: InMemoryState<u32> = InMemoryState::new();
+    // No `mut`: StateOps is an interior-mutability facade (every method is &self).
+    let st: InMemoryState<u32> = InMemoryState::new();
     assert_eq!(st.insert_new(10), 1);
     assert_eq!(st.insert_new(20), 2);
     assert_eq!(st.insert_new(30), 3);
     // In-place replace does not allocate; later allocations keep climbing.
     st.replace(2, 99);
     assert_eq!(st.insert_new(40), 4);
-    // Every index remains resolvable; replace overwrote only index 2.
-    assert_eq!(st.get(1), Some(&10));
-    assert_eq!(st.get(2), Some(&99));
-    assert_eq!(st.get(3), Some(&30));
-    assert_eq!(st.get(4), Some(&40));
-    assert_eq!(st.get(5), None);
-    assert_eq!(st.entries(), vec![(1, &10), (2, &99), (3, &30), (4, &40)]);
+    // Every index remains resolvable; replace overwrote only index 2. `snapshot`
+    // hands out an owned copy (not a borrow) so the lock is released each call.
+    assert_eq!(st.snapshot(1), Some(10));
+    assert_eq!(st.snapshot(2), Some(99));
+    assert_eq!(st.snapshot(3), Some(30));
+    assert_eq!(st.snapshot(4), Some(40));
+    assert_eq!(st.snapshot(5), None);
+    assert_eq!(st.indices(), vec![1, 2, 3, 4]);
 }
 
 #[test]
 fn inmemory_state_remove_and_monotonicity_after_remove() {
-    let mut st: InMemoryState<u32> = InMemoryState::new();
+    let st: InMemoryState<u32> = InMemoryState::new();
     st.insert_new(10);
     st.insert_new(20);
     assert_eq!(st.remove(1), Some(10));
     assert_eq!(st.remove(1), None);
-    assert_eq!(st.get(1), None);
+    assert_eq!(st.snapshot(1), None);
     // The counter never rewinds: the next allocation is 3, not a reused 1.
     assert_eq!(st.insert_new(30), 3);
-    assert_eq!(st.entries(), vec![(2, &20), (3, &30)]);
+    assert_eq!(st.indices(), vec![2, 3]);
 }
 
 #[test]
 fn seeded_state_puts_base_at_index_one() {
     let st = InMemoryState::seeded("base".to_string());
-    assert_eq!(st.get(1), Some(&"base".to_string()));
-    assert_eq!(st.entries().len(), 1);
+    assert_eq!(st.snapshot(1), Some("base".to_string()));
+    assert_eq!(st.indices(), vec![1]);
 }

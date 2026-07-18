@@ -1,0 +1,10 @@
+theory DiffEquivTrue
+begin
+
+// Both sides of every diff() are identical, so the two projected systems are
+// observationally equivalent: expect the auto-generated Observational_equivalence
+// lemma to be VERIFIED under --diff --prove.
+rule Send:
+  [ Fr(~k) ] --[ ]-> [ Out(diff(~k, ~k)) ]
+
+end

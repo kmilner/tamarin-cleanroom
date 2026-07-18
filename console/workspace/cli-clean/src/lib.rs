@@ -34,7 +34,7 @@ pub use emit::{drive_batch, BatchEmitter, Sink, StreamCollector};
 pub use errors::{CliError, ParseError};
 pub use framing::{
     frame_batch, frame_parse_only, frame_variants, render_summary, BatchTheory, LemmaOutcome,
-    LemmaResult, LoadedTheory, Summary, TraceKind, WarningSummary,
+    LemmaResult, LemmaSide, LoadedTheory, Summary, TraceKind, WarningSummary,
 };
 pub use help::render_help;
 pub use modes::Mode;

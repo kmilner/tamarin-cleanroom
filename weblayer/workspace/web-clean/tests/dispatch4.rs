@@ -134,7 +134,7 @@ fn server() -> Server<Fake> {
 
 #[test]
 fn robots_txt_byte_identical() {
-    let mut s = server();
+    let s = server();
     let r = s.dispatch(&Request::get("/robots.txt"));
     assert_eq!(r.status, 200);
     assert_eq!(r.content_type, "text/plain; charset=utf-8");
@@ -147,7 +147,7 @@ fn robots_txt_byte_identical() {
 
 #[test]
 fn favicon_is_303_to_static_icon_with_no_cache() {
-    let mut s = server();
+    let s = server();
     let r = s.dispatch(&Request::get("/favicon.ico"));
     assert_eq!(r.status, 303);
     assert_eq!(r.location.as_deref(), Some("/static/img/favicon.ico"));
@@ -157,7 +157,7 @@ fn favicon_is_303_to_static_icon_with_no_cache() {
 
 #[test]
 fn kill_requires_path_query() {
-    let mut s = server();
+    let s = server();
     // No path arg -> 400 Invalid Arguments (byte-identical to the live page).
     let bad = s.dispatch(&Request::get("/kill"));
     assert_eq!(bad.status, 400);
@@ -177,7 +177,7 @@ fn kill_requires_path_query() {
 
 #[test]
 fn static_serves_by_extension_and_404s_missing() {
-    let mut s = server();
+    let s = server();
     let hit = s.dispatch(&Request::get("/static/css/app.css"));
     assert_eq!(hit.status, 200);
     assert_eq!(hit.content_type, "text/css");
@@ -197,7 +197,7 @@ fn static_serves_by_extension_and_404s_missing() {
 
 #[test]
 fn download_is_octet_stream_equal_to_source() {
-    let mut s = server();
+    let s = server();
     let dl = s.dispatch(&Request::get("/thy/trace/1/download/Tutorial.spthy"));
     assert_eq!(dl.status, 200);
     assert_eq!(dl.content_type, "application/octet-stream");
@@ -211,7 +211,7 @@ fn download_is_octet_stream_equal_to_source() {
 
 #[test]
 fn reload_is_json_redirect_in_place() {
-    let mut s = server();
+    let s = server();
     let r = s.dispatch(&Request::post("/thy/trace/1/reload", &[]));
     assert_eq!(r.status, 200);
     assert_eq!(r.content_type, "application/json; charset=utf-8");
@@ -223,7 +223,7 @@ fn reload_is_json_redirect_in_place() {
 
 #[test]
 fn get_and_append_is_alert_envelope() {
-    let mut s = server();
+    let s = server();
     let r = s.dispatch(&Request::post("/thy/trace/1/get_and_append/Tutorial.spthy", &[]));
     assert_eq!(r.status, 200);
     assert_eq!(r.content_type, "application/json; charset=utf-8");
@@ -237,7 +237,7 @@ fn get_and_append_is_alert_envelope() {
 
 #[test]
 fn upload_allocates_fresh_index_from_global_counter() {
-    let mut s = server();
+    let s = server();
     // First bump the counter via a proof op so an upload cannot collide with it.
     s.dispatch(&Request::get("/thy/trace/1/main/method/types/1"));
     assert_eq!(s.versions(), vec![1, 2]);
@@ -260,7 +260,7 @@ fn upload_allocates_fresh_index_from_global_counter() {
 
 #[test]
 fn delete_missing_lemma_redirects_to_delete_view() {
-    let mut s = server();
+    let s = server();
     // Existing lemma -> 303 to help, removed in place.
     let ok = s.dispatch(&Request::post("/thy/trace/1/edit/delete/types", &[]));
     assert_eq!(ok.status, 303);
@@ -275,7 +275,7 @@ fn delete_missing_lemma_redirects_to_delete_view() {
 
 #[test]
 fn failed_method_is_alert_no_version_bump() {
-    let mut s = server();
+    let s = server();
     // Method 0 is the failure case in the fake: a JSON {alert}, no new version.
     let r = s.dispatch(&Request::get("/thy/trace/1/main/method/types/0"));
     assert_eq!(r.status, 200);
@@ -333,7 +333,7 @@ fn equiv_overview_shell_byte_identical() {
 
 #[test]
 fn diff_method_redirects_to_diffproof_new_version() {
-    let mut s = server();
+    let s = server();
     let r = s.dispatch(&Request::get("/thy/equiv/1/main/diffMethod/Observational_equivalence/1"));
     assert_eq!(r.status, 200);
     assert_eq!(r.content_type, "application/json; charset=utf-8");
@@ -350,7 +350,7 @@ fn diff_method_redirects_to_diffproof_new_version() {
 
 #[test]
 fn equiv_intdot_uses_equiv_kind_in_dotsrc() {
-    let mut s = server();
+    let s = server();
     let r = s.dispatch(&Request::get("/thy/equiv/1/intdot/graph/diffProof/Observational_equivalence/Rule_Send"));
     assert_eq!(r.content_type, "text/html; charset=utf-8");
     assert!(r.body.contains(
@@ -381,7 +381,7 @@ fn toplevel_route_grammar() {
 
 #[test]
 fn unknown_index_and_current_are_404() {
-    let mut s = server();
+    let s = server();
     assert_eq!(s.dispatch(&Request::get("/thy/trace/99/overview/help")).status, 404);
     assert_eq!(s.dispatch(&Request::get("/thy/trace/#/overview/help")).status, 404);
 }

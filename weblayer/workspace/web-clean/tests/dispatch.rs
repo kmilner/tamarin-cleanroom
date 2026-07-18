@@ -161,7 +161,7 @@ fn server() -> Server<FakeProver> {
 
 #[test]
 fn method_application_bumps_version_and_redirects() {
-    let mut s = server();
+    let s = server();
     let r = s.dispatch(&Request::get("/thy/trace/1/main/method/Client_session_key_secrecy/1"));
     assert_eq!(r.status, 200);
     assert_eq!(r.content_type, "application/json; charset=utf-8");
@@ -182,7 +182,7 @@ fn method_application_bumps_version_and_redirects() {
 
 #[test]
 fn method_at_deeper_path_carries_number_before_path() {
-    let mut s = server();
+    let s = server();
     // method/{lemma}/{n}/{path…}: the number precedes the path.
     let r = s.dispatch(&Request::get("/thy/trace/1/main/method/Client_session_key_secrecy/2/_/B_2"));
     assert_eq!(r.status, 200);
@@ -197,7 +197,7 @@ fn autoprove_variants_redirect_json_and_bump() {
     for form in [
         "idfs/0/False", "idfs/5/False", "idfs/0/True", "characterize/0/False", "characterize/5/False",
     ] {
-        let mut s = server();
+        let s = server();
         let path = format!("/thy/trace/1/autoprove/{form}/proof/Client_session_key_honest_setup");
         let r = s.dispatch(&Request::get(&path));
         assert_eq!(r.status, 200, "form {form}");
@@ -239,7 +239,7 @@ fn autoprove_route_parses_the_variant_matrix() {
 
 #[test]
 fn delete_lemma_is_303_to_help_and_in_place() {
-    let mut s = server();
+    let s = server();
     let r = s.dispatch(&Request::post("/thy/trace/1/edit/delete/Client_auth", &[]));
     assert_eq!(r.status, 303);
     assert_eq!(r.location.as_deref(), Some("/thy/trace/1/overview/help"));
@@ -250,7 +250,7 @@ fn delete_lemma_is_303_to_help_and_in_place() {
 
 #[test]
 fn valid_edit_and_add_are_303_to_their_form_pages() {
-    let mut s = server();
+    let s = server();
     let good = [("lemma-text".to_string(), "lemma X: exists-trace \"T\"".to_string())];
     let re = s.dispatch(&Request::post("/thy/trace/1/edit/edit/Client_auth", &good));
     assert_eq!(re.status, 303);
@@ -263,7 +263,7 @@ fn valid_edit_and_add_are_303_to_their_form_pages() {
 
 #[test]
 fn failed_edit_returns_200_form_page_no_change() {
-    let mut s = server();
+    let s = server();
     let bad = [("lemma-text".to_string(), "this is not a lemma".to_string())];
     let r = s.dispatch(&Request::post("/thy/trace/1/edit/edit/Client_auth", &bad));
     assert_eq!(r.status, 200);
@@ -280,7 +280,7 @@ fn failed_edit_returns_200_form_page_no_change() {
 
 #[test]
 fn edit_form_envelope_byte_parity_with_rows_formula() {
-    let mut s = server();
+    let s = server();
     for (lemma, fixture) in [
         ("Client_auth", include_str!("fixtures/r3_edit_form_client_auth.json")),
         ("Client_session_key_honest_setup", include_str!("fixtures/r3_edit_form_honest_setup.json")),
@@ -301,7 +301,7 @@ fn edit_form_envelope_byte_parity_with_rows_formula() {
 
 #[test]
 fn add_and_delete_form_envelope_byte_parity() {
-    let mut s = server();
+    let s = server();
     let radd = s.dispatch(&Request::get("/thy/trace/1/main/add/Client_session_key_secrecy"));
     let want_add: Value = serde_json::from_str(include_str!("fixtures/r3_add_form_named.json")).unwrap();
     let got_add: Value = serde_json::from_str(&radd.body).unwrap();
@@ -319,7 +319,7 @@ fn add_and_delete_form_envelope_byte_parity() {
 
 #[test]
 fn next_prev_are_plain_text_urls_no_bump() {
-    let mut s = server();
+    let s = server();
     let n = s.dispatch(&Request::get("/thy/trace/1/next/normal/proof/Client_auth"));
     assert_eq!(n.status, 200);
     assert_eq!(n.content_type, "text/plain; charset=utf-8");
@@ -335,7 +335,7 @@ fn next_prev_are_plain_text_urls_no_bump() {
 
 #[test]
 fn source_and_message_are_identical_plain_text() {
-    let mut s = server();
+    let s = server();
     let src = s.dispatch(&Request::get("/thy/trace/1/source"));
     let msg = s.dispatch(&Request::get("/thy/trace/1/message"));
     assert_eq!(src.content_type, "text/plain; charset=utf-8");
@@ -344,7 +344,7 @@ fn source_and_message_are_identical_plain_text() {
 
 #[test]
 fn intdot_page_swaps_handler_and_keeps_tail() {
-    let mut s = server();
+    let s = server();
     let r = s.dispatch(&Request::get("/thy/trace/1/intdot/proof/Client_auth/_/B_2"));
     assert_eq!(r.content_type, "text/html; charset=utf-8");
     assert!(r.body.contains(
@@ -356,7 +356,7 @@ fn intdot_page_swaps_handler_and_keeps_tail() {
 
 #[test]
 fn unmatched_route_and_unknown_index_are_404() {
-    let mut s = server();
+    let s = server();
     let a = s.dispatch(&Request::get("/thy/trace/1/main/nope"));
     assert_eq!(a.status, 404);
     assert!(a.body.contains("<title>Not Found</title>"));
@@ -370,7 +370,7 @@ fn unmatched_route_and_unknown_index_are_404() {
 #[test]
 fn post_to_a_get_route_is_not_a_mutation() {
     // A POST to a non-edit path is unmatched (no accidental mutation).
-    let mut s = server();
+    let s = server();
     let r = s.dispatch(&Request::post("/thy/trace/1/main/help", &[]));
     assert_eq!(r.status, 404);
     assert_eq!(s.versions(), vec![1]);

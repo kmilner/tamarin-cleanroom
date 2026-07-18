@@ -744,3 +744,150 @@ backend shares no identifier or structure with upstream's `MVar TheoryMap` +
 narration to scrub; `Uploaded` broader than its name) — neither is copied protectable
 expression nor requires redo. Findings that survive filtration: 0. No redo instructions
 issued. VERDICT: PASS.
+
+---
+
+## Round 7 — both-sides similarity audit (weblayer delta: concurrency-safe dispatch)
+
+Scope: this round's delta only. Baselined against clean-room HEAD `e76455a` (pre-round);
+`git diff` restricted to `weblayer/`. Upstream reference read for this audit:
+`src/Web/Handler.hs` (state/thread machinery: `getTheory` 173–176, `putTheory`/`putDiffTheory`
+341–382, `replaceTheory`/`replaceDiffTheory` 300–338, `adjEitherTheory` 522–534, `delTheory`
+488–495, `getTheories` 497–501, the `threadVar` subsystem `putThread`/`delThread`/`getThread`
+560–592, `evalInThread` 634–652, `withTheory`/`withBothTheory`/`withDiffTheory`/`withEitherTheory`
+656–706), `src/Web/Types.hs` (`WebUI.theoryVar :: MVar TheoryMap` / `threadVar :: MVar ThreadMap`
+96/142, `TheoryMap`/`ThreadMap`/`TheoryIdx` 88–96, `GenericTheoryInfo` 174–183), `src/Web/Settings.hs`.
+
+Delta contents: `src/dispatch.rs` (the substantive change); `tests/dispatch7.rs` (new, 2 tests);
+`tests/dispatch{,4,5,6}.rs` (mechanical API adaptation); `BEHAVIOR.md` §17 + §16.2 note;
+`QUERIES.log` [R70]–[R76]; `REPORT.md` Round-7 section.
+
+### What the round changes (abstraction)
+
+A behaviour-neutral concurrency refactor of the state façade. `StateOps` goes from a
+`&mut self` / borrow-returning trait to an **interior-mutability, snapshot-handing** trait:
+`get(index) -> Option<&T>` → `snapshot(index) -> Option<T>` (owned clone); `entries() ->
+Vec<(u64,&T)>` → `indices() -> Vec<u64>`; `insert_new`/`replace`/`remove` become `&self`.
+`InMemoryState<T>` wraps `Mutex<StateInner<T>>` (`StateInner = { versions: BTreeMap<u64,T>,
+next_index: u64 }`), each method holding the lock only for the map/counter op. `Server::dispatch`
+becomes `&self`; every theory-scoped handler takes one snapshot at entry (`thy()`), computes
+lock-free, and commits via a separate atomic `StateOps` call — the get-snapshot → compute →
+commit pipeline. No wire output changes (all prior byte-parity tests stay green under
+`Server::new`/`InMemoryState`).
+
+### Provenance cross-check — the concurrency contract is probe-derived, not source-derived
+
+Every behavioural claim the redesign rests on is logged as a live black-box probe in
+`QUERIES.log` [R70]–[R76] (ports 3100/3101; PKCS11 `cannot_obtain_key_ind` ~30s as the long op)
+with concrete timings, and written up as behaviour in `BEHAVIOR.md` §17:
+
+* Non-blocking under a long op ([R71], §17.1) — burst at t≈2.5s into a 30.56s autoprove; reads
+  on other/same theories, a 2nd proof op on a different AND the same theory, upload, reload all
+  returned 0.02–0.52s, all `200`, all before the op's 30.5s finish.
+* Commit-time allocation ([R72]/[R73], §17.2) — the long op started first (t=0.014s) but committed
+  last (t=30.57s) and got the highest index (10); fast ops that committed at t≈2.6s got 8/9;
+  index-page polling never showed the pending index until after completion.
+* Atomic under races ([R74], §17.3) — 12 simultaneous ops → indices 12..23, contiguous, no
+  collision, no skip.
+* Snapshot isolation ([R75], §17.4) — a long autoprove on idx3 completed (→ idx24) despite an
+  in-place reload of idx3 mid-compute; retention reconfirmed.
+
+These are emergent *runtime* properties (where the commit sits relative to the compute; visibility
+timing; race behaviour) — precisely the things NOT legible from reading `Handler.hs`, and correctly
+obtained by observation. `dispatch7.rs` re-encodes exactly this interleaving with a `GatedProver`
+whose `autoprove` parks on a condvar gate (start-first / fast-commit-first → idx2 / pending idx
+invisible + unresolvable / release → slow commits last → idx3; plus a 16-thread allocation race).
+No prover source was needed to author it.
+
+### Filtration — shared elements carry no protectable expression
+
+* **The three-phase snapshot → compute → commit shape is merger / scenes-à-faire.** Given the
+  observed constraints ([R71]/[R72]/[R74]/[R75]) — a multi-second prover call must not freeze
+  other requests, allocation is atomic at completion, a concurrent in-place replace must not
+  corrupt an in-flight compute — "read an owned snapshot, drop the lock, compute, re-acquire to
+  commit atomically" is the single correct implementation any competent engineer converges on.
+  It is also what upstream does, but for a language reason, not a copied one: Haskell values are
+  immutable, so `getTheory`'s `withMVar … M.lookup` yields an owned immutable snapshot **for
+  free**, the heavy `closeTheory`/autoprove runs on that value with no `MVar` held, and `putTheory`
+  re-takes the `MVar` via `modifyMVar` only to `M.insert`. The clean side must reproduce the same
+  isolation *explicitly* (`snapshot` returns a `clone()`, gated on a new `T: Clone` bound) — a
+  Rust-necessity divergence driven by the observed behaviour, not by reading that Haskell gets it
+  gratis. Convergent by external constraint; unprotectable.
+* **Monotonic index allocation** (first = 1, never reused, atomic; §13.1/§17.2/§17.3) is
+  behaviourally observed AND expressed differently from upstream. Upstream is stateless —
+  `idx | M.null theories = 1 | otherwise = fst (M.findMax theories) + 1` recomputed per insert
+  (Handler.hs 351–352/373–374); the clean side keeps a stored `next_index` counter that never
+  rewinds even after `remove`. These are behaviourally distinguishable (delete-the-top-then-insert:
+  upstream reuses the freed index, the clean counter does not) — affirmatively non-copying, not
+  merely a rename.
+* **`Mutex<BTreeMap + counter>` vs `MVar (Map …)`.** One lock guarding the version map is
+  scenes-à-faire for "single owner of a version namespace"; `Mutex` is the idiomatic Rust analogue
+  of a single guarding `MVar`, and a sorted map keyed by index is dictated by the ascending
+  index-page enumeration. The nested `InMemoryState { inner: Mutex<StateInner> }` is an ordinary
+  Rust wrapping idiom with no upstream counterpart (upstream is a bare `MVar` field on `WebUI`).
+* **Resolve-or-404 per theory route.** `thy()` taking one snapshot and 404-ing on a missing (or
+  `#`/current) index is the observable contract of every theory-scoped route; upstream expresses
+  it as a family of typed combinators (`withTheory`/`withBothTheory`/`withDiffTheory`/
+  `withEitherTheory`, Handler.hs 656–706), the clean side as a single snapshot threaded through
+  `match` arms. Same behaviour, different decomposition.
+
+### Comparison — affirmative evidence of independent, observation-only construction
+
+* **Identifier constellation: zero overlap.** New/changed clean identifiers —
+  `StateOps::snapshot`, `indices`, `insert_new`, `replace`, `remove`, `InMemoryState`, `StateInner`,
+  `versions`, `next_index`, `Server::dispatch` — mirror none of upstream's state/thread
+  vocabulary (`theoryVar`, `threadVar`, `TheoryMap`, `ThreadMap`, `TheoryIdx`, `getTheory`,
+  `putTheory`, `replaceTheory`, `adjEitherTheory`, `delTheory`, `storeTheory`, `getTheories`,
+  `evalInThread`, `putThread`, `delThread`, `getThread`). A grep of the whole delta (src + all
+  tests) for upstream state/thread/type identifiers (`theoryVar`, `threadVar`, `TheoryMap`,
+  `ThreadMap`, `TheoryIdx`, `getTheory`, `putTheory`, `replaceTheory`, `adjEitherTheory`,
+  `delTheory`, `evalInThread`, `modifyMVar`, `withMVar`, `MVar`, `findMax`, `WebUI`,
+  `EitherTheoryInfo`, `ThreadId`, `killThread`, `forkIO`) returns nothing.
+* **Upstream's most distinctive concurrency expression is NOT reproduced.** The identifiable
+  Handler.hs machinery here is the cancellable-thread subsystem: `threadVar :: MVar ThreadMap`
+  keyed by the *rendered request URL*, `evalInThread` (fork the compute into a killable thread,
+  register, wait, unregister), and `putThread`/`delThread`/`getThread` feeding a `/kill` →
+  `killThread` route. The delta introduces **none** of it — no thread registry, no URL→ThreadId
+  map, no cancellation. The clean model is a strict subset (pure snapshot/compute/commit), so the
+  one subsystem a copier would most plausibly lift is affirmatively absent. (The `/kill` 400-page
+  route exercised by `dispatch4` is boundary URL grammar audited in an earlier round, not the
+  `threadVar` mechanism, and is not in this round's delta.)
+* **No comment lineage.** The new doc comments describe the observed contract in the clean-room's
+  own terms; no Haddock prose is echoed — upstream's "-- | Load a theory given an index."
+  (getTheory), "-- | Store a theory, return index." (putTheory), "-- | Fully evaluate a value in a
+  thread that can be canceled." (evalInThread) have no clean counterpart.
+* **Test-file changes are mechanical.** `dispatch{,4,5,6}.rs` diffs are `let mut s` → `let s`,
+  `body(&mut Server)` → `body(&Server)`, and the `WrapState` backend + `InMemoryState` contract
+  tests re-pointed from `get`/`entries` to `snapshot`/`indices`. Generic clean identifiers
+  throughout; no theory sources or upstream names introduced. `dispatch7.rs` uses only the clean
+  public API and a self-contained condvar gate.
+
+### Non-blocking note (NOT a similarity finding, no redo, does not bear on the verdict)
+
+1. **Shipped-comment process narration expanded again.** The Round-6 audit already flagged
+   provenance/round narration leaking into shipped `dispatch.rs`/`page.rs` doc comments as a
+   regression of the clean-room's own "comments describe current state only" standard. This round
+   *adds* to it: the module and trait docs now carry inline `BEHAVIOR.md §17` / `§17.2/§17.3` /
+   `§17.4` section-references and an `([R71])` probe citation, plus phrasing like "matching the
+   probed completion-order allocation" and "see the honesty note in `REPORT.md`". This is the
+   clean-room's own provenance narration — the *opposite* of copied expression — so it has **no**
+   effect on the similarity verdict; it is recorded only for hygiene consistency with the Round-6
+   note. Team may want to move the §/[R]-references and "probed"/"matching the probed" phrasing
+   out of shipped source into BEHAVIOR/QUERIES/REPORT, leaving comments to describe current
+   behaviour only.
+
+### VIOLATIONS (Round 7)
+
+None. The delta is a behaviour-neutral concurrency refactor. Its snapshot → compute → commit
+shape is dictated by the probed non-blocking / commit-time-allocation / atomicity / snapshot-
+isolation behaviour ([R71]–[R75]) and is the single correct concurrent implementation (merger /
+scenes-à-faire); its monotonic allocation is expressed via a stored counter that affirmatively
+diverges from upstream's stateless `findMax + 1`; its `Mutex<BTreeMap + counter>` shares no
+identifier or structure with upstream's `MVar TheoryMap` model; and it pointedly does **not**
+reproduce upstream's distinctive `threadVar`/`evalInThread`/`killThread` cancellation subsystem.
+Identifier-constellation overlap with `Handler.hs`/`Types.hs`: none. Comment lineage: none. One
+non-blocking hygiene note recorded (shipped-comment process narration), which is not copied
+protectable expression and requires no redo. Findings that survive filtration: 0. No redo
+instructions issued.
+
+VERDICT: pass

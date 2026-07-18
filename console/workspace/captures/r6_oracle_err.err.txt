@@ -1,0 +1,9 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory ExistsVerified] Theory loaded
+[Theory ExistsVerified] Theory translated
+[Theory ExistsVerified] Derivation checks started
+[Theory ExistsVerified] Derivation checks ended
+[Theory ExistsVerified] Theory closed
+tamarin-prover: ./oracle: readCreateProcess: posix_spawnp: does not exist (No such file or directory)

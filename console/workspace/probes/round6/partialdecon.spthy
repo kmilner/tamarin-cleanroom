@@ -1,0 +1,15 @@
+theory PartialDecon
+begin
+
+builtins: symmetric-encryption
+
+// A decryption rule whose key arrives from the network. The source of the
+// plaintext m cannot be resolved, which typically leaves a partial
+// deconstruction (open chain). Probe whether that surfaces in the summary.
+rule Dec:
+  [ In(senc(m, k)), In(k) ] --[ Got(m) ]-> [ Out(m) ]
+
+lemma secret [sources]:
+  "All m #i. Got(m) @ i ==> Ex #j. K(m) @ j"
+
+end

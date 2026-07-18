@@ -818,3 +818,100 @@ invoked by any current route — under the observed retention invariant the web 
 never drops a version. All prior tests keep running byte-identical (they use
 `Server::new` → the default `InMemoryState`); `dispatch6.rs` adds a custom-backend
 dispatch test and `InMemoryState` contract tests.
+
+> **Superseded by §17.5 (Round 7).** Round 6 delegated state but `StateOps` was still
+> a `&mut self` / borrow-returning trait (`get(index) -> Option<&thy>`, `entries() ->
+> [(u64,&thy)]`), so `Server::dispatch` still needed `&mut self` — one long op behind a
+> lock froze the server. Round 7 probed the reference's concurrency semantics (§17) and
+> reshaped `StateOps` into an **interior-mutability, snapshot-handing** trait
+> (`snapshot(index) -> Option<thy>`, `indices() -> [u64]`, all `&self`) so
+> `dispatch(&self)` runs snapshot → compute → commit with no lock held across the
+> (possibly slow) prover call. `insert_new`/`replace`/`remove` are unchanged in meaning
+> but now `&self`; `get`→`snapshot` (owned), `entries`→`indices`+`snapshot`.
+
+---
+
+## 17. Concurrency semantics — snapshot → compute → commit dispatch (Round 7)
+
+Derived from live probing of the sanctioned oracle ([R70]–[R76], ports 3100/3101,
+Tutorial/NSLPK3/NAXOS_eCK/RYY_PFS trace + the `sapic/slow` PKCS11 theory as the long
+op). No file under `/home/kamilner/tamarin-rs/` was read. All servers stopped. This
+section is the **behavioural contract** the round-7 dispatch redesign honours: the
+reference server serves a long-running proof operation **without** freezing unrelated
+(or related) requests, so the port must do the same.
+
+### 17.1 The reference is fully concurrent under a long proof op ([R71])
+With a ~30s `autoprove` (PKCS11 `cannot_obtain_key_ind`, measured 30.56s) **in flight**,
+a burst fired ~2.5s in — every probe returned in its own small latency (0.02–0.52s), all
+`200`, all long before the long op's 30.5s completion. Nothing blocked:
+
+| concurrent request during the long op | served |
+|---------------------------------------|:------:|
+| GET on **other** theories (overview, source) | immediately |
+| GET on the **same** theory being proved (overview/help) | immediately |
+| GET on the same theory's **other** versions | immediately |
+| a **second proof op** on a **different** theory (`method` → new version) | immediately, concurrently |
+| a **second proof op** on the **same** theory (`autoprove` → new version) | immediately, concurrently |
+| **upload** (`POST /`) | immediately |
+| **reload** (`POST …/reload`), incl. the **same** base index | immediately |
+
+So a slow `ProverOps` computation must NOT hold any exclusive lock on the server or the
+state backend: reads, mutations, and other proof ops all proceed alongside it.
+
+### 17.2 Version allocation is at COMMIT, not at request start ([R72],[R73])
+One global monotonic counter (§§13.1/14.3). The fresh index for a proof operation is
+allocated **when the operation completes** (commits its result), not when the request
+arrives:
+
+* In the burst, the long op **started first** (t=0.014s) but **committed last**
+  (t=30.57s) and received the **highest** index (10); the two fast ops that committed at
+  t=2.57/2.73s received the **lower** indices 8/9. Indices follow **completion order**,
+  independent of start order ([R72]).
+* The to-be-allocated version is **invisible/unresolvable during the computation**:
+  index-page polling every ~1.4s across the whole 30s op never showed the new index until
+  **after** completion ([R73]). A version becomes resolvable exactly at its commit.
+
+### 17.3 Concurrent allocation never collides or skips ([R74])
+12 truly-simultaneous fast proof ops allocated indices 12..23 — 12 **distinct,
+contiguous** indices, **zero** collisions, **zero** skips. Allocation is atomic: each
+committing op takes the next counter value under mutual exclusion, and the counter is the
+only thing that must be briefly serialized.
+
+### 17.4 Snapshot isolation ([R75])
+A long `autoprove` on base index 3 completed successfully (→ index 24) **even though that
+base was `reload`-ed in place at t=3–8s during the computation** — the in-place reload was
+itself served concurrently (redirect to idx3/help) and neither corrupted nor aborted the
+long op. The long computation operates on the **base snapshot it read at the start**; a
+concurrent in-place replace of that base does not affect the in-flight result. Retention
+reconfirmed: idx 4 dropped from the capped index-page window but still resolved (`200`).
+
+### 17.5 The dispatch contract this implies (implemented in Round 7)
+Every request is processed as **get-snapshot → compute → commit**:
+
+1. **get-snapshot.** Resolve the requested index and take a cheap **owned snapshot** of
+   that version through `StateOps::snapshot` (releasing any backend lock immediately). No
+   state borrow is held past this step.
+2. **compute.** Run the `ProverOps` call — including the possibly-slow ones (`autoprove*`,
+   `apply_method`/`apply_diff_method`, `del_*`, `reload`, `load_theory`, edits) — on the
+   snapshot **with no state lock held**. Concurrent requests take their own snapshots and
+   run in parallel (§17.1/§17.4).
+3. **commit.** Apply the result with a **separate, atomic** `StateOps` call:
+   `insert_new` for a proof op / upload / `del/path` (allocates the fresh monotonic index
+   **now**, at commit — §17.2/§17.3), or `replace` for an in-place `reload`/structural
+   edit. Reads commit nothing.
+
+`Server::dispatch` therefore takes **`&self`** (not `&mut self`): the server is shared
+across concurrent requests, and all mutation lives behind the `StateOps` backend's
+interior mutability. `StateOps` is now an **interior-mutability, snapshot-handing** trait
+(`&self` everywhere; `snapshot`/`entries` return owned handles; `insert_new`/`replace`/
+`remove` mutate atomically). The reference `InMemoryState<T>` provides this with a
+`Mutex` around the `BTreeMap`+counter; a consumer's async cache implements the same
+`&self` façade. The observed lifecycle — monotonic **commit-time** allocation, atomicity
+under races, retention, in-place mutation, snapshot isolation — is the documented
+contract a backend must satisfy.
+
+### 17.6 Incidental discovery (out of round-7 scope) ([R76])
+`autoprove` can **fail** with a JSON `{"alert":"Sorry, but the autoprover () failed!"}`
+(observed on NAXOS `eCK_same_key`, `idfs/0/True`), analogous to the `method`-failure
+alert. The current dispatcher models `autoprove` as always-redirect; modelling the alert
+branch is a documented gap, deferred to keep the round-7 change scoped to concurrency.

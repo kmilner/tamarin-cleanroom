@@ -73,8 +73,8 @@ impl TraceKind {
 }
 
 /// Per-lemma verdict. The printed text of a falsified verdict depends on the
-/// lemma's [`TraceKind`] (see [`LemmaOutcome::result_text`]); verified and
-/// incomplete verdicts print the same for both kinds.
+/// lemma's [`TraceKind`] (see [`verdict_phrase`]); verified and incomplete
+/// verdicts print the same for both kinds.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LemmaResult {
     Verified,
@@ -82,43 +82,116 @@ pub enum LemmaResult {
     AnalysisIncomplete,
 }
 
-/// One lemma's verdict line in a theory's summary body:
-/// `<name> (<kind>): <verdict> (<steps> steps)`.
+/// Which system a summary line describes. A non-diff run reports every lemma as
+/// [`LemmaSide::Whole`] (no prefix). Under `--diff` the prover verifies each
+/// ordinary lemma separately against the two projected systems, prefixing its
+/// line with `RHS`/`LHS`, and reports the auto-generated observational-equivalence
+/// lemma as a [`LemmaSide::Diff`] line (`DiffLemma:` prefix, no trace-kind). In a
+/// diff summary the entries appear in the order: for each ordinary lemma its
+/// `RHS` line then its `LHS` line, and finally the single `Diff` line.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LemmaSide {
+    Whole,
+    Rhs,
+    Lhs,
+    Diff,
+}
+
+/// The verdict phrase for a `<result>` under a given [`TraceKind`]. `verified`
+/// and `analysis incomplete` read the same for both kinds; a `falsified` verdict
+/// carries a kind-dependent suffix: `- found trace` for an all-traces lemma (a
+/// counter-example trace was produced) and `- no trace found` for an exists-trace
+/// lemma (no witnessing trace exists).
+fn verdict_phrase(result: LemmaResult, kind: TraceKind) -> &'static str {
+    match result {
+        LemmaResult::Verified => "verified",
+        LemmaResult::AnalysisIncomplete => "analysis incomplete",
+        LemmaResult::Falsified => match kind {
+            TraceKind::AllTraces => "falsified - found trace",
+            TraceKind::ExistsTrace => "falsified - no trace found",
+        },
+    }
+}
+
+/// One lemma's verdict line in a theory's summary body. In a non-diff run this is
+/// `<name> (<kind>): <verdict> (<steps> steps)`; under `--diff` a projected
+/// ordinary lemma prefixes that with `RHS :  `/`LHS :  `, and the
+/// observational-equivalence lemma renders as
+/// `DiffLemma:  <name> : <verdict> (<steps> steps)` (no trace-kind).
 #[derive(Debug, Clone)]
 pub struct LemmaOutcome {
     pub name: String,
+    /// The lemma's trace quantification. Ignored when [`side`](Self::side) is
+    /// [`LemmaSide::Diff`]: an observational-equivalence lemma has no trace-kind,
+    /// and its `falsified` verdict always reads `- found trace`.
     pub kind: TraceKind,
     pub result: LemmaResult,
     /// The `<N>` in `(<N> steps)` — the number of proof steps explored (also the
     /// value shown for bounded/incomplete analyses, reflecting the explored depth).
     pub steps: u64,
+    /// Which projected system this line reports (see [`LemmaSide`]).
+    pub side: LemmaSide,
 }
 
 impl LemmaOutcome {
-    /// The verdict phrase. `verified` and `analysis incomplete` are uniform; a
-    /// `falsified` verdict reads `falsified - found trace` for an all-traces lemma
-    /// (a counter-example was produced) and `falsified - no trace found` for an
-    /// exists-trace lemma (no witnessing trace exists).
-    fn result_text(&self) -> &'static str {
-        match self.result {
-            LemmaResult::Verified => "verified",
-            LemmaResult::AnalysisIncomplete => "analysis incomplete",
-            LemmaResult::Falsified => match self.kind {
-                TraceKind::AllTraces => "falsified - found trace",
-                TraceKind::ExistsTrace => "falsified - no trace found",
-            },
+    /// A non-diff lemma line (`<name> (<kind>): <verdict> (<N> steps)`).
+    pub fn whole(
+        name: impl Into<String>,
+        kind: TraceKind,
+        result: LemmaResult,
+        steps: u64,
+    ) -> Self {
+        LemmaOutcome { name: name.into(), kind, result, steps, side: LemmaSide::Whole }
+    }
+
+    /// A `--diff` projected ordinary-lemma line for one side ([`LemmaSide::Rhs`]
+    /// or [`LemmaSide::Lhs`]).
+    pub fn projected(
+        side: LemmaSide,
+        name: impl Into<String>,
+        kind: TraceKind,
+        result: LemmaResult,
+        steps: u64,
+    ) -> Self {
+        LemmaOutcome { name: name.into(), kind, result, steps, side }
+    }
+
+    /// A `--diff` observational-equivalence line
+    /// (`DiffLemma:  <name> : <verdict> (<N> steps)`).
+    pub fn diff_lemma(name: impl Into<String>, result: LemmaResult, steps: u64) -> Self {
+        LemmaOutcome {
+            name: name.into(),
+            kind: TraceKind::AllTraces,
+            result,
+            steps,
+            side: LemmaSide::Diff,
         }
     }
 
-    /// The single result line, without its `  ` indent.
+    /// The single result line, without its `  ` body indent.
     fn line(&self) -> String {
-        format!(
-            "{} ({}): {} ({} steps)",
-            self.name,
-            self.kind.text(),
-            self.result_text(),
-            self.steps
-        )
+        match self.side {
+            LemmaSide::Diff => format!(
+                "DiffLemma:  {} : {} ({} steps)",
+                self.name,
+                verdict_phrase(self.result, TraceKind::AllTraces),
+                self.steps
+            ),
+            LemmaSide::Whole | LemmaSide::Rhs | LemmaSide::Lhs => {
+                let core = format!(
+                    "{} ({}): {} ({} steps)",
+                    self.name,
+                    self.kind.text(),
+                    verdict_phrase(self.result, self.kind),
+                    self.steps
+                );
+                match self.side {
+                    LemmaSide::Rhs => format!("RHS :  {core}"),
+                    LemmaSide::Lhs => format!("LHS :  {core}"),
+                    _ => core,
+                }
+            }
+        }
     }
 }
 

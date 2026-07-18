@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# OOM guard: prover is the preferred kill target, capped at 24GB address space
+echo 1000 > /proc/self/oom_score_adj 2>/dev/null || true
+ulimit -v 25165824 2>/dev/null || true
 # Black-box oracle: prints the HS tamarin-prover's full output (incl. the
 # wellformedness WARNING section). Usage: wf_oracle.sh <file.spthy> [extra args e.g. --diff]
 export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"

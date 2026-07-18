@@ -1,0 +1,83 @@
+theory DiffWarn
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) Bad:
+   [ Fr( ~k ) ] --[ Ev( ) ]-> [ Out( diff(~k, ~'foo') ) ]
+
+lemma happens [right]:
+  all-traces "∀ #i. (Ev( ) @ #i) ⇒ (∃ #j. Ev( ) @ #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ #i. (Ev( ) @ #i) ∧ ∀ #j. (Ev( ) @ #j) ⇒ ⊥"
+*/
+simplify
+by contradiction /* from formulas */
+
+lemma happens [left]:
+  all-traces "∀ #i. (Ev( ) @ #i) ⇒ (∃ #j. Ev( ) @ #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ #i. (Ev( ) @ #i) ∧ ∀ #j. (Ev( ) @ #j) ⇒ ⊥"
+*/
+simplify
+by contradiction /* from formulas */
+
+diffLemma Observational_equivalence:
+rule-equivalence
+  case Rule_Equality
+  backward-search
+    case RHS
+    step( simplify )
+    step( solve( !KD( x ) ▶₁ #i ) )
+      case Bad
+      step( solve( (#vl, 0) ~~> (#i, 1) ) )
+        case Const_fresh_foo
+        step( solve( !KU( ~'foo' ) @ #vk ) )
+          case Bad
+          by ATTACK // trace found
+        qed
+      qed
+    qed
+  qed
+qed
+
+/*
+WARNING: the following wellformedness checks failed!
+
+Fresh public constants
+======================
+
+  rule `Bad': fresh public constants are not allowed: ~'foo'
+*/
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: probes/round6/diff_warn.spthy
+
+  processing time: 0.10s
+  
+  WARNING: 1 wellformedness check failed!
+           The analysis results might be wrong!
+  
+  RHS :  happens (all-traces): verified (2 steps)
+  LHS :  happens (all-traces): verified (2 steps)
+  DiffLemma:  Observational_equivalence : falsified - found trace (7 steps)
+
+==============================================================================

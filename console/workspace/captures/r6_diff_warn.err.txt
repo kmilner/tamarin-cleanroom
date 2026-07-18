@@ -1,0 +1,15 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+diffLemma
+[Theory DiffWarn] Theory loaded
+[Theory DiffWarn] Theory translated
+[Theory DiffWarn] Derivation checks started
+[Saturating Sources] Step 1 (Max 5)
+[Saturating Sources] Done
+[Theory DiffWarn] Derivation checks ended
+[Theory DiffWarn] Theory closed
+[Saturating Sources] Step 1 (Max 5)
+[Saturating Sources] Done
+[Saturating Sources] Step 1 (Max 5)
+[Saturating Sources] Done

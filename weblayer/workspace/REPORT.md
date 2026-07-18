@@ -263,3 +263,82 @@ this round pins is the *lifecycle*, which is what the observed behaviour constra
 7 dispatch6 + 23 parity), `cargo clippy --tests --examples` clean. Every ITEM-1 body
 was live-captured and reproduced byte-for-byte; the fresh-server determinism check
 confirms reproducibility.
+
+---
+
+## Round 7 — concurrency-safe dispatch (snapshot → compute → commit)
+
+Adoption blocker: the round-6 `Server::dispatch(&mut self)` required exclusive
+ownership per request, so behind one lock a long `autoprove` (seconds-to-minutes)
+would freeze the whole server. Black-box only: live probing ([R70]–[R76], ports
+3100/3101, Tutorial/NSLPK3/NAXOS_eCK/RYY_PFS trace + the `sapic/slow` PKCS11 theory
+as the long op) plus three committed probe scripts (`scratch/r7/*.sh`). No file under
+`/home/kamilner/tamarin-rs/` was read. All live servers stopped.
+
+### STEP 1 — the reference's concurrency contract (probed; BEHAVIOR §17)
+
+Using PKCS11 `cannot_obtain_key_ind` (~30s, terminating) as an in-flight long op:
+
+* **Fully non-blocking ([R71]).** A burst fired ~2.5s into the 30s autoprove — reads
+  on other theories, reads on the SAME theory being proved, reads of other versions, a
+  second proof op on a different theory, a second proof op on the SAME theory, an
+  upload (`POST /`), and a reload (incl. the same base index) — every one returned in
+  0.02–0.52s, all `200`, all long before the long op finished. Nothing blocked.
+* **Commit-time allocation ([R72]).** The long op STARTED first (t=0.014s) but
+  COMMITTED last (t=30.57s) and got the HIGHEST index (10); the two fast ops that
+  committed at t≈2.6s got the lower indices 8/9. Indices follow **completion** order.
+* **Invisible until commit ([R73]).** Index-page polling across the whole 30s never
+  showed the long op's index until after it completed — the to-be-allocated version is
+  unresolvable during the computation.
+* **Atomic under races ([R74]).** 12 truly-simultaneous fast proof ops allocated
+  indices 12..23 — distinct, contiguous, zero collisions, zero skips.
+* **Snapshot isolation ([R75]).** A long autoprove on idx3 completed fine (→ idx24)
+  even though idx3 was reloaded in place mid-computation; the reload was itself served
+  concurrently. Retention reconfirmed (a capped-out index still resolves `200`).
+* Incidental ([R76]): autoprove can fail with `{"alert":"Sorry, but the autoprover ()
+  failed!"}` — documented gap, not addressed this round (concurrency-scoped change).
+
+### STEP 2 — the redesign
+
+`Server::dispatch` now takes **`&self`** (one server shared across concurrent
+requests). Each request runs **get-snapshot → compute → commit**: resolve + take a
+cheap owned snapshot via `StateOps::snapshot` (lock released), run the `ProverOps`
+call — including the slow ones — on the snapshot with **no state lock held**, then
+commit atomically (`insert_new` allocates the fresh monotonic index **at commit**;
+`replace` for in-place reload/edits). The only serialized sections are the
+microsecond-scale atomic `StateOps` calls. Design note: I kept a single `dispatch`
+entry point (not a static cheap/slow route split) because the snapshot→compute→commit
+pipeline already isolates the lock-free compute from the two tiny atomic state calls,
+and even a "read" route may invoke a non-trivial fragment producer — classifying
+routes as cheap/slow would be a lossy approximation of "hold no lock during any
+`ProverOps` call".
+
+`StateOps` was reshaped to an interior-mutability, snapshot-handing trait (all `&self`;
+`get`→`snapshot` returns an owned copy; `entries`→`indices`+`snapshot`). The reference
+`InMemoryState<T: Clone>` is now a `Mutex<BTreeMap + counter>`; each method holds the
+lock only for the map/counter op, never across compute. `Server`/`InMemoryState`
+therefore compose to `Send + Sync`, so a consumer wraps the server in an `Arc` and
+serves requests from any async task; a real backend implements the same `&self` façade
+over its own async cache. The probed lifecycle (commit-time monotonic allocation,
+atomicity, retention, in-place mutation, snapshot isolation) is the documented contract.
+
+### Deliverables
+
+- `src/dispatch.rs` — `dispatch(&self)`; `StateOps` reshaped (`snapshot`/`indices`,
+  all `&self`); `InMemoryState` behind a `Mutex`; every handler restructured to take
+  the request's single snapshot and commit via a separate atomic `StateOps` call.
+- `tests/dispatch7.rs` (2 tests) — a `GatedProver` whose `autoprove` parks mid-compute
+  on a controllable gate: `slow_op_in_flight_is_non_blocking_and_commits_last` asserts
+  the full probed interleaving (non-blocking read while parked; a fast op commits first
+  → index 2; the parked op's index invisible/unresolvable pre-commit; on release it
+  commits last → index 3; final set contiguous), and `concurrent_allocations_never_
+  collide_or_skip` races 16 threads and asserts a contiguous unique index block ([R74]).
+- `tests/dispatch6.rs` — `WrapState` custom backend + `InMemoryState` contract tests
+  updated to the `&self` snapshot API. All round-3/4/5/6 tests unchanged in intent
+  (`let mut s` → `let s`; `dispatch5`'s `body` helper takes `&Server`).
+- BEHAVIOR.md §17 (+ §16.2 superseding note); QUERIES.log [R70]–[R76].
+
+`cargo test` → **104 passing** (26 unit + 15 dispatch + 17 dispatch4 + 14 dispatch5 +
+7 dispatch6 + **2 dispatch7** + 23 parity); `cargo clippy --tests --examples` clean;
+`dispatch7` verified non-flaky over 20 consecutive runs. All prior byte-parity tests
+stay green (the state reshape is behind `Server::new`/`InMemoryState`, unchanged output).

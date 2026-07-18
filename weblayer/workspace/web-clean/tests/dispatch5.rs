@@ -130,7 +130,7 @@ fn equiv_server() -> Server<Fake> {
     Server::new(Fake, equiv_base())
 }
 
-fn body(s: &mut Server<Fake>, path: &str) -> (u16, &'static str, String) {
+fn body(s: &Server<Fake>, path: &str) -> (u16, &'static str, String) {
     let r = s.dispatch(&Request::get(path));
     (r.status, r.content_type, r.body)
 }
@@ -142,8 +142,8 @@ fn body(s: &mut Server<Fake>, path: &str) -> (u16, &'static str, String) {
 #[test]
 fn verify_lemma_returns_help_pane_no_version_bump() {
     // round5/verify.json: verify/lemma/<name> -> the help content envelope.
-    let mut s = trace_server();
-    let (status, ct, b) = body(&mut s, "/thy/trace/1/verify/lemma/debug");
+    let s = trace_server();
+    let (status, ct, b) = body(&s, "/thy/trace/1/verify/lemma/debug");
     assert_eq!(status, 200);
     assert_eq!(ct, "application/json; charset=utf-8");
     assert_eq!(
@@ -157,25 +157,25 @@ fn verify_lemma_returns_help_pane_no_version_bump() {
 #[test]
 fn verify_proof_of_existing_lemma_redirects_same_version() {
     // round5/verify_proof.json: verify/proof/<lemma> -> {redirect} at the SAME idx.
-    let mut s = trace_server();
-    let (status, ct, b) = body(&mut s, "/thy/trace/1/verify/proof/debug");
+    let s = trace_server();
+    let (status, ct, b) = body(&s, "/thy/trace/1/verify/proof/debug");
     assert_eq!(status, 200);
     assert_eq!(ct, "application/json; charset=utf-8");
     assert_eq!(b, r#"{"redirect":"/thy/trace/1/overview/proof/debug"}"#);
     assert_eq!(s.versions(), vec![1]); // no bump
     // The redirect target is overview/ + the verbatim proof path.
-    let deep = body(&mut s, "/thy/trace/1/verify/proof/debug/_/ONE/ONE").2;
+    let deep = body(&s, "/thy/trace/1/verify/proof/debug/_/ONE/ONE").2;
     assert_eq!(deep, r#"{"redirect":"/thy/trace/1/overview/proof/debug/_/ONE/ONE"}"#);
     // A bogus sub-node of a REAL lemma still redirects (predicate = lemma existence).
-    let bogus = body(&mut s, "/thy/trace/1/verify/proof/debug/BOGUS").2;
+    let bogus = body(&s, "/thy/trace/1/verify/proof/debug/BOGUS").2;
     assert_eq!(bogus, r#"{"redirect":"/thy/trace/1/overview/proof/debug/BOGUS"}"#);
 }
 
 #[test]
 fn verify_proof_of_absent_lemma_falls_back_to_help() {
-    let mut s = trace_server();
+    let s = trace_server();
     // proof/<nonexistent-lemma> -> the help pane, not a redirect.
-    let b = body(&mut s, "/thy/trace/1/verify/proof/nope").2;
+    let b = body(&s, "/thy/trace/1/verify/proof/nope").2;
     assert!(b.starts_with(r#"{"html":"#), "{b}");
     assert!(b.contains(r#""title":"Theory: RevealingSignatures""#), "{b}");
 }
@@ -183,17 +183,17 @@ fn verify_proof_of_absent_lemma_falls_back_to_help() {
 #[test]
 fn verify_nonproof_paths_all_return_the_same_help_envelope() {
     // Every non-proof theory path returns the identical help envelope (== main/help).
-    let mut s = trace_server();
-    let help = body(&mut s, "/thy/trace/1/verify/lemma/debug").2;
+    let s = trace_server();
+    let help = body(&s, "/thy/trace/1/verify/lemma/debug").2;
     for p in ["help", "message", "rules", "tactic", "cases/raw/0/0", "method/debug/1", "add/debug", "edit/debug", "delete/debug"] {
-        let b = body(&mut s, &format!("/thy/trace/1/verify/{p}")).2;
+        let b = body(&s, &format!("/thy/trace/1/verify/{p}")).2;
         assert_eq!(b, help, "verify/{p} should equal the help envelope");
     }
 }
 
 #[test]
 fn verify_method_and_parse_ordering() {
-    let mut s = trace_server();
+    let s = trace_server();
     // GET-only: a parseable path with POST -> 405; an unparseable tail -> 404 (any method).
     assert_eq!(s.dispatch(&Request::post("/thy/trace/1/verify/proof/debug", &[])).status, 405);
     assert_eq!(s.dispatch(&Request::post("/thy/trace/1/verify/sources", &[])).status, 404);
@@ -206,7 +206,7 @@ fn verify_method_and_parse_ordering() {
 #[test]
 fn verify_is_absent_in_equiv_mode() {
     // The verify route is not registered for equiv theories: 404 for any method/path.
-    let mut s = equiv_server();
+    let s = equiv_server();
     assert_eq!(s.dispatch(&Request::get("/thy/equiv/1/verify/diffProof/Observational_equivalence")).status, 404);
     assert_eq!(s.dispatch(&Request::get("/thy/equiv/1/verify/help")).status, 404);
     assert_eq!(s.dispatch(&Request::post("/thy/equiv/1/verify/diffProof/Observational_equivalence", &[])).status, 404);
@@ -220,8 +220,8 @@ fn verify_is_absent_in_equiv_mode() {
 fn del_path_lemma_redirects_to_overview_lemma_new_version() {
     // round5/del_path.json: del/path/lemma/<name> -> {redirect} to overview/lemma/<name>
     // at a FRESH version (base retained). Fresh server -> new index 2.
-    let mut s = trace_server();
-    let (status, ct, b) = body(&mut s, "/thy/trace/1/del/path/lemma/debug");
+    let s = trace_server();
+    let (status, ct, b) = body(&s, "/thy/trace/1/del/path/lemma/debug");
     assert_eq!(status, 200);
     assert_eq!(ct, "application/json; charset=utf-8");
     assert_eq!(b, r#"{"redirect":"/thy/trace/2/overview/lemma/debug"}"#);
@@ -231,39 +231,39 @@ fn del_path_lemma_redirects_to_overview_lemma_new_version() {
 #[test]
 fn del_path_undeletable_path_alerts_no_bump() {
     // round5/del_path_bad.json: del/path/rules -> the "Can't delete" alert, no bump.
-    let mut s = trace_server();
-    let b = body(&mut s, "/thy/trace/1/del/path/rules").2;
+    let s = trace_server();
+    let b = body(&s, "/thy/trace/1/del/path/rules").2;
     assert_eq!(b, r#"{"alert":"Can't delete the given theory path!"}"#);
     // Every non-lemma / non-proof theory path gets the same alert.
     for p in ["help", "message", "tactic", "cases/raw/0/0", "method/debug/1", "add/debug", "edit/debug", "delete/debug"] {
-        assert_eq!(body(&mut s, &format!("/thy/trace/1/del/path/{p}")).2, b, "del/path/{p}");
+        assert_eq!(body(&s, &format!("/thy/trace/1/del/path/{p}")).2, b, "del/path/{p}");
     }
     assert_eq!(s.versions(), vec![1]); // none of these mutate
 }
 
 #[test]
 fn del_path_proof_redirect_and_verbatim_target() {
-    let mut s = trace_server();
-    let b = body(&mut s, "/thy/trace/1/del/path/proof/debug").2;
+    let s = trace_server();
+    let b = body(&s, "/thy/trace/1/del/path/proof/debug").2;
     assert_eq!(b, r#"{"redirect":"/thy/trace/2/overview/proof/debug"}"#);
     assert_eq!(s.versions(), vec![1, 2]);
     // A deeper proof path redirects to overview/ + the verbatim path at a new version.
-    let deep = body(&mut s, "/thy/trace/1/del/path/proof/debug/_/ONE").2;
+    let deep = body(&s, "/thy/trace/1/del/path/proof/debug/_/ONE").2;
     assert_eq!(deep, r#"{"redirect":"/thy/trace/3/overview/proof/debug/_/ONE"}"#);
     assert_eq!(s.versions(), vec![1, 2, 3]);
 }
 
 #[test]
 fn del_path_failure_alerts_selected_by_path_type() {
-    let mut s = trace_server();
+    let s = trace_server();
     // lemma/<absent> -> the lemma-removal alert; no bump.
     assert_eq!(
-        body(&mut s, "/thy/trace/1/del/path/lemma/nope").2,
+        body(&s, "/thy/trace/1/del/path/lemma/nope").2,
         r#"{"alert":"Sorry, but removing the selected lemma failed!"}"#
     );
     // proof/<absent lemma> -> the proof-step-removal alert; no bump.
     assert_eq!(
-        body(&mut s, "/thy/trace/1/del/path/proof/nope").2,
+        body(&s, "/thy/trace/1/del/path/proof/nope").2,
         r#"{"alert":"Sorry, but removing the selected proof step failed!"}"#
     );
     assert_eq!(s.versions(), vec![1]);
@@ -271,7 +271,7 @@ fn del_path_failure_alerts_selected_by_path_type() {
 
 #[test]
 fn del_path_method_and_parse_ordering() {
-    let mut s = trace_server();
+    let s = trace_server();
     // Parseable path + POST -> 405 (registration proof, overturns round-4 [R47]).
     assert_eq!(s.dispatch(&Request::post("/thy/trace/1/del/path/lemma/debug", &[])).status, 405);
     // Unparseable tail + POST -> 404 (route miss precedes method dispatch).
@@ -293,18 +293,18 @@ fn del_path_method_and_parse_ordering() {
 
 #[test]
 fn del_path_equiv_uses_diffproof_grammar() {
-    let mut s = equiv_server();
+    let s = equiv_server();
     // Deletable diff proof node -> redirect to overview/diffProof/<lemma> new version.
-    let b = body(&mut s, "/thy/equiv/1/del/path/diffProof/Observational_equivalence").2;
+    let b = body(&s, "/thy/equiv/1/del/path/diffProof/Observational_equivalence").2;
     assert_eq!(b, r#"{"redirect":"/thy/equiv/2/overview/diffProof/Observational_equivalence"}"#);
     assert_eq!(s.versions(), vec![1, 2]);
     // diffProof/<absent> -> the proof-step alert; diffrules -> the "Can't delete" alert.
     assert_eq!(
-        body(&mut s, "/thy/equiv/1/del/path/diffProof/nope").2,
+        body(&s, "/thy/equiv/1/del/path/diffProof/nope").2,
         r#"{"alert":"Sorry, but removing the selected proof step failed!"}"#
     );
     assert_eq!(
-        body(&mut s, "/thy/equiv/1/del/path/diffrules").2,
+        body(&s, "/thy/equiv/1/del/path/diffrules").2,
         r#"{"alert":"Can't delete the given theory path!"}"#
     );
     // Trace-grammar heads do not parse in equiv -> 404 (route miss for any method).
@@ -321,12 +321,12 @@ fn del_path_equiv_uses_diffproof_grammar() {
 
 #[test]
 fn del_path_allocates_off_the_global_counter_like_proof_ops() {
-    let mut s = trace_server();
+    let s = trace_server();
     // A proof method bumps 1 -> 2.
     s.dispatch(&Request::get("/thy/trace/1/main/method/debug/1"));
     assert_eq!(s.versions(), vec![1, 2]);
     // del/path on v2 allocates 3 off the same counter, base retained.
-    let b = body(&mut s, "/thy/trace/2/del/path/lemma/debug").2;
+    let b = body(&s, "/thy/trace/2/del/path/lemma/debug").2;
     assert_eq!(b, r#"{"redirect":"/thy/trace/3/overview/lemma/debug"}"#);
     assert_eq!(s.versions(), vec![1, 2, 3]);
     // Every earlier version stays resolvable.

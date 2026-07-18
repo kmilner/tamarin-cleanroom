@@ -32,10 +32,12 @@
 
 pub mod abbrev;
 pub mod alloc;
+pub mod doclayout;
 pub mod dot;
 pub mod generate;
 pub mod model;
 pub mod options;
+pub mod pretty;
 pub mod render;
 pub mod term;
 

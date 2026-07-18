@@ -1,0 +1,8 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory OpenChains] Theory loaded
+[Theory OpenChains] Theory translated
+[Theory OpenChains] Derivation checks started
+[Theory OpenChains] Derivation checks ended
+[Theory OpenChains] Theory closed

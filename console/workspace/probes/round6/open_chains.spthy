@@ -1,0 +1,21 @@
+theory OpenChains
+begin
+
+builtins: symmetric-encryption
+
+// The decryption key ~k lives only in the persistent !Key fact (never sent), so
+// the source of the plaintext m produced by Decrypt cannot be refined by the
+// adversary — this is expected to leave a PARTIAL DECONSTRUCTION (open chain).
+rule CreateKey:
+  [ Fr(~k) ] --> [ !Key(~k) ]
+
+rule Encrypt:
+  [ !Key(~k), In(m) ] --> [ Out(senc(m, ~k)) ]
+
+rule Decrypt:
+  [ !Key(~k), In(senc(m, ~k)) ] --[ Dec(m) ]-> [ Out(m) ]
+
+lemma dec_secret:
+  "All m #i. Dec(m) @ i ==> Ex #j. K(m) @ j"
+
+end

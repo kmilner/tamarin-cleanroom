@@ -481,3 +481,84 @@ the assembled model rather than against the oracle:
   progress; stdout = payloads in order then the single summary. Proven by tests
   `streaming_matches_assembled_on_shared_inputs` and
   `streaming_reproduces_captured_multifile_streams`.
+
+## 14. Completed lemma-verdict taxonomy (Round 6)  [r6_* captures]
+
+Round 5 recorded three regular-lemma verdict phrases. Round 6 drove every lemma
+into every reachable terminal state to close the taxonomy. Probe theories are
+self-authored in `probes/round6/*.spthy`; diff summary captures are copied to
+`tests/fixtures/r6_diff_*.out.txt`.
+
+### 14a. The verdict-phrase set is exactly four (regular lemmas)
+`<verdict>` in `<name> (<kind>): <verdict> (<N> steps)` is one of:
+- `verified` — uniform for both kinds (§12c).
+- `falsified - found trace` — all-traces (§12c).
+- `falsified - no trace found` — exists-trace (§12c).
+- `analysis incomplete` — unselected, `--prove` pattern not matching (§12b/R5
+  `r5_falsify_nomatch`), or cut off by `--bound` (§12c). No further phrase appears
+  under `--stop-on-trace=SORRY|NONE` `[r6_sot_sorry, r6_sot_none]`, reloading a
+  partially/fully embedded proof `[r6_analysed_reload: only verified/falsified]`,
+  or for a `[sources]`-attributed lemma `[r6_partialdecon]`. The `[sources]`
+  attribute is invisible in the summary — such a lemma prints with the identical
+  line form (`secret (all-traces): falsified - found trace (4 steps)`).
+
+Partial deconstructions / open chains do NOT add a summary-of-summaries line: a
+theory that exercises them prints exactly one verdict line per lemma
+`[r6_openchains_default, r6_woolam_noautosrc]` (they only add opaque stderr
+`[Open Chains] …` progress and, when they trip a wellformedness rule, feed the
+existing WARNING count-line slot).
+
+### 14b. `--diff` adds three prefixed line forms  [r6_diff_* captures]
+Under `--diff` the summary body's lemma section gains side-prefixed lines. Byte
+layout (each still carries the `  ` body indent of §12a):
+
+    "  RHS :  <name> (<kind>): <verdict> (<N> steps)\n"   projected ordinary lemma
+    "  LHS :  <name> (<kind>): <verdict> (<N> steps)\n"   projected ordinary lemma
+    "  DiffLemma:  <name> : <verdict> (<N> steps)\n"      observational equivalence
+
+- `RHS`/`LHS` prefix = `RHS` + ` :  ` (space, colon, two spaces); the remainder is
+  the *identical* regular line form of §12c (the `<kind>` renders normally,
+  including `exists-trace` `[r6_diff_two_lemmas: can_send]`).
+- `DiffLemma` prefix = `DiffLemma` + `:  ` (colon, two spaces — NO space before the
+  colon, unlike RHS/LHS). Its content is `<name> : <verdict>` (a single space each
+  side of the colon) with NO `(<kind>)`: an observational-equivalence lemma has no
+  trace-kind. Its `falsified` always reads `- found trace` (a distinguishing
+  attack) `[r6_diff_n5n6: 8 steps; r6_diff_warn: 7 steps]`; `verified`
+  `[r6_diff_equiv_true: 31 steps]`; `analysis incomplete` `[r6_diff_default]`.
+- The auto-generated diff lemma is always named `Observational_equivalence`.
+
+### 14c. Diff summary ordering  [r6_diff_with_lemma, r6_diff_two_lemmas, r6_diff_warn]
+Within one theory's body the lemma section is, in order:
+1. for EACH ordinary lemma, its `RHS` line then its `LHS` line (the pair is
+   grouped per lemma: `RHS l1, LHS l1, RHS l2, LHS l2, …`), then
+2. the single `DiffLemma:` line, last.
+The surrounding body structure of §12a is unchanged: opening `  ` line, then the
+warning section first (with the §12b `--prove` advisory), then a `  ` separator,
+then this lemma section `[r6_diff_warn]`.
+
+### 14d. Diff STDERR (documented, opaque — NOT byte-modelled)
+Diff runs prefix the per-theory progress with a bare `diffLemma\n` line right
+after the maude preamble, and the `[Saturating Sources] …` / `[Open Chains] …`
+engine markers interleave *within* the five phases (not only after `Theory
+closed`, unlike §10a) and in run-varying multiplicity `[r6_diff_* .err]`. Because
+that interleaving is engine-timing-driven, the Round-6 fixtures assert only the
+STDOUT summary section (via `render_summary`); diff stderr is treated as an opaque
+progress stream, same policy as the `extra_progress` slot.
+
+### 14e. Lemma errors are NOT per-lemma verdicts
+No probe produced an "error" verdict *line* in the summary. A malformed lemma
+fails a wellformedness check → the whole-theory WARNING count-line slot (§12b), and
+a solver/oracle failure aborts the entire run after `Theory closed` with a runtime
+stderr line and empty stdout — e.g. a missing heuristic oracle:
+`tamarin-prover: ./oracle: readCreateProcess: posix_spawnp: does not exist (No such
+file or directory)` (exit 1) `[r6_oracle_err]`. These belong to the §8c runtime-error
+surface, not the summary taxonomy.
+
+### 14f. Clean-crate model
+`framing::LemmaOutcome` gains a `side: LemmaSide` field (`Whole` | `Rhs` | `Lhs` |
+`Diff`); `Whole` keeps the pre-R6 rendering byte-for-byte. `Diff` renders the
+`DiffLemma:` form and ignores `kind` (set to `AllTraces` by the `diff_lemma`
+constructor). `Summary.lemmas` stays a single ordered `Vec` — a diff theory lists
+its `Rhs`/`Lhs`/`Diff` entries in the §14c order and `render_block` prints them in
+sequence. The verdict phrase moved to a shared `verdict_phrase(result, kind)`.
+Byte-parity tests: `diff_summary_*` (five captures) + `diff_summary_line_bytes_are_exact`.

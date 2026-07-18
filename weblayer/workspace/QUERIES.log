@@ -397,3 +397,46 @@
       container) and the TAIL (after the center pane), index-normalized — are
       byte-identical to the committed r6_overview_trace_{local,upload}.html fixtures.
       Only the center-pane "Loaded at" text differs (non-det). All servers stopped.
+
+## Round 7 (source B) — concurrency semantics, live probing (ports 3100-3101)
+# Own wrapper scratch/wl_server7.sh (serves a DIRECTORY of theories so several load
+# at once; --port= form; ports 3100-3199). :3100 served Tutorial(1)/NSLPK3(2)/
+# NAXOS_eCK(3)/RYY_PFS(4); :3101 served Tutorial(1)/NSLPK3(2)/PKCS11(3). Long op =
+# sapic/slow PKCS11 lemma cannot_obtain_key_ind autoprove (~28-30s, terminating).
+# Probe scripts: r7/probe_concurrency.sh, probe_long.sh, probe_isolation.sh.
+[R70] Autoprove timing survey (find a long, terminating op) | RYY key_secrecy_PFS cold
+      ~5s / warm ~0.5s (source-precompute caching); NAXOS eCK_key_secrecy ~1.8s;
+      PKCS11 cannot_obtain_key ~8.8s cold / 0.12s warm; PKCS11 cannot_obtain_key_ind
+      ~28-30s (repeatable, terminating) -> chosen as the LONG op. Incidental: PKCS11
+      no_key_is_wrap_and_dec__or_unwrap_and_dec_ind >70s.
+[R71] NON-BLOCKING: unrelated + related requests served concurrently WITH an in-flight
+      ~30s autoprove (probe_long.sh, LONG=autoprove idx3 cannot_obtain_key_ind,
+      dur 30.56s). At t=2.5s a concurrent burst fired; every probe returned in its own
+      small latency (0.02-0.52s), all HTTP 200, all long before LONG's 30.5s finish:
+      GET other-theory (Tutorial idx1 overview 0.06s; NSLPK3 idx2 source 0.03s);
+      GET SAME theory being proved (PKCS11 idx3 overview/help 0.04s); 2nd proof op on a
+      DIFFERENT theory (method idx1 -> idx8, 0.06s); 2nd proof op (autoprove) on the
+      SAME theory idx3 -> idx9, 0.22s; upload POST / (0.02s); reload POST idx2 (0.52s).
+      NOTHING blocked. (probe_concurrency.sh corroborated on :3100 with a short op.)
+[R72] ALLOCATION IS AT COMMIT (completion), NOT request-start | Same burst: LONG
+      STARTED first (t=0.014) but COMMITTED last (t=30.57) and got the HIGHEST index
+      (10); method (committed t=2.57) -> 8; autoprove-warm (committed t=2.73) -> 9.
+      Indices follow COMPLETION order, independent of start order.
+[R73] VERSION INVISIBLE until its op completes | index-page poll every ~1.4s across the
+      30s LONG op: versions never included idx10 until AFTER completion (last pre-finish
+      poll t=30.41 shows ...,9; first post-finish poll t=32.21 shows ...,10,11). The
+      to-be-allocated version is unresolvable/invisible during the computation ->
+      allocation+visibility are atomic at commit.
+[R74] COUNTER RACE: 12 truly-simultaneous fast proof ops (method on idx1) allocated
+      indices 12..23 -> 12 distinct, contiguous, ZERO collision, ZERO skip. Atomic
+      monotonic allocation under concurrency.
+[R75] SNAPSHOT ISOLATION (probe_isolation.sh) | LONG autoprove on idx3 (dur 29.66s ->
+      idx24) completed successfully DESPITE an in-place `reload` of the SAME base idx3
+      at t=3.0-8.2s (reload itself served concurrently, 5.16s, redirect idx3/help). The
+      long compute used the base snapshot it read at start; a concurrent in-place
+      replace of that base neither corrupted nor aborted it. RETENTION reconfirmed: idx4
+      dropped from the capped index-page window but GET idx4 overview/help still 200.
+[R76] INCIDENTAL (out of round-7 scope, logged) | autoprove can FAIL with JSON
+      {"alert":"Sorry, but the autoprover () failed!"} (observed idx3 eCK_same_key,
+      NAXOS, idfs/0/True). Analogous to method-failure alert; current dispatch models
+      autoprove as always-redirect -> documented gap, not changed this round.

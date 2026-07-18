@@ -10,7 +10,7 @@ use cli_clean::emit::{drive_batch, BatchEmitter, StreamCollector};
 use cli_clean::errors::{app_error, open_file_error, OpenFileError, ParseError};
 use cli_clean::framing::{
     frame_batch, frame_parse_only, frame_variants, render_summary, BatchTheory, LemmaOutcome,
-    LemmaResult, LoadedTheory, Summary, TraceKind, WarningSummary,
+    LemmaResult, LemmaSide, LoadedTheory, Summary, TraceKind, WarningSummary,
 };
 use cli_clean::stream::{Stream, Streams};
 use cli_clean::version::{frame_version, MaudeInfo, VersionInfo};
@@ -374,7 +374,7 @@ fn summary_start(out: &str) -> usize {
 }
 
 fn lemma(name: &str, kind: TraceKind, result: LemmaResult, steps: u64) -> LemmaOutcome {
-    LemmaOutcome { name: s(name), kind, result, steps }
+    LemmaOutcome::whole(s(name), kind, result, steps)
 }
 
 fn nslpk3_entries(nonce_result: LemmaResult, nonce_steps: u64) -> Vec<LemmaOutcome> {
@@ -993,4 +993,133 @@ fn structural_parse_still_records_flags() {
         }
         other => panic!("expected Run, got {other:?}"),
     }
+}
+
+// ---- Round 6: --diff summary line taxonomy (RHS / LHS / DiffLemma) -------------
+//
+// Under `--diff` the summary body gains prefixed line forms (captures r6_diff_*):
+//   `  RHS :  <name> (<kind>): <verdict> (<N> steps)`   projected ordinary lemma
+//   `  LHS :  <name> (<kind>): <verdict> (<N> steps)`   projected ordinary lemma
+//   `  DiffLemma:  <name> : <verdict> (<N> steps)`      observational equivalence
+// The verdict phrases are the same set as non-diff lemmas; a DiffLemma has no
+// trace-kind and its `falsified` always reads `- found trace`.
+
+fn rhs(name: &str, kind: TraceKind, result: LemmaResult, steps: u64) -> LemmaOutcome {
+    LemmaOutcome::projected(LemmaSide::Rhs, s(name), kind, result, steps)
+}
+fn lhs(name: &str, kind: TraceKind, result: LemmaResult, steps: u64) -> LemmaOutcome {
+    LemmaOutcome::projected(LemmaSide::Lhs, s(name), kind, result, steps)
+}
+fn diff_lemma(name: &str, result: LemmaResult, steps: u64) -> LemmaOutcome {
+    LemmaOutcome::diff_lemma(s(name), result, steps)
+}
+
+/// Build a single-theory summary from a `--diff` capture's dynamic slots and
+/// assert `render_summary` reproduces that capture's summary section byte-exactly.
+fn assert_diff_summary(out_cap: &str, warnings: Option<WarningSummary>, lemmas: Vec<LemmaOutcome>) {
+    let section = &out_cap[summary_start(out_cap)..];
+    let (analyzed, output, time) = slots(section).remove(0);
+    let summary = Summary { analyzed, output, processing_time: time, warnings, lemmas };
+    assert_eq!(render_summary(std::slice::from_ref(&summary)), section);
+}
+
+#[test]
+fn diff_summary_regular_lemma_then_obs_equiv_verified() {
+    // --diff --prove: one ordinary lemma projected to RHS then LHS, then the
+    // observational-equivalence DiffLemma (verified, no trace-kind).
+    let out_cap = include_str!("fixtures/r6_diff_with_lemma.out.txt");
+    assert_diff_summary(
+        out_cap,
+        None,
+        vec![
+            rhs("sent_secret", TraceKind::AllTraces, LemmaResult::Verified, 3),
+            lhs("sent_secret", TraceKind::AllTraces, LemmaResult::Verified, 3),
+            diff_lemma("Observational_equivalence", LemmaResult::Verified, 50),
+        ],
+    );
+}
+
+#[test]
+fn diff_summary_two_lemmas_grouped_rhs_then_lhs_per_lemma() {
+    // Two ordinary lemmas: RHS/LHS are grouped PER lemma (RHS l1, LHS l1, RHS l2,
+    // LHS l2), the exists-trace kind renders normally, then the trailing DiffLemma.
+    let out_cap = include_str!("fixtures/r6_diff_two_lemmas.out.txt");
+    assert_diff_summary(
+        out_cap,
+        None,
+        vec![
+            rhs("sent_secret", TraceKind::AllTraces, LemmaResult::Verified, 3),
+            lhs("sent_secret", TraceKind::AllTraces, LemmaResult::Verified, 3),
+            rhs("can_send", TraceKind::ExistsTrace, LemmaResult::Verified, 2),
+            lhs("can_send", TraceKind::ExistsTrace, LemmaResult::Verified, 2),
+            diff_lemma("Observational_equivalence", LemmaResult::Verified, 50),
+        ],
+    );
+}
+
+#[test]
+fn diff_summary_warning_precedes_diff_lines_under_prove() {
+    // --diff --prove with a wellformedness warning: the WARNING section (with the
+    // --prove advisory line) comes first, then a `  ` separator, then the RHS/LHS
+    // lines and a FALSIFIED DiffLemma (`- found trace`).
+    let out_cap = include_str!("fixtures/r6_diff_warn.out.txt");
+    assert_diff_summary(
+        out_cap,
+        Some(WarningSummary { failed_checks: 1, analysis_maybe_wrong: true }),
+        vec![
+            rhs("happens", TraceKind::AllTraces, LemmaResult::Verified, 2),
+            lhs("happens", TraceKind::AllTraces, LemmaResult::Verified, 2),
+            diff_lemma("Observational_equivalence", LemmaResult::Falsified, 7),
+        ],
+    );
+}
+
+#[test]
+fn diff_summary_obs_equiv_incomplete_only() {
+    // --diff without --prove: the DiffLemma alone, analysis incomplete.
+    let out_cap = include_str!("fixtures/r6_diff_default.out.txt");
+    assert_diff_summary(
+        out_cap,
+        None,
+        vec![diff_lemma("Observational_equivalence", LemmaResult::AnalysisIncomplete, 1)],
+    );
+}
+
+#[test]
+fn diff_summary_obs_equiv_falsified_found_trace() {
+    // --diff --prove: the DiffLemma falsified reads `- found trace` (a
+    // distinguishing attack was found).
+    let out_cap = include_str!("fixtures/r6_diff_n5n6.out.txt");
+    assert_diff_summary(
+        out_cap,
+        None,
+        vec![diff_lemma("Observational_equivalence", LemmaResult::Falsified, 8)],
+    );
+}
+
+#[test]
+fn diff_summary_line_bytes_are_exact() {
+    // Pin the exact diff line prefixes independent of any capture, using only
+    // observed forms: `RHS :  ` / `LHS :  ` before a normal lemma line (each kind),
+    // and `DiffLemma:  <name> : <verdict>` (no trace-kind) for obs-equivalence.
+    let summary = Summary {
+        analyzed: s("D.spthy"),
+        output: None,
+        processing_time: 0.10,
+        warnings: None,
+        lemmas: vec![
+            rhs("l", TraceKind::AllTraces, LemmaResult::Verified, 3),
+            lhs("l", TraceKind::ExistsTrace, LemmaResult::Verified, 2),
+            diff_lemma("Observational_equivalence", LemmaResult::Falsified, 8),
+        ],
+    };
+    let block = render_summary(std::slice::from_ref(&summary));
+    let expected_body = concat!(
+        "  processing time: 0.10s\n",
+        "  \n",
+        "  RHS :  l (all-traces): verified (3 steps)\n",
+        "  LHS :  l (exists-trace): verified (2 steps)\n",
+        "  DiffLemma:  Observational_equivalence : falsified - found trace (8 steps)\n",
+    );
+    assert!(block.contains(expected_body), "block was: {block:?}");
 }

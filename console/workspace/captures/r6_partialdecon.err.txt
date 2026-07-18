@@ -1,0 +1,10 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory PartialDecon] Theory loaded
+[Theory PartialDecon] Theory translated
+[Theory PartialDecon] Derivation checks started
+[Theory PartialDecon] Derivation checks ended
+[Theory PartialDecon] Theory closed
+[Saturating Sources] Step 1 (Max 5)
+[Saturating Sources] Done

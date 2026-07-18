@@ -7,7 +7,7 @@
 //! only decides which callback to invoke, how the version state changes, and how
 //! to wrap the result into an HTTP response.
 //!
-//! Everything here was derived from black-box observation (`BEHAVIOR.md` §§13–14,
+//! Everything here was derived from black-box observation (`BEHAVIOR.md` §§13–17,
 //! `QUERIES.log`); no prover source was read.
 //!
 //! ## Surface owned here
@@ -31,14 +31,37 @@
 //! the theory **in place** at its index (no new index; the counter is untouched).
 //! Navigation and read views never change the version set.
 //!
-//! ## State delegation
-//! [`Server`] owns dispatch/transport/envelope logic but **not** the version state:
-//! that lives behind the [`StateOps`] backend (in-memory reference: [`InMemoryState`]),
-//! so a consumer can supply an asynchronous, internally-caching backend that
-//! remains the single owner of theory state. The version-model rules above are the
-//! documented lifecycle **contract** that backend must satisfy.
+//! ## Concurrency: snapshot → compute → commit (`BEHAVIOR.md` §17)
+//! [`dispatch`](Server::dispatch) takes **`&self`**, so one [`Server`] is shared
+//! across concurrent requests. The reference web UI serves a long-running proof
+//! operation *without* freezing unrelated (or related) requests ([R71]); a slow
+//! [`ProverOps`] call therefore must NOT hold any exclusive lock. Each request runs
+//! as three phases:
+//!
+//! 1. **get-snapshot** — resolve the requested index and take a cheap owned
+//!    snapshot of that version through [`StateOps::snapshot`], releasing the
+//!    backend lock immediately.
+//! 2. **compute** — run the [`ProverOps`] call (including the possibly-slow
+//!    `autoprove*` / `apply_method` / `del_*` / `reload` / `load_theory` / edits)
+//!    on the snapshot **with no state lock held**. Concurrent requests take their
+//!    own snapshots and run in parallel.
+//! 3. **commit** — apply the result with a separate, atomic [`StateOps`] call:
+//!    [`insert_new`](StateOps::insert_new) for a proof op / upload / `del/path`
+//!    (the fresh monotonic index is allocated **now**, at commit — matching the
+//!    probed completion-order allocation), or [`replace`](StateOps::replace) for an
+//!    in-place `reload`/structural edit. Reads commit nothing.
+//!
+//! The only serialized sections are the microsecond-scale atomic `StateOps` calls;
+//! all compute is lock-free. Version state lives behind the [`StateOps`] backend's
+//! interior mutability ([`InMemoryState`] is the reference in-memory implementation),
+//! so a consumer can supply an asynchronous, internally-caching backend that remains
+//! the single owner of theory state. The observed lifecycle (`BEHAVIOR.md` §17) —
+//! commit-time monotonic allocation, atomicity under races, retention, in-place
+//! mutation, snapshot isolation — is the documented **contract** that backend must
+//! satisfy.
 
 use std::collections::BTreeMap;
+use std::sync::Mutex;
 
 use crate::envelope::METHOD_FAILED_ALERT;
 use crate::page::{Flash, Origin, PageParams, RootRow, ShellKind};
@@ -202,6 +225,11 @@ pub enum MainReq<'a> {
 /// The prover-supplied callbacks. The web layer treats every returned string as an
 /// opaque fragment; the *decisions* around these calls (version allocation, route
 /// dispatch, envelope shape, content types, redirects) live in [`Server`].
+///
+/// Callbacks receive a `&Self::Theory` **snapshot** (owned by the caller for the
+/// duration of the call), never a live handle into the state backend; a possibly
+/// slow call (`autoprove*`, `apply_method`/`apply_diff_method`, `del_*`, `reload`,
+/// `load_theory`, edits) therefore runs with no state lock held (`BEHAVIOR.md` §17).
 pub trait ProverOps {
     /// Opaque per-version theory handle held by the [`Server`].
     type Theory;
@@ -278,54 +306,77 @@ pub trait ProverOps {
 
 /// The theory-version **state backend**: the single owner of the version set and
 /// the monotonic version counter. [`Server`] holds no version map of its own and
-/// drives all version state exclusively through this trait, so a consumer can
-/// supply an asynchronous, internally-caching backend that remains the sole owner
-/// of theory state ([`InMemoryState`] is the reference in-memory implementation).
+/// drives all version state exclusively through this trait.
 ///
-/// The lifecycle semantics below are the **contract** a backend must satisfy for
-/// the observed web-UI behaviour to hold (probed live; `BEHAVIOR.md` §§13.1/14.3,
-/// §16). One global index namespace covers every loaded, uploaded, or
-/// proof-derived version:
+/// The trait is an **interior-mutability** façade (every method takes `&self`) so a
+/// single [`Server`] can be **shared** across concurrent requests
+/// ([`dispatch`](Server::dispatch) is `&self`). Reads take an owned **snapshot**
+/// ([`snapshot`](StateOps::snapshot)) so the caller can run a possibly-slow
+/// computation on it with no lock held; mutations
+/// ([`insert_new`](StateOps::insert_new)/[`replace`](StateOps::replace)) are
+/// separate atomic commits. A consumer can supply an asynchronous, internally-caching
+/// backend that remains the sole owner of theory state ([`InMemoryState`] is the
+/// reference in-memory implementation).
 ///
-/// * **Monotonic allocation.** [`insert_new`](StateOps::insert_new) stores the
-///   theory at `= (max index ever allocated) + 1`, never reusing an index and
-///   independent of any base index. The first allocation on a fresh backend is
-///   index `1` (the originally loaded theory).
+/// The lifecycle semantics below are the **contract** a backend must satisfy for the
+/// observed web-UI behaviour to hold (probed live; `BEHAVIOR.md` §§13.1/14.3/17).
+/// One global index namespace covers every loaded, uploaded, or proof-derived
+/// version:
+///
+/// * **Commit-time monotonic allocation.** [`insert_new`](StateOps::insert_new)
+///   stores the theory at `= (max index ever allocated) + 1`, never reusing an index
+///   and independent of any base index. Allocation happens **at the call** (i.e. when
+///   a proof op *completes*), not when the request begins, and is **atomic**: two
+///   concurrent `insert_new` calls receive distinct, consecutive indices — never a
+///   collision, never a skip (`BEHAVIOR.md` §17.2/§17.3). The first allocation on a
+///   fresh backend is index `1` (the originally loaded theory).
 /// * **Retention.** Every allocated index stays resolvable by
-///   [`get`](StateOps::get) for the backend's lifetime; the web layer never asks
-///   for a version to be dropped (the index-page window is a display cap only).
-/// * **In-place mutation.** [`replace`](StateOps::replace) overwrites the theory
-///   at an existing index (structural edits + `reload`) without allocating, and
-///   leaves the counter and every other version untouched. The web layer only
-///   calls it on an index it has already resolved.
-/// * **Enumeration.** [`entries`](StateOps::entries) yields all `(index, theory)`
-///   in ascending index order (drives the index page).
+///   [`snapshot`](StateOps::snapshot) for the backend's lifetime; the web layer never
+///   asks for a version to be dropped (the index-page window is a display cap only).
+/// * **Snapshot isolation.** [`snapshot`](StateOps::snapshot) returns a cheap owned
+///   copy that is unaffected by later mutations of the same index; a long compute run
+///   on a snapshot is not corrupted by a concurrent [`replace`](StateOps::replace) of
+///   its base (`BEHAVIOR.md` §17.4).
+/// * **In-place mutation.** [`replace`](StateOps::replace) overwrites the theory at an
+///   existing index (structural edits + `reload`) without allocating, and leaves the
+///   counter and every other version untouched. The web layer only calls it on an
+///   index it has already resolved.
+/// * **Enumeration.** [`indices`](StateOps::indices) yields all allocated indices in
+///   ascending order (drives the index page and [`Server::versions`]).
 /// * **Deletion.** [`remove`](StateOps::remove) drops a version. Under the observed
-///   retention contract the web layer never invokes it; it is part of the
-///   backend's ownership surface (e.g. cache eviction) — see the honesty note in
-///   `REPORT.md`.
+///   retention contract the web layer never invokes it; it is part of the backend's
+///   ownership surface (e.g. cache eviction) — see the honesty note in `REPORT.md`.
 pub trait StateOps {
     /// The per-version theory handle, shared with [`ProverOps::Theory`].
     type Theory;
-    /// Allocate a fresh monotonic index, store `theory` there, and return the
-    /// index (never reused; `1` on a fresh backend). Prior versions are retained.
-    fn insert_new(&mut self, theory: Self::Theory) -> u64;
-    /// Retrieve the theory at `index`, or `None` if no such version exists.
-    fn get(&self, index: u64) -> Option<&Self::Theory>;
+    /// Take a cheap **owned snapshot** of the theory at `index` (`None` if no such
+    /// version exists), releasing any internal lock before returning so the caller
+    /// can compute on it lock-free.
+    fn snapshot(&self, index: u64) -> Option<Self::Theory>;
+    /// Atomically allocate a fresh monotonic index, store `theory` there, and return
+    /// the index (never reused; `1` on a fresh backend). Prior versions are retained.
+    /// Concurrent calls never collide or skip.
+    fn insert_new(&self, theory: Self::Theory) -> u64;
     /// Overwrite the theory at an existing `index` in place (no allocation; the
     /// counter and other versions are untouched).
-    fn replace(&mut self, index: u64, theory: Self::Theory);
-    /// Remove the version at `index` (returning it if present). Not exercised by
-    /// the current web-layer surface — see the trait-level note.
-    fn remove(&mut self, index: u64) -> Option<Self::Theory>;
-    /// All `(index, theory)` pairs in ascending index order.
-    fn entries(&self) -> Vec<(u64, &Self::Theory)>;
+    fn replace(&self, index: u64, theory: Self::Theory);
+    /// Remove the version at `index` (returning it if present). Not exercised by the
+    /// current web-layer surface — see the trait-level note.
+    fn remove(&self, index: u64) -> Option<Self::Theory>;
+    /// All allocated indices in ascending order.
+    fn indices(&self) -> Vec<u64>;
 }
 
 /// In-memory reference implementation of [`StateOps`]: a `BTreeMap` keyed by index
-/// plus a monotonic counter. Satisfies the full lifecycle contract and is the
-/// default backend used by [`Server::new`].
+/// plus a monotonic counter, behind a [`Mutex`] for interior mutability. Satisfies
+/// the full lifecycle contract and is the default backend used by [`Server::new`].
+/// `snapshot`/`insert_new`/`replace`/`remove` each hold the lock only for the
+/// map/counter operation itself, never across a [`ProverOps`] computation.
 pub struct InMemoryState<T> {
+    inner: Mutex<StateInner<T>>,
+}
+
+struct StateInner<T> {
     versions: BTreeMap<u64, T>,
     next_index: u64,
 }
@@ -333,13 +384,14 @@ pub struct InMemoryState<T> {
 impl<T> InMemoryState<T> {
     /// An empty backend whose first [`StateOps::insert_new`] allocates index `1`.
     pub fn new() -> InMemoryState<T> {
-        InMemoryState { versions: BTreeMap::new(), next_index: 1 }
+        InMemoryState { inner: Mutex::new(StateInner { versions: BTreeMap::new(), next_index: 1 }) }
     }
+}
 
-    /// A backend pre-seeded with `base` at index `1` (the originally loaded
-    /// theory).
+impl<T: Clone> InMemoryState<T> {
+    /// A backend pre-seeded with `base` at index `1` (the originally loaded theory).
     pub fn seeded(base: T) -> InMemoryState<T> {
-        let mut s = InMemoryState::new();
+        let s = InMemoryState::new();
         let i = s.insert_new(base);
         debug_assert_eq!(i, 1, "the first allocated version index is 1");
         s
@@ -352,39 +404,47 @@ impl<T> Default for InMemoryState<T> {
     }
 }
 
-impl<T> StateOps for InMemoryState<T> {
+impl<T: Clone> StateOps for InMemoryState<T> {
     type Theory = T;
 
-    fn insert_new(&mut self, theory: T) -> u64 {
-        let index = self.next_index;
-        self.next_index += 1;
-        self.versions.insert(index, theory);
+    fn snapshot(&self, index: u64) -> Option<T> {
+        self.inner.lock().unwrap().versions.get(&index).cloned()
+    }
+    fn insert_new(&self, theory: T) -> u64 {
+        let mut g = self.inner.lock().unwrap();
+        let index = g.next_index;
+        g.next_index += 1;
+        g.versions.insert(index, theory);
         index
     }
-    fn get(&self, index: u64) -> Option<&T> {
-        self.versions.get(&index)
+    fn replace(&self, index: u64, theory: T) {
+        self.inner.lock().unwrap().versions.insert(index, theory);
     }
-    fn replace(&mut self, index: u64, theory: T) {
-        self.versions.insert(index, theory);
+    fn remove(&self, index: u64) -> Option<T> {
+        self.inner.lock().unwrap().versions.remove(&index)
     }
-    fn remove(&mut self, index: u64) -> Option<T> {
-        self.versions.remove(&index)
-    }
-    fn entries(&self) -> Vec<(u64, &T)> {
-        self.versions.iter().map(|(&i, t)| (i, t)).collect()
+    fn indices(&self) -> Vec<u64> {
+        self.inner.lock().unwrap().versions.keys().copied().collect()
     }
 }
 
 /// The interactive server. It owns all route dispatch, transport, and response
 /// assembly, but **not** the version state: that lives behind a [`StateOps`]
-/// backend `S` (defaulting to the in-memory [`InMemoryState`]). Every version
-/// read/allocation/mutation flows through `S`.
+/// backend `S` (defaulting to the in-memory [`InMemoryState`]).
+///
+/// [`dispatch`](Server::dispatch) takes `&self`, so one `Server` is shared across
+/// concurrent requests; every version read/allocation/mutation flows through `S`'s
+/// interior mutability as a snapshot → compute → commit pipeline (see the module
+/// docs and `BEHAVIOR.md` §17).
 pub struct Server<P: ProverOps, S: StateOps<Theory = P::Theory> = InMemoryState<<P as ProverOps>::Theory>> {
     ops: P,
     state: S,
 }
 
-impl<P: ProverOps> Server<P, InMemoryState<P::Theory>> {
+impl<P: ProverOps> Server<P, InMemoryState<P::Theory>>
+where
+    P::Theory: Clone,
+{
     /// Create a server holding `base` as version 1 in a fresh in-memory backend.
     pub fn new(ops: P, base: P::Theory) -> Server<P, InMemoryState<P::Theory>> {
         Server::with_state(ops, InMemoryState::seeded(base))
@@ -401,29 +461,13 @@ impl<P: ProverOps, S: StateOps<Theory = P::Theory>> Server<P, S> {
 
     /// Version indices currently allocated (ascending). All are resolvable.
     pub fn versions(&self) -> Vec<u64> {
-        self.state.entries().into_iter().map(|(i, _)| i).collect()
+        self.state.indices()
     }
 
-    /// The theory at a **resolved** index (panics if absent — callers resolve
-    /// first via [`Self::resolve`]).
-    fn theory(&self, index: u64) -> &P::Theory {
-        self.state.get(index).expect("dispatch resolves the index before use")
-    }
-
-    fn resolve(&self, index: &Index) -> Option<u64> {
-        match index {
-            Index::Num(v) if self.state.get(*v).is_some() => Some(*v),
-            _ => None,
-        }
-    }
-
-    fn commit_new_version(&mut self, thy: P::Theory) -> u64 {
-        self.state.insert_new(thy)
-    }
-
-    /// Dispatch a request across the whole surface, mutating version state as
-    /// observed.
-    pub fn dispatch(&mut self, req: &Request) -> Response {
+    /// Dispatch a request across the whole surface. Takes `&self`: safe to call
+    /// concurrently on a shared server (each call snapshots, computes lock-free, and
+    /// commits atomically — see the module docs).
+    pub fn dispatch(&self, req: &Request) -> Response {
         match Toplevel::parse(req.path) {
             Toplevel::Root => self.root(req),
             Toplevel::Robots => self.get_only(req, || Response::text(assets::ROBOTS_TXT.to_string())),
@@ -445,11 +489,12 @@ impl<P: ProverOps, S: StateOps<Theory = P::Theory>> Server<P, S> {
 
     // ---- top-level routes ------------------------------------------------
 
-    fn root(&mut self, req: &Request) -> Response {
+    fn root(&self, req: &Request) -> Response {
         match req.method {
             HttpMethod::Get => Response::html(self.render_index(Flash::None)),
             HttpMethod::Post => {
                 let uploaded = req.field("uploadedTheory");
+                // compute: parse the uploaded source (no state lock held).
                 let loaded = if uploaded.is_empty() {
                     None
                 } else {
@@ -457,7 +502,8 @@ impl<P: ProverOps, S: StateOps<Theory = P::Theory>> Server<P, S> {
                 };
                 match loaded {
                     Some(thy) => {
-                        self.commit_new_version(thy);
+                        // commit: allocate a fresh index for the upload.
+                        self.state.insert_new(thy);
                         Response::html(self.render_index(Flash::Loaded))
                     }
                     None => Response::html(self.render_index(Flash::PostFailed)),
@@ -466,26 +512,36 @@ impl<P: ProverOps, S: StateOps<Theory = P::Theory>> Server<P, S> {
         }
     }
 
-    /// Render the index page for the current version set. Rows are emitted in
-    /// ascending index order; the reference server's exact row *ordering* and the
+    /// Render the index page for the current version set. Each version is snapshotted
+    /// (releasing the lock) and its row metadata produced lock-free; rows are emitted
+    /// in ascending index order. The reference server's exact row *ordering* and the
     /// per-row time/origin are non-deterministic (prover/environment concerns).
     fn render_index(&self, flash: Flash) -> String {
-        let entries = self.state.entries();
         let mut version = String::new();
-        let mut rows: Vec<RootRow> = Vec::with_capacity(entries.len());
         // Owned strings must outlive the borrowed RootRow slice.
         let mut owned: Vec<(u64, String, String, bool, String)> = Vec::new();
-        for (idx, thy) in entries {
-            let m = self.ops.meta(thy);
-            let rm = self.ops.root_meta(thy);
+        for idx in self.state.indices() {
+            let thy = match self.state.snapshot(idx) {
+                Some(t) => t,
+                None => continue, // dropped between the index list and the snapshot
+            };
+            let m = self.ops.meta(&thy);
+            let rm = self.ops.root_meta(&thy);
             if version.is_empty() {
                 version = m.version.clone();
             }
             owned.push((idx, m.name, rm.time, rm.modified, rm.origin));
         }
-        for (idx, name, time, modified, origin) in &owned {
-            rows.push(RootRow { index: *idx, name, time, modified: *modified, origin });
-        }
+        let rows: Vec<RootRow> = owned
+            .iter()
+            .map(|(idx, name, time, modified, origin)| RootRow {
+                index: *idx,
+                name,
+                time,
+                modified: *modified,
+                origin,
+            })
+            .collect();
         page::render_root(flash, &version, &rows)
     }
 
@@ -517,59 +573,68 @@ impl<P: ProverOps, S: StateOps<Theory = P::Theory>> Server<P, S> {
 
     // ---- theory-scoped routes -------------------------------------------
 
-    fn thy(&mut self, req: &Request, route: &Route) -> Response {
-        let index = match self.resolve(&route.index) {
-            Some(v) => v,
+    fn thy(&self, req: &Request, route: &Route) -> Response {
+        // get-snapshot: resolve the index and take one owned snapshot of the version.
+        // A `#` (current) index never resolves; an unknown index is a 404. This is the
+        // only state read for the whole request; the compute below runs on the snapshot
+        // with no lock held.
+        let index = match route.index {
+            Index::Num(v) => v,
+            Index::Current => return Response::not_found(req.path),
+        };
+        let thy = match self.state.snapshot(index) {
+            Some(t) => t,
             None => return Response::not_found(req.path),
         };
         let kind = shell_kind(&route.theory_kind);
         match (req.method, &route.handler) {
             // Proof operations (allocate a new version) — intercept before reads.
             (HttpMethod::Get, Handler::Main(Main::Method { lemma, n, path })) => {
-                self.proof_method(kind, index, &lemma.clone(), *n, &path.clone(), false)
+                self.proof_method(kind, &thy, lemma, *n, path, false)
             }
             (HttpMethod::Get, Handler::Main(Main::DiffMethod { lemma, n, path })) => {
-                self.proof_method(kind, index, &lemma.clone(), *n, &path.clone(), true)
+                self.proof_method(kind, &thy, lemma, *n, path, true)
             }
-            (HttpMethod::Get, Handler::Main(m)) => self.get_main(index, m),
+            (HttpMethod::Get, Handler::Main(m)) => self.get_main(index, &thy, m),
             (HttpMethod::Get, Handler::Overview(tail)) => {
-                self.get_overview(kind, index, &OverviewView::parse(tail))
+                self.get_overview(kind, index, &thy, &OverviewView::parse(tail))
             }
             (HttpMethod::Get, Handler::Autoprove(tail)) => match Autoprove::parse(tail) {
                 Some(ap) => {
-                    let (thy, focus) = self.ops.autoprove(self.theory(index), &ap);
-                    let new = self.commit_new_version(thy);
+                    // compute (possibly slow) on the snapshot, then commit a new version.
+                    let (new_thy, focus) = self.ops.autoprove(&thy, &ap);
+                    let new = self.state.insert_new(new_thy);
                     Response::json(envelope::render_redirect(&overview_proof_path(kind, new, &ap.lemma, &focus, false)))
                 }
                 None => Response::not_found(req.path),
             },
             (HttpMethod::Get, Handler::AutoproveDiff(tail)) => match AutoproveDiff::parse(tail) {
                 Some(ap) => {
-                    let (thy, focus) = self.ops.autoprove_diff(self.theory(index), &ap);
-                    let new = self.commit_new_version(thy);
+                    let (new_thy, focus) = self.ops.autoprove_diff(&thy, &ap);
+                    let new = self.state.insert_new(new_thy);
                     Response::json(envelope::render_redirect(&overview_proof_path(kind, new, &ap.lemma, &focus, true)))
                 }
                 None => Response::not_found(req.path),
             },
             (HttpMethod::Get, Handler::AutoproveAll(tail)) => match AutoproveAll::parse(tail) {
                 Some(ap) => {
-                    let thy = self.ops.autoprove_all(self.theory(index), &ap);
-                    let new = self.commit_new_version(thy);
+                    let new_thy = self.ops.autoprove_all(&thy, &ap);
+                    let new = self.state.insert_new(new_thy);
                     Response::json(envelope::render_redirect(&format!("/thy/{}/{}/overview/help", kind.path(), new)))
                 }
                 None => Response::not_found(req.path),
             },
-            (HttpMethod::Get, Handler::Next(tail)) => self.get_nav(index, NavDir::Next, tail, req.path),
-            (HttpMethod::Get, Handler::Prev(tail)) => self.get_nav(index, NavDir::Prev, tail, req.path),
+            (HttpMethod::Get, Handler::Next(tail)) => self.get_nav(index, &thy, NavDir::Next, tail, req.path),
+            (HttpMethod::Get, Handler::Prev(tail)) => self.get_nav(index, &thy, NavDir::Prev, tail, req.path),
             (HttpMethod::Get, Handler::Source) | (HttpMethod::Get, Handler::Message) => {
-                Response::text(self.ops.source_text(self.theory(index)))
+                Response::text(self.ops.source_text(&thy))
             }
             (HttpMethod::Get, Handler::Download(_)) => {
-                Response::octet(self.ops.source_text(self.theory(index)))
+                Response::octet(self.ops.source_text(&thy))
             }
-            (HttpMethod::Get, Handler::Intdot(tail)) => self.get_intdot(kind, index, tail),
+            (HttpMethod::Get, Handler::Intdot(tail)) => self.get_intdot(kind, index, &thy, tail),
             (HttpMethod::Get, Handler::InteractiveGraphDef(tail)) => {
-                Response::text(self.ops.graph_dot(self.theory(index), tail))
+                Response::text(self.ops.graph_dot(&thy, tail))
             }
             // Wrong method on GET-only theory routes.
             (HttpMethod::Post, Handler::Source)
@@ -578,24 +643,25 @@ impl<P: ProverOps, S: StateOps<Theory = P::Theory>> Server<P, S> {
 
             // In-place mutating POSTs.
             (HttpMethod::Post, Handler::Reload) => {
-                let new_thy = self.ops.reload(self.theory(index));
+                // compute: re-parse (possibly slow) on the snapshot, then commit in place.
+                let new_thy = self.ops.reload(&thy);
                 self.state.replace(index, new_thy);
                 Response::json(envelope::render_redirect(&format!("/thy/{}/{}/overview/help", kind.path(), index)))
             }
             (HttpMethod::Get, Handler::Reload) => Response::bad_method(HttpMethod::Get),
             (HttpMethod::Post, Handler::GetAndAppend(_)) => {
-                Response::json(envelope::render_alert(&self.ops.append_message(self.theory(index))))
+                Response::json(envelope::render_alert(&self.ops.append_message(&thy)))
             }
             (HttpMethod::Get, Handler::GetAndAppend(_)) => Response::bad_method(HttpMethod::Get),
-            (HttpMethod::Post, Handler::Edit(tail)) => self.post_edit(kind, index, tail, req),
+            (HttpMethod::Post, Handler::Edit(tail)) => self.post_edit(kind, index, &thy, tail, req),
 
             // del/path (both kinds) and verify (trace only). The theory-path parse
             // decides route-match (unparseable -> 404 for any method); a parseable
             // path with a non-GET method is a 405.
-            (_, Handler::DelPath(segs)) => self.del_path(req.method, kind, index, segs, req.path),
+            (_, Handler::DelPath(segs)) => self.del_path(req.method, kind, &thy, segs, req.path),
             (_, Handler::Verify(segs)) => {
                 if kind == ShellKind::Trace {
-                    self.verify(req.method, index, segs, req.path)
+                    self.verify(req.method, index, &thy, segs, req.path)
                 } else {
                     // `verify` is not registered for equiv theories: a miss for any method.
                     Response::not_found(req.path)
@@ -606,8 +672,7 @@ impl<P: ProverOps, S: StateOps<Theory = P::Theory>> Server<P, S> {
     }
 
     // ---- GET main/* : JSON envelopes ----
-    fn get_main(&self, index: u64, m: &Main) -> Response {
-        let thy = self.theory(index);
+    fn get_main(&self, index: u64, thy: &P::Theory, m: &Main) -> Response {
         let content = match m {
             Main::Help => self.ops.main_content(thy, index, &MainReq::Help),
             Main::Message => self.ops.main_content(thy, index, &MainReq::Message),
@@ -638,8 +703,7 @@ impl<P: ProverOps, S: StateOps<Theory = P::Theory>> Server<P, S> {
     }
 
     // ---- GET overview/* : full-page HTML ----
-    fn get_overview(&self, kind: ShellKind, index: u64, view: &OverviewView) -> Response {
-        let thy = self.theory(index);
+    fn get_overview(&self, kind: ShellKind, index: u64, thy: &P::Theory, view: &OverviewView) -> Response {
         let meta = self.ops.meta(thy);
         let west = self.ops.west_pane(thy, index);
         let center = self.center_for(thy, index, view);
@@ -676,31 +740,33 @@ impl<P: ProverOps, S: StateOps<Theory = P::Theory>> Server<P, S> {
     }
 
     // ---- GET next/prev : text/plain bare URL ----
-    fn get_nav(&self, index: u64, dir: NavDir, tail: &[String], path: &str) -> Response {
+    fn get_nav(&self, index: u64, thy: &P::Theory, dir: NavDir, tail: &[String], path: &str) -> Response {
         match Nav::parse(dir, tail) {
-            Some(nav) => Response::text(self.ops.nav_target(self.theory(index), index, dir, &nav.mode, &nav.lemma)),
+            Some(nav) => Response::text(self.ops.nav_target(thy, index, dir, &nav.mode, &nav.lemma)),
             None => Response::not_found(path),
         }
     }
 
     // ---- GET intdot : html mini page (handler swapped intdot -> i-g-def) ----
-    fn get_intdot(&self, kind: ShellKind, index: u64, tail: &[String]) -> Response {
-        let meta = self.ops.meta(self.theory(index));
+    fn get_intdot(&self, kind: ShellKind, index: u64, thy: &P::Theory, tail: &[String]) -> Response {
+        let meta = self.ops.meta(thy);
         let trailing = tail.join("/");
         let dotsrc = format!("/thy/{}/{}/interactive-graph-def/{}", kind.path(), index, trailing);
         Response::html(intdot::render_intdot(&meta.name, &dotsrc))
     }
 
     // ---- proof operations: new version + JSON {redirect}, or {alert} on failure ----
-    fn proof_method(&mut self, kind: ShellKind, index: u64, lemma: &str, n: usize, path: &[String], diff: bool) -> Response {
+    fn proof_method(&self, kind: ShellKind, thy: &P::Theory, lemma: &str, n: usize, path: &[String], diff: bool) -> Response {
+        // compute (possibly slow) on the snapshot with no state lock held.
         let applied = if diff {
-            self.ops.apply_diff_method(self.theory(index), lemma, n, path)
+            self.ops.apply_diff_method(thy, lemma, n, path)
         } else {
-            self.ops.apply_method(self.theory(index), lemma, n, path)
+            self.ops.apply_method(thy, lemma, n, path)
         };
         match applied {
             Some((new_thy, focus)) => {
-                let new = self.commit_new_version(new_thy);
+                // commit: allocate the fresh index at completion.
+                let new = self.state.insert_new(new_thy);
                 Response::json(envelope::render_redirect(&overview_proof_path(kind, new, lemma, &focus, diff)))
             }
             None => Response::json(envelope::render_alert(METHOD_FAILED_ALERT)),
@@ -713,7 +779,7 @@ impl<P: ProverOps, S: StateOps<Theory = P::Theory>> Server<P, S> {
     /// with a non-GET method is a `405`. A deletable path (a lemma or proof node)
     /// allocates a fresh version and redirects to `overview/<same-path>`; every
     /// other outcome is a JSON alert whose text is selected by the path type.
-    fn del_path(&mut self, method: HttpMethod, kind: ShellKind, index: u64, segs: &[String], path: &str) -> Response {
+    fn del_path(&self, method: HttpMethod, kind: ShellKind, thy: &P::Theory, segs: &[String], path: &str) -> Response {
         let diff = kind == ShellKind::Equiv;
         let thy_path = match ThyPath::parse(segs, diff) {
             Some(tp) => tp,
@@ -723,23 +789,23 @@ impl<P: ProverOps, S: StateOps<Theory = P::Theory>> Server<P, S> {
             return Response::bad_method(method);
         }
         match thy_path {
-            ThyPath::Lemma(name) => match self.ops.del_lemma_path(self.theory(index), &name) {
+            ThyPath::Lemma(name) => match self.ops.del_lemma_path(thy, &name) {
                 Some(new_thy) => {
-                    let new = self.commit_new_version(new_thy);
+                    let new = self.state.insert_new(new_thy);
                     Response::json(envelope::render_redirect(&overview_lemma_path(kind, new, &name)))
                 }
                 None => Response::json(envelope::render_alert(envelope::DEL_LEMMA_FAILED_ALERT)),
             },
-            ThyPath::Proof { lemma, path } => self.del_proof(kind, index, &lemma, &path, false),
-            ThyPath::DiffProof { lemma, path } => self.del_proof(kind, index, &lemma, &path, true),
+            ThyPath::Proof { lemma, path } => self.del_proof(kind, thy, &lemma, &path, false),
+            ThyPath::DiffProof { lemma, path } => self.del_proof(kind, thy, &lemma, &path, true),
             ThyPath::Other => Response::json(envelope::render_alert(envelope::DEL_PATH_CANT_ALERT)),
         }
     }
 
-    fn del_proof(&mut self, kind: ShellKind, index: u64, lemma: &str, path: &[String], diff: bool) -> Response {
-        match self.ops.del_proof_step(self.theory(index), lemma, path, diff) {
+    fn del_proof(&self, kind: ShellKind, thy: &P::Theory, lemma: &str, path: &[String], diff: bool) -> Response {
+        match self.ops.del_proof_step(thy, lemma, path, diff) {
             Some(new_thy) => {
-                let new = self.commit_new_version(new_thy);
+                let new = self.state.insert_new(new_thy);
                 Response::json(envelope::render_redirect(&overview_proof_path(kind, new, lemma, path, diff)))
             }
             None => Response::json(envelope::render_alert(envelope::DEL_PROOF_STEP_FAILED_ALERT)),
@@ -753,7 +819,7 @@ impl<P: ProverOps, S: StateOps<Theory = P::Theory>> Server<P, S> {
     /// A `proof/{lemma}[/path]` whose lemma is present redirects to
     /// `overview/proof/{lemma}[/path]` at the **same** version; every other path
     /// (including a proof path to an absent lemma) returns the theory help pane.
-    fn verify(&self, method: HttpMethod, index: u64, segs: &[String], path: &str) -> Response {
+    fn verify(&self, method: HttpMethod, index: u64, thy: &P::Theory, segs: &[String], path: &str) -> Response {
         let thy_path = match ThyPath::parse(segs, false) {
             Some(tp) => tp,
             None => return Response::not_found(path),
@@ -761,7 +827,6 @@ impl<P: ProverOps, S: StateOps<Theory = P::Theory>> Server<P, S> {
         if method != HttpMethod::Get {
             return Response::bad_method(method);
         }
-        let thy = self.theory(index);
         match thy_path {
             ThyPath::Proof { lemma, path } if self.ops.lemma_present(thy, &lemma) => {
                 Response::json(envelope::render_redirect(&overview_proof_path(
@@ -776,7 +841,7 @@ impl<P: ProverOps, S: StateOps<Theory = P::Theory>> Server<P, S> {
     }
 
     // ---- structural POST: mutate in place; 303 (or 200 form on edit/add failure) ----
-    fn post_edit(&mut self, kind: ShellKind, index: u64, tail: &[String], req: &Request) -> Response {
+    fn post_edit(&self, kind: ShellKind, index: u64, thy: &P::Theory, tail: &[String], req: &Request) -> Response {
         let (verb, name) = match tail {
             [v, n] => match EditVerb::parse(v) {
                 Some(verb) => (verb, n.clone()),
@@ -786,7 +851,7 @@ impl<P: ProverOps, S: StateOps<Theory = P::Theory>> Server<P, S> {
         };
         let k = kind.path();
         match verb {
-            EditVerb::Delete => match self.ops.delete_lemma(self.theory(index), &name) {
+            EditVerb::Delete => match self.ops.delete_lemma(thy, &name) {
                 Some(new_thy) => {
                     self.state.replace(index, new_thy);
                     Response::see_other(format!("/thy/{k}/{index}/overview/help"))
@@ -796,22 +861,22 @@ impl<P: ProverOps, S: StateOps<Theory = P::Theory>> Server<P, S> {
             },
             EditVerb::Edit => {
                 let text = req.field("lemma-text");
-                match self.ops.edit_lemma(self.theory(index), &name, text) {
+                match self.ops.edit_lemma(thy, &name, text) {
                     Some(new_thy) => {
                         self.state.replace(index, new_thy);
                         Response::see_other(format!("/thy/{k}/{index}/overview/edit/{name}"))
                     }
-                    None => self.get_overview(kind, index, &OverviewView::Edit(name)),
+                    None => self.get_overview(kind, index, thy, &OverviewView::Edit(name)),
                 }
             }
             EditVerb::Add => {
                 let text = req.field("lemma-text");
-                match self.ops.add_lemma(self.theory(index), &name, text) {
+                match self.ops.add_lemma(thy, &name, text) {
                     Some(new_thy) => {
                         self.state.replace(index, new_thy);
                         Response::see_other(format!("/thy/{k}/{index}/overview/add/{name}"))
                     }
-                    None => self.get_overview(kind, index, &OverviewView::Add(name)),
+                    None => self.get_overview(kind, index, thy, &OverviewView::Add(name)),
                 }
             }
         }
@@ -819,8 +884,12 @@ impl<P: ProverOps, S: StateOps<Theory = P::Theory>> Server<P, S> {
 
     /// Apply a proof method that arrived as a parsed `Main::Method`. Exposed so a
     /// caller that pre-parses `main/method` can drive the version bump directly.
-    pub fn apply_main_method(&mut self, index: u64, lemma: &str, n: usize, path: &[String]) -> Response {
-        self.proof_method(ShellKind::Trace, index, lemma, n, path, false)
+    /// Snapshots `index` internally (a `404` body if the version is absent).
+    pub fn apply_main_method(&self, index: u64, lemma: &str, n: usize, path: &[String]) -> Response {
+        match self.state.snapshot(index) {
+            Some(thy) => self.proof_method(ShellKind::Trace, &thy, lemma, n, path, false),
+            None => Response::not_found("method"),
+        }
     }
 }
 

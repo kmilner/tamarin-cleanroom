@@ -1,0 +1,19 @@
+theory DiffTwoLemmas
+begin
+
+builtins: symmetric-encryption
+
+// Diff theory with TWO regular lemmas (one all-traces, one exists-trace) to
+// observe the RHS/LHS grouping order and how the (kind) renders in projected
+// lines, plus the trailing Observational_equivalence DiffLemma.
+rule Send:
+  [ Fr(~k), Fr(~m) ] --[ Sent(~m) ]-> [ Out(senc(diff(~m, ~m), ~k)) ]
+
+lemma sent_secret:
+  "All m #i. Sent(m) @ i ==> not (Ex #j. K(m) @ j)"
+
+lemma can_send:
+  exists-trace
+  "Ex m #i. Sent(m) @ i"
+
+end

@@ -1,0 +1,19 @@
+theory Wide begin
+
+builtins: hashing
+
+rule Wide:
+    [ In(<x1, x2, x3, x4, x5, x6, x7, x8, x9, x10>), Fr(~n) ]
+  --[ Made(~n) ]->
+    [ Ack(~n, <x1, x2>),
+      Big(<x1, x2, x3, x4, x5, x6, x7, x8, x9, x10>),
+      Out(x1) ]
+
+rule Use:
+    [ Ack(n, p) ] --> [ ]
+
+lemma reachable:
+  exists-trace
+  "Ex n #i. Made(n) @ #i"
+
+end

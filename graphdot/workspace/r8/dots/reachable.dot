@@ -1,0 +1,30 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n6[shape="record",label="{{<n0> In( \<x1, x2, x3, x4, x5, x6, x7, x8, x9, x10\> )|<n1> Fr( ~n )}|{<n2> #i : Wide[Made( ~n )]}|{<n3> Ack( ~n, \<x1, x2\> )|<n4> Big( \<x1, x2, x3, x4, x5, x6, x7, x8, x9, x10\> )|<n5> Out( x1 )}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+n7[label="#vf : isend",shape="ellipse"];
+n8[label="!KU( x1 ) @ #vk.1",shape="ellipse",color="gray"];
+n9[label="!KU( x2 ) @ #vk.3",shape="ellipse",color="gray"];
+n10[label="!KU( x3 ) @ #vk.5",shape="ellipse",color="gray"];
+n11[label="!KU( x4 ) @ #vk.7",shape="ellipse",color="gray"];
+n12[label="!KU( x5 ) @ #vk.9",shape="ellipse",color="gray"];
+n13[label="!KU( x6 ) @ #vk.11",shape="ellipse",color="gray"];
+n14[label="!KU( x7 ) @ #vk.13",shape="ellipse",color="gray"];
+n15[label="!KU( x8 ) @ #vk.15",shape="ellipse",color="gray"];
+n16[label="!KU( x9 ) @ #vk.17",shape="ellipse",color="gray"];
+n17[label="!KU( x10 ) @ #vk.18",shape="ellipse",color="gray"];
+n7 -> n6:n0[color="gray30"];
+n8 -> n7[color="red",style="dashed"];
+n9 -> n7[color="red",style="dashed"];
+n10 -> n7[color="red",style="dashed"];
+n11 -> n7[color="red",style="dashed"];
+n12 -> n7[color="red",style="dashed"];
+n13 -> n7[color="red",style="dashed"];
+n14 -> n7[color="red",style="dashed"];
+n15 -> n7[color="red",style="dashed"];
+n16 -> n7[color="red",style="dashed"];
+n17 -> n7[color="red",style="dashed"];
+
+}
