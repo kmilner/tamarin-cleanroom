@@ -2977,3 +2977,252 @@ sorts" body-text divergence (part of #2).
   mod already matched). Deleted: none (the ported wf was removed in the round-4
   swap). Header delta: **0**. Gate: **71 DIFF -> 8 DIFF**, 0 regressions; residual
   8 kept-and-reported as sealed-checker gaps.
+
+================================================================================
+# Dirty-room integration report — round-6 wellformedness closure, unit C
+
+Date: 2026-07-18. Integrator: open-side wf integrator (mechanical re-sync +
+open-side assembly/adapter fixes only; no logic transplanted, no hand-edit of
+the sealed checker). Round 6 closed the remaining **8** full-corpus wf
+divergences: **8 DIFF -> 0 DIFF**, 0 regressions. The sealed side fixed one
+residual in `wf-clean` (the `ble` list-format dedup); the other seven were
+open-side gaps in the workspace assembly/adapter layer, fixed here.
+
+## C.1 Re-sync of the round-6 clean sources — DONE
+Re-applied the established mechanical recipe (`crate::{pretty,report,formula,
+checks}` -> `super::…`; `crate::ast` kept — resolves to the real tamarin-parser
+AST) to the round-6 `wf-clean/src`. Only ONE file changed vs the tree:
+* `wf/checks.rs` <- wf-clean/src/checks.rs. The sole delta is `fact_lhs_occur_
+  no_rhs`: the round-6 sealed checker dropped the `seen` dedup vector so EVERY
+  LHS-only premise occurrence is listed in pure source order (one entry per
+  occurrence, RHS-identity exclusion unchanged) — the `ble` fix.
+* `wf/formula.rs`, `wf/pretty.rs`, `wf/report.rs`, `wf/mod.rs` — reverse-transform
+  BYTE-IDENTICAL to the round-6 sealed sources (unchanged since round-5).
+PRESERVED workspace lines `pub mod order; pub use order::*;` + `wf/order.rs`
+untouched. Fidelity: `sed 's/super::.../crate::.../' <vendored>` reverse-maps
+byte-identical to each sealed source; `mod.rs` matches the (drop `pub mod ast;`,
+`pub use ast::*;` -> `pub use crate::ast::*;`) transform of `lib.rs`. All six
+`wf/` files remain headerless (0 `.hs` citations; tripwire clean — no provenance
+violation).
+
+## C.2 Open-side fixes (assembly + adapter; sealed checker NOT touched)
+All fixes are in workspace-authored / ported open-side files OUTSIDE `wf/`; the
+sealed bodies are consumed verbatim. Full-corpus gate is the arbiter throughout.
+
+* **(a) blank1 — `pretty_theory::wf_headerless_preamble`** (stateverif_left_right,
+  issue515, CertificateTransparency, OCSPS). The header-less-body topics
+  `Unbound variables` / `Special facts` were emitting `underline + "\n"` (no
+  blank); the reference prints a blank line after the underline. Moved both to
+  the `underline + "\n\n"` arm. A pre-existing comment claimed some corpus
+  `Unbound variables` blocks had no blank — a full scan of the HS reference
+  cache DISPROVED it (`Unbound variables` 4/4 and `Special facts` 1/1 blocks all
+  have the blank; ZERO non-blank), so there is no context split; the stale
+  comment was corrected.
+* **(b) lemanno — `wf_headerless_preamble`** (loops/Axioms_and_Induction).
+  Registered `Lemma annotations` in the `underline + "\n\n"` arm (the sealed
+  `lemma_annotations` emits a header-less body; the assembly now supplies its
+  underline + blank).
+* **(c) issue527 sortbody seam — `wf_headerless_preamble`.** The round-6 sealed
+  `mismatching_sorts` body already carries its own `Possible reasons:` preamble;
+  the assembly's arm for `Variable with mismatching sorts or capitalization` was
+  ALSO prepending that paragraph -> a duplicate. Dropped the assembly copy and
+  moved the topic to the plain `underline + "\n\n"` arm so the paragraph appears
+  exactly once (byte-equal to targets/regression_trace_issue527 lines 24-35).
+* **pubcap/fact-cap/fact-arity headers — `wf_headerless_preamble`** (issue527,
+  CentralizedMonitor). The sealed `public_names_report` / `fact_capitalization`
+  / `fact_arity` emit header-less bodies (descriptive text + numbered groups,
+  each a single `WfError`), but their topics were unregistered, so the assembly
+  emitted the body with NO underline header. Registered `Public constants with
+  mismatching capitalization`, `Fact capitalization issues`, `Fact arity issues`
+  in the `underline + "\n\n"` arm. Cache scan confirms all three always carry
+  the blank-after-underline and appear in only these 2 corpus files (no
+  regression surface).
+* **pubcap SAPIC adapter tuple order — `elaborate::sapic_public_names_report`**
+  (CentralizedMonitor; the sole SAPIC-pubcap file in the 419-file corpus, so the
+  bug had never been gated). The adapter pushed pairs as `(case_name, n)` =
+  `(rule, const)`, but the sealed `public_names_report_from_pairs` keys on the
+  FIRST tuple element (the constant spelling) and attributes it to the SECOND
+  (the rule) — it expects `(const, rule)`. The reversed order made it group by
+  rule name, so the `'C'`/`'c'` clash (both collected under rule `Init`) never
+  formed and the whole pubcap block was absent. Fixed to `(n, case_name)`.
+  Root-caused by an env-gated probe (added, verified, and fully removed —
+  `run.rs`/`elaborate.rs` carry no debug scaffolding). This is an open-side
+  adapter bug in `tamarin-theory`, not a sealed-checker gap.
+
+## C.3 Full-corpus wf gate — 8 DIFF -> 0 DIFF (0 regressions)
+`RESULTS_TSV=scripts/wf_gate_round6.tsv JOBS=6 bash scripts/wf_gate.sh` over the
+419-file corpus, RS = fresh `--release` build vs the HS 1.13.0 reference cache:
+* BEFORE (round-5, `scripts/wf_gate_round5.tsv`): **411 MATCH / 8 DIFF / 0 SKIP**.
+* AFTER  (`scripts/wf_gate_round6.tsv`):           **419 MATCH / 0 DIFF / 0 SKIP**.
+
+All 8 round-5 DIFF files now MATCH (`ble`, stateverif_left_right,
+Axioms_and_Induction, issue515, CertificateTransparency, OCSPS, issue527,
+CentralizedMonitor). Regression check (`comm` of the round-5 vs round-6 MATCH
+sets): every round-5 MATCH still MATCH — **0 regressions**. No residual.
+
+## C.4 Regression guard — all green
+* `cargo build --release`: 0 errors.
+* `cargo test`: `-p tamarin-parser` lib **67** + wellformedness **2**;
+  `-p tamarin-theory` lib **489** (+1 ignored) + oracle_solver **19** (+9 ignored)
+  + wf_formula_terms **5**; `-p tamarin-prover` lib **60** + cli_e2e **7** +
+  console_split_parity **59**; `-p tamarin-server` lib **107** (+2 ignored) +
+  routes (autoprove 6 / basic 19 / graph 4 / proof_step 3 / static 3 / stubs 15 /
+  upload 3). 0 failures (counts identical to round-5).
+* `gen_license_headers.py --check`: **0 stale** (exit 0). No `wf/` file gained a
+  header — all six headerless (0 `.hs` citations). Header-count delta: **0**.
+
+## Summary (round-6, unit C) — deleted / kept / header delta
+* C RE-SYNCED (round-6 `wf/checks.rs` only — `ble` dedup; other five wf files
+  byte-identical). Open-side fixes: `pretty_theory::wf_headerless_preamble`
+  (blank1 + lemanno + sortbody seam + pubcap/fact-cap/fact-arity header
+  registration) and `elaborate::sapic_public_names_report` (pubcap tuple order).
+  Deleted: none. Header delta: **0**. Gate: **8 DIFF -> 0 DIFF**, 0 regressions;
+  the wf slice is now at full-corpus parity.
+
+================================================================================
+# Open-side integration report — pretty round-1 (R1: term core + signature)
+
+Date: 2026-07-18. Integrator: open side (adapters + vendoring only; no logic
+transplanted from the replaced pretty-printer into the clean crate). Repo:
+`/home/kamilner/tamarin-rs`. Same protocol/precedent as the sections above
+(wf cluster: clean sources vendored as an in-crate module with mechanical path
+fixes + a small workspace-authored value adapter; clean files stay headerless).
+
+Slice: the sealed `pretty-clean` crate's R1 deliverable — `Term`→text core and
+the `builtins:`/`functions:`/`equations:` signature block
+(`/home/kamilner/tamarin-cleanroom/pretty/workspace/pretty-clean`). R2–R4
+(rules/formula/lemma/macros) are `unimplemented!()` stubs in this deliverable,
+so `render_theory` (the whole echo) is not yet functional; only
+`render_signature_block` and `render_term` are live.
+
+--------------------------------------------------------------------------------
+## 0. Vendoring — DONE (headerless)
+
+Copied `pretty-clean/src/*` verbatim into the theory crate as an in-crate
+module, single mechanical fix `crate::` -> `super::` (module re-rooting), and
+`lib.rs` -> `mod.rs`:
+
+* `crates/tamarin-theory/src/pretty_clean/` <- `pretty-clean/src/`
+  (`mod.rs` <- `lib.rs`, plus `ast.rs`, `doc.rs`, `term.rs`, `signature.rs`,
+  `formula.rs`, `lemma.rs`, `macros.rs`, `rule.rs`, `theory.rs`) — 10 files.
+* Registered `pub mod pretty_clean;` in `crates/tamarin-theory/src/lib.rs`
+  (one headerless line; the kept file's own top matter untouched).
+
+Fidelity: `sed 's/super::/crate::/g' <vendored>` reverse-maps BYTE-IDENTICAL to
+each clean source for the eight files that carry `crate::`; `doc.rs` has no
+`crate::` (it carries a pre-existing `use super::*;` test import) so its
+vendored copy is byte-identical untouched; `mod.rs` reverse-maps byte-identical
+to `lib.rs`. No license header added: the only `.hs` citation across the clean
+sources is `HughesPJ.hs` in `doc.rs` (the BSD Doc engine), which is in
+`gen_license_headers.py`'s `EXTERNAL` skip-set; the header generator adds none
+(verified `--check` = 0 stale). `doc.rs` is a SECOND clean copy of the HughesPJ
+engine (independent of `tamarin_theory::pretty_hpj`), BSD-provenance, headerless
+— same precedent as the graph_clean vendored `doclayout.rs`/`pretty.rs`.
+
+--------------------------------------------------------------------------------
+## 1. Adapter — DONE (headerless, workspace-authored)
+
+`crates/tamarin-theory/src/pretty_clean_adapt.rs` (`pub mod pretty_clean_adapt;`
+in lib.rs): pure value translation, no render logic — every output byte comes
+out of the clean crate.
+
+* `term(&tamarin_parser::ast::Term) -> pretty_clean::ast::Term` — a 1:1
+  structural map (the two `Term`/`BinOp`/`VarSpec`/`SortHint`/`SuffixSort`
+  surfaces are identical, per `interface/ast_types.rs`).
+* `signature(&tamarin_term::maude_sig::MaudeSig) -> pretty_clean::ast::Signature`
+  — feeds the clean expander the enabled line-builtins (dh/bp/mset/nat/xor; they
+  add no funcs/eqs in the clean tables) plus the fully-CLOSED `st_fun_syms` /
+  `st_rules` as "user" declarations; the clean crate re-adds the base pairing
+  symbols/equations and dedups, so the merged set equals the ported
+  `render_fun_syms`/`render_equations` input. Equation terms route
+  `LNTerm -> parser Term (existing lnterm_to_parser) -> clean Term`.
+* `signature_section(&MaudeSig) -> String` — the whole section (clean
+  `render_signature_block` + a trailing `\n`), a drop-in for the batch-echo
+  header push + `render_signature` call.
+
+--------------------------------------------------------------------------------
+## 2. Adoption — (a) TERM and (b) SIGNATURE BLOCK both KEPT PORTED, reported
+
+Neither R1 entry point could be wired byte-green through a thin adapter this
+round; both are kept ported and the sealed-side blockers reported. Deletions:
+none (no replaced path has every caller byte-green through the clean route).
+
+### (a) Term rendering — no thin byte-green route
+* The theory ECHO renders terms via `pretty_formula::term_doc` embedded in the
+  `tamarin_theory::pretty_hpj` `Doc` tree (the whole echo is one HughesPJ
+  document). The clean term renderer produces a `pretty_clean::doc::Doc` — a
+  SEPARATE, non-composable engine — so a term leaf cannot be swapped into the
+  live theory `Doc` without routing the entire echo (R2–R4 not yet built).
+* The `crates/tamarin-term/src/pretty.rs` `pretty_lnterm` surface (the flat
+  web/graph term renderer) never wraps; the clean `render_term` renders at
+  width 110 / ribbon 73 and WRAPS wide terms — routing it would inject newlines
+  into graph record-cells (the graph does its own balanced wrapping over flat
+  text), diverging on the web pane. Kept ported.
+
+### (b) Signature block — 2 residual NEW DIFFs after the max adapter fix
+Routed the batch-echo `render_signature` through `signature_section`, gated on
+the FULL corpus. After the adapter-level dest-pairing normalization the gate
+read **401 MATCH / 18 DIFF** — i.e. TWO new DIFFs beyond the 16 known
+auto-sources. "Any new DIFF is a blocker", so the call-site swap was REVERTED
+(ported `render_signature` restored; it is also still used by the web
+`web_signature_block` path, so it is kept regardless). Baseline restored:
+**403 MATCH / 16 DIFF**.
+
+Sealed-side blockers (clean-crate render behavior; NOT adapter-fixable):
+
+1. **Equation ORDERING.** Clean `signature::merged_equations` byte-sorts
+   equations on their rendered text; HS / ported `render_equations` emit them in
+   structural `CtxtStRule` `BTreeSet` order (`S.toList`). The ported code
+   comments explicitly warn against re-sorting by pretty-string. Divergences:
+   * `sapic/fast/GJM-contract/contract.spthy` (first diverging line, HS line
+     11): the two `checkpcs/5` equations swap — byte-sort orders the
+     `...pk(ysk), zpk, fakepcs(...)` variant vs `...pk(xsk), ypk, zpk, pcs(...)`
+     variant by comparing `p`(k) < `x`(pk), placing the `pk(xsk)`/`pcs` variant
+     first; HS structural order has the `fakepcs` variant first.
+   * `esorics23-bluetooth/models/mesh.spthy` (first diverging line, HS line 23):
+     the `get_b1(...)`/`get_b2(...)` equations interleave in structural order;
+     the clean byte-sort groups all `get_b1` before `get_b2`.
+
+2. **Wide-tuple WRAP.** Clean `term::pair_doc` renders a tuple as
+   `beside_op(beside_op(char('<'), fcat(elems)), char('>'))`, attaching `<` to
+   the first element and `>` to the last, so a wrapped wide tuple keeps
+   `<firstElem` on the opening line and `lastElem>` on the closing line. HS
+   breaks `<` onto its OWN line and `>` onto its OWN line. First divergence:
+   `esorics23-bluetooth/models/mesh.spthy` equations block, the `<aes_cmac(...`
+   line (HS lines 33-37 emit a lone `<` / lone `>`; clean emits `<aes_cmac…` /
+   `…nb_three>)>`).
+
+3. **dest-pairing (ADAPTER-SOLVED — not a blocker, noted).** Clean
+   `signature::base_functions` defaults `fst`/`snd` to CONSTRUCTORS unless the
+   declared builtins carry `dest-pairing`; a closed sig holding them as
+   DESTRUCTORS (`fst/1[destructor]`) produced duplicate `fst/1` + `fst/1
+   [destructor]`. The adapter detects destructor `fst`/`snd` in `st_fun_syms`
+   and passes `dest-pairing` (a non-line builtin), so the clean base pairing
+   dedups against the closed symbols. `features/noise/secrecy_4_passiveINpsk1_
+   proof.spthy` recovered to MATCH (401 vs 400 before the fix). This is
+   legitimate input normalization (the wf temporal-sort precedent), not clean
+   logic; kept in the vendored-ready adapter.
+
+A future close needs the clean crate to (1) order equations by the structural
+`CtxtStRule` key rather than rendered text, and (2) reproduce HS's tuple
+`<`/`>` line-breaking; then `signature_section` becomes a byte-green swap for
+the batch echo (401/403 already match today).
+
+--------------------------------------------------------------------------------
+## 3. Gates (all green) + header delta
+
+* `cargo build --release` — 0 errors.
+* `cargo test --workspace` — 31 test suites, 0 failures (incl. the vendored
+  `pretty_clean::doc` BSD-engine unit tests).
+* pretty_gate (`RESULTS_TSV=scripts/pretty_gate_r1.tsv JOBS=6`): **403 MATCH /
+  16 DIFF / 0 SKIP** — the 16 DIFFs are exactly the `features/auto-sources/spore/*`
+  closure gap; zero new divergences vs the ported-tree baseline.
+* wf_gate (`RESULTS_TSV=scripts/wf_gate_after_pretty.tsv JOBS=6`): **419 MATCH /
+  0 DIFF**, `diff`-identical rows to `scripts/wf_gate_round6.tsv` (no regression).
+* web_parity (Tutorial seed): **158 MATCH / 0 DIFF** (web path unchanged — still
+  ported `pretty_lnterm` + `render_signature`).
+* `gen_license_headers.py --check` — **0 stale**; GPL-headered file count
+  unchanged (this pass added only headerless clean sources + a headerless
+  adapter, and touched no ported derivation surface). No clean file gained a
+  header.
+* Deleted: none. Header delta: 0.
