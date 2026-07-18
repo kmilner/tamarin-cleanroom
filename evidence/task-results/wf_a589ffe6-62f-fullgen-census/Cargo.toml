@@ -1,0 +1,10 @@
+[package]
+name = "fullgen_census"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+graph-clean = { path = "/home/kamilner/tamarin-cleanroom/graphdot/workspace/graph-clean" }
+
+[profile.release]
+opt-level = 3

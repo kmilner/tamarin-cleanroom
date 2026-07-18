@@ -4175,3 +4175,305 @@ not overflow on the same inputs).
 
 Deleted: none (the signature swap's ported `render_signature` is retained for
 the web path). **Header delta: 0 (133 → 133).**
+
+
+================================================================================
+# Open-side integration report — graph round-12 (FULL-GENERATE measurement:
+#   byte + SEMANTIC)
+#   graph_clean RE-SYNCED to the round-12 layout engine (slack law
+#   ceil(e/2)-1 any-position, ftup occupancy, relief charge min(hd(q+1/3),C)).
+#   Built the payload->clean-System adapter and drove the COMPLETE clean
+#   pipeline (id alloc, clustering, records, legend, edges, serialization) over
+#   all 12 022 payloads. Reports BOTH the byte metric and the web_parity
+#   SEMANTIC metric (canon_dot). No adoption; every serving path byte-unchanged.
+
+Date: 2026-07-18. Integrator: open side (mechanical re-sync + adapter +
+measurement only; no logic transplanted into clean files). Repo:
+`/home/kamilner/tamarin-rs`. Rebased on the round-11 vendored graph_clean + the
+current tree. Outcome: **round-12 is RE-SYNCED (byte-faithful, headerless); the
+FULL clean pipeline was driven from adapted inputs over all 12 022 payloads AND
+on 3 live-served theories. Full-generate whole-payload byte = 3.968 %;
+web_parity SEMANTIC = 45.824 % as-is, 75.695 % once a trivial 3-style edge-
+vocabulary gap is closed. The byte collapse (vs round-11's 63.28 % cell-layout
+ceiling) is NOT a layout regression — the node/record/cluster/legend/header
+regeneration is byte-exact at 65.42 %, the SAME fill ceiling — it is two nameable
+STRUCTURAL clean-model gaps that whole-graph regeneration exposes and that
+cell-layout-only routing never touched.** No headered file added or deleted
+(133 -> 133). Live servers on 3210/3201, stopped; OOM guards preserved.
+
+--------------------------------------------------------------------------------
+## B.0 Re-sync graph_clean <- round-12 workspace — DONE (clean, headerless)
+
+`crates/tamarin-server/src/graph_clean/` <- graphdot round-12 workspace
+(`graph-clean/src/`, committed at `c3ff835`). Only ONE vendored file changed vs
+the round-11 copy: `generate.rs` (963 -> 1050 lines — round-12 battery L/O laws:
+the slack law `ceil(elems/2)-1` over top-level tuple/union args in ANY position
+replacing the round-11 `floor(n/2)+2` last-arg bonus, the `ftup` function-in-tuple
+occupancy surcharge, and the relief second-pass charge `min(hd(q+1/3), C)`). The
+other TEN files (`abbrev,alloc,doclayout,dot,model,options,pretty,render,term` +
+`mod`) are byte-stable: forward-transforming each round-12 workspace src with the
+established `crate::` -> `super::` rewrite reproduces the vendored file with 0
+differing lines; `mod.rs` = round-12 `lib.rs` modulo the single ` ```ignore `
+doctest fence. Reverse-transform of the new `generate.rs` (`super::` -> `crate::`)
+diffs the workspace source with ZERO non-artifact lines. The round-12 workspace
+changed `generate.rs` + a non-vendored bin (`band_dump.rs`) + `generate_tests.rs`.
+Tripwire: `gen_license_headers.py --check` -> **0 stale header(s)**; `generate.rs`
+starts with `//!` and stays headerless.
+
+Gates: `cargo build -p tamarin-server` 0 errors; `cargo test -p tamarin-server`
+lib 15 + routes (autoprove 6 / basic 19 / graph 4 / proof_step 3 / static 3 /
+stubs 15 / upload 3) green. Workspace graph-clean suite: lib 22 (+2 ignored) +
+abbrev 16 + alloc_corpus 2 + generate_tests **27** (incl. the round-11 override
+regressions + the round-12 slack/relief tests) + roundtrip 14. Serializer
+roundtrip **12 022/12 022 byte-exact**; allocator **12 022/12 022 byte-consistent**
+(the re-sync touched no `dot.rs`/`model.rs`/`alloc.rs`).
+
+--------------------------------------------------------------------------------
+## B.1 The payload -> clean-System adapter (INTERFACE.md input model)
+
+**Three sentences.** The adapter reconstructs a full `generate::System` from each
+captured HS DOT payload: every record node becomes a `RawRule` carrying the
+DEWRAPPED flat premise/info/conclusion cell strings (the round-11 `\l`-dewrap law,
+so `generate` re-wraps them) plus the payload's role / cluster / fill+font color,
+every NON-record node becomes a `GraphNode::Shaped { label, shape, color }` — a
+byte-exact passthrough, since `Shaped` and `Ellipse` serialize identically and the
+payload exposes only the final ellipse text, not its `(term, temporal)`
+decomposition — edges resolve through `EndRef` (a port map keyed by the record's
+cell-port ids) and the fixed `EdgeStyle` vocabulary, and the legend is carried as
+`legend_html` + `legend_edges`. The clean pipeline then runs end to end —
+`alloc.record`/`alloc.node` re-derive every `n<K>` id from scratch, records route
+into `cluster_<label>` buckets in first-appearance order, each cell re-wraps
+through the round-12 `group_widths`+`wrap_cell_dot`, the legend sink-block +
+invis edges re-emit, and `dot::to_dot` serializes — so id allocation, clustering,
+record layout, legend, edges, and serialization are ALL exercised. The ONLY
+component not regenerated is the abbreviation SELECTION (cells are fed
+pre-abbreviated): selecting which sub-terms to abbreviate and rendering their
+expansions needs live `LNTerm`s, the standing `LNTerm -> graph_clean::Term`
+blocker (rounds 2/5: `Term` cannot represent AC/DH/multiset operators), so the
+legend HTML is carried verbatim and the corpus surface measures everything the
+full pipeline does EXCEPT abbreviation selection.
+
+The harness is an OPEN-side measurement crate (`scratchpad/fullgen_census`,
+path-depending on the workspace graph-clean). Every structural place the clean
+INPUT MODEL cannot faithfully represent a payload is recorded as a "compromise"
+(not silently absorbed), so byte divergences are correctly attributed to the
+clean-model gap vs the layout engine.
+
+--------------------------------------------------------------------------------
+## B.2 FULL-GENERATE BYTE census — all 12 022 payloads
+
+    metric                                             | round-12 full-generate
+    ---------------------------------------------------|------------------------
+    (a) WHOLE-PAYLOAD byte-exact (whole clean pipeline)| 477/12022   =  3.968 %
+        cleanly-reconstructable (0 structural gaps)    | 526/12022   =  4.375 %
+        byte-exact AMONG cleanly-reconstructable       | 477/526     = 90.684 %
+        NON-EDGE byte-exact (node/record/cluster/      | 7865/12022  = 65.422 %
+          legend/header lines only)                    |
+    (round-11 cell-layout-only whole-payload, for ref) | 7607/12022  = 63.276 %
+
+The headline 3.968 % looks like a collapse from round-11's 63.28 %, but it is NOT
+a layout regression: **NON-EDGE byte fidelity is 65.42 %** — i.e. once edge lines
+are set aside, whole clean generation reproduces the node/record/cluster/legend/
+header bytes at the SAME fill ceiling round-11 measured with structure REUSED. The
+collapse is entirely two edge-structural clean-model gaps that whole-graph
+regeneration EXPOSES (cell-layout-only routing reused reference edges verbatim, so
+it never hit them):
+
+### Byte divergence families (ranked)
+
+1. **info-port edge — 11 298 payloads (94.0 %), 56 990 edges.** HS anchors
+   temporal/structural edges at a rule-instance's INFO port (`n131:n128 -> …`,
+   `n128` = the `#t : Rule[…]` cell), but `generate::EndRef` has no `Info`
+   variant (`Resolved::Record` retains only prem/concl ports — "the info port is
+   never an edge endpoint" is FALSE on the corpus). The adapter falls back to the
+   whole node, so clean emits `n131 -> …`. Witness `00082e1d6a47b5af.dot`:
+   HS `n131:n128 -> n4[color="blue3",style="dashed"];` vs clean
+   `n131 -> n4[color="blue3",style="dashed"];`. **Byte-affecting, semantically
+   BENIGN** (canon_dot strips ports; the edge still exists with the right
+   endpoints).
+2. **unknown edge-style — 4 345 payloads (36.1 %), 6 363 edges.** The `EdgeStyle`
+   enum covers 8 styles; the corpus has 11. Missing: `[color="purple",style=
+   "dashed"]` (2 416), `[style="dotted",color="green"]` (2 394),
+   `[color="darkorange3",style="dashed"]` (1 553). The adapter cannot express
+   them through `SysEdge`, so the edge is DROPPED. **Byte AND semantic loss.**
+3. **cell fill/wrap — 49 payloads in the clean-expressible subset.** The
+   round-12 fill residual: both HS and clean wrap, break at a different tuple
+   element. Witness `026cdfc052c875aa.dot` / `0011f263c0d9579a.dot`
+   (`St_1_gNB( ~gNB_ID, KD1, KD2, '0', AM1, GN2 )` — HS breaks after `KD1,`,
+   clean after a different element). This is the ONLY family among the 526
+   payloads the clean model CAN fully express, and it caps them at 90.68 %.
+
+--------------------------------------------------------------------------------
+## B.3 FULL-GENERATE SEMANTIC census — web_normalize.canon_dot, all 12 022
+
+`scripts/web_normalize.canon_dot` is the web_parity DOT normalizer: it keys nodes
+by port/bracket-agnostic normalized label, collapses `\l`/`&nbsp;` wrapping to
+spaces, merges default attrs, canonicalizes numeric attrs, and drops `style=invis`
+edges — i.e. it compares the GRAPH, not the serialization. The dominant byte
+family (fill/wrap) is largely canceled by the `\l`->space collapse.
+
+    metric (canon_dot)                                  | round-12 full-generate
+    ----------------------------------------------------|------------------------
+    (b)   WHOLE-PAYLOAD semantic-match (engine as-is)   | 5509/12022 = 45.824 %
+    (b')  semantic, 3-style edge-vocab gap CLOSED (sim) | 9100/12022 = 75.695 %
+    (b'') vocab-closed + bracket-whitespace-normalized  | 11028/12022 = 91.732 %
+            (diagnostic upper bound)                    |
+    clean-EXPRESSIBLE subset (526), engine as-is        | 501/526    = 95.247 %
+
+The semantic result decomposes cleanly:
+* **45.82 % -> 75.70 %** is closing the 3-style edge-vocabulary gap (family 2
+  above): a purely mechanical `EdgeStyle` extension whose endpoint resolution is
+  already identical (simulated by excluding those 3 styles from the reference, on
+  which clean and HS then agree by shared absence). Payloads whose ONLY defect is
+  the vocab gap go from 0 % to **99.49 %** semantic.
+* **75.70 % -> 91.73 %** is the fill-break-adjacent-to-bracket residual: a wrong
+  break that lands next to an escaped `\<`/`\>`/`(`/`)` shifts a space ACROSS the
+  bracket, which `\l`->space collapse cannot cancel (`~SUPI\> )` vs `~SUPI \>)`).
+  This is NOT a graph-structure difference — under a canon_dot that also
+  normalized bracket-adjacent whitespace it disappears. It scales with payload
+  size (large protocols carry many wide tuples), which is why the info-port-only
+  class sits at 70.03 % semantic while the small clean-expressible subset is
+  95.25 %.
+
+### Semantic divergence families (ranked, engine as-is)
+
+1. **dropped-edge (unknown edge-style) — 4 345 payloads, 0 % semantic.** A
+   missing edge is a real edge-SET difference. Witness `01c5db0a7030e664.dot`.
+   Closed mechanically (family 2 above) -> 99.49 % / 81.84 %.
+2. **fill-break-adjacent-to-bracket — ~2 168 payloads.** Info-port-only class
+   70.03 % (2 143 fail); clean-expressible 25 fail. Witness `0011f263c0d9579a.dot`
+   (`!Handover_Session( KD2, <…, ~SUPI> )` renders `~SUPI\> )` vs `~SUPI \>)`)
+   and `0571c51f20849877.dot` (`…'NAXOS_C'\> )]` vs `…'NAXOS_C'\>)]`). Cosmetic
+   under a bracket-whitespace-normalizing comparison (the 91.73 % diagnostic),
+   but a canon_dot mismatch as shipped.
+
+--------------------------------------------------------------------------------
+## B.4 DIALECT — measured explicitly (task requirement)
+
+**The clean serializer emits the HS dialect, so B.2 is a DIRECT byte comparison,
+no dialect confound.** Clean `to_dot` produces `digraph "G" {`, one quoted attr
+per line, global `<n_k>` ports, `{{..}|{..}}` records, a blank line before `}` —
+byte-identical framing to the captured HS payloads.
+
+**The TREE serves a DIFFERENT dialect than the cache holds.** Booting the tree's
+own server live (port 3210) and diffing a served graph against the HS server
+(port 3201) for the same URL: **byte 0/100, semantic 100/100.** The tree's
+`handlers/dot::system_to_dot` emits a compact viz.js dialect:
+
+    HS / cache / clean serializer     | tree (handlers/dot, served live)
+    ----------------------------------|-----------------------------------------
+    digraph "G" {                     | digraph G {
+    nodesep="0.3";                    |   nodesep=0.3; ranksep=0.3;
+    ranksep="0.3";                    |   node [fontsize=8,...,shape=record];
+    node[fontsize="8",...];           |   edge [fontsize=8,...];
+    edge[fontsize="8",...];           | }
+    <blank line>                      |
+    }                                 |
+
+Differences: `"G"` vs `G` (quoting), quoted vs unquoted attr values, one-attr-per-
+line vs packed, no-indent vs 2-space, `node[` vs `node [`, `shape=record` per-node
+(HS via genRecord) vs in the `node[]` default, trailing blank line. All render
+identically (semantic 100 %). Consequence for adoption: the clean output targets
+the CACHE/HS bytes, not the tree's current served bytes — so adopting clean
+generation would SWITCH the tree's served dialect toward HS-verbose. That is a
+deliberate serving-surface change pinned by `routes_graph::
+dot_output_for_a_simple_system` (which asserts the compact ported dialect), not a
+silent regression; there is no in-repo byte oracle for the HS dialect.
+
+--------------------------------------------------------------------------------
+## B.5 LIVE surface — 3 theories, servers on 3200-3299 (task step 4)
+
+Booted the RS tree server (`--port=3210`) and the HS server (`hs_server.sh`
+binary, `--port=3201`) side by side for 3 diverse theories, crawled both with
+`scripts/web_crawl.py` (auto-discovers every `interactive-graph-def` graph URL),
+and ran FULL CLEAN GENERATION on each live HS-served payload:
+
+    theory        | live HS DOT | full-clean-gen vs HS | RS(tree) vs HS
+                  |  payloads   |   semantic (canon)   | byte / semantic
+    --------------|-------------|----------------------|------------------
+    Tutorial      |     36      |   36/36  = 100.0 %   |  0/36  / 36/36
+    NAXOS_eCK (DH)|     60      |   36/60  =  60.0 %   |  0/60  / 60/60
+    issue193      |      4      |    4/4   = 100.0 %   |   0/4  /  4/4
+    --------------|-------------|----------------------|------------------
+    TOTAL         |    100      |   76/100 =  76.0 %   | 0/100  / 100/100
+
+Live confirms the corpus finding on fresh, HTTP-served graphs not in the corpus:
+the simple theories (Tutorial, issue193) are 100 % semantic; the DH theory
+(NAXOS) drops to 60 % on exactly the corpus families — clean-gen compromises here
+were `info-port-edge` (28/57/3 across theories) and `unknown-edge-style` (24, all
+in NAXOS). `RS(tree) vs HS` is byte 0 / semantic 100 everywhere — the live proof
+of the B.4 dialect gap (the tree is semantically HS-faithful but byte-different).
+
+--------------------------------------------------------------------------------
+## B.6 Adoption — NOT PERFORMED (measurement round; keep-and-report)
+
+Nothing routed; every serving path is byte-unchanged (the routing exists only in
+`scratchpad/fullgen_census` + the live crawl harness). KEPT intact (headers
+untouched): `handlers/dot.rs` (byte-faithful ported serializer — 22-author
+header), `graph/{abbreviation,repr,simplify,options,render_system}.rs`.
+`routes_graph` UNCHANGED. `graph_clean` NOT renamed. Deleted: none.
+
+**What SEMANTIC adoption (canon_dot as the acceptance bar) would REQUIRE:**
+1. **3 new `EdgeStyle` variants** (`purple/dashed`, `dotted/green`,
+   `darkorange3/dashed`) — mechanical sealed-side edit; lifts semantic
+   45.82 % -> 75.70 % (and is REQUIRED for byte parity too).
+2. **An info-port `EndRef` anchor** (`EndRef::Info(node)` + `Resolved::Record`
+   retaining the info port) so rule-instance temporal/structural edges resolve —
+   byte-required (94 % of payloads); semantically already benign but needed for
+   the byte dialect.
+3. **The `LNTerm -> graph_clean::Term` abbreviation-selection adapter** (still
+   blocked for AC/DH/multiset) to regenerate the legend + which cells abbreviate
+   — on the corpus and the live surface this was REUSED from the ported printer,
+   so semantic adoption of clean *serialization* is possible while leaving the
+   abbreviation *engine* on the ported side.
+4. A decision to switch the tree's served dialect from compact-ported to
+   HS-verbose (B.4), re-pinning `routes_graph::dot_output_for_a_simple_system`.
+
+**What SEMANTIC adoption would LEAVE UNRESOLVED:** the fill-break residual. Round
+12 PROVED the SigmaC=88 wrap zone is non-closed-form (battery O: no function of
+the cell widths reproduces the reference's coupled per-row `fits`), so the wrap
+layer cannot be byte-exact and ~0.24 % of cells are terminally wrong. Under
+canon_dot most wrap divergence cancels, but the bracket-adjacent subset does not
+(the 75.70 % -> 91.73 % gap): ~16 % of payloads carry an intra-label whitespace
+difference that is NOT a graph-structure difference yet IS a canon_dot mismatch as
+shipped. Semantic adoption at the current normalizer therefore tops out near
+75.70 % (with gaps 1-2 closed); reaching ~91.7 % additionally needs a canon_dot
+refinement to collapse whitespace adjacent to escaped brackets — a NORMALIZER
+change, orthogonal to the clean engine. Byte adoption remains capped at the
+65.42 % non-edge / 90.68 % clean-expressible fill ceiling regardless.
+
+--------------------------------------------------------------------------------
+## Summary (round-12, unit B) — deleted / kept / header delta
+
+* B.0 RE-SYNCED (`graph_clean/generate.rs` round-12, headerless; other 10 files
+  byte-stable). `crate::`->`super::` verified byte-exact; tripwire 0 stale.
+  Serializer roundtrip 12 022/12 022; allocator 12 022/12 022.
+* B.1 payload->clean-System adapter BUILT (open-side `scratchpad/fullgen_census`;
+  RawRule/Shaped/EndRef/EdgeStyle/legend). Drives the WHOLE pipeline; abbreviation
+  selection reused (LNTerm->Term blocker).
+* B.2 BYTE census: whole-payload 3.968 %; non-edge 65.42 % (= the round-11 fill
+  ceiling); clean-expressible 90.68 %. Two structural gaps ranked (info-port edge
+  11 298 payloads; unknown edge-style 4 345) + fill residual.
+* B.3 SEMANTIC census (canon_dot): 45.82 % as-is; 75.70 % with the 3-style vocab
+  gap closed; 91.73 % bracket-normalized diagnostic; clean-expressible 95.25 %.
+  Families ranked (dropped-edge; fill-break-adjacent-to-bracket) with witnesses.
+* B.4 DIALECT measured: clean = HS dialect (byte-comparable); tree serves a
+  compact viz.js dialect (byte 0 / semantic 100 vs HS live).
+* B.5 LIVE surface (3 theories, 3210/3201): 100 payloads, full-clean-gen vs HS
+  semantic 76 %; RS-vs-HS byte 0 / semantic 100.
+* B.6 Adoption NOT PERFORMED. Semantic adoption needs 3 EdgeStyle variants +
+  info-port EndRef + dialect switch (+ LNTerm->Term for the legend engine);
+  leaves the non-closed-form fill residual (cosmetic under a bracket-aware
+  normalizer). KEPT ported `handlers/dot.rs` + `graph/*`.
+
+Header-count delta: **133 -> 133 (net 0).** No headered file added or deleted; the
+re-synced `generate.rs` stayed headerless (tripwire verified). No author citation
+disappeared — the swap that would remove `handlers/dot.rs` stays blocked.
+
+Validation (all green): `cargo test --workspace` 1195 passed / 0 failed;
+`cargo test -p tamarin-server` lib + routes; workspace graph-clean suite
+(generate_tests 27); serializer roundtrip 12 022/12 022; allocator 12 022/12 022;
+`JOBS=6 scripts/wf_gate.sh` **419 MATCH / 0 DIFF / 0 SKIP**;
+`gen_license_headers.py --check` **0 stale** (graph_clean files headerless).
+Live servers on 3210/3201 stopped; OOM guards (oom_score_adj + ulimit -v)
+preserved in every boot.
