@@ -3823,3 +3823,206 @@ byte diff (footer included):
   **0**. Gate: **419 MATCH / 0 DIFF** (byte-stable) + footer **5 MATCH**
   (per-finding counts HS-faithful). KEEP-AND-REPORT: the seven topics' missing
   HS underline header (pre-existing, 0 corpus coverage) for a future sealed round.
+
+================================================================================
+# Dirty-room integration report — PRODUCERS cluster (web fragment producers)
+#   producers-clean (R1-R5) VENDORED into tamarin-server; R1 `main/help` ROUTED
+#   byte-identically + gated; the remaining producer surfaces and all four
+#   target-file deletions KEPT with code-grounded blockers. The author-erasure
+#   premise is FALSIFIED by the citation topology (net zero, doubly).
+
+Date: 2026-07-18. Integrator: open-side (adapters only; no render logic
+transplanted from replaced files into clean code; no clean file acquired a GPL
+header). Repo: `/home/kamilner/tamarin-rs`. Rebased on the CURRENT tree (header
+count inherited at 133). This is the first round in which the web fragment
+PRODUCERS exist clean-side: the round-9 unit-A close said the producers had "no
+clean home yet" and that reimplementing them was "a materially larger clean-room
+mandate"; `producers-clean` (R1 center-section fragments + shared HTML skin, R2
+west proof-script pane, R3 proof-tree HTML, R4 welcome/index + housekeeping, R5
+theory-path grammar) is that deliverable, and this round vendors and integrates
+it.
+
+--------------------------------------------------------------------------------
+## P.0 Vendored producers-clean -> `crates/tamarin-server/src/producers/` — DONE
+
+Copied `weblayer/producers/workspace/producers-clean/src/` verbatim into
+`crates/tamarin-server/src/producers/` as an in-crate module, applying only the
+established mechanical fix `crate::` -> `super::` (the crate's internal
+`crate::{html,model,path,prooftree}` sibling references re-root under the
+`producers` module) and `lib.rs` -> `mod.rs`. The seven `include_str!` HTML
+assets (`help_static.html`, `welcome_*`, `invalid_args_*`) copied byte-for-byte.
+
+* Files: `mod.rs`(<-lib.rs), `model.rs`, `html.rs`, `section.rs`,
+  `proofscript.rs`, `prooftree.rs`, `welcome.rs`, `path.rs` + 7 `.html`.
+* Registered `pub mod producers;` in `lib.rs` (headered file; only the `pub mod`
+  line + the existing clean-module comment extended — the kept header untouched).
+
+Fidelity: the reverse transform `sed 's/super::/crate::/g'` maps every vendored
+`.rs` byte-identically back to its clean source, and each `.html` diffs
+byte-identical. Provenance tripwire CLEARED: the vendored files carry zero `.hs`
+paths, zero `// Ported from upstream` blocks, zero dotted HS module paths
+(`grep` clean), so `gen_license_headers.py` scans them and adds NO header — they
+remain headerless relicensable clean sources (`--check` 0 stale, 133 unchanged).
+std-only, no new dependency for `tamarin-server`. Build + `tamarin-server` suite
+GREEN with the module vendored, before any routing (lib 109 (+2 ignored) + route
+suites).
+
+--------------------------------------------------------------------------------
+## P.1 Routing (step 2) — R1 `main/help` ROUTED byte-identically + gated
+
+`GET /thy/trace/<idx>/main/help` is now produced end-to-end by the clean
+`producers::render_help_pane`. Open-side glue (headerless):
+
+* `handlers/producers_adapt.rs` (new) — `help_pane(&TheoryEntry) ->
+  producers::HelpPane`: a pure value bridge mapping the SAME inputs the ported
+  `help_html` consumed (name, `HH:MM:SS` load time, `show origin` text, the
+  precomputed `errors_html` wf banner) into the clean input shape. No render
+  logic.
+* `handlers/mod.rs::json_str_response(String)` (new) — pre-serialized JSON body
+  with `content-type: application/json`, byte-matching `axum::Json`'s header.
+* `handlers/theory.rs::theory_path_main` — a `TheoryPath::Help` fast-path returns
+  `json_str_response(render_help_pane(&help_pane(&entry)))` instead of
+  `json_resp::html(title_for(Help), help_html(entry))`.
+
+Byte-identity PROVEN: the static help block is `diff`-identical between the
+ported `theory_html::HELP_STATIC` (2154 bytes) and vendored `help_static.html`;
+the clean skin primitives coincide with the dispatch's (`postprocess_lines` ==
+`pretty_hpj::postprocess_html` on the join pattern; `escape_text` == the 5-entity
+`escape_html_entities`; `html_envelope` == serde `json_resp::html` — same
+escaping, same html-first key order); new headerless `tests/
+producers_help_parity.rs` (2 tests) asserts `render_help_pane` byte-equals the
+reconstructed ported envelope incl. a metachar name + non-empty banner; and the
+existing real-server capture test `routes_basic::
+test_main_help_envelope_matches_haskell_keys` passes on the ROUTED response.
+
+BLAST RADIUS: the entire `producers` module + `producers_adapt` are reachable
+from exactly one call site (`theory.rs` Help branch, `grep`-confirmed), so every
+non-help route runs byte-identical code to before this round.
+
+### Why only `main/help` was routed live (the rest KEPT, staged)
+
+The clean R1 API returns the COMPLETE `{html,title}` envelope, but the ported
+dispatch embeds the SAME inner fragment in two contexts — the AJAX `main/*` JSON
+response AND the `overview` full-page shell (center pane) — so those callers need
+the inner HTML WITHOUT the envelope. The clean crate exposes no inner-only entry
+point; synthesizing one in the adapter (strip the envelope / re-drive
+`html::postprocess_lines`) would transplant the frame the clean crate owns.
+`main/help`'s only full-envelope caller is `theory_path_main`, so it routes;
+`help_html` stays for the byte-identical `overview`/`reload` embeddings. The
+message/rules/tactic bodies additionally need solver data-gathering (intruder-
+rule classification, injective-fact instances, signature/macros/restrictions)
+inline; routing them relocates solver code into an adapter (hot-path churn) for
+zero header. Per the campaign precedent (round-6 A2, round-9 A2 — byte-parity
+risk for zero header removal is refused), they are KEPT with the frame
+equivalence recorded as staged.
+
+--------------------------------------------------------------------------------
+## P.2 Deletions (step 3) — NONE; each target file is producer + irreducible core
+
+None of the four target files can be deleted, because each interleaves pure-render
+producer content (clean-replaceable) with logic the clean crate scopes OUT and
+that cannot move without a provenance violation or a header-relocation:
+
+* `handlers/proof_tree.rs` (1311 LOC) — DEFINES `ProofState`, the core proof-
+  state type used by `state.rs`/`theory.rs`/`theory_io.rs`/`theory_html.rs`
+  (`grep`-confirmed). Only `render_proof_tree_html`/`render_node`/`method_label`
+  (R3) map to `producers::render_proof_tree`; the other ~90% is solver machinery
+  (`ProofState`, `parse_method`, `write_applicable_methods`, autoprove, ranking).
+* `handlers/theory_html.rs` (1012 LOC) — `sources_html`/`compute_source_lists`/
+  `source_case_counts` (saturation + refinement), `proof_html` ->
+  `render_sub_proof_snippet` (applicable proof methods), injective-fact +
+  intruder-rule classification, `proto_rule_count` — all solver.
+* `handlers/root.rs` (216 LOC) — live axum plumbing `postRootR` (multipart
+  upload), `kill_thread`, `robots`, `favicon` (`Web/Handler.hs`), none producer.
+* `handlers/path_parse.rs` (241 LOC) — clean R5 (`path.rs`) DELIBERATELY scopes
+  out the `Method` grammar (drives proof-method application), the Yesod
+  `prefixWithUnderscore`/`unprefixUnderscore` quirk, `url_path_escape`/
+  `encode_sub_path`, and uses a Haskell-`reads` numeric grammar vs the port's
+  strict `.parse::<usize>()`. Routing the live parse (every `main/*`) or render
+  (every href) would drop Method routing, change numeric acceptance, and drop the
+  `_`-prefix doubling — behavior changes.
+
+Extraction relocates the header (round-9 finding, unchanged): moving the
+solver/plumbing to a new `.rs` re-blames the still-cited `Web/*.hs`/`Theory/*.hs`;
+moving it into the clean tree is the forbidden provenance violation.
+
+--------------------------------------------------------------------------------
+## P.3 Author-erasure arithmetic (step 5) — NET ZERO, and doubly so
+
+Header count: **133 -> 133** (`--check` 0 stale; apply updates 0). Vendored
+`producers/*` + `producers_adapt.rs` + `json_str_response` are all headerless and
+citation-free.
+
+Beyond "no file deleted -> no header dropped", a `grep` of the actual headers
+shows the deletions would erase ZERO authors EVEN IF achievable — the
+pseudonymous/web-team authors are NOT localized to the producer files:
+
+* `Kanakanajm` (SPEC "carried directly on path_parse.rs") is ALSO on `lib.rs`,
+  `state.rs`, `theory.rs`, `handlers/dot.rs`, `graph/options.rs`,
+  `pretty_theory.rs`. Deleting `path_parse.rs` drops nothing.
+* `YannColomb`, `Esslingen-Security-Privacy` — NOT on any of the four producer
+  files; they are graph/state-cluster authors (`state.rs`, `handlers/dot.rs`,
+  `graph/options.rs`, `pretty_theory.rs`).
+* `cascremers` — also `theory.rs`, `state.rs`, `theory_io.rs`, `handlers/dot.rs`,
+  `graph/options.rs`, `pretty_theory.rs`.
+* the `proof_tree.rs` 18-author list (`racoucho1u`, `charlie-j`, `rkunnema`,
+  `yavivanov`, `PhilipLukertWork`, `ValentinYuri`, `katrielalex`, `felixonmars`,
+  `Nick Moore`, `kevinmorio`, `addap`, …) — ALL pervasive across
+  `tamarin-theory`/`term`/`sapic`/`parser` solver core (e.g. `katrielalex` on 9
+  files, `felixonmars` on 6, `Nick Moore` on 4).
+* `arcz`, `felixlinker`, `meiersi`, `jdreier`, `beschmi`, `rsasse`, `BTom-GH` —
+  all on `lib.rs`/`state.rs`/`pretty_theory.rs` + solver core.
+
+The task premise ("the deletions that erase the remaining web-cluster authors")
+is FALSIFIED by the topology, more strongly than round-9: these authors are
+spread across the ENTIRE solver/term/graph/pretty core, so NO web-file deletion
+(producer OR dispatch shell) can retire them; only relicensing the core clusters
+can, which is outside the web mandate.
+
+--------------------------------------------------------------------------------
+## P.4 Dispatch shells (step 4) — re-confirmed BLOCKED (topology, not concurrency)
+
+With the producers vendored, the round-9 unit-A blockers stand: `proof-step`
+(Rust-only progressive UI), `graph` (server `dot -Tsvg`), `unload` have no clean-
+dispatch home and keep their ported axum entries -> `routes.rs`/`theory.rs`
+survive; and P.3 shows deleting the covered shells removes zero citations. The
+three no-clean-home routes stay ported and already-factored (separate
+`handlers::theory` fns). Not performed; `web_clean` not renamed. Deleted: none.
+
+--------------------------------------------------------------------------------
+## P.5 Validation / gate numbers (step 6)
+
+* `cargo build --release` — 0 errors.
+* `cargo test --workspace` — ALL GREEN, 0 failures: tamarin-server lib 109 (+2
+  ignored) + routes (autoprove 6 / basic 19 / graph 4 / proof_step 3 / static 3 /
+  stubs 15 / upload 3) + producers_help_parity 2; tamarin-theory lib 495 (+1
+  ignored) + oracle_solver 19 (+9 ignored) + wf_formula_terms 5; tamarin-parser
+  67 + 2; tamarin-prover lib 60 + cli_e2e 7 + console_split_parity 55.
+* `scripts/wf_gate.sh` (JOBS=6, full 419-corpus) — **MATCH=419 DIFF=0 SKIP=0**;
+  byte-IDENTICAL to `scripts/wf_gate_round7.tsv` (no regression).
+* `scripts/pretty_gate.sh` (RESULTS_TSV=pretty_gate_check.tsv, JOBS=6) —
+  **MATCH=403 DIFF=16**, byte-IDENTICAL to the `pretty_gate_r1.tsv` 403/16
+  baseline (the 16 are the pre-existing known DIFFs; exit 1 reflects DIFF>0, not
+  a regression). The batch `--prove` path runs zero web-handler/producers code.
+* `scripts/web_parity.sh` (16-file allowlist, RS release vs HS cache; 16/16
+  crawled) — **7765 MATCH / 319 DIFF**; `main/help` = MATCH on all 16 theories,
+  `overview/help` MATCH; ALL 319 DIFF rows are pre-existing `main/proof` +
+  `main/cases` SOLVER panes (proof-method + source-saturation residue), zero
+  outside solver panes, blast-radius-proven unrelated to this round.
+* `gen_license_headers.py --check` — 0 stale, **133 headers (delta 0)**;
+  `producers/*` + adapters headerless (no clean file acquired a header).
+
+--------------------------------------------------------------------------------
+## P.6 What a future close now requires (scope note for the cluster owner)
+
+1. A clean-side inner-fragment split (`render_content_pane_inner` /
+   `render_help_pane_inner`) so ONE producer feeds both the AJAX envelope AND the
+   `overview` shell embedding without an adapter-side envelope strip — unblocks
+   routing message/rules/tactic/help through R1 in both contexts.
+2. R5 must model `Method` + `prefixWithUnderscore` + strict-int parse (or the
+   port keep `path_parse.rs`) before the live parse/render can route.
+3. R4 must model the empty index ("No theories loaded!") and confirm the HS-quirk
+   bytes (unclosed `<em>Modified`) before `render_index` can route.
+4. Even with (1)-(3), retiring the pseudonymous/web authors requires deleting
+   their citations on the SOLVER/TERM/GRAPH core (P.3) — outside the web mandate;
+   the web deletions alone erase no author.

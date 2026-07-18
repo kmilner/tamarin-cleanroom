@@ -1,0 +1,38 @@
+{
+  "summary": "Open-side joint web-producers integration: vendor producers-clean R1-R5, adapter-route the producer surface, gate (web_parity + suites + live probes), attempt deletion of the four producer files and the dispatch shells",
+  "agentCount": 1,
+  "logs": [],
+  "result": {
+    "gate": "All work complete, gated, no commits, no stray servers. Here is my summary.\n\n---\n\n# PRODUCERS cluster integration — open-side, 2026-07-18\n\n## What routed\n- **R1 `main/help`** now serves entirely through the clean `producers::render_help_pane` (via `handlers/producers_adapt.rs::help_pane` + `handlers/mod.rs::json_str_response`, dispatched in `theory.rs::theory_path_main`). **Byte-identical**, proven three ways: (a) the ported `HELP_STATIC` (2154 B) `diff`-identical to the vendored `help_static.html`; (b) the clean skin primitives coincide with the ported dispatch's (`postprocess_lines`==`postprocess_html` on the join pattern, `escape_text`==the 5-entity escape, `html_envelope`==serde `json_resp::html` same escaping + html-first key order); (c) new guard `tests/producers_help_parity.rs` asserts the full envelope byte-equals the reconstructed ported one (incl. metachars + banner), and the real-server capture test `routes_basic::test_main_help_envelope_matches_haskell_keys` passes on the routed response. Blast radius is provably one call site.\n\n## What was vendored (step 1)\n- `producers-clean/src/` → `crates/tamarin-server/src/producers/` (8 `.rs` + 7 `.html`), mechanical `crate::`→`super::` + `lib.rs`→`mod.rs` only. Reverse transform byte-identical to source; HTML byte-identical. Headerless, citation-free (no `.hs`/`Ported from`/module paths) → `gen_license_headers.py` adds no header (provenance tripwire clear). `pub mod producers;` added to `lib.rs`. Builds + full `tamarin-server` suite green before routing.\n\n## What was deleted (step 3)\n- **NONE.** All four target files interleave clean-replaceable producer content with irreducible core:\n  - `proof_tree.rs` — **defines `ProofState`**, the server-wide proof-state type (used by state.rs/theory.rs/theory_io.rs/theory_html.rs); ~90 % is solver machinery.\n  - `theory_html.rs` — `sources_html`/`compute_source_lists`/`source_case_counts` (saturation+refinement), `proof_html`→`render_sub_proof_snippet` (applicable methods), injective-fact + intruder-rule classification — all solver.\n  - `root.rs` — live axum plumbing `postRootR` upload / `kill_thread` / `robots` / `favicon` (`Web/Handler.hs`), not producer content.\n  - `path_parse.rs` — clean R5 deliberately omits the `Method` grammar (drives proof-method application), the Yesod `prefixWithUnderscore` quirk, `url_path_escape`/`encode_sub_path`, and uses a Haskell-`reads` numeric grammar vs the port's strict `.parse::<usize>()`.\n  - Extraction relocates the header (round-9 finding); moving to clean code is a forbidden provenance violation.\n\n## What was kept-and-reported (blockers)\n- **R1 message/rules/tactic**: frame proven byte-identical, but bodies need inline solver data-gathering; and the clean R1 API returns the full `{html,title}` envelope while `overview`'s shell needs the inner fragment — no clean inner-only entry point exists, so routing them (or help's `overview`/`reload` embeddings) would transplant the frame. Kept.\n- **R2 west pane / R3 proof-tree**: map to `render_proof_script`/`render_proof_tree` but need the live `ProofNode` tree + per-node method/formula text extracted; `proof_tree.rs` stays as `ProofState` home. Zero-header, hot-path risk → kept.\n- **R4 welcome**: producers omits the empty \"No theories loaded!\" index and diverges on HS-quirk bytes; root.rs plumbing stays regardless. Kept.\n- **R5 grammar**: unmodeled `Method` + underscore quirk + numeric grammar (above). Kept.\n- **Dispatch shells (step 4)**: re-confirmed blocked — `proof-step`/`graph-svg`/`unload` have no clean home; per topology below, deleting shells drops zero citations.\n\n## Gate numbers (step 6)\n- `cargo build --release` — 0 errors. `cargo test --workspace` — **all green** (tamarin-server lib 109+2ign + routes 6/19/4/3/3/15/3 + producers_help_parity 2; theory 495+oracle 19+wf 5; parser 67+2; prover 60+cli 7+split 55).\n- `wf_gate.sh` (full 419-corpus) — **MATCH=419 DIFF=0**, byte-identical to `wf_gate_round7.tsv`.\n- `pretty_gate.sh` — **MATCH=403 DIFF=16**, byte-identical to the `pretty_gate_r1` 403/16 baseline (the 16 are the known pre-existing DIFFs).\n- `web_parity.sh` (16-file allowlist, RS release vs HS cache, 16/16) — **7765 MATCH / 319 DIFF**; **`main/help` MATCH on all 16**; every DIFF is a pre-existing `main/proof`/`main/cases` SOLVER pane (zero outside solver panes, blast-radius-proven unrelated).\n- `gen_license_headers.py --check` — **0 stale, 133 headers (delta 0)**; producers + adapters headerless, no clean file acquired a header"
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Integrate"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "integrate:producers",
+      "phaseIndex": 1,
+      "phaseTitle": "Integrate",
+      "agentId": "a8a9923c432730218",
+      "model": "claude-opus-4-8[1m]",
+      "state": "done",
+      "startedAt": 1784401276614,
+      "queuedAt": 1784401276613,
+      "attempt": 1,
+      "lastToolName": "Bash",
+      "lastToolSummary": "cd /home/kamilner/tamarin-rs; echo \"=== NEW files I added (…",
+      "promptPreview": "You are the OPEN-SIDE integrator for the tamarin-rs sealed relicensing campaign, working in /home/kamilner/tamarin-rs. This is the campaign's most consequential integration: the sealed web PRODUCER surface (R1-R5) is complete, and your job is to wire it in, gate it, and attempt the deletions that erase the remaining web-cluster authors.\nREAD FIRST: /home/kamilner/tamarin-cleanroom/PROTOCOL.md (\"Fu…",
+      "lastProgressAt": 1784403461548,
+      "tokens": 280758,
+      "toolCalls": 92,
+      "durationMs": 2184933,
+      "resultPreview": "All work complete, gated, no commits, no stray servers. Here is my summary.\n\n---\n\n# PRODUCERS cluster integration — open-side, 2026-07-18\n\n## What routed\n- **R1 `main/help`** now serves entirely through the clean `producers::render_help_pane` (via `handlers/producers_adapt.rs::help_pane` + `handlers/mod.rs::json_str_response`, dispatched in `theory.rs::theory_path_main`). **Byte-identical**, prove…"
+    }
+  ],
+  "totalTokens": 280758,
+  "totalToolCalls": 92
+}
