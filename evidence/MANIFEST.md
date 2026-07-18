@@ -19,7 +19,8 @@ symlinked access was whitelisted before), and gained a stricter override that
 flags direct `.hs`/`crates/` path use even alongside allowed substrings. The
 full historical set re-validates at 0 violations under the stricter rule.
 2026-07-18 (later): wf round-5 implementer (wf_b6a947c0-a82) audited — 153
-tool calls, 0 forbidden accesses, 0 web accesses; 37 sealed transcripts total.
+tool calls, 0 forbidden accesses, 0 web accesses; graphdot round-9 implementer
+(wf_6b16799d-1c9) audited — 156 tool calls, 0/0; 38 sealed transcripts total.
 
 | Path | Agent | Role |
 |------|-------|------|
@@ -55,6 +56,7 @@ tool calls, 0 forbidden accesses, 0 web accesses; 37 sealed transcripts total.
 | workflows/wf_3b637271-f7f/agent-*.jsonl (implementers among 14+) | wave 4: B8 (HughesPJ-faithful engine from sanctioned BSD source), A7 (concurrency contract + snapshot/commit dispatch), D6 (diff verdict taxonomy) |
 | workflows/wf_a43edc65-4dc/agent-ab519587162798c8b.jsonl | round 7 (unit D, overlapped) | non-diff verdict family (AnalysisCannotBeFinished) |
 | workflows/wf_b6a947c0-a82/agent-aac83361400743475.jsonl | round 5 (unit C) | wf corpus-divergence closure: equality-guards + quantifier fusion, sort-clash keying, tail (full gate 71→8 DIFF) |
+| workflows/wf_6b16799d-1c9/agent-a6d5afeb848c42e89.jsonl | round 9 (unit B) | fill-width allocation: two-layer trigger/fill model probe-exact 343/343, engine laziness fix, residue characterized (abbreviation-width = caller-input gap) |
 
 Corresponding workspaces (../wellformedness, ../graphdot, ../weblayer) hold
 each agent's QUERIES.log, BEHAVIOR.md, REPORT*.md and code — cross-reference
@@ -75,6 +77,7 @@ the transcripts against those logs.
 | workflows/wf_60530b15-4b6/agent-{ae835430920982249,aa7a475a42e7f0a16,a13ca9ba2bbcd5182}.jsonl | round-5/6 delta audits: E / A / B (all pass, 0 findings) |
 | workflows/wf_a3b4feac-a25/agent-{a9df6213a26883a9d,a49c583ac48623111,a1250a539cbe74da9,aab79db7bb6b49c3c}.jsonl | round-5/6/7 delta audits: E / D / A / B (all pass, 0 findings) |
 | workflows/wf_b6a947c0-a82/agent-a351c5451327cd399.jsonl | wf round-5 delta audit (pass, 0 findings; closes the round-4 equality-guard advisory — clean side previously under-claimed vs the source, reached parity by probing) |
+| workflows/wf_6b16799d-1c9/agent-aef2578a65838b522.jsonl | graphdot round-9 delta audit (pass, 0 Dot.hs-resemblance findings; laziness = sanctioned BSD semantics; every fitted constant probe-traced, disjoint from source's 100/1.3/130/30; one non-blocking behavioral redo: reconcile sqa correction magnitude/placement) |
 
 Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUDIT.md,
 ../console/AUDIT.md, ../macros/AUDIT.md, ../injective/AUDIT.md, ../derivcheck/AUDIT.md.

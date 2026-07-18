@@ -3223,3 +3223,9 @@ ac2294a0cd925504a12d734c576c47679d62b477e101625ff3b016b0454424c0  ./wellformedne
 945ceab57a0c705a7bcecca72af73ede7597d047215b332ad7ed21c7570701a7  ./wellformedness/workspace/wf-clean/tests/fixtures/z11_io_action.txt
 205689aa66998bc829846c6045c11eb27359252710721dbbdbe1301fce822790  ./wellformedness/workspace/wf-clean/tests/fixtures/z12_fr_rhs.txt
 9fb9b2ea0f1ea028c5375261d19ab97c6d3e26faa806c048ba354e992ac0dd2f  ./wellformedness/workspace/wf-clean/tests/round5_tests.rs
+61088999511622dd3ac2e864222fdca4281786867d9e529f900ea6df8dd1b92d  ./evidence/workflows/wf_6b16799d-1c9/agent-a6d5afeb848c42e89.jsonl
+83949d3b7596f06e91d6668a8f3470e0237cd653432db8081448f101f733e95b  ./evidence/workflows/wf_6b16799d-1c9/agent-a6d5afeb848c42e89.meta.json
+644b5c8d3ba1d1d3e877720c5f098da45f69001652287b0e878ed153f2c71865  ./evidence/workflows/wf_6b16799d-1c9/agent-aef2578a65838b522.jsonl
+6f3875c7f24932f3b1af709e735c778f22edfc6ed650136b8c6d652fdc6d5a81  ./evidence/workflows/wf_6b16799d-1c9/agent-aef2578a65838b522.meta.json
+bae7bf43573c62b8f5b4f6930b2c709561613aa3d0da84e24d544fd89c4233f3  ./evidence/workflows/wf_6b16799d-1c9/journal.jsonl
+c0680067265b2c3910928d860c0d523d898a801bb69a475bab320708bf378cfd  ./evidence/launch-scripts/graph-allocation-b9-wf_6b16799d-1c9.js
