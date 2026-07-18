@@ -1,0 +1,38 @@
+{
+  "summary": "Open-side graph B integration attempt: re-sync B10 sources, occupancy adapter via CellWidths (un-abbreviated widths), corpus + live gates, swap or keep-and-report",
+  "agentCount": 1,
+  "logs": [],
+  "result": {
+    "gate": "Everything is confirmed and consistent. License `--check` = **0 stale**, exit 0. The three re-synced files (doclayout, generate, pretty) are untracked campaign files I updated to round-10; dot/mod/model were already at round-10 (I did not touch them). No commits, no HS servers started, no sealed-workspace sources modified. Task complete.\n\nHere is the plain-text summary (my return value):\n\n---\n\nGRAPH ROUND-10 OCCUPANCY-ADAPTER INTEGRATION — open side, 2026-07-18\n\nRE-SYNC (step 1). Round-10 graph-clean sources vendored into `/home/kamilner/tamarin-rs/crates/tamarin-server/src/graph_clean/`. Only three files changed vs the round-8 copy — `doclayout.rs`, `generate.rs`, `pretty.rs` (the round-9/10 fill engine + the NEW `CellWidths`/`group_widths_with`/`RawRule::{premise,conclusion}_widths` surface); the other eight are byte-stable. Mechanical `crate::`→`super::` only; reverse-transform diffs the workspace with zero content lines (only the pre-existing test `use super::*;`). Serializer roundtrip 12022/12022 byte-exact; workspace suite green incl. both override regression tests; `tamarin-server` lib 111 + all route suites green; `gen_license_headers.py --check` = 0 stale (the three files are headerless and carry no resolving `.hs` citation — the only token, `HughesPJ.hs`, is the BSD library, not a submodule file).\n\nADAPTER DESIGN (two sentences). For every prem/concl record cell the adapter recovers the reference's internal (UN-abbreviated) rendering by fixpoint-expanding the graph's own legend `NAME = EXPANSION` map back into the display text, then computes the round-10 shape law on that internal text (occupancy = flat_int + Σ tuple/union(elems+1); fill_width = flat_int + Σ union(elems+1) + #function-nodes; bonus = max ⌊elems/2⌋+2) and supplies it as a per-cell `generate::CellWidths` override through `group_widths_with` / `RawRule::*_widths`. It is an open-side measurement harness (`/tmp/claude-1000/-home-kamilner-tamarin-rs/57f8e1bc-d495-4b36-93c0-033347d5034a/scratchpad/occ_census/`) that computes INPUTS only — no render logic left the clean module, and a cell with no abbreviation gets the display-text default byte-for-byte.\n\nGATE NUMBERS (step 3, full 12022-payload GRAPHCLEAN_CORPUS gate; before → after occupancies):\n- ALL prem/concl cells: 594789/615850 = 96.580%  →  occ-only 589526/615850 = 95.726%  (occ+bonus+fill 95.650%)\n- WRAP-SENSITIVE (wrapping cells): 122957/142540 = 86.261%  →  occ-only 119579/142540 = 83.892%  (occ+bonus+fill 83.566%)\n- multi-cell wrapping: 85.291% → 82.714%;  abbreviated-group wrapping: 83.746% → 73.577%\n- Per-cell lever delta (occ-only vs baseline): FIXED 372 (117 abbr) / BROKEN 5635 (2350 abbr), net −5263.\n- Root cause isolated: the shipped display-flat TRIGGER is already 99.627% accurate overall and 99.459% on abbreviated groups; the symmetric internal-width trigger is WORSE (98.445% / 88.405%). Charging siblings their full internal width over-tightens budgets (false-positives 1478→3363, the reference's coupled-`fits` relief), the cell's own trigger has no self-width override (lone-abbreviated false-negatives unclosable), and `wrap_cell_dot` lays out post-abbreviation text so abbreviated cells' break positions are unreproducible at any budget.\n\nSupplying the internal widths REGRESSES the gate; the adapter is therefore NOT usable as-is.\n\nADOPTION OUTCOME (step 4): NOT PERFORMED — keep-and-report. No byte-green surface, full or subset: the occupancy adapter regresses; even the no-override baseline reproduces only 89.828% of records all-cells-exact and 86.261% of wrapping cells (the ported `handlers/dot::render_balanced` is byte-faithful to HS on exactly these, so any route through clean silently regresses ~10% of records); and, unchanged from rounds 2–8, the clean serializer emits the HS dialect (`digraph \"G\" {`, global `<n_k>` ports) while the only byte-sensitive graph test pins the ported dialect and the repo has no HS graph byte oracle. Kept intact (headers untouched): `handlers/dot.rs`, `graph/{a"
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Integrate"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "integrate:graph-b10",
+      "phaseIndex": 1,
+      "phaseTitle": "Integrate",
+      "agentId": "aea2058e09b9ed188",
+      "model": "claude-opus-4-8[1m]",
+      "state": "done",
+      "startedAt": 1784389097982,
+      "queuedAt": 1784389097981,
+      "attempt": 1,
+      "lastToolName": "Bash",
+      "lastToolSummary": "cd /home/kamilner/tamarin-rs echo \"=== license --check fina…",
+      "promptPreview": "You are the OPEN-SIDE integrator for the tamarin-rs sealed relicensing campaign, working in /home/kamilner/tamarin-rs. You are open-side: you may read everything, including ported code and the cleanroom. Read first: the graphdot/unit-B sections of /home/kamilner/tamarin-cleanroom/INTEGRATION_REPORT.md (rounds 7-9 blockers and history), /home/kamilner/tamarin-cleanroom/graphdot/workspace/INTERFACE.…",
+      "lastProgressAt": 1784390739264,
+      "tokens": 227187,
+      "toolCalls": 48,
+      "durationMs": 1641282,
+      "resultPreview": "Everything is confirmed and consistent. License `--check` = **0 stale**, exit 0. The three re-synced files (doclayout, generate, pretty) are untracked campaign files I updated to round-10; dot/mod/model were already at round-10 (I did not touch them). No commits, no HS servers started, no sealed-workspace sources modified. Task complete.\n\nHere is the plain-text summary (my return value):\n\n---\n\nGRA…"
+    }
+  ],
+  "totalTokens": 227187,
+  "totalToolCalls": 48
+}

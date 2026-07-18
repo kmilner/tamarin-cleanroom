@@ -3226,3 +3226,232 @@ the batch echo (401/403 already match today).
   adapter, and touched no ported derivation surface). No clean file gained a
   header.
 * Deleted: none. Header delta: 0.
+
+================================================================================
+# Open-side integration report — graph round-10 (CellWidths occupancy adapter)
+#   graph_clean RE-SYNCED to the round-10 layout engine + width-override
+#   interface; the occupancy adapter is BUILT and MEASURED on the full
+#   GRAPHCLEAN_CORPUS gate; it REGRESSES byte-match, so it is NOT adopted and the
+#   serialization swap stays KEPT. The corpus numbers re-pin the residual and
+#   name a concrete round-11 interface fix.
+
+Date: 2026-07-18. Integrator: open side (adapters + measurement only; no logic
+transplanted into clean files; sealed sources re-synced mechanically). Repo:
+`/home/kamilner/tamarin-rs`. Rebased on the round-8 vendored graph_clean (the
+last unit-B pass) + the current tree. Outcome: **round-10 is RE-SYNCED
+(byte-faithful); the occupancy adapter — legend-expansion → un-abbreviated
+internal widths → `CellWidths` overrides — is built and run over all 12 022 DOT
+payloads. Supplying the internal widths REGRESSES corpus byte-match (wrapping
+cells 86.26 % → 83.89 %; per-cell it FIXES 372 and BREAKS 5 635, net −5 263), so
+it is NOT adopted; the live DOT serialization stays on the byte-faithful ported
+`handlers/dot::render_balanced`.** No headered file added or deleted (133 → 133).
+
+--------------------------------------------------------------------------------
+## B.0 Re-sync graph_clean <- round-10 workspace — DONE (clean, headerless)
+
+`crates/tamarin-server/src/graph_clean/` <- graphdot round-10 workspace
+(`graph-clean/src/`). Only THREE files changed vs the round-8 vendored copy:
+`doclayout.rs`, `generate.rs`, `pretty.rs` (the round-9/10 fill-engine + width
+laws: union/function-application cell documents, the size-corrected flat-sum
+`C = flat + Σ(elems+1)` trigger with `⌊n/2⌋+2` bonus, the internal-numerator
+proportional fill, and the NEW override surface). The other eight
+(`abbrev,alloc,dot,model,options,render,term` + `mod`) are byte-stable after the
+established `crate::` → `super::` transform (`alloc/options/render` differ from a
+naive reverse only in the pre-existing test-module `use super::*;`; `mod.rs` =
+`lib.rs` modulo the one ` ```ignore ` doctest fence). Mechanical `crate::` →
+`super::` only; forward transform verified byte-exact (reverse-transform of each
+re-synced file diffs the workspace source with zero content lines — only the
+`use super::*;` test artifact). Tripwire: `gen_license_headers.py` adds NO header
+— all three re-synced files start with `//!` doc comments and carry no derivation
+citation the scanner keys on (`pretty.rs`'s `Annotated/HughesPJ.hs` names the
+BSD `pretty` library, `generate.rs`'s "the GPL solver" is prose — both were
+already headerless in round 8).
+
+The NEW round-10 override surface now lives in the vendored module:
+`generate::CellWidths { occupancy, bonus, fill_width }`, `group_widths_with`,
+`RawRule::premise_widths / conclusion_widths`. Gates: workspace graph-clean
+suite 22 + 16 + 2 + 18 + 14 + 1 = green, **incl. the two override regression
+tests** `supplied_cell_widths_override_estimates` and
+`raw_rule_supplied_widths_reach_cells`; serializer roundtrip
+**12 022/12 022 byte-exact** (the re-sync touched no `dot.rs`/`model.rs`);
+`tamarin-server` lib **111** (was 107; the round-10 override + census tests) +
+all route suites green.
+
+--------------------------------------------------------------------------------
+## B.1 The occupancy adapter — design + where the internal widths come from
+
+**Two sentences.** For every prem/concl record cell the adapter recovers the
+reference's *internal* (UN-abbreviated) rendering by fixpoint-expanding the
+graph's own legend `NAME = EXPANSION` map back into the display text, then
+computes the round-10 shape law on that internal text — `occupancy =
+flat_int + Σ_{top-level tuple/union args}(elems+1)`, `fill_width =
+flat_int + Σ_{union args}(elems+1) + #function-nodes`, `bonus = max ⌊elems/2⌋+2`
+— and supplies it as a per-cell `generate::CellWidths` override through
+`group_widths_with` / `RawRule::{premise,conclusion}_widths`. In the live server
+these same internal widths are available pre-abbreviation from the ported
+pipeline (`graph/abbreviation::compute_abbreviations` keys the `LNTerm` →
+alias map, so the un-substituted `pretty_lnterm` width is in scope at the
+`handlers/dot` cell-render boundary); the corpus gate recovers them from the
+legend because the corpus is post-abbreviation DOT (the legend IS the
+open-side view of the internal terms).
+
+The adapter is an OPEN-side measurement harness
+(`scratchpad/occ_census`, a standalone crate path-depending on graph-clean); it
+computes INPUTS only — no render logic was moved out of the clean module, and
+the override for a cell with no abbreviation equals the display-text default
+byte-for-byte (so the no-abbreviation cells stay identical to the baseline gate).
+
+--------------------------------------------------------------------------------
+## B.2 GRAPHCLEAN_CORPUS gate — adapter ON vs the no-occupancy baseline
+
+Full corpus (12 022 DOT payloads; 615 850 prem/concl cells, 142 540 wrapping,
+160 409 records). The harness baseline reproduces the sealed `census.rs`
+numbers EXACTLY (same parse/dewrap/`wrap_cell_dot` path), so the only variable
+is the override:
+
+    metric (prem/concl)      | BASELINE (no occ) | occ-only        | occ+bonus+fill
+    -------------------------|-------------------|-----------------|----------------
+    ALL cells byte-exact     | 594789/615850     | 589526/615850   | 589062/615850
+                             |   = 96.580 %      |   = 95.726 %    |   = 95.650 %
+    wrapping cells (sens.)   | 122957/142540     | 119579/142540   | 119115/142540
+                             |   = 86.261 %      |   = 83.892 %    |   = 83.566 %
+    multi-cell wrapping      | 111834/131121     | 108456/131121   | 107992/131121
+                             |   = 85.291 %      |   = 82.714 %    |   = 82.361 %
+    abbreviated-group wrap   |  27818/33217      |  24440/33217    |  23976/33217
+                             |   = 83.746 %      |   = 73.577 %    |   = 72.180 %
+    (info cells 156464/160409 = 97.541 %; records-all-cells-exact 144092/160409
+     = 89.828 % — both unchanged by the override, which touches only prem/concl
+     groups.)
+
+**Supplying the internal widths REGRESSES every wrap metric** — most on the very
+family it targets (abbreviated groups, −10.2 pp). Per-cell delta (occ-only vs
+baseline): **FIXED 372 (117 abbreviated) / BROKEN 5 635 (2 350 abbreviated),
+net −5 263.** The lever has a real but tiny correct signal (372 genuine fixes,
+the intended non-abbreviated-cell-beside-abbreviated-sibling case) swamped 15× by
+breakage. Adding `bonus`+`fill_width` on top of occupancy is marginally worse
+still.
+
+**Why (root cause, isolated).** A trigger-only census (does `\l`-presence match,
+fill ignored) shows the DISPLAY-flat trigger is already near-perfect and the
+internal-width trigger is WORSE:
+
+    trigger accuracy         | display-flat (shipped) | symmetric internal-width
+    -------------------------|------------------------|--------------------------
+    ALL prem/concl cells     | 613553/615850 99.627 % | 606273/615850 98.445 %
+    ABBREVIATED groups       |  65502/65858  99.459 % |  58222/65858  88.405 %
+
+So (i) the shipped size-corrected flat-sum budget already predicts the wrap
+DECISION to 99.46 % even on abbreviated groups; charging siblings their full
+internal width over-tightens budgets and inflates false-positives
+(1 478 → 3 363) — the reference applies a coupled-`fits` RELIEF (a wide sibling
+that itself wraps occupies only its ALLOCATED width, not its flat/internal
+width), which the raw internal occupancy ignores. (ii) `group_widths_with` uses
+the DISPLAY flat for a cell's OWN trigger and routes `occupancy` only into
+SIBLINGS' budgets — an asymmetry with no `flat`/self-width override, so it cannot
+fix a lone abbreviated cell that wraps on its own internal width (n == 1 returns
+87 regardless of override). (iii) even with a correct budget,
+`wrap_cell_dot` lays out the POST-abbreviation display text, so an abbreviated
+wrapping cell's break POSITIONS (HS lays out the un-abbreviated term, THEN
+substitutes names into the broken lines) are unreproducible at ANY budget.
+
+--------------------------------------------------------------------------------
+## B.3 Residual families (ranked) — the round-11 targets
+
+Counts from the BASELINE gate (the true target set; the override does not shrink
+any of them). First-diverging-byte examples from real corpus records:
+
+1. **NON-abbreviated multi-cell fill divergence — DOMINANT: ~14 954 cells**
+   (fillErr 18 764 total − 3 810 abbreviated). Both HS and clean wrap, but break
+   at a DIFFERENT element; NO abbreviation involved. This is the fill-ALLOCATION
+   gap (clean `group_widths` proportional 87/20 vs HS `renderBalanced 100 (max 30
+   . round . (*1.3))` per-field ribbon). The `CellWidths` interface does not
+   address it. Example `St_1_gNB( ~gNB_ID, KD1, KD2, '0', AM1, GN2 )` — first
+   diverge byte 23: HS breaks after `KD1,` (ragged, on the internal KD/AM/GN
+   widths), clean after `KD2,`.
+2. **Abbreviated multi-cell fill divergence — ~3 810 cells.** Break positions
+   are decided by laying the UN-abbreviated term out then substituting; a
+   budget-only override + `wrap_cell_dot(display, b)` cannot reposition them.
+   Needs a layout-internal-then-substitute path (a clean-side capability the
+   interface does not expose).
+3. **False-positive coupled-`fits` relief — 1 478 baseline (→ 3 363 with occ).**
+   A wide sibling that wraps frees room for a small cell; internal occupancy
+   makes this strictly WORSE, proving the sibling must be charged its ALLOCATED
+   (post-wrap) width, not its flat/internal width. Example
+   `!Store( ~device, ~handle, ~key, ('1'++n) )` — HS keeps it flat; the
+   occupancy override wrongly wraps it (first diverge byte 31) because an
+   abbreviated sibling's inflated occupancy shrank this cell's budget.
+4. **Lone-abbreviated-cell false-negative — the interface-shaped gap.** A single
+   cell that wraps on its OWN internal width (e.g.
+   `St_I( ~id, ~ltkA, pk(~ltkB), 'm1', <'commit', pk(~ltkB), pk(~ltkA), ni>, SI4 )`
+   — display flat 78, but `SI4` expands past the budget so HS wraps; first
+   diverge byte 78). `CellWidths` has no self-width override and `occupancy`
+   never enters a cell's own trigger, so it is unclosable through this interface
+   as specified.
+
+**Round-11 interface fix (concrete).** For the override to help rather than
+regress, the sealed side needs, in priority order: (a) charge a WRAPPING
+sibling its allocated width, not its flat/internal width, in the trigger
+denominator (models the coupled-`fits` relief that family 3 needs and that the
+raw internal occupancy breaks); (b) a per-cell `flat`/self-width override so a
+lone cell's OWN trigger can run on the internal width (family 4); (c) a
+layout-on-internal-then-substitute cell path so an abbreviated wrapping cell's
+break positions match (family 2). Family 1 (the dominant one) is not an
+abbreviation problem at all — it is the fill allocator, a clean-side
+`group_widths`/`renderBalanced` question independent of `CellWidths`.
+
+--------------------------------------------------------------------------------
+## B.4 Adoption — NOT PERFORMED (keep-and-report)
+
+No byte-green adoption surface exists, full or subset:
+* The occupancy adapter REGRESSES the corpus (B.2), so routing the live DOT
+  serialization through clean `generate` WITH occupancies is strictly worse than
+  the ported path, not better.
+* Even the no-occupancy baseline reproduces only **89.83 % of records
+  all-cells-exact** and **86.26 % of wrapping cells**, so routing through clean
+  `generate` (no overrides) still silently regresses ~10 % of records — the
+  forbidden class (round-8 B established the ported `render_balanced` is
+  byte-faithful to HS on exactly these cells).
+* Independently unchanged from rounds 2–8: the clean serializer emits the
+  HS-exact dialect (`digraph "G" {`, global `<n_k>` ports, `{{..}|{..}}`) while
+  the repo's only byte-sensitive graph test
+  (`routes_graph::dot_output_for_a_simple_system`) pins the ported dialect, and
+  the captured server graph fixtures are ISE pages (no in-repo byte oracle for a
+  dialect switch).
+
+KEPT intact (headers untouched): `handlers/dot.rs` (byte-faithful
+`render_balanced` + DotBuilder — 22-author header), `graph/{abbreviation,repr,
+simplify,options,render_system}.rs`. `routes_graph` UNCHANGED. `graph_clean` NOT
+renamed. Deleted: none. The round-10 override surface is vendored and READY for
+the round-11 close once families 1–4 above are addressed clean-side.
+
+--------------------------------------------------------------------------------
+## Summary (round-10, unit B) — deleted / kept / header delta
+
+* B.0 RE-SYNCED (`graph_clean/{doclayout,generate,pretty}.rs` round-10,
+  headerless; NEW `CellWidths`/`group_widths_with`/`RawRule::*_widths` surface).
+  `crate::` → `super::` verified byte-exact; tripwire clean. Serializer roundtrip
+  12 022/12 022.
+* B.1 Occupancy adapter BUILT (open-side `scratchpad/occ_census`; legend-
+  expansion → internal widths → `CellWidths`). Inputs only; no clean logic moved.
+* B.2 Corpus gate RUN: baseline all-cells 96.580 % / wrapping 86.261 %; adapter
+  ON all-cells 95.726 % / wrapping 83.892 % — a REGRESSION (per-cell FIXED 372 /
+  BROKEN 5 635, net −5 263). Root cause isolated: display trigger already
+  99.46 % on abbreviated groups; internal occupancy over-charges (missing
+  coupled-`fits` relief) + no self-width override + display-text fill layout.
+* B.3 Residual re-pinned + ranked (families 1–4) with first-diverging-byte
+  examples; concrete round-11 interface fix named.
+* B.4 Adoption NOT PERFORMED — adapter regresses + baseline < byte-green +
+  dialect/no-oracle. KEPT ported `handlers/dot.rs` + `graph/*`. Deleted: none.
+
+Header-count delta: **133 → 133 (net 0).** No headered file added or deleted; the
+three re-synced clean files stayed headerless (tripwire verified). No author
+citation disappeared — the swap that would remove `handlers/dot.rs` stays
+blocked.
+
+Validation (all green): workspace graph-clean suite (incl. both `CellWidths`
+override regression tests); serializer roundtrip 12 022/12 022 byte-exact;
+`cargo build -p tamarin-server` 0 errors; `cargo test -p tamarin-server` lib 111
+(+2 ignored) + routes (autoprove 6 / basic 19 / graph 4 / proof_step 3 / static 3
+/ stubs 15 / upload 3); GRAPHCLEAN_CORPUS occupancy census run over all 12 022
+payloads (baseline / occ-only / occ+bonus+fill + trigger-accuracy +
+fixed/broken delta).
