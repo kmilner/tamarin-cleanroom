@@ -1,0 +1,37 @@
+WARNING: the following wellformedness checks failed!
+
+Facts occur in the left-hand-side but not in any right-hand-side 
+=================================================================
+
+   1. in rule "Oracle_f4":  factName `LowEntropyf4' arity: 4 multiplicity: Linear
+  
+   2. in rule "Oracle_passkey":  factName `LowEntropy' arity: 1 multiplicity: Linear
+  
+   3. in rule "RespSelectKeysizeSS":  factName `RespChooseKeysize' arity: 2 multiplicity: Linear
+  
+   4. in rule "RespSelectKeysizeSW":  factName `RespChooseKeysize' arity: 2 multiplicity: Linear
+  
+   5. in rule "RespSelectKeysizeWS":  factName `RespChooseKeysize' arity: 2 multiplicity: Linear
+  
+   6. in rule "RespSelectKeysizeWW":  factName `RespChooseKeysize' arity: 2 multiplicity: Linear
+  
+   7. in rule "InitSelectKeysizeSS":  factName `InitChooseKeysize' arity: 2 multiplicity: Linear
+  
+   8. in rule "InitSelectKeysizeSW":  factName `InitChooseKeysize' arity: 2 multiplicity: Linear
+  
+   9. in rule "InitSelectKeysizeWS":  factName `InitChooseKeysize' arity: 2 multiplicity: Linear
+  
+  10. in rule "InitSelectKeysizeWW":  factName `InitChooseKeysize' arity: 2 multiplicity: Linear
+
+Subterm Convergence Warning
+===========================
+
+  User-defined equations must be convergent and have the finite variant property. The following equations are not subterm convergent. If you are sure that the set of equations is nevertheless convergent and has the finite variant property, you can ignore this warning and continue 
+
+    f4(u, v, x, z) = aes_cmac(x, <u, v, z>)
+    f6(w, n1, n2, r, iocap, a1, a2)
+  = aes_cmac(w, <n1, n2, r, iocap, a1, a2>)
+    g2(u, v, x, y) = aes_cmac(x, <u, v, y>)
+   
+ For more information, please refer to the manual : https://tamarin-prover.com/manual/master/book/010_modeling-issues.html 
+*/

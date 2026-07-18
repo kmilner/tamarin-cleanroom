@@ -1,0 +1,1 @@
+(∀ #i #j s role_ k_. ((BeforeComplete( s ) @ #i) ∧ (Complete( s, role_, k_ ) @ #j)) ⇒ (#i < #j)) ∧ (∀ #i #j s. ((BeforeExpire( s ) @ #i) ∧ (Expire( s ) @ #j)) ⇒ (#i < #j))

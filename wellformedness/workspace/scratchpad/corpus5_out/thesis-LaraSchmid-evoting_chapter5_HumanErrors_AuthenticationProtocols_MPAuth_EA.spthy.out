@@ -1,0 +1,630 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+Deprecation Warning: using 'axiom' is retired notation, replace all uses of 'axiom' by 'restriction'.
+[Theory MPAuth_EA] Theory loaded
+[Theory MPAuth_EA] Theory translated
+[Theory MPAuth_EA] Derivation checks started
+[Theory MPAuth_EA] Derivation checks ended
+[Theory MPAuth_EA] Theory closed
+theory MPAuth_EA
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: adec/2, aenc/2, f/1, fst/1, h/1, pair/2, pk/1, pw/1, r/1,
+           sdec/2, senc/2, sign/2, snd/1, true/0, verify/3
+equations:
+    adec(aenc(x.1, pk(x.2)), x.2) = x.1,
+    fst(<x.1, x.2>) = x.1,
+    sdec(senc(x.1, x.2), x.2) = x.1,
+    snd(<x.1, x.2>) = x.2,
+    verify(sign(x.1, x.2), x.1, pk(x.2)) = true
+
+rule (modulo E) H_fresh:
+   [ Fr( ~x ) ]
+  --[ Fresh( $H, $x.1, ~x ), !HK( $H, $x.1, ~x ), H( $H ) ]->
+   [ !HK( $H, $x.1, ~x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_send:
+   [ !HK( $H, $x.1, x.2 ) ]
+  --[ Send( $H, $x.1, x.2 ), H( $H ) ]->
+   [ Out( <$x.1, x.2> ) ]
+
+  /*
+  rule (modulo AC) H_send:
+     [ !HK( $H, $x, x.1 ) ]
+    --[ Send( $H, $x, x.1 ), H( $H ) ]->
+     [ Out( <$x, x.1> ) ]
+  */
+
+rule (modulo E) H_receive:
+   [ In( <$x.1, x.2> ) ]
+  --[ Receive( $H, $x.1, x.2 ), !HK( $H, $x.1, x.2 ), H( $H ) ]->
+   [ !HK( $H, $x.1, x.2 ) ]
+
+  /*
+  rule (modulo AC) H_receive:
+     [ In( <$x, x.1> ) ]
+    --[ Receive( $H, $x, x.1 ), !HK( $H, $x, x.1 ), H( $H ) ]->
+     [ !HK( $H, $x, x.1 ) ]
+  */
+
+rule (modulo E) H_send_S:
+   [ !HK( $H, $x.1, x.2 ) ]
+  --[ Send( $H, $x.1, x.2 ), H( $H ), To( $A ) ]->
+   [ Out_S( $H, $A, $x.1, x.2 ) ]
+
+  // loop breaker: [0]
+  /*
+  rule (modulo AC) H_send_S:
+     [ !HK( $H, $x, x.1 ) ]
+    --[ Send( $H, $x, x.1 ), H( $H ), To( $A ) ]->
+     [ Out_S( $H, $A, $x, x.1 ) ]
+    // loop breaker: [0]
+  */
+
+rule (modulo E) H_receive_S:
+   [ In_S( $A, $H, $x.1, x.2 ) ]
+  --[ Receive( $H, $x.1, x.2 ), !HK( $H, $x.1, x.2 ), H( $H ), From( $A )
+  ]->
+   [ !HK( $H, $x.1, x.2 ) ]
+
+  /*
+  rule (modulo AC) H_receive_S:
+     [ In_S( $A, $H, $x, x.1 ) ]
+    --[ Receive( $H, $x, x.1 ), !HK( $H, $x, x.1 ), H( $H ), From( $A ) ]->
+     [ !HK( $H, $x, x.1 ) ]
+  */
+
+rule (modulo E) H_send_S2:
+   [ !HK( $H, $x.1, x.2 ), !HK( $H, $y.1, y.2 ) ]
+  --[ Send( $H, $x.1, x.2 ), Send( $H, $y.1, y.2 ), H( $H ), To( $A ) ]->
+   [ Out_S( $H, $A, <$x.1, $y.1>, <x.2, y.2> ) ]
+
+  // loop breakers: [0,1]
+  /*
+  rule (modulo AC) H_send_S2:
+     [ !HK( $H, $x, x.1 ), !HK( $H, $y, y.1 ) ]
+    --[ Send( $H, $x, x.1 ), Send( $H, $y, y.1 ), H( $H ), To( $A ) ]->
+     [ Out_S( $H, $A, <$x, $y>, <x.1, y.1> ) ]
+    // loop breakers: [0,1]
+  */
+
+rule (modulo E) H_send_S3:
+   [ !HK( $H, $x.1, x.2 ), !HK( $H, $y.1, y.2 ), !HK( $H, $z.1, z.2 ) ]
+  --[
+  Send( $H, $x.1, x.2 ), Send( $H, $y.1, y.2 ), Send( $H, $z.1, z.2 ),
+  H( $H ), To( $A )
+  ]->
+   [ Out_S( $H, $A, <$x.1, $y.1, $z.1>, <x.2, y.2, z.2> ) ]
+
+  // loop breakers: [0,1,2]
+  /*
+  rule (modulo AC) H_send_S3:
+     [ !HK( $H, $x, x.1 ), !HK( $H, $y, y.1 ), !HK( $H, $z, z.1 ) ]
+    --[
+    Send( $H, $x, x.1 ), Send( $H, $y, y.1 ), Send( $H, $z, z.1 ), H( $H ),
+    To( $A )
+    ]->
+     [ Out_S( $H, $A, <$x, $y, $z>, <x.1, y.1, z.1> ) ]
+    // loop breakers: [0,1,2]
+  */
+
+rule (modulo E) H_send_S4:
+   [
+   !HK( $H, $x.1, x.2 ), !HK( $H, $y.1, y.2 ), !HK( $H, $z.1, z.2 ),
+   !HK( $H, $w.1, w.2 )
+   ]
+  --[
+  Send( $H, $x.1, x.2 ), Send( $H, $y.1, y.2 ), Send( $H, $z.1, z.2 ),
+  Send( $H, $w.1, w.2 ), H( $H ), To( $A )
+  ]->
+   [ Out_S( $H, $A, <$x.1, $y.1, $z.1, $w.1>, <x.2, y.2, z.2, w.2> ) ]
+
+  // loop breakers: [0,1,2,3]
+  /*
+  rule (modulo AC) H_send_S4:
+     [
+     !HK( $H, $x, x.1 ), !HK( $H, $y, y.1 ), !HK( $H, $z, z.1 ),
+     !HK( $H, $w, w.1 )
+     ]
+    --[
+    Send( $H, $x, x.1 ), Send( $H, $y, y.1 ), Send( $H, $z, z.1 ),
+    Send( $H, $w, w.1 ), H( $H ), To( $A )
+    ]->
+     [ Out_S( $H, $A, <$x, $y, $z, $w>, <x.1, y.1, z.1, w.1> ) ]
+    // loop breakers: [0,1,2,3]
+  */
+
+rule (modulo E) H_receive_S2:
+   [ In_S( $A, $H, <$x.1, $y.1>, <x.2, y.2> ) ]
+  --[
+  Receive( $H, $x.1, x.2 ), Receive( $H, $y.1, y.2 ), !HK( $H, $x.1, x.2 ),
+  !HK( $H, $y.1, y.2 ), H( $H ), From( $A )
+  ]->
+   [ !HK( $H, $x.1, x.2 ), !HK( $H, $y.1, y.2 ) ]
+
+  /*
+  rule (modulo AC) H_receive_S2:
+     [ In_S( $A, $H, <$x, $y>, <x.1, y.1> ) ]
+    --[
+    Receive( $H, $x, x.1 ), Receive( $H, $y, y.1 ), !HK( $H, $x, x.1 ),
+    !HK( $H, $y, y.1 ), H( $H ), From( $A )
+    ]->
+     [ !HK( $H, $x, x.1 ), !HK( $H, $y, y.1 ) ]
+  */
+
+rule (modulo E) H_receive_S4:
+   [ In_S( $A, $H, <$x.1, $y.1, $z.1, $v.1>, <x.2, y.2, z.2, v.2> ) ]
+  --[
+  Receive( $H, $x.1, x.2 ), Receive( $H, $y.1, y.2 ),
+  Receive( $H, $z.1, z.2 ), Receive( $H, $v.1, v.2 ), !HK( $H, $x.1, x.2 ),
+  !HK( $H, $y.1, y.2 ), !HK( $H, $z.1, z.2 ), !HK( $H, $v.1, v.2 ),
+  H( $H ), From( $A )
+  ]->
+   [
+   !HK( $H, $x.1, x.2 ), !HK( $H, $y.1, y.2 ), !HK( $H, $z.1, z.2 ),
+   !HK( $H, $v.1, v.2 )
+   ]
+
+  /*
+  rule (modulo AC) H_receive_S4:
+     [ In_S( $A, $H, <$x, $y, $z, $v>, <x.1, y.1, z.1, v.1> ) ]
+    --[
+    Receive( $H, $x, x.1 ), Receive( $H, $y, y.1 ), Receive( $H, $z, z.1 ),
+    Receive( $H, $v, v.1 ), !HK( $H, $x, x.1 ), !HK( $H, $y, y.1 ),
+    !HK( $H, $z, z.1 ), !HK( $H, $v, v.1 ), H( $H ), From( $A )
+    ]->
+     [
+     !HK( $H, $x, x.1 ), !HK( $H, $y, y.1 ), !HK( $H, $z, z.1 ),
+     !HK( $H, $v, v.1 )
+     ]
+  */
+
+rule (modulo E) ChanOut_S:
+   [ Out_S( $A, $B, xn, x ) ]
+  --[ ChanOut_S( $A, $B, xn, x ) ]->
+   [ !Sec( $A, $B, xn, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanIn_S:
+   [ !Sec( $A, $B, xn, x ) ]
+  --[ ChanIn_S( $A, $B, xn, x ) ]->
+   [ In_S( $A, $B, xn, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanOut_C:
+   [ Out_C( $A, $B, xn, x ) ]
+  --[ ChanOut_C( $A, $B, xn, x ) ]->
+   [ !Conf( $B, xn, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanIn_C:
+   [ !Conf( $B, xn, x ), In( $A ) ]
+  --[ ChanIn_C( $A, $B, xn, x ) ]->
+   [ In_C( $A, $B, xn, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanIn_CAdv:
+   [ In( <$A, $B, xn, x> ) ] --> [ In_C( $A, $B, xn, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanOut_A:
+   [ Out_A( $A, $B, xn, x ) ]
+  --[ ChanOut_A( $A, $B, xn, x ) ]->
+   [ !Auth( $A, xn, x ), Out( <$A, $B, xn, x> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanIn_A:
+   [ !Auth( $A, xn, x ), In( $B ) ]
+  --[ ChanIn_A( $A, $B, xn, x ) ]->
+   [ In_A( $A, $B, xn, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) passworddistribution:
+   [ Fr( ~pw ) ]
+  --[ PasswordHS( $X, $Y, ~pw ) ]->
+   [ !Password( $X, $Y, ~pw ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) publickeyinfrastructure:
+   [ Fr( ~skX ) ]
+  --[ LontermKey( $X, ~skX ) ]->
+   [ !Ltk( $X, ~skX ), !Pk( $X, pk(~skX) ), Out( pk(~skX) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Setup:
+   [ !Password( $H, $S, ~pw ), !Ltk( $S, ~skS ) ]
+  --[
+  Setup( $H ), Roles( $H, $D, $P, $S ), Device( $H, $D ), User( $idH, $H ),
+  InitK( $H, 'D', $D ), InitK( $H, 'P', $P ), InitK( $H, 'S', $S ),
+  InitK( $H, 'pw', pw(~pw) ), InitK( $H, 'idH', $idH ),
+  InitK( $H, 'idS', $idS ), Rule4( $H, 'noTellEx', 'pw', $D )
+  ]->
+   [
+   AgSt_D0( $D, 'D_0', <$H, $idH, pk(~skS)> ),
+   AgSt_S0( $S, 'S_0', <~skS, $H, $idS, pw(~pw), $idH> ), !ID_S( $S, $idS ),
+   !HK( $H, 'D', $D ), !HK( $H, 'P', $P ), !HK( $H, 'S', $S ),
+   !HK( $H, 'pw', pw(~pw) ), !HK( $H, 'idH', $idH ), !HK( $H, 'idS', $idS ),
+   AgSt_H0( $H, 'H_0', <$D, $P, $S, pw(~pw), $idH, $idS> )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) D_4:
+   [
+   AgSt_D0( $D, 'D_0', <$H, $idH, pk(~skS)> ), In( <$idS, r(~rS)> ),
+   !ID_S( $S, $idS ), !Ltk( $S, ~skS )
+   ]
+  --[ D( $D ) ]->
+   [
+   AgSt_D5( $D, 'D_5', <$H, $idH, pk(~skS), $idS, $S, r(~rS)> ),
+   Out_S( $D, $H, 'idS', $idS )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) D_6:
+   [
+   AgSt_D5( $D, 'D_5', <$H, $idH, pk(~skS), $idS, $S, r(~rS)> ),
+   In_S( $H, $D, <'pw', 'idH'>, <pw(~pw), $idH> ), Fr( ~rD )
+   ]
+  --[
+  DfromHx( $D, $H, 'pw', pw(~pw) ), DfromHx( $D, $H, 'idH', $idH ),
+  RunningD( $D, $S, <$H, f(<r(~rS), r(~rD)>)> ), D( $D )
+  ]->
+   [
+   AgSt_D7( $D, 'D_7',
+            <$H, $idH, pk(~skS), $idS, $S, r(~rS), r(~rD), pw(~pw)>
+   ),
+   Out( <aenc(r(~rD), pk(~skS)), 
+         senc(<f(r(~rS)), $idH, pw(~pw)>, f(<r(~rS), r(~rD)>))>
+   )
+   ]
+
+  // loop breaker: [1]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) D_10:
+   [
+   AgSt_D7( $D, 'D_7',
+            <$H, $idH, pk(~skS), $idS, $S, r(~rS), r(~rD), pw(~pw)>
+   ),
+   In( senc(f(r(~rD)), f(<r(~rS), r(~rD)>)) )
+   ]
+  --[ Dfin( ), CommitD( $D, $S, <$H, f(<r(~rS), r(~rD)>)> ), D( $D ) ]->
+   [ Out_S( $D, $H, 'success', 'success' ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) S_2:
+   [
+   AgSt_S0( $S, 'S_0', <~skS, $H, $idS, pw(~pw), $idH> ), In( 'start' ),
+   Fr( ~rS )
+   ]
+  --[ Sstart( $S ) ]->
+   [
+   AgSt_S3( $S, 'S_3', <~skS, $H, $idS, pw(~pw), $idH, r(~rS)> ),
+   Out( <$idS, r(~rS)> )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) S_8:
+   [
+   AgSt_S3( $S, 'S_3', <~skS, $H, $idS, pw(~pw), $idH, r(~rS)> ),
+   In( <aenc(r(~rD), pk(~skS)), 
+        senc(<f(r(~rS)), $idH, pw(~pw)>, f(<r(~rS), r(~rD)>))>
+   )
+   ]
+  --[
+  Commit( $S, $H, pw(~pw) ), CommitS( $S, $D, <$H, f(<r(~rS), r(~rD)>)> ),
+  RunningS( $S, $D, <$H, f(<r(~rS), r(~rD)>)> ), CommitCA( $S, $H )
+  ]->
+   [ Out( senc(f(r(~rD)), f(<r(~rS), r(~rD)>)) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_1:
+   [ AgSt_H0( $H, 'H_0', <$D, $P, $S, pw(~pw), $idH, $idS> ) ]
+  --[ H_role( $H, '1' ), Send( $H, 'S', $S ) ]->
+   [
+   AgSt_H1( $H, 'H_1', <$D, $P, $S, pw(~pw), $idH, $idS> ), Out( <'S', $S> )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_5:
+   [
+   AgSt_H1( $H, 'H_1', <$D, $P, $S, pw(~pw), $idH, $idS> ),
+   In_S( $D, $H, 'idS', $idS )
+   ]
+  --[
+  H_role( $H, '5' ), Receive( $H, 'idS', $idS ), Send( $H, 'pw', pw(~pw) ),
+  Send( $H, 'idH', $idH ), To( $D )
+  ]->
+   [
+   AgSt_H6( $H, 'H_6', <$D, $P, $S, pw(~pw), $idH, $idS> ),
+   Out_S( $H, $D, <'pw', 'idH'>, <pw(~pw), $idH> )
+   ]
+
+  // loop breaker: [1]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_11:
+   [
+   AgSt_H6( $H, 'H_6', <$D, $P, $S, pw(~pw), $idH, $idS> ),
+   In_S( $D, $H, 'success', 'success' )
+   ]
+  --[ Hfin( ), Receive( $H, 'success', 'success' ) ]->
+   [ ]
+
+  /* has exactly the trivial AC variant */
+
+restriction setup_for_IK:
+  "∀ H #i. (H( H ) @ #i) ⇒ (∃ #j. (Setup( H ) @ #j) ∧ (#j < #i))"
+
+  /*
+  expanded formula:
+  "∀ H #i. (H( H ) @ #i) ⇒ (∃ #j. (Setup( H ) @ #j) ∧ (#j < #i))"
+  */
+
+restriction not_Chan_S_human_to_human:
+  "∀ A B mn m #i #j #k.
+    (((ChanOut_S( A, B, mn, m ) @ #i) ∧ (H( A ) @ #j)) ∧ (H( B ) @ #k)) ⇒
+    (⊥)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ A B mn m #i #j #k.
+    (((ChanOut_S( A, B, mn, m ) @ #i) ∧ (H( A ) @ #j)) ∧ (H( B ) @ #k)) ⇒
+    (⊥)"
+  */
+
+restriction notSameRole:
+  "∀ H1 H2 D1 D2 P1 P2 S1 S2 #i #j.
+    ((Roles( H1, D1, P1, S1 ) @ #i) ∧ (Roles( H2, D2, P2, S2 ) @ #j)) ⇒
+    ((((((((((((¬(H1 = D1)) ∧ (¬(H1 = D2))) ∧ (¬(H1 = P1))) ∧ (¬(H1 = P2))) ∧
+            (¬(H1 = S1))) ∧
+           (¬(H1 = S2))) ∧
+          (¬(D1 = P1))) ∧
+         (¬(D1 = P2))) ∧
+        (¬(D1 = S1))) ∧
+       (¬(D1 = S2))) ∧
+      (¬(P1 = S1))) ∧
+     (¬(P1 = S2)))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ H1 H2 D1 D2 P1 P2 S1 S2 #i #j.
+    ((Roles( H1, D1, P1, S1 ) @ #i) ∧ (Roles( H2, D2, P2, S2 ) @ #j)) ⇒
+    ((((((((((((¬(H1 = D1)) ∧ (¬(H1 = D2))) ∧ (¬(H1 = P1))) ∧ (¬(H1 = P2))) ∧
+            (¬(H1 = S1))) ∧
+           (¬(H1 = S2))) ∧
+          (¬(D1 = P1))) ∧
+         (¬(D1 = P2))) ∧
+        (¬(D1 = S1))) ∧
+       (¬(D1 = S2))) ∧
+      (¬(P1 = S1))) ∧
+     (¬(P1 = S2)))"
+  */
+
+restriction Device:
+  "∀ H1 H2 D #i #j.
+    ((Device( H1, D ) @ #i) ∧ (Device( H2, D ) @ #j)) ⇒ (H1 = H2)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ H1 H2 D #i #j.
+    ((Device( H1, D ) @ #i) ∧ (Device( H2, D ) @ #j)) ⇒ (H1 = H2)"
+  */
+
+restriction DeviceImmediateProcessing:
+  "∀ D H xn x #i #k.
+    (((Send( H, xn, x ) @ #i) ∧ (To( D ) @ #i)) ∧
+     (DfromHx( D, H, xn, x ) @ #k)) ⇒
+    (¬(∃ #j. ((D( D ) @ #j) ∧ (#i < #j)) ∧ (#j < #k)))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ D H xn x #i #k.
+    (((Send( H, xn, x ) @ #i) ∧ (To( D ) @ #i)) ∧
+     (DfromHx( D, H, xn, x ) @ #k)) ⇒
+    (¬(∃ #j. ((D( D ) @ #j) ∧ (#i < #j)) ∧ (#j < #k)))"
+  */
+
+restriction uniqueUserID:
+  "∀ idH H1 H2 #i #j.
+    ((User( idH, H1 ) @ #i) ∧ (User( idH, H2 ) @ #j)) ⇒ (H1 = H2)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ idH H1 H2 #i #j.
+    ((User( idH, H1 ) @ #i) ∧ (User( idH, H2 ) @ #j)) ⇒ (H1 = H2)"
+  */
+
+lemma functional_withAgreement:
+  exists-trace
+  "(∀ H1 H2 #i #j. ((Setup( H1 ) @ #i) ∧ (Setup( H2 ) @ #j)) ⇒ (#i = #j)) ∧
+   (∃ D #j S k m #k.1.
+     ((CommitD( D, S, <'Human', k> ) @ #j) ∧
+      (Commit( S, 'Human', m ) @ #k.1)) ∧
+     (RunningS( S, D, <'Human', k> ) @ #k.1))"
+/*
+guarded formula characterizing all satisfying traces:
+"(∀ H1 H2 #i #j. (Setup( H1 ) @ #i) ∧ (Setup( H2 ) @ #j) ⇒ #i = #j) ∧
+ (∃ D #j S k m #k.1.
+   (CommitD( D, S, <'Human', k> ) @ #j) ∧
+   (Commit( S, 'Human', m ) @ #k.1) ∧
+   (RunningS( S, D, <'Human', k> ) @ #k.1))"
+*/
+by sorry
+
+lemma functional:
+  exists-trace
+  "(∀ H1 H2 #i #j. ((Setup( H1 ) @ #i) ∧ (Setup( H2 ) @ #j)) ⇒ (#i = #j)) ∧
+   (∃ #k #n S m. (Dfin( ) @ #k) ∧ (Commit( S, 'Human', m ) @ #n))"
+/*
+guarded formula characterizing all satisfying traces:
+"(∀ H1 H2 #i #j. (Setup( H1 ) @ #i) ∧ (Setup( H2 ) @ #j) ⇒ #i = #j) ∧
+ (∃ #k #n S m. (Dfin( ) @ #k) ∧ (Commit( S, 'Human', m ) @ #n))"
+*/
+by sorry
+
+lemma entity_authentication:
+  all-traces
+  "∀ S m #k.
+    (Commit( S, 'Human', m ) @ #k) ⇒
+    ((∃ #i #j.
+       (((Sstart( S ) @ #i) ∧ (H( 'Human' ) @ #j)) ∧ (#i < #j)) ∧ (#j < #k)) ∨
+     (∃ x #i #j.
+       (((Sstart( S ) @ #i) ∧ (H_role( 'Human', x ) @ #j)) ∧ (#i < #j)) ∧
+       (#j < #k)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ S m #k.
+  (Commit( S, 'Human', m ) @ #k)
+ ∧
+  (∀ #i #j.
+    (Sstart( S ) @ #i) ∧ (H( 'Human' ) @ #j)
+   ⇒
+    ((¬(#i < #j)) ∨ (¬(#j < #k)))) ∧
+  (∀ x #i #j.
+    (Sstart( S ) @ #i) ∧ (H_role( 'Human', x ) @ #j)
+   ⇒
+    ((¬(#i < #j)) ∨ (¬(#j < #k))))"
+*/
+by sorry
+
+lemma device_authentication:
+  all-traces
+  "∀ S #k.
+    (CommitCA( S, 'Human' ) @ #k) ⇒
+    (∃ D #i #j #s.
+      ((((Sstart( S ) @ #i) ∧ (D( D ) @ #j)) ∧ (#i < #j)) ∧ (#j < #k)) ∧
+      (Device( 'Human', D ) @ #s))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ S #k.
+  (CommitCA( S, 'Human' ) @ #k)
+ ∧
+  ∀ D #i #j #s.
+   (Sstart( S ) @ #i) ∧ (D( D ) @ #j) ∧ (Device( 'Human', D ) @ #s)
+  ⇒
+   ((¬(#i < #j)) ∨ (¬(#j < #k)))"
+*/
+by sorry
+
+lemma weak_data_agreement_S_claims_wrt_D:
+  all-traces
+  "∀ S D k #i.
+    (CommitS( S, D, <'Human', k> ) @ #i) ⇒
+    (∃ D1 S1 #j. RunningD( D1, S1, <'Human', k> ) @ #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ S D k #i.
+  (CommitS( S, D, <'Human', k> ) @ #i)
+ ∧
+  ∀ D1 S1 #j. (RunningD( D1, S1, <'Human', k> ) @ #j) ⇒ ⊥"
+*/
+by sorry
+
+lemma weak_data_agreement_D_claims_wrt_known_S:
+  all-traces
+  "∀ D S k #i.
+    (CommitD( D, S, <'Human', k> ) @ #i) ⇒
+    (∃ D1 #j. RunningS( S, D1, <'Human', k> ) @ #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ D S k #i.
+  (CommitD( D, S, <'Human', k> ) @ #i)
+ ∧
+  ∀ D1 #j. (RunningS( S, D1, <'Human', k> ) @ #j) ⇒ ⊥"
+*/
+by sorry
+
+/*
+WARNING: the following wellformedness checks failed!
+
+Facts occur in the left-hand-side but not in any right-hand-side 
+=================================================================
+
+  1. in rule "ChanOut_C":  factName `Out_C' arity: 4 multiplicity: Linear. Perhaps you want to use the fact in rule "H_send_S":  factName `Out_S' arity: 4 multiplicity: Linear
+  
+  2. in rule "ChanOut_A":  factName `Out_A' arity: 4 multiplicity: Linear. Perhaps you want to use the fact in rule "H_send_S":  factName `Out_S' arity: 4 multiplicity: Linear
+
+Message Derivation Checks
+=========================
+
+  The variables of the following rule(s) are not derivable from their premises, you may be performing unintended pattern matching.
+
+Rule D_4: 
+Failed to derive Variable(s): ~rS
+
+Rule D_6: 
+Failed to derive Variable(s): ~pw, ~rS, ~skS
+
+Rule D_10: 
+Failed to derive Variable(s): ~pw, ~rD, ~rS, ~skS
+
+Rule S_2: 
+Failed to derive Variable(s): ~pw
+
+Rule S_8: 
+Failed to derive Variable(s): ~pw, ~rD, ~rS
+
+Rule H_1: 
+Failed to derive Variable(s): ~pw
+
+Rule H_5: 
+Failed to derive Variable(s): ~pw
+
+Rule H_11: 
+Failed to derive Variable(s): ~pw
+*/
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: /home/kamilner/tamarin-rs/tamarin-prover/examples/thesis-LaraSchmid-evoting/chapter5_HumanErrors/AuthenticationProtocols/MPAuth_EA.spthy
+
+  processing time: 0.62s
+  
+  WARNING: 2 wellformedness check failed!
+  
+  functional_withAgreement (exists-trace): analysis incomplete (1 steps)
+  functional (exists-trace): analysis incomplete (1 steps)
+  entity_authentication (all-traces): analysis incomplete (1 steps)
+  device_authentication (all-traces): analysis incomplete (1 steps)
+  weak_data_agreement_S_claims_wrt_D (all-traces): analysis incomplete (1 steps)
+  weak_data_agreement_D_claims_wrt_known_S (all-traces): analysis incomplete (1 steps)
+
+==============================================================================

@@ -1,0 +1,27 @@
+/*
+WARNING: the following wellformedness checks failed!
+
+Unbound variables
+=================
+
+  rule `R1' has unbound variables: 
+    %x
+
+Variable with mismatching sorts or capitalization
+=================================================
+
+Possible reasons:
+1. Identifiers are case sensitive, i.e.,'x' and 'X' are considered to be different.
+2. The same holds for sorts:, i.e., '$x', 'x', and '~x' are considered to be different.
+
+  rule `R1': 
+    1. $x, ~x, x, %x
+
+Message Derivation Checks
+=========================
+
+  The variables of the following rule(s) are not derivable from their premises, you may be performing unintended pattern matching.
+
+Rule R1: 
+Failed to derive Variable(s): $x, ~x, x, %x
+*/

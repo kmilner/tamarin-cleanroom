@@ -1,0 +1,5 @@
+theory Ts5_groups
+begin
+rule R1:
+   [ In($zz), In(zz), In($aa), In(aa) ] --[ M(zz, aa) ]-> [ ]
+end

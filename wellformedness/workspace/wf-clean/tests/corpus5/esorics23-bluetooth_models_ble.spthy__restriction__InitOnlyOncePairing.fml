@@ -1,0 +1,1 @@
+∀ #i #j. ((InitOnlyOncePairing( ) @ #i) ∧ (InitOnlyOncePairing( ) @ #j)) ⇒ (#i = #j)

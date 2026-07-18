@@ -1,0 +1,7 @@
+theory Tt5_lookup
+begin
+rule lookup_time_as_t_0_11121111:
+   [ State_11121111( ~lock8, ~lock9, sk ) ]
+  --[ IsIn( 'time', ~t ) ]->
+   [ State_111211111( ~lock8, ~lock9, ~t, sk ) ]
+end

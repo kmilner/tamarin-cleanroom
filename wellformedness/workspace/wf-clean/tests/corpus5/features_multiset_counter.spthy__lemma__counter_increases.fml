@@ -1,0 +1,1 @@
+∀ x y #i #j s. ((Counter( s, x ) @ #i) ∧ (Counter( s, y ) @ #j)) ⇒ ((#i < #j) ⇒ (∃ z. (x++z) = y))

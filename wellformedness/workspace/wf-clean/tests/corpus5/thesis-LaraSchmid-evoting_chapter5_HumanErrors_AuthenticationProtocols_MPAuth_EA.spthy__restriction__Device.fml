@@ -1,0 +1,1 @@
+∀ H1 H2 D #i #j. ((Device( H1, D ) @ #i) ∧ (Device( H2, D ) @ #j)) ⇒ (H1 = H2)

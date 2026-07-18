@@ -1,0 +1,1 @@
+((∀ #c1. (Corrupted( 'LA' ) @ #c1) ⇒ (⊥)) ∧ ((∃ #c0. Corrupted( 'CA' ) @ #c0) ∧ (⊤))) ∧ (¬(∀ #i S pk. (TestCA( S, pk ) @ #i) ⇒ (∃ #j. HonestRegister( S, 'CA', pk ) @ #j)))

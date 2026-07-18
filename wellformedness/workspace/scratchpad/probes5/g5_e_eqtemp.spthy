@@ -1,0 +1,12 @@
+theory Tg5_e_eqtemp
+begin
+
+functions: h/1
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x), B(~x,~x), C(~x) ]->
+   [ Out(~x) ]
+lemma L:
+  all-traces
+  "All #j x. A(x) @ #j ==> Ex #i. #i = #j"
+end

@@ -1,0 +1,1 @@
+((∃ #i #j #k #l BB ba sid sskDa. (Server( <sid, 'S1'> ) @ #i) ∧ ((BB_rec( <sid, BB>, <'b', ba> ) @ #j) ∧ ((BB_pskDs( <sid, BB>, <'spkD', pk(sskDa)> ) @ #k) ∧ ((¬(∃ bPrimeb. ba = sg(bPrimeb, sskDa))) ∧ (H2( sid ) @ #l))))) ∧ (⊤)) ⇒ (¬(∀ #i #j H b sid. ((Ballot( <sid, H>, b ) @ #i) ∧ (End( sid ) @ #j)) ⇒ (∃ #k BB. (BB_rec( <sid, BB>, <'b', b> ) @ #k) ∧ ((#i < #k) ∧ (#k = #j)))))

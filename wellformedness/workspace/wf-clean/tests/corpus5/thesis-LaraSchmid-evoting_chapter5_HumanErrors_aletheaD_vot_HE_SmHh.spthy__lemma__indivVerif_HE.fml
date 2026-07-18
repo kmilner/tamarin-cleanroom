@@ -1,0 +1,1 @@
+∀ v #i b #j #k. (((Claim( 'H1', 'IVHE' ) @ #i) ∧ (Goal( 'H1', 'IVHE', <<'v', 'b'>, v, 'ukn'> ) @ #j)) ∧ (HK_event( 'H1', 'b', b ) @ #k)) ⇒ (∃ BB #l r pkS sskD. (BB_rec( BB, <'bs', b> ) @ #l) ∧ (b = sg(encp(v, r, pkS), sskD)))

@@ -1,0 +1,1 @@
+∀ pid sid k tuple otc tc #i. (InitStuff( pid, sid, k, tuple, otc, tc ) @ #i) ⇒ ((tuple = <sid, k, otc>) ∧ (∃ #j. (YubiInit( pid, sid, k ) @ #j) ∧ (#j < #i)))

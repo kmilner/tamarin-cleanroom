@@ -1,0 +1,25 @@
+WARNING: the following wellformedness checks failed!
+
+Facts occur in the left-hand-side but not in any right-hand-side 
+=================================================================
+
+   1. in rule "C01":  factName `Q01' arity: 1 multiplicity: Linear. Perhaps you want to use the fact in rule "G":  factName `P01' arity: 1 multiplicity: Linear
+  
+   2. in rule "C02":  factName `Q02' arity: 1 multiplicity: Linear. Perhaps you want to use the fact in rule "G":  factName `P02' arity: 1 multiplicity: Linear
+  
+   3. in rule "C03":  factName `Q03' arity: 1 multiplicity: Linear. Perhaps you want to use the fact in rule "G":  factName `P03' arity: 1 multiplicity: Linear
+  
+   4. in rule "C04":  factName `Q04' arity: 1 multiplicity: Linear. Perhaps you want to use the fact in rule "G":  factName `P04' arity: 1 multiplicity: Linear
+  
+   5. in rule "C05":  factName `Q05' arity: 1 multiplicity: Linear. Perhaps you want to use the fact in rule "G":  factName `P05' arity: 1 multiplicity: Linear
+  
+   6. in rule "C06":  factName `Q06' arity: 1 multiplicity: Linear. Perhaps you want to use the fact in rule "G":  factName `P06' arity: 1 multiplicity: Linear
+  
+   7. in rule "C07":  factName `Q07' arity: 1 multiplicity: Linear. Perhaps you want to use the fact in rule "G":  factName `P07' arity: 1 multiplicity: Linear
+  
+   8. in rule "C08":  factName `Q08' arity: 1 multiplicity: Linear. Perhaps you want to use the fact in rule "G":  factName `P08' arity: 1 multiplicity: Linear
+  
+   9. in rule "C09":  factName `Q09' arity: 1 multiplicity: Linear. Perhaps you want to use the fact in rule "G":  factName `P09' arity: 1 multiplicity: Linear
+  
+  10. in rule "C10":  factName `Q10' arity: 1 multiplicity: Linear. Perhaps you want to use the fact in rule "G":  factName `P10' arity: 1 multiplicity: Linear
+*/

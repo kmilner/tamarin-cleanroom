@@ -1,0 +1,1 @@
+∀ A B mn m #i #j #k. (((ChanOut_S( A, B, mn, m ) @ #i) ∧ (H( A ) @ #j)) ∧ (H( B ) @ #k)) ⇒ (⊥)

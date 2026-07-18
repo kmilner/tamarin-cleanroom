@@ -1,0 +1,1 @@
+(∃ #i. DishonestCA( ) @ #i) ∨ (¬(∃ #i. DishonestCA( ) @ #i))

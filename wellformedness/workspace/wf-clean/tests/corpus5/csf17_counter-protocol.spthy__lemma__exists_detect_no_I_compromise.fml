@@ -1,0 +1,1 @@
+∃ ki kr #i. (Detect( <ki, kr> ) @ #i) ∧ (¬(∃ #j. Compromise( ki ) @ #j))

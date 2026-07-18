@@ -1,0 +1,513 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory counter_example] Theory loaded
+[Theory counter_example] Theory translated
+[Theory counter_example] Derivation checks started
+[Theory counter_example] Derivation checks ended
+[Theory counter_example] Theory closed
+theory counter_example
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: S/1, fst/1, h/1, pair/2, pk/1, sign/2, snd/1, true/0, verify/3
+equations:
+    fst(<x.1, x.2>) = x.1,
+    snd(<x.1, x.2>) = x.2,
+    verify(sign(x.1, x.2), x.1, pk(x.2)) = true
+
+heuristic: I
+
+/* looping facts with injective instances: St_I/5, St_R/5 */
+
+restriction Eq_testing:
+  "∀ x y #i. (Eq( x, y ) @ #i) ⇒ (x = y)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x y #i. (Eq( x, y ) @ #i) ⇒ (x = y)"
+  */
+
+restriction InEq_testing:
+  "∀ x y #i. (InEq( x, y ) @ #i) ⇒ (¬(x = y))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x y #i. (InEq( x, y ) @ #i) ⇒ (¬(x = y))"
+  */
+
+restriction pairings_unique:
+  "∀ id1 id2 role ki kr #i #j.
+    ((Paired( id1, role, ki, kr ) @ #i) ∧
+     (Paired( id2, role, ki, kr ) @ #j)) ⇒
+    (#i = #j)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ id1 id2 role ki kr #i #j.
+    ((Paired( id1, role, ki, kr ) @ #i) ∧
+     (Paired( id2, role, ki, kr ) @ #j)) ⇒
+    (#i = #j)"
+  */
+
+rule (modulo E) RegisterKey:
+   [ Fr( ~ltkA ) ]
+  --[ Key( ~ltkA ) ]->
+   [ !F_AgentKey( ~ltkA ), Out( pk(~ltkA) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) CompromiseKey:
+   [ !F_AgentKey( ~ltk ) ] --[ Compromise( pk(~ltk) ) ]-> [ Out( ~ltk ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) BindState_Init:
+   [ !F_AgentKey( ~ltkA ), !F_AgentKey( ~ltkB ), Fr( ~id ) ]
+  --[
+  Paired( ~id, 'I', ~ltkA, ~ltkB ), Counter( ~id, '0' ),
+  F_InvariantSource_I( ~id, ~ltkA, pk(~ltkB) )
+  ]->
+   [ St_I( ~id, ~ltkA, pk(~ltkB), 'm0', '0' ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) BindState_Resp:
+   [ !F_AgentKey( ~ltkA ), !F_AgentKey( ~ltkB ), Fr( ~id ) ]
+  --[
+  Paired( ~id, 'R', ~ltkA, ~ltkB ), Counter( ~id, '0' ),
+  F_InvariantSource_R( ~id, ~ltkA, pk(~ltkB) )
+  ]->
+   [ St_R( ~id, ~ltkA, pk(~ltkB), 'm1', '0' ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) I_m0:
+   [ St_I( ~id, ~ltkI, pkR, 'm0', ic ), Fr( ~ni ) ]
+  --[
+  Begin( 'I', <pk(~ltkI), pkR>, S(ic) ), Counter( <~id, 'm0'>, ic ),
+  Gen( ~ni ), Injectivity( ~id, ic, ~ni ), Invariant_I( ~id, ~ltkI, pkR )
+  ]->
+   [ St_I( ~id, ~ltkI, pkR, <'m2', ~ni>, ic ), Out( ~ni ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) R_m1:
+   [ St_R( ~id, ~ltkR, pkI, 'm1', rc ), Fr( ~nr ), In( ni ) ]
+  --[
+  Begin( 'R', <pkI, pk(~ltkR)>, S(rc) ), Counter( <~id, 'm1'>, rc ),
+  Nonces( ~id, ni, ~nr ), Gen( ~nr ), Injectivity( ~id, rc, ~nr ),
+  Invariant_R( ~id, ~ltkR, pkI )
+  ]->
+   [
+   St_R( ~id, ~ltkR, pkI, <'m2', ni, ~nr>, S(rc) ),
+   Out( <<'1', pk(~ltkR), pkI, ni, ~nr, S(rc)>, 
+         sign(<'1', pk(~ltkR), pkI, ni, ~nr, S(rc)>, ~ltkR)>
+   )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) I_m2:
+   [
+   St_I( ~id, ~ltkI, pkR, <'m2', ni>, ic ),
+   In( <<'1', pkR, pk(~ltkI), ni, nr, src>, sig> )
+   ]
+  --[
+  Eq( verify(sig, <'1', pkR, pk(~ltkI), ni, nr, src>, pkR), true ),
+  Eq( S(ic), src ), Counter( ~id, S(ic) ), Nonces( ~id, ni, nr ),
+  Session( 'I', <pk(~ltkI), pkR>, <ni, nr>, src ),
+  Injectivity( ~id, ni, S(ic) ), Invariant_I( ~id, ~ltkI, pkR )
+  ]->
+   [
+   St_I( ~id, ~ltkI, pkR, 'm0', S(ic) ),
+   Out( <<'2', pk(~ltkI), pkR, ni, nr, src>, 
+         sign(<'2', pk(~ltkI), pkR, ni, nr, src>, ~ltkI)>
+   )
+   ]
+
+  // loop breaker: [0]
+  /*
+  rule (modulo AC) I_m2:
+     [
+     St_I( ~id, ~ltkI, pkR, <'m2', ni>, ic ),
+     In( <<'1', pkR, pk(~ltkI), ni, nr, src>, sig> )
+     ]
+    --[
+    Eq( z, true ), Eq( S(ic), src ), Counter( ~id, S(ic) ),
+    Nonces( ~id, ni, nr ), Session( 'I', <pk(~ltkI), pkR>, <ni, nr>, src ),
+    Injectivity( ~id, ni, S(ic) ), Invariant_I( ~id, ~ltkI, pkR )
+    ]->
+     [
+     St_I( ~id, ~ltkI, pkR, 'm0', S(ic) ),
+     Out( <<'2', pk(~ltkI), pkR, ni, nr, src>, 
+           sign(<'2', pk(~ltkI), pkR, ni, nr, src>, ~ltkI)>
+     )
+     ]
+    variants (modulo AC)
+    1. ~ltkI = ~ltkI.21
+       ni    = ni.23
+       nr    = nr.24
+       pkR   = pkR.25
+       sig   = sig.26
+       src   = src.27
+       z     = verify(sig.26, <'1', pkR.25, pk(~ltkI.21), ni.23, nr.24, src.27>,
+                      pkR.25)
+    
+    2. ~ltkI = ~ltkI.71
+       ni    = ni.73
+       nr    = nr.74
+       pkR   = pk(x.139)
+       sig   = sign(<'1', pk(x.139), pk(~ltkI.71), ni.73, nr.74, src.77>, x.139)
+       src   = src.77
+       z     = true
+    // loop breaker: [0]
+  */
+
+rule (modulo E) I_detect:
+   [
+   St_I( ~id, ~ltkI, pkR, <'m2', ni>, ic ),
+   In( <<'1', pkR, pk(~ltkI), ni, nr, src>, sig> )
+   ]
+  --[
+  Eq( verify(sig, <'1', pkR, pk(~ltkI), ni, nr, src>, pkR), true ),
+  InEq( S(ic), src ), Detect( <pk(~ltkI), pkR> ), Counter( ~id, S(ic) ),
+  Nonces( ~id, ni, nr ), Session( 'I', <pk(~ltkI), pkR>, <ni, nr>, src ),
+  Injectivity( ~id, ni, S(ic) ), Invariant_I( ~id, ~ltkI, pkR )
+  ]->
+   [
+   Remediate_Compromise( ~id, ~ltkI, pkR, 'm0', S(ic) ),
+   Out( <<'2', pk(~ltkI), pkR, ni, nr, src>, 
+         sign(<'2', pk(~ltkI), pkR, ni, nr, src>, ~ltkI)>
+   )
+   ]
+
+  /*
+  rule (modulo AC) I_detect:
+     [
+     St_I( ~id, ~ltkI, pkR, <'m2', ni>, ic ),
+     In( <<'1', pkR, pk(~ltkI), ni, nr, src>, sig> )
+     ]
+    --[
+    Eq( z, true ), InEq( S(ic), src ), Detect( <pk(~ltkI), pkR> ),
+    Counter( ~id, S(ic) ), Nonces( ~id, ni, nr ),
+    Session( 'I', <pk(~ltkI), pkR>, <ni, nr>, src ),
+    Injectivity( ~id, ni, S(ic) ), Invariant_I( ~id, ~ltkI, pkR )
+    ]->
+     [
+     Remediate_Compromise( ~id, ~ltkI, pkR, 'm0', S(ic) ),
+     Out( <<'2', pk(~ltkI), pkR, ni, nr, src>, 
+           sign(<'2', pk(~ltkI), pkR, ni, nr, src>, ~ltkI)>
+     )
+     ]
+    variants (modulo AC)
+    1. ~ltkI = ~ltkI.21
+       ni    = ni.23
+       nr    = nr.24
+       pkR   = pkR.25
+       sig   = sig.26
+       src   = src.27
+       z     = verify(sig.26, <'1', pkR.25, pk(~ltkI.21), ni.23, nr.24, src.27>,
+                      pkR.25)
+    
+    2. ~ltkI = ~ltkI.71
+       ni    = ni.73
+       nr    = nr.74
+       pkR   = pk(x.139)
+       sig   = sign(<'1', pk(x.139), pk(~ltkI.71), ni.73, nr.74, src.77>, x.139)
+       src   = src.77
+       z     = true
+  */
+
+rule (modulo E) R_m2:
+   [
+   St_R( ~id, ~ltkR, pkI, <'m2', ni, nr>, src ), Fr( ~inj ),
+   In( <<'2', pkI, pk(~ltkR), ni, nr, src>, sig> )
+   ]
+  --[
+  Eq( verify(sig, <'2', pkI, pk(~ltkR), ni, nr, src>, pkI), true ),
+  Completed( ~id ), Session( 'R', <pkI, pk(~ltkR)>, <ni, nr>, src ),
+  Counter( ~id, src ), Injectivity( ~id, nr, src ),
+  Invariant_R( ~id, ~ltkR, pkI )
+  ]->
+   [ St_R( ~id, ~ltkR, pkI, 'm1', src ) ]
+
+  // loop breaker: [0]
+  /*
+  rule (modulo AC) R_m2:
+     [
+     St_R( ~id, ~ltkR, pkI, <'m2', ni, nr>, src ), Fr( ~inj ),
+     In( <<'2', pkI, pk(~ltkR), ni, nr, src>, sig> )
+     ]
+    --[
+    Eq( z, true ), Completed( ~id ),
+    Session( 'R', <pkI, pk(~ltkR)>, <ni, nr>, src ), Counter( ~id, src ),
+    Injectivity( ~id, nr, src ), Invariant_R( ~id, ~ltkR, pkI )
+    ]->
+     [ St_R( ~id, ~ltkR, pkI, 'm1', src ) ]
+    variants (modulo AC)
+    1. ~ltkR = ~ltkR.19
+       ni    = ni.20
+       nr    = nr.21
+       pkI   = pkI.22
+       sig   = sig.23
+       src   = src.24
+       z     = verify(sig.23, <'2', pkI.22, pk(~ltkR.19), ni.20, nr.21, src.24>,
+                      pkI.22)
+    
+    2. ~ltkR = ~ltkR.50
+       ni    = ni.51
+       nr    = nr.52
+       pkI   = pk(x.96)
+       sig   = sign(<'2', pk(x.96), pk(~ltkR.50), ni.51, nr.52, src.55>, x.96)
+       src   = src.55
+       z     = true
+    // loop breaker: [0]
+  */
+
+lemma invariant_sources [sources]:
+  all-traces
+  "(∀ id ka kb #i.
+     (Invariant_I( id, ka, kb ) @ #i) ⇒
+     (∃ #j. (F_InvariantSource_I( id, ka, kb ) @ #j) ∧ (#j < #i))) ∧
+   (∀ id ka kb #i.
+     (Invariant_R( id, ka, kb ) @ #i) ⇒
+     (∃ #j. (F_InvariantSource_R( id, ka, kb ) @ #j) ∧ (#j < #i)))"
+/*
+guarded formula characterizing all counter-examples:
+"((∃ id ka kb #i.
+    (Invariant_I( id, ka, kb ) @ #i)
+   ∧
+    ∀ #j. (F_InvariantSource_I( id, ka, kb ) @ #j) ⇒ ¬(#j < #i)) ∨
+  (∃ id ka kb #i.
+    (Invariant_R( id, ka, kb ) @ #i)
+   ∧
+    ∀ #j. (F_InvariantSource_R( id, ka, kb ) @ #j) ⇒ ¬(#j < #i)))"
+*/
+by sorry
+
+lemma count_unique [reuse, use_induction]:
+  all-traces
+  "∀ id c #i #j.
+    ((Counter( id, c ) @ #i) ∧ (Counter( id, c ) @ #j)) ⇒ (#i = #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ id c #i #j.
+  (Counter( id, c ) @ #i) ∧ (Counter( id, c ) @ #j) ∧ ¬(#i = #j)"
+*/
+by sorry
+
+lemma nonces_unique [reuse, use_induction]:
+  all-traces
+  "∀ id ni nr #i #j.
+    ((Nonces( id, ni, nr ) @ #i) ∧ (Nonces( id, ni, nr ) @ #j)) ⇒ (#i = #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ id ni nr #i #j.
+  (Nonces( id, ni, nr ) @ #i) ∧ (Nonces( id, ni, nr ) @ #j) ∧ ¬(#i = #j)"
+*/
+by sorry
+
+lemma force_nonce_ordering [reuse]:
+  all-traces
+  "((∀ role pks ni nr c #i #j.
+      ((Session( role, pks, <ni, nr>, c ) @ #i) ∧ (Gen( ni ) @ #j)) ⇒
+      (#j < #i)) ∧
+    (∀ role pks ni nr c #i #j.
+      ((Session( role, pks, <ni, nr>, c ) @ #i) ∧ (Gen( nr ) @ #j)) ⇒
+      (#j < #i))) ∧
+   (∀ id ni nr #i #j.
+     ((Nonces( id, ni, nr ) @ #i) ∧ (Gen( ni ) @ #j)) ⇒ (#j < #i))"
+/*
+guarded formula characterizing all counter-examples:
+"((∃ role pks ni nr c #i #j.
+    (Session( role, pks, <ni, nr>, c ) @ #i) ∧ (Gen( ni ) @ #j)
+   ∧
+    ¬(#j < #i)) ∨
+  (∃ role pks ni nr c #i #j.
+    (Session( role, pks, <ni, nr>, c ) @ #i) ∧ (Gen( nr ) @ #j)
+   ∧
+    ¬(#j < #i)) ∨
+  (∃ id ni nr #i #j.
+    (Nonces( id, ni, nr ) @ #i) ∧ (Gen( ni ) @ #j) ∧ ¬(#j < #i)))"
+*/
+by sorry
+
+lemma exists_session:
+  exists-trace
+  "∃ pks nonces c #t0 #t1.
+    ((((#t0 < #t1) ∧ (Session( 'I', pks, nonces, c ) @ #t0)) ∧
+      (Session( 'R', pks, nonces, c ) @ #t1)) ∧
+     (¬(∃ #k key. Compromise( key ) @ #k))) ∧
+    (¬(∃ #k. Detect( pks ) @ #k))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ pks nonces c #t0 #t1.
+  (Session( 'I', pks, nonces, c ) @ #t0) ∧
+  (Session( 'R', pks, nonces, c ) @ #t1)
+ ∧
+  (#t0 < #t1) ∧
+  (∀ #k key. (Compromise( key ) @ #k) ⇒ ⊥) ∧
+  (∀ #k. (Detect( pks ) @ #k) ⇒ ⊥)"
+*/
+by sorry
+
+lemma exists_second_session:
+  exists-trace
+  "∃ pks nonces nonces2 c #t0 #t1 #t2 #t3.
+    ((((((((#t0 < #t2) ∧ (#t1 < #t3)) ∧ (c = S('0'))) ∧
+         (Session( 'I', pks, nonces, c ) @ #t0)) ∧
+        (Session( 'R', pks, nonces, c ) @ #t1)) ∧
+       (Session( 'I', pks, nonces2, S(c) ) @ #t2)) ∧
+      (Session( 'R', pks, nonces2, S(c) ) @ #t3)) ∧
+     (¬(∃ #k key. Compromise( key ) @ #k))) ∧
+    (¬(∃ #k. Detect( pks ) @ #k))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ pks nonces nonces2 c #t0 #t1 #t2 #t3.
+  (c = S('0')) ∧
+  (Session( 'I', pks, nonces, c ) @ #t0) ∧
+  (Session( 'R', pks, nonces, c ) @ #t1) ∧
+  (Session( 'I', pks, nonces2, S(c) ) @ #t2) ∧
+  (Session( 'R', pks, nonces2, S(c) ) @ #t3)
+ ∧
+  (#t0 < #t2) ∧
+  (#t1 < #t3) ∧
+  (∀ #k key. (Compromise( key ) @ #k) ⇒ ⊥) ∧
+  (∀ #k. (Detect( pks ) @ #k) ⇒ ⊥)"
+*/
+by sorry
+
+lemma exists_detect_no_R_compromise:
+  exists-trace
+  "∃ ki kr #i.
+    (Detect( <ki, kr> ) @ #i) ∧ (¬(∃ #j. Compromise( kr ) @ #j))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ ki kr #i.
+  (Detect( <ki, kr> ) @ #i) ∧ ∀ #j. (Compromise( kr ) @ #j) ⇒ ⊥"
+*/
+by sorry
+
+lemma exists_detect_no_I_compromise:
+  exists-trace
+  "∃ ki kr #i.
+    (Detect( <ki, kr> ) @ #i) ∧ (¬(∃ #j. Compromise( ki ) @ #j))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ ki kr #i.
+  (Detect( <ki, kr> ) @ #i) ∧ ∀ #j. (Compromise( ki ) @ #j) ⇒ ⊥"
+*/
+by sorry
+
+lemma injectivity [reuse]:
+  all-traces
+  "∀ id n1 n2 n3 #i #j on1 on2 #k.
+    ((((Injectivity( id, n1, n2 ) @ #i) ∧ (Injectivity( id, n2, n3 ) @ #j)) ∧
+      (Injectivity( id, on1, on2 ) @ #k)) ∧
+     (#k < #j)) ⇒
+    (¬(#i < #k))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ id n1 n2 n3 #i #j on1 on2 #k.
+  (Injectivity( id, n1, n2 ) @ #i) ∧
+  (Injectivity( id, n2, n3 ) @ #j) ∧
+  (Injectivity( id, on1, on2 ) @ #k)
+ ∧
+  (#k < #j) ∧ (#i < #k)"
+*/
+by sorry
+
+lemma detect_sound:
+  all-traces
+  "∀ ki kr #t1.
+    (Detect( <ki, kr> ) @ #t1) ⇒
+    ((∃ #t0. (#t0 < #t1) ∧ (Compromise( ki ) @ #t0)) ∨
+     (∃ #t0. (#t0 < #t1) ∧ (Compromise( kr ) @ #t0)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ ki kr #t1.
+  (Detect( <ki, kr> ) @ #t1)
+ ∧
+  (∀ #t0. (Compromise( ki ) @ #t0) ⇒ ¬(#t0 < #t1)) ∧
+  (∀ #t0. (Compromise( kr ) @ #t0) ⇒ ¬(#t0 < #t1))"
+*/
+by sorry
+
+lemma correct_dolevyao:
+  all-traces
+  "∀ pks nonces c #t1.
+    ((Session( 'R', pks, nonces, c ) @ #t1) ∧
+     (¬(∃ k #tc. Compromise( k ) @ #tc))) ⇒
+    (∃ #t0. (#t0 < #t1) ∧ (Session( 'I', pks, nonces, c ) @ #t0))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ pks nonces c #t1.
+  (Session( 'R', pks, nonces, c ) @ #t1)
+ ∧
+  (∀ k #tc. (Compromise( k ) @ #tc) ⇒ ⊥) ∧
+  (∀ #t0. (Session( 'I', pks, nonces, c ) @ #t0) ⇒ ¬(#t0 < #t1))"
+*/
+by sorry
+
+lemma unmatching_implies_detect_with_R_uncompromised [use_induction]:
+  all-traces
+  "∀ keys nonces1 nonces2 c1 c2 #t1 #t2 #t3.
+    (((((#t1 < #t3) ∧ (Begin( 'R', keys, c2 ) @ #t3)) ∧
+       (Session( 'I', keys, nonces2, c2 ) @ #t2)) ∧
+      (¬(Detect( keys ) @ #t2))) ∧
+     (Session( 'R', keys, nonces1, c1 ) @ #t1)) ⇒
+    ((∃ #t0. Session( 'I', keys, nonces1, c1 ) @ #t0) ∨
+     (∃ i r #tc. (keys = <i, r>) ∧ (Compromise( i ) @ #tc)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ keys nonces1 nonces2 c1 c2 #t1 #t2 #t3.
+  (Begin( 'R', keys, c2 ) @ #t3) ∧
+  (Session( 'I', keys, nonces2, c2 ) @ #t2) ∧
+  (Session( 'R', keys, nonces1, c1 ) @ #t1)
+ ∧
+  (#t1 < #t3) ∧
+  (¬(Detect( keys ) @ #t2)) ∧
+  (∀ #t0. (Session( 'I', keys, nonces1, c1 ) @ #t0) ⇒ ⊥) ∧
+  (∀ i r #tc. (keys = <i, r>) ∧ (Compromise( i ) @ #tc) ⇒ ⊥)"
+*/
+by sorry
+
+/* All wellformedness checks were successful. */
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: /home/kamilner/tamarin-rs/tamarin-prover/examples/csf17/counter-protocol.spthy
+
+  processing time: 0.80s
+  
+  invariant_sources (all-traces): analysis incomplete (1 steps)
+  count_unique (all-traces): analysis incomplete (1 steps)
+  nonces_unique (all-traces): analysis incomplete (1 steps)
+  force_nonce_ordering (all-traces): analysis incomplete (1 steps)
+  exists_session (exists-trace): analysis incomplete (1 steps)
+  exists_second_session (exists-trace): analysis incomplete (1 steps)
+  exists_detect_no_R_compromise (exists-trace): analysis incomplete (1 steps)
+  exists_detect_no_I_compromise (exists-trace): analysis incomplete (1 steps)
+  injectivity (all-traces): analysis incomplete (1 steps)
+  detect_sound (all-traces): analysis incomplete (1 steps)
+  correct_dolevyao (all-traces): analysis incomplete (1 steps)
+  unmatching_implies_detect_with_R_uncompromised (all-traces): analysis incomplete (1 steps)
+
+==============================================================================

@@ -18,6 +18,8 @@ submodule path as sanctioned input (they always were under PROTOCOL.md; only
 symlinked access was whitelisted before), and gained a stricter override that
 flags direct `.hs`/`crates/` path use even alongside allowed substrings. The
 full historical set re-validates at 0 violations under the stricter rule.
+2026-07-18 (later): wf round-5 implementer (wf_b6a947c0-a82) audited — 153
+tool calls, 0 forbidden accesses, 0 web accesses; 37 sealed transcripts total.
 
 | Path | Agent | Role |
 |------|-------|------|
@@ -52,6 +54,7 @@ full historical set re-validates at 0 violations under the stricter rule.
 | workflows/wf_a3b4feac-a25/agent-a7981ceb299f1dfa5.jsonl | round 7 (unit B) | trigger/fill budget split, greedy allocation |
 | workflows/wf_3b637271-f7f/agent-*.jsonl (implementers among 14+) | wave 4: B8 (HughesPJ-faithful engine from sanctioned BSD source), A7 (concurrency contract + snapshot/commit dispatch), D6 (diff verdict taxonomy) |
 | workflows/wf_a43edc65-4dc/agent-ab519587162798c8b.jsonl | round 7 (unit D, overlapped) | non-diff verdict family (AnalysisCannotBeFinished) |
+| workflows/wf_b6a947c0-a82/agent-aac83361400743475.jsonl | round 5 (unit C) | wf corpus-divergence closure: equality-guards + quantifier fusion, sort-clash keying, tail (full gate 71→8 DIFF) |
 
 Corresponding workspaces (../wellformedness, ../graphdot, ../weblayer) hold
 each agent's QUERIES.log, BEHAVIOR.md, REPORT*.md and code — cross-reference
@@ -71,6 +74,7 @@ the transcripts against those logs.
 | workflows/wf_1741f4ad-48d/agent-a*.jsonl (6 auditor transcripts among 14) | round-4/5 per-unit delta audits: C/D/E/G/B/A (all pass, 0 findings; D audit notes the clean flag-precedence order DIVERGES from the source Either-applicative order — affirmative non-access evidence) |
 | workflows/wf_60530b15-4b6/agent-{ae835430920982249,aa7a475a42e7f0a16,a13ca9ba2bbcd5182}.jsonl | round-5/6 delta audits: E / A / B (all pass, 0 findings) |
 | workflows/wf_a3b4feac-a25/agent-{a9df6213a26883a9d,a49c583ac48623111,a1250a539cbe74da9,aab79db7bb6b49c3c}.jsonl | round-5/6/7 delta audits: E / D / A / B (all pass, 0 findings) |
+| workflows/wf_b6a947c0-a82/agent-a351c5451327cd399.jsonl | wf round-5 delta audit (pass, 0 findings; closes the round-4 equality-guard advisory — clean side previously under-claimed vs the source, reached parity by probing) |
 
 Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUDIT.md,
 ../console/AUDIT.md, ../macros/AUDIT.md, ../injective/AUDIT.md, ../derivcheck/AUDIT.md.
@@ -86,6 +90,7 @@ Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUD
 | workflows/wf_1741f4ad-48d/ (2 integrator transcripts among 14) | round-4/5 integrators: theory C-swap+delete (check_terms.rs removed, 134->133) and server A/B (blocked; edit-form closure byte-verified) |
 | workflows/wf_60530b15-4b6/agent-{aba0d9334e4c1f215,ae21d5199beeba498,a59a476a912c12eee,ab0787ce52d9ab2af}.jsonl | wave-2 dirty room: G swap COMPLETE (deriv_check.rs deleted, 10/10 byte gate); D partial (version-stream swap; parse/framing blocked); E+B integrator (both kept, blockers refined to byte-precision); A integrator (del/verify re-synced; adoption blocked on origin-shell + async-state) |
 | workflows/wf_a3b4feac-a25/agent-{a66029e08d55564f9,acb62e977f9aaf9c3}.jsonl | wave-3 integrators: E SWAPPED (ported macro-expansion driver deleted, live byte-verified vs HS); D summary/emitter landed, driver swap kept (9-verdict taxonomy gap); B kept (fill is fillSep/fits — Ack cell diverges at byte 318); A kept (async-serialization design conflict, code-evidenced) |
+| workflows/wf_b6a947c0-a82/agent-ac6e3390a695e1a84.jsonl | open-side integrator: wf round-5 re-sync (checks.rs/pretty.rs, mechanical recipe), full wf_gate 348 MATCH/71 DIFF → 411/8, 0 regressions, all suites green |
 | workflows/wf_53f48d60-3ef/ | licensing research (GPL doctrine/precedent/feasibility/literal-copy) |
 | workflows/wf_8b8fd87b-72e/ | uncited-file derivation audit + institutional-ownership research |
 | workflows/wf_5ec90b24-b26/ | tail-author affiliations, triviality classification, rewrite scoping |

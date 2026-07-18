@@ -771,3 +771,144 @@ boundary-observable and each traces to a logged `probes4` entry; the guardedness
 engine and printer are independent (and, for guardedness, strictly simpler than)
 the GPL sources. One non-blocking correctness advisory (equality-guard claim
 under-probed) is recorded for the clean-room team. **PASS.**
+
+## Round 5 incremental audit
+
+Delta scope (git HEAD 7980f8d, working tree): `workspace/wf-clean/src/checks.rs`,
+`workspace/wf-clean/src/pretty.rs` (source), plus `BEHAVIOR.md`, `QUERIES.log`,
+and untracked round5/ + tests/round5_tests.rs + tests/corpus5_acceptance.rs +
+fixtures/probes. Reference read for comparison: `Guarded.hs`
+(`formulaToGuarded`/`convert`/`convEx`/`convAll`/`conjActionsEqs`/
+`remainingUnguarded`/`covered`/`sortGAtoms`/`atomToGAtom`/`openFormulaPrefix`),
+`Wellformedness.hs` (`sortsClashCheck`/`clashesOn`/`publicNamesReport'`/
+`mostSimilarName`/`factLhsOccurNoRhs'`/`checkEquationsSubtermConvergence`),
+`SubtermRule.hs` (`isSubtermConvergentCtxtRule`), `Formula.hs`
+(`openFormula`/`openFormulaPrefix`).
+
+### This round closes the Round-4 advisory (equality guards) — the RIGHT way
+Round 4 recorded a non-blocking advisory: the clean code *under*-claimed
+("equality never guards", probe gx_eq_ant = `x=x` only) relative to upstream's
+`covered`/`remainingUnguarded` (Guarded.hs:523-533), and recommended adding a
+probe such as `Ex x. x='c'` to confirm or narrow. Round 5 did exactly this via
+the black box: g5_e_eqbare (`Ex z. z='c'` -> SUCCESS), g5_e_eqinner,
+g5_e_eqself/eqtwo (fail), g5_e_eqchain vs g5_e_revchain (single L-to-R pass, no
+fixpoint), g5_e_actorder (actions before eqs), g5_e_unif (`<z,'c'>=<'c',w>` ->
+unguarded: side-based, NOT unification). The resulting mechanism converges on
+upstream's semantics, which is *merger* (the decision must accept exactly what
+the reference accepts); the question for this audit is whether the convergence
+was reached by copying protectable EXPRESSION or by probing. Evidence says
+probing:
+
+- **Discriminators are captured, not inferred from source.** The two behaviors
+  hardest to guess without either the source or a probe — the SINGLE
+  left-to-right equality pass (no fixpoint) and actions-resolved-before-
+  equalities — are each pinned by a real oracle capture: g5_e_revchain.wfblock
+  (`(w=h(z)) & (z='c')` -> "unguarded 'w'") and the g5_e_actorder probe. Upstream
+  reaches "actions first" via `sortGAtoms = uncurry (++) . partition isGAction`
+  and "single pass" via the `go` fold in `remainingUnguarded`; the clean code
+  reaches the same observable set via `collect_guard_vars` (all actions) then a
+  single loop over `collect_guard_eqs`. Different decomposition, identical
+  boundary behavior.
+- **Upstream's known incompleteness is reproduced as an observation, not a
+  transcription.** Guarded.hs:527-533 has a FIXME that `covered` does not do
+  full unification (whole-side var test only). The clean code has the same
+  limitation, pinned by g5_e_unif — arrived at black-box, and its comment says
+  "side-based, not unification" (upstream's word is "covered"; no lineage).
+
+### Abstraction / filtration / comparison — guardedness (Family 1, 49 files)
+- **Idea/merger (unprotectable):** guardedness DECISION (accept/reject, which
+  var, which of the two reasons), same-kind prefix fusion, action-atom guards,
+  one-clean-side equality resolution, (name, index, sort-class) binder identity.
+  Each is behavior-forced and each traces to a probe capture (g5_e_*, g5_a_*,
+  g5_idx) or to the corpus pin (684 formulas, tests/corpus5, all accepted).
+- **Filtered clean expression:** `fuse_quantifiers` (recursive same-kind fusion
+  over the whole tree) is NOT upstream's `openFormulaPrefix` (outermost-prefix
+  opening inside a MonadFresh alpha-renamer); `resolved_guard_keys` +
+  `unresolved_side` + `formula_var_key`/`VKey` is NOT
+  `remainingUnguarded`/`covered`/`frees`/`\\`; the clean code carries NO polarity
+  machinery, NO `gconj`/`gdisj`/`closeGuarded`/`GAtom`/`Precise.evalFreshT`/
+  `avoidPrecise`, i.e. it implements only the wf-observable decision, not the
+  guarded-formula datatype. The fused-form RENDERING (g5_a_nest_noimpl:
+  "∀ x #i. A( x ) @ #i") is a property of the reference pretty-printer captured
+  in g5_a_nest_noimpl.wfblock, not lifted from `ppFormula f0`.
+
+### Abstraction / filtration / comparison — sort clash (Family 2, 15 files)
+- Upstream `sortsClashCheck` keys on `removeSort lv = (lowerCase (lvarName lv),
+  lvarIdx lv)` and lists variants via `clashesOn removeSort id` +
+  `sortednubOn id` (LVar Ord = sort-then-name) + groups by `sortOn f`. The clean
+  code's `key = (v.name.to_lowercase(), v.idx)`, `class_rank` ($<~<msg<%<#),
+  `variant_string`, and group `sort_by(a.0)` reproduce this exact ordering.
+  Merger on the key/order; the integer ranks 0..4 are the clean code's own,
+  calibrated to s5_all4/s5_crossname/s5_capord captures (not the Haskell
+  data-declaration Ord). Public-names rework (first-occurrence attribution,
+  spelling sort, consecutive-same-rule merge, group sort) mirrors
+  `sortednubOn (show.snd)` + `groupOn fst` + `clashesOn`, and is byte-pinned by
+  the issue527 target (`rule "Four":  name 'firSt', rule "Two":  name 'first'`).
+  No `clashesOn`/`sortednubOn`/`groupOn`/`removeSort`/`ppRuleAndName`/
+  `findClashes`/`prettyVarList` identifiers appear in the clean code.
+
+### Abstraction / filtration / comparison — tail (Family 3, 7 files)
+- Builtin-fact normalization (`canon_builtin`/`canon_fact`): case-insensitive
+  {k,ku,kd,in,out,fr} -> canonical name + persistence. Every element is
+  boundary-observable — `!KU( x )` persistence and the case folding are in
+  t5_ku_all.wfblock / t5_up_inout.wfblock; the K-participates-in-lhs/rhs and
+  the builtins-are-excluded split reflects upstream `isProtoFact` and is pinned
+  by the issue515/issue527 targets. Subterm convergence: `term_has_vars`
+  reproduces upstream `isConstant rhs = null (frees rhs)` (SubtermRule.hs:109);
+  the sorted listing reproduces the Set-ordering of `thyEquations`, pinned by
+  t5_sub_order2 and the ble/mesh targets. Right-aligned item numbers and
+  per-render arity/mult dedup are pinned by t5_align.wfblock / t5_lemdup.wfblock.
+- **Equation layout engine (`pretty::pp_equation`/`EqLayout`/`lay_eq_term`):**
+  the one genuinely expression-heavy new block. It is a bespoke fill/break
+  engine, NOT a port of Text.PrettyPrint.HughesPJ (no Doc algebra, no
+  `Union`/`fits`/`nest` combinators). The constants `min(100, 67 + nest)` are
+  the render-boundary line width (100) and ribbon (100/1.5≈67); both are
+  boundary-recoverable — they set exactly where wrapping occurs, and are pinned
+  byte-exact by t5_wl55..66, t5_last36/37.wfblock, t5_tup3/3b.wfblock and the
+  mesh k2 ten-line reference block. Filtered: observed layout; custom engine;
+  boundary-observable widths.
+
+### Round-5 cross-checks
+- **Identifier scan** of the delta (checks.rs, pretty.rs) for
+  `guardConj|guardEx|openFormula|conjActionsEqs|remainingUnguarded|covered|
+  sortGAtoms|atomToGAtom|GAtom|GAction|GEqE|closeGuarded|formulaToGuarded|
+  noUnguardedVars|isSubtermConvergent|filterNonSubterm|clashesOn|removeSort|
+  sortednubOn|mostSimilarName|prettyVarList|freshNamesReport|partitionEithers|
+  bvarToLVar`: **empty**. New names (`canon_builtin`, `canon_fact`,
+  `class_rank`, `variant_string`, `formula_var_key`, `VKey`, `fuse_quantifiers`,
+  `collect_guard_eqs`, `resolved_guard_keys`, `unresolved_side`, `eq_margin`,
+  `EqLayout`, `lay_eq_term`, `tuple_elems`, `term_has_vars`) — none appears in
+  the Haskell.
+- **Comment-lineage scan** for `implicit negation|quantifier switch|FIXME|We do
+  not consider the terms|not last-free|cannot happen|is not a guarded atom`:
+  **empty**. Delta comments describe observed behavior and cite g5_*/s5_*/t5_*
+  probes or named targets (issue515/issue527/Axioms_and_Induction/ble/mesh).
+- **Boundary-observable strings only:** `!KU( x )`, `Fr( x )`, `Out( x )`,
+  `∀ x #i.`, `∃ z w.`, `unguarded variable(s)`, `universal quantifier without
+  toplevel implication`, the subterm-warning prose and manual URL all appear
+  verbatim in captured `.wfblock`/target files.
+- **Provenance of every behavioral claim:** oracle is the compiled HS binary
+  via `oracle/wf_oracle.sh`; probes are `gprobe5.sh` -> `wf.sh` black-box
+  captures (22 `.wfblock` files spot-checked: g5_a_nest_noimpl, g5_e_eqself,
+  g5_e_fuse_all, g5_e_revchain, g5_e_vac, s5_all4/crossname, t5_up_inout/ku_all/
+  lemdup/align/last37 all match their BEHAVIOR.md claims); the 71 targets are
+  materialized by `fetch_hs_targets.sh` from the same binary on permitted
+  corpus inputs; the 684-formula corpus pin (`tests/corpus5_acceptance.rs`)
+  asserts acceptance of exactly what the reference prints. No claim traces to
+  Guarded.hs/Wellformedness.hs rather than a probe or capture.
+- Minor non-blocking note (not a redo): `canon_builtin` lower-cases before
+  matching `"k"`, so it would canonicalize a lowercase `k` fact to `K`; because
+  Tamarin fact names are uppercase-initial this branch only ever fires on `K`,
+  so it is inert — a robustness nit, not a divergence and not a copyright issue.
+
+### Round-5 verdict
+No copied protectable expression. The guardedness/sort-clash/tail changes are a
+faithful reproduction of reference BEHAVIOR (merger) reached through logged
+black-box probes and captured targets, with independent expression: distinct
+identifier constellation, no comment lineage, only boundary-observable strings
+and widths, and a decision engine that is structurally simpler than (and carries
+none of the internal datatype machinery of) the GPL sources. The Round-4
+equality-guard advisory is now correctly closed by probe-derived evidence.
+**PASS.**
+
+VERDICT: pass

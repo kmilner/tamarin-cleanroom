@@ -1,0 +1,12 @@
+theory Tg5_idx
+begin
+
+functions: h/1
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x), B(~x,~x), C(~x) ]->
+   [ Out(~x) ]
+lemma L:
+  exists-trace
+  "Ex y #i. A(y.1) @ #i"
+end

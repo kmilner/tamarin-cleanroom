@@ -1,0 +1,1 @@
+∀ sid s #i. (Server( <sid, s> ) @ #i) ⇒ (s = 'S1')

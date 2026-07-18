@@ -1,0 +1,5 @@
+theory Ts5_capdiff
+begin
+rule R1:
+   [ In($X.1), In($x.2) ] --[ M($X.1, $x.2) ]-> [ ]
+end

@@ -1,0 +1,1 @@
+∃ x y #i #j. (Exclusive( x, y ) @ #i) ∧ (K( x ) @ #j)

@@ -1,0 +1,302 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory UM_one_pass_attack] Theory loaded
+[Theory UM_one_pass_attack] Theory translated
+[Theory UM_one_pass_attack] Derivation checks started
+[Theory UM_one_pass_attack] Derivation checks ended
+[Theory UM_one_pass_attack] Theory closed
+theory UM_one_pass_attack
+
+begin
+
+// Function signature and definition of the equational theory E
+
+builtins: diffie-hellman
+functions: fst/1, h/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) Register_key_honest:
+   [ Fr( ~ea ) ]
+  --[ KeyReg( $A ) ]->
+   [ !Ltk( $A, ~ea ), !Pk( $A, 'g'^~ea ), Out( 'g'^~ea ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) I_Activate:
+   [ Fr( ~ex ) ]
+  --[ Activate( <$A, $B, 'g'^~ex> ) ]->
+   [ I_Act( ~ex, $A, $B ), !SessionState( <$A, $B, 'g'^~ex>, $A, ~ex ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) I_Complete:
+   [ I_Act( ~ex, $A, $B ), !Ltk( $A, ~ea ), !Pk( $B, 'g'^~eb ) ]
+  --[
+  Complete( <$A, $B, 'g'^~ex>, 'I', h(<'g'^~eb^~ex, 'g'^~eb^~ea, $A, $B>) )
+  ]->
+   [
+   I_Comp( <$A, $B, 'g'^~ex> ), Out( <$B, $A, 'g'^~ex> ),
+   !SessionKey( <$A, $B, 'g'^~ex>, $A, h(<'g'^~eb^~ex, 'g'^~eb^~ea, $A, $B>)
+   )
+   ]
+
+  /*
+  rule (modulo AC) I_Complete:
+     [ I_Act( ~ex, $A, $B ), !Ltk( $A, ~ea ), !Pk( $B, 'g'^~eb ) ]
+    --[
+    Complete( <$A, $B, 'g'^~ex>, 'I',
+              h(<'g'^(~eb*~ex), 'g'^(~ea*~eb), $A, $B>)
+    )
+    ]->
+     [
+     I_Comp( <$A, $B, 'g'^~ex> ), Out( <$B, $A, 'g'^~ex> ),
+     !SessionKey( <$A, $B, 'g'^~ex>, $A,
+                  h(<'g'^(~eb*~ex), 'g'^(~ea*~eb), $A, $B>)
+     )
+     ]
+  */
+
+rule (modulo E) I_Expire:
+   [ I_Comp( sid ) ] --[ Expire( sid ) ]-> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) R_Complete:
+   [ In( X ), !Ltk( $B, ~eb ), !Pk( $A, 'g'^~ea ) ]
+  --[
+  Activate( <$B, $A, X> ),
+  Complete( <$B, $A, X>, 'R', h(<X^~eb, 'g'^~ea^~eb, $A, $B>) )
+  ]->
+   [
+   R_Comp( <$B, $A, X> ),
+   !SessionKey( <$B, $A, X>, $B, h(<X^~eb, 'g'^~ea^~eb, $A, $B>) )
+   ]
+
+  /*
+  rule (modulo AC) R_Complete:
+     [ In( X ), !Ltk( $B, ~eb ), !Pk( $A, 'g'^~x ) ]
+    --[
+    Activate( <$B, $A, X> ),
+    Complete( <$B, $A, X>, 'R', h(<z, 'g'^(~eb*~x), $A, $B>) )
+    ]->
+     [
+     R_Comp( <$B, $A, X> ),
+     !SessionKey( <$B, $A, X>, $B, h(<z, 'g'^(~eb*~x), $A, $B>) )
+     ]
+    variants (modulo AC)
+    1. ~eb   = ~eb.28
+       X     = X.29
+       z     = X.29^~eb.28
+    
+    2. ~eb   = ~eb.28
+       X     = z.31^inv(~eb.28)
+       z     = z.31
+    
+    3. ~eb   = ~eb.137
+       X     = x.268^x.269
+       z     = x.268^(~eb.137*x.269)
+    
+    4. ~eb   = ~eb.138
+       X     = x.270^inv((~eb.138*x.271))
+       z     = x.270^inv(x.271)
+    
+    5. ~eb   = ~eb.138
+       X     = x.270^(x.271*inv(~eb.138))
+       z     = x.270^x.271
+    
+    6. ~eb   = ~eb.139
+       X     = x.271^(x.272*inv((~eb.139*x.273)))
+       z     = x.271^(x.272*inv(x.273))
+    
+    7. X     = DH_neutral
+       z     = DH_neutral
+  */
+
+rule (modulo E) R_Expire:
+   [ R_Comp( sid ) ] --[ Expire( sid ) ]-> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Corrupt_Ltk:
+   [ !Ltk( $A, ~ea ) ] --[ Corrupt( $A ) ]-> [ Out( ~ea ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Corrupt_SessionState:
+   [ !SessionState( sid, ~x, $A ) ]
+  --[ Corrupt( $A ), BeforeComplete( sid ) ]->
+   [ Out( ~x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Corrupt_SessionKey:
+   [ !SessionKey( sid, $A, k ) ]
+  --[ Corrupt( $A ), BeforeExpire( sid ) ]->
+   [ Out( k ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Reveal_SessionState:
+   [ !SessionState( sid, ~x, $A ) ]
+  --[ SessionStateReveal( sid ), BeforeComplete( sid ) ]->
+   [ Out( ~x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Reveal_SessionKey:
+   [ !SessionKey( sid, $A, k ) ]
+  --[ SessionKeyReveal( sid ), BeforeExpire( sid ) ]->
+   [ Out( k ) ]
+
+  /* has exactly the trivial AC variant */
+
+restriction sid_unique:
+  "∀ #i #j sid.
+    ((Activate( sid ) @ #i) ∧ (Activate( sid ) @ #j)) ⇒ (#i = #j)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ #i #j sid.
+    ((Activate( sid ) @ #i) ∧ (Activate( sid ) @ #j)) ⇒ (#i = #j)"
+  */
+
+restriction keyreg_unique:
+  "∀ #i #j A. ((KeyReg( A ) @ #i) ∧ (KeyReg( A ) @ #j)) ⇒ (#i = #j)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ #i #j A. ((KeyReg( A ) @ #i) ∧ (KeyReg( A ) @ #j)) ⇒ (#i = #j)"
+  */
+
+restriction corrupt_and_reveal_not_too_early:
+  "(∀ #i #j s role_ k_.
+     ((BeforeComplete( s ) @ #i) ∧ (Complete( s, role_, k_ ) @ #j)) ⇒
+     (#i < #j)) ∧
+   (∀ #i #j s. ((BeforeExpire( s ) @ #i) ∧ (Expire( s ) @ #j)) ⇒ (#i < #j))"
+  // safety formula
+
+  /*
+  expanded formula:
+  "(∀ #i #j s role_ k_.
+     ((BeforeComplete( s ) @ #i) ∧ (Complete( s, role_, k_ ) @ #j)) ⇒
+     (#i < #j)) ∧
+   (∀ #i #j s. ((BeforeExpire( s ) @ #i) ∧ (Expire( s ) @ #j)) ⇒ (#i < #j))"
+  */
+
+lemma key_agreement_reachable:
+  exists-trace
+  "∃ #i #j sid sidm k.
+    ((((Complete( sid, 'I', k ) @ #i) ∧ (Complete( sidm, 'R', k ) @ #j)) ∧
+      (¬(∃ #j.1 C. Corrupt( C ) @ #j.1))) ∧
+     (¬(∃ #j.1 s. SessionKeyReveal( s ) @ #j.1))) ∧
+    (¬(∃ #j.1 s. SessionStateReveal( s ) @ #j.1))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ #i #j sid sidm k.
+  (Complete( sid, 'I', k ) @ #i) ∧ (Complete( sidm, 'R', k ) @ #j)
+ ∧
+  (∀ #j.1 C. (Corrupt( C ) @ #j.1) ⇒ ⊥) ∧
+  (∀ #j.1 s. (SessionKeyReveal( s ) @ #j.1) ⇒ ⊥) ∧
+  (∀ #j.1 s. (SessionStateReveal( s ) @ #j.1) ⇒ ⊥)"
+*/
+by sorry
+
+lemma CK_secure:
+  all-traces
+  "∀ #i #j role A B X k s sp.
+    ((((Complete( <A, B, X>, role, k ) @ #i) ∧ (K( k ) @ #j)) ∧
+      (s = <A, B, X>)) ∧
+     (sp = <B, A, X>)) ⇒
+    ((((∃ #k.1. SessionKeyReveal( s ) @ #k.1) ∨
+       (∃ #i1. SessionKeyReveal( sp ) @ #i1)) ∨
+      ((role = 'I') ∧
+       (((∃ #k.1.
+           (Corrupt( A ) @ #k.1) ∧
+           ((∃ #l. (Expire( s ) @ #l) ∧ (#k.1 < #l)) ∨
+            (¬(∃ #l. Expire( s ) @ #l)))) ∨
+         (∃ #k.1 #l. (SessionStateReveal( s ) @ #k.1) ∧ (Corrupt( A ) @ #l))) ∨
+        (∃ #k.1. Corrupt( B ) @ #k.1)))) ∨
+     ((((role = 'R') ∧ (∃ #k.1. Corrupt( A ) @ #k.1)) ∨
+       (∃ #k.1 k_ role_.
+         (Complete( sp, role_, k_ ) @ #k.1) ∧
+         ((∃ #k.2.
+            (Corrupt( B ) @ #k.2) ∧
+            ((∃ #l. (Expire( sp ) @ #l) ∧ (#k.2 < #l)) ∨
+             (¬(∃ #l. Expire( sp ) @ #l)))) ∨
+          (∃ #k.2 #l. (SessionStateReveal( sp ) @ #k.2) ∧ (Corrupt( B ) @ #l))))) ∨
+      ((¬(∃ #k.1 k_ role_. Complete( sp, role_, k_ ) @ #k.1)) ∧
+       (∃ #k.1. Corrupt( B ) @ #k.1))))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ #i #j role A B X k s sp.
+  (Complete( <A, B, X>, role, k ) @ #i) ∧
+  (K( k ) @ #j) ∧
+  (s = <A, B, X>) ∧
+  (sp = <B, A, X>)
+ ∧
+  (∀ #k.1. (SessionKeyReveal( s ) @ #k.1) ⇒ ⊥) ∧
+  (∀ #i1. (SessionKeyReveal( sp ) @ #i1) ⇒ ⊥) ∧
+  (((¬(role = 'I')) ∨
+    ((∀ #k.1.
+       (Corrupt( A ) @ #k.1)
+      ⇒
+       (∀ #l. (Expire( s ) @ #l) ⇒ ¬(#k.1 < #l)) ∧ (∃ #l. (Expire( s ) @ #l))) ∧
+     (∀ #k.1 #l. (SessionStateReveal( s ) @ #k.1) ∧ (Corrupt( A ) @ #l) ⇒ ⊥) ∧
+     (∀ #k.1. (Corrupt( B ) @ #k.1) ⇒ ⊥)))) ∧
+  (((¬(role = 'R')) ∨ (∀ #k.1. (Corrupt( A ) @ #k.1) ⇒ ⊥))) ∧
+  (∀ #k.1 k_ role_.
+    (Complete( sp, role_, k_ ) @ #k.1)
+   ⇒
+    (∀ #k.2.
+      (Corrupt( B ) @ #k.2)
+     ⇒
+      (∀ #l. (Expire( sp ) @ #l) ⇒ ¬(#k.2 < #l)) ∧
+      (∃ #l. (Expire( sp ) @ #l))) ∧
+    (∀ #k.2 #l.
+      (SessionStateReveal( sp ) @ #k.2) ∧ (Corrupt( B ) @ #l) ⇒ ⊥)) ∧
+  (((∃ #k.1 k_ role_. (Complete( sp, role_, k_ ) @ #k.1)) ∨
+    (∀ #k.1. (Corrupt( B ) @ #k.1) ⇒ ⊥)))"
+*/
+by sorry
+
+/*
+WARNING: the following wellformedness checks failed!
+
+Message Derivation Checks
+=========================
+
+  The variables of the following rule(s) are not derivable from their premises, you may be performing unintended pattern matching.
+
+Rule I_Complete: 
+Failed to derive Variable(s): ~eb
+
+Rule R_Complete: 
+Failed to derive Variable(s): ~ea
+*/
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: /home/kamilner/tamarin-rs/tamarin-prover/examples/ake/dh/UM_one_pass_attack.spthy
+
+  processing time: 0.29s
+  
+  WARNING: 1 wellformedness check failed!
+  
+  key_agreement_reachable (exists-trace): analysis incomplete (1 steps)
+  CK_secure (all-traces): analysis incomplete (1 steps)
+
+==============================================================================

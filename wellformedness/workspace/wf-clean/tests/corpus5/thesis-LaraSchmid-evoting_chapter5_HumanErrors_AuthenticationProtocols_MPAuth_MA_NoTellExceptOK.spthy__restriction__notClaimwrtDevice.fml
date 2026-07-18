@@ -1,0 +1,1 @@
+∀ X #s1. (Rule4( 'Human', 'noTellEx', 'ok', X ) @ #s1) ⇒ (¬(∃ #s2. Device( 'Human', X ) @ #s2))

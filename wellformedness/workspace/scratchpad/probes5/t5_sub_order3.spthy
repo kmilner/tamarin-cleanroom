@@ -1,0 +1,9 @@
+theory Tt5_sub_order3
+begin
+functions: f/2, g/1, hh/1
+equations: f(x, y) = hh(x), g(zz) = hh(zz)
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x) ]->
+   [ Out(~x) ]
+end

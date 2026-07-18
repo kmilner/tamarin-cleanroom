@@ -1,0 +1,21 @@
+Subterm Convergence Warning
+===========================
+
+  User-defined equations must be convergent and have the finite variant property. The following equations are not subterm convergent. If you are sure that the set of equations is nevertheless convergent and has the finite variant property, you can ignore this warning and continue 
+
+    k1(n, salt, p) = aes_cmac(aes_cmac(salt, n), p)
+    k2(n, p)
+  = <aes_cmac(aes_cmac(s1(smk2), n), <p, nb_one>), 
+     aes_cmac(aes_cmac(s1(smk2), n),
+              <aes_cmac(aes_cmac(s1(smk2), n), <p, nb_one>), p, nb_two>), 
+     aes_cmac(aes_cmac(s1(smk2), n),
+              <
+               aes_cmac(aes_cmac(s1(smk2), n),
+                        <aes_cmac(aes_cmac(s1(smk2), n), <p, nb_one>), p, nb_two>), 
+               p, nb_three>)
+    >
+    k3(n) = aes_cmac(aes_cmac(s1(smk3), n), id7)
+    k4(n) = aes_cmac(aes_cmac(s1(smk4), n), id6)
+    s1(m) = aes_cmac(null, m)
+   
+ For more information, please refer to the manual : https://tamarin-prover.com/manual/master/book/010_modeling-issues.html 

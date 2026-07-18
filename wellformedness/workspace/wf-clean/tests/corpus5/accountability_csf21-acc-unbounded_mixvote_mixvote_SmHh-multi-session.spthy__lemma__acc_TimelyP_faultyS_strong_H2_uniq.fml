@@ -1,0 +1,1 @@
+∀ S sid Sp BB ba sskDa #i #j #k #l. ((((((S = <sid, Sp>) ∧ (Server( S ) @ #i)) ∧ (BB_rec( <sid, BB>, <'b', ba> ) @ #j)) ∧ (BB_pskDs( <sid, BB>, <'spkD', pk(sskDa)> ) @ #k)) ∧ (¬(∃ bPrimeb. ba = sg(bPrimeb, sskDa)))) ∧ (H2( sid ) @ #l)) ⇒ (∃ #i.1. Corrupted( S ) @ #i.1)

@@ -1,0 +1,1 @@
+∀ id c #i #j. ((Counter( id, c ) @ #i) ∧ (Counter( id, c ) @ #j)) ⇒ (#i = #j)

@@ -1,0 +1,1 @@
+∀ x a id #i #j. ((((Log( x, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)) ∧ (¬((a = SpecialReq) ∨ (a = NormalReq)))) ∧ (¬(∃ a.1 b. x = <a.1, b>))) ⇒ (¬(∀ a.1 id.1 #i.1. (Execute( a.1, id.1 ) @ #i.1) ⇒ ((a.1 = SpecialReq) ∨ (a.1 = NormalReq))))

@@ -1,0 +1,1 @@
+∀ #i x s. (Counter( s, x ) @ #i) ⇒ (∃ #j. (Start( s ) @ #j) ∧ (#j < #i))

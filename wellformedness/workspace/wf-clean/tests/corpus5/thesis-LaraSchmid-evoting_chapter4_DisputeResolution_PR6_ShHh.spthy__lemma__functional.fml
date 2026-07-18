@@ -1,0 +1,1 @@
+∃ #i #j BB #k #l. ((((Vote( 'H', 'v' ) @ #i) ∧ (Ballot( 'H', <'v', 'H'> ) @ #j)) ∧ (BB_recorded( BB, <'bs', 'v', 'H'> ) @ #k)) ∧ (BB_tallied( BB, <'vs', 'v'> ) @ #k)) ∧ (Verify( 'H', <'v', 'H'>, <'v', 'H'> ) @ #l)

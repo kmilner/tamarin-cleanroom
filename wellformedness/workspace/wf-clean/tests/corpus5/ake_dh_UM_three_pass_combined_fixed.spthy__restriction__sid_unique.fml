@@ -1,0 +1,1 @@
+∀ #i #j sid. ((UM1_Activate( sid ) @ #i) ∧ (UM1_Activate( sid ) @ #j)) ⇒ (#i = #j)

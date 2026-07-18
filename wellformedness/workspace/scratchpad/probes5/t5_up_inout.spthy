@@ -1,0 +1,4 @@
+theory Tt5_up_inout
+begin
+rule r1: [ IN(x) ] --[ OUT(x) ]-> [ FR(x) ]
+end

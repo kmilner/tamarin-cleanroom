@@ -1,0 +1,1 @@
+∀ A B m #i. (Send_R_PH( A, B, m ) @ #i) ⇒ (∃ #j. Receive_R_PH( A, B, m ) @ #j)

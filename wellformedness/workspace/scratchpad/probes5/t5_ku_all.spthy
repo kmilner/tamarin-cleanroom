@@ -1,0 +1,4 @@
+theory Tt5_ku_all
+begin
+rule r1: [ Ku(x) ] --[ Ku(x) ]-> [ Ku(x) ]
+end

@@ -1,0 +1,1 @@
+∀ S m #k. (Commit( S, 'Human', m ) @ #k) ⇒ (∃ mn #i. (Send( 'Human', mn, m ) @ #i) ∧ (#i < #k))

@@ -1,0 +1,1 @@
+∀ pid k x #t2. (Login( pid, k, x ) @ #t2) ⇒ (∃ #t1 sid. (YubiPress( pid, sid, k, x ) @ #t1) ∧ (#t1 < #t2))

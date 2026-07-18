@@ -1,0 +1,1 @@
+∀ keys nonces1 nonces2 c1 c2 #t1 #t2 #t3. (((((#t1 < #t3) ∧ (Begin( 'R', keys, c2 ) @ #t3)) ∧ (Session( 'I', keys, nonces2, c2 ) @ #t2)) ∧ (¬(Detect( keys ) @ #t2))) ∧ (Session( 'R', keys, nonces1, c1 ) @ #t1)) ⇒ ((∃ #t0. Session( 'I', keys, nonces1, c1 ) @ #t0) ∨ (∃ i r #tc. (keys = <i, r>) ∧ (Compromise( i ) @ #tc)))

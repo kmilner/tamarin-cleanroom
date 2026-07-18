@@ -1,0 +1,5 @@
+theory Ts5_suffix2
+begin
+rule R1:
+   [ In(x:pub), Fr(~x) ] --[ M(x:pub, ~x) ]-> [ ]
+end

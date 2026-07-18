@@ -1,0 +1,15 @@
+[package]
+name = "pretty-clean"
+version = "0.1.0"
+edition = "2021"
+
+# Clean-room reimplementation of the tamarin-prover theory pretty-printer,
+# derived purely from black-box oracle behavior (see ../../SPEC.md).
+# std-only. The HughesPJ Doc layout engine is BSD-provenance and is reused
+# from the graphdot clean-room crate rather than re-derived here.
+
+[lib]
+name = "pretty_clean"
+path = "src/lib.rs"
+
+[dependencies]

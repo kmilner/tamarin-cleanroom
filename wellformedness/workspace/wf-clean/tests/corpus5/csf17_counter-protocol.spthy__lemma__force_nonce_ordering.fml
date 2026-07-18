@@ -1,0 +1,1 @@
+((∀ role pks ni nr c #i #j. ((Session( role, pks, <ni, nr>, c ) @ #i) ∧ (Gen( ni ) @ #j)) ⇒ (#j < #i)) ∧ (∀ role pks ni nr c #i #j. ((Session( role, pks, <ni, nr>, c ) @ #i) ∧ (Gen( nr ) @ #j)) ⇒ (#j < #i))) ∧ (∀ id ni nr #i #j. ((Nonces( id, ni, nr ) @ #i) ∧ (Gen( ni ) @ #j)) ⇒ (#j < #i))

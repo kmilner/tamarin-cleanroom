@@ -1,0 +1,12 @@
+theory Tg5_e_selfnoop
+begin
+
+functions: h/1
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x), B(~x,~x), C(~x) ]->
+   [ Out(~x) ]
+lemma L:
+  exists-trace
+  "Ex z. (z = 'c') & (z = z)"
+end

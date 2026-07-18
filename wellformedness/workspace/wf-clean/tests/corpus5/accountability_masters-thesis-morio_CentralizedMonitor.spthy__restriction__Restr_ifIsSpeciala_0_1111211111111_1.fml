@@ -1,0 +1,1 @@
+∀ x #NOW. (Restr_ifIsSpeciala_0_1111211111111_1( x ) @ #NOW) ⇒ (x = SpecialReq)

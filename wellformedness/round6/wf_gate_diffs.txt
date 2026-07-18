@@ -1,0 +1,8 @@
+accountability/masters-thesis-morio/CentralizedMonitor.spthy
+esorics23-bluetooth/models/ble.spthy
+features/auto-sources/tamarin-repo/sapic/statVerifLeftRight/stateverif_left_right.spthy
+loops/Axioms_and_Induction.spthy
+regression/trace/issue515.spthy
+regression/trace/issue527.spthy
+sapic/deprecated/accountability-old/CertificateTransparency.spthy
+sapic/deprecated/accountability-old/OCSPS.spthy

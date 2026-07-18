@@ -1,0 +1,1 @@
+∀ m #i. (Access( m ) @ #i) ⇒ (((∃ #j. (!KU( m ) @ #j) ∧ (#j < #i)) ∨ (∃ x #j. Exclusive( x, m ) @ #j)) ∨ (∃ y #j. Exclusive( m, y ) @ #j))

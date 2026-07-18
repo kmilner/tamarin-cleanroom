@@ -1,0 +1,1 @@
+(∃ #i #j cert t. (Judged( t, cert ) @ #i) ∧ (BlameS( ) @ #j)) ∨ (¬(∃ #i #j cert t. (Judged( t, cert ) @ #i) ∧ (BlameS( ) @ #j)))

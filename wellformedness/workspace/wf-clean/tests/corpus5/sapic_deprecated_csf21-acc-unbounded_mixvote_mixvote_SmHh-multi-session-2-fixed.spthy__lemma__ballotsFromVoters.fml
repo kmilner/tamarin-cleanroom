@@ -1,0 +1,1 @@
+∀ sid S Sp b #i. ((S = <sid, Sp>) ∧ (Learn_S_ballot( S, b ) @ #i)) ⇒ (∃ H Hp S2 S2p #j. ((H = <sid, Hp>) ∧ (S2 = <sid, S2p>)) ∧ (Comm_H_ballot( H, S2, b ) @ #j))

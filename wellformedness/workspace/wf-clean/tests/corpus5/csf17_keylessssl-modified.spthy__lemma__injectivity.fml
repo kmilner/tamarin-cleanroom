@@ -1,0 +1,1 @@
+∀ id n1 n2 n3 #i #j on1 on2 #k. ((((Injectivity( id, n1, n2 ) @ #i) ∧ (Injectivity( id, n2, n3 ) @ #j)) ∧ (Injectivity( id, on1, on2 ) @ #k)) ∧ (#k < #j)) ⇒ (¬(#i < #k))

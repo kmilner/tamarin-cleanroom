@@ -1,0 +1,1 @@
+∀ idH H1 H2 #i #j. ((User( idH, H1 ) @ #i) ∧ (User( idH, H2 ) @ #j)) ⇒ (H1 = H2)

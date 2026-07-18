@@ -1,0 +1,25 @@
+theory privateFunctionTest
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: f/0[private,constructor], fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) Test:
+   [ ] --> [ Out( f ) ]
+
+  /* has exactly the trivial AC variant */
+
+lemma secretF:
+  all-traces "∀ #i. (K( f ) @ #i) ⇒ (⊥)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ #i. (K( f ) @ #i)"
+*/
+by sorry
+
+
+
+end

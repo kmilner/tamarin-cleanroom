@@ -1,0 +1,6 @@
+theory Ts5_all4
+begin
+builtins: natural-numbers
+rule R1:
+   [ Fr(~x), In($x), In(x) ] --[ M(%x) ]-> [ ]
+end

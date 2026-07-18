@@ -1,0 +1,1 @@
+∀ v #i #j. ((Claim( 'H1', 'IVHE2' ) @ #i) ∧ (Goal( 'H1', 'IVHE2', <'v', v> ) @ #j)) ⇒ (∃ b BB #l r pkS sskD D #d. ((BB_rec( BB, <'bs', b> ) @ #l) ∧ (b = sg(encp(v, r, pkS), sskD))) ∧ (DeviceKey( D, 'H1', sskD ) @ #d))

@@ -1,0 +1,1 @@
+∀ #i #j sid. ((Activate( sid ) @ #i) ∧ (Activate( sid ) @ #j)) ⇒ (#i = #j)

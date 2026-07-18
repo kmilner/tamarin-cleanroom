@@ -1,0 +1,22 @@
+# Round-6 residual families (8 files, strict subset of the round-5 71).
+# Classified from the round-5 full-corpus gate (wf_gate_round5.tsv, open side).
+# diffcount = number of differing lines vs the HS reference wf-block.
+# family key:
+#   pubcap   — a "Public constants with mismatching capitalization" topic the
+#              reference emits and the sealed checker omits entirely.
+#   listfmt  — long numbered fact lists: reference right-aligns the index to
+#              the widest entry ("   1." … "  10.") and separates consecutive
+#              entries with a blank line; sealed uses fixed 2-space, no blanks.
+#   lemanno  — a "Lemma annotations" block the reference emits, sealed omits.
+#   blank1   — exactly one missing blank line between topics.
+#   sortbody — body text of the "mismatching sorts" report diverges.
+# A file can be in several families; primary listed first.
+# relpath	families	diffcount
+accountability/masters-thesis-morio/CentralizedMonitor.spthy	pubcap	7
+esorics23-bluetooth/models/ble.spthy	listfmt	20
+features/auto-sources/tamarin-repo/sapic/statVerifLeftRight/stateverif_left_right.spthy	blank1	1
+loops/Axioms_and_Induction.spthy	lemanno	3
+regression/trace/issue515.spthy	blank1	1
+regression/trace/issue527.spthy	pubcap,listfmt,sortbody	13
+sapic/deprecated/accountability-old/CertificateTransparency.spthy	blank1	1
+sapic/deprecated/accountability-old/OCSPS.spthy	blank1	1

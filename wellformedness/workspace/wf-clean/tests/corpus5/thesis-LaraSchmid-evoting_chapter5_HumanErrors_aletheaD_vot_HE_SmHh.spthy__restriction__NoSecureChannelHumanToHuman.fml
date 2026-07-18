@@ -1,0 +1,1 @@
+∀ H1 H2 x #i #j1 #j2. (((ChanOut_S( H1, H2, x ) @ #i) ∧ (Untrained( H1 ) @ #j1)) ∧ (Untrained( H2 ) @ #j2)) ⇒ (⊥)

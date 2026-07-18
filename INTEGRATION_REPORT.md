@@ -2880,3 +2880,100 @@ ignored) + routes (autoprove 6 / basic 19 / graph 4 / proof_step 3 / static 3 / 
 15 / upload 3). wf fixture suite 2/2. `gen_license_headers.py` --check 0 stale (133
 headers). Live oracle: summary-framing corpus gate (HS 1.13.0 testing binary vs RS
 debug) — 6/6 verdict classes byte-identical incl. `Unfinishable`.
+
+--------------------------------------------------------------------------------
+# Dirty-room integration report — round-5 wellformedness refinement, unit C
+
+Date: 2026-07-18. Integrator: open-side wf integrator (mechanical re-sync only;
+no logic transplanted, no hand-edit of the sealed checker). The sealed wf-clean
+workspace was refined this round to close corpus wf divergences; this entry
+propagates that refinement into `crates/tamarin-parser/src/wf/` and re-runs the
+full-corpus wf gate. (This is the wf slice's own round-5 sealed sources; the
+global report counter is separately at round-9 for unit D.)
+
+## C.1 Re-sync of the round-5 clean sources — DONE
+Re-applied the established mechanical recipe (`crate::{pretty,report,formula,
+checks}` -> `super::…`; `crate::ast` kept — resolves to the real tamarin-parser
+AST) to the round-5 `wf-clean/src` sources. Only two files actually changed vs
+the tree; the other three were already byte-identical to the round-5 sealed
+sources from the round-4 sync:
+* `wf/checks.rs`  <- wf-clean/src/checks.rs (67 493 -> 76 669 bytes). New in the
+  round-5 checker: the subterm/equation path now renders through
+  `super::pretty::pp_equation` (checks.rs:1706) and the guardedness wrapped
+  printer routes through `super::formula::pp_formula_wrapped` at the round-5
+  offsets (checks.rs:1540-1541).
+* `wf/pretty.rs`  <- wf-clean/src/pretty.rs (5 635 -> 10 925 bytes; adds
+  `pp_equation` + supporting renderers). Only `use crate::ast::*;` — no
+  `super::` cross-ref, so path-fix is a no-op on this file.
+* `wf/formula.rs`, `wf/report.rs` — reverse-transform byte-IDENTICAL to the
+  round-5 sealed sources; unchanged.
+* `wf/mod.rs` — the round-5 `lib.rs` module surface is unchanged from round-4;
+  the rebuilt transform (`pub mod ast;` dropped, `pub use ast::*;` ->
+  `pub use crate::ast::*;`) is byte-identical to the existing `mod.rs`.
+  PRESERVED workspace lines `pub mod order; pub use order::*;` + `wf/order.rs`
+  (workspace-authored) untouched. The OPEN-SIDE wf-prep adapters that live
+  OUTSIDE `wf/` (run.rs let-substitution + `normalize_wf_vars`, `wf_adapt.rs`,
+  `pretty_theory.rs` preamble map + subterm blank-lines, `theory_io.rs`) were
+  NOT touched or reverted.
+
+All six `wf/` files remain headerless (doc comments only; 0 `.hs` citations, so
+`gen_license_headers.py` assigns them no header — tripwire clean, no provenance
+violation).
+
+## C.2 Full-corpus wf gate — 71 DIFF -> 8 DIFF (0 regressions)
+`RESULTS_TSV=scripts/wf_gate_round5.tsv JOBS=6 bash scripts/wf_gate.sh` over the
+419-file corpus, RS = fresh `--release` build vs the HS 1.13.0 reference cache:
+
+* BEFORE (pre-round baseline, `scripts/wf_gate_full.tsv`): **348 MATCH / 71 DIFF / 0 SKIP**.
+* AFTER  (`scripts/wf_gate_round5.tsv`):                    **411 MATCH /  8 DIFF / 0 SKIP**.
+
+63 of the 71 divergences closed. All 8 residual files are a strict SUBSET of the
+original 71 (verified by `comm`) — **no MATCH file regressed to DIFF**.
+
+## C.3 Residual 8 (KEEP-AND-REPORT — sealed-checker gaps, not hand-fixed)
+Per the rules the sealed code is not hand-edited; these are reported for the next
+clean-side round. Path — diffcount — family:
+
+1. `esorics23-bluetooth/models/ble.spthy` — 20 — fact-arity numbered-list layout:
+   HS right-aligns the index to the max-index width (`   1.` … `  10.`) and emits
+   a blank continuation line between entries; the clean printer uses a fixed
+   2-space index and no inter-entry blank. Pretty-printer list-layout gap.
+2. `regression/trace/issue527.spthy` — 13 — compound: missing the "Public
+   constants with mismatching capitalization", "Fact capitalization issues", and
+   "Fact arity issues" topic blocks, plus a divergent "mismatching sorts" body
+   (clean emits `Possible reasons: 1./2. …`, HS omits it here), plus block
+   spacing.
+3. `accountability/masters-thesis-morio/CentralizedMonitor.spthy` — 7 — the whole
+   "Public constants with mismatching capitalization" topic is absent from the
+   clean output (HS flags rule "Init" name `'C'`/`'c'`).
+4. `loops/Axioms_and_Induction.spthy` — 3 — the "Lemma annotations" topic block
+   is absent from the clean output.
+5. `features/auto-sources/tamarin-repo/sapic/statVerifLeftRight/stateverif_left_right.spthy`
+   — 1 — single missing blank line (topic-block spacing).
+6. `regression/trace/issue515.spthy` — 1 — single missing blank line.
+7. `sapic/deprecated/accountability-old/CertificateTransparency.spthy` — 1 — single
+   missing blank line.
+8. `sapic/deprecated/accountability-old/OCSPS.spthy` — 1 — single missing blank line.
+
+Families: (a) missing "Public constants with mismatching capitalization" check
+(#2, #3); (b) long fact-list numbered-list right-align + inter-entry blanks
+(#1, part of #2); (c) missing "Lemma annotations" render (#4); (d) single
+leading/trailing blank-line spacing in a topic block (#5-#8); (e) "mismatching
+sorts" body-text divergence (part of #2).
+
+## C.4 Regression guard — all green
+* `cargo build --release`: 0 errors (3m30s).
+* `cargo test`: `-p tamarin-parser` lib **67** + wellformedness **2**;
+  `-p tamarin-theory` lib **489** (+1 ignored) + oracle_solver **19** (+9 ignored)
+  + wf_formula_terms **5**; `-p tamarin-prover` lib **60** + cli_e2e **7** +
+  console_split_parity **59**; `-p tamarin-server` lib **107** (+2 ignored) +
+  routes (autoprove 6 / basic 19 / graph 4 / proof_step 3 / static 3 / stubs 15 /
+  upload 3). 0 failures.
+* `gen_license_headers.py --check`: **0 stale** (exit 0); no `wf/` file gained a
+  header (all six headerless, 0 `.hs` citations). Header-count delta: **0**.
+
+## Summary (round-5, unit C) — deleted / kept / header delta
+* C RE-SYNCED (round-5 `wf/checks.rs` + `wf/pretty.rs`, headerless; formula/report/
+  mod already matched). Deleted: none (the ported wf was removed in the round-4
+  swap). Header delta: **0**. Gate: **71 DIFF -> 8 DIFF**, 0 regressions; residual
+  8 kept-and-reported as sealed-checker gaps.

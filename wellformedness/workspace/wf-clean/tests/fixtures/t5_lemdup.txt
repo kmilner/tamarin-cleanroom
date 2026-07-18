@@ -1,0 +1,24 @@
+WARNING: the following wellformedness checks failed!
+
+Fact arity issues
+=================
+
+Same fact is used with different arities, i.e., Fact('A','B') is different from Fact('A'). 
+Check the arguments of your facts.
+  
+
+  Fact `bt':
+
+    1. Rule `R1', arity 1
+         Bt( ~x )
+    
+    2. Rule `R2', arity 3
+         Bt( ~x, ~y, ~z )
+    
+    3. Lemma `L', arity 3
+         Fact {factTag = ProtoFact Linear "Bt" 3, factAnnotations = fromList [], factTerms = [Bound 3,Bound 2,Bound 1]}
+    
+    4. Lemma `L', arity 3
+         Fact {factTag = ProtoFact Linear "Bt" 3, factAnnotations = fromList [], factTerms = [Bound 4,Bound 3,Bound 2]}
+  
+*/

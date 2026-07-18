@@ -1,0 +1,22 @@
+WARNING: the following wellformedness checks failed!
+
+Unbound variables
+=================
+
+  rule `lookup_s_as_status_0_1111112111' has unbound variables: 
+    status
+  
+  rule `lookup_s_as_status_0_111112111' has unbound variables: 
+    status
+
+Message Derivation Checks
+=========================
+
+  The variables of the following rule(s) are not derivable from their premises, you may be performing unintended pattern matching.
+
+Rule lookup_s_as_status_0_1111112111: 
+Failed to derive Variable(s): status
+
+Rule lookup_s_as_status_0_111112111: 
+Failed to derive Variable(s): status
+*/

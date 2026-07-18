@@ -1,0 +1,10 @@
+cav13/DH_example.spthy
+features/xor/xor.spthy
+features/xor/xorplusdh.spthy
+regression/trace/issue777.spthy
+features/multiset/minimal_multiset.spthy
+features/multiset/NumberSubtermTests.spthy
+sp14/Joux.spthy
+features/private_function_symbols/test.spthy
+Tutorial.spthy
+classic/NSLPK3.spthy

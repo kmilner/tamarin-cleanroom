@@ -1,0 +1,12 @@
+theory Tg5_e_eqself2
+begin
+
+functions: h/1
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x), B(~x,~x), C(~x) ]->
+   [ Out(~x) ]
+lemma L:
+  exists-trace
+  "Ex z. z = h(z)"
+end

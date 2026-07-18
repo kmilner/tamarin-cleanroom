@@ -1,0 +1,12 @@
+/*
+WARNING: the following wellformedness checks failed!
+
+ Formula guardedness
+====================
+
+  Lemma `L' cannot be converted to a guarded formula:
+    unguarded variable(s) 'w' in the subformula
+      "∃ z w. (w = h(z)) ∧ (z = 'c')"
+    in the formula
+      "∃ z w. (w = h(z)) ∧ (z = 'c')"
+*/

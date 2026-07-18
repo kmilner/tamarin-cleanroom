@@ -1,0 +1,7 @@
+WARNING: the following wellformedness checks failed!
+
+Facts occur in the left-hand-side but not in any right-hand-side 
+=================================================================
+
+  1. in rule "ChanOut_IR":  factName `Out_IR' arity: 3 multiplicity: Linear. Perhaps you want to use the fact in rule "P":  factName `Out_IU' arity: 3 multiplicity: Linear
+*/

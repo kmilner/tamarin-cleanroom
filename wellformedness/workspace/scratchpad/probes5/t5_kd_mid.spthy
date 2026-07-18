@@ -1,0 +1,4 @@
+theory Tt5_kd_mid
+begin
+rule r1: [ In(x) ] --[ Kd(x) ]-> [ ]
+end

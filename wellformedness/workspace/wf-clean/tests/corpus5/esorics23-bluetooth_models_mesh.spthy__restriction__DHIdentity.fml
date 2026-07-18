@@ -1,0 +1,1 @@
+∀ t r y #i. (Raised( t, DH_neutral, r, y ) @ #i) ⇒ (r = DH_neutral)

@@ -1,0 +1,27 @@
+WARNING: the following wellformedness checks failed!
+
+Facts occur in the left-hand-side but not in any right-hand-side 
+=================================================================
+
+  1. in rule "ChanOut_A":  factName `Out_A' arity: 4 multiplicity: Linear. Perhaps you want to use the fact in rule "H_send_S":  factName `Out_S' arity: 4 multiplicity: Linear
+
+Message Derivation Checks
+=========================
+
+  The variables of the following rule(s) are not derivable from their premises, you may be performing unintended pattern matching.
+
+Rule D_3: 
+Failed to derive Variable(s): ~c, ~m
+
+Rule S_2: 
+Failed to derive Variable(s): ~m, ~pw
+
+Rule S_6: 
+Failed to derive Variable(s): ~c, ~m, ~pw
+
+Rule H_1: 
+Failed to derive Variable(s): ~m, ~pw
+
+Rule H_4: 
+Failed to derive Variable(s): ~c, ~m, ~pw
+*/

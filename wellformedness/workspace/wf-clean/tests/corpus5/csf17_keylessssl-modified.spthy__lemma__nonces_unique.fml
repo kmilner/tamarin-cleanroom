@@ -1,0 +1,1 @@
+∀ id ni nr #i #j. ((Nonces( id, ni, nr ) @ #i) ∧ (Nonces( id, ni, nr ) @ #j)) ⇒ (#i = #j)

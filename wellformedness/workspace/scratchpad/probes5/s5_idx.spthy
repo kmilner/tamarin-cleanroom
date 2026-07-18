@@ -1,0 +1,5 @@
+theory Ts5_idx
+begin
+rule R1:
+   [ In($x.1), In(x.2) ] --[ M($x.1, x.2) ]-> [ ]
+end

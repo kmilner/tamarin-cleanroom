@@ -1,0 +1,12 @@
+theory Tg5_e_eqpair
+begin
+
+functions: h/1
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x), B(~x,~x), C(~x) ]->
+   [ Out(~x) ]
+lemma L:
+  all-traces
+  "All k #i. A(k) @ #i ==> Ex y r. k = <y, r>"
+end

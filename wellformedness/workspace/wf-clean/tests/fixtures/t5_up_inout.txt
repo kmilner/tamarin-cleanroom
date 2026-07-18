@@ -1,0 +1,14 @@
+WARNING: the following wellformedness checks failed!
+
+Reserved names
+==============
+
+  Rule `r1' contains facts with reserved names on the middle:
+    Out( x )
+
+Special facts
+=============
+
+  rule `r1' uses disallowed facts on right-hand-side:
+    Fr( x )
+*/

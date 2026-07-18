@@ -1,0 +1,1 @@
+((∃ #c1. Corrupted( 'LA' ) @ #c1) ∧ ((∀ #c0. (Corrupted( 'CA' ) @ #c0) ⇒ (⊥)) ∧ (⊤))) ∧ (¬(∀ #i pk. (TestLA( pk ) @ #i) ⇒ (∃ #j. (HonestLog( pk ) @ #j) ∧ (#j < #i))))

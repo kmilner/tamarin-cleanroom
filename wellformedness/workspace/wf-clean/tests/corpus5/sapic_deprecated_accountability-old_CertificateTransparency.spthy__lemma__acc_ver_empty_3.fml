@@ -1,0 +1,1 @@
+(¬(((∃ #i. DishonestCA( ) @ #i) ∧ (∃ #i. DishonestLA( ) @ #i)) ∨ (((¬(∃ #i. DishonestCA( ) @ #i)) ∧ (∃ #i. DishonestLA( ) @ #i)) ∨ ((∃ #i. DishonestCA( ) @ #i) ∧ (¬(∃ #i. DishonestLA( ) @ #i)))))) ⇒ ((∀ #i pk. (TestLA( pk ) @ #i) ⇒ (∃ #j. (HonestLog( pk ) @ #j) ∧ (#j < #i))) ∧ (∀ #i S pk. (TestCA( S, pk ) @ #i) ⇒ (∃ #j. HonestRegister( S, 'CA', pk ) @ #j)))

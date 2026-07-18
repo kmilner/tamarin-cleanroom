@@ -1,0 +1,1 @@
+(∀ H1 H2 #i #j. ((Setup( H1 ) @ #i) ∧ (Setup( H2 ) @ #j)) ⇒ (#i = #j)) ∧ (∃ #k #n S m. (Dfin( ) @ #k) ∧ (Commit( S, 'Human', m ) @ #n))

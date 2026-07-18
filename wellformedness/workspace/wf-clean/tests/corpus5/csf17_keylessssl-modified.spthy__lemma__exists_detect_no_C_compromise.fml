@@ -1,0 +1,1 @@
+∃ kc kw #i. (Detect( <kc, kw> ) @ #i) ∧ (¬(∃ #j. Compromise( kc ) @ #j))

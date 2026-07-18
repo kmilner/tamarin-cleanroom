@@ -1,0 +1,34 @@
+WARNING: the following wellformedness checks failed!
+
+Unbound variables
+=================
+
+  rule `lookup_proofOfID_S_pk_as_ignored_0_111211' has unbound variables: 
+    ignored
+  
+  rule `lookup_log_LA_S_pk_c1_as_x1_0_11211' has unbound variables: 
+    x1
+  
+  rule `lookup_log_LA_S_pk_s1_as_x2_0_112111' has unbound variables: 
+    x2
+  
+  rule `lookup_log_LA_S_pk_s1_as_x2_0_112112' has unbound variables: 
+    x2
+
+Message Derivation Checks
+=========================
+
+  The variables of the following rule(s) are not derivable from their premises, you may be performing unintended pattern matching.
+
+Rule lookup_proofOfID_S_pk_as_ignored_0_111211: 
+Failed to derive Variable(s): ignored
+
+Rule lookup_log_LA_S_pk_c1_as_x1_0_11211: 
+Failed to derive Variable(s): x1
+
+Rule lookup_log_LA_S_pk_s1_as_x2_0_112111: 
+Failed to derive Variable(s): x2
+
+Rule lookup_log_LA_S_pk_s1_as_x2_0_112112: 
+Failed to derive Variable(s): x2
+*/

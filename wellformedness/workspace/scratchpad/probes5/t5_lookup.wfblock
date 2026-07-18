@@ -1,0 +1,22 @@
+/*
+WARNING: the following wellformedness checks failed!
+
+Unbound variables
+=================
+
+  rule `lookup_time_as_t_0_11121111' has unbound variables: 
+    ~t
+
+Facts occur in the left-hand-side but not in any right-hand-side 
+=================================================================
+
+  1. in rule "lookup_time_as_t_0_11121111":  factName `State_11121111' arity: 3 multiplicity: Linear. Perhaps you want to use the fact in rule "lookup_time_as_t_0_11121111":  factName `State_111211111' arity: 4 multiplicity: Linear
+
+Message Derivation Checks
+=========================
+
+  The variables of the following rule(s) are not derivable from their premises, you may be performing unintended pattern matching.
+
+Rule lookup_time_as_t_0_11121111: 
+Failed to derive Variable(s): ~t
+*/

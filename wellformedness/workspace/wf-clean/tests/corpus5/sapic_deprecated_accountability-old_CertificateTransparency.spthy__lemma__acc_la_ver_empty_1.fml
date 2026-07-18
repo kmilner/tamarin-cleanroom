@@ -1,0 +1,1 @@
+(¬(∃ #i. DishonestLA( ) @ #i)) ⇒ (∀ #i pk. (TestLA( pk ) @ #i) ⇒ (∃ #j. (HonestLog( pk ) @ #j) ∧ (#j < #i)))

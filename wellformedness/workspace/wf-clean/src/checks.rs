@@ -48,8 +48,35 @@ fn is_reserved(name: &str) -> bool {
 fn is_special(name: &str) -> bool {
     SPECIAL_FACTS.contains(&name)
 }
-fn is_builtin_factname(name: &str) -> bool {
-    is_reserved(name) || is_special(name)
+
+/// Builtin-fact normalization: fact names matching KU/KD/In/Out/Fr
+/// case-insensitively (and the exact single letter `K`) denote the builtin
+/// facts; `Ku(x)` reports as `!KU( x )` and `FR(x)` as `Fr( x )` (probes
+/// t5_ku_lhs / t5_up_inout). Returns the canonical name and multiplicity.
+fn canon_builtin(name: &str) -> Option<(&'static str, bool)> {
+    match name.to_ascii_lowercase().as_str() {
+        "k" => Some(("K", false)),
+        "ku" => Some(("KU", true)),
+        "kd" => Some(("KD", true)),
+        "in" => Some(("In", false)),
+        "out" => Some(("Out", false)),
+        "fr" => Some(("Fr", false)),
+        _ => None,
+    }
+}
+
+/// The fact with its name/multiplicity rewritten to the canonical builtin
+/// form when it matches one (otherwise unchanged).
+fn canon_fact(f: &Fact) -> Fact {
+    match canon_builtin(&f.name) {
+        Some((name, persistent)) => Fact {
+            persistent,
+            name: name.to_string(),
+            args: f.args.clone(),
+            annotations: f.annotations.clone(),
+        },
+        None => f.clone(),
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -283,12 +310,16 @@ pub fn mismatching_sorts(thy: &Theory) -> Vec<WfError> {
         collect_facts_vars(&r.actions, &mut vars);
         collect_facts_vars(&r.conclusions, &mut vars);
 
-        // Group by lowercased base name; a group with >1 distinct variant
-        // (prefix+name, ignoring index) is a conflict.
-        let mut groups: Vec<(String, Vec<String>)> = Vec::new(); // (lc key, variants)
+        // Group by (lowercased base name, index): `$x.1` and `x.2` are
+        // different variables and never clash (probes s5_idx / s5_capdiff).
+        // A group with >1 distinct variant (sort class + exact name) is a
+        // conflict; suffix-sort and sigil spellings of the same sort are the
+        // SAME variant (s5_suffix).
+        type Variant = (i32, String); // (sort-class rank, exact name)
+        let mut groups: Vec<((String, u64), Vec<Variant>)> = Vec::new();
         for v in &vars {
-            let key = v.name.to_lowercase();
-            let variant = variant_repr(v);
+            let key = (v.name.to_lowercase(), v.idx);
+            let variant = (class_rank(var_class(v)), v.name.clone());
             match groups.iter_mut().find(|(k, _)| *k == key) {
                 Some((_, variants)) => {
                     if !variants.contains(&variant) {
@@ -298,22 +329,31 @@ pub fn mismatching_sorts(thy: &Theory) -> Vec<WfError> {
                 None => groups.push((key, vec![variant])),
             }
         }
-        let mut conflicts: Vec<Vec<String>> = groups
+        let mut conflicts: Vec<((String, u64), Vec<Variant>)> = groups
             .into_iter()
             .filter(|(_, vs)| vs.len() > 1)
-            .map(|(_, mut vs)| {
+            .map(|(k, mut vs)| {
+                // Variants ordered by sort class ($ < ~ < msg < %), then by
+                // exact name (probes s5_all4 / s5_crossname / s5_capord).
                 vs.sort();
-                vs
+                (k, vs)
             })
             .collect();
         if conflicts.is_empty() {
             continue;
         }
-        // deterministic ordering of groups within a rule
-        conflicts.sort();
+        // Groups ordered by their (lowercased name, index) key (s5_groups).
+        conflicts.sort_by(|a, b| a.0.cmp(&b.0));
         let mut body = format!("  rule `{}': ", r.name);
-        for (i, variants) in conflicts.iter().enumerate() {
-            body.push_str(&format!("\n    {}. {}", i + 1, variants.join(", ")));
+        for (i, ((_, idx), variants)) in conflicts.iter().enumerate() {
+            if i > 0 {
+                body.push_str("\n    ");
+            }
+            let rendered: Vec<String> = variants
+                .iter()
+                .map(|(rank, name)| variant_string(*rank, name, *idx))
+                .collect();
+            body.push_str(&format!("\n    {}. {}", i + 1, rendered.join(", ")));
         }
         rule_entries.push(body);
     }
@@ -325,16 +365,33 @@ pub fn mismatching_sorts(thy: &Theory) -> Vec<WfError> {
     vec![WfError::new(T_SORTS, msg)]
 }
 
-/// A variable's sort+name representation without the numeric index.
-fn variant_repr(v: &VarSpec) -> String {
-    let prefix = match v.sort {
-        SortHint::Fresh => "~",
-        SortHint::Pub => "$",
-        SortHint::Nat => "%",
-        SortHint::Node => "#",
+/// Report-order rank of a sort class in the variant listing: `$x, ~x, x, %x`
+/// (probe s5_all4; Node placement unobserved - listed last).
+fn class_rank(c: SortClass) -> i32 {
+    match c {
+        SortClass::Pub => 0,
+        SortClass::Fresh => 1,
+        SortClass::Msg => 2,
+        SortClass::Nat => 3,
+        SortClass::Node => 4,
+    }
+}
+
+/// A variant rendered with its sort sigil and the group's index suffix
+/// (suffix-sorted spellings render with the sigil too - probe s5_suffix2).
+fn variant_string(rank: i32, name: &str, idx: u64) -> String {
+    let sigil = match rank {
+        0 => "$",
+        1 => "~",
+        3 => "%",
+        4 => "#",
         _ => "",
     };
-    format!("{}{}", prefix, v.name)
+    if idx > 0 {
+        format!("{}{}.{}", sigil, name, idx)
+    } else {
+        format!("{}{}", sigil, name)
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -345,19 +402,22 @@ pub fn reserved_names(thy: &Theory) -> Vec<WfError> {
     for r in protocol_rules(thy) {
         // On the left/right the reserved set is {K,KU,KD}; in the middle
         // (actions) the I/O facts In/Out/Fr are reserved too (observed z9/z11).
+        // Matching is via the builtin normalization (`Ku` hits as `!KU( x )` -
+        // probe t5_ku_all).
         for (facts, phrase, middle) in [
             (&r.premises, "left-hand-side", false),
             (&r.actions, "the middle", true),
             (&r.conclusions, "the right-hand-side", false),
         ] {
-            let hits: Vec<&Fact> = facts
+            let hits: Vec<Fact> = facts
                 .iter()
+                .map(canon_fact)
                 .filter(|f| is_reserved(&f.name) || (middle && is_special(&f.name)))
                 .collect();
             if hits.is_empty() {
                 continue;
             }
-            let rendered: Vec<String> = hits.iter().map(|f| pp_fact(f)).collect();
+            let rendered: Vec<String> = hits.iter().map(pp_fact).collect();
             entries.push(format!(
                 "  Rule `{}' contains facts with reserved names on {}:\n    {}",
                 r.name,
@@ -381,6 +441,7 @@ pub fn fr_facts(thy: &Theory) -> Vec<WfError> {
     for r in protocol_rules(thy) {
         for facts in [&r.premises, &r.conclusions] {
             for f in facts {
+                let f = canon_fact(f);
                 if f.name != "Fr" {
                     continue;
                 }
@@ -390,7 +451,7 @@ pub fn fr_facts(thy: &Theory) -> Vec<WfError> {
                         Term::Var(v) if matches!(v.sort, SortHint::Fresh | SortHint::Msg | SortHint::Untagged)
                     );
                 if !ok {
-                    entries.push(format!("  rule `{}' fact: {}", r.name, pp_fact(f)));
+                    entries.push(format!("  rule `{}' fact: {}", r.name, pp_fact(&f)));
                 }
             }
         }
@@ -408,12 +469,14 @@ pub fn fr_facts(thy: &Theory) -> Vec<WfError> {
 pub fn special_facts(thy: &Theory) -> Vec<WfError> {
     let mut entries: Vec<String> = Vec::new();
     for r in protocol_rules(thy) {
-        // Premise side: `Out` is disallowed.
+        // Premise side: `Out` is disallowed (builtin-normalized; `FR(x)` in a
+        // conclusion reports as `Fr( x )` - probe t5_up_inout).
         let lhs: Vec<String> = r
             .premises
             .iter()
+            .map(canon_fact)
             .filter(|f| f.name == "Out")
-            .map(|f| pp_fact(f))
+            .map(|f| pp_fact(&f))
             .collect();
         if !lhs.is_empty() {
             entries.push(format!(
@@ -426,8 +489,9 @@ pub fn special_facts(thy: &Theory) -> Vec<WfError> {
         let rhs: Vec<String> = r
             .conclusions
             .iter()
+            .map(canon_fact)
             .filter(|f| f.name == "In" || f.name == "Fr")
-            .map(|f| pp_fact(f))
+            .map(|f| pp_fact(&f))
             .collect();
         if !rhs.is_empty() {
             entries.push(format!(
@@ -508,7 +572,7 @@ fn gather_formula_facts(
         Formula::Forall(vs, g) | Formula::Exists(vs, g) => {
             let n = vs.len();
             for v in vs {
-                stack.push((v.name.clone(), var_class(v)));
+                stack.push((v.name.clone(), v.idx, var_class(v)));
             }
             gather_formula_facts(g, stack, owner, out);
             for _ in 0..n {
@@ -597,6 +661,12 @@ pub fn fact_capitalization(thy: &Theory) -> Vec<WfError> {
     for r in protocol_rules(thy) {
         for facts in [&r.premises, &r.actions, &r.conclusions] {
             for f in facts {
+                // Builtin facts normalize their spelling (`Ku` = `KU`), so
+                // they never produce a capitalization conflict (issue515:
+                // Ku/KU/Kd/KD yield no such topic).
+                if canon_builtin(&f.name).is_some() {
+                    continue;
+                }
                 occ.push(Occ {
                     name: f.name.clone(),
                     rule: r.name.clone(),
@@ -655,11 +725,13 @@ pub fn fact_arity(thy: &Theory) -> Vec<WfError> {
         if arities.len() < 2 {
             continue;
         }
-        // one item per distinct (label, owner, arity), first render kept.
-        let mut seen: Vec<(&str, String, usize)> = Vec::new();
+        // One item per distinct (label, owner, arity, render): two uses in
+        // the same owner at the same arity are BOTH listed when their raw
+        // renders differ (probe t5_lemdup: `Bound 3,2,1` and `Bound 4,3,2`).
+        let mut seen: Vec<(&str, String, usize, String)> = Vec::new();
         let mut items: Vec<String> = Vec::new();
         for u in us {
-            let k = (u.label, u.owner.clone(), u.arity);
+            let k = (u.label, u.owner.clone(), u.arity, u.render.clone());
             if seen.contains(&k) {
                 continue;
             }
@@ -692,10 +764,10 @@ pub fn fact_multiplicity(thy: &Theory) -> Vec<WfError> {
         if mults.len() < 2 {
             continue;
         }
-        let mut seen: Vec<(&str, String, bool)> = Vec::new();
+        let mut seen: Vec<(&str, String, bool, String)> = Vec::new();
         let mut items: Vec<String> = Vec::new();
         for u in us {
-            let k = (u.label, u.owner.clone(), u.persistent);
+            let k = (u.label, u.owner.clone(), u.persistent, u.render.clone());
             if seen.contains(&k) {
                 continue;
             }
@@ -749,11 +821,15 @@ impl FactId {
 }
 
 pub fn fact_lhs_occur_no_rhs(thy: &Theory) -> Vec<WfError> {
+    // The builtin facts KU/KD/In/Out/Fr (matched via normalization) do not
+    // participate; the reserved proto-fact `K` DOES - a K-only premise is
+    // listed (issue527 target: `factName `K'` with suggestion `F`).
+    let excluded = |name: &str| matches!(canon_builtin(name), Some((c, _)) if c != "K");
     let mut lhs: Vec<FactId> = Vec::new();
     let mut rhs: Vec<FactId> = Vec::new();
     for r in protocol_rules(thy) {
         for f in &r.premises {
-            if is_builtin_factname(&f.name) {
+            if excluded(&f.name) {
                 continue;
             }
             lhs.push(FactId {
@@ -764,7 +840,7 @@ pub fn fact_lhs_occur_no_rhs(thy: &Theory) -> Vec<WfError> {
             });
         }
         for f in &r.conclusions {
-            if is_builtin_factname(&f.name) {
+            if excluded(&f.name) {
                 continue;
             }
             rhs.push(FactId {
@@ -780,24 +856,30 @@ pub fn fact_lhs_occur_no_rhs(thy: &Theory) -> Vec<WfError> {
 
     // LHS-only identities, first occurrence, in source order.
     let mut seen: Vec<(String, usize, bool)> = Vec::new();
-    let mut items: Vec<String> = Vec::new();
+    let mut entries: Vec<String> = Vec::new();
     for f in &lhs {
         if rhs_idents.contains(&f.ident()) || seen.contains(&f.ident()) {
             continue;
         }
         seen.push(f.ident());
-        let n = items.len() + 1;
-        let mut line = format!("  {}. {}", n, f.render());
+        let mut line = f.render();
         if let Some(sugg) = nearest_rhs(&f.name, &rhs) {
             line.push_str(&format!(". Perhaps you want to use the fact {}", sugg.render()));
         }
-        items.push(line);
+        entries.push(line);
     }
-    if items.is_empty() {
-        vec![]
-    } else {
-        vec![WfError::new(T_LHSRHS, items.join("\n  \n"))]
+    if entries.is_empty() {
+        return vec![];
     }
+    // Item numbers are right-aligned to the widest index with a two-space
+    // margin ("   1." ... "  10." - probe t5_align / ble & mesh targets).
+    let w = entries.len().to_string().len();
+    let items: Vec<String> = entries
+        .iter()
+        .enumerate()
+        .map(|(i, e)| format!("  {:>w$}. {}", i + 1, e, w = w))
+        .collect();
+    vec![WfError::new(T_LHSRHS, items.join("\n  \n"))]
 }
 
 /// Nearest RHS fact by name edit distance, if within threshold (<= 3).
@@ -858,37 +940,42 @@ pub fn public_names_report(thy: &Theory) -> Vec<WfError> {
 }
 
 pub fn public_names_report_from_pairs(pairs: Vec<(String, String)>) -> Vec<WfError> {
-    // Group by lowercased constant name, preserving first-seen order.
-    let mut groups: Vec<(String, Vec<(String, String)>)> = Vec::new();
+    // Each DISTINCT spelling is attributed to the rule of its FIRST
+    // occurrence (issue527 target: 'second' is listed only for rule One even
+    // though later rules use it too).
+    let mut first_rule: Vec<(String, String)> = Vec::new(); // (name, first rule)
     for (name, rule) in &pairs {
+        if !first_rule.iter().any(|(n, _)| n == name) {
+            first_rule.push((name.clone(), rule.clone()));
+        }
+    }
+    // Group the distinct spellings by lowercased name; conflicting groups are
+    // reported sorted by that key (issue527: 'first' group before 'second').
+    let mut groups: Vec<(String, Vec<(String, String)>)> = Vec::new();
+    for (name, rule) in &first_rule {
         let key = name.to_lowercase();
         match groups.iter_mut().find(|(k, _)| *k == key) {
             Some((_, v)) => v.push((name.clone(), rule.clone())),
             None => groups.push((key, vec![(name.clone(), rule.clone())])),
         }
     }
+    groups.retain(|(_, v)| v.len() > 1);
+    groups.sort_by(|a, b| a.0.cmp(&b.0));
     let mut items: Vec<String> = Vec::new();
-    for (_, occ) in &groups {
-        let distinct: std::collections::BTreeSet<&String> = occ.iter().map(|(n, _)| n).collect();
-        if distinct.len() < 2 {
-            continue; // no capitalization conflict
-        }
-        // Group occurrences by rule, preserving first-seen rule order.
-        let mut by_rule: Vec<(String, Vec<String>)> = Vec::new();
-        for (n, rule) in occ {
-            match by_rule.iter_mut().find(|(rr, _)| rr == rule) {
-                Some((_, ns)) => {
-                    if !ns.contains(n) {
-                        ns.push(n.clone());
-                    }
-                }
-                None => by_rule.push((rule.clone(), vec![n.clone()])),
+    for (_, mut names) in groups {
+        // Spellings sorted; consecutive spellings sharing their first rule
+        // merge into one `rule "R":  name 'a', 'b'` segment.
+        names.sort();
+        let mut segs: Vec<(String, Vec<String>)> = Vec::new();
+        for (name, rule) in names {
+            match segs.last_mut() {
+                Some((r, ns)) if *r == rule => ns.push(name),
+                _ => segs.push((rule, vec![name])),
             }
         }
-        let locs: Vec<String> = by_rule
+        let locs: Vec<String> = segs
             .into_iter()
-            .map(|(rule, mut ns)| {
-                ns.sort();
+            .map(|(rule, ns)| {
                 let quoted: Vec<String> = ns.iter().map(|n| format!("'{}'", n)).collect();
                 format!("rule \"{}\":  name {}", rule, quoted.join(", "))
             })
@@ -939,8 +1026,15 @@ fn var_class(v: &VarSpec) -> SortClass {
     sort_class(v.sort)
 }
 
-/// A binder on the quantifier stack: the bound variable's name and sort class.
-type Binder = (String, SortClass);
+/// A binder on the quantifier stack: the bound variable's name, numeric index
+/// and sort class. The index participates in variable identity (probe g5_idx:
+/// a binder `y` does not bind a use `y.1`).
+type Binder = (String, u64, SortClass);
+
+/// The identity key of a formula variable: name, index and sort class.
+fn formula_var_key(v: &VarSpec) -> (String, u64, SortClass) {
+    (v.name.clone(), v.idx, var_class(v))
+}
 
 // ---------------------------------------------------------------------------
 // Quantifier sorts (variables quantified over a disallowed sort)
@@ -1011,22 +1105,23 @@ fn quantifier_sorts_entry(entity: &str, name: &str, f: &Formula) -> Option<Strin
 
 const FORMULA_TERMS_HELP: &str = "  The only allowed terms are public constants and bound node and\n  message variables. If you encounter free message variables, then\n  you might have forgotten a #-prefix. Sort prefixes can only be\n  dropped where this is unambiguous. Moreover, reducible function\n  symbols are disallowed.";
 
-/// De Bruijn index of `(name, class)` on the binder stack (outermost pushed
-/// first): the innermost binder matching BOTH name and class is 0. `None` if no
-/// binder matches (the variable is free). Every quantified variable - including
-/// temporals and sort-mismatched ones - occupies one stack slot, so the index
-/// counts all binders between the use and its matching binder.
-fn debruijn_index(stack: &[Binder], name: &str, class: SortClass) -> Option<usize> {
+/// De Bruijn index of `(name, idx, class)` on the binder stack (outermost
+/// pushed first): the innermost binder matching name, index AND class is 0.
+/// `None` if no binder matches (the variable is free). Every quantified
+/// variable - including temporals and sort-mismatched ones - occupies one
+/// stack slot, so the index counts all binders between the use and its
+/// matching binder.
+fn debruijn_index(stack: &[Binder], name: &str, idx: u64, class: SortClass) -> Option<usize> {
     stack
         .iter()
-        .rposition(|(n, c)| n == name && *c == class)
+        .rposition(|(n, i, c)| n == name && *i == idx && *c == class)
         .map(|pos| stack.len() - 1 - pos)
 }
 
 /// Render a term in the oracle's raw "wrong form" representation.
 fn show_wf_term(t: &Term, stack: &[Binder]) -> String {
     match t {
-        Term::Var(v) => match debruijn_index(stack, &v.name, var_class(v)) {
+        Term::Var(v) => match debruijn_index(stack, &v.name, v.idx, var_class(v)) {
             Some(idx) => format!("Bound {}", idx),
             None => format!("Free {}", pp_var(v)),
         },
@@ -1085,7 +1180,7 @@ fn term_is_ill_formed(
     reducible: &std::collections::BTreeSet<String>,
 ) -> bool {
     match t {
-        Term::Var(v) => debruijn_index(stack, &v.name, var_class(v)).is_none(), // free -> ill
+        Term::Var(v) => debruijn_index(stack, &v.name, v.idx, var_class(v)).is_none(), // free -> ill
         Term::PubLit(_)
         | Term::FreshLit(_)
         | Term::NatLit(_)
@@ -1157,7 +1252,7 @@ fn collect_ill_terms(
         Formula::Forall(vs, g) | Formula::Exists(vs, g) => {
             let n = vs.len();
             for v in vs {
-                stack.push((v.name.clone(), var_class(v)));
+                stack.push((v.name.clone(), v.idx, var_class(v)));
             }
             collect_ill_terms(g, stack, reducible, out);
             for _ in 0..n {
@@ -1243,14 +1338,24 @@ pub fn formula_terms(thy: &Theory) -> Vec<WfError> {
 // Formula guardedness (decision procedure over the guarded fragment)
 // ---------------------------------------------------------------------------
 // A LEMMA formula must be convertible to guarded form (an unguarded RESTRICTION
-// is a fatal error, not a warning, so this check is lemma-only). A universal is
-// guarded only as `guard ==> rest`; an existential as a conjunction whose action
-// atoms guard its variables. The guard of a quantifier is the set of variables
-// occurring in ACTION atoms reachable through conjunctions of the antecedent
-// (universal) or body (existential); disjunction, negation, implication,
-// equality/ordering atoms and nested quantifiers contribute no guards. The first
-// failing quantifier (antecedent before consequent, left before right) is
-// reported together with the whole lemma formula.
+// is a fatal error, not a warning, so this check is lemma-only). Directly
+// nested quantifiers of the same kind FUSE into one binder list before the
+// check (probes g5_e_nest / g5_a_nest; the report renders the fused form -
+// g5_a_nest_noimpl). A universal is guarded only as `guard ==> rest`; an
+// existential's guard region is its whole body. Within the guard region a
+// variable is guarded (resolved) by
+//   1. occurring anywhere inside an ACTION atom reachable through
+//      conjunctions (all action atoms are collected first - g5_e_actorder), or
+//   2. an EQUALITY atom reachable through conjunctions, processed in a SINGLE
+//      left-to-right pass (g5_e_eqchain vs g5_e_revchain): when one side of
+//      the equality contains no unresolved quantified variables, every
+//      unresolved quantified variable of the other side becomes resolved
+//      (g5_e_eqbare/g5_e_eqinner/g5_e_eqpair; side-based, not unification -
+//      g5_e_unif).
+// Disjunction, negation, implication, ordering/subterm/last atoms and nested
+// quantifiers contribute no guards. The first failing quantifier (antecedent
+// before consequent, left before right) is reported together with the whole
+// lemma formula.
 
 /// A guardedness failure and its reason.
 enum GuardFail {
@@ -1260,8 +1365,52 @@ enum GuardFail {
     NoImplication,
 }
 
+/// Fuse directly nested quantifiers of the same kind (`∀x.∀y.φ` -> `∀x y.φ`),
+/// recursively over the whole formula. The guardedness decision AND the
+/// report's formula rendering both operate on the fused form.
+fn fuse_quantifiers(f: &Formula) -> Formula {
+    match f {
+        Formula::Forall(vs, g) => {
+            let mut vars = vs.clone();
+            let mut body = fuse_quantifiers(g);
+            while let Formula::Forall(vs2, g2) = body {
+                vars.extend(vs2);
+                body = *g2;
+            }
+            Formula::Forall(vars, Box::new(body))
+        }
+        Formula::Exists(vs, g) => {
+            let mut vars = vs.clone();
+            let mut body = fuse_quantifiers(g);
+            while let Formula::Exists(vs2, g2) = body {
+                vars.extend(vs2);
+                body = *g2;
+            }
+            Formula::Exists(vars, Box::new(body))
+        }
+        Formula::Not(g) => Formula::Not(Box::new(fuse_quantifiers(g))),
+        Formula::And(a, b) => Formula::And(
+            Box::new(fuse_quantifiers(a)),
+            Box::new(fuse_quantifiers(b)),
+        ),
+        Formula::Or(a, b) => Formula::Or(
+            Box::new(fuse_quantifiers(a)),
+            Box::new(fuse_quantifiers(b)),
+        ),
+        Formula::Implies(a, b) => Formula::Implies(
+            Box::new(fuse_quantifiers(a)),
+            Box::new(fuse_quantifiers(b)),
+        ),
+        Formula::Iff(a, b) => Formula::Iff(
+            Box::new(fuse_quantifiers(a)),
+            Box::new(fuse_quantifiers(b)),
+        ),
+        other => other.clone(),
+    }
+}
+
 /// Collect the variables of every ACTION atom reachable through conjunctions of
-/// `f`. These are the variables a guard binds.
+/// `f`. These are the variables a guard binds outright.
 fn collect_guard_vars(f: &Formula, out: &mut Vec<VarSpec>) {
     match f {
         Formula::Atom(Atom::Action(fact, t)) => {
@@ -1276,31 +1425,80 @@ fn collect_guard_vars(f: &Formula, out: &mut Vec<VarSpec>) {
     }
 }
 
-/// The `(name, class)` keys of a guard formula's action-atom variables.
-fn guard_key_set(f: &Formula) -> std::collections::HashSet<(String, SortClass)> {
-    let mut gv = Vec::new();
-    collect_guard_vars(f, &mut gv);
-    gv.iter().map(|v| (v.name.clone(), var_class(v))).collect()
+/// Collect the EQUALITY atoms reachable through conjunctions of `f`, in
+/// left-to-right source order.
+fn collect_guard_eqs<'a>(f: &'a Formula, out: &mut Vec<(&'a Term, &'a Term)>) {
+    match f {
+        Formula::Atom(Atom::Eq(l, r)) => out.push((l, r)),
+        Formula::And(a, b) => {
+            collect_guard_eqs(a, out);
+            collect_guard_eqs(b, out);
+        }
+        _ => {}
+    }
 }
 
-/// Quantified variables of `vs` not guarded by `gset` (matched sort-aware), in
+type VKey = (String, u64, SortClass);
+
+/// The subset of `current` (the quantifier's own variables) resolved by the
+/// guard region `f`: first every conjunction-reachable action atom resolves
+/// all of its variables, then the conjunction-reachable equalities are
+/// processed once, left to right - an equality whose one side is clean (has no
+/// unresolved current variables) resolves the current variables of its other
+/// side.
+fn resolved_guard_keys(
+    f: &Formula,
+    current: &std::collections::HashSet<VKey>,
+) -> std::collections::HashSet<VKey> {
+    let mut resolved: std::collections::HashSet<VKey> = std::collections::HashSet::new();
+    let mut avs = Vec::new();
+    collect_guard_vars(f, &mut avs);
+    for v in &avs {
+        let k = formula_var_key(v);
+        if current.contains(&k) {
+            resolved.insert(k);
+        }
+    }
+    let mut eqs = Vec::new();
+    collect_guard_eqs(f, &mut eqs);
+    for (l, r) in eqs {
+        let unresolved_side = |t: &Term| -> Vec<VKey> {
+            let mut vs = Vec::new();
+            collect_term_vars(t, &mut vs);
+            vs.iter()
+                .map(formula_var_key)
+                .filter(|k| current.contains(k) && !resolved.contains(k))
+                .collect()
+        };
+        let lu = unresolved_side(l);
+        let ru = unresolved_side(r);
+        if lu.is_empty() && !ru.is_empty() {
+            resolved.extend(ru);
+        } else if ru.is_empty() && !lu.is_empty() {
+            resolved.extend(lu);
+        }
+    }
+    resolved
+}
+
+/// Quantified variables of `vs` not resolved by the guard region `region`, in
 /// binding order.
-fn unguarded_vars(
-    vs: &[VarSpec],
-    gset: &std::collections::HashSet<(String, SortClass)>,
-) -> Vec<VarSpec> {
+fn unguarded_vars(vs: &[VarSpec], region: &Formula) -> Vec<VarSpec> {
+    let current: std::collections::HashSet<VKey> = vs.iter().map(formula_var_key).collect();
+    let resolved = resolved_guard_keys(region, &current);
     vs.iter()
-        .filter(|v| !gset.contains(&(v.name.clone(), var_class(v))))
+        .filter(|v| !resolved.contains(&formula_var_key(v)))
         .cloned()
         .collect()
 }
 
 /// Return the first guardedness failure and the failing quantifier subformula.
+/// Expects a quantifier-fused formula (see [`fuse_quantifiers`]).
 fn find_guard_failure(f: &Formula) -> Option<(GuardFail, Formula)> {
     match f {
         Formula::Forall(vs, body) => match &**body {
             Formula::Implies(guard, rest) => {
-                let unguarded = unguarded_vars(vs, &guard_key_set(guard));
+                let unguarded = unguarded_vars(vs, guard);
                 if !unguarded.is_empty() {
                     return Some((GuardFail::Unguarded(unguarded), f.clone()));
                 }
@@ -1309,7 +1507,7 @@ fn find_guard_failure(f: &Formula) -> Option<(GuardFail, Formula)> {
             _ => Some((GuardFail::NoImplication, f.clone())),
         },
         Formula::Exists(vs, body) => {
-            let unguarded = unguarded_vars(vs, &guard_key_set(body));
+            let unguarded = unguarded_vars(vs, body);
             if !unguarded.is_empty() {
                 return Some((GuardFail::Unguarded(unguarded), f.clone()));
             }
@@ -1326,6 +1524,7 @@ fn find_guard_failure(f: &Formula) -> Option<(GuardFail, Formula)> {
 
 /// The guardedness report entry for one lemma, or `None` when it is guarded.
 fn guardedness_entry(name: &str, f: &Formula) -> Option<String> {
+    let f = &fuse_quantifiers(f);
     let (fail, sub) = find_guard_failure(f)?;
     let reason = match fail {
         GuardFail::Unguarded(vars) => {
@@ -1490,15 +1689,21 @@ fn collect_nat_issues(t: &Term, out: &mut Vec<String>) {
 // ---------------------------------------------------------------------------
 
 pub fn subterm_convergence(thy: &Theory) -> Vec<WfError> {
-    let mut bad: Vec<String> = Vec::new();
+    // An equation is subterm convergent when its RHS is a subterm of its LHS
+    // or GROUND (no variables - probes t5_sub_ground/t5_sub_groundapp). The
+    // flagged equations are listed sorted by their rendered form, not source
+    // order (t5_sub_order*; mesh: k1..k4 before s1), and wide equations wrap
+    // via the equation layout engine (ble f6 / mesh k2).
+    let mut bad: Vec<(String, String)> = Vec::new(); // (flat sort key, rendered)
     for it in &thy.items {
         if let TheoryItem::Equations { convergent, eqs } = it {
             if *convergent {
                 continue; // user asserted convergence
             }
             for eq in eqs {
-                if !is_subterm(&eq.rhs, &eq.lhs) {
-                    bad.push(format!("    {} = {}", pp_term(&eq.lhs), pp_term(&eq.rhs)));
+                if !is_subterm(&eq.rhs, &eq.lhs) && term_has_vars(&eq.rhs) {
+                    let key = format!("{} = {}", pp_term(&eq.lhs), pp_term(&eq.rhs));
+                    bad.push((key, crate::pretty::pp_equation(&eq.lhs, &eq.rhs)));
                 }
             }
         }
@@ -1506,10 +1711,19 @@ pub fn subterm_convergence(thy: &Theory) -> Vec<WfError> {
     if bad.is_empty() {
         return vec![];
     }
+    bad.sort();
+    let bad: Vec<String> = bad.into_iter().map(|(_, r)| r).collect();
     let intro = "  User-defined equations must be convergent and have the finite variant property. The following equations are not subterm convergent. If you are sure that the set of equations is nevertheless convergent and has the finite variant property, you can ignore this warning and continue ";
     let manual = " For more information, please refer to the manual : https://tamarin-prover.com/manual/master/book/010_modeling-issues.html ";
     let msg = format!("{}\n\n{}\n   \n{}", intro, bad.join("\n"), manual);
     vec![WfError::new(T_SUBTERM, msg)]
+}
+
+/// Does the term contain any variable? (A ground RHS is convergent.)
+fn term_has_vars(t: &Term) -> bool {
+    let mut vs = Vec::new();
+    collect_term_vars(t, &mut vs);
+    !vs.is_empty()
 }
 
 /// Structural subterm test: does `small` occur as a subterm of `big`?

@@ -1,0 +1,1 @@
+∀ S sid Sp BB ba sskDa #i #j #k #l. ((((((S = <sid, Sp>) ∧ (Server( S ) @ #i)) ∧ (BB_rec( <sid, BB>, <'b', ba> ) @ #j)) ∧ (BB_pskDs( <sid, BB>, <'spkD', pk(sskDa)> ) @ #k)) ∧ (¬(∃ bPrimeb. ba = sg(bPrimeb, sskDa)))) ∧ (H4( sid ) @ #l)) ⇒ (¬(∀ sid.1 H b #j.1 b1. (Verify( <sid.1, H>, b, b1 ) @ #j.1) ⇒ (∃ BB.1 #k.1. BB_rec( <sid.1, BB.1>, <'b', b> ) @ #k.1)))

@@ -1,0 +1,441 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory alethea_sel_ShHh] Theory loaded
+[Theory alethea_sel_ShHh] Theory translated
+[Theory alethea_sel_ShHh] Derivation checks started
+[Open Chains] Too many chain constraints, stopping precomputation. Open Chains limits (can be changed with -c=): 10
+[Open Chains] Too many chain constraints, stopping precomputation. Open Chains limits (can be changed with -c=): 10
+[Theory alethea_sel_ShHh] Derivation checks ended
+[Theory alethea_sel_ShHh] Theory closed
+theory alethea_sel_ShHh
+
+begin
+
+// Function signature and definition of the equational theory E
+
+builtins: multiset
+functions: adec/2, aenc/2, fst/1, h/1, pair/2, pk/1, sdec/2, senc/2,
+           sign/2, snd/1, true/0, verify/3
+equations:
+    adec(aenc(x.1, pk(x.2)), x.2) = x.1,
+    fst(<x.1, x.2>) = x.1,
+    sdec(senc(x.1, x.2), x.2) = x.1,
+    snd(<x.1, x.2>) = x.2,
+    verify(sign(x.1, x.2), x.1, pk(x.2)) = true
+
+rule (modulo E) ChanOut_S:
+   [ Out_S( $A, $B, x ) ]
+  --[ ChanOut_S( $A, $B, x ) ]->
+   [ !Sec( $A, $B, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanIn_S:
+   [ !Sec( $A, $B, x ) ] --[ ChanIn_S( $A, $B, x ) ]-> [ In_S( $A, $B, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanOut_A:
+   [ Out_A( $A, x ) ]
+  --[ ChanOut_A( $A, x ) ]->
+   [ !Auth( $A, x ), Out( <$A, x> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanIn_A:
+   [ !Auth( $A, x ) ] --[ ChanIn_A( $A, x ) ]-> [ In_A( $A, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) publickeyinfrastructure:
+   [ Fr( ~skX ) ]
+  --[ LongtermKey( $X, ~skX ) ]->
+   [ !Ltk( $X, ~skX ), !Pk( $X, pk(~skX) ), Out( pk(~skX) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Setup:
+   [ !Ltk( 'S', ~skS ), !Ltk( 'D1', ~eskD1 ), !Ltk( 'D2', ~eskD2 ) ]
+  --[
+  Setup( ), Voter( 'H1' ), Voter( 'H2' ), Device( 'H1', 'D1' ),
+  Device( 'H2', 'D2' )
+  ]->
+   [
+   AgSt_D0( 'D1', <'H1', 'S', ~eskD1, pk(~skS)> ),
+   AgSt_D0( 'D2', <'H2', 'S', ~eskD2, pk(~skS)> ),
+   AgSt_S0( 'S', <'E', ~skS, 'H1', 'D1', pk(~eskD1), 'H2', 'D2', pk(~eskD2)>
+   ),
+   AgSt_A0( 'A', <'S', 'BB', 'E'> ), AgSt_BB0( 'BB', 'S' ), Env( 'E' ),
+   AgSt_H0( 'H1', <'D1', 'BB'> ), AgSt_H0( 'H2', <'D2', 'BB'> )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) S_1a:
+   [
+   AgSt_S0( $S, <$E, ~skS, $H1, $D1, epkD1, $H2, $D2, epkD2> ), Fr( ~x1 ),
+   Fr( ~x2 )
+   ]
+  --[ Pseudonym( $H1, pk(h(<$H1, ~x1>)), $H2, pk(h(<$H2, ~x2>)) ) ]->
+   [
+   AgSt_S1( $S, <$E, ~skS, $H1, $D1, epkD1, $H2, $D2, epkD2, ~x1, ~x2> ),
+   Out_A( $S, aenc(~x1, epkD1) ), Out_A( $S, aenc(~x2, epkD2) ),
+   Pi( (pk(h(<$H1, ~x1>))++pk(h(<$H2, ~x2>))) )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) S_1b:
+   [
+   AgSt_S1( $S, <$E, ~skS, $H1, $D1, epkD1, $H2, $D2, epkD2, ~x1, ~x2> ),
+   Pi( (spkDa++spkDb) )
+   ]
+  -->
+   [
+   Out_A( $S, <'spkDs', spkDa, spkDb> ),
+   AgSt_S1b( $S,
+             <$E, ~skS, $H1, $D1, epkD1, $H2, $D2, epkD2, ~x1, ~x2, spkDa, spkDb>
+   )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) BB_1:
+   [ AgSt_BB0( $BB, $S ), In_A( $S, <'spkDs', spkDa, spkDb> ) ]
+  --[
+  BB_spkDs( $BB, <'spkDs', spkDa, spkDb> ), Running_DBB( $BB, spkDa ),
+  Running_DBB( $BB, spkDb )
+  ]->
+   [
+   AgSt_BB1( $BB, <$S, 'spkDs', spkDa, spkDb> ),
+   Out_A( $BB, <'spkDs', spkDa, spkDb> )
+   ]
+
+  // loop breaker: [1]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) A_1:
+   [ AgSt_A0( $A, <$S, $BB, $E> ), In_A( $BB, <'spkDs', spkDa, spkDb> ) ]
+  -->
+   [
+   AgSt_A1( $A, <$S, $BB, $E, 'spkDs', spkDa, spkDb> ),
+   PseudonymsPublished( )
+   ]
+
+  // loop breaker: [1]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) D_1:
+   [ AgSt_D0( $D, <$H, $S, ~eskD, pkS> ), In_A( $S, aenc(x, pk(~eskD)) ) ]
+  --[
+  D( $D ), Running_DS( $D, $S, <pk(~eskD), pkS, h(<$H, x>)> ),
+  Commit_DBB( $D, pk(h(<$H, x>)) ), Secret( $D, x )
+  ]->
+   [ Out_S( $D, $H, pk(h(<$H, x>)) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_5:
+   [
+   AgSt_H0( $H, <$D, $BB> ), In_S( $D, $H, spkDD ),
+   In_A( $BB, <'spkDs', spkDa, spkDb> )
+   ]
+  --[ Verify_spkDD( $H, spkDD, spkDa, spkDb ) ]->
+   [ AgSt_H1( $H, <$D, $BB, spkDD, spkDa, spkDb> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) environment_1:
+   [ Env( $E ), PseudonymsPublished( ) ]
+  --[ Env_No( $E, '1' ) ]->
+   [ Out_A( $E, '1' ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) environment_2:
+   [ Env( $E ), PseudonymsPublished( ) ]
+  --[ Env_No( $E, '2' ) ]->
+   [ Out_A( $E, '2' ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) S_2a:
+   [
+   AgSt_S1b( $S,
+             <$E, ~skS, $H1, $D1, epkD1, $H2, $D2, epkD2, ~x1, ~x2, spkDa, spkDb>
+   ),
+   In_A( $E, '1' )
+   ]
+  --[
+  Commit_DS( $D1, $S, <epkD1, pk(~skS), h(<$H1, ~x1>)> ),
+  Commit_DS( $D2, $S, <epkD2, pk(~skS), h(<$H2, ~x2>)> ),
+  Running_SBB( $S, spkDa )
+  ]->
+   [ Out_A( $S, <'SG', spkDa> ) ]
+
+  // loop breaker: [1]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) S_2b:
+   [
+   AgSt_S1b( $S,
+             <$E, ~skS, $H1, $D1, epkD1, $H2, $D2, epkD2, ~x1, ~x2, spkDa, spkDb>
+   ),
+   In_A( $E, '2' )
+   ]
+  --[
+  Commit_DS( $D1, $S, <epkD1, pk(~skS), h(<$H1, ~x1>)> ),
+  Commit_DS( $D2, $S, <epkD2, pk(~skS), h(<$H2, ~x2>)> ),
+  Running_SBB( $S, spkDb )
+  ]->
+   [ Out_A( $S, <'SG', spkDb> ) ]
+
+  // loop breaker: [1]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) BB_2:
+   [
+   AgSt_BB1( $BB, <$S, 'spkDs', spkDa, spkDb> ), In_A( $S, <'SG', spkDsel> )
+   ]
+  --[ BB_SG( $BB, <'SG', spkDsel> ), Commit_SBB( $BB, spkDsel ) ]->
+   [ Out_A( $BB, <'SG', spkDsel> ) ]
+
+  // loop breaker: [1]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_9:
+   [
+   AgSt_H1( $H, <$D, $BB, spkDD, spkDa, spkDb> ),
+   In_A( $BB, <'SG', spkDsel> )
+   ]
+  --[ Sel( $H, spkDD, spkDsel ) ]->
+   [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) A_2:
+   [
+   AgSt_A1( $A, <$S, $BB, $E, 'spkDs', spkDa, spkDb> ),
+   In_A( $BB, <'SG', spkDsel> ), In_A( $E, r )
+   ]
+  --[ Verify_SG( $A, spkDsel, r, spkDa, spkDb ) ]->
+   [ ]
+
+  /* has exactly the trivial AC variant */
+
+restriction OneSetup:
+  "∀ #i #j. ((Setup( ) @ #i) ∧ (Setup( ) @ #j)) ⇒ (#i = #j)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ #i #j. ((Setup( ) @ #i) ∧ (Setup( ) @ #j)) ⇒ (#i = #j)"
+  */
+
+lemma functional:
+  exists-trace
+  "∃ H1 H2 #i spkD2 spkD1 BB #j #k #l E #m #n #o #p A #q.
+    (((((((((¬(H1 = H2)) ∧ (Pseudonym( H1, spkD1, H2, spkD2 ) @ #i)) ∧
+           (BB_spkDs( BB, <'spkDs', spkD2, spkD1> ) @ #j)) ∧
+          (Verify_spkDD( H1, spkD1, spkD2, spkD1 ) @ #k)) ∧
+         (Verify_spkDD( H2, spkD2, spkD2, spkD1 ) @ #l)) ∧
+        (Env_No( E, '1' ) @ #m)) ∧
+       (BB_SG( BB, <'SG', spkD2> ) @ #n)) ∧
+      (Sel( H1, spkD1, spkD2 ) @ #o)) ∧
+     (Sel( H2, spkD2, spkD2 ) @ #p)) ∧
+    (Verify_SG( A, spkD2, '1', spkD2, spkD1 ) @ #q)"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ H1 H2 #i spkD2 spkD1 BB #j #k #l E #m #n #o #p A #q.
+  (Pseudonym( H1, spkD1, H2, spkD2 ) @ #i) ∧
+  (BB_spkDs( BB, <'spkDs', spkD2, spkD1> ) @ #j) ∧
+  (Verify_spkDD( H1, spkD1, spkD2, spkD1 ) @ #k) ∧
+  (Verify_spkDD( H2, spkD2, spkD2, spkD1 ) @ #l) ∧
+  (Env_No( E, '1' ) @ #m) ∧
+  (BB_SG( BB, <'SG', spkD2> ) @ #n) ∧
+  (Sel( H1, spkD1, spkD2 ) @ #o) ∧
+  (Sel( H2, spkD2, spkD2 ) @ #p) ∧
+  (Verify_SG( A, spkD2, '1', spkD2, spkD1 ) @ #q)
+ ∧
+  ¬(H1 = H2)"
+*/
+by sorry
+
+lemma functional2:
+  exists-trace
+  "∃ H1 H2 #i spkD2 spkD1 BB #j #k #l E #m #n #o #p A #q.
+    (((((((((¬(H1 = H2)) ∧ (Pseudonym( H1, spkD1, H2, spkD2 ) @ #i)) ∧
+           (BB_spkDs( BB, <'spkDs', spkD2, spkD1> ) @ #j)) ∧
+          (Verify_spkDD( H1, spkD1, spkD2, spkD1 ) @ #k)) ∧
+         (Verify_spkDD( H2, spkD2, spkD2, spkD1 ) @ #l)) ∧
+        (Env_No( E, '2' ) @ #m)) ∧
+       (BB_SG( BB, <'SG', spkD1> ) @ #n)) ∧
+      (Sel( H1, spkD1, spkD1 ) @ #o)) ∧
+     (Sel( H2, spkD2, spkD1 ) @ #p)) ∧
+    (Verify_SG( A, spkD1, '2', spkD2, spkD1 ) @ #q)"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ H1 H2 #i spkD2 spkD1 BB #j #k #l E #m #n #o #p A #q.
+  (Pseudonym( H1, spkD1, H2, spkD2 ) @ #i) ∧
+  (BB_spkDs( BB, <'spkDs', spkD2, spkD1> ) @ #j) ∧
+  (Verify_spkDD( H1, spkD1, spkD2, spkD1 ) @ #k) ∧
+  (Verify_spkDD( H2, spkD2, spkD2, spkD1 ) @ #l) ∧
+  (Env_No( E, '2' ) @ #m) ∧
+  (BB_SG( BB, <'SG', spkD1> ) @ #n) ∧
+  (Sel( H1, spkD1, spkD1 ) @ #o) ∧
+  (Sel( H2, spkD2, spkD1 ) @ #p) ∧
+  (Verify_SG( A, spkD1, '2', spkD2, spkD1 ) @ #q)
+ ∧
+  ¬(H1 = H2)"
+*/
+by sorry
+
+lemma functional3:
+  exists-trace
+  "∃ H1 H2 #i spkD2 spkD1 BB #j #k #l E #m #n #o #p A #q.
+    (((((((((¬(H1 = H2)) ∧ (Pseudonym( H1, spkD1, H2, spkD2 ) @ #i)) ∧
+           (BB_spkDs( BB, <'spkDs', spkD1, spkD2> ) @ #j)) ∧
+          (Verify_spkDD( H1, spkD1, spkD1, spkD2 ) @ #k)) ∧
+         (Verify_spkDD( H2, spkD2, spkD1, spkD2 ) @ #l)) ∧
+        (Env_No( E, '2' ) @ #m)) ∧
+       (BB_SG( BB, <'SG', spkD2> ) @ #n)) ∧
+      (Sel( H1, spkD1, spkD2 ) @ #o)) ∧
+     (Sel( H2, spkD2, spkD2 ) @ #p)) ∧
+    (Verify_SG( A, spkD2, '2', spkD1, spkD2 ) @ #q)"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ H1 H2 #i spkD2 spkD1 BB #j #k #l E #m #n #o #p A #q.
+  (Pseudonym( H1, spkD1, H2, spkD2 ) @ #i) ∧
+  (BB_spkDs( BB, <'spkDs', spkD1, spkD2> ) @ #j) ∧
+  (Verify_spkDD( H1, spkD1, spkD1, spkD2 ) @ #k) ∧
+  (Verify_spkDD( H2, spkD2, spkD1, spkD2 ) @ #l) ∧
+  (Env_No( E, '2' ) @ #m) ∧
+  (BB_SG( BB, <'SG', spkD2> ) @ #n) ∧
+  (Sel( H1, spkD1, spkD2 ) @ #o) ∧
+  (Sel( H2, spkD2, spkD2 ) @ #p) ∧
+  (Verify_SG( A, spkD2, '2', spkD1, spkD2 ) @ #q)
+ ∧
+  ¬(H1 = H2)"
+*/
+by sorry
+
+lemma indivVerif_ps:
+  all-traces
+  "(∀ H spkDD spkDb #i.
+     (Verify_spkDD( H, spkDD, spkDD, spkDb ) @ #i) ⇒
+     ((∃ BB spkD2 x #j.
+        (BB_spkDs( BB, <'spkDs', spkDD, spkD2> ) @ #j) ∧
+        (spkDD = pk(h(<H, x>)))) ∨
+      (∃ BB spkD2 x #j.
+        (BB_spkDs( BB, <'spkDs', spkD2, spkDD> ) @ #j) ∧
+        (spkDD = pk(h(<H, x>)))))) ∧
+   (∀ H spkDD spkDb #i.
+     (Verify_spkDD( H, spkDD, spkDb, spkDD ) @ #i) ⇒
+     ((∃ BB spkD2 x #j.
+        (BB_spkDs( BB, <'spkDs', spkDD, spkD2> ) @ #j) ∧
+        (spkDD = pk(h(<H, x>)))) ∨
+      (∃ BB spkD2 x #j.
+        (BB_spkDs( BB, <'spkDs', spkD2, spkDD> ) @ #j) ∧
+        (spkDD = pk(h(<H, x>))))))"
+/*
+guarded formula characterizing all counter-examples:
+"((∃ H spkDD spkDb #i.
+    (Verify_spkDD( H, spkDD, spkDD, spkDb ) @ #i)
+   ∧
+    (∀ BB spkD2 x #j.
+      (BB_spkDs( BB, <'spkDs', spkDD, spkD2> ) @ #j) ∧ (spkDD = pk(h(<H, x>)))
+     ⇒
+      ⊥) ∧
+    (∀ BB spkD2 x #j.
+      (BB_spkDs( BB, <'spkDs', spkD2, spkDD> ) @ #j) ∧ (spkDD = pk(h(<H, x>)))
+     ⇒
+      ⊥)) ∨
+  (∃ H spkDD spkDb #i.
+    (Verify_spkDD( H, spkDD, spkDb, spkDD ) @ #i)
+   ∧
+    (∀ BB spkD2 x #j.
+      (BB_spkDs( BB, <'spkDs', spkDD, spkD2> ) @ #j) ∧ (spkDD = pk(h(<H, x>)))
+     ⇒
+      ⊥) ∧
+    (∀ BB spkD2 x #j.
+      (BB_spkDs( BB, <'spkDs', spkD2, spkDD> ) @ #j) ∧ (spkDD = pk(h(<H, x>)))
+     ⇒
+      ⊥)))"
+*/
+by sorry
+
+lemma indivVerif_sel:
+  all-traces
+  "∀ H spkDD #i.
+    (Sel( H, spkDD, spkDD ) @ #i) ⇒
+    (∃ x BB #j. (BB_SG( BB, <'SG', spkDD> ) @ #j) ∧ (spkDD = pk(h(<H, x>))))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ H spkDD #i.
+  (Sel( H, spkDD, spkDD ) @ #i)
+ ∧
+  ∀ x BB #j.
+   (BB_SG( BB, <'SG', spkDD> ) @ #j) ∧ (spkDD = pk(h(<H, x>))) ⇒ ⊥"
+*/
+by sorry
+
+lemma univVerif_sel:
+  all-traces
+  "∀ A spkD1 spkD2 #a1.
+    (Verify_SG( A, spkD1, '1', spkD1, spkD2 ) @ #a1) ⇒
+    (∃ BB #b1 #b2.
+      ((BB_spkDs( BB, <'spkDs', spkD1, spkD2> ) @ #b1) ∧
+       (BB_SG( BB, <'SG', spkD1> ) @ #b2)) ∧
+      (∀ A.1 spkD1.1 spkD2.1 #a1.1.
+        (Verify_SG( A.1, spkD2.1, '2', spkD1.1, spkD2.1 ) @ #a1.1) ⇒
+        (∃ BB.1 #b1.1 #b2.1.
+          (BB_spkDs( BB.1, <'spkDs', spkD1.1, spkD2.1> ) @ #b1.1) ∧
+          (BB_SG( BB.1, <'SG', spkD2.1> ) @ #b2.1))))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ A spkD1 spkD2 #a1.
+  (Verify_SG( A, spkD1, '1', spkD1, spkD2 ) @ #a1)
+ ∧
+  ∀ BB #b1 #b2.
+   (BB_spkDs( BB, <'spkDs', spkD1, spkD2> ) @ #b1) ∧
+   (BB_SG( BB, <'SG', spkD1> ) @ #b2)
+  ⇒
+   ∃ A.1 spkD1.1 spkD2.1 #a1.1.
+    (Verify_SG( A.1, spkD2.1, '2', spkD1.1, spkD2.1 ) @ #a1.1)
+   ∧
+    ∀ BB.1 #b1.1 #b2.1.
+     (BB_spkDs( BB.1, <'spkDs', spkD1.1, spkD2.1> ) @ #b1.1) ∧
+     (BB_SG( BB.1, <'SG', spkD2.1> ) @ #b2.1)
+    ⇒
+     ⊥"
+*/
+by sorry
+
+/* All wellformedness checks were successful. */
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: /home/kamilner/tamarin-rs/tamarin-prover/examples/thesis-LaraSchmid-evoting/chapter3_Alethea/alethea_sel_ShHh.spthy
+
+  processing time: 1.55s
+  
+  functional (exists-trace): analysis incomplete (1 steps)
+  functional2 (exists-trace): analysis incomplete (1 steps)
+  functional3 (exists-trace): analysis incomplete (1 steps)
+  indivVerif_ps (all-traces): analysis incomplete (1 steps)
+  indivVerif_sel (all-traces): analysis incomplete (1 steps)
+  univVerif_sel (all-traces): analysis incomplete (1 steps)
+
+==============================================================================

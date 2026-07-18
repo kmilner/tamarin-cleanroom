@@ -1,0 +1,37 @@
+theory XorPlusDHTest
+
+begin
+
+// Function signature and definition of the equational theory E
+
+builtins: diffie-hellman, xor
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) Test:
+   [ Fr( ~x ), Fr( ~y ) ] --[ Secret( ~x ) ]-> [ Out( (~x⊕~y) ), Out( ~y ) ]
+
+  /*
+  rule (modulo AC) Test:
+     [ Fr( ~x ), Fr( ~y ) ] --[ Secret( ~x ) ]-> [ Out( z ), Out( ~y ) ]
+    variants (modulo AC)
+    1. ~x    = ~x.4
+       ~y    = ~x.4
+       z     = zero
+    
+    2. ~x    = ~x.4
+       ~y    = ~y.4
+       z     = (~x.4⊕~y.4)
+  */
+
+lemma Secret:
+  all-traces "∀ x #i. (Secret( x ) @ #i) ⇒ (¬(∃ #j. K( x ) @ #j))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i. (Secret( x ) @ #i) ∧ ∃ #j. (K( x ) @ #j)"
+*/
+by sorry
+
+
+
+end

@@ -1,0 +1,1 @@
+∃ #i1 #i2 s1 s2 k A B com role1 role2. ((((Accept( s1, k ) @ #i1) ∧ (Accept( s2, k ) @ #i2)) ∧ (Sid( s1, <A, B, com, role1, 'NAXOS_C'> ) @ #i1)) ∧ (Sid( s2, <B, A, com, role2, 'NAXOS_C'> ) @ #i2)) ∧ (¬(role1 = role2))

@@ -1,0 +1,1 @@
+∀ #i #j A. ((RegKey( A ) @ #i) ∧ (RegKey( A ) @ #j)) ⇒ (#i = #j)

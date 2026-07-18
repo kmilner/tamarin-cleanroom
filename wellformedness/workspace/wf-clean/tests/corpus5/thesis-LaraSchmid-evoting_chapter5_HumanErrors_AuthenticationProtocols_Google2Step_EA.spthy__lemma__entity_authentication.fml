@@ -1,0 +1,1 @@
+∀ S m #k. (Commit( S, 'Human', m ) @ #k) ⇒ ((∃ #i #j. (((Sstart( S ) @ #i) ∧ (H( 'Human' ) @ #j)) ∧ (#i < #j)) ∧ (#j < #k)) ∨ (∃ x #i #j. (((Sstart( S ) @ #i) ∧ (H_role( 'Human', x ) @ #j)) ∧ (#i < #j)) ∧ (#j < #k)))

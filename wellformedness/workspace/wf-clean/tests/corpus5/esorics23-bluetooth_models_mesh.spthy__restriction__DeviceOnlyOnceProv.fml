@@ -1,0 +1,1 @@
+∀ #i #j. ((DeviceOnlyOnceProv( ) @ #i) ∧ (DeviceOnlyOnceProv( ) @ #j)) ⇒ (#i = #j)

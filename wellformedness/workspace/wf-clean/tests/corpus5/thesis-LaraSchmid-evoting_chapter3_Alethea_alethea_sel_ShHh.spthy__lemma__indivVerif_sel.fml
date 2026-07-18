@@ -1,0 +1,1 @@
+∀ H spkDD #i. (Sel( H, spkDD, spkDD ) @ #i) ⇒ (∃ x BB #j. (BB_SG( BB, <'SG', spkDD> ) @ #j) ∧ (spkDD = pk(h(<H, x>))))

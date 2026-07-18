@@ -1,0 +1,1 @@
+∀ pid sid k tuple otc tc #i. (InitStuff( pid, sid, k, tuple, otc, tc ) @ #i) ⇒ (¬(∃ #j. !KU( k ) @ #j))

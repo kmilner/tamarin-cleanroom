@@ -1,0 +1,1 @@
+¬(∃ #i #j pid sid x otp1 otp2. ((Login( pid, sid, x, otp1 ) @ #i) ∧ (Login( pid, sid, x, otp2 ) @ #j)) ∧ (¬(#i = #j)))

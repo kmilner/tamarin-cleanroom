@@ -1,0 +1,15 @@
+# Round-1 byte targets — sub-target R1 (term core + signature block).
+# Curated corpus files that span the term-operator + signature-attribute space,
+# all currently MATCH on scripts/pretty_gate.sh (so their extracted theory echo
+# is a trustworthy byte target). Kept small and formula-light so a whole-file
+# MATCH is reachable early. Format: <feature tags><TAB><relpath under examples/>
+exp/dh, pair, private, destructor, ac-variants	cav13/DH_example.spthy
+xor	features/xor/xor.spthy
+xor, exp/dh	features/xor/xorplusdh.spthy
+exp/dh, tiny	regression/trace/issue777.spthy
+multiset	features/multiset/minimal_multiset.spthy
+nat, subterm	features/multiset/NumberSubtermTests.spthy
+bilinear, pmult/em	sp14/Joux.spthy
+private, destructor	features/private_function_symbols/test.spthy
+hashing, functions	Tutorial.spthy
+asym-enc, standard	classic/NSLPK3.spthy

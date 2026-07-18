@@ -1,0 +1,1 @@
+¬(∃ #i #j pid k x. ((Login( pid, k, x ) @ #i) ∧ (Login( pid, k, x ) @ #j)) ∧ (¬(#i = #j)))

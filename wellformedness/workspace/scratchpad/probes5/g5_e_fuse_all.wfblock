@@ -1,0 +1,12 @@
+/*
+WARNING: the following wellformedness checks failed!
+
+ Formula guardedness
+====================
+
+  Lemma `L' cannot be converted to a guarded formula:
+    unguarded variable(s) 'x' in the subformula
+      "∃ x. ∀ #i. (A( x ) @ #i) ⇒ (C( x ) @ #i)"
+    in the formula
+      "∃ x. ∀ #i. (A( x ) @ #i) ⇒ (C( x ) @ #i)"
+*/

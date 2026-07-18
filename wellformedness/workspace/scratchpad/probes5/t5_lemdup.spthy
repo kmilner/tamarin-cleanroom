@@ -1,0 +1,8 @@
+theory Tt5_lemdup
+begin
+rule R1: [ Fr(~x) ] --[ Bt(~x) ]-> [ Out(~x) ]
+rule R2: [ Fr(~x), Fr(~y), Fr(~z) ] --[ Bt(~x, ~y, ~z) ]-> [ Out(~x) ]
+lemma L:
+  exists-trace
+  "Ex a b k #i. Bt(a, b, k) @ #i & (Ex #j. Bt(a, b, k) @ #j)"
+end

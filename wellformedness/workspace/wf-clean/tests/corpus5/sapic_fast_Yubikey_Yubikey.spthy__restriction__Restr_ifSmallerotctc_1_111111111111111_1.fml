@@ -1,0 +1,1 @@
+∀ x #NOW x.1. (Restr_ifSmallerotctc_1_111111111111111_1( x, x.1 ) @ #NOW) ⇒ (¬(∃ z. x = (z++x.1)))

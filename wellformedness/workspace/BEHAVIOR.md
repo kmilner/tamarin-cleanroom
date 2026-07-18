@@ -100,23 +100,44 @@ premise. Entries joined by "\n  \n":
 Trigger: two public constants whose names are equal under ASCII-lowercasing but
 differ in capitalization. Body:
     "Identifiers are case-sensitive, mismatched capitalizations are considered as different, i.e., 'ID' is different from 'id'. Check the capitalization of your identifiers.\n\n" + numbered items
-Each lowercased-key group -> one item "  N. " + occurrences. Occurrences group by
-location; same loc: `rule "R1":  name 'Alice', 'alice'`; different locs joined
-", ": `rule "R1":  name 'Server', rule "R2":  name 'server'`. Names ASCII-sorted.
-`public_names_report_from_pairs` takes raw (location, name) pairs.
+Each lowercased-key group -> one item "  N. " + occurrences. ROUND5 (issue527
+target): each DISTINCT spelling is attributed to the rule of its FIRST
+occurrence only ('second' used in four rules lists just `rule "One"`); the
+spellings are ASCII-sorted and consecutive spellings sharing their first rule
+merge into one segment: `rule "R1":  name 'Alice', 'alice'`; segments joined
+", ": `rule "Four":  name 'firSt', rule "Two":  name 'first'` (the segment
+order follows the sorted spellings, not the source rules). Groups are sorted
+by their lowercased key. `public_names_report_from_pairs` takes raw
+(name, location) pairs in occurrence order.
 
-### Variable with mismatching sorts or capitalization
-Trigger: within one rule, two variables share a base name but differ in sort
-prefix ($x/x/~x) or capitalization. Fixed header:
+### Variable with mismatching sorts or capitalization  (round5: index-aware)
+Trigger: within one rule, two variables share a base name AND numeric index but
+differ in sort or capitalization. The grouping key is (lowercased name, index):
+`$x.1` vs `x.2` is SILENT, `$x.1` vs `x.1` reports "1. $x.1, x.1" (probes
+s5_idx/s5_idxsame/s5_capdiff). Suffix-sort spellings are the same variable as
+their sigil form (`x:pub` = `$x`, silent - s5_suffix) and render with the
+sigil (`x:pub` vs `~x` -> "$x, ~x" - s5_suffix2). Fixed header:
     "Possible reasons:\n1. Identifiers are case sensitive, i.e.,'x' and 'X' are considered to be different.\n2. The same holds for sorts:, i.e., '$x', 'x', and '~x' are considered to be different.\n"
-per rule: "  rule `A5': \n    1. $s, ~s" (trailing space; numbered variant groups).
+per rule: "  rule `A5': \n    1. $s, ~s" (trailing space; numbered variant
+groups). Variants are ordered by sort class $ < ~ < msg < % (s5_all4; Node
+unobserved, placed last) and by exact name within a class ("$Ab, $aB" -
+s5_capord; sort rank beats name order - s5_crossname "$x, ~X"). Groups are
+sorted by their key and separated by a 4-space line (s5_groups). Rule entries
+join with "\n  \n" (issue527 target).
 
-### Reserved names
+### Reserved names  (round5: builtin normalization)
 Trigger: rule uses a fact with a reserved name in a position. The reserved set
 is POSITION-DEPENDENT (observed z9/z11/z12):
   - left-hand-side / right-hand-side: {K, KU, KD}
   - the middle (actions): {K, KU, KD, In, Out, Fr}  (the I/O facts are also
     reserved as actions; on LHS/RHS they are "Special facts" instead)
+BUILTIN NORMALIZATION (round5, t5_ku_lhs/t5_ku_all/t5_kd_mid/t5_up_inout +
+issue515 target): fact names matching KU/KD/In/Out/Fr CASE-INSENSITIVELY
+denote the builtin facts and render canonically - `Ku(x)` reports `!KU( x )`
+(persistent), `Kd` -> `!KD( x )`, `OUT`/`FR` -> `Out( x )`/`Fr( x )`; an `IN`
+premise is a legal In premise (silent). `K` is single-letter (only the exact
+spelling parses). Normalized builtins never produce Fact-capitalization
+conflicts (issue515 has Ku/KU/Kd/KD and no such topic).
 Per (rule, position) entry joined "\n  \n":
     "  Rule `R1' contains facts with reserved names on left-hand-side:\n    <facts>"
 Position phrases: LHS `on left-hand-side:`, actions `on the middle:`,
@@ -142,9 +163,11 @@ item i: "    {i}. {Label} `{owner}', arity {n}\n         {render}"; items joined
 restrictions do NOT (r3_restrarity). Rule facts: Label=`Rule`, render=fact pp.
 Lemma action facts: Label=`Lemma`, render = raw Haskell `Fact {factTag =
 ProtoFact {Linear|Persistent} "{name}" {arity}, factAnnotations = fromList [],
-factTerms = [{de-Bruijn terms}]}` (r3_lemarity). Rule items dedup per
-(label,owner,arity); lemma facts likewise. Multiplicity is analogous and ALSO
-gathers lemma facts (r3_lemmult, item = `... multiplicity (persistence) ...`).
+factTerms = [{de-Bruijn terms}]}` (r3_lemarity). ROUND5: items dedup per
+(label, owner, arity, RENDER) - the same lemma fact at two binder depths
+yields TWO items (`Bound 3,2,1` and `Bound 4,3,2` - t5_lemdup, issue527
+target). Multiplicity is analogous and ALSO gathers lemma facts (r3_lemmult,
+item = `... multiplicity (persistence) ...`).
 
 ### Fact multiplicity issues
 Same structure keyed on multiplicity; header:
@@ -168,7 +191,12 @@ conclusion. Numbered items joined "\n  \n":
     "  1. in rule \"r1\":  factName `X' arity: 0 multiplicity: Linear" +
       optional ". Perhaps you want to use the fact in rule \"r1\":  factName `Y' arity: 0 multiplicity: Linear"
 suggestion = nearest RHS fact by edit distance under a threshold (omitted when
-nothing close). Special facts excluded from both sides.
+nothing close). ROUND5: the excluded facts are the normalized builtins
+{KU,KD,In,Out,Fr} only - the reserved proto-fact `K` PARTICIPATES on both
+sides (issue527 target lists a K-only premise with suggestion `F`; issue515's
+K premise is satisfied by a K conclusion). Item numbers are RIGHT-ALIGNED to
+the widest index with a 2-space margin: "   1." .. "  10." (t5_align; ble and
+mesh targets).
 
 ### Fresh public constants (round2; always-on)
 Trigger: a fresh-name literal (`~'foo'`, AST `Term::FreshLit`) used directly in
@@ -249,12 +277,15 @@ message binder `x` does not bind a node use `#x` (g1_msgnode: `Free #x`). Sort
 classes: {Msg, Untagged, Suffix(Msg)} collapse to Msg (this keeps a quantified
 message var bound to its uses across the parser's Untagged-vs-Msg tagging - the
 round2 false-positive fix, now done sort-aware instead of name-only);
-Pub/Fresh/Node/Nat (and their Suffix forms) are each their own class. The de
-Bruijn stack counts EVERY quantified var (temporals and sort-mismatched ones
-included); the index is the distance to the innermost binder matching (name,
-class) - probe g1_dbsort: `All x #x. ... h(x)` -> `h(Bound 1)` (msg x sits under
-node #x). Same-name/different-sort binders coexist without capture (g1_samename:
-`Ex x #x. A(x)@#x` -> SUCCESS).
+Pub/Fresh/Node/Nat (and their Suffix forms) are each their own class. ROUND5:
+the variable's numeric INDEX is part of its identity too - a binder `y` does
+not bind a use `y.1` (probe g5_idx: `Ex y #i. A(y.1)@#i` -> `Free y.1` and an
+unguarded binder; the accountability translation's primed variables `S.1`
+depend on this). The de Bruijn stack counts EVERY quantified var (temporals
+and sort-mismatched ones included); the index is the distance to the innermost
+binder matching (name, index, class) - probe g1_dbsort: `All x #x. ... h(x)`
+-> `h(Bound 1)` (msg x sits under node #x). Same-name/different-sort binders
+coexist without capture (g1_samename: `Ex x #x. A(x)@#x` -> SUCCESS).
 
 ### Formula terms  (round3: FULL coverage; round4: sort-aware)
 Trigger: a lemma/restriction formula uses a TERM "of the wrong form". The unit
@@ -300,28 +331,53 @@ formula. Exactly two reasons:
   - `universal quantifier without toplevel implication`
 
 DECISION PROCEDURE (pre-order; first failure reported, antecedent before
-consequent, left before right - probes gr_both/gr_sib):
+consequent, left before right - probes gr_both/gr_sib; ROUND5 revision):
+  - QUANTIFIER FUSION: directly nested quantifiers of the SAME kind fuse into
+    one binder list BEFORE the check (`∀x.∀#i.φ` = `∀x #i.φ` - g5_a_nest,
+    `∃x.∃#i.φ` - g5_e_nest; predicate-expanded timepoints.spthy needs this).
+    The report renders the FUSED form for both the failing subformula and the
+    whole formula (g5_a_nest_noimpl prints "∀ x #i. A( x ) @ #i"). No
+    cross-kind fusion (g5_a_fuse_ex errors; g5_e_fuse_all: a ∀ body guards
+    nothing for the outer ∃).
   - `∀ vars. body`: body MUST be a top-level implication `guard ==> rest`;
     otherwise "without toplevel implication" (bare atom, conjunction,
     disjunction, negation, iff ALL fail this way - gu_bareatom/gu_conj/gu_disj/
-    gu_neg/gu_iff). If it is `guard ==> rest`, every quantified var must be in
-    the guard set, else "unguarded variable(s)"; then recurse into guard then
-    rest.
-  - `∃ vars. body`: every quantified var must be in the guard set of `body`,
-    else "unguarded variable(s)" (a non-conjunction body - disjunction/
-    implication/negation - guards nothing: ge_disj/ge_impl/ge_neg); then recurse
-    into body. A bare action atom or a conjunction of them is a valid guard
-    (ge_bareact/ge_conj_ok).
-  - GUARD SET of a formula = the (name, sort-class) keys of variables occurring
-    in ACTION atoms reachable through CONJUNCTIONS only. Disjunction, negation,
-    implication, equality/`<`/`⋖`/`⊏`/`last` atoms, and nested quantifiers
-    contribute NO guards (gx_disj_ant/gx_neg_ant/gx_eq_ant/gx_less/gx_last/
-    gx_quant_g). An action atom guards all its fact-arg vars AND its temporal
-    (gx_pair). Guard matching is sort-aware (syn_pubsuffix: pub `$x` is NOT
-    guarded by a msg `x` in `A(x)`). This is the only semantic change from the
-    round-3 heuristic (which recursed guards through Or/Not/quantifiers).
+    gu_neg/gu_iff). If it is `guard ==> rest`, every quantified var must be
+    RESOLVED by the guard region (= the antecedent; equalities in the
+    consequent do not guard - g5_a_conseq_eq), else "unguarded variable(s)";
+    then recurse into guard then rest.
+  - `∃ vars. body`: every quantified var must be RESOLVED by the guard region
+    (= the whole body), else "unguarded variable(s)"; then recurse into body.
+  - GUARD RESOLUTION of a region for quantified vars `vs` (round5 -
+    supersedes the round-4 action-only guard set):
+      1. every var occurring anywhere inside an ACTION atom reachable through
+         CONJUNCTIONS only is resolved (deep args count - g5_e_actdeep; all
+         action atoms are collected BEFORE the equality pass regardless of
+         their position - g5_e_actorder);
+      2. the conjunction-reachable EQUALITY atoms are processed in a SINGLE
+         left-to-right pass: if one side of an equality contains NO unresolved
+         quantified variables ("clean" - outer-bound and free vars are clean:
+         g5_e_eqpair/g5_e_eqfree), all unresolved quantified vars of the OTHER
+         side (however deep - g5_e_eqinner, whole tuples at once -
+         g5_e_pairboth) become resolved. One pass only: `(z='c') & (w=h(z))`
+         succeeds but `(w=h(z)) & (z='c')` leaves w unguarded
+         (g5_e_eqchain/g5_e_revchain); side-based, not unification
+         (g5_e_unif); both-sides-current fails (g5_e_eqself/g5_e_eqtwo);
+         temporal equalities behave identically (g5_e_eqtemp). Equalities can
+         guard ∀ vars in the antecedent the same way (g5_a_eqg1/g5_a_eqg2/
+         g5_a_eqonly, and the round-4 gx_eq_ant `x=x` rejection is the
+         both-sides-current case).
+    Disjunction, negation, implication, `<`/`⋖`/`⊏`/`last` atoms, and nested
+    quantifiers contribute NOTHING (gx_disj_ant/gx_neg_ant/gx_less/gx_last/
+    gx_quant_g/g5_e_disjeq/g5_e_neg_eq/g5_e_lessonly/g5_e_lastonly/
+    g5_e_subterm/g5_e_conjnest). Matching is (name, INDEX, sort-class)-aware
+    (g5_idx: a binder `y` does not bind or guard `y.1`).
   - `¬`, `∧`, `∨`, `⇒`, `⇔` at the top: recurse into operands (left first).
   - Any non-quantified formula: no failure (gt_noquant/gt_topconj).
+  - CORPUS PIN: the reference accepts all 459 lemma + 225 restriction
+    formulas of the 71 round-5 gate-diff theories (captures in
+    scratchpad/corpus5_out, extracted to wf-clean/tests/corpus5); the decision
+    above accepts every one (test corpus5_acceptance).
 
 MULTI-LINE FORMULA PRINTER (pp_formula_wrapped, col-relative; round4 fix).
 Page width 72 (single line fits at total col 72, breaks by 74). The formula is
@@ -349,10 +405,37 @@ prefix vars so no free collision arises).
 Trigger: var used in %+ (nat) context not of sort nat. Entries joined "\n  \n":
     "  y in term (y%+z) must be of sort nat" (nat-sort inference - structural only, gap).
 
-### Subterm Convergence Warning
-Trigger: user equation l=r not subterm convergent. Body:
+### Subterm Convergence Warning  (round5: decision + layout closed)
+Trigger: user equation l=r not subterm convergent. An equation IS convergent
+(silent) when its RHS is a subterm of the LHS OR GROUND - no variables
+(t5_sub_ground/t5_sub_groundapp; mesh's `aes_ccm_verify(..) = true_val` is
+silent). Flagged equations are listed SORTED by their rendered form, not
+source order (t5_sub_order/order2/order3; ble f4<f6<g2, mesh k1..k4<s1). Body:
     "  User-defined equations must be convergent and have the finite variant property. The following equations are not subterm convergent. If you are sure that the set of equations is nevertheless convergent and has the finite variant property, you can ignore this warning and continue \n\n" + eqs + "\n   \n For more information, please refer to the manual : https://tamarin-prover.com/manual/master/book/010_modeling-issues.html "
-each eq "    {lhsPP} = {rhsPP}" (subterm decision + printer partial - gap).
+each eq "    {lhsPP} = {rhsPP}" on one line while its total width <= 71
+(t5_wl55..66); wider equations put the LHS on its own 4-indented line and the
+RHS on the next as "  = {rhs}" with the RHS laid out by the EQUATION LAYOUT
+ENGINE (below). Entries joined "\n".
+
+EQUATION LAYOUT ENGINE (pp_equation; calibrated on t5_tup*/t5_last* and the
+ble/mesh reference blocks, all byte-exact):
+  - Every fit check compares an end column against min(100, 67 + N) where N is
+    the NEST of the current line - the continuation column that started it
+    (2 for the "  = " line, else the fill column that broke).
+  - A term is laid FLAT when its flat width fits from the current column.
+  - Function application `f(a1, a2)`: when broken, args fill at the column
+    after `f(`; a fitting arg is placed flat with `, ` between args mid-line
+    but a bare `,` glued at a break (mesh: line ends "n),"); a non-fitting arg
+    breaks to the continuation column and lays out in full. The closing `)`
+    ALWAYS glues.
+  - Tuple `<e1, ..., en>`: elements fill one column after `<`; each mid
+    element carries its `", "` suffix (kept at the line end when the next
+    element breaks - trailing space); a non-fitting element breaks to the
+    continuation column (the FIRST element too, leaving `<` alone - mesh);
+    an element following a MULTI-LINE element always breaks. The closing `>`
+    glues after a single-line last element that fits, and otherwise drops to
+    the TUPLE'S START column on its own line (t5_last36/t5_last37; mesh outer
+    `>` at the start column after a multi-line last element).
 
 ## Term pretty-printer (observed)
 - Var: sortprefix + base + ("."+idx if idx>0). Fresh `~`, Pub `$`, Nat `%`,
@@ -435,6 +518,57 @@ post-elaboration replacement):
 - Formula-check bundle assembly (lemmas-then-restrictions, per-item sub-order,
   consecutive-merge) and the col-relative multi-line printer (top-level binop
   break and relational-atom break fixed).
+
+## Round 5 (gate-diff families) - closed
+
+Driven by the 71-theory wf-gate diff list (round5/wf_gate_diffs.txt) with the
+Haskell reference blocks pre-materialized in round5/targets/. All facts above
+tagged "round5" trace to probes in scratchpad/probes5 (QUERIES.log) or to
+those targets.
+
+- FAMILY 1 (guardedness over-report, 49 files): the decision procedure gained
+  EQUALITY-ATOM GUARDS (one-clean-side resolution, single left-to-right pass,
+  actions first) and SAME-KIND QUANTIFIER FUSION; binder identity now includes
+  the numeric index. Pinned against every lemma/restriction formula the
+  reference prints for the 71 theories (tests/corpus5, 684 formulas, all
+  accepted) plus byte fixtures for the still-rejected shapes.
+- FAMILY 2 (sort/capitalization over-report, 15 files): grouping is
+  (lowercased name, index); suffix-sort = sigil sort; variant order = sort
+  rank then name; groups sorted with a 4-space separator. Public-names
+  listing reworked: distinct spellings attributed to their FIRST rule,
+  sorted, consecutive same-rule spellings merged, groups sorted by key.
+- FAMILY 3 (tail, 7 files): case-insensitive builtin-fact normalization
+  (issue515), K participates in lhs-not-rhs (issue527), right-aligned item
+  numbers (ble/mesh), lemma arity/multiplicity items deduped per-render
+  (issue527), Lemma-annotations target pinned (Axioms_and_Induction), the
+  SAPIC lookup-rule unbound block pinned (t5_lookup vs OCSPS/CT targets), and
+  the Subterm Convergence decision (ground RHS), ordering (sorted) and wide-
+  equation layout engine - the mesh k2 ten-line block renders byte-exact.
+
+Round-5 report (REPORT5 folded here; .md creation blocked):
+- Tests: 130 pass (was 74): +29 round-5 byte-parity/behavior tests
+  (tests/round5_tests.rs, fixtures g5_*/s5_*/t5_* captured from oracle probes
+  plus 4 reference-target extracts: issue515, issue527, Axioms_and_Induction,
+  ble/mesh subterm blocks) and +1 corpus harness
+  (tests/corpus5_acceptance.rs: a parser for the oracle's pretty-printed
+  Unicode formula syntax runs the formula bundle over all 684 extracted
+  formulas and asserts silence).
+- The round-4 "equality atoms do NOT guard" fact (gx_eq_ant) was an artifact
+  of the `x = x` self-case; the general mechanism is the one-clean-side
+  resolution above. The round-4 (name, class) binder identity was likewise
+  incomplete: the index is part of identity (g5_idx).
+- Axioms_and_Induction / stateverif / OCSPS / CertificateTransparency: the
+  sealed checks already produce the reference blocks given a faithful AST
+  (pinned by t5_axioms_induction and t5_lookup); their gate divergence is on
+  the integration side (which rules/lemmas are fed to the checker), not in
+  the check logic.
+- INTEGRATOR NOTES: (a) the adapter must carry variable INDICES into
+  `VarSpec.idx` (formula binders and uses, and rule variables like `$x.1`) -
+  index-blind mapping reintroduces both the family-1 and family-2 false
+  positives; (b) `Message Derivation Checks`/`Derivation Checks` and the
+  accountability "Accountability (RP check)" block remain out of scope
+  (computed elsewhere); (c) public entry points unchanged;
+  `pretty::pp_equation` is new (used by the subterm check).
 
 ## Out-of-scope / known gaps
 - Message Derivation Checks & Derivation Checks: computed by Maude after

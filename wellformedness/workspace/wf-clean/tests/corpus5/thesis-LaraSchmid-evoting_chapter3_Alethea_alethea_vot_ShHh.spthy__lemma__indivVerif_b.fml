@@ -1,0 +1,1 @@
+∀ H b #j bOther. (Verify( H, b, (b++bOther) ) @ #j) ⇒ (∃ BB b2 #l. BB_rec( BB, <'b', (b++b2)> ) @ #l)

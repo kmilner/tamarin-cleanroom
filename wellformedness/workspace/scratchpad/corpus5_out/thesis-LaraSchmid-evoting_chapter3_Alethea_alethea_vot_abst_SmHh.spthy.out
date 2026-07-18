@@ -1,0 +1,275 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory alethea_vot_abst_SmHh] Theory loaded
+[Theory alethea_vot_abst_SmHh] Theory translated
+[Theory alethea_vot_abst_SmHh] Derivation checks started
+[Theory alethea_vot_abst_SmHh] Derivation checks ended
+[Theory alethea_vot_abst_SmHh] Theory closed
+theory alethea_vot_abst_SmHh
+
+begin
+
+// Function signature and definition of the equational theory E
+
+builtins: multiset
+functions: adec/2, aenc/2, decp/2, encp/3, fst/1, h/1, pair/2, pk/1,
+           sdec/2, senc/2, sg/2, sign/2, snd/1, true/0, ver/2, verify/3, verzkp/4,
+           zkp/3
+equations:
+    adec(aenc(x.1, pk(x.2)), x.2) = x.1,
+    decp(encp(x, r, pk(sk)), sk) = x,
+    fst(<x.1, x.2>) = x.1,
+    sdec(senc(x.1, x.2), x.2) = x.1,
+    snd(<x.1, x.2>) = x.2,
+    ver(sg(m, sk), pk(sk)) = m,
+    verify(sign(x.1, x.2), x.1, pk(x.2)) = true
+
+rule (modulo E) ChanOut_S:
+   [ Out_S( $A, $B, x ) ]
+  --[ ChanOut_S( $A, $B, x ) ]->
+   [ !Sec( $A, $B, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanIn_S:
+   [ !Sec( $A, $B, x ) ] --[ ChanIn_S( $A, $B, x ) ]-> [ In_S( $A, $B, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanOut_A:
+   [ Out_A( $A, x ) ]
+  --[ ChanOut_A( $A, x ) ]->
+   [ !Auth( $A, x ), Out( <$A, x> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanIn_A:
+   [ !Auth( $A, x ) ] --[ ChanIn_A( $A, x ) ]-> [ In_A( $A, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) publickeyinfrastructure:
+   [ Fr( ~skX ) ]
+  --[ LongtermKey( $X, ~skX ) ]->
+   [ !Ltk( $X, ~skX ), !Pk( $X, pk(~skX) ), Out( pk(~skX) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Setup:
+   [ !Ltk( 'S', ~skS ), Fr( ~x1 ), Fr( ~x2 ) ]
+  --[
+  Setup( ), BB_pskDs( 'BB', <'spkDSG', pk(h(<'H1', ~x1>))> ), Voter( 'H1' )
+  ]->
+   [
+   AgSt_H0( 'H1', <'D1', 'BB', 'empty'> ),
+   AgSt_D0( 'D1', <'H1', 'S', pk(~skS), h(<'H1', ~x1>)> ),
+   AgSt_A0( 'A', <'S', 'BB', pk(~skS)> ),
+   AgSt_BB0( 'BB', <'S', 'spkDSG', pk(h(<'H1', ~x1>))> ),
+   Out_A( 'BB', <'spkDSG', pk(h(<'H1', ~x1>))> ), Out( <'S', ~skS, ~x1> )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_1:
+   [ AgSt_H0( $H, <$D, $BB, $v> ) ]
+  --[ Vote( $H, $v ) ]->
+   [ AgSt_H1( $H, <$D, $BB, $v> ), Out_S( $H, $D, $v ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) D_1:
+   [ AgSt_D0( $D, <$H, $S, pkS, h(<$H, ~x>)> ), In_S( $H, $D, 'empty' ) ]
+  -->
+   [ Out_S( $D, $H, sg(encp('empty', ~x, pkS), h(<$H, ~x>)) ) ]
+
+  // loop breaker: [1]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_2:
+   [ AgSt_H1( $H, <$D, $BB, $v> ), In_S( $D, $H, b ) ]
+  --[ Abstain( $H, 'empty' ), Ballot( $H, b ) ]->
+   [ AgSt_H2( $H, <$D, $BB, $v, b> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) BB:
+   [
+   AgSt_BB0( $BB, <$S, 'spkDSG', spkDa> ), In( <$S, 'b', ba> ),
+   In( <$S, 'bPrime', bPrimea> ), In( <$S, 'v', va> ), In( <$S, 'zkp', p> )
+   ]
+  --[
+  BB_rec( $BB, <'b', ba> ), BB_woS( $BB, <'bPrime', bPrimea> ),
+  BB_tal( $BB, <'v', va> ), BB_zkp( $BB, <'zkp', p> )
+  ]->
+   [
+   Out_A( $BB, <'b', ba> ), Out_A( $BB, <'bPrime', bPrimea> ),
+   Out_A( $BB, <'v', va> ), Out_A( $BB, <'zkp', p> )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) A_1:
+   [
+   AgSt_A0( $A, <$S, $BB, pkS> ), In_A( $BB, <'b', sg(bPrimea, sskDa)> ),
+   In_A( $BB, <'bPrime', bPrimea> ), In_A( $BB, <'v', va> ),
+   In_A( $BB, <'zkp', p> ), In_A( $BB, <'spkDSG', pk(sskDa)> )
+   ]
+  --[
+  Learn_A_proof( $A, <'zkp', p> ),
+  Learn_A_spkDSG( $A, <'spkDSG', pk(sskDa)> ), Learn_A_Vs( $A, <'v', va> ),
+  Learn_A_Bs( $A, <'b', sg(bPrimea, sskDa)> ),
+  Learn_A_bPrimes( $A, <'bPrime', bPrimea> ),
+  VerifyA2( $A, verzkp(p, bPrimea, va, pkS) )
+  ]->
+   [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_3:
+   [ AgSt_H2( $H, <$D, $BB, $v, b> ), In_A( $BB, <'b', ba> ) ]
+  --[ Verify( $H, b, ba ) ]->
+   [ ]
+
+  /* has exactly the trivial AC variant */
+
+restriction OneSetup:
+  "∀ #i #j. ((Setup( ) @ #i) ∧ (Setup( ) @ #j)) ⇒ (#i = #j)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ #i #j. ((Setup( ) @ #i) ∧ (Setup( ) @ #j)) ⇒ (#i = #j)"
+  */
+
+lemma functional:
+  exists-trace
+  "∃ H #i #j b BB #k #l #m #n A p bPrime v pkS #o.
+    ((((((Vote( H, 'empty' ) @ #i) ∧ (Abstain( H, 'empty' ) @ #j)) ∧
+        (Ballot( H, b ) @ #n)) ∧
+       (BB_rec( BB, <'b', b> ) @ #k)) ∧
+      (BB_tal( BB, <'v', 'empty'> ) @ #l)) ∧
+     (Verify( H, b, b ) @ #m)) ∧
+    (VerifyA2( A, verzkp(p, bPrime, v, pkS) ) @ #o)"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ H #i #j b BB #k #l #m #n A p bPrime v pkS #o.
+  (Vote( H, 'empty' ) @ #i) ∧
+  (Abstain( H, 'empty' ) @ #j) ∧
+  (Ballot( H, b ) @ #n) ∧
+  (BB_rec( BB, <'b', b> ) @ #k) ∧
+  (BB_tal( BB, <'v', 'empty'> ) @ #l) ∧
+  (Verify( H, b, b ) @ #m) ∧
+  (VerifyA2( A, verzkp(p, bPrime, v, pkS) ) @ #o)"
+*/
+by sorry
+
+lemma indivVerif_v:
+  all-traces
+  "∀ H v #i b #j.
+    ((Vote( H, v ) @ #i) ∧ (Verify( H, b, b ) @ #j)) ⇒
+    (∃ BB #l r pkS sskD.
+      (BB_rec( BB, <'b', b> ) @ #l) ∧ (b = sg(encp(v, r, pkS), sskD)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ H v #i b #j.
+  (Vote( H, v ) @ #i) ∧ (Verify( H, b, b ) @ #j)
+ ∧
+  ∀ BB #l r pkS sskD.
+   (BB_rec( BB, <'b', b> ) @ #l) ∧ (b = sg(encp(v, r, pkS), sskD)) ⇒ ⊥"
+*/
+by sorry
+
+lemma indivVerif_b:
+  all-traces
+  "∀ H b #j.
+    (Verify( H, b, b ) @ #j) ⇒ (∃ BB #l. BB_rec( BB, <'b', b> ) @ #l)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ H b #j.
+  (Verify( H, b, b ) @ #j) ∧ ∀ BB #l. (BB_rec( BB, <'b', b> ) @ #l) ⇒ ⊥"
+*/
+by sorry
+
+lemma Tall_As_Rec:
+  all-traces
+  "∀ A #a spkDSG p votes ballots bPrimes sk xa ra.
+    ((((((Learn_A_spkDSG( A, <'spkDSG', spkDSG> ) @ #a) ∧
+         (Learn_A_proof( A, <'zkp', p> ) @ #a)) ∧
+        (Learn_A_Vs( A, <'v', votes> ) @ #a)) ∧
+       (Learn_A_Bs( A, <'b', ballots> ) @ #a)) ∧
+      (Learn_A_bPrimes( A, <'bPrime', bPrimes> ) @ #a)) ∧
+     (VerifyA2( A,
+                verzkp(zkp(encp(xa, ra, pk(sk)), xa, sk), encp(xa, ra, pk(sk)), xa,
+                       pk(sk))
+      ) @ #a)) ⇒
+    (∃ #b BB r1 sskD1 #b2.
+      ((((BB_rec( BB, <'b', ballots> ) @ #b) ∧
+         (BB_tal( BB, <'v', votes> ) @ #b)) ∧
+        (BB_pskDs( BB, <'spkDSG', spkDSG> ) @ #b2)) ∧
+       (spkDSG = pk(sskD1))) ∧
+      (ballots = sg(encp(votes, r1, pk(sk)), sskD1)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ A #a spkDSG p votes ballots bPrimes sk xa ra.
+  (Learn_A_spkDSG( A, <'spkDSG', spkDSG> ) @ #a) ∧
+  (Learn_A_proof( A, <'zkp', p> ) @ #a) ∧
+  (Learn_A_Vs( A, <'v', votes> ) @ #a) ∧
+  (Learn_A_Bs( A, <'b', ballots> ) @ #a) ∧
+  (Learn_A_bPrimes( A, <'bPrime', bPrimes> ) @ #a) ∧
+  (VerifyA2( A,
+             verzkp(zkp(encp(xa, ra, pk(sk)), xa, sk), encp(xa, ra, pk(sk)), xa,
+                    pk(sk))
+   ) @ #a)
+ ∧
+  ∀ #b BB r1 sskD1 #b2.
+   (BB_rec( BB, <'b', ballots> ) @ #b) ∧
+   (BB_tal( BB, <'v', votes> ) @ #b) ∧
+   (BB_pskDs( BB, <'spkDSG', spkDSG> ) @ #b2) ∧
+   (spkDSG = pk(sskD1)) ∧
+   (ballots = sg(encp(votes, r1, pk(sk)), sskD1))
+  ⇒
+   ⊥"
+*/
+by sorry
+
+/*
+WARNING: the following wellformedness checks failed!
+
+Message Derivation Checks
+=========================
+
+  The variables of the following rule(s) are not derivable from their premises, you may be performing unintended pattern matching.
+
+Rule D_1: 
+Failed to derive Variable(s): ~x
+
+Rule A_1: 
+Failed to derive Variable(s): sskDa
+*/
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: /home/kamilner/tamarin-rs/tamarin-prover/examples/thesis-LaraSchmid-evoting/chapter3_Alethea/alethea_vot_abst_SmHh.spthy
+
+  processing time: 0.41s
+  
+  WARNING: 1 wellformedness check failed!
+  
+  functional (exists-trace): analysis incomplete (1 steps)
+  indivVerif_v (all-traces): analysis incomplete (1 steps)
+  indivVerif_b (all-traces): analysis incomplete (1 steps)
+  Tall_As_Rec (all-traces): analysis incomplete (1 steps)
+
+==============================================================================

@@ -1,0 +1,1 @@
+∀ x #t3. (IsNotSet( x ) @ #t3) ⇒ (∀ #t1 y. (Insert( x, y ) @ #t1) ⇒ (#t3 < #t1))

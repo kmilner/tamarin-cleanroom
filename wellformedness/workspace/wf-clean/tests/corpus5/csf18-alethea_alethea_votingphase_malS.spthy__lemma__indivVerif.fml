@@ -1,0 +1,1 @@
+∀ H S vote fstcode sndcode #i2 #i #j. (((Vote( H, vote ) @ #i2) ∧ (MyCode( H, <fstcode, sndcode> ) @ #i)) ∧ (Learn_H_C( H, S, <fstcode, sndcode> ) @ #j)) ⇒ (∃ BB #k hV pkS codeOther. (BB_Cs( BB, <'codes', (codeOther++<fstcode, sndcode>)> ) @ #k) ∧ (fstcode = cp(<vote, hV>, pkS)))

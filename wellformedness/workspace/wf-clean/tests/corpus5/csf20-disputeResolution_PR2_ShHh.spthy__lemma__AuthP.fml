@@ -1,0 +1,1 @@
+∀ S #i. (Honest( S ) @ #i) ⇒ (¬(∃ b BB human P b1 #k #l #m v. ((((BB_recorded( BB, <'bs', b1> ) @ #k) ∧ (¬(b1 = b))) ∧ (Pub( human, P, b ) @ #l)) ∧ (BB_P( BB, <'Ps', P> ) @ #m)) ∧ (b = <v, human>)))

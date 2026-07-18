@@ -1,0 +1,1 @@
+∀ id1 id2 role ka kb #i #j. ((Paired( id1, role, ka, kb ) @ #i) ∧ (Paired( id2, role, ka, kb ) @ #j)) ⇒ (#i = #j)

@@ -1,0 +1,12 @@
+theory Tg5_e_actdeep
+begin
+
+functions: h/1
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x), B(~x,~x), C(~x) ]->
+   [ Out(~x) ]
+lemma L:
+  exists-trace
+  "Ex z #i. A(h(z)) @ #i"
+end

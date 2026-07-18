@@ -1,0 +1,1 @@
+∀ A B m #i. (Send_U( A, B, m ) @ #i) ⇒ (∃ #j. Receive_U( A, B, m ) @ #j)

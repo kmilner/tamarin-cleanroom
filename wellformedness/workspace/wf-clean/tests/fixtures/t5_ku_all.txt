@@ -1,0 +1,14 @@
+WARNING: the following wellformedness checks failed!
+
+Reserved names
+==============
+
+  Rule `r1' contains facts with reserved names on left-hand-side:
+    !KU( x )
+  
+  Rule `r1' contains facts with reserved names on the middle:
+    !KU( x )
+  
+  Rule `r1' contains facts with reserved names on the right-hand-side:
+    !KU( x )
+*/

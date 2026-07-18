@@ -1,0 +1,5 @@
+theory Ts5_node
+begin
+rule R1:
+   [ In(x) ] --[ M(x) ]-> [ Out(x) ]
+end

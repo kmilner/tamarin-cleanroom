@@ -1,0 +1,1 @@
+∀ pid otc1 tc1 otc2 tc2 #t1 #t2 z. (((LoginCounter( pid, otc1, tc1 ) @ #t1) ∧ (LoginCounter( pid, otc2, tc2 ) @ #t2)) ∧ (tc2 = (tc1++z))) ⇒ (#t1 < #t2)

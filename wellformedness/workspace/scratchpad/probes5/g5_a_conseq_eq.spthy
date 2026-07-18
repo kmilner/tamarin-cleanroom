@@ -1,0 +1,12 @@
+theory Tg5_a_conseq_eq
+begin
+
+functions: h/1
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x), B(~x,~x), C(~x) ]->
+   [ Out(~x) ]
+lemma L:
+  all-traces
+  "All w x #i. A(x) @ #i ==> ((w = h(x)) & (C(w) @ #i))"
+end

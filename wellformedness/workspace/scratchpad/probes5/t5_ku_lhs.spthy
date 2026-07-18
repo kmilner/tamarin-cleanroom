@@ -1,0 +1,4 @@
+theory Tt5_ku_lhs
+begin
+rule r1: [ Ku(x) ] --[ M(x) ]-> [ ]
+end

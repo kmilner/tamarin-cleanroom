@@ -1,0 +1,1 @@
+∀ sid H Hp v #i b #j. (((H = <sid, Hp>) ∧ (Vote( H, v ) @ #i)) ∧ (Verify( H, b, b ) @ #j)) ⇒ (∃ BB BBp #l r pkS sskD. ((BB = <sid, BBp>) ∧ (BB_rec( BB, <'b', b> ) @ #l)) ∧ (b = sg(encp(v, r, pkS), sskD)))

@@ -1,0 +1,1 @@
+(¬(∃ k l h #keyCreate #keyKU. (CreateKey( k, h, l ) @ #keyCreate) ∧ (!KU( k ) @ #keyKU))) ∧ (∀ d k l h #keyImport. (ImportKey( d, k, l, h ) @ #keyImport) ⇒ (∃ #keyCreate. (CreateKey( k, h, l ) @ #keyCreate) ∧ (#keyCreate < #keyImport)))

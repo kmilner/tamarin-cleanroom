@@ -1,0 +1,12 @@
+/*
+WARNING: the following wellformedness checks failed!
+
+ Formula guardedness
+====================
+
+  Lemma `L' cannot be converted to a guarded formula:
+    unguarded variable(s) 'z' in the subformula
+      "∃ z. z = z"
+    in the formula
+      "∃ z. z = z"
+*/

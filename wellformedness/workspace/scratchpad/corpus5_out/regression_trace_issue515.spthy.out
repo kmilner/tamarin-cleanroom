@@ -1,0 +1,117 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory issue515] Theory loaded
+[Theory issue515] Theory translated
+[Theory issue515] Derivation checks started
+[Theory issue515] Derivation checks ended
+[Theory issue515] Theory closed
+theory issue515
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+/* looping facts with injective instances: K/1 */
+
+rule (modulo E) test:
+   [ K( x ) ] --[ !KU( x ) ]-> [ !KD( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) test2:
+   [ Out( x ) ] --[ !KD( x ) ]-> [ In( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) test3:
+   [ K( x ) ] --[ In( x ) ]-> [ K( x ) ]
+
+  // loop breaker: [0]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) test4:
+   [ !KU( x ) ] --[ !KU( x ) ]-> [ Out( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) test5:
+   [ !KD( x ) ] --[ !KD( x ) ]-> [ !KU( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+/*
+WARNING: the following wellformedness checks failed!
+
+Reserved names
+==============
+
+  Rule `test' contains facts with reserved names on left-hand-side:
+    K( x )
+  
+  Rule `test' contains facts with reserved names on the middle:
+    !KU( x )
+  
+  Rule `test' contains facts with reserved names on the right-hand-side:
+    !KD( x )
+  
+  Rule `test2' contains facts with reserved names on the middle:
+    !KD( x )
+  
+  Rule `test3' contains facts with reserved names on left-hand-side:
+    K( x )
+  
+  Rule `test3' contains facts with reserved names on the middle:
+    In( x )
+  
+  Rule `test3' contains facts with reserved names on the right-hand-side:
+    K( x )
+  
+  Rule `test4' contains facts with reserved names on left-hand-side:
+    !KU( x )
+  
+  Rule `test4' contains facts with reserved names on the middle:
+    !KU( x )
+  
+  Rule `test5' contains facts with reserved names on left-hand-side:
+    !KD( x )
+  
+  Rule `test5' contains facts with reserved names on the middle:
+    !KD( x )
+  
+  Rule `test5' contains facts with reserved names on the right-hand-side:
+    !KU( x )
+
+Special facts
+=============
+
+  rule `test2' uses disallowed facts on left-hand-side:
+    Out( x )
+  
+  rule `test2' uses disallowed facts on right-hand-side:
+    In( x )
+*/
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: /home/kamilner/tamarin-rs/tamarin-prover/examples/regression/trace/issue515.spthy
+
+  processing time: 0.11s
+  
+  WARNING: 14 wellformedness check failed!
+
+==============================================================================

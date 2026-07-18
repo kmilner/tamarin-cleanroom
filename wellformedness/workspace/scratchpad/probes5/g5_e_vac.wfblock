@@ -1,0 +1,12 @@
+/*
+WARNING: the following wellformedness checks failed!
+
+ Formula guardedness
+====================
+
+  Lemma `L' cannot be converted to a guarded formula:
+    unguarded variable(s) 'z' in the subformula
+      "∃ y z. y = 'c'"
+    in the formula
+      "∀ #i x. (A( x ) @ #i) ⇒ (∃ y z. y = 'c')"
+*/

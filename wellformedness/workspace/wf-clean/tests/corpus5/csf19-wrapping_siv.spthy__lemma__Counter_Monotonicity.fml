@@ -1,0 +1,1 @@
+∀ d c C #before #later. (((DCtrIs( d, c ) @ #before) ∧ (DCtrIs( d, C ) @ #later)) ∧ (#before < #later)) ⇒ (∃ z. C = (c++z))

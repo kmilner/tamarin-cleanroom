@@ -1,0 +1,302 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory BluetoothLowEnergyPairing] Theory loaded
+[Theory BluetoothLowEnergyPairing] Theory translated
+[Theory BluetoothLowEnergyPairing] Derivation checks started
+[Theory BluetoothLowEnergyPairing] Derivation checks ended
+[Theory BluetoothLowEnergyPairing] Theory closed
+theory BluetoothLowEnergyPairing
+
+begin
+
+// Function signature and definition of the equational theory E
+
+builtins: diffie-hellman
+functions: aes_cmac/2, c1/8, e/3, extract_e/1, f4/4, f5_ltk/6,
+           f5_mackey/6, f6/7, fst/1, g2/4, get_nonce/8, low_entropy/1, pair/2,
+           recover/2, reduce_key/2, s1/3, sdec/2, senc/2, snd/1, split1/1, split2/1
+equations:
+    c1(x, get_nonce(cf, x, b, c, d, e, f, g), b, c, d, e, f, g) = cf,
+    extract_e(e(t, s, n)) = n,
+    f4(u, v, x, z) = aes_cmac(x, <u, v, z>),
+    f6(w, n1, n2, r, iocap, a1, a2)
+  = aes_cmac(w, <n1, n2, r, iocap, a1, a2>),
+    fst(<x.1, x.2>) = x.1,
+    g2(u, v, x, y) = aes_cmac(x, <u, v, y>),
+    get_nonce(c1(x, n, b, c, d, e, f, g), x, b, c, d, e, f, g) = n,
+    recover(split1(x), split2(x)) = x,
+    sdec(senc(x.1, x.2), x.2) = x.1,
+    snd(<x.1, x.2>) = x.2
+
+rule (modulo E) CreateDevice:
+   [ ]
+  -->
+   [ !Device( <$id, $cap, 'strong'> ), Out( <$id, $cap, 'strong'> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) InitPreparePairing:
+   [ !Device( <$idI, $capI, $keysizeI> ), In( <$idR, $capR, $keysizeR> ) ]
+  --[ InitPreparePairing( $idI, $capI, $keysizeI, $idR, $capR, $keysizeR )
+  ]->
+   [ InitPreparePairing( $idI, $capI, $keysizeI, $idR, $capR, $keysizeR ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) RespPreparePairing:
+   [ !Device( <$idR, $capR, $keysizeR> ), In( <$idI, $capI, $keysizeI> ) ]
+  --[ RespPreparePairing( $idR, $capR, $keysizeR, $idI, $capI, $keysizeI )
+  ]->
+   [ RespPreparePairing( $idR, $capR, $keysizeR, $idI, $capI, $keysizeI ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Oracle_f4:
+   [
+   LowEntropyf4( pk1, pk2, n, s ), In( pk1 ), In( pk2 ), In( n ),
+   In( f4(pk1, pk2, n, s) )
+   ]
+  --[ AttackerRecoveredPasskey( s ) ]->
+   [ Out( s ) ]
+
+  /*
+  rule (modulo AC) Oracle_f4:
+     [
+     LowEntropyf4( pk1, pk2, n, s ), In( pk1 ), In( pk2 ), In( n ),
+     In( aes_cmac(n, <pk1, pk2, s>) )
+     ]
+    --[ AttackerRecoveredPasskey( s ) ]->
+     [ Out( s ) ]
+  */
+
+rule (modulo E) Oracle_passkey:
+   [
+   LowEntropy( passkey ),
+   In( c1(low_entropy(passkey), N, capI, capR, idI, idR, keysizeI, keysizeR)
+   ),
+   In( N ), In( capI ), In( capR ), In( idI ), In( idR ), In( keysizeI ),
+   In( keysizeR )
+   ]
+  --[ AttackerRecoveredPasskey( passkey ) ]->
+   [ Out( passkey ) ]
+
+  /*
+  rule (modulo AC) Oracle_passkey:
+     [
+     LowEntropy( passkey ), In( z ), In( N ), In( capI ), In( capR ),
+     In( idI ), In( idR ), In( keysizeI ), In( keysizeR )
+     ]
+    --[ AttackerRecoveredPasskey( passkey ) ]->
+     [ Out( passkey ) ]
+    variants (modulo AC)
+    1. N     = N.10
+       capI  = capI.10
+       capR  = capR.10
+       idI   = idI.10
+       idR   = idR.10
+       keysizeI
+             = keysizeI.10
+       keysizeR
+             = keysizeR.10
+       passkey
+             = passkey.10
+       z     = c1(low_entropy(passkey.10), N.10, capI.10, capR.10, idI.10,
+                  idR.10, keysizeI.10, keysizeR.10)
+    
+    2. N     = get_nonce(x.10, low_entropy(x.11), x.12, x.13, x.14, x.15,
+                         x.16, x.17)
+       capI  = x.12
+       capR  = x.13
+       idI   = x.14
+       idR   = x.15
+       keysizeI
+             = x.16
+       keysizeR
+             = x.17
+       passkey
+             = x.11
+       z     = x.10
+  */
+
+rule (modulo E) RespSelectKeysizeSS:
+   [ RespChooseKeysize( 'strong', 'strong' ) ]
+  -->
+   [ RespSelectKeysize( 'strong' ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) RespSelectKeysizeSW:
+   [ RespChooseKeysize( 'strong', 'weak' ) ]
+  -->
+   [ RespSelectKeysize( 'weak' ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) RespSelectKeysizeWS:
+   [ RespChooseKeysize( 'weak', 'strong' ) ]
+  -->
+   [ RespSelectKeysize( 'weak' ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) RespSelectKeysizeWW:
+   [ RespChooseKeysize( 'weak', 'weak' ) ]
+  -->
+   [ RespSelectKeysize( 'weak' ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) InitSelectKeysizeSS:
+   [ InitChooseKeysize( 'strong', 'strong' ) ]
+  -->
+   [ InitSelectKeysize( 'strong' ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) InitSelectKeysizeSW:
+   [ InitChooseKeysize( 'strong', 'weak' ) ]
+  -->
+   [ InitSelectKeysize( 'weak' ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) InitSelectKeysizeWS:
+   [ InitChooseKeysize( 'weak', 'strong' ) ]
+  -->
+   [ InitSelectKeysize( 'weak' ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) InitSelectKeysizeWW:
+   [ InitChooseKeysize( 'weak', 'weak' ) ]
+  -->
+   [ InitSelectKeysize( 'weak' ) ]
+
+  /* has exactly the trivial AC variant */
+
+restriction InitOnlyOncePairing:
+  "∀ #i #j.
+    ((InitOnlyOncePairing( ) @ #i) ∧ (InitOnlyOncePairing( ) @ #j)) ⇒
+    (#i = #j)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ #i #j.
+    ((InitOnlyOncePairing( ) @ #i) ∧ (InitOnlyOncePairing( ) @ #j)) ⇒
+    (#i = #j)"
+  */
+
+restriction RespOnlyOncePairing:
+  "∀ #i #j.
+    ((RespOnlyOncePairing( ) @ #i) ∧ (RespOnlyOncePairing( ) @ #j)) ⇒
+    (#i = #j)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ #i #j.
+    ((RespOnlyOncePairing( ) @ #i) ∧ (RespOnlyOncePairing( ) @ #j)) ⇒
+    (#i = #j)"
+  */
+
+restriction DHConsistency:
+  "∀ t s r1 r2 y #i #j.
+    ((Raised( t, s, r1, y ) @ #i) ∧ (Raised( t, s, r2, y ) @ #j)) ⇒
+    (r1 = r2)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ t s r1 r2 y #i #j.
+    ((Raised( t, s, r1, y ) @ #i) ∧ (Raised( t, s, r2, y ) @ #j)) ⇒
+    (r1 = r2)"
+  */
+
+restriction DHIdentity:
+  "∀ t r y #i. (Raised( t, DH_neutral, r, y ) @ #i) ⇒ (r = DH_neutral)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ t r y #i. (Raised( t, DH_neutral, r, y ) @ #i) ⇒ (r = DH_neutral)"
+  */
+
+restriction ValidPt:
+  "∀ x y #i. (ValidPt( x, y ) @ #i) ⇒ (x = y)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x y #i. (ValidPt( x, y ) @ #i) ⇒ (x = y)"
+  */
+
+restriction InvalidPt:
+  "∀ x #i. (InvalidPt( x, x ) @ #i) ⇒ (⊥)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #i. (InvalidPt( x, x ) @ #i) ⇒ (⊥)"
+  */
+
+/*
+WARNING: the following wellformedness checks failed!
+
+Facts occur in the left-hand-side but not in any right-hand-side 
+=================================================================
+
+   1. in rule "Oracle_f4":  factName `LowEntropyf4' arity: 4 multiplicity: Linear
+  
+   2. in rule "Oracle_passkey":  factName `LowEntropy' arity: 1 multiplicity: Linear
+  
+   3. in rule "RespSelectKeysizeSS":  factName `RespChooseKeysize' arity: 2 multiplicity: Linear
+  
+   4. in rule "RespSelectKeysizeSW":  factName `RespChooseKeysize' arity: 2 multiplicity: Linear
+  
+   5. in rule "RespSelectKeysizeWS":  factName `RespChooseKeysize' arity: 2 multiplicity: Linear
+  
+   6. in rule "RespSelectKeysizeWW":  factName `RespChooseKeysize' arity: 2 multiplicity: Linear
+  
+   7. in rule "InitSelectKeysizeSS":  factName `InitChooseKeysize' arity: 2 multiplicity: Linear
+  
+   8. in rule "InitSelectKeysizeSW":  factName `InitChooseKeysize' arity: 2 multiplicity: Linear
+  
+   9. in rule "InitSelectKeysizeWS":  factName `InitChooseKeysize' arity: 2 multiplicity: Linear
+  
+  10. in rule "InitSelectKeysizeWW":  factName `InitChooseKeysize' arity: 2 multiplicity: Linear
+
+Subterm Convergence Warning
+===========================
+
+  User-defined equations must be convergent and have the finite variant property. The following equations are not subterm convergent. If you are sure that the set of equations is nevertheless convergent and has the finite variant property, you can ignore this warning and continue 
+
+    f4(u, v, x, z) = aes_cmac(x, <u, v, z>)
+    f6(w, n1, n2, r, iocap, a1, a2)
+  = aes_cmac(w, <n1, n2, r, iocap, a1, a2>)
+    g2(u, v, x, y) = aes_cmac(x, <u, v, y>)
+   
+ For more information, please refer to the manual : https://tamarin-prover.com/manual/master/book/010_modeling-issues.html 
+*/
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: /home/kamilner/tamarin-rs/tamarin-prover/examples/esorics23-bluetooth/models/ble.spthy
+
+  processing time: 0.53s
+  
+  WARNING: 2 wellformedness check failed!
+
+==============================================================================

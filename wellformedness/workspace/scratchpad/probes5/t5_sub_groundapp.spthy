@@ -1,0 +1,9 @@
+theory Tt5_sub_groundapp
+begin
+functions: f/1, c0/0, g0/1
+equations: f(x) = g0(c0)
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x) ]->
+   [ Out(~x) ]
+end

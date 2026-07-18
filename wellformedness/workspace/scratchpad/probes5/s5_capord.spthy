@@ -1,0 +1,5 @@
+theory Ts5_capord
+begin
+rule R1:
+   [ In($aB), In($Ab) ] --[ M($aB) ]-> [ ]
+end

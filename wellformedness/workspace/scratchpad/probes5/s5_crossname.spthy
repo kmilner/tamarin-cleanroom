@@ -1,0 +1,5 @@
+theory Ts5_crossname
+begin
+rule R1:
+   [ Fr(~X), In($x) ] --[ M(~X, $x) ]-> [ ]
+end

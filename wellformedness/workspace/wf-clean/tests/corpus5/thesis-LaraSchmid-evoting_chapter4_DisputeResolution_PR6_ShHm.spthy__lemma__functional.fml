@@ -1,0 +1,1 @@
+∃ BB #k. (BB_recorded( BB, <'bs', 'v', 'H'> ) @ #k) ∧ (BB_tallied( BB, <'vs', 'v'> ) @ #k)

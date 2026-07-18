@@ -1,0 +1,16 @@
+features/auto-sources/spore/AS_Modified_RPC.spthy
+features/auto-sources/spore/AS_RPC.spthy
+features/auto-sources/spore/Denning-Sacco-SK-Lowe.spthy
+features/auto-sources/spore/Denning-Sacco-SK.spthy
+features/auto-sources/spore/Nssk_amended.spthy
+features/auto-sources/spore/Nssk.spthy
+features/auto-sources/spore/Otway-Rees.spthy
+features/auto-sources/spore/SpliceAS_2.spthy
+features/auto-sources/spore/SpliceAS_3.spthy
+features/auto-sources/spore/SpliceAS.spthy
+features/auto-sources/spore/Wide_Mouthed_Frog_Lowe.spthy
+features/auto-sources/spore/Wide_Mouthed_Frog.spthy
+features/auto-sources/spore/WooLam_Pi_f.spthy
+features/auto-sources/spore/Yahalom_BAN.spthy
+features/auto-sources/spore/Yahalom-Lowe.spthy
+features/auto-sources/spore/Yahalom.spthy

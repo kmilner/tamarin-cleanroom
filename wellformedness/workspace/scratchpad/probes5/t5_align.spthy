@@ -1,0 +1,14 @@
+theory Tt5_align
+begin
+rule G: [ Fr(~z) ] --[ ]-> [ P01(~z), P02(~z), P03(~z), P04(~z), P05(~z), P06(~z), P07(~z), P08(~z), P09(~z), P10(~z) ]
+rule C01: [ P01(x), Q01(x) ] --[ ]-> [ ]
+rule C02: [ P02(x), Q02(x) ] --[ ]-> [ ]
+rule C03: [ P03(x), Q03(x) ] --[ ]-> [ ]
+rule C04: [ P04(x), Q04(x) ] --[ ]-> [ ]
+rule C05: [ P05(x), Q05(x) ] --[ ]-> [ ]
+rule C06: [ P06(x), Q06(x) ] --[ ]-> [ ]
+rule C07: [ P07(x), Q07(x) ] --[ ]-> [ ]
+rule C08: [ P08(x), Q08(x) ] --[ ]-> [ ]
+rule C09: [ P09(x), Q09(x) ] --[ ]-> [ ]
+rule C10: [ P10(x), Q10(x) ] --[ ]-> [ ]
+end

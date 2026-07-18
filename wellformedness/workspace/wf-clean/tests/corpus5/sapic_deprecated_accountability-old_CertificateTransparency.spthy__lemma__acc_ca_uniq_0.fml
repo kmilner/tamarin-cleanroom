@@ -1,0 +1,1 @@
+(∃ #i. DishonestCA( ) @ #i) ⇒ (∃ #c0. (Corrupted( 'CA' ) @ #c0) ∧ (⊤))

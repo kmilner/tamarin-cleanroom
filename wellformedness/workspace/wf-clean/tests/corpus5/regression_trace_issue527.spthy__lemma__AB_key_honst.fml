@@ -1,0 +1,1 @@
+∃ A B k #i. (((B_TEST( A, B, k ) @ #i) ∧ (∃ #j. (B_TEST( A, B, k ) @ #j) ∧ (#j < #i))) ∧ (¬(∃ #r. Register_pk( A ) @ #r))) ∧ (¬(∃ #a. Register_pk( B ) @ #a))

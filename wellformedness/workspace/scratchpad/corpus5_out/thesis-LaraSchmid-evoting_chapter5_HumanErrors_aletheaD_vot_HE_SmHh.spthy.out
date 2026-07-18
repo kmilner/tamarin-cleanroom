@@ -1,0 +1,598 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory aletheaD_vot_HE_SmHh] Theory loaded
+[Theory aletheaD_vot_HE_SmHh] Theory translated
+[Theory aletheaD_vot_HE_SmHh] Derivation checks started
+[Theory aletheaD_vot_HE_SmHh] Derivation checks ended
+[Theory aletheaD_vot_HE_SmHh] Theory closed
+theory aletheaD_vot_HE_SmHh
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: adec/2, aenc/2, decp/2, encp/3, fst/1, h/1, pair/2, pk/1,
+           sg/2, snd/1, ver/2, verzkp/4, zkp/3
+equations:
+    adec(aenc(x.1, pk(x.2)), x.2) = x.1,
+    decp(encp(x, r, pk(sk)), sk) = x,
+    fst(<x.1, x.2>) = x.1,
+    snd(<x.1, x.2>) = x.2,
+    ver(sg(m, sk), pk(sk)) = m
+
+rule (modulo E) H_Fresh:
+   [ Fr( ~x ) ]
+  --[ Fresh( $H, $t, ~x ), HK_event( $H, $t, ~x ), Untrained( $H ) ]->
+   [ !HK( $H, $t, ~x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_Send_I:
+   [ !HK( $H, $t, x ) ]
+  --[ Send( $H, $A, <$t, x> ), Untrained( $H ) ]->
+   [ Out( <$t, x> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_Receive_I:
+   [ In( <$t, x> ) ]
+  --[ Receive( $A, $H, <$t, x> ), HK_event( $H, $t, x ), Untrained( $H )
+  ]->
+   [ !HK( $H, $t, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_Send_S:
+   [ !HK( $H, $t, x ) ]
+  --[ Send( $H, $A, <$t, x> ), To( $A ), Untrained( $H ) ]->
+   [ Out_S( $H, $A, <$t, x> ) ]
+
+  // loop breaker: [0]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_Receive_S:
+   [ In_S( $A, $H, <$t, x> ) ]
+  --[
+  Receive( $A, $H, <$t, x> ), From( $A ), HK_event( $H, $t, x ),
+  Untrained( $H )
+  ]->
+   [ !HK( $H, $t, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_Receive_A:
+   [ In_A( $A, <$t, x> ) ]
+  --[
+  Receive( $A, $H, <$t, x> ), From( $A ), HK_event( $H, $t, x ),
+  Untrained( $H )
+  ]->
+   [ !HK( $H, $t, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_Claim:
+   [ ] --[ Claim( $H, $goal ), Untrained( $H ) ]-> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanOut_S:
+   [ Out_S( $A, $B, x ) ]
+  --[ ChanOut_S( $A, $B, x ) ]->
+   [ !Sec( $A, $B, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanIn_S:
+   [ !Sec( $A, $B, x ) ] --[ ChanIn_S( $A, $B, x ) ]-> [ In_S( $A, $B, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanOut_A:
+   [ Out_A( $A, x ) ]
+  --[ ChanOut_A( $A, x ) ]->
+   [ !Auth( $A, x ), Out( <$A, x> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanIn_A:
+   [ !Auth( $A, x ) ] --[ ChanIn_A( $A, x ) ]-> [ In_A( $A, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) publickeyinfrastructure:
+   [ Fr( ~skX ) ]
+  --[ LongtermKey( $X, ~skX ) ]->
+   [ !Ltk( $X, ~skX ), !Pk( $X, pk(~skX) ), Out( pk(~skX) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Setup:
+   [ !Ltk( 'S', ~skS ), !Ltk( 'D1', ~sskD1 ) ]
+  --[
+  Setup( ), BB_pskDs( 'BB', <'spkD', pk(~sskD1)> ), SecretKeyD( ~sskD1 ),
+  DeviceKey( 'D1', 'H1', ~sskD1 ), Pseudonym( 'H1', pk(~sskD1) ),
+  Human( 'H1' ), Goal( 'H1', 'IVHE', <<'v', 'b'>, $v1, 'ukn'> ),
+  Goal( 'H1', 'IVHE2', <'v', $v1> ), Goal( 'H1', 'vote', <'v', $v1> ),
+  Goal( 'H1', 'ballot', <'b', 'ukn'> ),
+  Goal( 'H1', 'IVHE4', <<'b', 'bs'>, 'ukn', 'ukn'> ),
+  HK_event( 'H1', 'D', 'D1' ), HK_event( 'H1', 'BB', 'BB' ),
+  HK_event( 'H1', 'v', $v1 ), InitK( 'H1', 'D', 'D1' ),
+  InitK( 'H1', 'BB', 'BB' ), InitK( 'H1', 'v', $v1 ),
+  NoOverwrite( 'H1', 'v' ), GetFrom( 'H1', 'bs', 'BB' ),
+  GetFrom( 'H1', 'b', 'D' ), Compare( 'H1', 'b', 'bs' )
+  ]->
+   [
+   AgSt_H0( 'H1', <'D1', 'BB', $v1> ),
+   AgSt_D0( 'D1', <'H1', 'S', pk(~skS), ~sskD1> ),
+   AgSt_A0( 'A', <'S', 'BB', pk(~skS)> ),
+   AgSt_BB0( 'BB', <'S', pk(~sskD1)> ), Out_A( 'BB', <'spkD', pk(~sskD1)> ),
+   Out( <'S', ~skS, pk(~sskD1)> ), !HK( 'H1', 'D', 'D1' ),
+   !HK( 'H1', 'BB', 'BB' ), !HK( 'H1', 'v', $v1 )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_1:
+   [ AgSt_H0( $H, <$D, $BB, $v> ) ]
+  --[
+  H1( ), Infallible( $H ), Send( $H, $D, <'v', $v> ), To( $D ),
+  Claim( $H, 'vote' )
+  ]->
+   [ AgSt_H1( $H, <$D, $BB, $v> ), Out_S( $H, $D, <'v', $v> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) D_1:
+   [ AgSt_D0( $D, <$H, $S, pkS, ~sskD> ), In_S( $H, $D, <'v', v> ), Fr( ~r )
+   ]
+  --[ D1( ) ]->
+   [ Out_S( $D, $H, <'b', sg(encp(v, ~r, pkS), ~sskD)> ) ]
+
+  // loop breaker: [1]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_2:
+   [ AgSt_H1( $H, <$D, $BB, $v> ), In_S( $D, $H, <'b', b> ) ]
+  --[
+  Comm_H_vote( $H, $S, $v ), Comm_H_ballot( $H, $S, b ), H2( ),
+  Infallible( $H ), Receive( $D, $H, <'b', b> ), From( $D ),
+  HK_event( $H, 'b', b ), Send( $H, $P, <'b', b> ), Claim( $H, 'ballot' )
+  ]->
+   [ AgSt_H2( $H, <$D, $BB, $v, b> ), Out( <'b', b> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) BB:
+   [
+   AgSt_BB0( $BB, <$S, spkDa> ), In( <$S, 'bs', ba> ),
+   In( <$S, 'bPrime', bPrimea> ), In( <$S, 'vs', va> ), In( <$S, 'zkp', p> )
+   ]
+  --[
+  BB( ), BB_rec( $BB, <'bs', ba> ), BB_woS( $BB, <'bPrime', bPrimea> ),
+  BB_tal( $BB, <'vs', va> ), BB_zkp( $BB, <'zkp', p> )
+  ]->
+   [
+   Out_A( $BB, <'bs', ba> ), Out_A( $BB, <'bPrime', bPrimea> ),
+   Out_A( $BB, <'vs', va> ), Out_A( $BB, <'zkp', p> )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) A_1:
+   [
+   AgSt_A0( $A, <$S, $BB, pkS> ), In_A( $BB, <'bs', sg(bPrimea, sskDa)> ),
+   In_A( $BB, <'bPrime', bPrimea> ), In_A( $BB, <'vs', va> ),
+   In_A( $BB, <'zkp', p> ), In_A( $BB, <'spkD', pk(sskDa)> )
+   ]
+  --[
+  Learn_A_proof( $A, <'zkp', p> ),
+  Learn_A_spkDSG( $A, <'spkD', pk(sskDa)> ), Learn_A_Vs( $A, <'vs', va> ),
+  Learn_A_Bs( $A, <'bs', sg(bPrimea, sskDa)> ),
+  Learn_A_bPrimes( $A, <'bPrime', bPrimea> ),
+  VerifyA2( $A, verzkp(p, bPrimea, va, pkS) ),
+  Learn_A_ballot( $A, sg(bPrimea, sskDa) ), A1( )
+  ]->
+   [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_3:
+   [ AgSt_H2( $H, <$D, $BB, $v, b> ), In_A( $BB, <'bs', b> ) ]
+  --[
+  H3( ), Infallible( $H ), Receive( $BB, $H, <'bs', b> ), From( $BB ),
+  HK_event( $H, 'bs', b ), Claim( $H, 'IVHE' ), Claim( $H, 'IVHE2' ),
+  Claim( $H, 'IVHE3' ), Claim( $H, 'IVHE4' )
+  ]->
+   [ ]
+
+  /* has exactly the trivial AC variant */
+
+restriction OneSetup:
+  "∀ #i #j. ((Setup( ) @ #i) ∧ (Setup( ) @ #j)) ⇒ (#i = #j)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ #i #j. ((Setup( ) @ #i) ∧ (Setup( ) @ #j)) ⇒ (#i = #j)"
+  */
+
+restriction UntrainedHumanSetup:
+  "∀ H #i. (Untrained( H ) @ #i) ⇒ (∃ #j. (Human( H ) @ #j) ∧ (#j < #i))"
+
+  /*
+  expanded formula:
+  "∀ H #i. (Untrained( H ) @ #i) ⇒ (∃ #j. (Human( H ) @ #j) ∧ (#j < #i))"
+  */
+
+restriction NoSecureChannelHumanToHuman:
+  "∀ H1 H2 x #i #j1 #j2.
+    (((ChanOut_S( H1, H2, x ) @ #i) ∧ (Untrained( H1 ) @ #j1)) ∧
+     (Untrained( H2 ) @ #j2)) ⇒
+    (⊥)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ H1 H2 x #i #j1 #j2.
+    (((ChanOut_S( H1, H2, x ) @ #i) ∧ (Untrained( H1 ) @ #j1)) ∧
+     (Untrained( H2 ) @ #j2)) ⇒
+    (⊥)"
+  */
+
+lemma onlyonce1 [reuse]:
+  all-traces "∀ #i #j. ((H1( ) @ #i) ∧ (H1( ) @ #j)) ⇒ (#i = #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ #i #j. (H1( ) @ #i) ∧ (H1( ) @ #j) ∧ ¬(#i = #j)"
+*/
+by sorry
+
+lemma onlyonce2 [reuse]:
+  all-traces "∀ #i #j. ((H2( ) @ #i) ∧ (H2( ) @ #j)) ⇒ (#i = #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ #i #j. (H2( ) @ #i) ∧ (H2( ) @ #j) ∧ ¬(#i = #j)"
+*/
+by sorry
+
+lemma onlyonce3 [reuse]:
+  all-traces "∀ #i #j. ((H3( ) @ #i) ∧ (H3( ) @ #j)) ⇒ (#i = #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ #i #j. (H3( ) @ #i) ∧ (H3( ) @ #j) ∧ ¬(#i = #j)"
+*/
+by sorry
+
+lemma onlyonce4 [reuse]:
+  all-traces "∀ #i #j. ((D1( ) @ #i) ∧ (D1( ) @ #j)) ⇒ (#i = #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ #i #j. (D1( ) @ #i) ∧ (D1( ) @ #j) ∧ ¬(#i = #j)"
+*/
+by sorry
+
+lemma onlyonce6 [reuse]:
+  all-traces "∀ #i #j. ((BB( ) @ #i) ∧ (BB( ) @ #j)) ⇒ (#i = #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ #i #j. (BB( ) @ #i) ∧ (BB( ) @ #j) ∧ ¬(#i = #j)"
+*/
+by sorry
+
+lemma onlyonce7 [reuse]:
+  all-traces "∀ #i #j. ((A1( ) @ #i) ∧ (A1( ) @ #j)) ⇒ (#i = #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ #i #j. (A1( ) @ #i) ∧ (A1( ) @ #j) ∧ ¬(#i = #j)"
+*/
+by sorry
+
+lemma functional:
+  exists-trace
+  "∃ H v #s #i #i2 D P #d b #h #h2 #k #l BB #m A r skS #o #p.
+    (((((((((((InitK( H, 'v', v ) @ #s) ∧ (Send( H, D, <'v', v> ) @ #i)) ∧
+             (Claim( H, 'vote' ) @ #i2)) ∧
+            (D1( ) @ #d)) ∧
+           (Send( H, P, <'b', b> ) @ #h)) ∧
+          (Claim( H, 'ballot' ) @ #h2)) ∧
+         (BB_rec( BB, <'bs', b> ) @ #k)) ∧
+        (BB_tal( BB, <'vs', v> ) @ #l)) ∧
+       (Receive( BB, H, <'bs', b> ) @ #m)) ∧
+      (From( 'BB' ) @ #m)) ∧
+     (VerifyA2( A,
+                verzkp(zkp(encp(v, r, pk(skS)), v, skS), encp(v, r, pk(skS)), v, pk(skS))
+      ) @ #o)) ∧
+    (Claim( H, 'IVHE4' ) @ #p)"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ H v #s #i #i2 D P #d b #h #h2 #k #l BB #m A r skS #o #p.
+  (InitK( H, 'v', v ) @ #s) ∧
+  (Send( H, D, <'v', v> ) @ #i) ∧
+  (Claim( H, 'vote' ) @ #i2) ∧
+  (D1( ) @ #d) ∧
+  (Send( H, P, <'b', b> ) @ #h) ∧
+  (Claim( H, 'ballot' ) @ #h2) ∧
+  (BB_rec( BB, <'bs', b> ) @ #k) ∧
+  (BB_tal( BB, <'vs', v> ) @ #l) ∧
+  (Receive( BB, H, <'bs', b> ) @ #m) ∧
+  (From( 'BB' ) @ #m) ∧
+  (VerifyA2( A,
+             verzkp(zkp(encp(v, r, pk(skS)), v, skS), encp(v, r, pk(skS)), v, pk(skS))
+   ) @ #o) ∧
+  (Claim( H, 'IVHE4' ) @ #p)"
+*/
+by sorry
+
+lemma functional2:
+  exists-trace
+  "∃ v #i b #j #k #l #m #n bs #i2 #j2 #i3 #j3 #i4 #j4 A.
+    (((((((((((Claim( 'H1', 'vote' ) @ #i) ∧
+              (Goal( 'H1', 'vote', <'v', v> ) @ #j)) ∧
+             (Claim( 'H1', 'IVHE4' ) @ #k)) ∧
+            (Goal( 'H1', 'IVHE4', <<'b', 'bs'>, 'ukn', 'ukn'> ) @ #l)) ∧
+           (HK_event( 'H1', 'b', b ) @ #m)) ∧
+          (HK_event( 'H1', 'bs', bs ) @ #n)) ∧
+         (Claim( 'H1', 'IVHE' ) @ #i2)) ∧
+        (Goal( 'H1', 'IVHE', <<'v', 'b'>, v, 'ukn'> ) @ #j2)) ∧
+       (Claim( 'H1', 'IVHE2' ) @ #i3)) ∧
+      (Goal( 'H1', 'IVHE2', <'v', v> ) @ #j3)) ∧
+     (Claim( 'H1', 'IVHE3' ) @ #i4)) ∧
+    (Send( 'H1', A, <'v', v> ) @ #j4)"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ v #i b #j #k #l #m #n bs #i2 #j2 #i3 #j3 #i4 #j4 A.
+  (Claim( 'H1', 'vote' ) @ #i) ∧
+  (Goal( 'H1', 'vote', <'v', v> ) @ #j) ∧
+  (Claim( 'H1', 'IVHE4' ) @ #k) ∧
+  (Goal( 'H1', 'IVHE4', <<'b', 'bs'>, 'ukn', 'ukn'> ) @ #l) ∧
+  (HK_event( 'H1', 'b', b ) @ #m) ∧
+  (HK_event( 'H1', 'bs', bs ) @ #n) ∧
+  (Claim( 'H1', 'IVHE' ) @ #i2) ∧
+  (Goal( 'H1', 'IVHE', <<'v', 'b'>, v, 'ukn'> ) @ #j2) ∧
+  (Claim( 'H1', 'IVHE2' ) @ #i3) ∧
+  (Goal( 'H1', 'IVHE2', <'v', v> ) @ #j3) ∧
+  (Claim( 'H1', 'IVHE3' ) @ #i4) ∧
+  (Send( 'H1', A, <'v', v> ) @ #j4)"
+*/
+by sorry
+
+lemma indivVerif_HE:
+  all-traces
+  "∀ v #i b #j #k.
+    (((Claim( 'H1', 'IVHE' ) @ #i) ∧
+      (Goal( 'H1', 'IVHE', <<'v', 'b'>, v, 'ukn'> ) @ #j)) ∧
+     (HK_event( 'H1', 'b', b ) @ #k)) ⇒
+    (∃ BB #l r pkS sskD.
+      (BB_rec( BB, <'bs', b> ) @ #l) ∧ (b = sg(encp(v, r, pkS), sskD)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ v #i b #j #k.
+  (Claim( 'H1', 'IVHE' ) @ #i) ∧
+  (Goal( 'H1', 'IVHE', <<'v', 'b'>, v, 'ukn'> ) @ #j) ∧
+  (HK_event( 'H1', 'b', b ) @ #k)
+ ∧
+  ∀ BB #l r pkS sskD.
+   (BB_rec( BB, <'bs', b> ) @ #l) ∧ (b = sg(encp(v, r, pkS), sskD)) ⇒ ⊥"
+*/
+by sorry
+
+lemma indivVerif_HE2:
+  all-traces
+  "∀ v #i #j.
+    ((Claim( 'H1', 'IVHE2' ) @ #i) ∧
+     (Goal( 'H1', 'IVHE2', <'v', v> ) @ #j)) ⇒
+    (∃ b BB #l r pkS sskD D #d.
+      ((BB_rec( BB, <'bs', b> ) @ #l) ∧ (b = sg(encp(v, r, pkS), sskD))) ∧
+      (DeviceKey( D, 'H1', sskD ) @ #d))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ v #i #j.
+  (Claim( 'H1', 'IVHE2' ) @ #i) ∧ (Goal( 'H1', 'IVHE2', <'v', v> ) @ #j)
+ ∧
+  ∀ b BB #l r pkS sskD D #d.
+   (BB_rec( BB, <'bs', b> ) @ #l) ∧
+   (b = sg(encp(v, r, pkS), sskD)) ∧
+   (DeviceKey( D, 'H1', sskD ) @ #d)
+  ⇒
+   ⊥"
+*/
+by sorry
+
+lemma indivVerif_HE3:
+  all-traces
+  "∀ v #i #j A.
+    ((Claim( 'H1', 'IVHE3' ) @ #i) ∧ (Send( 'H1', A, <'v', v> ) @ #j)) ⇒
+    (∃ b BB #l r pkS sskD D #d.
+      ((BB_rec( BB, <'bs', b> ) @ #l) ∧ (b = sg(encp(v, r, pkS), sskD))) ∧
+      (DeviceKey( D, 'H1', sskD ) @ #d))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ v #i #j A.
+  (Claim( 'H1', 'IVHE3' ) @ #i) ∧ (Send( 'H1', A, <'v', v> ) @ #j)
+ ∧
+  ∀ b BB #l r pkS sskD D #d.
+   (BB_rec( BB, <'bs', b> ) @ #l) ∧
+   (b = sg(encp(v, r, pkS), sskD)) ∧
+   (DeviceKey( D, 'H1', sskD ) @ #d)
+  ⇒
+   ⊥"
+*/
+by sorry
+
+lemma indivVerif_HE4:
+  all-traces
+  "∀ v #i b #j #k #l #m #n bs.
+    ((((((Claim( 'H1', 'vote' ) @ #i) ∧
+         (Goal( 'H1', 'vote', <'v', v> ) @ #j)) ∧
+        (Claim( 'H1', 'IVHE4' ) @ #k)) ∧
+       (Goal( 'H1', 'IVHE4', <<'b', 'bs'>, 'ukn', 'ukn'> ) @ #l)) ∧
+      (HK_event( 'H1', 'b', b ) @ #m)) ∧
+     (HK_event( 'H1', 'bs', bs ) @ #n)) ⇒
+    (∃ BB #l.1 r pkS sskD.
+      (BB_rec( BB, <'bs', b> ) @ #l.1) ∧ (b = sg(encp(v, r, pkS), sskD)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ v #i b #j #k #l #m #n bs.
+  (Claim( 'H1', 'vote' ) @ #i) ∧
+  (Goal( 'H1', 'vote', <'v', v> ) @ #j) ∧
+  (Claim( 'H1', 'IVHE4' ) @ #k) ∧
+  (Goal( 'H1', 'IVHE4', <<'b', 'bs'>, 'ukn', 'ukn'> ) @ #l) ∧
+  (HK_event( 'H1', 'b', b ) @ #m) ∧
+  (HK_event( 'H1', 'bs', bs ) @ #n)
+ ∧
+  ∀ BB #l.1 r pkS sskD.
+   (BB_rec( BB, <'bs', b> ) @ #l.1) ∧ (b = sg(encp(v, r, pkS), sskD)) ⇒ ⊥"
+*/
+by sorry
+
+lemma secretSskD [reuse]:
+  all-traces
+  "∀ sskD #i. (SecretKeyD( sskD ) @ #i) ⇒ (¬(∃ #j. K( sskD ) @ #j))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ sskD #i. (SecretKeyD( sskD ) @ #i) ∧ ∃ #j. (K( sskD ) @ #j)"
+*/
+by sorry
+
+lemma ballotsFromVoters_HE [reuse]:
+  all-traces
+  "∀ S b #i.
+    (Learn_A_ballot( S, b ) @ #i) ⇒
+    ((∃ H S2 #j. Comm_H_ballot( H, S2, b ) @ #j) ∨
+     (∃ H #j A. Send( H, A, <'b', b> ) @ #j))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ S b #i.
+  (Learn_A_ballot( S, b ) @ #i)
+ ∧
+  (∀ H S2 #j. (Comm_H_ballot( H, S2, b ) @ #j) ⇒ ⊥) ∧
+  (∀ H #j A. (Send( H, A, <'b', b> ) @ #j) ⇒ ⊥)"
+*/
+by sorry
+
+lemma Tall_As_Rec_D:
+  all-traces
+  "∀ A #a spkD p votes ballots bPrimes sk xa ra.
+    ((((((Learn_A_spkDSG( A, <'spkD', spkD> ) @ #a) ∧
+         (Learn_A_proof( A, <'zkp', p> ) @ #a)) ∧
+        (Learn_A_Vs( A, <'vs', votes> ) @ #a)) ∧
+       (Learn_A_Bs( A, <'bs', ballots> ) @ #a)) ∧
+      (Learn_A_bPrimes( A, <'bPrime', bPrimes> ) @ #a)) ∧
+     (VerifyA2( A,
+                verzkp(zkp(encp(xa, ra, pk(sk)), xa, sk), encp(xa, ra, pk(sk)), xa,
+                       pk(sk))
+      ) @ #a)) ⇒
+    (∃ #b BB r1 sskD1 #b2.
+      ((((BB_rec( BB, <'bs', ballots> ) @ #b) ∧
+         (BB_tal( BB, <'vs', votes> ) @ #b)) ∧
+        (BB_pskDs( BB, <'spkD', spkD> ) @ #b2)) ∧
+       (spkD = pk(sskD1))) ∧
+      (ballots = sg(encp(votes, r1, pk(sk)), sskD1)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ A #a spkD p votes ballots bPrimes sk xa ra.
+  (Learn_A_spkDSG( A, <'spkD', spkD> ) @ #a) ∧
+  (Learn_A_proof( A, <'zkp', p> ) @ #a) ∧
+  (Learn_A_Vs( A, <'vs', votes> ) @ #a) ∧
+  (Learn_A_Bs( A, <'bs', ballots> ) @ #a) ∧
+  (Learn_A_bPrimes( A, <'bPrime', bPrimes> ) @ #a) ∧
+  (VerifyA2( A,
+             verzkp(zkp(encp(xa, ra, pk(sk)), xa, sk), encp(xa, ra, pk(sk)), xa,
+                    pk(sk))
+   ) @ #a)
+ ∧
+  ∀ #b BB r1 sskD1 #b2.
+   (BB_rec( BB, <'bs', ballots> ) @ #b) ∧
+   (BB_tal( BB, <'vs', votes> ) @ #b) ∧
+   (BB_pskDs( BB, <'spkD', spkD> ) @ #b2) ∧
+   (spkD = pk(sskD1)) ∧
+   (ballots = sg(encp(votes, r1, pk(sk)), sskD1))
+  ⇒
+   ⊥"
+*/
+by sorry
+
+lemma EligVerif:
+  all-traces
+  "∀ A #a spkD votes sk xa ra.
+    (((Learn_A_spkDSG( A, <'spkD', spkD> ) @ #a) ∧
+      (Learn_A_Vs( A, <'vs', votes> ) @ #a)) ∧
+     (VerifyA2( A,
+                verzkp(zkp(encp(xa, ra, pk(sk)), xa, sk), encp(xa, ra, pk(sk)), xa,
+                       pk(sk))
+      ) @ #a)) ⇒
+    (∃ #b BB H1 #h1 A.1 #b2 #s.
+      (((BB_tal( BB, <'vs', votes> ) @ #b) ∧
+        (BB_pskDs( BB, <'spkD', spkD> ) @ #b2)) ∧
+       (Send( H1, A.1, <'v', votes> ) @ #h1)) ∧
+      (Pseudonym( H1, spkD ) @ #s))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ A #a spkD votes sk xa ra.
+  (Learn_A_spkDSG( A, <'spkD', spkD> ) @ #a) ∧
+  (Learn_A_Vs( A, <'vs', votes> ) @ #a) ∧
+  (VerifyA2( A,
+             verzkp(zkp(encp(xa, ra, pk(sk)), xa, sk), encp(xa, ra, pk(sk)), xa,
+                    pk(sk))
+   ) @ #a)
+ ∧
+  ∀ #b BB H1 #h1 A.1 #b2 #s.
+   (BB_tal( BB, <'vs', votes> ) @ #b) ∧
+   (BB_pskDs( BB, <'spkD', spkD> ) @ #b2) ∧
+   (Send( H1, A.1, <'v', votes> ) @ #h1) ∧
+   (Pseudonym( H1, spkD ) @ #s)
+  ⇒
+   ⊥"
+*/
+by sorry
+
+/*
+WARNING: the following wellformedness checks failed!
+
+Message Derivation Checks
+=========================
+
+  The variables of the following rule(s) are not derivable from their premises, you may be performing unintended pattern matching.
+
+Rule A_1: 
+Failed to derive Variable(s): sskDa
+*/
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: /home/kamilner/tamarin-rs/tamarin-prover/examples/thesis-LaraSchmid-evoting/chapter5_HumanErrors/aletheaD_vot_HE_SmHh.spthy
+
+  processing time: 0.45s
+  
+  WARNING: 1 wellformedness check failed!
+  
+  onlyonce1 (all-traces): analysis incomplete (1 steps)
+  onlyonce2 (all-traces): analysis incomplete (1 steps)
+  onlyonce3 (all-traces): analysis incomplete (1 steps)
+  onlyonce4 (all-traces): analysis incomplete (1 steps)
+  onlyonce6 (all-traces): analysis incomplete (1 steps)
+  onlyonce7 (all-traces): analysis incomplete (1 steps)
+  functional (exists-trace): analysis incomplete (1 steps)
+  functional2 (exists-trace): analysis incomplete (1 steps)
+  indivVerif_HE (all-traces): analysis incomplete (1 steps)
+  indivVerif_HE2 (all-traces): analysis incomplete (1 steps)
+  indivVerif_HE3 (all-traces): analysis incomplete (1 steps)
+  indivVerif_HE4 (all-traces): analysis incomplete (1 steps)
+  secretSskD (all-traces): analysis incomplete (1 steps)
+  ballotsFromVoters_HE (all-traces): analysis incomplete (1 steps)
+  Tall_As_Rec_D (all-traces): analysis incomplete (1 steps)
+  EligVerif (all-traces): analysis incomplete (1 steps)
+
+==============================================================================

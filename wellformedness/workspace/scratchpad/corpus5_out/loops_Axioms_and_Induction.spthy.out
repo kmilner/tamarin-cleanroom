@@ -1,0 +1,97 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory Axioms_and_Induction] Theory loaded
+[Theory Axioms_and_Induction] Theory translated
+[Theory Axioms_and_Induction] Derivation checks started
+[Theory Axioms_and_Induction] Derivation checks ended
+[Theory Axioms_and_Induction] Theory closed
+theory Axioms_and_Induction
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) Start:
+   [ Fr( x ) ] --[ Start( x ) ]-> [ A( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Step:
+   [ A( x ) ] --[ Step( x ) ]-> [ B( x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Stop:
+   [ B( x ) ] --[ Stop( x ) ]-> [ ]
+
+  /* has exactly the trivial AC variant */
+
+restriction Start_implies_Stop:
+  "∀ x #i. (Start( x ) @ #i) ⇒ (∃ #j. Stop( x ) @ #j)"
+
+  /*
+  expanded formula:
+  "∀ x #i. (Start( x ) @ #i) ⇒ (∃ #j. Stop( x ) @ #j)"
+  */
+
+lemma Exists_test [reuse]:
+  exists-trace "∀ x #i. (Step( x ) @ #i) ⇒ (⊥)"
+/*
+guarded formula characterizing all satisfying traces:
+"∀ x #i. (Step( x ) @ #i) ⇒ ⊥"
+*/
+by sorry
+
+lemma NoStep_with_induction [use_induction]:
+  all-traces "∀ x #i. (Step( x ) @ #i) ⇒ (⊥)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i. (Step( x ) @ #i)"
+*/
+by sorry
+
+lemma NoStep_without_induction:
+  all-traces "∀ x #i. (Step( x ) @ #i) ⇒ (⊥)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ x #i. (Step( x ) @ #i)"
+*/
+by sorry
+
+/*
+WARNING: the following wellformedness checks failed!
+
+Lemma annotations
+=================
+
+  Lemma `Exists_test': cannot reuse 'exists-trace' lemmas
+*/
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: /home/kamilner/tamarin-rs/tamarin-prover/examples/loops/Axioms_and_Induction.spthy
+
+  processing time: 0.10s
+  
+  WARNING: 1 wellformedness check failed!
+  
+  Exists_test (exists-trace): analysis incomplete (1 steps)
+  NoStep_with_induction (all-traces): analysis incomplete (1 steps)
+  NoStep_without_induction (all-traces): analysis incomplete (1 steps)
+
+==============================================================================

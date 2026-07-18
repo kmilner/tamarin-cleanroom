@@ -1,0 +1,1 @@
+∀ pks nonces c #t1. ((Complete( 'C', pks, nonces, c ) @ #t1) ∧ (¬(∃ k #tc. Compromise( k ) @ #tc))) ⇒ (∃ #t0. (#t0 < #t1) ∧ (Session( 'W', pks, nonces, c ) @ #t0))

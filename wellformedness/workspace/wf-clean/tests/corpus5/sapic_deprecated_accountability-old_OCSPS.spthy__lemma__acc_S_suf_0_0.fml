@@ -1,0 +1,1 @@
+((∃ #c0. Corrupted( 'S' ) @ #c0) ∧ (⊤)) ∧ (¬(¬(∃ #i #j #k #l cert sk t. (Judged( t, cert ) @ #i) ∧ ((Secret( cert, sk ) @ #j) ∧ ((Learn( sk ) @ #k) ∧ ((Time( t ) @ #l) ∧ (#k < #l)))))))

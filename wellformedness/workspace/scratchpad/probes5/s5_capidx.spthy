@@ -1,0 +1,5 @@
+theory Ts5_capidx
+begin
+rule R1:
+   [ In($X.1), In($x.1) ] --[ M($X.1, $x.1) ]-> [ ]
+end

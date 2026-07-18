@@ -1,0 +1,1 @@
+∀ x #i. (IsTrue( x ) @ #i) ⇒ (x = true)

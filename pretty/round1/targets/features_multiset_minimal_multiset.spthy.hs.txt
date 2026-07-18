@@ -1,0 +1,31 @@
+theory minimal_multiset
+
+begin
+
+// Function signature and definition of the equational theory E
+
+builtins: multiset
+functions: fst/1, pair/2, snd/1
+equations: fst(<x.1, x.2>) = x.1, snd(<x.1, x.2>) = x.2
+
+rule (modulo E) A:
+   [ Fr( ~x ) ] --> [ Out( ($A++~x) ), S( ~x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) B:
+   [ S( ~x ), In( ~x ) ] --[ Reach( ) ]-> [ ]
+
+  /* has exactly the trivial AC variant */
+
+lemma Reachable:
+  exists-trace "∃ #i. Reach( ) @ #i"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ #i. (Reach( ) @ #i)"
+*/
+by sorry
+
+
+
+end

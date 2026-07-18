@@ -1,0 +1,20 @@
+WARNING: the following wellformedness checks failed!
+
+Accountability (RP check)
+  The specification contains at least one restriction.
+  
+  Please verify manually that your protocol fulfills the following condition:
+  
+  For each case test τ, traces t, t’, and instantiations ρ, ρ’:
+  If τ holds on t with ρ, and τ single-matches with ρ’ on t’, then
+  there exists a trace t’’ such that τ single-matches with ρ on t’’
+  and the parties corrupted in t’’ are the same as the parties
+  corrupted in t’ renamed from rng(ρ’) to rng(ρ).
+
+Public constants with mismatching capitalization
+================================================
+
+Identifiers are case-sensitive, mismatched capitalizations are considered as different, i.e., 'ID' is different from 'id'. Check the capitalization of your identifiers.
+
+  1. rule "Init":  name 'C', 'c'
+*/

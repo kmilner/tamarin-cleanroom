@@ -1,0 +1,1 @@
+∃ #i #j sid sidm k. ((((Complete( sid, 'I', k ) @ #i) ∧ (Complete( sidm, 'R', k ) @ #j)) ∧ (¬(∃ #j.1 C. Corrupt( C ) @ #j.1))) ∧ (¬(∃ #j.1 s. SessionKeyReveal( s ) @ #j.1))) ∧ (¬(∃ #j.1 s. SessionStateReveal( s ) @ #j.1))

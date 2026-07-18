@@ -1,0 +1,13 @@
+WARNING: the following wellformedness checks failed!
+
+Message Derivation Checks
+=========================
+
+  The variables of the following rule(s) are not derivable from their premises, you may be performing unintended pattern matching.
+
+Rule S_1a: 
+Failed to derive Variable(s): ~sskDp, ra
+
+Rule A_1: 
+Failed to derive Variable(s): sskDa
+*/

@@ -1,0 +1,1 @@
+∀ x a id #i #j. ((((Log( x, a, id ) @ #i) ∧ (Execute( a, id ) @ #j)) ∧ (¬((a = SpecialReq) ∨ (a = NormalReq)))) ∧ (¬(∃ a.1 b. x = <a.1, b>))) ⇒ (∃ #i.1. Corrupted( x ) @ #i.1)

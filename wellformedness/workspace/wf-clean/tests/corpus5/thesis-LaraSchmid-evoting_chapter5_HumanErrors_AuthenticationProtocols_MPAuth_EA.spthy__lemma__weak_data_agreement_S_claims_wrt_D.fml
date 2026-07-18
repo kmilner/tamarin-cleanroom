@@ -1,0 +1,1 @@
+∀ S D k #i. (CommitS( S, D, <'Human', k> ) @ #i) ⇒ (∃ D1 S1 #j. RunningD( D1, S1, <'Human', k> ) @ #j)

@@ -1,0 +1,1 @@
+∀ H b #i #j. (((Ballot( H, b ) @ #i) ∧ (End( ) @ #j)) ∧ (#i < #j)) ⇒ ((∃ BB #k. BB_recorded( BB, <'bs', b> ) @ #k) ∨ (∃ BB human P b1 #k #l #m v. ((((BB_recorded( BB, <'bs', b1> ) @ #k) ∧ (¬(b1 = b))) ∧ (Pub( human, P, b ) @ #l)) ∧ (BB_P( BB, <'Ps', P> ) @ #m)) ∧ (b = <v, human>)))

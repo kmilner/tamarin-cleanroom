@@ -1,0 +1,1 @@
+∀ S b #i. (Learn_S_ballot( S, b ) @ #i) ⇒ (∃ H S2 #j. Comm_H_ballot( H, S2, b ) @ #j)

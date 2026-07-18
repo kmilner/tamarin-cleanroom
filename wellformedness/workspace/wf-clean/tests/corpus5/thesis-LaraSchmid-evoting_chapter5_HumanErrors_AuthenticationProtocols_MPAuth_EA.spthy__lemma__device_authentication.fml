@@ -1,0 +1,1 @@
+∀ S #k. (CommitCA( S, 'Human' ) @ #k) ⇒ (∃ D #i #j #s. ((((Sstart( S ) @ #i) ∧ (D( D ) @ #j)) ∧ (#i < #j)) ∧ (#j < #k)) ∧ (Device( 'Human', D ) @ #s))

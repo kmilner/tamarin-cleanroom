@@ -1,0 +1,1 @@
+∀ #i #j A B X key msid. (((Accept( <B, A, X, 'R'>, key ) @ #i) ∧ (K( key ) @ #j)) ∧ (msid = <A, B, X, 'I'>)) ⇒ (((∃ #k. RevealLtk( B ) @ #k) ∨ (∃ #k #l. (RevealEphk( msid ) @ #k) ∧ (RevealLtk( A ) @ #l))) ∨ ((¬(∃ #k key_. Accept( msid, key_ ) @ #k)) ∧ (∃ #k. RevealLtk( A ) @ #k)))

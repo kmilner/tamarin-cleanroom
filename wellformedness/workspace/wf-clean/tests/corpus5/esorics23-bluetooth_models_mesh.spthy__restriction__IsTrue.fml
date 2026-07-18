@@ -1,0 +1,1 @@
+∀ t #i. (IsTrue( t ) @ #i) ⇒ (t = true_val)

@@ -1,0 +1,168 @@
+theory NumberSubtermTests
+
+begin
+
+// Function signature and definition of the equational theory E
+
+builtins: diffie-hellman, bilinear-pairing, multiset, natural-numbers,
+          xor
+functions: fst/1, h/1, myfst/1, mypair/2, mysnd/1, pair/2, snd/1
+equations:
+    fst(<x.1, x.2>) = x.1,
+    myfst(mypair(a, b)) = a,
+    mysnd(mypair(a, b)) = b,
+    snd(<x.1, x.2>) = x.2
+
+/* looping facts with injective instances: Counter/2 */
+
+rule (modulo E) Create:
+   [ Fr( ~s ) ] --[ Start( ~s ) ]-> [ Counter( ~s, %1 ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Inc:
+   [ In( %x ), Counter( s, %x ) ]
+  --[ Number( %x ) ]->
+   [ Counter( s, (%x%+%1) ) ]
+
+  // loop breaker: [1]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) AttackerMsg:
+   [ In( x ) ] --[ Value( x ) ]-> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) AttackerPub:
+   [ In( $x ) ] --[ PubValue( $x ) ]-> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) AttackerNat:
+   [ In( x ), Counter( ~s, x ) ] --[ NatValue( x ) ]-> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) InOut:
+   [ In( %x ), In( (%x%+%1%+%1%+%1) ) ]
+  --[ Out( <(%x%+%1%+%1), %1, %1, %x, (%x%+%1), (%x%+%1)> ) ]->
+   [ ]
+
+  /* has exactly the trivial AC variant */
+
+lemma SnatChain:
+  all-traces
+  "∀ %a %b #i #j.
+    ((Number( %a ) @ #i) ∧ (Number( %b ) @ #j)) ⇒
+    ((%a ⊏ %b) ∨ (%b ⊏ (%a%+%1)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ %a %b #i #j.
+  (Number( %a ) @ #i) ∧ (Number( %b ) @ #j)
+ ∧
+  (¬(%a ⊏ %b)) ∧ (¬(%b ⊏ (%a%+%1)))"
+*/
+by sorry
+
+lemma SnegRecurse:
+  all-traces "∀ a #i. (Value( a ) @ #i) ⇒ (a ⊏ <a, a>)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a #i. (Value( a ) @ #i) ∧ ¬(a ⊏ <a, a>)"
+*/
+by sorry
+
+lemma SnegACRecurse:
+  all-traces "∀ a #i. (Value( a ) @ #i) ⇒ (a ⊏ (a++a))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a #i. (Value( a ) @ #i) ∧ ¬(a ⊏ (a++a))"
+*/
+by sorry
+
+lemma Sneg:
+  all-traces
+  "∀ a b #i #j.
+    ((Value( a ) @ #i) ∧ (Value( b ) @ #j)) ⇒ ((¬(<a, a> ⊏ b)) ∨ (a ⊏ b))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a b #i #j.
+  (Value( a ) @ #i) ∧ (Value( b ) @ #j) ∧ (<a, a> ⊏ b) ∧ (¬(a ⊏ b))"
+*/
+by sorry
+
+lemma Sinvalid:
+  all-traces
+  "∀ a b #i #j. ((PubValue( a ) @ #i) ∧ (Value( b ) @ #j)) ⇒ (¬(b ⊏ a))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a b #i #j. (PubValue( a ) @ #i) ∧ (Value( b ) @ #j) ∧ b ⊏ a"
+*/
+by sorry
+
+lemma Schain:
+  all-traces
+  "∀ a b #i #j.
+    ((Value( a ) @ #i) ∧ (Value( b ) @ #j)) ⇒ (¬((<a, a> ⊏ b) ∧ (b ⊏ a)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a b #i #j.
+  (Value( a ) @ #i) ∧ (Value( b ) @ #j) ∧ (<a, a> ⊏ b) ∧ (b ⊏ a)"
+*/
+by sorry
+
+lemma SRecurse:
+  all-traces "∀ a #i. (Value( a ) @ #i) ⇒ (¬(<a, a, a> ⊏ <a, a>))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a #i. (Value( a ) @ #i) ∧ <a, a, a> ⊏ <a, a>"
+*/
+by sorry
+
+lemma SACRecurse:
+  all-traces "∀ a #i. (Value( a ) @ #i) ⇒ (¬((a++a++a) ⊏ (a++a)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a #i. (Value( a ) @ #i) ∧ (a++a++a) ⊏ (a++a)"
+*/
+by sorry
+
+lemma testEqual:
+  all-traces "∀ a #i. (Value( a ) @ #i) ⇒ (¬(a ⊏ a))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a #i. (Value( a ) @ #i) ∧ a ⊏ a"
+*/
+by sorry
+
+lemma arityOneDeduction:
+  all-traces
+  "∀ a b #i #j.
+    ((Value( a ) @ #i) ∧ (Value( b ) @ #j)) ⇒
+    (¬(((¬(a ⊏ b)) ∧ (a ⊏ h(b))) ∧ (¬(a = b))))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ a b #i #j.
+  (Value( a ) @ #i) ∧ (Value( b ) @ #j)
+ ∧
+  (¬(a ⊏ b)) ∧ (a ⊏ h(b)) ∧ (¬(a = b))"
+*/
+by sorry
+
+lemma antiCharlie:
+  all-traces
+  "∀ %a %b #i #j.
+    ((Number( %a ) @ #i) ∧ (Number( %b ) @ #j)) ⇒
+    (¬(((%a ⊏ (%b%+%1)) ∧ (%b ⊏ (%a%+%1))) ∧ (¬(%a = %b))))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ %a %b #i #j.
+  (Number( %a ) @ #i) ∧ (Number( %b ) @ #j)
+ ∧
+  (%a ⊏ (%b%+%1)) ∧ (%b ⊏ (%a%+%1)) ∧ (¬(%a = %b))"
+*/
+by sorry
+
+
+
+end

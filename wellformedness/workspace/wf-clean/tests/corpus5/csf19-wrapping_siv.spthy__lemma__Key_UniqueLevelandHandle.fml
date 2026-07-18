@@ -1,0 +1,1 @@
+∀ d D k l L h H #i #j. ((InitKey( d, k, h, l ) @ #i) ∧ (InitKey( D, k, H, L ) @ #j)) ⇒ ((l = L) ∧ (h = H))

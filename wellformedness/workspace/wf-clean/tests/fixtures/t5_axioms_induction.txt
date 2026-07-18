@@ -1,0 +1,7 @@
+WARNING: the following wellformedness checks failed!
+
+Lemma annotations
+=================
+
+  Lemma `Exists_test': cannot reuse 'exists-trace' lemmas
+*/

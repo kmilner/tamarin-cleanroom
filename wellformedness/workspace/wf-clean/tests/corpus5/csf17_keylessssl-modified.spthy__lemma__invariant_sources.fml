@@ -1,0 +1,1 @@
+(∀ id ka kb #i. (Invariant_C( id, ka, kb ) @ #i) ⇒ (∃ #j. (F_InvariantSource_C( id, ka, kb ) @ #j) ∧ (#j < #i))) ∧ (∀ id ka kb #i. (Invariant_W( id, ka, kb ) @ #i) ⇒ (∃ #j. (F_InvariantSource_W( id, ka, kb ) @ #j) ∧ (#j < #i)))

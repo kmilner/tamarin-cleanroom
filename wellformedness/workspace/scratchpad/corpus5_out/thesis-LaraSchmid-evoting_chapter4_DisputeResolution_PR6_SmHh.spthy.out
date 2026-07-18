@@ -1,0 +1,171 @@
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory PR6_SmHh] Theory loaded
+[Theory PR6_SmHh] Theory translated
+[Theory PR6_SmHh] Derivation checks started
+[Theory PR6_SmHh] Derivation checks ended
+[Theory PR6_SmHh] Theory closed
+theory PR6_SmHh
+
+begin
+
+// Function signature and definition of the equational theory E
+
+builtins: multiset
+functions: fst/1, pair/2, pk/1, sg/2, sign/2, snd/1, true/0, ver/2,
+           verify/3
+equations:
+    fst(<x.1, x.2>) = x.1,
+    snd(<x.1, x.2>) = x.2,
+    ver(sg(m, sk), pk(sk)) = m,
+    verify(sign(x.1, x.2), x.1, pk(x.2)) = true
+
+rule (modulo E) ChanOut_A:
+   [ Out_A( $A, x ) ]
+  --[ ChanOut_A( $A, x ) ]->
+   [ !Auth( $A, x ), Out( <$A, x> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanIn_A:
+   [ !Auth( $A, x ) ] --[ ChanIn_A( $A, x ) ]-> [ In_A( $A, x ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanOut_IU:
+   [ Out_IU( $A, $B, m ) ]
+  --[ ChanOut_IU( $A, $B, m ) ]->
+   [ Out( <$A, $B, m> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ChanIn_IU:
+   [ In( <$A, $B, m> ) ]
+  --[ ChanIn_IU( $A, $B, m ) ]->
+   [ In_IU( $A, $B, m ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) fakeEvidence:
+   [ In( <ballot, evidence> ) ] --[ Evidence( ballot, evidence ) ]-> [ ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) publickeyinfrastructure:
+   [ Fr( ~skX ) ]
+  --[ LongtermKey( $X, ~skX ) ]->
+   [ !Ltk( $X, ~skX ), !Pk( $X, pk(~skX) ), Out( pk(~skX) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Setup:
+   [ ]
+  --[ Setup( ), Voter( 'H' ), Server( 'S' ) ]->
+   [
+   AgSt_H0( 'H', <'BB', $v, 'S'> ), AgSt_BB0( 'BB', 'S' ),
+   Out( <'S', 'empty'> )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_1:
+   [ AgSt_H0( $H, <$BB, $v, $S> ) ]
+  --[
+  Vote( $H, $v ), Ballot( $H, <$v, $H> ), Send_U( $H, $S, <$v, $H> ),
+  Pub( $H, $S, <$v, $H> )
+  ]->
+   [ AgSt_H1( $H, <$BB, $v, $S> ), Out_IU( $H, $S, <$v, $H> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) BB:
+   [ AgSt_BB0( $BB, $S ), In( <$S, 'bs', bs> ), In( <$S, 'vs', vs> ) ]
+  --[ BB_recorded( $BB, <'bs', bs> ), BB_tallied( $BB, <'vs', vs> ), End( )
+  ]->
+   [ Out_A( $BB, <'bs', bs> ), Out_A( $BB, <'vs', vs> ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) H_5:
+   [ AgSt_H1( $H, <$BB, $v, $S> ), In_A( $BB, <'bs', bRecorded> ) ]
+  --[ Verify( $H, <$v, $H>, bRecorded ) ]->
+   [ ]
+
+  /* has exactly the trivial AC variant */
+
+restriction OneSetup:
+  "∀ #i #j. ((Setup( ) @ #i) ∧ (Setup( ) @ #j)) ⇒ (#i = #j)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ #i #j. ((Setup( ) @ #i) ∧ (Setup( ) @ #j)) ⇒ (#i = #j)"
+  */
+
+lemma functional:
+  exists-trace
+  "∃ #i #j BB #k #l.
+    ((((Vote( 'H', 'v' ) @ #i) ∧ (Ballot( 'H', <'v', 'H'> ) @ #j)) ∧
+      (BB_recorded( BB, <'bs', 'v', 'H'> ) @ #k)) ∧
+     (BB_tallied( BB, <'vs', 'v'> ) @ #k)) ∧
+    (Verify( 'H', <'v', 'H'>, <'v', 'H'> ) @ #l)"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ #i #j BB #k #l.
+  (Vote( 'H', 'v' ) @ #i) ∧
+  (Ballot( 'H', <'v', 'H'> ) @ #j) ∧
+  (BB_recorded( BB, <'bs', 'v', 'H'> ) @ #k) ∧
+  (BB_tallied( BB, <'vs', 'v'> ) @ #k) ∧
+  (Verify( 'H', <'v', 'H'>, <'v', 'H'> ) @ #l)"
+*/
+by sorry
+
+lemma DRvoterT:
+  all-traces
+  "∀ H b #i #j.
+    (((Ballot( H, b ) @ #i) ∧ (End( ) @ #j)) ∧ (#i < #j)) ⇒
+    ((∃ BB #k. BB_recorded( BB, <'bs', b> ) @ #k) ∨
+     (∃ BB H2 S b1 #k #l v.
+       (((BB_recorded( BB, <'bs', b1> ) @ #k) ∧ (¬(b1 = b))) ∧
+        (Pub( H2, S, b ) @ #l)) ∧
+       (b = <v, H2>)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ H b #i #j.
+  (Ballot( H, b ) @ #i) ∧ (End( ) @ #j)
+ ∧
+  (#i < #j) ∧
+  (∀ BB #k. (BB_recorded( BB, <'bs', b> ) @ #k) ⇒ ⊥) ∧
+  (∀ BB H2 S b1 #k #l v.
+    (BB_recorded( BB, <'bs', b1> ) @ #k) ∧
+    (Pub( H2, S, b ) @ #l) ∧
+    (b = <v, H2>)
+   ⇒
+    b1 = b)"
+*/
+by sorry
+
+/* All wellformedness checks were successful. */
+
+/*
+Generated from:
+Tamarin version 1.13.0
+Maude version 3.5.1
+Git revision: 0234f6a1abee25677c0accef62de0ac2883b0347 (with uncommited changes), branch: HEAD
+Compiled at: 2026-07-16 18:33:16.036427196 UTC
+*/
+
+end
+
+==============================================================================
+summary of summaries:
+
+analyzed: /home/kamilner/tamarin-rs/tamarin-prover/examples/thesis-LaraSchmid-evoting/chapter4_DisputeResolution/PR6_SmHh.spthy
+
+  processing time: 0.20s
+  
+  functional (exists-trace): analysis incomplete (1 steps)
+  DRvoterT (all-traces): analysis incomplete (1 steps)
+
+==============================================================================

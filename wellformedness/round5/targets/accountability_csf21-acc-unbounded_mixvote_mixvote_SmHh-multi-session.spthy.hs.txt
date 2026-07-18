@@ -1,0 +1,26 @@
+WARNING: the following wellformedness checks failed!
+
+Accountability (RP check)
+  The specification contains at least one restriction.
+  The specification contains public names.
+  At least one case test can be instantiated with non-public names.
+  
+  Please verify manually that your protocol fulfills the following condition:
+  
+  For each case test τ, traces t, t’, and instantiations ρ, ρ’:
+  If τ holds on t with ρ, and τ single-matches with ρ’ on t’, then
+  there exists a trace t’’ such that τ single-matches with ρ on t’’
+  and the parties corrupted in t’’ are the same as the parties
+  corrupted in t’ renamed from rng(ρ’) to rng(ρ).
+
+Message Derivation Checks
+=========================
+
+  The variables of the following rule(s) are not derivable from their premises, you may be performing unintended pattern matching.
+
+Rule S_1a: 
+Failed to derive Variable(s): ~sskDp, ra
+
+Rule A_1: 
+Failed to derive Variable(s): sskDa
+*/

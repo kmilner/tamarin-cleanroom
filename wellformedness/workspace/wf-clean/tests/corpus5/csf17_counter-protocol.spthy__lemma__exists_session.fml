@@ -1,0 +1,1 @@
+∃ pks nonces c #t0 #t1. ((((#t0 < #t1) ∧ (Session( 'I', pks, nonces, c ) @ #t0)) ∧ (Session( 'R', pks, nonces, c ) @ #t1)) ∧ (¬(∃ #k key. Compromise( key ) @ #k))) ∧ (¬(∃ #k. Detect( pks ) @ #k))

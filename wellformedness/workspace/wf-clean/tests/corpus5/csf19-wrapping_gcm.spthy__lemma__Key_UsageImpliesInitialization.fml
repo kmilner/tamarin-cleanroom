@@ -1,0 +1,1 @@
+∀ d k l h #keyUse. (UseKey( d, k, h, l ) @ #keyUse) ⇒ (∃ #keyInit. (InitKey( d, k, h, l ) @ #keyInit) ∧ (#keyInit < #keyUse))

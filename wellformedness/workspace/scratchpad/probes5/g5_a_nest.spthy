@@ -1,0 +1,12 @@
+theory Tg5_a_nest
+begin
+
+functions: h/1
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x), B(~x,~x), C(~x) ]->
+   [ Out(~x) ]
+lemma L:
+  all-traces
+  "All x. All #i. A(x) @ #i ==> C(x) @ #i"
+end

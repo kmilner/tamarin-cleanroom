@@ -1,0 +1,1 @@
+¬(((¬(∃ #i. DishonestCA( ) @ #i)) ∧ (∃ #i. DishonestLA( ) @ #i)) ∧ ((∀ #c1. (Corrupted( 'LA' ) @ #c1) ⇒ (⊥)) ∧ ((∀ #c0. (Corrupted( 'CA' ) @ #c0) ⇒ (⊥)) ∧ (⊤))))

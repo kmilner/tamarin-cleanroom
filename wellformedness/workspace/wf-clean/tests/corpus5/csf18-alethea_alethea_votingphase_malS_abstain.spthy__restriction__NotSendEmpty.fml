@@ -1,0 +1,1 @@
+∀ #i H S. (Comm_H_V( H, S, 'empty' ) @ #i) ⇒ (⊥)

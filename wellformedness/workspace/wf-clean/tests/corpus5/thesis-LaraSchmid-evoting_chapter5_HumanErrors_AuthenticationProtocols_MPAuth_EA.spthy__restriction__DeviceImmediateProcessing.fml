@@ -1,0 +1,1 @@
+∀ D H xn x #i #k. (((Send( H, xn, x ) @ #i) ∧ (To( D ) @ #i)) ∧ (DfromHx( D, H, xn, x ) @ #k)) ⇒ (¬(∃ #j. ((D( D ) @ #j) ∧ (#i < #j)) ∧ (#j < #k)))

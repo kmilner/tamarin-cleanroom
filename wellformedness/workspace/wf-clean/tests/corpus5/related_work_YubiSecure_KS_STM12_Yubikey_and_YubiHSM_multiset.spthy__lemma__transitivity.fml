@@ -1,0 +1,1 @@
+∀ #t1 #t2 a b c. ((Smaller( a, b ) @ #t1) ∧ (Smaller( b, c ) @ #t2)) ⇒ (∃ z. (a++z) = c)

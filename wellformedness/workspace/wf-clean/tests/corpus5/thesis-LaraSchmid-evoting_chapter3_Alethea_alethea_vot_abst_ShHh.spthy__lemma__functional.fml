@@ -1,0 +1,1 @@
+∃ H #i #j b BB #k #l #m #n A p bPrime v pkS #o. ((((((Vote( H, 'empty' ) @ #i) ∧ (Abstain( H, 'empty' ) @ #j)) ∧ (Ballot( H, b ) @ #n)) ∧ (BB_rec( BB, <'b', b> ) @ #k)) ∧ (BB_tal( BB, <'v', 'empty'> ) @ #l)) ∧ (Verify( H, b, b ) @ #m)) ∧ (VerifyA2( A, verzkp(p, bPrime, v, pkS) ) @ #o)

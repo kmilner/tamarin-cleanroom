@@ -1,0 +1,1 @@
+∀ ki kr #t1. (Detect( <ki, kr> ) @ #t1) ⇒ ((∃ #t0. (#t0 < #t1) ∧ (Compromise( ki ) @ #t0)) ∨ (∃ #t0. (#t0 < #t1) ∧ (Compromise( kr ) @ #t0)))

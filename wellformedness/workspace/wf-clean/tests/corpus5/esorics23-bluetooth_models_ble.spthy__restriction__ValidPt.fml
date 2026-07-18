@@ -1,0 +1,1 @@
+∀ x y #i. (ValidPt( x, y ) @ #i) ⇒ (x = y)

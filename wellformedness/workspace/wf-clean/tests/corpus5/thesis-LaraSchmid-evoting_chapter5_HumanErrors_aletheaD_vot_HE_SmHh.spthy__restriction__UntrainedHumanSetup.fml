@@ -1,0 +1,1 @@
+∀ H #i. (Untrained( H ) @ #i) ⇒ (∃ #j. (Human( H ) @ #j) ∧ (#j < #i))

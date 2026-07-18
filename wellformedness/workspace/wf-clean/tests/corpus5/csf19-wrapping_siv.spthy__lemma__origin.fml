@@ -1,0 +1,1 @@
+(∀ m #decrypt. (Decrypt( m ) @ #decrypt) ⇒ (∃ #mKU. (!KU( m ) @ #mKU) ∧ (#mKU < #decrypt))) ∧ (∀ d k l h #keyImport. (ImportKey( d, k, l, h ) @ #keyImport) ⇒ ((∃ #keyCreate. (CreateKey( k, h, l ) @ #keyCreate) ∧ (#keyCreate < #keyImport)) ∨ (∃ #keyKU. (!KU( k ) @ #keyKU) ∧ (#keyKU < #keyImport))))

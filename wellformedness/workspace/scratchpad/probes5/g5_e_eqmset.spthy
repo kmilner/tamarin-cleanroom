@@ -1,0 +1,12 @@
+theory Tg5_e_eqmset
+begin
+builtins: multiset
+functions: h/1
+rule R1:
+   [ Fr(~x) ]
+  --[ A(~x), B(~x,~x), C(~x) ]->
+   [ Out(~x) ]
+lemma L:
+  all-traces
+  "All x y #i. B(x, y) @ #i ==> Ex z. x + z = y"
+end

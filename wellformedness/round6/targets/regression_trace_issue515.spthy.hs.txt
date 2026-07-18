@@ -1,0 +1,50 @@
+WARNING: the following wellformedness checks failed!
+
+Reserved names
+==============
+
+  Rule `test' contains facts with reserved names on left-hand-side:
+    K( x )
+  
+  Rule `test' contains facts with reserved names on the middle:
+    !KU( x )
+  
+  Rule `test' contains facts with reserved names on the right-hand-side:
+    !KD( x )
+  
+  Rule `test2' contains facts with reserved names on the middle:
+    !KD( x )
+  
+  Rule `test3' contains facts with reserved names on left-hand-side:
+    K( x )
+  
+  Rule `test3' contains facts with reserved names on the middle:
+    In( x )
+  
+  Rule `test3' contains facts with reserved names on the right-hand-side:
+    K( x )
+  
+  Rule `test4' contains facts with reserved names on left-hand-side:
+    !KU( x )
+  
+  Rule `test4' contains facts with reserved names on the middle:
+    !KU( x )
+  
+  Rule `test5' contains facts with reserved names on left-hand-side:
+    !KD( x )
+  
+  Rule `test5' contains facts with reserved names on the middle:
+    !KD( x )
+  
+  Rule `test5' contains facts with reserved names on the right-hand-side:
+    !KU( x )
+
+Special facts
+=============
+
+  rule `test2' uses disallowed facts on left-hand-side:
+    Out( x )
+  
+  rule `test2' uses disallowed facts on right-hand-side:
+    In( x )
+*/

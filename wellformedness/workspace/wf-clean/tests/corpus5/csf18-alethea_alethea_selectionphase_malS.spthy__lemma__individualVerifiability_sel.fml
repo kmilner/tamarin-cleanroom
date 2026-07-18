@@ -1,0 +1,1 @@
+∀ H D yD #h1 S #h2. ((Learn_H_yD( H, D, yD ) @ #h1) ∧ (Learn_H_ySG( H, S, <'ySG', yD> ) @ #h2)) ⇒ (∃ x BB #b1. (BB_YSG( BB, <'ySG', yD> ) @ #b1) ∧ (yD = h(<H, x>)))

@@ -183,3 +183,72 @@ gact :: action atom `fact @ temporal` rendered single-line (no internal break at
 g1_samename :: Ex x #x. A(x)@#x -> SUCCESS (msg x and node #x are distinct binders, both bound)
 g1_dbsort :: All x #x. ... x = h(x) -> h(Bound 1): msg x sits under node #x on the binder stack (all binders counted; match is sort-aware)
 g1_msgnode :: All x #i. ... #x=#i -> Free #x (no node binder named x); msg binder x does not bind node use #x
+# ---- ROUND 5 probes (scratchpad/probes5/, via wf.sh -> wf_oracle.sh) ----
+# Guardedness: equality-atom guards (existential)
+g5_e_eqbare/g5_e_eqbarer :: Ex z. z='c' / 'c'=z -> SUCCESS (equality with one clean side guards the other side's vars)
+g5_e_eqinner/g5_e_eqinner_r :: Ex z. h(z)='c' / 'c'=h(z) -> SUCCESS (guarded side vars may sit DEEP in the term)
+g5_e_eqself/g5_e_eqself2 :: Ex z. z=z / z=h(z) -> unguarded 'z' (both sides contain the current var)
+g5_e_eqtwo :: Ex y z. y=z -> unguarded 'y','z' (neither side clean)
+g5_e_eqboth :: Ex y z. <y,z>=y -> unguarded 'y','z'
+g5_e_eqpair :: All k #i. A(k)@#i ==> Ex y r. k=<y,r> -> SUCCESS (outer-bound side clean -> guards y,r)
+g5_e_eqmset :: ... ==> Ex z. x+z=y (multiset) -> SUCCESS
+g5_e_eqchain :: Ex z w. (z='c') & (w=h(z)) -> SUCCESS (left-to-right: z resolved, then h(z) clean)
+g5_e_revchain :: Ex z w. (w=h(z)) & (z='c') -> unguarded 'w' -> SINGLE left-to-right pass over equalities, NO fixpoint
+g5_e_cyc :: Ex z w. (z=h(w)) & (w=h(z)) -> unguarded 'z','w'
+g5_e_actorder :: ... Ex y w #i. (w=h(y)) & (A(y)@#i) -> SUCCESS -> ALL action atoms are collected BEFORE the equality pass
+g5_e_vac :: ... Ex y z. y='c' -> unguarded 'z' only (y eq-guarded; vacuous var unguarded)
+g5_e_pairboth :: Ex y z. <y,z>='c' -> SUCCESS (clean side resolves ALL other-side vars at once)
+g5_e_unif :: Ex z w. <z,'c'>=<'c',w> -> unguarded 'z','w' -> side-based, NOT unification
+g5_e_selfnoop :: Ex z. (z='c') & (z=z) -> SUCCESS (equality over already-resolved vars is a no-op)
+g5_e_disjeq :: Ex z. (z='c')|(z='d') -> unguarded 'z' (equality guards are conjunction-reachable only)
+g5_e_neg_eq :: Ex z. not(z='c') -> unguarded 'z'
+g5_e_eqfree :: Ex z. z=h(w) (w free) -> guardedness SILENT (free vars are "clean"); only Formula terms fires
+g5_e_eqtemp :: ... ==> Ex #i. #i=#j -> SUCCESS (temporal equality guards the same way)
+g5_e_lessonly :: ... ==> Ex #j. #j<#i -> unguarded '#j' (Less does NOT guard)
+g5_e_lastonly :: Ex #i. last(#i) -> unguarded '#i' (last does NOT guard)
+g5_e_subterm :: ... ==> Ex z. z<<x -> unguarded 'z' (subterm atom does NOT guard)
+g5_e_actdeep :: Ex z #i. A(h(z))@#i -> SUCCESS (action atom guards vars DEEP in its args)
+g5_e_conjnest :: Ex x. (Ex #i. A(x)@#i)&(Ex #j. C(x)@#j) -> unguarded 'x' (nested quantifiers guard NOTHING)
+# Guardedness: universal antecedent equality guards
+g5_a_eqg1/g5_a_eqg2 :: All w x #i. (A(x)@#i & w=h(x)) ==> C(w)@#i (either conjunct order) -> SUCCESS
+g5_a_eqonly :: All w. (w='c') ==> (w='c') -> SUCCESS (pure equality guard works for universals)
+g5_a_conseq_eq :: All w x #i. A(x)@#i ==> (w=h(x) & C(w)@#i) -> unguarded 'w' (guard region = antecedent only)
+g5_a_disj_ant :: (A|C) ==> ... -> unguarded (disjunction antecedent still guards nothing; round-4 confirmed)
+g5_a_iff :: All x #i. A<=>C -> "universal quantifier without toplevel implication" (unchanged)
+# Guardedness: quantifier fusion
+g5_e_nest :: Ex x. Ex #i. A(x)@#i -> SUCCESS (directly-nested same-kind quantifiers FUSE before the check)
+g5_a_nest :: All x. All #i. A@#i ==> C@#i -> SUCCESS (forall fusion)
+g5_a_nest_noimpl :: All x. All #i. A@#i -> "without toplevel implication"; report renders the FUSED form "∀ x #i. A( x ) @ #i"
+g5_a_fuse_ex :: All x. Ex #i. A(x)@#i -> "without toplevel implication" (NO cross-kind fusion)
+g5_e_fuse_all :: Ex x. All #i. (A==>C) -> unguarded 'x' (forall body guards nothing for the outer Ex)
+# Variable identity includes the numeric index
+g5_idx :: Ex y #i. A(y.1)@#i -> Formula terms `Free y.1' AND unguarded binder (renamed 'y.2' by capture-avoidance) -> binder identity = (name, INDEX, sort-class)
+# Family 2: mismatching sorts/capitalization grouping
+s5_idx :: rule with $x.1 and x.2 -> SILENT (grouping key includes the index)
+s5_idxsame :: $x.1 and x.1 -> reported "1. $x.1, x.1" (index shown in the variant listing)
+s5_capidx :: $X.1 and $x.1 -> reported "1. $X.1, $x.1" (same index, capitalization clash)
+s5_capdiff :: $X.1 and $x.2 -> SILENT
+# Family 3: reserved-name capitalization normalization
+t5_ku_lhs :: [ Ku(x) ] premise -> Reserved names "on left-hand-side: !KU( x )"; NO lhs-not-rhs entry (normalized to builtin KU)
+t5_ku_all :: Ku in all three positions -> three entries, all rendered !KU( x )
+t5_kd_mid :: Kd action -> "on the middle: !KD( x )"
+t5_up_inout :: [ IN(x) ] --[ OUT(x) ]-> [ FR(x) ] -> premise silent (IN=In legal), action "Out( x )" reserved-middle, conclusion "Fr( x )" special-facts -> In/Out/Fr/KU/KD match case-insensitively and render canonically
+s5_suffix :: x:pub with $x in one rule -> SILENT (suffix-sort and sigil spellings are the SAME variable)
+s5_suffix2 :: x:pub with ~x -> "1. $x, ~x" (suffix spelling rendered with its sigil; variants in FIRST-OCCURRENCE order)
+s5_suffix3 :: x:pub with x -> "1. $x, x"
+# issue527 target cross-checks (round5/targets): variants first-seen order "~ltk, ltk"; K premise IS listed in lhs-not-rhs (suggestion F); lemma arity items NOT deduped per (owner,arity) when renders differ (Bound 3,2,1 vs 4,3,2 both listed)
+# Subterm-convergence layout (probes t5_*)
+t5_sub_ground/t5_sub_groundapp :: ground RHS (nullary or compound, no vars) -> NOT flagged
+t5_sub_order/2/3 :: flagged equations SORTED by rendered string ("aa"<"zz", "f(a)"<"f(z)"), not source order
+t5_wl55..66 :: one-line equation "    lhs = rhs" fits at total width 71, breaks at 72 (margin = 4-nest + ribbon 67)
+t5_last33..42 :: tuple ">" closer: glues while end<=69 (line nest 2 + 67); breaks to the TUPLE START column when over; after a fill-broken single-line last element the ">" glues at the element line
+t5_tup3/t5_tup3b/t5_tup_small :: tuple elements fill left-to-right; mid elements carry ", " (kept at line end when the break follows); fit margin = min(100, 67 + nest of the line on which the governing construct starts)
+mesh k2 target trace :: app args fill at col(fn)+len(fn)+1 with "," glued (no trailing space); a construct starting on a broken line uses that line's nest for its margin; ">" goes to its own line when the last element is multi-line; app ")" always glues
+s5_capord :: [$aB, $Ab] same sort -> "1. $Ab, $aB" (same-sort variants ordered by exact name, ASCII; not first-seen)
+s5_groups :: zz-group and aa-group in one rule -> groups SORTED by lowercased key with a 4-space separator line between numbered groups
+s5_all4 / s5_all4b :: $x,~x,x,%x one rule (natural-numbers) -> "1. $x, ~x, x, %x" -> variant order pub < fresh < msg < nat (Node unobserved)
+s5_node :: In(x)/M(x)/Out(x) consistent -> silent (control)
+t5_align :: 10 lhs-only facts -> numbered items right-aligned to widest index ("   1." .. "  10."), suggestions unchanged
+t5_lemdup :: lemma uses Bt(a,b,k) at two binder depths + rule arity clash -> lemma items NOT deduped when renders differ (Bound 3,2,1 AND Bound 4,3,2)
+t5_lookup :: hand-built SAPIC-style lookup rule (State premise, IsIn('time',~t) action, ~t in conclusion) -> Unbound variables `~t' + lhs-not-rhs State suggestion (mirrors OCSPS/CertTransparency targets)
+corpus5_out/*.out :: oracle full outputs for all 71 gate-diff theories (default flags); NONE contains a guardedness/QS/FT block; 459 lemma + 225 restriction formulas extracted to wf-clean/tests/corpus5/*.fml with per-theory nullary-function sidecars (*.fns)

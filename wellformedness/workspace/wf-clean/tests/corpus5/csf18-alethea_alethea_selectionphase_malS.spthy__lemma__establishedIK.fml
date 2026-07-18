@@ -1,0 +1,1 @@
+∀ H D yD #h1 #h2 S no1 other #d x. (((Learn_H_yD( H, D, yD ) @ #h1) ∧ (Learn_H_Ys( H, S, <'ys', (other++<yD, no1>)> ) @ #h2)) ∧ (Commit( D, S, H, x ) @ #d)) ⇒ (∃ BB #b1 other2 no. BB_Ys( BB, 'ys', (other2++<h(<H, x>), no>) ) @ #b1)
