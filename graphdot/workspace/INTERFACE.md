@@ -1,27 +1,31 @@
-# graph-clean — adapter-facing width-input interface (round 10)
+# graph-clean — adapter-facing width-input interface (round 11)
 
 Audience: the OPEN-side integrator wiring an adapter later. Everything here is
 implemented and test-gated in `workspace/graph-clean`; semantics trace to
-BEHAVIOR.md §3f (Session 10).
+BEHAVIOR.md §3f (Sessions 10–11).
 
-## Why this exists
+## Round-11 status: internal widths are NOT how the reference decides
 
-The reference decides record-row wrapping (which cells break, and how wide a
-broken cell's fill is) on the *internal* term widths — notably the
-UN-abbreviATED renderings — while this crate consumes post-abbreviation display
-text. The crate's estimates reproduce 96.6 % of corpus cells; the dominant
-residual is exactly this internal-width family. An adapter that sits on the
-term representation can close it by supplying the values directly.
+Round-11 live probes (battery J, QUERIES.log Session 11) REFUTED the round-9/10
+belief that the reference wraps cells on their UN-abbreviated internal widths:
+abbreviated cells with internal widths 96–150 render FLAT when their display
+text fits, and a sibling's budget follows the abbreviated display occupancy.
+The reference lays out the POST-abbreviation display text everywhere probed.
+Consequently an adapter should normally pass **no overrides at all** — the
+display-text estimates are the probed reference behavior. The override surface
+remains for callers that know better in exceptional cases, and every field
+falls back per-field to the estimate, byte-identically.
 
 ## Surface
 
 ```rust
 pub struct generate::CellWidths {
-    pub occupancy:  Option<i64>, // row occupancy C (columns this cell counts
-                                 // for in its SIBLINGS' trigger budgets)
-    pub bonus:      Option<i64>, // the cell's own trigger-budget bonus
-    pub fill_width: Option<i64>, // fill numerator (internal width) once the
-                                 // cell wraps
+    pub occupancy:     Option<i64>, // row occupancy C (columns this cell counts
+                                    // for in siblings' budgets + fill shares)
+    pub bonus:         Option<i64>, // the cell's own pass-1 trigger-budget bonus
+    pub fill_width:    Option<i64>, // fill numerator once the cell wraps
+    pub trigger_width: Option<i64>, // effective self width in BOTH trigger
+                                    // passes (incl. lone cells vs 87)
 }
 pub fn generate::group_widths_with(cells: &[String],
                                    overrides: &[Option<CellWidths>]) -> Vec<usize>;
@@ -30,44 +34,36 @@ RawRule::premise_widths(Vec<Option<CellWidths>>)
 RawRule::conclusion_widths(Vec<Option<CellWidths>>)
 ```
 
-## Semantics (precise)
+## Semantics (precise, round-11 laws)
 
 Per record group (premises, or conclusions; the info cell is its own group):
 
-- trigger: cell *i* wraps iff `flat_i > max(87 + bonus_i − Σ_{j≠i} C_j, 20)`
-  (lone cell: budget exactly 87, no bonus);
-- fill (only if wrapping): ribbon
-  `clamp(round(87·N_i / (N_i + Σ_{j≠i} w_j·C_j)), 20, flat_i − 1)`,
-  `w_j = 5/6` for a single-quoted-atom sibling when cell *i* has a top-level
-  tuple argument, else 1; the cell is laid out at lineLength `⌊3·ribbon/2⌋`,
-  ribbonsPerLine 1.5 (ragged HughesPJ fill).
+- **occupancy**: `C_i = flat_i + rec_sur_i` where `rec_sur` is the recursive
+  tuple/union surcharge — each tuple/union node contributes `elems + 1`,
+  except nodes directly inside another tuple/union which contribute
+  `elems − 1`;
+- **trigger pass 1**: cell *i* wraps iff
+  `eff_i > max(87 + bonus_i − Σ_{j≠i} C_j, 20)` (lone cell: budget exactly
+  87), `eff_i` = display flat (or `trigger_width`), `bonus_i` = the largest
+  `⌊elems/2⌋ + 2` over top-level tuple/union args (4 at ≥ 9 elems) applied
+  ONLY when the fact's LAST argument is such a tuple/union, else 0;
+- **fill** (only if wrapping): ribbon
+  `clamp(hd(87·N_i / (N_i + Σ_{j≠i} w_j·C_j)), 20, flat_i − 1)` rounded
+  half-DOWN, `N_i = flat_i + rec_sur7_i + nfunc_i` (per-node surcharges
+  capped at 7), `w_j = 5/6` for a single-quoted-atom sibling when cell *i*
+  has a top-level tuple/union arg, else 1; the cell is laid out at
+  lineLength `⌊3·ribbon/2⌋`, ribbonsPerLine 1.5 (ragged HughesPJ fill; the
+  tuple opener `<` may hang);
+- **trigger pass 2 (relief)**: a pass-1-wrapping cell renders FLAT iff
+  `eff_i ≤ max(87 − Σ_{j≠i} charge_j, 20)` where a truly-broken wrapping
+  sibling (fill < flat − 2) charges its fill allocation and everything else
+  charges `C_j`; no bonus here.
 
-Overrides substitute per FIELD: `C_i` ← `occupancy`, `bonus_i` ← `bonus`,
-`N_i` ← `fill_width`; each absent field (or absent entry, or a short/empty
-override slice) falls back to the display-text estimate for that field:
-
-- `C_i` default: `flat_i + Σ_{top-level tuple/union args}(elems + 1)`;
-- `bonus_i` default: max over those args of `⌊elems/2⌋ + 2` (an arg with ≥ 9
-  elements contributes 4); 0 with no such arg;
-- `N_i` default: `flat_i + Σ_{union args}(elems + 1) + #function-nodes`.
-
-The display flat width `flat_i` always comes from the cell text (it IS the
-rendered content). With every input absent the output is byte-identical to
-`group_widths` — regression-gated by
-`tests/generate_tests.rs::supplied_cell_widths_override_estimates` and
+Overrides substitute per FIELD (`C_i` ← `occupancy`, `bonus_i` ← `bonus`,
+`N_i` ← `fill_width`, `eff_i` ← `trigger_width`); each absent field (or absent
+entry, or a short/empty override slice) falls back to the display-text
+estimate for that field. With every input absent the output is byte-identical
+to `group_widths` — regression-gated by
+`tests/generate_tests.rs::supplied_cell_widths_override_estimates`,
+`::supplied_trigger_width_overrides_self_width`,
 `::raw_rule_supplied_widths_reach_cells`, plus the corpus census.
-
-## What an adapter should pass
-
-For each premise/conclusion cell, compute on the UN-abbreviATED internal term:
-
-- `occupancy`: the internal flat width (with tuple/union args measured in
-  their internal form — the display-side law `+ (elems+1)` / spaced `++`
-  separators approximates exactly this);
-- `fill_width`: the same internal width used as the cell's fill numerator;
-- `bonus`: only if the adapter can compute the reference's own-budget bonus;
-  otherwise leave `None` (the display-text law is probe-exact on
-  un-abbreviated shapes).
-
-Passing only `occupancy` (the biggest lever — it fixes the sibling budgets) is
-valid; fields are independent.

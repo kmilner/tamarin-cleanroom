@@ -1,0 +1,230 @@
+theory FillTripleProbe
+begin
+
+
+// HA: [W 70, M 26, S 16] wrap/wrap(?)/flat
+rule HA_70_26_16:
+  [ In(<$dw, $dx>) ]
+  --[ F0() ]->
+  [ Waa($q00aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak), Mbb($qx00aaaa, $be, $bf), Scc($qy00aaaa) ]
+
+// HA: [W 70, M 26, S 19] wrap/wrap(?)/flat
+rule HA_70_26_19:
+  [ In(<$dw, $dx>) ]
+  --[ F1() ]->
+  [ Waa($q01aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak), Mbb($qx01aaaa, $be, $bf), Scc($qy01aa, $ci) ]
+
+// HA: [W 70, M 35, S 16] wrap/wrap(?)/flat
+rule HA_70_35_16:
+  [ In(<$dw, $dx>) ]
+  --[ F2() ]->
+  [ Waa($q02aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak), Mbb($qx02aaa, $be, $bf, $bg, $bh), Scc($qy02aaaa) ]
+
+// HA: [W 70, M 35, S 19] wrap/wrap(?)/flat
+rule HA_70_35_19:
+  [ In(<$dw, $dx>) ]
+  --[ F3() ]->
+  [ Waa($q03aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak), Mbb($qx03aaa, $be, $bf, $bg, $bh), Scc($qy03aa, $ci) ]
+
+// HA: [W 70, M 45, S 16] wrap/wrap(?)/flat
+rule HA_70_45_16:
+  [ In(<$dw, $dx>) ]
+  --[ F4() ]->
+  [ Waa($q04aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak), Mbb($qx04aaa, $be, $bf, $bg, $bh, $bi, $bj), Scc($qy04aaaa) ]
+
+// HA: [W 70, M 45, S 19] wrap/wrap(?)/flat
+rule HA_70_45_19:
+  [ In(<$dw, $dx>) ]
+  --[ F5() ]->
+  [ Waa($q05aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak), Mbb($qx05aaa, $be, $bf, $bg, $bh, $bi, $bj), Scc($qy05aa, $ci) ]
+
+// HA: [W 90, M 26, S 16] wrap/wrap(?)/flat
+rule HA_90_26_16:
+  [ In(<$dw, $dx>) ]
+  --[ F6() ]->
+  [ Waa($q06aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao), Mbb($qx06aaaa, $be, $bf), Scc($qy06aaaa) ]
+
+// HA: [W 90, M 26, S 19] wrap/wrap(?)/flat
+rule HA_90_26_19:
+  [ In(<$dw, $dx>) ]
+  --[ F7() ]->
+  [ Waa($q07aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao), Mbb($qx07aaaa, $be, $bf), Scc($qy07aa, $ci) ]
+
+// HA: [W 90, M 35, S 16] wrap/wrap(?)/flat
+rule HA_90_35_16:
+  [ In(<$dw, $dx>) ]
+  --[ F8() ]->
+  [ Waa($q08aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao), Mbb($qx08aaa, $be, $bf, $bg, $bh), Scc($qy08aaaa) ]
+
+// HA: [W 90, M 35, S 19] wrap/wrap(?)/flat
+rule HA_90_35_19:
+  [ In(<$dw, $dx>) ]
+  --[ F9() ]->
+  [ Waa($q09aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao), Mbb($qx09aaa, $be, $bf, $bg, $bh), Scc($qy09aa, $ci) ]
+
+// HA: [W 90, M 45, S 16] wrap/wrap(?)/flat
+rule HA_90_45_16:
+  [ In(<$dw, $dx>) ]
+  --[ F10() ]->
+  [ Waa($q10aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao), Mbb($qx10aaa, $be, $bf, $bg, $bh, $bi, $bj), Scc($qy10aaaa) ]
+
+// HA: [W 90, M 45, S 19] wrap/wrap(?)/flat
+rule HA_90_45_19:
+  [ In(<$dw, $dx>) ]
+  --[ F11() ]->
+  [ Waa($q11aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao), Mbb($qx11aaa, $be, $bf, $bg, $bh, $bi, $bj), Scc($qy11aa, $ci) ]
+
+// HC: all-wrap triple [45, 32, 27]
+rule HC_45_32_27:
+  [ In(<$dw, $dx>) ]
+  --[ F12() ]->
+  [ Aaa($q12aaaa, $aa, $ab, $ac, $ad, $ae, $af), Bbb($qx12, $be, $bf, $bg, $bh), Ccc($qy12, $ci, $cj, $ck) ]
+
+// HC: all-wrap triple [45, 33, 26]
+rule HC_45_33_26:
+  [ In(<$dw, $dx>) ]
+  --[ F13() ]->
+  [ Aaa($q13aaaa, $aa, $ab, $ac, $ad, $ae, $af), Bbb($qx13a, $be, $bf, $bg, $bh), Ccc($qy13aaaa, $ci, $cj) ]
+
+// HC: all-wrap triple [41, 30, 23]
+rule HC_41_30_23:
+  [ In(<$dw, $dx>) ]
+  --[ F14() ]->
+  [ Aaa($q14, $aa, $ab, $ac, $ad, $ae, $af), Bbb($qx14aaa, $be, $bf, $bg), Ccc($qy14a, $ci, $cj) ]
+
+// HC: all-wrap triple [35, 29, 30]
+rule HC_35_29_30:
+  [ In(<$dw, $dx>) ]
+  --[ F15() ]->
+  [ Aaa($q15aaaa, $aa, $ab, $ac, $ad), Bbb($qx15aa, $be, $bf, $bg), Ccc($qy15aaa, $ci, $cj, $ck) ]
+
+// HC: all-wrap triple [50, 40, 30]
+rule HC_50_40_30:
+  [ In(<$dw, $dx>) ]
+  --[ F16() ]->
+  [ Aaa($q16aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag), Bbb($qx16aaa, $be, $bf, $bg, $bh, $bi), Ccc($qy16aaa, $ci, $cj, $ck) ]
+
+// HC: all-wrap triple [60, 45, 35]
+rule HC_60_45_35:
+  [ In(<$dw, $dx>) ]
+  --[ F17() ]->
+  [ Aaa($q17aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai), Bbb($qx17aaa, $be, $bf, $bg, $bh, $bi, $bj), Ccc($qy17aaa, $ci, $cj, $ck, $cl) ]
+
+// HD: two-wide + small [54, 61, 19]
+rule HD_54_61_19:
+  [ In(<$dw, $dx>) ]
+  --[ F18() ]->
+  [ Aaa($q18aaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Bbb($qx18aaaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm), Ccc($qy18aa, $ci) ]
+
+// HD: two-wide + small [52, 59, 17]
+rule HD_52_59_17:
+  [ In(<$dw, $dx>) ]
+  --[ F19() ]->
+  [ Aaa($q19a, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Bbb($qx19aa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm), Ccc($qy19, $ci) ]
+
+// HD: two-wide + small [70, 26, 16]
+rule HD_70_26_16:
+  [ In(<$dw, $dx>) ]
+  --[ F20() ]->
+  [ Aaa($q20aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak), Bbb($qx20aaaa, $be, $bf), Ccc($qy20aaaa) ]
+
+// HD: two-wide + small [72, 26, 19]
+rule HD_72_26_19:
+  [ In(<$dw, $dx>) ]
+  --[ F21() ]->
+  [ Aaa($q21a, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al), Bbb($qx21aaaa, $be, $bf), Ccc($qy21aa, $ci) ]
+
+// HD: two-wide + small [51, 26, 15]
+rule HD_51_26_15:
+  [ In(<$dw, $dx>) ]
+  --[ F22() ]->
+  [ Aaa($q22, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Bbb($qx22aaaa, $be, $bf), Ccc($qy22aaa) ]
+
+// HE: 4-cell [45, 30, 25, 20]
+rule HE_45_30_25_20:
+  [ In(<$dw, $dx>) ]
+  --[ F23() ]->
+  [ Aaa($q23aaaa, $aa, $ab, $ac, $ad, $ae, $af), Bbb($qx23aaa, $be, $bf, $bg), Ccc($qy23aaa, $ci, $cj), Ddd($qz23aaa, $dm) ]
+
+// HE: 4-cell [60, 40, 30, 16]
+rule HE_60_40_30_16:
+  [ In(<$dw, $dx>) ]
+  --[ F24() ]->
+  [ Aaa($q24aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai), Bbb($qx24aaa, $be, $bf, $bg, $bh, $bi), Ccc($qy24aaa, $ci, $cj, $ck), Ddd($qz24aaaa) ]
+
+lemma l_HA_70_26_16:
+  exists-trace "Ex #i. F0() @ #i"
+
+lemma l_HA_70_26_19:
+  exists-trace "Ex #i. F1() @ #i"
+
+lemma l_HA_70_35_16:
+  exists-trace "Ex #i. F2() @ #i"
+
+lemma l_HA_70_35_19:
+  exists-trace "Ex #i. F3() @ #i"
+
+lemma l_HA_70_45_16:
+  exists-trace "Ex #i. F4() @ #i"
+
+lemma l_HA_70_45_19:
+  exists-trace "Ex #i. F5() @ #i"
+
+lemma l_HA_90_26_16:
+  exists-trace "Ex #i. F6() @ #i"
+
+lemma l_HA_90_26_19:
+  exists-trace "Ex #i. F7() @ #i"
+
+lemma l_HA_90_35_16:
+  exists-trace "Ex #i. F8() @ #i"
+
+lemma l_HA_90_35_19:
+  exists-trace "Ex #i. F9() @ #i"
+
+lemma l_HA_90_45_16:
+  exists-trace "Ex #i. F10() @ #i"
+
+lemma l_HA_90_45_19:
+  exists-trace "Ex #i. F11() @ #i"
+
+lemma l_HC_45_32_27:
+  exists-trace "Ex #i. F12() @ #i"
+
+lemma l_HC_45_33_26:
+  exists-trace "Ex #i. F13() @ #i"
+
+lemma l_HC_41_30_23:
+  exists-trace "Ex #i. F14() @ #i"
+
+lemma l_HC_35_29_30:
+  exists-trace "Ex #i. F15() @ #i"
+
+lemma l_HC_50_40_30:
+  exists-trace "Ex #i. F16() @ #i"
+
+lemma l_HC_60_45_35:
+  exists-trace "Ex #i. F17() @ #i"
+
+lemma l_HD_54_61_19:
+  exists-trace "Ex #i. F18() @ #i"
+
+lemma l_HD_52_59_17:
+  exists-trace "Ex #i. F19() @ #i"
+
+lemma l_HD_70_26_16:
+  exists-trace "Ex #i. F20() @ #i"
+
+lemma l_HD_72_26_19:
+  exists-trace "Ex #i. F21() @ #i"
+
+lemma l_HD_51_26_15:
+  exists-trace "Ex #i. F22() @ #i"
+
+lemma l_HE_45_30_25_20:
+  exists-trace "Ex #i. F23() @ #i"
+
+lemma l_HE_60_40_30_16:
+  exists-trace "Ex #i. F24() @ #i"
+
+end

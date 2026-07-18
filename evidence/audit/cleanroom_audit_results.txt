@@ -41,3 +41,4 @@ workflows/wf_58b2a176-d66/agent-ab3a750508a830592.jsonl: tool_calls=148 web=0 VI
 workflows/wf_cdfa493d-262/agent-aebcd06acb5de46a7.jsonl: tool_calls=49 web=0 VIOLATIONS=0
 workflows/wf_cdfa493d-262/agent-a57fc416f110972cf.jsonl: tool_calls=88 web=0 VIOLATIONS=0
 workflows/wf_910e7687-413/agent-a4262551b04e2c696.jsonl: tool_calls=103 web=0 VIOLATIONS=0
+workflows/wf_6c1add5e-f10/agent-a5c3c235083120633.jsonl: tool_calls=149 web=0 VIOLATIONS=0

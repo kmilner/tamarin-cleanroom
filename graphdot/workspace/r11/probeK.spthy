@@ -1,0 +1,619 @@
+theory ShapePinProbe
+begin
+
+builtins: multiset
+
+functions: ff/1, w3/3, w1/1
+
+// K1: [Faa 45, pair-of-pairs 33] X-flip pins nested occupancy
+rule K1_33:
+  [ In(<$dw, $dx>) ]
+  --[ F0() ]->
+  [ Faa($q00aaaa, $aa, $ab, $ac, $ad, $ae, $af), N(<<$qx00aa, $be>, <$bf, $bg>>) ]
+
+// K1: [Faa 45, pair-of-pairs 34] X-flip pins nested occupancy
+rule K1_34:
+  [ In(<$dw, $dx>) ]
+  --[ F1() ]->
+  [ Faa($q01aaaa, $aa, $ab, $ac, $ad, $ae, $af), N(<<$qx01aaa, $be>, <$bf, $bg>>) ]
+
+// K1: [Faa 45, pair-of-pairs 35] X-flip pins nested occupancy
+rule K1_35:
+  [ In(<$dw, $dx>) ]
+  --[ F2() ]->
+  [ Faa($q02aaaa, $aa, $ab, $ac, $ad, $ae, $af), N(<<$qx02aaaa, $be>, <$bf, $bg>>) ]
+
+// K1: [Faa 45, pair-of-pairs 36] X-flip pins nested occupancy
+rule K1_36:
+  [ In(<$dw, $dx>) ]
+  --[ F3() ]->
+  [ Faa($q03aaaa, $aa, $ab, $ac, $ad, $ae, $af), N(<<$qx03aaaaa, $be>, <$bf, $bg>>) ]
+
+// K1: [Faa 45, pair-of-pairs 37] X-flip pins nested occupancy
+rule K1_37:
+  [ In(<$dw, $dx>) ]
+  --[ F4() ]->
+  [ Faa($q04aaaa, $aa, $ab, $ac, $ad, $ae, $af), N(<<$qx04aaaaaa, $be>, <$bf, $bg>>) ]
+
+// K1: [Faa 45, pair-of-pairs 38] X-flip pins nested occupancy
+rule K1_38:
+  [ In(<$dw, $dx>) ]
+  --[ F5() ]->
+  [ Faa($q05aaaa, $aa, $ab, $ac, $ad, $ae, $af), N(<<$qx05aaaaaaa, $be>, <$bf, $bg>>) ]
+
+// K1: [Faa 45, pair-of-pairs 39] X-flip pins nested occupancy
+rule K1_39:
+  [ In(<$dw, $dx>) ]
+  --[ F6() ]->
+  [ Faa($q06aaaa, $aa, $ab, $ac, $ad, $ae, $af), N(<<$qx06aaaaaaaa, $be>, <$bf, $bg>>) ]
+
+// K1: [Faa 45, pair-of-pairs 40] X-flip pins nested occupancy
+rule K1_40:
+  [ In(<$dw, $dx>) ]
+  --[ F7() ]->
+  [ Faa($q07aaaa, $aa, $ab, $ac, $ad, $ae, $af), N(<<$qx07aaaaaaaaa, $be>, <$bf, $bg>>) ]
+
+// K1: [Faa 45, pair-of-pairs 41] X-flip pins nested occupancy
+rule K1_41:
+  [ In(<$dw, $dx>) ]
+  --[ F8() ]->
+  [ Faa($q08aaaa, $aa, $ab, $ac, $ad, $ae, $af), N(<<$qx08aaaaaaaaaa, $be>, <$bf, $bg>>) ]
+
+// K2: [Faa 45, func(3-tuple) 36] X-flip pins func-nested occupancy
+rule K2_36:
+  [ In(<$dw, $dx>) ]
+  --[ F9() ]->
+  [ Faa($q09aaaa, $aa, $ab, $ac, $ad, $ae, $af), Q(ff(<$qx09aaaaaaaaaa, $be, $bf>)) ]
+
+// K2: [Faa 45, func(3-tuple) 37] X-flip pins func-nested occupancy
+rule K2_37:
+  [ In(<$dw, $dx>) ]
+  --[ F10() ]->
+  [ Faa($q10aaaa, $aa, $ab, $ac, $ad, $ae, $af), Q(ff(<$qx10aaaaaaaaaaa, $be, $bf>)) ]
+
+// K2: [Faa 45, func(3-tuple) 38] X-flip pins func-nested occupancy
+rule K2_38:
+  [ In(<$dw, $dx>) ]
+  --[ F11() ]->
+  [ Faa($q11aaaa, $aa, $ab, $ac, $ad, $ae, $af), Q(ff(<$qx11aaaaaaaaaaaa, $be, $bf>)) ]
+
+// K2: [Faa 45, func(3-tuple) 39] X-flip pins func-nested occupancy
+rule K2_39:
+  [ In(<$dw, $dx>) ]
+  --[ F12() ]->
+  [ Faa($q12aaaa, $aa, $ab, $ac, $ad, $ae, $af), Q(ff(<$qx12aaaaaaaaaaaaa, $be, $bf>)) ]
+
+// K2: [Faa 45, func(3-tuple) 40] X-flip pins func-nested occupancy
+rule K2_40:
+  [ In(<$dw, $dx>) ]
+  --[ F13() ]->
+  [ Faa($q13aaaa, $aa, $ab, $ac, $ad, $ae, $af), Q(ff(<$qx13aaaaaaaaaaaaaa, $be, $bf>)) ]
+
+// K2: [Faa 45, func(3-tuple) 41] X-flip pins func-nested occupancy
+rule K2_41:
+  [ In(<$dw, $dx>) ]
+  --[ F14() ]->
+  [ Faa($q14aaaa, $aa, $ab, $ac, $ad, $ae, $af), Q(ff(<$qx14aaaaaaaaaaaaaaa, $be, $bf>)) ]
+
+// K2: [Faa 45, func(3-tuple) 42] X-flip pins func-nested occupancy
+rule K2_42:
+  [ In(<$dw, $dx>) ]
+  --[ F15() ]->
+  [ Faa($q15aaaa, $aa, $ab, $ac, $ad, $ae, $af), Q(ff(<$qx15aaaaaaaaaaaaaaaa, $be, $bf>)) ]
+
+// K2: [Faa 45, func(3-tuple) 43] X-flip pins func-nested occupancy
+rule K2_43:
+  [ In(<$dw, $dx>) ]
+  --[ F16() ]->
+  [ Faa($q16aaaa, $aa, $ab, $ac, $ad, $ae, $af), Q(ff(<$qx16aaaaaaaaaaaaaaaaa, $be, $bf>)) ]
+
+// K2: [Faa 45, func(3-tuple) 44] X-flip pins func-nested occupancy
+rule K2_44:
+  [ In(<$dw, $dx>) ]
+  --[ F17() ]->
+  [ Faa($q17aaaa, $aa, $ab, $ac, $ad, $ae, $af), Q(ff(<$qx17aaaaaaaaaaaaaaaaaa, $be, $bf>)) ]
+
+// K3: [2-tuple 27, Sib 50] receiver fill numerator
+rule K3_27_2_50:
+  [ In(<$dw, $dx>) ]
+  --[ F18() ]->
+  [ Trr(<$q18aaaaaaaaa, $aa>), Sbb($qx18aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk) ]
+
+// K3: [2-tuple 27, Sib 60] receiver fill numerator
+rule K3_27_2_60:
+  [ In(<$dw, $dx>) ]
+  --[ F19() ]->
+  [ Trr(<$q19aaaaaaaaa, $aa>), Sbb($qx19aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm) ]
+
+// K3: [2-tuple 27, Sib 70] receiver fill numerator
+rule K3_27_2_70:
+  [ In(<$dw, $dx>) ]
+  --[ F20() ]->
+  [ Trr(<$q20aaaaaaaaa, $aa>), Sbb($qx20aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo) ]
+
+// K3: [2-tuple 27, Sib 75] receiver fill numerator
+rule K3_27_2_75:
+  [ In(<$dw, $dx>) ]
+  --[ F21() ]->
+  [ Trr(<$q21aaaaaaaaa, $aa>), Sbb($qx21aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp) ]
+
+// K3: [2-tuple 27, Sib 80] receiver fill numerator
+rule K3_27_2_80:
+  [ In(<$dw, $dx>) ]
+  --[ F22() ]->
+  [ Trr(<$q22aaaaaaaaa, $aa>), Sbb($qx22aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq) ]
+
+// K3: [2-tuple 27, Sib 90] receiver fill numerator
+rule K3_27_2_90:
+  [ In(<$dw, $dx>) ]
+  --[ F23() ]->
+  [ Trr(<$q23aaaaaaaaa, $aa>), Sbb($qx23aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs) ]
+
+// K3: [2-tuple 36, Sib 50] receiver fill numerator
+rule K3_36_2_50:
+  [ In(<$dw, $dx>) ]
+  --[ F24() ]->
+  [ Trr(<$q24aaaaaaaaaaaaaaaaaa, $aa>), Sbb($qx24aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk) ]
+
+// K3: [2-tuple 36, Sib 60] receiver fill numerator
+rule K3_36_2_60:
+  [ In(<$dw, $dx>) ]
+  --[ F25() ]->
+  [ Trr(<$q25aaaaaaaaaaaaaaaaaa, $aa>), Sbb($qx25aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm) ]
+
+// K3: [2-tuple 36, Sib 70] receiver fill numerator
+rule K3_36_2_70:
+  [ In(<$dw, $dx>) ]
+  --[ F26() ]->
+  [ Trr(<$q26aaaaaaaaaaaaaaaaaa, $aa>), Sbb($qx26aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo) ]
+
+// K3: [2-tuple 36, Sib 75] receiver fill numerator
+rule K3_36_2_75:
+  [ In(<$dw, $dx>) ]
+  --[ F27() ]->
+  [ Trr(<$q27aaaaaaaaaaaaaaaaaa, $aa>), Sbb($qx27aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp) ]
+
+// K3: [2-tuple 36, Sib 80] receiver fill numerator
+rule K3_36_2_80:
+  [ In(<$dw, $dx>) ]
+  --[ F28() ]->
+  [ Trr(<$q28aaaaaaaaaaaaaaaaaa, $aa>), Sbb($qx28aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq) ]
+
+// K3: [2-tuple 36, Sib 90] receiver fill numerator
+rule K3_36_2_90:
+  [ In(<$dw, $dx>) ]
+  --[ F29() ]->
+  [ Trr(<$q29aaaaaaaaaaaaaaaaaa, $aa>), Sbb($qx29aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs) ]
+
+// K3: [6-tuple 40, Sib 50] receiver fill numerator
+rule K3_40_6_50:
+  [ In(<$dw, $dx>) ]
+  --[ F30() ]->
+  [ Trr(<$q30aa, $aa, $ab, $ac, $ad, $ae>), Sbb($qx30aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk) ]
+
+// K3: [6-tuple 40, Sib 60] receiver fill numerator
+rule K3_40_6_60:
+  [ In(<$dw, $dx>) ]
+  --[ F31() ]->
+  [ Trr(<$q31aa, $aa, $ab, $ac, $ad, $ae>), Sbb($qx31aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm) ]
+
+// K3: [6-tuple 40, Sib 70] receiver fill numerator
+rule K3_40_6_70:
+  [ In(<$dw, $dx>) ]
+  --[ F32() ]->
+  [ Trr(<$q32aa, $aa, $ab, $ac, $ad, $ae>), Sbb($qx32aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo) ]
+
+// K3: [6-tuple 40, Sib 75] receiver fill numerator
+rule K3_40_6_75:
+  [ In(<$dw, $dx>) ]
+  --[ F33() ]->
+  [ Trr(<$q33aa, $aa, $ab, $ac, $ad, $ae>), Sbb($qx33aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp) ]
+
+// K3: [6-tuple 40, Sib 80] receiver fill numerator
+rule K3_40_6_80:
+  [ In(<$dw, $dx>) ]
+  --[ F34() ]->
+  [ Trr(<$q34aa, $aa, $ab, $ac, $ad, $ae>), Sbb($qx34aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq) ]
+
+// K3: [6-tuple 40, Sib 90] receiver fill numerator
+rule K3_40_6_90:
+  [ In(<$dw, $dx>) ]
+  --[ F35() ]->
+  [ Trr(<$q35aa, $aa, $ab, $ac, $ad, $ae>), Sbb($qx35aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs) ]
+
+// K4: lone func(tuple with 84-wide first elem) - hang shape?
+rule K4_tupfunc:
+  [ In(<$dw, $dx>) ]
+  --[ F36() ]->
+  [ Qzz(w1(<$q90aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $ha, $hb, $hc>)) ]
+
+// K4: lone union with 84-wide first elem - hang after ( ?
+rule K4_union:
+  [ In(<$dw, $dx>) ]
+  --[ F37() ]->
+  [ Uzz(($q91aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa++$hd++$he)) ]
+
+// K4: lone func with 84-wide first ARG - hang after name( ?
+rule K4_funcatom:
+  [ In(<$dw, $dx>) ]
+  --[ F38() ]->
+  [ Qzz(w3($q92aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $hf, $hg)) ]
+
+// K4: lone tuple 95-wide first elem (control, GC shape)
+rule K4_tuple2:
+  [ In(<$dw, $dx>) ]
+  --[ F39() ]->
+  [ Tzz(<$q93aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $hh>) ]
+
+// K6: witness [42, 116 pair-of-6tuples]
+rule K6_42_116:
+  [ In(<$dw, $dx>) ]
+  --[ F40() ]->
+  [ Rem($q80a, $aa, $ab, $ac, $ad, $ae, $af), Ott(<<$qx80aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $be, $bf, $bg, $bh, $bi>, <$bj, $bk, $bl, $bm, $bn>>) ]
+
+// K6: witness [61, 114 pair-of-6tuples]
+rule K6_61_114:
+  [ In(<$dw, $dx>) ]
+  --[ F41() ]->
+  [ Rem($q81, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj), Ott(<<$qx81aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $be, $bf, $bg, $bh, $bi>, <$bj, $bk, $bl, $bm, $bn>>) ]
+
+// K6: [42, 100 pair-of-6tuples] denominator readout
+rule K6_42_100:
+  [ In(<$dw, $dx>) ]
+  --[ F42() ]->
+  [ Rem($q82a, $aa, $ab, $ac, $ad, $ae, $af), Ott(<<$qx82aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $be, $bf, $bg, $bh, $bi>, <$bj, $bk, $bl, $bm, $bn>>) ]
+
+// TB4: [4-tuple 43, Fbb 45] own-flip pins bonus(4)
+rule TB4_43:
+  [ In(<$dw, $dx>) ]
+  --[ F43() ]->
+  [ Tf(<$q43aaaaaaaaaaaaaaaa, $aa, $ab, $ac>), Fbb($qx43aaa, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// TB4: [4-tuple 44, Fbb 45] own-flip pins bonus(4)
+rule TB4_44:
+  [ In(<$dw, $dx>) ]
+  --[ F44() ]->
+  [ Tf(<$q44aaaaaaaaaaaaaaaaa, $aa, $ab, $ac>), Fbb($qx44aaa, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// TB4: [4-tuple 45, Fbb 45] own-flip pins bonus(4)
+rule TB4_45:
+  [ In(<$dw, $dx>) ]
+  --[ F45() ]->
+  [ Tf(<$q45aaaaaaaaaaaaaaaaaa, $aa, $ab, $ac>), Fbb($qx45aaa, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// TB4: [4-tuple 46, Fbb 45] own-flip pins bonus(4)
+rule TB4_46:
+  [ In(<$dw, $dx>) ]
+  --[ F46() ]->
+  [ Tf(<$q46aaaaaaaaaaaaaaaaaaa, $aa, $ab, $ac>), Fbb($qx46aaa, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// TB4: [4-tuple 47, Fbb 45] own-flip pins bonus(4)
+rule TB4_47:
+  [ In(<$dw, $dx>) ]
+  --[ F47() ]->
+  [ Tf(<$q47aaaaaaaaaaaaaaaaaaaa, $aa, $ab, $ac>), Fbb($qx47aaa, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// TB4: [4-tuple 48, Fbb 45] own-flip pins bonus(4)
+rule TB4_48:
+  [ In(<$dw, $dx>) ]
+  --[ F48() ]->
+  [ Tf(<$q48aaaaaaaaaaaaaaaaaaaaa, $aa, $ab, $ac>), Fbb($qx48aaa, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// TB4: [4-tuple 49, Fbb 45] own-flip pins bonus(4)
+rule TB4_49:
+  [ In(<$dw, $dx>) ]
+  --[ F49() ]->
+  [ Tf(<$q49aaaaaaaaaaaaaaaaaaaaaa, $aa, $ab, $ac>), Fbb($qx49aaa, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// TB4f: [4-tuple with funcs 43, Fbb 45] own-flip
+rule TB4f_43:
+  [ In(<$dw, $dx>) ]
+  --[ F50() ]->
+  [ Tf(<'cm', ff($aa), ff($ab), $q50aaaaaaa>), Fbb($qx50aaa, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// TB4f: [4-tuple with funcs 44, Fbb 45] own-flip
+rule TB4f_44:
+  [ In(<$dw, $dx>) ]
+  --[ F51() ]->
+  [ Tf(<'cm', ff($aa), ff($ab), $q51aaaaaaaa>), Fbb($qx51aaa, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// TB4f: [4-tuple with funcs 45, Fbb 45] own-flip
+rule TB4f_45:
+  [ In(<$dw, $dx>) ]
+  --[ F52() ]->
+  [ Tf(<'cm', ff($aa), ff($ab), $q52aaaaaaaaa>), Fbb($qx52aaa, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// TB4f: [4-tuple with funcs 46, Fbb 45] own-flip
+rule TB4f_46:
+  [ In(<$dw, $dx>) ]
+  --[ F53() ]->
+  [ Tf(<'cm', ff($aa), ff($ab), $q53aaaaaaaaaa>), Fbb($qx53aaa, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// TB4f: [4-tuple with funcs 47, Fbb 45] own-flip
+rule TB4f_47:
+  [ In(<$dw, $dx>) ]
+  --[ F54() ]->
+  [ Tf(<'cm', ff($aa), ff($ab), $q54aaaaaaaaaaa>), Fbb($qx54aaa, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// TB4f: [4-tuple with funcs 48, Fbb 45] own-flip
+rule TB4f_48:
+  [ In(<$dw, $dx>) ]
+  --[ F55() ]->
+  [ Tf(<'cm', ff($aa), ff($ab), $q55aaaaaaaaaaaa>), Fbb($qx55aaa, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// TB4f: [4-tuple with funcs 49, Fbb 45] own-flip
+rule TB4f_49:
+  [ In(<$dw, $dx>) ]
+  --[ F56() ]->
+  [ Tf(<'cm', ff($aa), ff($ab), $q56aaaaaaaaaaaaa>), Fbb($qx56aaa, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// WIT: [St-like 73, Fr 13] witness trigger boundary
+rule Init_W73:
+  [ Fr(~id) ]
+  -->
+  [ St_I(~id, $q57aaaaaaaaaaaa, <'commit', ff($cf), ff($cg), $ch>, w1($zz)) ]
+
+rule WIT_73:
+  [ St_I(~id, $q57aaaaaaaaaaaa, <'commit', ff($cf), ff($cg), $ch>, w1($zz)), Fr(~ni) ]
+  --[ F57() ]->
+  [ Out(~ni) ]
+
+// WIT: [St-like 74, Fr 13] witness trigger boundary
+rule Init_W74:
+  [ Fr(~id) ]
+  -->
+  [ St_I(~id, $q58aaaaaaaaaaaaa, <'commit', ff($cg), ff($ch), $ci>, w1($zz)) ]
+
+rule WIT_74:
+  [ St_I(~id, $q58aaaaaaaaaaaaa, <'commit', ff($cg), ff($ch), $ci>, w1($zz)), Fr(~ni) ]
+  --[ F58() ]->
+  [ Out(~ni) ]
+
+// WIT: [St-like 75, Fr 13] witness trigger boundary
+rule Init_W75:
+  [ Fr(~id) ]
+  -->
+  [ St_I(~id, $q59aaaaaaaaaaaaaa, <'commit', ff($ch), ff($ci), $cj>, w1($zz)) ]
+
+rule WIT_75:
+  [ St_I(~id, $q59aaaaaaaaaaaaaa, <'commit', ff($ch), ff($ci), $cj>, w1($zz)), Fr(~ni) ]
+  --[ F59() ]->
+  [ Out(~ni) ]
+
+// WIT: [St-like 76, Fr 13] witness trigger boundary
+rule Init_W76:
+  [ Fr(~id) ]
+  -->
+  [ St_I(~id, $q60aaaaaaaaaaaaaaa, <'commit', ff($ci), ff($cj), $ck>, w1($zz)) ]
+
+rule WIT_76:
+  [ St_I(~id, $q60aaaaaaaaaaaaaaa, <'commit', ff($ci), ff($cj), $ck>, w1($zz)), Fr(~ni) ]
+  --[ F60() ]->
+  [ Out(~ni) ]
+
+// WIT: [St-like 77, Fr 13] witness trigger boundary
+rule Init_W77:
+  [ Fr(~id) ]
+  -->
+  [ St_I(~id, $q61aaaaaaaaaaaaaaaa, <'commit', ff($cj), ff($ck), $cl>, w1($zz)) ]
+
+rule WIT_77:
+  [ St_I(~id, $q61aaaaaaaaaaaaaaaa, <'commit', ff($cj), ff($ck), $cl>, w1($zz)), Fr(~ni) ]
+  --[ F61() ]->
+  [ Out(~ni) ]
+
+// WIT: [St-like 78, Fr 13] witness trigger boundary
+rule Init_W78:
+  [ Fr(~id) ]
+  -->
+  [ St_I(~id, $q62aaaaaaaaaaaaaaaaa, <'commit', ff($ck), ff($cl), $cm>, w1($zz)) ]
+
+rule WIT_78:
+  [ St_I(~id, $q62aaaaaaaaaaaaaaaaa, <'commit', ff($ck), ff($cl), $cm>, w1($zz)), Fr(~ni) ]
+  --[ F62() ]->
+  [ Out(~ni) ]
+
+// WIT: [St-like 79, Fr 13] witness trigger boundary
+rule Init_W79:
+  [ Fr(~id) ]
+  -->
+  [ St_I(~id, $q63aaaaaaaaaaaaaaaaaa, <'commit', ff($cl), ff($cm), $cn>, w1($zz)) ]
+
+rule WIT_79:
+  [ St_I(~id, $q63aaaaaaaaaaaaaaaaaa, <'commit', ff($cl), ff($cm), $cn>, w1($zz)), Fr(~ni) ]
+  --[ F63() ]->
+  [ Out(~ni) ]
+
+lemma l_K1_33:
+  exists-trace "Ex #i. F0() @ #i"
+
+lemma l_K1_34:
+  exists-trace "Ex #i. F1() @ #i"
+
+lemma l_K1_35:
+  exists-trace "Ex #i. F2() @ #i"
+
+lemma l_K1_36:
+  exists-trace "Ex #i. F3() @ #i"
+
+lemma l_K1_37:
+  exists-trace "Ex #i. F4() @ #i"
+
+lemma l_K1_38:
+  exists-trace "Ex #i. F5() @ #i"
+
+lemma l_K1_39:
+  exists-trace "Ex #i. F6() @ #i"
+
+lemma l_K1_40:
+  exists-trace "Ex #i. F7() @ #i"
+
+lemma l_K1_41:
+  exists-trace "Ex #i. F8() @ #i"
+
+lemma l_K2_36:
+  exists-trace "Ex #i. F9() @ #i"
+
+lemma l_K2_37:
+  exists-trace "Ex #i. F10() @ #i"
+
+lemma l_K2_38:
+  exists-trace "Ex #i. F11() @ #i"
+
+lemma l_K2_39:
+  exists-trace "Ex #i. F12() @ #i"
+
+lemma l_K2_40:
+  exists-trace "Ex #i. F13() @ #i"
+
+lemma l_K2_41:
+  exists-trace "Ex #i. F14() @ #i"
+
+lemma l_K2_42:
+  exists-trace "Ex #i. F15() @ #i"
+
+lemma l_K2_43:
+  exists-trace "Ex #i. F16() @ #i"
+
+lemma l_K2_44:
+  exists-trace "Ex #i. F17() @ #i"
+
+lemma l_K3_27_2_50:
+  exists-trace "Ex #i. F18() @ #i"
+
+lemma l_K3_27_2_60:
+  exists-trace "Ex #i. F19() @ #i"
+
+lemma l_K3_27_2_70:
+  exists-trace "Ex #i. F20() @ #i"
+
+lemma l_K3_27_2_75:
+  exists-trace "Ex #i. F21() @ #i"
+
+lemma l_K3_27_2_80:
+  exists-trace "Ex #i. F22() @ #i"
+
+lemma l_K3_27_2_90:
+  exists-trace "Ex #i. F23() @ #i"
+
+lemma l_K3_36_2_50:
+  exists-trace "Ex #i. F24() @ #i"
+
+lemma l_K3_36_2_60:
+  exists-trace "Ex #i. F25() @ #i"
+
+lemma l_K3_36_2_70:
+  exists-trace "Ex #i. F26() @ #i"
+
+lemma l_K3_36_2_75:
+  exists-trace "Ex #i. F27() @ #i"
+
+lemma l_K3_36_2_80:
+  exists-trace "Ex #i. F28() @ #i"
+
+lemma l_K3_36_2_90:
+  exists-trace "Ex #i. F29() @ #i"
+
+lemma l_K3_40_6_50:
+  exists-trace "Ex #i. F30() @ #i"
+
+lemma l_K3_40_6_60:
+  exists-trace "Ex #i. F31() @ #i"
+
+lemma l_K3_40_6_70:
+  exists-trace "Ex #i. F32() @ #i"
+
+lemma l_K3_40_6_75:
+  exists-trace "Ex #i. F33() @ #i"
+
+lemma l_K3_40_6_80:
+  exists-trace "Ex #i. F34() @ #i"
+
+lemma l_K3_40_6_90:
+  exists-trace "Ex #i. F35() @ #i"
+
+lemma l_K4_tupfunc:
+  exists-trace "Ex #i. F36() @ #i"
+
+lemma l_K4_union:
+  exists-trace "Ex #i. F37() @ #i"
+
+lemma l_K4_funcatom:
+  exists-trace "Ex #i. F38() @ #i"
+
+lemma l_K4_tuple2:
+  exists-trace "Ex #i. F39() @ #i"
+
+lemma l_K6_42_116:
+  exists-trace "Ex #i. F40() @ #i"
+
+lemma l_K6_61_114:
+  exists-trace "Ex #i. F41() @ #i"
+
+lemma l_K6_42_100:
+  exists-trace "Ex #i. F42() @ #i"
+
+lemma l_TB4_43:
+  exists-trace "Ex #i. F43() @ #i"
+
+lemma l_TB4_44:
+  exists-trace "Ex #i. F44() @ #i"
+
+lemma l_TB4_45:
+  exists-trace "Ex #i. F45() @ #i"
+
+lemma l_TB4_46:
+  exists-trace "Ex #i. F46() @ #i"
+
+lemma l_TB4_47:
+  exists-trace "Ex #i. F47() @ #i"
+
+lemma l_TB4_48:
+  exists-trace "Ex #i. F48() @ #i"
+
+lemma l_TB4_49:
+  exists-trace "Ex #i. F49() @ #i"
+
+lemma l_TB4f_43:
+  exists-trace "Ex #i. F50() @ #i"
+
+lemma l_TB4f_44:
+  exists-trace "Ex #i. F51() @ #i"
+
+lemma l_TB4f_45:
+  exists-trace "Ex #i. F52() @ #i"
+
+lemma l_TB4f_46:
+  exists-trace "Ex #i. F53() @ #i"
+
+lemma l_TB4f_47:
+  exists-trace "Ex #i. F54() @ #i"
+
+lemma l_TB4f_48:
+  exists-trace "Ex #i. F55() @ #i"
+
+lemma l_TB4f_49:
+  exists-trace "Ex #i. F56() @ #i"
+
+lemma l_WIT_73:
+  exists-trace "Ex #i. F57() @ #i"
+
+lemma l_WIT_74:
+  exists-trace "Ex #i. F58() @ #i"
+
+lemma l_WIT_75:
+  exists-trace "Ex #i. F59() @ #i"
+
+lemma l_WIT_76:
+  exists-trace "Ex #i. F60() @ #i"
+
+lemma l_WIT_77:
+  exists-trace "Ex #i. F61() @ #i"
+
+lemma l_WIT_78:
+  exists-trace "Ex #i. F62() @ #i"
+
+lemma l_WIT_79:
+  exists-trace "Ex #i. F63() @ #i"
+
+end

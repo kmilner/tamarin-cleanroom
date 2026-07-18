@@ -1,0 +1,392 @@
+theory FillPairProbe
+begin
+
+
+// GA: both-wrap pair [30, 90]
+rule GA_30_90:
+  [ In(<$dw, $dx>) ]
+  --[ F0() ]->
+  [ Naa($q00aaaa, $aa, $ab, $ac), Wbb($qx00aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs) ]
+
+// GA: both-wrap pair [30, 105]
+rule GA_30_105:
+  [ In(<$dw, $dx>) ]
+  --[ F1() ]->
+  [ Naa($q01aaaa, $aa, $ab, $ac), Wbb($qx01aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs, $bt, $bu, $bv) ]
+
+// GA: both-wrap pair [30, 120]
+rule GA_30_120:
+  [ In(<$dw, $dx>) ]
+  --[ F2() ]->
+  [ Naa($q02aaaa, $aa, $ab, $ac), Wbb($qx02aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by) ]
+
+// GA: both-wrap pair [40, 90]
+rule GA_40_90:
+  [ In(<$dw, $dx>) ]
+  --[ F3() ]->
+  [ Naa($q03aaaa, $aa, $ab, $ac, $ad, $ae), Wbb($qx03aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs) ]
+
+// GA: both-wrap pair [40, 105]
+rule GA_40_105:
+  [ In(<$dw, $dx>) ]
+  --[ F4() ]->
+  [ Naa($q04aaaa, $aa, $ab, $ac, $ad, $ae), Wbb($qx04aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs, $bt, $bu, $bv) ]
+
+// GA: both-wrap pair [40, 120]
+rule GA_40_120:
+  [ In(<$dw, $dx>) ]
+  --[ F5() ]->
+  [ Naa($q05aaaa, $aa, $ab, $ac, $ad, $ae), Wbb($qx05aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by) ]
+
+// GA: both-wrap pair [45, 90]
+rule GA_45_90:
+  [ In(<$dw, $dx>) ]
+  --[ F6() ]->
+  [ Naa($q06aaaa, $aa, $ab, $ac, $ad, $ae, $af), Wbb($qx06aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs) ]
+
+// GA: both-wrap pair [45, 105]
+rule GA_45_105:
+  [ In(<$dw, $dx>) ]
+  --[ F7() ]->
+  [ Naa($q07aaaa, $aa, $ab, $ac, $ad, $ae, $af), Wbb($qx07aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs, $bt, $bu, $bv) ]
+
+// GA: both-wrap pair [45, 120]
+rule GA_45_120:
+  [ In(<$dw, $dx>) ]
+  --[ F8() ]->
+  [ Naa($q08aaaa, $aa, $ab, $ac, $ad, $ae, $af), Wbb($qx08aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by) ]
+
+// GA: both-wrap pair [50, 90]
+rule GA_50_90:
+  [ In(<$dw, $dx>) ]
+  --[ F9() ]->
+  [ Naa($q09aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag), Wbb($qx09aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs) ]
+
+// GA: both-wrap pair [50, 105]
+rule GA_50_105:
+  [ In(<$dw, $dx>) ]
+  --[ F10() ]->
+  [ Naa($q10aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag), Wbb($qx10aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs, $bt, $bu, $bv) ]
+
+// GA: both-wrap pair [50, 120]
+rule GA_50_120:
+  [ In(<$dw, $dx>) ]
+  --[ F11() ]->
+  [ Naa($q11aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag), Wbb($qx11aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by) ]
+
+// GA: both-wrap pair [55, 90]
+rule GA_55_90:
+  [ In(<$dw, $dx>) ]
+  --[ F12() ]->
+  [ Naa($q12aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Wbb($qx12aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs) ]
+
+// GA: both-wrap pair [55, 105]
+rule GA_55_105:
+  [ In(<$dw, $dx>) ]
+  --[ F13() ]->
+  [ Naa($q13aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Wbb($qx13aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs, $bt, $bu, $bv) ]
+
+// GA: both-wrap pair [55, 120]
+rule GA_55_120:
+  [ In(<$dw, $dx>) ]
+  --[ F14() ]->
+  [ Naa($q14aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Wbb($qx14aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by) ]
+
+// GA: both-wrap pair [61, 90]
+rule GA_61_90:
+  [ In(<$dw, $dx>) ]
+  --[ F15() ]->
+  [ Naa($q15, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj), Wbb($qx15aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs) ]
+
+// GA: both-wrap pair [61, 105]
+rule GA_61_105:
+  [ In(<$dw, $dx>) ]
+  --[ F16() ]->
+  [ Naa($q16, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj), Wbb($qx16aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs, $bt, $bu, $bv) ]
+
+// GA: both-wrap pair [61, 120]
+rule GA_61_120:
+  [ In(<$dw, $dx>) ]
+  --[ F17() ]->
+  [ Naa($q17, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj), Wbb($qx17aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by) ]
+
+// GA: both-wrap pair [66, 90]
+rule GA_66_90:
+  [ In(<$dw, $dx>) ]
+  --[ F18() ]->
+  [ Naa($q18, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak), Wbb($qx18aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs) ]
+
+// GA: both-wrap pair [66, 105]
+rule GA_66_105:
+  [ In(<$dw, $dx>) ]
+  --[ F19() ]->
+  [ Naa($q19, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak), Wbb($qx19aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs, $bt, $bu, $bv) ]
+
+// GA: both-wrap pair [66, 120]
+rule GA_66_120:
+  [ In(<$dw, $dx>) ]
+  --[ F20() ]->
+  [ Naa($q20, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak), Wbb($qx20aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by) ]
+
+// GA: both-wrap pair [71, 90]
+rule GA_71_90:
+  [ In(<$dw, $dx>) ]
+  --[ F21() ]->
+  [ Naa($q21, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al), Wbb($qx21aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs) ]
+
+// GA: both-wrap pair [71, 105]
+rule GA_71_105:
+  [ In(<$dw, $dx>) ]
+  --[ F22() ]->
+  [ Naa($q22, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al), Wbb($qx22aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs, $bt, $bu, $bv) ]
+
+// GA: both-wrap pair [71, 120]
+rule GA_71_120:
+  [ In(<$dw, $dx>) ]
+  --[ F23() ]->
+  [ Naa($q23, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al), Wbb($qx23aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by) ]
+
+// GA: both-wrap pair [76, 90]
+rule GA_76_90:
+  [ In(<$dw, $dx>) ]
+  --[ F24() ]->
+  [ Naa($q24, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am), Wbb($qx24aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs) ]
+
+// GA: both-wrap pair [76, 105]
+rule GA_76_105:
+  [ In(<$dw, $dx>) ]
+  --[ F25() ]->
+  [ Naa($q25, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am), Wbb($qx25aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs, $bt, $bu, $bv) ]
+
+// GA: both-wrap pair [76, 120]
+rule GA_76_120:
+  [ In(<$dw, $dx>) ]
+  --[ F26() ]->
+  [ Naa($q26, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am), Wbb($qx26aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by) ]
+
+// GA: both-wrap pair [81, 90]
+rule GA_81_90:
+  [ In(<$dw, $dx>) ]
+  --[ F27() ]->
+  [ Naa($q27, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an), Wbb($qx27aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs) ]
+
+// GA: both-wrap pair [81, 105]
+rule GA_81_105:
+  [ In(<$dw, $dx>) ]
+  --[ F28() ]->
+  [ Naa($q28, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an), Wbb($qx28aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs, $bt, $bu, $bv) ]
+
+// GA: both-wrap pair [81, 120]
+rule GA_81_120:
+  [ In(<$dw, $dx>) ]
+  --[ F29() ]->
+  [ Naa($q29, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an), Wbb($qx29aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs, $bt, $bu, $bv, $bw, $bx, $by) ]
+
+// GB: near-equal both-wrap pair [45, 45]
+rule GB_45_45:
+  [ In(<$dw, $dx>) ]
+  --[ F30() ]->
+  [ Naa($q30aaaa, $aa, $ab, $ac, $ad, $ae, $af), Wbb($qx30aaa, $be, $bf, $bg, $bh, $bi, $bj) ]
+
+// GB: near-equal both-wrap pair [50, 50]
+rule GB_50_50:
+  [ In(<$dw, $dx>) ]
+  --[ F31() ]->
+  [ Naa($q31aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag), Wbb($qx31aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk) ]
+
+// GB: near-equal both-wrap pair [55, 55]
+rule GB_55_55:
+  [ In(<$dw, $dx>) ]
+  --[ F32() ]->
+  [ Naa($q32aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Wbb($qx32aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl) ]
+
+// GB: near-equal both-wrap pair [60, 60]
+rule GB_60_60:
+  [ In(<$dw, $dx>) ]
+  --[ F33() ]->
+  [ Naa($q33aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai), Wbb($qx33aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm) ]
+
+// GB: near-equal both-wrap pair [70, 70]
+rule GB_70_70:
+  [ In(<$dw, $dx>) ]
+  --[ F34() ]->
+  [ Naa($q34aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak), Wbb($qx34aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo) ]
+
+// GB: near-equal both-wrap pair [80, 80]
+rule GB_80_80:
+  [ In(<$dw, $dx>) ]
+  --[ F35() ]->
+  [ Naa($q35aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am), Wbb($qx35aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq) ]
+
+// GB: near-equal both-wrap pair [60, 70]
+rule GB_60_70:
+  [ In(<$dw, $dx>) ]
+  --[ F36() ]->
+  [ Naa($q36aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai), Wbb($qx36aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo) ]
+
+// GB: near-equal both-wrap pair [50, 70]
+rule GB_50_70:
+  [ In(<$dw, $dx>) ]
+  --[ F37() ]->
+  [ Naa($q37aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag), Wbb($qx37aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo) ]
+
+// GB: near-equal both-wrap pair [45, 60]
+rule GB_45_60:
+  [ In(<$dw, $dx>) ]
+  --[ F38() ]->
+  [ Naa($q38aaaa, $aa, $ab, $ac, $ad, $ae, $af), Wbb($qx38aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm) ]
+
+// GB: near-equal both-wrap pair [45, 90]
+rule GB_45_90:
+  [ In(<$dw, $dx>) ]
+  --[ F39() ]->
+  [ Naa($q39aaaa, $aa, $ab, $ac, $ad, $ae, $af), Wbb($qx39aaa, $be, $bf, $bg, $bh, $bi, $bj, $bk, $bl, $bm, $bn, $bo, $bp, $bq, $br, $bs) ]
+
+// GC: witness [42, 116(tuple)]
+rule GC_42_116:
+  [ In(<$dw, $dx>) ]
+  --[ F40() ]->
+  [ Rem($q40a, $aa, $ab, $ac, $ad, $ae, $af), Ott(<$qx40aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $be, $bf, $bg, $bh, $bi>) ]
+
+// GC: witness [61, 114(tuple)]
+rule GC_61_114:
+  [ In(<$dw, $dx>) ]
+  --[ F41() ]->
+  [ Rem($q41, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj), Ott(<$qx41aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $be, $bf, $bg, $bh, $bi>) ]
+
+// GC: witness [75, 27(pair)]
+rule GC_75_27:
+  [ In(<$dw, $dx>) ]
+  --[ F42() ]->
+  [ Rem($q42aaaa, $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al), Pai(<$qx42aaaaaaaa, $be>) ]
+
+lemma l_GA_30_90:
+  exists-trace "Ex #i. F0() @ #i"
+
+lemma l_GA_30_105:
+  exists-trace "Ex #i. F1() @ #i"
+
+lemma l_GA_30_120:
+  exists-trace "Ex #i. F2() @ #i"
+
+lemma l_GA_40_90:
+  exists-trace "Ex #i. F3() @ #i"
+
+lemma l_GA_40_105:
+  exists-trace "Ex #i. F4() @ #i"
+
+lemma l_GA_40_120:
+  exists-trace "Ex #i. F5() @ #i"
+
+lemma l_GA_45_90:
+  exists-trace "Ex #i. F6() @ #i"
+
+lemma l_GA_45_105:
+  exists-trace "Ex #i. F7() @ #i"
+
+lemma l_GA_45_120:
+  exists-trace "Ex #i. F8() @ #i"
+
+lemma l_GA_50_90:
+  exists-trace "Ex #i. F9() @ #i"
+
+lemma l_GA_50_105:
+  exists-trace "Ex #i. F10() @ #i"
+
+lemma l_GA_50_120:
+  exists-trace "Ex #i. F11() @ #i"
+
+lemma l_GA_55_90:
+  exists-trace "Ex #i. F12() @ #i"
+
+lemma l_GA_55_105:
+  exists-trace "Ex #i. F13() @ #i"
+
+lemma l_GA_55_120:
+  exists-trace "Ex #i. F14() @ #i"
+
+lemma l_GA_61_90:
+  exists-trace "Ex #i. F15() @ #i"
+
+lemma l_GA_61_105:
+  exists-trace "Ex #i. F16() @ #i"
+
+lemma l_GA_61_120:
+  exists-trace "Ex #i. F17() @ #i"
+
+lemma l_GA_66_90:
+  exists-trace "Ex #i. F18() @ #i"
+
+lemma l_GA_66_105:
+  exists-trace "Ex #i. F19() @ #i"
+
+lemma l_GA_66_120:
+  exists-trace "Ex #i. F20() @ #i"
+
+lemma l_GA_71_90:
+  exists-trace "Ex #i. F21() @ #i"
+
+lemma l_GA_71_105:
+  exists-trace "Ex #i. F22() @ #i"
+
+lemma l_GA_71_120:
+  exists-trace "Ex #i. F23() @ #i"
+
+lemma l_GA_76_90:
+  exists-trace "Ex #i. F24() @ #i"
+
+lemma l_GA_76_105:
+  exists-trace "Ex #i. F25() @ #i"
+
+lemma l_GA_76_120:
+  exists-trace "Ex #i. F26() @ #i"
+
+lemma l_GA_81_90:
+  exists-trace "Ex #i. F27() @ #i"
+
+lemma l_GA_81_105:
+  exists-trace "Ex #i. F28() @ #i"
+
+lemma l_GA_81_120:
+  exists-trace "Ex #i. F29() @ #i"
+
+lemma l_GB_45_45:
+  exists-trace "Ex #i. F30() @ #i"
+
+lemma l_GB_50_50:
+  exists-trace "Ex #i. F31() @ #i"
+
+lemma l_GB_55_55:
+  exists-trace "Ex #i. F32() @ #i"
+
+lemma l_GB_60_60:
+  exists-trace "Ex #i. F33() @ #i"
+
+lemma l_GB_70_70:
+  exists-trace "Ex #i. F34() @ #i"
+
+lemma l_GB_80_80:
+  exists-trace "Ex #i. F35() @ #i"
+
+lemma l_GB_60_70:
+  exists-trace "Ex #i. F36() @ #i"
+
+lemma l_GB_50_70:
+  exists-trace "Ex #i. F37() @ #i"
+
+lemma l_GB_45_60:
+  exists-trace "Ex #i. F38() @ #i"
+
+lemma l_GB_45_90:
+  exists-trace "Ex #i. F39() @ #i"
+
+lemma l_GC_42_116:
+  exists-trace "Ex #i. F40() @ #i"
+
+lemma l_GC_61_114:
+  exists-trace "Ex #i. F41() @ #i"
+
+lemma l_GC_75_27:
+  exists-trace "Ex #i. F42() @ #i"
+
+end

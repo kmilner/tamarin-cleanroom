@@ -1,0 +1,35 @@
+export const meta = {
+  name: 'graphdot-b11',
+  description: 'Sealed graphdot round 11: the four corpus-ranked fill families (allocator dominant, sibling allocated-width charging, self-width override, layout-internal-then-substitute); both-sides audit',
+  phases: [
+    { title: 'Implement', detail: 'sealed fill-model round 11 (Fable)', model: 'fable' },
+    { title: 'Audit', detail: 'both-sides similarity audit of the round-11 delta' },
+  ],
+}
+
+const IMPL = `You are a SEALED implementer under the barrier protocol at /home/kamilner/tamarin-cleanroom/PROTOCOL.md — read it first and comply strictly.
+ACCESS RULES: You must NOT read any file under /home/kamilner/tamarin-rs/crates/, and NOT read any Haskell source of tamarin-prover anywhere on disk (notably /home/kamilner/tamarin-rs/tamarin-prover/{lib,src}/ and /home/kamilner/tamarin-rs/tamarin-prover-testing/{lib,src}/). The ONLY Haskell you may read is the SANCTIONED BSD library /home/kamilner/tamarin-cleanroom/graphdot/sanctioned/pretty-1.1.3.6/. Do NOT read /home/kamilner/tamarin-cleanroom/INTEGRATION_REPORT.md, and do NOT read any AUDIT.md anywhere in the cleanroom. No web access. You MAY read .spthy examples under /home/kamilner/tamarin-rs/tamarin-prover/examples/. No git commits.
+DISCIPLINE: log every oracle interaction in workspace QUERIES.log (Session 11); record behavioral facts in BEHAVIOR.md with probe provenance. Oracle/server scripts carry OOM guards — preserve them; live HS servers only on ports 3200-3299; STOP every server you start. Return a PLAIN-TEXT summary.
+
+Workspace: /home/kamilner/tamarin-cleanroom/graphdot/ (read/write freely, except AUDIT.md). Crate: workspace/graph-clean. Re-read your BEHAVIOR.md (§3f, round-10 report), QUERIES.log Session 10, and workspace/INTERFACE.md first.
+
+CONTEXT — corpus-scale results relayed from the open-side round-10 integration measurement (all behavioral, with first-diverging-byte witnesses): the round-10 model reproduces 96.580% of all record cells and 86.261% of wrapping cells against the 12,022-graph corpus. The open side ALSO tested supplying your CellWidths with internally-computed (un-abbreviated) occupancies: it made things WORSE (fixed 372 cells, broke 5,635) — the round-9/10 belief that misses are explained by unknowable un-abbreviated widths is REFUTED at corpus scale; your display-text TRIGGER is already 99.63% accurate (99.46% on abbreviated groups). The residue is ranked into four families, in size order:
+
+FAMILY 1 (DOMINANT, ~15,000 cells) — multi-cell fill allocation on rows with NO abbreviations at all. Your proportional fill law mispredicts the break position. Witness: a premise row containing the cell St_1_gNB( ~gNB_ID, KD1, KD2, '0', AM1, GN2 ) diverges at byte 23 — the reference breaks after KD1 where your model breaks after KD2 (find such rows in the corpus captures; then design live probe batteries: multi-cell rows of plain facts, sweeping sibling widths and element counts to map break positions cell-by-cell). Your per-cell budget/fill laws are probe-exact on your probe sets but those sets under-sample multi-cell interaction — the allocation ACROSS cells in a row is where the reference diverges from proportional-with-your-weights. Attack this with fresh batteries designed around the corpus miss shapes (extract the actual miss inventory from the captures with your census tools first; cluster by row arity, sibling flats, break-position delta; then probe the cluster centroids live).
+
+FAMILY 2 (~3,800 cells) — abbreviated cells whose observed break positions are consistent with the reference laying out the UN-abbreviated text and substituting abbreviation names afterwards (breaks fall where internal-text layout would put them, rendered text carries the short names). A budget override cannot express this. Add a cell-document path that lays out a caller-supplied INTERNAL text and substitutes display tokens after layout (interface addition; semantics yours to define precisely and test with synthetic pairs).
+
+FAMILY 3 (1,478 cells) — false-positive wraps beside a WRAPPING wide sibling: when a sibling wraps, it occupies its post-wrap (allocated) width, freeing room the flat-width charge denies. Witness: !Store( ~device, ~handle, ~key, ('1'++n) ) diverges at byte 31. Hypothesis to probe: a sibling that wraps should be charged its allocated width, not its flat/occupancy width — iterate/fixpoint semantics need pinning (does relief cascade?).
+
+FAMILY 4 — lone-abbreviated-cell false-negatives: your single-cell path returns the fixed budget unconditionally and CellWidths has no SELF-width override for the triggering cell itself. Witness: St_I( ~id, ~ltkA, pk(~ltkB), 'm1', <'commit', pk(~ltkB), pk(~ltkA), ni>, SI4 ) diverges at byte 78. Extend the interface with a per-cell self-width override entering the cell's own trigger, including the n==1 path.
+
+PRIORITY: Family 1 is the whole ballgame — spend most of the round there. Families 3+4 are interface/law refinements likely solvable exactly. Family 2 is an interface addition with tests (the open side will supply the internal texts at integration).
+ACCEPTANCE: all tests green; GRAPHCLEAN_CORPUS roundtrip stays 12022/12022; report fill_census before/after (all cells, wrapping, multi-cell wrapping, false-flat) and probe-battery byte-exactness; absent-override behavior stays byte-identical (regression-gated). Do NOT edit anything outside /home/kamilner/tamarin-cleanroom/graphdot/.`
+
+const AUDIT = `You are a BOTH-SIDES similarity auditor for the tamarin-rs sealed relicensing campaign (exempt from barrier access rules; you may read everything). Audit ONLY this round's delta: /home/kamilner/tamarin-cleanroom HEAD (5f6ff68) contains through round 10 — git -C /home/kamilner/tamarin-cleanroom status/diff restricted to graphdot/ shows the round-11 delta (multi-cell allocation rework, sibling allocated-width charging, self-width override, layout-internal-then-substitute path).
+Audit against lib/theory/src/Theory/Constraint/System/Dot.hs in /home/kamilner/tamarin-rs/tamarin-prover/ (renderRow/renderBalanced/scaleIndent and the record machinery) and its HughesPJ usage (BSD resemblance filtered out as sanctioned). The allocation model converging on the reference's OBSERVABLE break positions is merger; verify every new constant/law traces to logged Session-11 probes or census clusters, not to Dot.hs; flag identifier constellations, non-observable constants, structural transcription, comment lineage.
+Append a round-11 section to /home/kamilner/tamarin-cleanroom/graphdot/AUDIT.md. Violations get BEHAVIORAL redo instructions. End with exactly one line: VERDICT: pass  — or —  VERDICT: fail`
+
+const impl = await agent(IMPL, { label: 'seal:graph-b11', phase: 'Implement', model: 'fable' })
+const audit = await agent(AUDIT, { label: 'audit:graph-b11', phase: 'Audit', model: 'opus' })
+return { impl: (impl || '').slice(0, 3000), audit: (audit || '').slice(0, 2500), passed: /VERDICT:\s*pass/i.test(audit || '') }

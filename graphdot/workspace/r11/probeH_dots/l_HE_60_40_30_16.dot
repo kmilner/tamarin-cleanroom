@@ -1,0 +1,10 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n6[shape="record",label="{{<n0> In( \<$dw, $dx\> )}|{<n1> #i : HE_60_40_30_16[F24( )]}|{<n2> Aaa( $q24aaaa, $aa, $ab, $ac, $ad,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$ae, $af, $ag, $ah, $ai\l)\l|<n3> Bbb( $qx24aaa, $be, $bf,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$bg, $bh, $bi\l)\l|<n4> Ccc( $qy24aaa, $ci,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$cj, $ck\l)\l|<n5> Ddd( $qz24aaaa )}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+n7[label="#vf : isend",shape="ellipse"];
+n7 -> n6:n0[color="gray30"];
+
+}

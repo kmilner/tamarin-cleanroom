@@ -1,0 +1,15 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n3[shape="record",label="{{<n0> St_J8( ~id, $ga, $gb, $gc, $gd, $ge, $gf, $gg, $gh, H1, $gi )}|{<n1> #i : Go_J8[F7( )]}|{<n2> Out( H1 )}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+{
+rank="sink";
+n4[shape="plain",label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="3" CELLPADDING="1"><TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">JA1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">'j10aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">H1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">h(JA1)</TD></TR></TABLE>>];
+
+}
+n3:n1 -> n4[style="invis"];
+
+}

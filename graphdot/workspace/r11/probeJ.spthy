@@ -1,0 +1,121 @@
+theory AbbrLayoutProbe
+begin
+
+builtins: hashing
+
+// J1: lone cell internal 96+, display small (producer)
+rule Init_J1:
+  [ Fr(~id) ]
+  -->
+  [ St_J1(~id, h('j01aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')) ]
+
+// J1: lone cell internal 96+, display small (consumer)
+rule Go_J1:
+  [ St_J1(~id, h('j01aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')) ]
+  --[ F0() ]->
+  [ Out(h('j01aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')) ]
+
+// J2: internal ~150 (producer)
+rule Init_J2:
+  [ Fr(~id) ]
+  -->
+  [ St_J2(~id, h('j02aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')) ]
+
+// J2: internal ~150 (consumer)
+rule Go_J2:
+  [ St_J2(~id, h('j02aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')) ]
+  --[ F1() ]->
+  [ Out(h('j02aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')) ]
+
+
+// J3: abbr first, vars after
+rule Init_J3:
+  [ Fr(~id) ]
+  -->
+  [ St_J3(h('j03aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), ~id, $ea, $eb) ]
+
+rule Go_J3:
+  [ St_J3(h('j03aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), ~id, $ea, $eb) ]
+  --[ F2() ]->
+  [ Out(h('j03aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')) ]
+
+// J4: two abbr terms
+rule Init_J4:
+  [ Fr(~id) ]
+  -->
+  [ St_J4(~id, h('j04aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), h('j05aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')) ]
+
+rule Go_J4:
+  [ St_J4(~id, h('j04aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), h('j05aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')) ]
+  --[ F3() ]->
+  [ Out(<h('j04aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), h('j05aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')>) ]
+
+// J5: nested abbr
+rule Init_J5:
+  [ Fr(~id) ]
+  -->
+  [ St_J5(~id, h(<h('j06aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), 'bbccddee'>)) ]
+
+rule Go_J5:
+  [ St_J5(~id, h(<h('j06aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), 'bbccddee'>)) ]
+  --[ F4() ]->
+  [ Out(<h(<h('j06aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), 'bbccddee'>), h('j06aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')>) ]
+
+// J6: [abbr cell, Faa 45] sibling budget probe
+rule Init_J6:
+  [ Fr(~id) ]
+  -->
+  [ St_J6(~id, h('j07aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')), Sd_J6(~id) ]
+
+rule Go_J6:
+  [ St_J6(~id, h('j07aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')), Sd_J6(~id), In(<$dw, $dx>) ]
+  --[ F5() ]->
+  [ Out(<h('j07aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), $dw>), Faa($q08aaaa, $aa, $ab, $ac, $ad, $ae, $af) ]
+
+// J7: display ~78 internal ~120, abbr last
+rule Init_J7:
+  [ Fr(~id) ]
+  -->
+  [ St_J7(~id, $fa, $fb, <'commit', $fc, $fd, $fe, $ff, $fg, $fh>, h('j09aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')) ]
+
+rule Go_J7:
+  [ St_J7(~id, $fa, $fb, <'commit', $fc, $fd, $fe, $ff, $fg, $fh>, h('j09aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')) ]
+  --[ F6() ]->
+  [ Out(h('j09aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')) ]
+
+// J8: internal break lands inside the expansion
+rule Init_J8:
+  [ Fr(~id) ]
+  -->
+  [ St_J8(~id, $ga, $gb, $gc, $gd, $ge, $gf, $gg, $gh, h('j10aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), $gi) ]
+
+rule Go_J8:
+  [ St_J8(~id, $ga, $gb, $gc, $gd, $ge, $gf, $gg, $gh, h('j10aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), $gi) ]
+  --[ F7() ]->
+  [ Out(h('j10aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')) ]
+
+lemma l_Go_J1:
+  exists-trace "Ex #i. F0() @ #i"
+
+lemma l_Go_J2:
+  exists-trace "Ex #i. F1() @ #i"
+
+lemma l_Go_J3:
+  exists-trace "Ex #i. F2() @ #i"
+
+lemma l_Go_J4:
+  exists-trace "Ex #i. F3() @ #i"
+
+lemma l_Go_J5:
+  exists-trace "Ex #i. F4() @ #i"
+
+lemma l_Go_J6:
+  exists-trace "Ex #i. F5() @ #i"
+
+lemma l_Go_J7:
+  exists-trace "Ex #i. F6() @ #i"
+
+lemma l_Go_J8:
+  exists-trace "Ex #i. F7() @ #i"
+
+end

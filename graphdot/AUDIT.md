@@ -1170,3 +1170,120 @@ reference OUTPUT; none is transcribed from the single-layer, shape-blind `render
 `pretty.rs`-based union/func layout is sanctioned BSD-combinator composition. No source identifier
 constellation, non-observable constant, or structural transcription found.
 VERDICT: pass
+
+## Round 11 incremental audit — two-PASS allocation (recursive occupancy, last-arg-gated bonus, half-DOWN fill numerator with tuples, relief pass), tuple-opener hang, `trigger_width` self-width override
+
+**Scope.** This round's delta = the uncommitted working tree under `graphdot/` on top of `5f6ff68`
+(confirmed via `git -C /home/kamilner/tamarin-cleanroom status`/`git diff -- graphdot/`, plus the
+untracked `graphdot/workspace/r11/` probe tree). Touched source: `generate.rs` (recursive occupancy
+`rec_walk`/`rec_walk_cap`/`rec_surcharge_capped`; `CellShape` made `pub` + new
+`rec_sur`/`rec_sur7`/`nargs`/`last_tup` fields; `CellWidths.trigger_width`; `group_widths_with`
+rewritten as a two-pass trigger + relief with half-DOWN fill), `doclayout.rs` (`tuple_doc` gains a
+zero-width leading fill item — the tuple-opener hang), `band_dump.rs` (emits the new shape fields for
+offline fitting), `generate_tests.rs` (7 probe-labelled fixtures). Docs: BEHAVIOR.md §3f Session-11
+bullet + §8 + Round-11 report, INTERFACE.md (round-11 laws + `trigger_width` + the J-battery
+internal-width refutation), QUERIES.log Session 11. Artifacts: `r11/` (probeG–K `.spthy`/`.names`,
+`drive.py`/`drive2.py` live drivers, `b{7,8,9}_probe*_dots.tsv` captures, `bands{6..9}`/`bandsK*`
+re-dumps, `variants.py`/`eval.py`/`pairfit.py`/`seqfit.py`/`ghi_fit.py`/`lprim.py` offline fitting).
+
+**Sides & method.** Abstraction–filtration–comparison against GPL source
+`lib/theory/src/Theory/Constraint/System/Dot.hs`, `renderRow`/`renderBalanced`/`scaleIndent` and the
+`D.record`/`D.portField`/`D.vcat`/`D.hcat` record machinery (lines 305–379, re-read this round), and
+its HughesPJ usage (`pretty-1.1.3.6`, BSD, filtered out). The source's protectable expression is a
+**single-pass, shape-blind proportional** allocation: `usedWidth_i = length(oneLineRender doc_i)`,
+`ratio = 100/Σ usedWidth`, each doc rendered at `lineLength = max(30, round(1.3·100·usedWidth_i/Σ))`,
+then `scaleIndent` ×1.5 on leading spaces. Distinctive source tokens: `100`, `1.3`, `30`,
+indent-`1.5`, `magic factor 1.3`, `renderBalanced`/`scaleIndent`/`usedWidths`/`oneLineRender`/`ratio`/
+`conv`/`widthRender`/`renderRow`. There is **no** trigger/fill split, **no** occupancy, **no** bonus,
+**no** relief re-check, **no** tuple/union/quote/function shape term, **no** per-cell hang, and the
+one round mode is Haskell `round` (round-half-to-**even**). The convergence brief is honored: the
+round-11 model refining toward the reference's OBSERVABLE break positions is sanctioned merger; the
+audit question is provenance — does each new constant/law trace to a logged Session-11 probe or
+census cluster, or to Dot.hs?
+
+### Structural divergence deepens, not narrows
+
+The reference stays one pass. Round 11 makes the clean side a **two-pass** trigger (pass-1 flat-sum
+budget → pass-2 relief re-check) feeding a separate proportional fill — a control structure with no
+counterpart anywhere in `renderBalanced` (which never re-examines a cell after allocating its
+lineLength). The "layout-internal-then-substitute" path (`trigger_width` overriding `eff_i` in both
+passes, fill still laying out the display text) is a clean-side adapter hook; `renderBalanced` has no
+width-injection point. Divergence widened this round.
+
+### The new laws — each pinned to a logged Session-11 probe or census cluster, none to Dot.hs
+
+- **Fill rounding = round-half-DOWN** (`generate.rs` `hd`). Traces to probe **GB** (equal both-wrap
+  pairs `[50,50]…[80,80]` allocate 43/43; archived r10 re-score 510/535 vs half-up 503) — QUERIES.log
+  Session 11, BEHAVIOR §3f. Note this **diverges** from the source's `round` (half-to-even, which
+  would give 44 on 43.5): a transcription would have inherited half-even. Observation-derived.
+- **Recursive occupancy `rec_sur`** (`elems+1`, nested-in-tuple `elems−1`, full inside func args;
+  `rec_walk`). Traces to **K1** (pair-of-pairs partner X-flips at 38 — the `+5` exactly), **K2**
+  (tuple inside a FUNC arg counts full `elems+1`, flip at 39), **K6** (nested-6 ≥ ~5) — logged,
+  byte-fixture `nested_tuple_occupancy_flips_partner_at_38`. Dot.hs has no tuple shape term.
+- **Fill numerator includes tuples, per-node capped at 7** (`rec_sur7`). Traces to **K3** (6-tuple
+  receiver fills at 38 beside a 60-argfact = `flat+7`; pair receiver 25/26) and the **r8 16/20-element
+  grids** forcing the cap — fixture `tuple_receiver_fill_numerator` asserts the K3 `38`. The round-10
+  "tuples don't enter N" is explicitly refuted by these captures, not by the source.
+- **Bonus gated on the LAST top-level arg** (`last_tup`). Traces to the **WIT** battery (mid-list
+  4-tuple flips at its bonus-free budget 78/79 beside `Fr( ~ni )`; **TB4** single-tuple keeps it) —
+  fixture `bonus_gated_on_last_tuple_arg`. The `⌊n/2⌋+2` cap-4 shape itself is the round-10 law
+  (already cleared); round 11 only re-conditions its placement, probe-selected (`variants.py`
+  bonus axis ship|single|zero).
+- **Relief pass 2** (`flat ≤ max(87 − Σ charge, 20)`; truly-broken sib `fill < flat−2` charges its
+  fill, else `C`; no bonus). Traces to battery **I/IA/IB** (beside-65 fits-at-23/wraps-at-24; IB
+  tuple target beside a wrapping 90 fits only at floor 20 ⇒ no bonus in the comparison) and the
+  corpus family-3 census (false-wrap 1,478→1,150) — QUERIES.log Session 11, fixture
+  `relief_target_beside_wrapping_sibling`. The `flat−2` peel-only zone is the observed `)`-peel
+  layout, not a source constant. No analogue in `renderBalanced`.
+- **Tuple-opener HANG** (`doclayout::tuple_doc` zero-width leading fill). Traces to battery **K4**
+  byte-captures (`Tzz( \<`-hang, `w1(<`-hang inside func args; fact/func openers overflow verbatim;
+  union first elements sort last under AC so a union hang is unobservable) — byte-fixture
+  `tuple_opener_hang_byte_fixtures`. This is BSD-`pretty.rs` combinator composition of the term
+  document; the term layout originates in the term library's pretty-printer, **not** in Dot.hs
+  (which constructs no term `Doc`, only `D.record` of pre-rendered fact strings). Reproduces
+  observed OUTPUT bytes; no source lineage.
+- **`trigger_width` self-width override** (`CellWidths`, INTERFACE.md). A novel per-cell adapter
+  field with no HS counterpart; empty ⇒ byte-identical fallback (regression-gated by
+  `supplied_trigger_width_overrides_self_width` + `supplied_cell_widths_override_estimates` +
+  `raw_rule_supplied_widths_reach_cells`). The lone-cell "wraps iff > 87" uses the pre-established,
+  observable `FILL_WIDTH = 87`, not the source's `100`/`130`/`30`. No source identifier appears; the
+  test's `Some(95)`/`Some(30)` are arbitrary override inputs, not the source `max 30` floor.
+- **`CellShape` made `pub` + new fields** (`rec_sur`/`rec_sur7`/`nargs`/`last_tup`). Exposed only for
+  the corpus-analysis binaries (`band_dump` emits a 20-field cell). None of the identifiers
+  (`rec_sur`, `rec_surcharge_capped`, `rec_walk`, `last_tup`, `nargs`, `trigger_width`) is a Haskell
+  name; all are probe/law vocabulary.
+
+### The abbreviation-refutation is honest retraction, not a similarity concern
+
+Battery **J** (`?unabbreviate=` twins) refuted the round-7/9/10 "wrap decided on the UN-abbreviated
+width" belief — abbreviated cells with internal widths 96–150 render flat, sibling budgets follow the
+display-C. INTERFACE.md/BEHAVIOR.md now state the reference lays out POST-abbreviation display text
+and an adapter should normally pass no overrides. The relay's requested internal-text/substitution
+cell-document was deliberately NOT built ("it would model behavior the reference demonstrably does not
+have"). This retires a clean-side hypothesis on live evidence; it moves the model further from any
+internal-representation the source might carry, so it cannot be a merger/transcription violation.
+
+### Grep / provenance sweeps (this round's files)
+
+`git diff -- graphdot/` added source lines and all `r11/` materials: **zero** occurrences of
+`renderBalanced`/`scaleIndent`/`usedWidths`/`oneLineRender`/`widthRender`/`renderRow`/`renderStyle`/
+`ratio`/`conv`/`magic`, and no `100`-as-totalWidth / `130` / `30`-as-floor / `1.3` / scaleIndent-`1.5`
+constant introduced in the delta source. The sole `1.5`/`⌊3·ribbon/2⌋` mention (INTERFACE.md) is the
+BSD HughesPJ **ribbonsPerLine**, cleared in Round 8 — not `scaleIndent`. `split_top_unions` (reused by
+`rec_walk_cap`) predates this round (round-10 commit `9408f99`). `r11/drive.py`/`drive2.py` are live
+autoprove+DOT-fetch drivers; `variants.py` scores exactly the shipped law axes (C=rec, N=rec7,
+bonus=ship|single|zero, relief on/off, half-down fixed) over captured band TSVs — offline selection
+from OUTPUT, not fit to source. Every round-11 constant/law traces to a logged live probe battery
+(GB/K1/K2/K3/K4/K6/WIT/TB4/IA/IB/J) or corpus census; none matches or derives from
+`renderBalanced`/`scaleIndent`/`renderRow`. New comments use probe vocabulary (K1/K2/WIT/relief/hang);
+none echoes the source's `magic factor 1.3` / "scale them up" comments — no comment lineage.
+
+### Findings surviving filtration (Round 11)
+
+Dot.hs-resemblance violations: **0**. The two-pass trigger+relief, recursive occupancy (`elems±1`),
+capped tuple numerator (7), last-arg-gated bonus, half-DOWN rounding, tuple-opener hang, and the
+`trigger_width` self-width override all trace to logged Session-11 probes or census clusters and
+reproduce observable reference OUTPUT; each further diverges structurally from the single-pass,
+shape-blind, half-even `renderBalanced`. No source identifier constellation, no non-observable
+constant, no structural transcription, no comment lineage. No redo instructions are issued.
+VERDICT: pass

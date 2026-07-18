@@ -390,3 +390,142 @@ fn raw_rule_supplied_widths_reach_cells() {
     assert!(dot_occ.contains("Faa( $aa,"), "Faa wraps under the supplied occupancy");
     assert!(dot_occ.contains("\\l"), "wrapped cell present");
 }
+
+// ---------------------------------------------------------------------------
+// Round 11: fill rounding, relief, nested occupancies, tuple numerators,
+// tuple-opener hang, trigger_width override (QUERIES.log Session 11).
+
+/// Build a plain `name( LONG, $aa, … )` argfact of an exact display width,
+/// mirroring the round-8..11 probe generators.
+fn probe_argfact(name: &str, flat: usize) -> String {
+    let k = (flat - name.len() - 8) / 5;
+    let l1 = flat - name.len() - 4 - 5 * k;
+    let long = format!("$q{}", "a".repeat(l1 - 2));
+    let mut elems = vec![long];
+    let a = "abcdefghijklmnopqrstuvwxyz".as_bytes();
+    for i in 0..k {
+        elems.push(format!("${}{}", a[i / 26] as char, a[i % 26] as char));
+    }
+    let s = format!("{}( {} )", name, elems.join(", "));
+    assert_eq!(s.chars().count(), flat);
+    s
+}
+
+/// Probe GB_50_50 (round 11): equal both-wrap pairs allocate 43/43 — the
+/// proportional share 43.5 rounds half-DOWN (half-up 44 is out of band).
+#[test]
+fn equal_pair_fill_rounds_half_down() {
+    let cells = vec![probe_argfact("Naa", 50), probe_argfact("Wbb", 50)];
+    assert_eq!(graph_clean::generate::group_widths(&cells), vec![43, 43]);
+}
+
+/// Probe IA_65_24 (round 11): beside a wrapping 65-wide sibling a 24-flat
+/// target wraps (the model's relief pass charges the peel-only-broken 65 at
+/// its full occupancy). The live IA_65_23 boundary — a 23-flat target saved
+/// beside the same sibling — sits one column inside the documented ±1
+/// coupled-`fits` residue and is intentionally NOT asserted here.
+#[test]
+fn relief_target_beside_wrapping_sibling() {
+    let w24 = graph_clean::generate::group_widths(&vec![
+        probe_argfact("Waa", 65),
+        probe_argfact("Tbb", 24),
+    ]);
+    assert!(w24[0] < 65, "the 65-wide cell wraps");
+    assert!(w24[1] < 24, "a 24-flat target wraps beside the same sibling");
+}
+
+/// Probe K1_37 / K1_38 (round 11): nested tuple-in-tuple occupancy is
+/// `elems − 1` per nested node — a pair-of-pairs of flat `s` occupies
+/// `s + 3 + 1 + 1`, so the 45-flat partner flips exactly between 37 and 38.
+#[test]
+fn nested_tuple_occupancy_flips_partner_at_38() {
+    let pp = |flat: usize| {
+        let l1 = flat - 26; // N( <<LONG, $aa>, <$ab, $ac>> )
+        let s = format!("N( <<$q{}, $aa>, <$ab, $ac>> )", "a".repeat(l1 - 2));
+        assert_eq!(s.chars().count(), flat);
+        s
+    };
+    let w37 = graph_clean::generate::group_widths(&vec![probe_argfact("Faa", 45), pp(37)]);
+    assert!(w37[0] >= 45, "beside a 37-wide pair-of-pairs the 45 partner stays flat");
+    let w38 = graph_clean::generate::group_widths(&vec![probe_argfact("Faa", 45), pp(38)]);
+    assert!(w38[0] < 45, "beside a 38-wide pair-of-pairs it wraps");
+}
+
+/// Probes TB4_47/TB4_48 + WIT_78/WIT_79 (round 11): the self-budget bonus is
+/// gated on the LAST argument being a tuple — a lone-4-tuple fact at 47 stays
+/// flat beside a 45-argfact (relief), 48 wraps; the witness-shaped fact whose
+/// tuple sits mid-list gets NO bonus (flips exactly at its flat-sum budget
+/// 78/79 beside `Fr( ~ni )`).
+#[test]
+fn bonus_gated_on_last_tuple_arg() {
+    let tup4 = |flat: usize| {
+        let l1 = flat - 23;
+        let s = format!("Tf( <$q{}, $aa, $ab, $ac> )", "a".repeat(l1 - 2));
+        assert_eq!(s.chars().count(), flat);
+        s
+    };
+    let w47 = graph_clean::generate::group_widths(&vec![tup4(47), probe_argfact("Fbb", 45)]);
+    assert!(w47[0] >= 47, "a 47-flat lone-tuple fact stays flat (relief)");
+    let w48 = graph_clean::generate::group_widths(&vec![tup4(48), probe_argfact("Fbb", 45)]);
+    assert!(w48[0] < 48, "a 48-flat lone-tuple fact wraps");
+    let wit = |flat: usize| {
+        let core = "<'commit', ff($cf), ff($cg), $ch>";
+        let l1 = flat - (6 + 5 + 2 + core.chars().count() + 2 + 7 + 2);
+        let s = format!("St_I( ~id, $q{}, {}, w1($zz) )", "a".repeat(l1 - 2), core);
+        assert_eq!(s.chars().count(), flat);
+        s
+    };
+    let w78 = graph_clean::generate::group_widths(&vec![wit(78), "Fr( ~ni )".to_string()]);
+    assert!(w78[0] >= 78, "mid-list tuple carries no bonus: 78 fits");
+    let w79 = graph_clean::generate::group_widths(&vec![wit(79), "Fr( ~ni )".to_string()]);
+    assert!(w79[0] < 79, "79 exceeds the bonus-free budget and wraps");
+}
+
+/// Probe K3_40_6_60 (round 11): a 6-tuple receiver's fill numerator carries
+/// the tuple surcharge (`flat + 7`), giving ribbon 38 beside a 60-argfact.
+#[test]
+fn tuple_receiver_fill_numerator() {
+    let recv = "Trr( <$q31aa, $aa, $ab, $ac, $ad, $ae> )".to_string();
+    assert_eq!(recv.chars().count(), 40);
+    let w = graph_clean::generate::group_widths(&vec![recv, probe_argfact("Sbb", 60)]);
+    assert_eq!(w[0], 38);
+}
+
+/// Probes K4_tuple2 / K4_tupfunc (round 11): the TUPLE opener hangs — when
+/// the first element does not fit beside the `<`, the `<` stays at the end of
+/// the line and the elements start on the next line at the fill column (also
+/// inside a function argument). Byte-exact against the captures.
+#[test]
+fn tuple_opener_hang_byte_fixtures() {
+    use graph_clean::doclayout::wrap_cell_dot;
+    let long95 = format!("$q93{}", "a".repeat(91));
+    let cell = format!("Tzz( <{}, $hh> )", long95);
+    let expect = format!(
+        "Tzz( \\<\\l{n}{}, \\l{n}$hh\\>\\l)\\l",
+        long95,
+        n = "&nbsp;".repeat(6)
+    );
+    assert_eq!(wrap_cell_dot(&cell, 87), expect);
+    let long84 = format!("$q90{}", "a".repeat(80));
+    let cell2 = format!("Qzz( w1(<{}, $ha, $hb, $hc>) )", long84);
+    let expect2 = format!(
+        "Qzz( w1(\\<\\l{n}{}, \\l{n}$ha, $hb, $hc\\>)\\l)\\l",
+        long84,
+        n = "&nbsp;".repeat(9)
+    );
+    assert_eq!(wrap_cell_dot(&cell2, 87), expect2);
+}
+
+/// The round-11 `trigger_width` override: a caller-supplied self width enters
+/// the wrap-trigger comparison (a cell whose display fits can be made to
+/// wrap), and an absent override stays byte-identical.
+#[test]
+fn supplied_trigger_width_overrides_self_width() {
+    use graph_clean::generate::{group_widths, group_widths_with, CellWidths};
+    let cells = vec![probe_argfact("Faa", 45), probe_argfact("Sbb", 40)];
+    assert_eq!(group_widths_with(&cells, &[None, None]), group_widths(&cells));
+    assert!(group_widths(&cells)[0] >= 45, "estimate path: row total 85 fits");
+    let ov = vec![Some(CellWidths { trigger_width: Some(95), ..Default::default() }), None];
+    let w = group_widths_with(&cells, &ov);
+    assert!(w[0] < 45, "a supplied 95-column self width makes the cell wrap");
+}

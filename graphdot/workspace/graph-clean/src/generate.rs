@@ -226,17 +226,25 @@ impl RawRule {
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct CellWidths {
     /// The cell's row **occupancy** `C` (columns it counts for in its
-    /// siblings' trigger budgets). Display-text default:
-    /// `flat + Σ_{top-level tuple/union args}(elems + 1)`.
+    /// siblings' trigger budgets and fill denominators). Display-text
+    /// default: `flat` plus the recursive tuple/union surcharge
+    /// ([`CellShape::rec_sur`]).
     pub occupancy: Option<i64>,
     /// The cell's own trigger-budget **bonus**. Display-text default: the
     /// largest `⌊elems/2⌋ + 2` over its top-level tuple/union args (4 for an
-    /// arg with ≥ 9 elements), 0 without such an arg.
+    /// arg with ≥ 9 elements) — applied only when the fact's LAST top-level
+    /// argument is such a tuple/union (round-11 WIT probe), else 0.
     pub bonus: Option<i64>,
     /// The cell's **fill numerator** (its internal width in the proportional
     /// fill share once it wraps). Display-text default:
-    /// `flat + Σ_{union args}(elems + 1) + #function-nodes`.
+    /// `flat + rec_sur + #function-nodes`.
     pub fill_width: Option<i64>,
+    /// The cell's effective **self width** in the wrap-trigger comparisons
+    /// (both passes), replacing the display flat width. Lets a caller make a
+    /// cell wrap (or keep fitting) on a width it computed itself — including
+    /// a lone cell, which wraps iff this exceeds 87. The fill layer still
+    /// lays out the display text.
+    pub trigger_width: Option<i64>,
 }
 
 impl CellWidths {
@@ -556,13 +564,33 @@ fn build_record(spec: &RecordSpec, ports_prem: &[String], port_info: &str, ports
 /// cell is a fact with exactly one argument that is a single-quoted constant
 /// (enters only the fill weight); `nfunc` = number of function-application
 /// nodes anywhere in the text (enters only the fill numerator).
-struct CellShape {
-    flat: usize,
-    tup_sur: i64,
-    uni_sur: i64,
-    bmax: i64,
-    sqa: bool,
-    nfunc: i64,
+///
+/// Public for the corpus-analysis binaries (band/miss dumps); not a stable
+/// interface.
+pub struct CellShape {
+    pub flat: usize,
+    pub tup_sur: i64,
+    pub uni_sur: i64,
+    /// Recursive tuple/union occupancy surcharge (round-11 law): every
+    /// tuple/union node contributes `elems + 1`, except a node whose
+    /// IMMEDIATE parent is itself a tuple/union, which contributes
+    /// `elems − 1` (probe K1: pair-of-pairs occupies flat + 3 + 1 + 1, the
+    /// X-flip at 38 exactly; K2: a tuple inside a FUNC arg counts full
+    /// `elems + 1`, flip at 39; K6 pins nested 6-tuples ≥ ~5).
+    pub rec_sur: i64,
+    /// [`CellShape::rec_sur`] with each node's contribution capped at 7 —
+    /// the FILL-numerator variant (the r8 16/20-element grids refute the
+    /// uncapped numerator; the K3 6-tuple pin `elems + 1 = 7` is preserved).
+    pub rec_sur7: i64,
+    pub bmax: i64,
+    /// Top-level argument count of a padded fact (0 for non-facts).
+    pub nargs: i64,
+    /// The fact's LAST top-level argument is a tuple/union of >= 2 elements
+    /// (round-11 bonus-gating candidate: WIT probe shows a mid-list tuple
+    /// carries no self-budget bonus).
+    pub last_tup: bool,
+    pub sqa: bool,
+    pub nfunc: i64,
 }
 
 /// Split a term list at top-level `", "`, honoring nesting and quotes.
@@ -629,9 +657,83 @@ fn union_elems(t: &str) -> i64 {
     if n >= 2 { n } else { 0 }
 }
 
-fn cell_shape(flat: &str) -> CellShape {
+/// Recursive tuple/union occupancy walk (round-11): a tuple/union node
+/// contributes `elems + 1`, or `elems − 1` when its immediate parent is a
+/// tuple/union; function applications are transparent (their tuple args count
+/// full — probe K2). `in_tuple` = the immediate parent is a tuple/union.
+fn rec_walk(t: &str, in_tuple: bool, sur: &mut i64) {
+    rec_walk_cap(t, in_tuple, i64::MAX, sur)
+}
+
+/// [`rec_walk`] with a per-node contribution cap (probe-fitting helper; the
+/// corpus-analysis binaries sweep caps). Public for the band/miss dumps.
+pub fn rec_surcharge_capped(flat: &str, cap: i64) -> i64 {
+    let mut sur = 0i64;
+    if let Some(open) = flat.find("( ") {
+        if flat.ends_with(" )")
+            && open + 2 <= flat.len() - 2
+            && !flat[..open].contains(['(', ')', '<', '>', ' ', ','])
+        {
+            let inner = &flat[open + 2..flat.len() - 2];
+            for a in split_level(inner) {
+                rec_walk_cap(a.trim(), false, cap, &mut sur);
+            }
+        }
+    }
+    sur
+}
+
+fn rec_walk_cap(t: &str, in_tuple: bool, cap: i64, sur: &mut i64) {
+    let t = t.trim();
+    if t.starts_with('<') && t.ends_with('>') && t.len() >= 2 {
+        let elems = split_level(&t[1..t.len() - 1]);
+        let e = elems.len() as i64;
+        if e >= 2 {
+            *sur += (if in_tuple { e - 1 } else { e + 1 }).min(cap);
+        }
+        for el in elems {
+            rec_walk_cap(el, true, cap, sur);
+        }
+        return;
+    }
+    let ue = union_elems(t);
+    if ue >= 2 {
+        *sur += (if in_tuple { ue - 1 } else { ue + 1 }).min(cap);
+        for part in split_top_unions_str(&t[1..t.len() - 1]) {
+            rec_walk_cap(&part, true, cap, sur);
+        }
+        return;
+    }
+    // function application name(args): recurse into args (parent = func)
+    if let Some(open) = t.find('(') {
+        if open > 0
+            && t.ends_with(')')
+            && t.len() > open + 1
+            && t[..open].chars().all(|c| c.is_alphanumeric() || c == '_' || c == '!')
+        {
+            let inner = &t[open + 1..t.len() - 1];
+            let inner = inner.strip_prefix(' ').unwrap_or(inner);
+            let inner = inner.strip_suffix(' ').unwrap_or(inner);
+            for a in split_level(inner) {
+                rec_walk_cap(a, false, cap, sur);
+            }
+        }
+    }
+}
+
+/// Split a union body at top-level `++` (delegates to
+/// [`crate::doclayout::split_top_unions`]).
+fn split_top_unions_str(s: &str) -> Vec<String> {
+    crate::doclayout::split_top_unions(s)
+}
+
+pub fn cell_shape(flat: &str) -> CellShape {
     let width = flat.chars().count();
     let (mut tup_sur, mut uni_sur, mut bmax) = (0i64, 0i64, 0i64);
+    let mut rec_sur = 0i64;
+    let mut nargs = 0i64;
+    let mut last_tup = false;
+    let mut rec_sur7 = 0i64;
     let mut sqa = false;
     if let Some(open) = flat.find("( ") {
         // a padded fact with at least one argument (`Name( )` has none)
@@ -641,6 +743,7 @@ fn cell_shape(flat: &str) -> CellShape {
         {
             let inner = &flat[open + 2..flat.len() - 2];
             let args = split_level(inner);
+            nargs = args.len() as i64;
             for a in &args {
                 let t = a.trim();
                 let (elems, is_tuple) = if t.starts_with('<') && t.ends_with('>') {
@@ -655,6 +758,11 @@ fn cell_shape(flat: &str) -> CellShape {
                         uni_sur += elems + 1;
                     }
                     bmax = bmax.max(if elems <= 8 { elems / 2 + 2 } else { 4 });
+                }
+                rec_walk(t, false, &mut rec_sur);
+                rec_walk_cap(t, false, 7, &mut rec_sur7);
+                if elems >= 2 {
+                    last_tup = std::ptr::eq(a, args.last().unwrap());
                 }
             }
             if args.len() == 1 {
@@ -678,42 +786,47 @@ fn cell_shape(flat: &str) -> CellShape {
             nfunc += 1;
         }
     }
-    CellShape { flat: width, tup_sur, uni_sur, bmax, sqa, nfunc }
+    CellShape { flat: width, tup_sur, uni_sur, rec_sur, rec_sur7, bmax, nargs, last_tup, sqa, nfunc }
 }
 
 /// The per-cell fit **budgets** of one record group (all premises together, or
-/// all conclusions together), from the cells' flat texts. Two probe-derived
-/// layers (BEHAVIOR.md §3f, rounds 9–10; every parameter pinned by live probe
-/// batteries — QUERIES.log Sessions 9–10):
+/// all conclusions together), from the cells' flat texts. Probe-derived layers
+/// (BEHAVIOR.md §3f, rounds 9–11; every parameter pinned by live probe
+/// batteries — QUERIES.log Sessions 9–11):
 ///
-/// **Trigger** (which cells wrap). Each cell occupies
-/// `C_j = flat_j + Σ_{top-level tuple/union args}(elems + 1)` columns of the
-/// row (the round-10 size law: X-flip boundaries at n = 2,3,4,6 tuples and
-/// 3,5,8 unions are each exact to the column); cell *i*'s trigger budget is
-/// `max(87 + bonus_i − Σ_{j≠i} C_j, 20)` in a multi-cell row, where
-/// `bonus_i` = the largest `⌊elems/2⌋ + 2` over its tuple/union args (4 for
-/// an arg with ≥ 9 elements — the r8 16/20-element rows cap it), and it
-/// wraps iff its flat width exceeds that budget. A lone cell's budget is
-/// exactly 87. There is NO single-quoted-atom, multi-quote, or
-/// function-node correction (round-10 batteries A–C: every such sib flips
-/// exactly at the plain-flat crossing). The only systematic residual is the
-/// `[45-argfact partner, budget+1]` relief (9/731 probe cells, all one
-/// pattern: beside a 45-flat argfact partner a cell at exactly budget+1
-/// stays flat; beside 46 or in triples it does not) — the known ±1
-/// coupled-`fits` flip, not modelable in closed form.
+/// **Trigger, pass 1** (flat-sum). Each cell occupies `C_j = flat_j +
+/// rec_sur_j` columns of the row, where `rec_sur` is the RECURSIVE
+/// tuple/union surcharge: every tuple/union node contributes `elems + 1`,
+/// except nodes directly inside another tuple/union, which contribute
+/// `elems − 1` (round-11 K1/K2/K6: pair-of-pairs flips at 38, a tuple inside
+/// a func arg counts full). Cell *i*'s pass-1 budget is
+/// `max(87 + bonus_i − Σ_{j≠i} C_j, 20)`, `bonus_i` = the largest
+/// `⌊elems/2⌋ + 2` over its top-level tuple/union args (4 at ≥ 9 elements),
+/// applied ONLY when the fact's LAST argument is such a tuple/union
+/// (round-11 WIT: a mid-list tuple carries no bonus); it wraps iff its flat
+/// width exceeds the budget. A lone cell's budget is 87.
 ///
 /// **Fill** (the ribbon a wrapping cell is laid out at):
-/// `round(87·N_i / (N_i + Σ_{j≠i} w_j·flat_j))`, half-up, clamped to
-/// `[20, flat_i − 1]`, where the numerator `N_i = flat_i + Σ_{union
-/// args}(elems + 1) + nfunc_i` is the cell's *internal* width (unions carry
-/// their spaced internal separators, function applications ~1 column each —
-/// pinned by the UD/UG/DN/FE squeezed fills), and `w_j = 5/6` for
-/// single-quoted-atom siblings of a tuple-fact receiver (round-9 Q/I series:
-/// the [Big 87, atom s] fill follows 87²/(87 + 5s/6) across s = 12…120),
-/// else 1 (round-10 argfact receivers track the plain share). Tuple args do
-/// NOT enter the numerator (the live `Wide` record byte-pins the tuple
-/// receiver at the display-flat share). A fitting cell keeps
-/// `max(trigger, flat)` so it renders flat.
+/// `hd(87·N_i / (N_i + Σ_{j≠i} w_j·C_j))`, rounded half-DOWN (round-11
+/// equal-pair probes), clamped to `[20, flat_i − 1]`, with the numerator
+/// `N_i = flat_i + rec_sur7_i + nfunc_i` (round-11 K3: tuple args DO enter
+/// the numerator at `elems + 1` — a 6-tuple receiver fills at 38 beside 60 —
+/// with per-node contributions capped at 7: the r8 16/20-element grids
+/// refute the uncapped sum)
+/// and `w_j = 5/6` for single-quoted-atom siblings of a tuple/union-fact
+/// receiver (round-9 Q/I series), else 1.
+///
+/// **Trigger, pass 2** (relief — round-11 battery I / TB / WIT): a
+/// pass-1-wrapping cell is SAVED (renders flat) iff it fits in the room its
+/// siblings actually occupy: `flat_i ≤ max(87 − Σ_{j≠i} charge_j, 20)`,
+/// where a truly-broken wrapping sibling (its fill < flat − 2, i.e. beyond
+/// the `)`-peel-only zone) charges its fill allocation and everything else
+/// charges `C_j`; no bonus enters this comparison (IB: a tuple target beside
+/// a wrapping 90-wide sibling fits only at the floor). This reproduces the
+/// beside-65 fits-at-23/wraps-at-24 boundary and the TB4 flip at 47/48.
+///
+/// The residual is the documented ±1 coupled-`fits` noise (e.g. `[45, 43]`
+/// saved but `[46, 42]` not — indistinguishable in closed form).
 pub fn group_widths(cells: &[String]) -> Vec<usize> {
     group_widths_with(cells, &[])
 }
@@ -729,48 +842,88 @@ pub fn group_widths_with(cells: &[String], overrides: &[Option<CellWidths>]) -> 
     let shapes: Vec<CellShape> = cells.iter().map(|t| cell_shape(t)).collect();
     let n = shapes.len();
     let full = FILL_WIDTH as i64; // 87
+    let floor = MIN_CELL_BUDGET as i64;
     let ov = |i: usize| -> Option<&CellWidths> { overrides.get(i).and_then(|o| o.as_ref()) };
+    // round half-DOWN: nearest integer, exact .5 toward zero (round-11 GB
+    // equal-pair probes: [50,50]…[80,80] all allocate 43, not 44; archived
+    // probe re-score 510/535 vs 503 half-up)
+    let hd = |x: f64| -> i64 {
+        let fl = x.floor();
+        if (x - fl - 0.5).abs() < 1e-9 { fl as i64 } else { (x + 0.5).floor() as i64 }
+    };
     let cs: Vec<i64> = shapes
         .iter()
         .enumerate()
-        .map(|(i, s)| {
-            ov(i)
-                .and_then(|w| w.occupancy)
-                .unwrap_or(s.flat as i64 + s.tup_sur + s.uni_sur)
-        })
+        .map(|(i, s)| ov(i).and_then(|w| w.occupancy).unwrap_or(s.flat as i64 + s.rec_sur))
         .collect();
     let ctot: i64 = cs.iter().sum();
-    let mut out = Vec::with_capacity(n);
+    // effective self width in the trigger comparisons (caller-overridable)
+    let eff: Vec<i64> =
+        (0..n).map(|i| ov(i).and_then(|w| w.trigger_width).unwrap_or(shapes[i].flat as i64)).collect();
+    // pass 1: flat-sum trigger with the last-arg-gated bonus
+    let mut budget1 = vec![0i64; n];
+    let mut wrap1 = vec![false; n];
     for (i, sh) in shapes.iter().enumerate() {
+        let bonus = ov(i)
+            .and_then(|w| w.bonus)
+            .unwrap_or(if sh.last_tup { sh.bmax } else { 0 });
+        budget1[i] = if n == 1 { full } else { (full + bonus - (ctot - cs[i])).max(floor) };
+        wrap1[i] = eff[i] > budget1[i];
+    }
+    // pass-1 fills for wrapping cells: proportional share of the internal
+    // width over sibling occupancies
+    let mut fill1 = vec![None::<i64>; n];
+    for (i, sh) in shapes.iter().enumerate() {
+        if !wrap1[i] {
+            continue;
+        }
         let flat = sh.flat as i64;
         if n == 1 {
-            out.push(full as usize);
+            fill1[i] = Some(full);
             continue;
         }
-        let bonus = ov(i).and_then(|w| w.bonus).unwrap_or(sh.bmax);
-        let b_trig = (full + bonus - (ctot - cs[i])).max(MIN_CELL_BUDGET as i64);
-        if flat <= b_trig {
-            // fits: any budget ≥ flat renders the cell flat
-            out.push(b_trig.max(flat) as usize);
-            continue;
-        }
-        // wraps: proportional fill share; the numerator is the cell's internal
-        // width (union separators + function nodes), siblings at their
-        // occupancy C with single-quoted atoms discounted 5/6 for a
-        // tuple-fact receiver
         let num = ov(i)
             .and_then(|w| w.fill_width)
-            .unwrap_or(flat + sh.uni_sur + sh.nfunc) as f64;
+            .unwrap_or(flat + sh.rec_sur7 + sh.nfunc) as f64;
         let mut t = num;
         for j in 0..n {
             if j != i {
-                let w = if shapes[j].sqa && sh.tup_sur > 0 { 5.0 / 6.0 } else { 1.0 };
+                let w = if shapes[j].sqa && (sh.tup_sur + sh.uni_sur) > 0 { 5.0 / 6.0 } else { 1.0 };
                 t += w * cs[j] as f64;
             }
         }
-        let mut b = ((full as f64) * num / t + 0.5).floor() as i64;
-        b = b.max(MIN_CELL_BUDGET as i64).min((flat - 1).max(MIN_CELL_BUDGET as i64));
-        out.push(b as usize);
+        let b = hd((full as f64) * num / t).max(floor).min((flat - 1).max(floor));
+        fill1[i] = Some(b);
+    }
+    // pass 2 (relief, round-11 battery I + TB/WIT): a pass-1-wrapping cell is
+    // saved — renders flat — iff it fits in the room its siblings actually
+    // occupy: a TRULY-BROKEN wrapping sibling (fill below its peel-only zone,
+    // i.e. fill < flat − 2) is charged its fill allocation, everything else
+    // its occupancy C. No bonus in this comparison (IB: a tuple target beside
+    // a wrapping 90 fits only at the floor).
+    let mut out = Vec::with_capacity(n);
+    for (i, sh) in shapes.iter().enumerate() {
+        let flat = sh.flat as i64;
+        if !wrap1[i] {
+            out.push(budget1[i].max(flat) as usize);
+            continue;
+        }
+        if n > 1 {
+            let mut tot = 0i64;
+            for j in 0..n {
+                if j != i {
+                    let truly_broken =
+                        wrap1[j] && fill1[j].map_or(false, |b| b < shapes[j].flat as i64 - 2);
+                    tot += if truly_broken { fill1[j].unwrap() } else { cs[j] };
+                }
+            }
+            let budget2 = (full - tot).max(floor);
+            if eff[i] <= budget2 {
+                out.push(budget2.max(flat) as usize);
+                continue;
+            }
+        }
+        out.push(fill1[i].unwrap() as usize);
     }
     out
 }

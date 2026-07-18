@@ -25,7 +25,8 @@ tool calls, 0 forbidden accesses, 0 web accesses; graphdot round-9 implementer
 (wf_58b2a176-d66) audited — 148 tool calls, 0/0; wf round-6 + pretty round-1
 implementers (wf_cdfa493d-262) audited — 49 + 88 tool calls, 0/0;
 producers round-2 implementer (wf_910e7687-413) audited — 103 tool calls, 0/0;
-43 sealed transcripts total.
+graphdot round-11 implementer (wf_6c1add5e-f10) audited — 149 tool calls, 0/0;
+44 sealed transcripts total.
 
 | Path | Agent | Role |
 |------|-------|------|
@@ -67,6 +68,7 @@ producers round-2 implementer (wf_910e7687-413) audited — 103 tool calls, 0/0;
 | workflows/wf_cdfa493d-262/agent-aebcd06acb5de46a7.jsonl | round 6 (unit C) | wf residual closure: ble list dedup removed (one entry per premise occurrence, source order); pubcap/fact-cap/fact-arity pinned as already-correct; open-side split confirmed via probes |
 | workflows/wf_cdfa493d-262/agent-a57fc416f110972cf.jsonl | pretty round 1 | term core + signature block: Doc-based renderer at 110/73, builtin expansion tables oracle-learned, 41 tests, whole-block parity on all 10 round-1 files |
 | workflows/wf_910e7687-413/agent-a4262551b04e2c696.jsonl | producers round 2 | R5 path grammar (923k-href harvest, live parse batteries, 40,037-tail round-trip) + R2 west pane (478/478 pane byte-identity; ≤69 escaped-width layout boundary live-bisected) |
+| workflows/wf_6c1add5e-f10/agent-a5c3c235083120633.jsonl | round 11 (unit B) | five allocation laws (half-DOWN, recursive occupancy, cap-7 numerator, last-arg bonus gate, tuple-opener hang) + relief pass; families 2/4 dissolved by ?unabbreviate= twins; wrapping 86.3→95.6%, single-cell 100% |
 
 Corresponding workspaces (../wellformedness, ../graphdot, ../weblayer) hold
 each agent's QUERIES.log, BEHAVIOR.md, REPORT*.md and code — cross-reference
@@ -93,6 +95,7 @@ the transcripts against those logs.
 | workflows/wf_cdfa493d-262/agent-a6d3c6533fd3d2c31.jsonl | wf round-6 delta audit (pass; identifier constellation disjoint from the Haskell; boundary bytes = merger) |
 | workflows/wf_cdfa493d-262/agent-a5fb0254d4385f4a6.jsonl | pretty round-1 delta audit (pass; doc.rs byte-identical to the audited BSD port — GPL wrapper only delegates; term core brackets from the outside, no copied expression) |
 | workflows/wf_910e7687-413/agent-a627c1987001ec5ff.jsonl | producers round-2 delta audit (pass; numeric grammar reconstructs GHC-reads behavior upstream never expresses; zero identifier overlap; PH-1 confirmed resolved; 3 non-blocking notes) |
+| workflows/wf_6c1add5e-f10/agent-aa34eecb3a83aa639.jsonl | graphdot round-11 delta audit (pass, 0 violations; half-DOWN diverges from source's half-even; structural divergence WIDENED — two-pass/shape-terms vs single-pass/shape-blind; every law probe-traced) |
 
 Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUDIT.md,
 ../console/AUDIT.md, ../macros/AUDIT.md, ../injective/AUDIT.md, ../derivcheck/AUDIT.md.

@@ -1,0 +1,66 @@
+{
+  "summary": "Sealed graphdot round 11: the four corpus-ranked fill families (allocator dominant, sibling allocated-width charging, self-width override, layout-internal-then-substitute); both-sides audit",
+  "agentCount": 2,
+  "logs": [],
+  "result": {
+    "impl": "All gates green. Final summary follows.\n\nROUND 11 (Session 11) COMPLETE — sealed implementer report, graph-clean record-cell wrap model.\n\nRESULTS (acceptance gates)\n- 80 tests green (73 prior + 7 new probe-derived fixtures); GRAPHCLEAN_CORPUS roundtrip 12022/12022; alloc_corpus 12022/12022.\n- fill_census before -> after: ALL cells 96.580% -> 98.794% (608422/615850); wrapping 86.26% -> 95.60% (136262/142540); single-cell wrapping 97.41% -> 100.00% (11419/11419); multi-cell wrapping 85.29% -> 95.21%; false-flat 819 -> 324; false-wrap 1478 -> 1150; fill misses 18764 -> 5954.\n- Probe-battery byte-exactness (every battery ever captured): 822/862 wrap cells (95.4%): G 84/86, H 55/58, I 99/101, K 63/70, A 43/44, B 19/20, C 33/34, D 11/12, E 66/68, F 50/51, p2 133/133, p3 81/89, p4 7/10, r8 78/86.\n- Absent-override behavior byte-identical to group_widths, regression-gated (supplied_cell_widths_override_estimates, supplied_trigger_width_overrides_self_width, raw_rule_supplied_widths_reach_cells).\n\nFAMILY OUTCOMES\n- FAMILY 1 (fill allocation): five new laws, all live-probe-pinned (batteries G/H/I/K, 189 rules): (a) fill rounding is round-HALF-DOWN (equal pairs 43/43); (b) occupancy is RECURSIVE: elems+1 per tuple/union node, elems-1 when directly nested in a tuple, full inside func args (K1 flip at 38, K2 at 39); (c) fill numerator INCLUDES tuple surcharges capped at 7 per node (K3: 6-tuple receiver ribbon 38; r8 16/20-elem grids force the cap; Wide fixture still byte-exact); (d) the self-budget bonus is gated on the LAST argument being the tuple/union (WIT battery); (e) the tuple opener HANGS (`<` left at line end, elements below at the fill column, also inside func args; fact/func openers never hang) — closed nearly the whole band-NONE family (corpus rows 6612 -> 854) and drove single-cell wraps to 100%.\n- FAMILY 3 (false wraps): a RELIEF second trigger pass — a pass-1-wrapping cell renders flat iff flat <= max(87 - sum(charges), 20), truly-broken wrapping siblings (fill < flat-2) charging their fill allocation, peel-only/flat siblings their C, no bonus (batteries I/IB/TB4; corpus false-wraps 1478 -> 1150).\n- FAMILIES 2 and 4 DISSOLVED by direct probe (battery J, with ?unabbreviate= twins): the reference lays out POST-abbreviation display text — abbreviated cells with internal widths 96-150 render flat, and sibling budgets follow display occupancy. The round-9/10 \"wrap decided on un-abbreviated width\" belief is REFUTED. The family-4 corpus witness (St_I(..., SI4)) is really a 2-cell row [St_I 77, Fr 9] wrapping by )-peel at its bonus-free budget. I did NOT build the requested internal-text/substitution cell-document — it would model behavior the reference demonstrably lacks; instead CellWidths.trigger_width (self-width override, both trigger passes, incl. lone cells vs 87) was added and test-gated. INTERFACE.md now documents that the display-text estimates ARE the probed reference behavior.\n\nHONEST RESIDUE: the +-1 coupled-fits relief boundary (IA_65_23;",
+    "audit": "Round-11 audit complete. Appended a round-11 section to `/home/kamilner/tamarin-cleanroom/graphdot/AUDIT.md` (ends with the single `VERDICT: pass` line).\n\nOutcome: 0 violations, no BEHAVIORAL redo instructions issued.\n\nDelta audited (scoped to `graphdot/` on `5f6ff68` + untracked `graphdot/workspace/r11/`): the multi-cell allocation rework in `generate.rs` (two-pass trigger→relief + half-DOWN proportional fill), the tuple-opener hang in `doclayout.rs` (`tuple_doc` zero-width leading fill), `band_dump.rs` shape-field emission, 7 probe-labelled fixtures in `generate_tests.rs`, and the BEHAVIOR/INTERFACE/QUERIES docs.\n\nVerified against `lib/theory/src/Theory/Constraint/System/Dot.hs` `renderRow`/`renderBalanced`/`scaleIndent` + `D.record` machinery (HughesPJ/BSD filtered out). Every new constant/law traces to a logged Session-11 probe or census cluster, not to Dot.hs:\n- half-DOWN rounding → probe GB (and it diverges from the source's half-even `round`);\n- recursive occupancy `elems±1` → K1/K2/K6;\n- capped-at-7 tuple numerator → K3 + r8 grids;\n- last-arg-gated bonus → WIT/TB4;\n- relief pass (`flat−2` peel zone, no bonus) → battery I/IA/IB + family-3 census;\n- tuple-opener hang → K4 byte-captures (BSD `pretty.rs` composition; term layout is not in Dot.hs);\n- `trigger_width` self-width override → novel adapter field, no HS counterpart, uses the pre-established observable 87.\n\nStructural divergence widened (source is single-pass, shape-blind, half-even; clean side is two-pass with trigger/fill split, relief, shape terms). Grep of the delta + all `r11/` artifacts: zero occurrences of `renderBalanced`/`scaleIndent`/`usedWidths`/`oneLineRender`/`ratio`/`conv`/`renderRow`/`magic` and no `100`/`130`/`30`-floor/`1.3`/scaleIndent-`1.5` constant (the one `1.5` is the BSD ribbonsPerLine). No identifier constellation, non-observable constant, structural transcription, or comment lineage found.\n\nVERDICT: pass",
+    "passed": true
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Implement"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "Audit"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "seal:graph-b11",
+      "phaseIndex": 1,
+      "phaseTitle": "Implement",
+      "agentId": "a5c3c235083120633",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1784391450223,
+      "queuedAt": 1784391450221,
+      "attempt": 1,
+      "lastToolName": "Bash",
+      "lastToolSummary": "cd /home/kamilner/tamarin-cleanroom/graphdot/workspace && c…",
+      "promptPreview": "You are a SEALED implementer under the barrier protocol at /home/kamilner/tamarin-cleanroom/PROTOCOL.md — read it first and comply strictly.\nACCESS RULES: You must NOT read any file under /home/kamilner/tamarin-rs/crates/, and NOT read any Haskell source of tamarin-prover anywhere on disk (notably /home/kamilner/tamarin-rs/tamarin-prover/{lib,src}/ and /home/kamilner/tamarin-rs/tamarin-prover-test…",
+      "lastProgressAt": 1784396353457,
+      "tokens": 402750,
+      "toolCalls": 149,
+      "durationMs": 4903234,
+      "resultPreview": "All gates green. Final summary follows.\n\nROUND 11 (Session 11) COMPLETE — sealed implementer report, graph-clean record-cell wrap model.\n\nRESULTS (acceptance gates)\n- 80 tests green (73 prior + 7 new probe-derived fixtures); GRAPHCLEAN_CORPUS roundtrip 12022/12022; alloc_corpus 12022/12022.\n- fill_census before -> after: ALL cells 96.580% -> 98.794% (608422/615850); wrapping 86.26% -> 95.60% (1362…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "audit:graph-b11",
+      "phaseIndex": 2,
+      "phaseTitle": "Audit",
+      "agentId": "aa34eecb3a83aa639",
+      "model": "claude-opus-4-8[1m]",
+      "state": "done",
+      "startedAt": 1784396353461,
+      "queuedAt": 1784396353458,
+      "attempt": 1,
+      "lastToolName": "Edit",
+      "lastToolSummary": "/home/kamilner/tamarin-cleanroom/graphdot/AUDIT.md",
+      "promptPreview": "You are a BOTH-SIDES similarity auditor for the tamarin-rs sealed relicensing campaign (exempt from barrier access rules; you may read everything). Audit ONLY this round's delta: /home/kamilner/tamarin-cleanroom HEAD (5f6ff68) contains through round 10 — git -C /home/kamilner/tamarin-cleanroom status/diff restricted to graphdot/ shows the round-11 delta (multi-cell allocation rework, sibling alloc…",
+      "lastProgressAt": 1784396626517,
+      "tokens": 79204,
+      "toolCalls": 19,
+      "durationMs": 273056,
+      "resultPreview": "Round-11 audit complete. Appended a round-11 section to `/home/kamilner/tamarin-cleanroom/graphdot/AUDIT.md` (ends with the single `VERDICT: pass` line).\n\nOutcome: 0 violations, no BEHAVIORAL redo instructions issued.\n\nDelta audited (scoped to `graphdot/` on `5f6ff68` + untracked `graphdot/workspace/r11/`): the multi-cell allocation rework in `generate.rs` (two-pass trigger→relief + half-DOWN prop…"
+    }
+  ],
+  "totalTokens": 481954,
+  "totalToolCalls": 168
+}

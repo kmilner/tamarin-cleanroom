@@ -1,0 +1,8 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n4[shape="record",label="{{<n0> St_I( ~id, $q60aaaaaaaaaaaaaaa, \<'commit', ff($ci), ff($cj), $ck\>, w1($zz) )|<n1> Fr( ~ni )}|{<n2> #i : WIT_76[F60( )]}|{<n3> Out( ~ni )}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+
+}

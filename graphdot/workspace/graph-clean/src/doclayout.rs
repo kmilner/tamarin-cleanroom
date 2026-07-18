@@ -283,11 +283,18 @@ fn func_doc(name: &str, args: &[String]) -> Doc {
 
 /// `<e1, …, en>` — the elements fill and align one past the `<`; the `>` is a
 /// fill element nested back one column so it stays beside the last element when
-/// it fits and peels under the `<` otherwise.
+/// it fits and peels under the `<` otherwise. A zero-width leading fill item
+/// gives the observed **opener hang**: when the first element does not fit
+/// beside the `<`, the `<` stays at the end of the current line and the
+/// elements start on the next line at the fill column (one past the `<`) —
+/// round-11 probes K4_tuple2 / K4_tupfunc (`w1(<` hang) and the corpus
+/// `In( <`-hang cells. Fact and function openers do NOT hang (K4_funcatom: a
+/// too-wide first argument overflows verbatim after `name(`).
 fn tuple_doc(inner: &str) -> Doc {
     let elems = split_top_commas(inner);
     let n = elems.len();
-    let mut toks: Vec<Doc> = Vec::with_capacity(n + 1);
+    let mut toks: Vec<Doc> = Vec::with_capacity(n + 2);
+    toks.push(text(""));
     for (i, e) in elems.iter().enumerate() {
         let d = arg_doc(e);
         if i + 1 < n {

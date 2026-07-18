@@ -592,3 +592,83 @@ across siblings collide -> occ>=2 -> ABBREVIATED, which corrupted the first
   cells byte-exact (96.0%). Band-NONE 14695 -> 8305 (5.83%): plain 9,
   abbr-only 14, func-only 646, func+abbr 7636. Servers: 3200-3205 all
   stopped; 3200-3299 verified clear (see below).
+
+## Session 11 (round 11) — Family 1 fill-allocation attack, F3 wrap-relief, F4 self-width trigger, F2 internal-layout interface
+- Baseline gates re-run before any change (build + tests + roundtrip + fill_census), below.
+- Baseline confirmed: 73 tests green (suite pass), roundtrip_corpus_dir 12022/12022 ok (3.0s),
+  fill_census: all 594789/615850=96.580%, wrap 122957/142540=86.26%, single 11123/11419=97.41%,
+  multi 111834/131121=85.29%, falseNeg 819, fillErr 18764 — byte-identical to round-10 finals.
+- Corpus analysis (captured OUTPUT: bands6.tsv re-dump with tup/uni/cbmax fields via
+  extended band_dump; eval.py/pairfit.py/seqfit.py): shipped-model miss inventory
+  reconciles fill_census exactly (FM 18764, FW 1478, FF 819). FW: 1029/1478 have a
+  WRAPPING sibling (family 3). FF: 784 in 2-cell abbr rows + 296 single-cell abbr
+  (family 4). FM abbr-free 2-cell BOTH-WRAP rows: allocations pair to ~87 with the
+  wide cell at ~prop and the narrow at ~(87 - prop_wide): model "M7 prop-wide,
+  rest-narrow" lifts both-wrap rows 1806->2115/3008 while keeping one-wrap 827/840;
+  n=3 rows NOT captured by sequential variants (shipped better there) => allocation
+  coupling needs live pinning.
+- LIVE batteries planned: probeG (2-cell both-wrap grid 43 rules :3200), probeH
+  (3/4-cell mixes 25 rules :3201), probeI (relief boundary sweeps 56 rules :3202).
+- LIVE battery results (probeG/H/I on :3200-3202, probeJ :3203, probeK :3204; all
+  servers STOPPED after capture; dots in r11/probe{G,H,I,J,K}_dots, bands in
+  r11/bandsGHI.tsv + bandsK.tsv):
+  * GA/GB/HA/HC/HD/HE plain-argfact grids: shipped proportional fill is probe-exact
+    EXCEPT rounding: equal pairs [50,50]..[80,80] give 43 not 44 (x=43.5 rounds
+    DOWN); re-score of ALL archived r10 probe TSVs: half-down 510/535 vs half-up
+    503/535, floor 472/535; GHI: 235/245 vs 225/245. Fill rounding = ROUND-HALF-DOWN.
+  * IA relief sweeps: beside W=65 the target fits at 23 (= 87 - b_W(64)) and wraps
+    at 24; beside W>=75 the floor-20 dominates; IB tuple-target beside 90: fits only
+    at 20 (floor) => the RELIEF comparison carries NO tuple bonus. Relief law:
+    a pass-1-wrapping cell is saved iff flat <= max(87 - sum(charge), 20), charge =
+    fill-alloc for pass-1-wrapping sibs, C for flat sibs. Corpus FW witness
+    [!Store 42 uni3, 65-wide] consistent (C=45 -> b_65 = 59 -> relief 28 >= 27).
+  * K1 pair-of-pairs X-flip at 38 => nested tuple-in-tuple occupancy = elems-1
+    (pairs +1; +3 top law refuted for nesting, full recursion +9 refuted).
+  * K2 func(3-tuple) X-flip at 39 => tuple inside a FUNC arg counts FULL elems+1.
+  * K6 pair-of-6-tuples: 61-cell fill band forces nested-6 contribution >= ~5
+    => elems-1 (or elems+1) per nested tuple; pairs pin elems-1.
+  * K3 tuple-receiver fills: pair receivers b=25..26 beside 70/75 and 6-tuple
+    receiver b=38 beside 60 => fill NUMERATOR includes tuple args at +(elems+1)
+    (round-10 "tuples don't enter N" REFUTED; Wide-Big fixture to re-verify).
+  * TB4/TB4f own-flips at 47/48 identical with/without funcs-in-tuple; WIT
+    multi-arg 4-tuple fact beside Fr(9): flips at 78/79 = bonus ZERO. TB4 series
+    fully explained by bonus-0 + RELIEF (b_Fbb=40 -> budget2 47). The round-10
+    "bonus" law is likely the relief mechanism in disguise; ship best of
+    {shipped bonus, single-arg-only, zero+relief} by corpus score.
+  * K4 hangs: TUPLE opener `<` hangs (break after `<`, continuation one-past-<,
+    also inside func args: `w1(<` hang); FUNC openers do NOT hang (84-wide first
+    arg overflows verbatim after `w3(`); union probe defeated by AC-reorder (wide
+    elem sorts last) - union hang unobservable/irrelevant.
+  * probeJ (abbrev): J1/J2/J7 abbreviated cells FLAT despite internal widths
+    96-150 >> 87 (unabbr twins wrap); J6 sibling Faa 45 stays FLAT beside an
+    abbr cell (display C 19, internal C ~99) => layout + sibling budgets use
+    the DISPLAY text; the round-9 "wrap decided on un-abbreviated width" is
+    REFUTED by direct probe. Family-4 witness re-found in corpus
+    (01e0a9f6bf86b671.dot etc.): NOT a lone cell - a 2-cell row [St_I 77, Fr 9],
+    )-peel wrap => trigger-margin case (bonus/relief), not internal widths.
+- IMPLEMENTED (graph-clean, round 11): (1) tuple-opener HANG in doclayout::tuple_doc
+  (zero-width leading fill item; byte-fixtures from K4 captures; corpus band-NONE
+  rows 6612 -> 854); (2) generate::cell_shape recursive occupancy rec_sur
+  (elems+1; nested-in-tuple elems-1; full in func args) + capped rec_sur7 + nargs
+  + last_tup; (3) generate::group_widths_with rewritten as the two-pass law:
+  pass-1 flat-sum trigger with last-arg-gated bonus, half-DOWN proportional fill
+  with N = flat + rec_sur7 + nfunc, pass-2 RELIEF (truly-broken wrapping sibs
+  charge their fill, peel-only sibs their C, no bonus); (4) CellWidths.trigger_width
+  self-width override (both passes, incl. lone cells vs 87); (5) band_dump emits
+  the new shape fields (20-field cells). Law selection by exhaustive offline
+  scoring over bands8/9 + all re-dumped probe TSVs (r11/variants.py + cap sweep):
+  C=rec/N=rec7/bonus=last/relief=peel best (corpus trigger errors 2297 -> 1474,
+  in-band fills 127.7k -> 136.3k); wrapping-sib charge surcharges (delta 1-3)
+  refuted; L-primitive floor refuted by archived near-equal rows.
+- FINAL GATES (round 11): 80 tests green (7 new probe-derived fixtures);
+  GRAPHCLEAN_CORPUS roundtrip 12022/12022; alloc_corpus 12022/12022; fill_census
+  corpus: all 608422/615850 = 98.794% (was 96.580%), wrap 136262/142540 = 95.60%
+  (86.26%), single 11419/11419 = 100.00% (97.41%), multi 124843/131121 = 95.21%
+  (85.29%), falseNeg 324 (819), falseWrap 1150 (1478), fillErr 5954 (18764).
+  Probe censuses (wrap cells byte-exact): G 84/86, H 55/58, I 99/101, K 63/70,
+  A 43/44, B 19/20, C 33/34, D 11/12, E 66/68, F 50/51, p2 133/133, p3 81/89,
+  p4 7/10, r8 78/86 => 822/862 (95.4%). Servers: 3200-3204 stopped during the
+  session; ports 3200-3299 verified clear (ss scan, no r11srv pid files).
+  BEHAVIOR.md §3f Session-11 bullet + §8 + round-11 report written; INTERFACE.md
+  rewritten (round-11 laws + trigger_width + the J-battery internal-width
+  refutation guidance). No forbidden paths read.

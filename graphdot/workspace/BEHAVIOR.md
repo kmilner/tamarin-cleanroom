@@ -447,6 +447,65 @@ renders `{info}|{concl}`).
     override absent the behavior is byte-identical to the estimate path
     (regression-gated by `supplied_cell_widths_override_estimates` /
     `raw_rule_supplied_widths_reach_cells` and the corpus census).
+  - **REVISED (Session 11) — the row-share model is a TWO-PASS trigger with
+    RECURSIVE occupancies, a last-arg-gated bonus, half-DOWN fill rounding, an
+    internal numerator that includes tuples (capped), and a TUPLE-OPENER HANG
+    in the cell document; and the round-9/10 "wrap decided on the
+    UN-abbreviated width" belief is REFUTED by direct probe.** Round-11 live
+    batteries (G/H/I 124 rules on :3200-3202; J 9 rules on :3203; K 65 rules
+    on :3204 — QUERIES.log Session 11):
+    * **Fill rounding = round-half-down** (exact .5 down, else nearest):
+      equal both-wrap pairs [50,50]…[80,80] allocate 43/43, refuting half-up's
+      44 (probe GB; archived r10 probe re-score 510/535 vs 503).
+    * **Occupancy is RECURSIVE**: `C = flat + Σ tuple/union nodes`, each node
+      `elems + 1` except directly-nested-in-a-tuple nodes at `elems − 1`
+      (K1 pair-of-pairs: partner flips at 38 = +5 exactly; K2 tuple inside a
+      FUNC arg counts FULL `elems + 1`, flip at 39; K6 pair-of-6-tuples pins
+      nested-6 ≥ ~5).
+    * **The self-budget bonus applies ONLY when the fact's LAST top-level arg
+      is the tuple/union** (WIT battery: a mid-list 4-tuple fact flips at its
+      bonus-free budget 78/79 beside `Fr( ~ni )`; TB4/TB4f single-tuple facts
+      keep it — and much of the apparent bonus is really the RELIEF pass:
+      TB4's 47/48 flip is reproduced by relief alone).
+    * **Trigger pass 2 — RELIEF (family 3)**: a pass-1-wrapping cell renders
+      flat iff it fits in the room its siblings actually occupy:
+      `flat ≤ max(87 − Σ charge_j, 20)`, where a truly-broken wrapping
+      sibling (fill < flat − 2, beyond the `)`-peel-only zone) charges its
+      fill allocation, everything else its C; NO bonus in this comparison
+      (IB: a tuple target beside a wrapping 90 fits only at the floor 20).
+      Pins the corpus family-3 false-wraps (1,478 → ~1,150) and the
+      beside-65 fits-at-23/wraps-at-24 boundary (the 23-case itself is the
+      known ±1 coupled-`fits` residue, as is `[45,43]` saved vs `[46,42]`
+      not).
+    * **Fill numerator includes tuples**: `N = flat + rec_sur(cap 7) + nfunc`
+      — a 6-tuple receiver fills at ribbon 38 beside a 60-argfact (= flat+7,
+      K3), a pair receiver at 25/26 beside 70/75; per-node contributions cap
+      at 7 (the r8 16/20-element grids refute the uncapped sum). Round-10's
+      "tuple args do NOT enter the numerator" is REFUTED (the Wide fixture
+      still reproduces byte-exact under the new law).
+    * **Tuple-opener HANG**: when a tuple's first element does not fit beside
+      the `<`, the `<` stays at the end of the current line and the elements
+      start on the next line at the fill column (one past the `<`) — also
+      inside function arguments (`w1(<` hang). FACT and FUNCTION openers do
+      NOT hang: a too-wide first argument overflows verbatim (K4 battery;
+      union first elements sort last under AC ordering, so a union hang is
+      unobservable). Implemented as a zero-width leading fill item;
+      byte-fixtures `tuple_opener_hang_byte_fixtures`. This closed the bulk
+      of the corpus band-NONE family (14,695 → 8,305 in round 10 → ~850 rows
+      round 11) INCLUDING almost all cells previously attributed to
+      pre-abbreviation layout.
+    * **Abbreviation/internal-width REFUTATION (battery J)**: crafted
+      theories whose abbreviated terms have internal widths 96–150 while
+      display fits (J1/J2/J7, with `?unabbreviate=` twins as ground truth)
+      render FLAT — the reference lays out the POST-abbreviation display
+      text; a sibling beside an abbr cell keeps the display-C budget (J6).
+      The round-7 "954 cells explained by un-abbreviated width" and the
+      round-9/10 family framing are superseded: those cells are now
+      reproduced by the display-side laws above (single-cell wrapping cells:
+      100 % byte-exact corpus-wide). The corpus family-4 witness
+      (`St_I( …, SI4 )`, e.g. 01e0a9f6bf86b671.dot) is actually a 2-cell row
+      `[St_I 77, Fr( ~ni.1 ) 9]` wrapping by `)`-peel at its bonus-free
+      budget — a trigger-margin case, not an internal-width one.
   - **REFUTED (Session 9): the group is NOT one horizontal HughesPJ document**
     (fcat/fsep/cat/sep of cell docs at any (lineLen, ribbon) tried fails almost
     every controlled case — cells that share a line would never wrap
@@ -726,46 +785,43 @@ Reproduced & byte-tested against captured/live payloads:
 - Abbreviation naming, numbering, legend HTML (65-space indent), and the SELECTION
   rule (§5c, REPORT2.md), plus the cluster/compact trigger (§4).
 
-- **Record-cell group WRAP** (§3f, Sessions 8–10): a **faithful HughesPJ port**
+- **Record-cell group WRAP** (§3f, Sessions 8–11): a **faithful HughesPJ port**
   (`pretty.rs`, from the sanctioned BSD `pretty` library, with the Haskell
   laziness mirrored via `Doc::Lazy` thunks + first-line-only `fits` — pure
   evaluation-order change, byte-identical, kills an exponential blowup on
   many-element fills) laid out at **ribbonsPerLine = 1.5** so the paragraph fill
-  is RAGGED, plus the **two-layer allocation** (`generate::group_widths`):
-  size-corrected flat-sum TRIGGER (`C = flat + Σ(elems+1)` per tuple/union
-  arg, bonus `⌊n/2⌋+2` capped at 4 for n ≥ 9, no quote/function corrections —
-  Session-10 batteries; 722/731 probe cells, every miss the one ±1 relief
-  pattern) and proportional FILL with an internal numerator (+`elems+1` per
-  union arg, +1 per function node) over sibling occupancies, quoted-atom sibs
-  at 5/6 for tuple-fact receivers (probe fill byte-exactness 525/547). The
-  cell grammar includes **union and function-application documents** (§3f
-  Session 10) — funcs break internally after `name(`, unions after `++` with
-  a tuple-style `)` peel. Corpus census: all-cells **96.58 %**, wrapping
-  cells **86.26 %** (single-cell 97.41 %, multi-cell **85.29 %**), false-flat
-  predictions 819 (round 9: 1000; round 7: 1843). Reproduces the live `Wide`
-  record, the ragged `St_1_gNB` fill, and the R10-B/D func/union probe cells
-  byte-exact. Callers may override per-cell widths (`CellWidths`, §3f
-  Session 10) to supply internal (pre-abbreviation) values.
+  is RAGGED, plus the **two-PASS allocation** (`generate::group_widths`,
+  Session 11): recursive-occupancy flat-sum TRIGGER (`C = flat + Σ per
+  tuple/union node (elems+1), directly-nested-in-tuple nodes (elems−1)`;
+  bonus `⌊n/2⌋+2` capped at 4 for n ≥ 9, applied only when the LAST arg is
+  the tuple/union), a RELIEF second pass (wrapping sibs charged at their fill
+  when truly broken), and proportional FILL rounded half-DOWN with the
+  internal numerator `flat + rec_sur(cap 7) + nfunc` over sibling
+  occupancies, quoted-atom sibs at 5/6 for tuple-fact receivers. The cell
+  grammar includes **union and function-application documents** (§3f Session
+  10) and the **tuple-opener hang** (§3f Session 11). Corpus census
+  (round 11): all-cells **98.79 %**, wrapping cells **95.60 %** (single-cell
+  **100.00 %**, multi-cell **95.21 %**), false-flat 324 (round 10: 819),
+  false-wrap 1,150 (1,478), fill misses 5,954 (18,764). Probe-battery wrap
+  byte-exactness 822/862 across every battery ever captured (r8 grids
+  78/86, r9 p2 133/133, round-11 G 84/86 / H 55/58 / I 99/101 / K 63/70).
+  Callers may override per-cell widths (`CellWidths` incl. round-11
+  `trigger_width`; INTERFACE.md) — though the J-battery shows the reference
+  itself computes on display text, so the estimates ARE the probed behavior.
 
 Documented gaps (need the GPL solver or an unavailable backend):
 - JSON graph backend format (unavailable / not in corpus).
-- **Record-cell wrap residuals** (§3f, Session 10) — the remaining ~14 % of
-  wrapping cells, characterized by the corpus band census (r10/bands5):
-  (a) **pre-abbreviation widths** — the dominant family: the reference decides
-      both trigger and fill on the UN-abbreviated internal term widths, which
-      a crate consuming post-abbreviation cell text cannot see (≈ 90 % of the
-      old/new trigger disagreements and 7 636 of the 8 305 band-NONE cells
-      involve abbreviation tokens). The `CellWidths` override interface (§3f
-      Session 10) lets an adapter that knows the internal widths close this
-      family; the estimates remain the display-text fallback.
-  (b) **cell-doc ceiling** — 8 305 wrapping cells (5.8 %, was 9.9 %) are
-      reproducible at NO budget (band-NONE) even after the union/function
-      documents: 7 636 abbreviation-expansion layouts, 646 func-only cells
-      (`name(<`-hang breaks where a tuple opener is left at line end inside a
-      function argument — a combinator shape not yet modeled), 14 abbr-only,
-      9 plain.
-  (c) the residual ±1 boundary flips: the `[45-partner, budget+1]` trigger
-      relief (9/731 probe cells) and ±1 fill roundings at band edges.
+- **Record-cell wrap residuals** (§3f, Session 11) — the remaining ~4.4 % of
+  wrapping cells (fill 5,954 + false-flat 324 + false-wrap 1,150):
+  (a) the **±1 coupled-`fits` boundary**: relief one column beyond the model
+      (`[45,43]` saved / `[46,42]` not; IA_65_23) and ±1 fill roundings at
+      band edges — the reference's per-row coupled `fits`, no closed form;
+  (b) **large-tuple numerators**: the cap-7 law approximates 8–20-element
+      tuple receivers (r8 grids 78/86);
+  (c) a small band-NONE residue (~850 rows, was 8,305): mostly
+      abbreviation-expansion layouts inside deep func chains and multi-run
+      band shapes — NOT explained by internal-width layout (refuted, §3f
+      Session 11); likely further combinator subtleties.
 - **compress/compact content** (§4, §6): which nodes/edges a raw constraint system
   yields — a solver transform. (The L1/L2/L3 level distinction is no longer a gap:
   it is proven non-existent, §7a.)
@@ -937,4 +993,67 @@ r9-p3 86/89, r9-p4 9/10, r8 85/86 (total 525/547). Corpus band-NONE
 14 695 → **8 305** (5.8 %): plain 9, abbr 14, func 646, func+abbr 7 636.
 
 **Probes logged** in QUERIES.log Session 10 (probeA–F on ports 3200–3205, all
+servers stopped, ports 3200-3299 verified clear). No forbidden paths read.
+
+--------------------------------------------------------------------------------
+## Round 11 report — multi-cell fill allocation, relief, tuple hang, abbreviation refutation (folded here per protocol)
+
+**Task (open-side round-10 measurement relayed four residue families).**
+(1) FAMILY 1 (dominant): multi-cell fill allocation mispredicts break
+positions. (2) FAMILY 2: abbreviated cells apparently laid out on internal
+text. (3) FAMILY 3: false-positive wraps beside a wrapping wide sibling.
+(4) FAMILY 4: lone-abbreviated-cell false negatives; extend the interface.
+
+**Method.** Corpus miss inventory from the captures (bands6-9 re-dumps with
+recursive shape features; eval/pairfit/seqfit/variants offline fitting against
+band constraints), then five live batteries (G/H/I/J/K, 198 rules, ports
+3200-3204, serve wrapper OOM-guarded, all servers stopped) designed around the
+miss-cluster centroids, then implementation + full gates.
+
+**Findings → laws shipped** (each pinned in §3f Session-11 bullet):
+1. Fill rounding is **half-down** (equal-pair probes).
+2. Occupancy is **recursive** (`elems+1`; nested-in-tuple `elems−1`; full
+   inside func args).
+3. The self-budget bonus is **gated on the LAST argument** being the
+   tuple/union (WIT); much of the round-10 "bonus" is really…
+4. …the **relief pass** (family 3): wrapping cells re-checked against the room
+   siblings actually occupy (truly-broken sibs charge their fill; peel-only
+   sibs their C; no bonus).
+5. The fill numerator **includes tuple surcharges capped at 7** (K3 pins
+   pair +3 / 6-tuple +7; r8 16/20-elem grids force the cap; Wide fixture
+   still byte-exact).
+6. The **tuple opener hangs** (`<` left at line end, elements below at the
+   fill column; also inside func args; fact/func openers never hang) —
+   implemented as a zero-width leading fill item; this closed nearly the
+   whole band-NONE family (6,612 → 854 corpus rows).
+7. **Families 2 and 4 dissolved under probing**: battery J (abbreviation
+   theories with `?unabbreviate=` twins) shows the reference lays out
+   POST-abbreviation display text (internal widths 96–150 render flat;
+   sibling budgets follow display C). The family-4 corpus witness is a
+   2-cell row wrapping at its bonus-free budget by `)`-peel. The
+   internal-text/substitution cell-document the relay requested was NOT
+   built — it would model behavior the reference demonstrably does not
+   have; instead `CellWidths.trigger_width` (self-width override, both
+   trigger passes, incl. lone cells) was added for adapter flexibility,
+   regression-gated.
+
+**Result (acceptance gates).** 80 tests green (7 new round-11 fixtures);
+GRAPHCLEAN_CORPUS roundtrip **12022/12022**; alloc_corpus 12022/12022.
+fill_census (615,850 cells, 142,540 wrapping): all cells 96.580 % →
+**98.794 %**, wrapping 86.26 % → **95.60 %**, single-cell 97.41 % →
+**100.00 %**, multi-cell 85.29 % → **95.21 %**, false-flat 819 → **324**,
+false-wrap 1,478 → **1,150**, fill misses 18,764 → **5,954**. Probe-battery
+wrap byte-exactness (fill_census over every battery ever captured):
+G 84/86, H 55/58, I 99/101, K 63/70, A 43/44, B 19/20, C 33/34, D 11/12,
+E 66/68, F 50/51, p2 133/133, p3 81/89, p4 7/10, r8 78/86 → **822/862**
+(95.4 %). Absent-override behavior byte-identical (regression-gated).
+
+**Honest residue.** The ±1 coupled-`fits` relief boundary (IA_65_23,
+`[45,43]`/`[46,42]`), large-tuple numerator approximation (cap 7), ~850
+band-NONE rows (deep func-chain + abbreviation-expansion layouts — NOT an
+internal-width effect). Old probe subset regressed slightly (525/547 →
+521/547) while the corpus gained ~13,500 byte-exact cells; the p3/p4/r8
+losses are all big-tuple fill ±1s.
+
+**Probes logged** in QUERIES.log Session 11 (probeG-K on ports 3200-3204, all
 servers stopped, ports 3200-3299 verified clear). No forbidden paths read.
