@@ -1,0 +1,501 @@
+theory SizeLawProbe
+begin
+
+builtins: multiset
+
+// TN: [Faa 45, 2-tuple 37] X-flip pins corr(2)
+rule TN2_37:
+  [ In(<$dw, $dx>) ]
+  --[ F0() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), T2(<$q00aaaaaaaaaaaaaaaaaaaa, $ai>) ]
+
+// TN: [Faa 45, 2-tuple 38] X-flip pins corr(2)
+rule TN2_38:
+  [ In(<$dw, $dx>) ]
+  --[ F1() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), T2(<$q01aaaaaaaaaaaaaaaaaaaaa, $ai>) ]
+
+// TN: [Faa 45, 2-tuple 39] X-flip pins corr(2)
+rule TN2_39:
+  [ In(<$dw, $dx>) ]
+  --[ F2() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), T2(<$q02aaaaaaaaaaaaaaaaaaaaaa, $ai>) ]
+
+// TN: [Faa 45, 2-tuple 40] X-flip pins corr(2)
+rule TN2_40:
+  [ In(<$dw, $dx>) ]
+  --[ F3() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), T2(<$q03aaaaaaaaaaaaaaaaaaaaaaa, $ai>) ]
+
+// TN: [Faa 45, 2-tuple 41] X-flip pins corr(2)
+rule TN2_41:
+  [ In(<$dw, $dx>) ]
+  --[ F4() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), T2(<$q04aaaaaaaaaaaaaaaaaaaaaaaa, $ai>) ]
+
+// TN: [Faa 45, 2-tuple 42] X-flip pins corr(2)
+rule TN2_42:
+  [ In(<$dw, $dx>) ]
+  --[ F5() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), T2(<$q05aaaaaaaaaaaaaaaaaaaaaaaaa, $ai>) ]
+
+// TN: [Faa 45, 2-tuple 43] X-flip pins corr(2)
+rule TN2_43:
+  [ In(<$dw, $dx>) ]
+  --[ F6() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), T2(<$q06aaaaaaaaaaaaaaaaaaaaaaaaaa, $ai>) ]
+
+// TN: [Faa 45, 3-tuple 37] X-flip pins corr(3)
+rule TN3_37:
+  [ In(<$dw, $dx>) ]
+  --[ F7() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), T3(<$q07aaaaaaaaaaaaaaa, $ai, $aj>) ]
+
+// TN: [Faa 45, 3-tuple 38] X-flip pins corr(3)
+rule TN3_38:
+  [ In(<$dw, $dx>) ]
+  --[ F8() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), T3(<$q08aaaaaaaaaaaaaaaa, $ai, $aj>) ]
+
+// TN: [Faa 45, 3-tuple 39] X-flip pins corr(3)
+rule TN3_39:
+  [ In(<$dw, $dx>) ]
+  --[ F9() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), T3(<$q09aaaaaaaaaaaaaaaaa, $ai, $aj>) ]
+
+// TN: [Faa 45, 3-tuple 40] X-flip pins corr(3)
+rule TN3_40:
+  [ In(<$dw, $dx>) ]
+  --[ F10() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), T3(<$q10aaaaaaaaaaaaaaaaaa, $ai, $aj>) ]
+
+// TN: [Faa 45, 4-tuple 35] X-flip pins corr(4)
+rule TN4_35:
+  [ In(<$dw, $dx>) ]
+  --[ F11() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), T4(<$q11aaaaaaaa, $ai, $aj, $ak>) ]
+
+// TN: [Faa 45, 4-tuple 36] X-flip pins corr(4)
+rule TN4_36:
+  [ In(<$dw, $dx>) ]
+  --[ F12() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), T4(<$q12aaaaaaaaa, $ai, $aj, $ak>) ]
+
+// TN: [Faa 45, 4-tuple 37] X-flip pins corr(4)
+rule TN4_37:
+  [ In(<$dw, $dx>) ]
+  --[ F13() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), T4(<$q13aaaaaaaaaa, $ai, $aj, $ak>) ]
+
+// TN: [Faa 45, 4-tuple 38] X-flip pins corr(4)
+rule TN4_38:
+  [ In(<$dw, $dx>) ]
+  --[ F14() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), T4(<$q14aaaaaaaaaaa, $ai, $aj, $ak>) ]
+
+// TN: [Faa 45, 4-tuple 39] X-flip pins corr(4)
+rule TN4_39:
+  [ In(<$dw, $dx>) ]
+  --[ F15() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), T4(<$q15aaaaaaaaaaaa, $ai, $aj, $ak>) ]
+
+// TN: [Faa 45, 4-tuple 40] X-flip pins corr(4)
+rule TN4_40:
+  [ In(<$dw, $dx>) ]
+  --[ F16() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), T4(<$q16aaaaaaaaaaaaa, $ai, $aj, $ak>) ]
+
+// TN: [Faa 45, 4-tuple 41] X-flip pins corr(4)
+rule TN4_41:
+  [ In(<$dw, $dx>) ]
+  --[ F17() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), T4(<$q17aaaaaaaaaaaaaa, $ai, $aj, $ak>) ]
+
+// TN: [Faa 45, 6-tuple 33] X-flip pins corr(6)
+rule TN6_33:
+  [ In(<$dw, $dx>), In(<zz, zy, zx, zw>) ]
+  --[ F18() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), T6(<$q18, $ai, zz, zy, zx, zw>) ]
+
+// TN: [Faa 45, 6-tuple 34] X-flip pins corr(6)
+rule TN6_34:
+  [ In(<$dw, $dx>), In(<zz, zy, zx, zw>) ]
+  --[ F19() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), T6(<$q19a, $ai, zz, zy, zx, zw>) ]
+
+// TN: [Faa 45, 6-tuple 35] X-flip pins corr(6)
+rule TN6_35:
+  [ In(<$dw, $dx>), In(<zz, zy, zx, zw>) ]
+  --[ F20() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), T6(<$q20aa, $ai, zz, zy, zx, zw>) ]
+
+// TN: [Faa 45, 6-tuple 36] X-flip pins corr(6)
+rule TN6_36:
+  [ In(<$dw, $dx>), In(<zz, zy, zx, zw>) ]
+  --[ F21() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), T6(<$q21aaa, $ai, zz, zy, zx, zw>) ]
+
+// TN: [Faa 45, 6-tuple 37] X-flip pins corr(6)
+rule TN6_37:
+  [ In(<$dw, $dx>), In(<zz, zy, zx, zw>) ]
+  --[ F22() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), T6(<$q22aaaa, $ai, zz, zy, zx, zw>) ]
+
+// TN: [Faa 45, 6-tuple 38] X-flip pins corr(6)
+rule TN6_38:
+  [ In(<$dw, $dx>), In(<zz, zy, zx, zw>) ]
+  --[ F23() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), T6(<$q23aaaaa, $ai, zz, zy, zx, zw>) ]
+
+// TN: [Faa 45, 6-tuple 39] X-flip pins corr(6)
+rule TN6_39:
+  [ In(<$dw, $dx>), In(<zz, zy, zx, zw>) ]
+  --[ F24() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), T6(<$q24aaaaaa, $ai, zz, zy, zx, zw>) ]
+
+// TB: [2-tuple 42, Fbb 45] own-flip pins bonus(2)
+rule TB2_42:
+  [ In(<$dw, $dx>) ]
+  --[ F25() ]->
+  [ T2(<$q25aaaaaaaaaaaaaaaaaaaaaaaaa, $ai>), Fbb($au, $av, $aw, $ax, $ay, $az, $ba, $bb) ]
+
+// TB: [2-tuple 43, Fbb 45] own-flip pins bonus(2)
+rule TB2_43:
+  [ In(<$dw, $dx>) ]
+  --[ F26() ]->
+  [ T2(<$q26aaaaaaaaaaaaaaaaaaaaaaaaaa, $ai>), Fbb($au, $av, $aw, $ax, $ay, $az, $ba, $bb) ]
+
+// TB: [2-tuple 44, Fbb 45] own-flip pins bonus(2)
+rule TB2_44:
+  [ In(<$dw, $dx>) ]
+  --[ F27() ]->
+  [ T2(<$q27aaaaaaaaaaaaaaaaaaaaaaaaaaa, $ai>), Fbb($au, $av, $aw, $ax, $ay, $az, $ba, $bb) ]
+
+// TB: [2-tuple 45, Fbb 45] own-flip pins bonus(2)
+rule TB2_45:
+  [ In(<$dw, $dx>) ]
+  --[ F28() ]->
+  [ T2(<$q28aaaaaaaaaaaaaaaaaaaaaaaaaaaa, $ai>), Fbb($au, $av, $aw, $ax, $ay, $az, $ba, $bb) ]
+
+// TB: [2-tuple 46, Fbb 45] own-flip pins bonus(2)
+rule TB2_46:
+  [ In(<$dw, $dx>) ]
+  --[ F29() ]->
+  [ T2(<$q29aaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $ai>), Fbb($au, $av, $aw, $ax, $ay, $az, $ba, $bb) ]
+
+// TB: [2-tuple 47, Fbb 45] own-flip pins bonus(2)
+rule TB2_47:
+  [ In(<$dw, $dx>) ]
+  --[ F30() ]->
+  [ T2(<$q30aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, $ai>), Fbb($au, $av, $aw, $ax, $ay, $az, $ba, $bb) ]
+
+// TB: [6-tuple 46, Fbb 45] own-flip pins bonus(6)
+rule TB6_46:
+  [ In(<$dw, $dx>) ]
+  --[ F31() ]->
+  [ T6(<$q31aaaaaaaaa, $ai, $aj, $ak, $al, $am>), Fbb($au, $av, $aw, $ax, $ay, $az, $ba, $bb) ]
+
+// TB: [6-tuple 47, Fbb 45] own-flip pins bonus(6)
+rule TB6_47:
+  [ In(<$dw, $dx>) ]
+  --[ F32() ]->
+  [ T6(<$q32aaaaaaaaaa, $ai, $aj, $ak, $al, $am>), Fbb($au, $av, $aw, $ax, $ay, $az, $ba, $bb) ]
+
+// TB: [6-tuple 48, Fbb 45] own-flip pins bonus(6)
+rule TB6_48:
+  [ In(<$dw, $dx>) ]
+  --[ F33() ]->
+  [ T6(<$q33aaaaaaaaaaa, $ai, $aj, $ak, $al, $am>), Fbb($au, $av, $aw, $ax, $ay, $az, $ba, $bb) ]
+
+// TB: [6-tuple 49, Fbb 45] own-flip pins bonus(6)
+rule TB6_49:
+  [ In(<$dw, $dx>) ]
+  --[ F34() ]->
+  [ T6(<$q34aaaaaaaaaaaa, $ai, $aj, $ak, $al, $am>), Fbb($au, $av, $aw, $ax, $ay, $az, $ba, $bb) ]
+
+// TB: [6-tuple 50, Fbb 45] own-flip pins bonus(6)
+rule TB6_50:
+  [ In(<$dw, $dx>) ]
+  --[ F35() ]->
+  [ T6(<$q35aaaaaaaaaaaaa, $ai, $aj, $ak, $al, $am>), Fbb($au, $av, $aw, $ax, $ay, $az, $ba, $bb) ]
+
+// TB: [6-tuple 51, Fbb 45] own-flip pins bonus(6)
+rule TB6_51:
+  [ In(<$dw, $dx>) ]
+  --[ F36() ]->
+  [ T6(<$q36aaaaaaaaaaaaaa, $ai, $aj, $ak, $al, $am>), Fbb($au, $av, $aw, $ax, $ay, $az, $ba, $bb) ]
+
+// UN: [Faa 45, 3-union 38] X-flip pins union corr(3)
+rule UN3_38:
+  [ In(<$dw, $dx>) ]
+  --[ F37() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), U3(($q37aaaaaaaaaaaaaaaa++$ai++$aj)) ]
+
+// UN: [Faa 45, 3-union 39] X-flip pins union corr(3)
+rule UN3_39:
+  [ In(<$dw, $dx>) ]
+  --[ F38() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), U3(($q38aaaaaaaaaaaaaaaaa++$ai++$aj)) ]
+
+// UN: [Faa 45, 3-union 40] X-flip pins union corr(3)
+rule UN3_40:
+  [ In(<$dw, $dx>) ]
+  --[ F39() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), U3(($q39aaaaaaaaaaaaaaaaaa++$ai++$aj)) ]
+
+// UN: [Faa 45, 3-union 41] X-flip pins union corr(3)
+rule UN3_41:
+  [ In(<$dw, $dx>) ]
+  --[ F40() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), U3(($q40aaaaaaaaaaaaaaaaaaa++$ai++$aj)) ]
+
+// UN: [Faa 45, 3-union 42] X-flip pins union corr(3)
+rule UN3_42:
+  [ In(<$dw, $dx>) ]
+  --[ F41() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), U3(($q41aaaaaaaaaaaaaaaaaaaa++$ai++$aj)) ]
+
+// UN: [Faa 45, 3-union 43] X-flip pins union corr(3)
+rule UN3_43:
+  [ In(<$dw, $dx>) ]
+  --[ F42() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), U3(($q42aaaaaaaaaaaaaaaaaaaaa++$ai++$aj)) ]
+
+// UN: [Faa 45, 8-union 33] X-flip pins union corr(8)
+rule UN8_33:
+  [ In(<$dw, $dx>), In(<z, y, x, w, v, u, t>) ]
+  --[ F43() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), U8(($q43++z++y++x++w++v++u++t)) ]
+
+// UN: [Faa 45, 8-union 34] X-flip pins union corr(8)
+rule UN8_34:
+  [ In(<$dw, $dx>), In(<z, y, x, w, v, u, t>) ]
+  --[ F44() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), U8(($q44a++z++y++x++w++v++u++t)) ]
+
+// UN: [Faa 45, 8-union 35] X-flip pins union corr(8)
+rule UN8_35:
+  [ In(<$dw, $dx>), In(<z, y, x, w, v, u, t>) ]
+  --[ F45() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), U8(($q45aa++z++y++x++w++v++u++t)) ]
+
+// UN: [Faa 45, 8-union 36] X-flip pins union corr(8)
+rule UN8_36:
+  [ In(<$dw, $dx>), In(<z, y, x, w, v, u, t>) ]
+  --[ F46() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), U8(($q46aaa++z++y++x++w++v++u++t)) ]
+
+// UN: [Faa 45, 8-union 37] X-flip pins union corr(8)
+rule UN8_37:
+  [ In(<$dw, $dx>), In(<z, y, x, w, v, u, t>) ]
+  --[ F47() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), U8(($q47aaaa++z++y++x++w++v++u++t)) ]
+
+// UN: [Faa 45, 8-union 38] X-flip pins union corr(8)
+rule UN8_38:
+  [ In(<$dw, $dx>), In(<z, y, x, w, v, u, t>) ]
+  --[ F48() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), U8(($q48aaaaa++z++y++x++w++v++u++t)) ]
+
+// UB2: [8-union 48, Fbb 45] own-flip pins union bonus(8)
+rule UB8_48:
+  [ In(<$dw, $dx>) ]
+  --[ F49() ]->
+  [ U8(($q49a++$ai++$aj++$ak++$al++$am++$an++$ao)), Fbb($au, $av, $aw, $ax, $ay, $az, $ba, $bb) ]
+
+// UB2: [8-union 49, Fbb 45] own-flip pins union bonus(8)
+rule UB8_49:
+  [ In(<$dw, $dx>) ]
+  --[ F50() ]->
+  [ U8(($q50aa++$ai++$aj++$ak++$al++$am++$an++$ao)), Fbb($au, $av, $aw, $ax, $ay, $az, $ba, $bb) ]
+
+// UB2: [8-union 50, Fbb 45] own-flip pins union bonus(8)
+rule UB8_50:
+  [ In(<$dw, $dx>) ]
+  --[ F51() ]->
+  [ U8(($q51aaa++$ai++$aj++$ak++$al++$am++$an++$ao)), Fbb($au, $av, $aw, $ax, $ay, $az, $ba, $bb) ]
+
+// UB2: [8-union 51, Fbb 45] own-flip pins union bonus(8)
+rule UB8_51:
+  [ In(<$dw, $dx>) ]
+  --[ F52() ]->
+  [ U8(($q52aaaa++$ai++$aj++$ak++$al++$am++$an++$ao)), Fbb($au, $av, $aw, $ax, $ay, $az, $ba, $bb) ]
+
+// UB2: [8-union 52, Fbb 45] own-flip pins union bonus(8)
+rule UB8_52:
+  [ In(<$dw, $dx>) ]
+  --[ F53() ]->
+  [ U8(($q53aaaaa++$ai++$aj++$ak++$al++$am++$an++$ao)), Fbb($au, $av, $aw, $ax, $ay, $az, $ba, $bb) ]
+
+// UB2: [8-union 53, Fbb 45] own-flip pins union bonus(8)
+rule UB8_53:
+  [ In(<$dw, $dx>) ]
+  --[ F54() ]->
+  [ U8(($q54aaaaaa++$ai++$aj++$ak++$al++$am++$an++$ao)), Fbb($au, $av, $aw, $ax, $ay, $az, $ba, $bb) ]
+
+lemma l_TN2_37:
+  exists-trace "Ex #i. F0() @ #i"
+
+lemma l_TN2_38:
+  exists-trace "Ex #i. F1() @ #i"
+
+lemma l_TN2_39:
+  exists-trace "Ex #i. F2() @ #i"
+
+lemma l_TN2_40:
+  exists-trace "Ex #i. F3() @ #i"
+
+lemma l_TN2_41:
+  exists-trace "Ex #i. F4() @ #i"
+
+lemma l_TN2_42:
+  exists-trace "Ex #i. F5() @ #i"
+
+lemma l_TN2_43:
+  exists-trace "Ex #i. F6() @ #i"
+
+lemma l_TN3_37:
+  exists-trace "Ex #i. F7() @ #i"
+
+lemma l_TN3_38:
+  exists-trace "Ex #i. F8() @ #i"
+
+lemma l_TN3_39:
+  exists-trace "Ex #i. F9() @ #i"
+
+lemma l_TN3_40:
+  exists-trace "Ex #i. F10() @ #i"
+
+lemma l_TN4_35:
+  exists-trace "Ex #i. F11() @ #i"
+
+lemma l_TN4_36:
+  exists-trace "Ex #i. F12() @ #i"
+
+lemma l_TN4_37:
+  exists-trace "Ex #i. F13() @ #i"
+
+lemma l_TN4_38:
+  exists-trace "Ex #i. F14() @ #i"
+
+lemma l_TN4_39:
+  exists-trace "Ex #i. F15() @ #i"
+
+lemma l_TN4_40:
+  exists-trace "Ex #i. F16() @ #i"
+
+lemma l_TN4_41:
+  exists-trace "Ex #i. F17() @ #i"
+
+lemma l_TN6_33:
+  exists-trace "Ex #i. F18() @ #i"
+
+lemma l_TN6_34:
+  exists-trace "Ex #i. F19() @ #i"
+
+lemma l_TN6_35:
+  exists-trace "Ex #i. F20() @ #i"
+
+lemma l_TN6_36:
+  exists-trace "Ex #i. F21() @ #i"
+
+lemma l_TN6_37:
+  exists-trace "Ex #i. F22() @ #i"
+
+lemma l_TN6_38:
+  exists-trace "Ex #i. F23() @ #i"
+
+lemma l_TN6_39:
+  exists-trace "Ex #i. F24() @ #i"
+
+lemma l_TB2_42:
+  exists-trace "Ex #i. F25() @ #i"
+
+lemma l_TB2_43:
+  exists-trace "Ex #i. F26() @ #i"
+
+lemma l_TB2_44:
+  exists-trace "Ex #i. F27() @ #i"
+
+lemma l_TB2_45:
+  exists-trace "Ex #i. F28() @ #i"
+
+lemma l_TB2_46:
+  exists-trace "Ex #i. F29() @ #i"
+
+lemma l_TB2_47:
+  exists-trace "Ex #i. F30() @ #i"
+
+lemma l_TB6_46:
+  exists-trace "Ex #i. F31() @ #i"
+
+lemma l_TB6_47:
+  exists-trace "Ex #i. F32() @ #i"
+
+lemma l_TB6_48:
+  exists-trace "Ex #i. F33() @ #i"
+
+lemma l_TB6_49:
+  exists-trace "Ex #i. F34() @ #i"
+
+lemma l_TB6_50:
+  exists-trace "Ex #i. F35() @ #i"
+
+lemma l_TB6_51:
+  exists-trace "Ex #i. F36() @ #i"
+
+lemma l_UN3_38:
+  exists-trace "Ex #i. F37() @ #i"
+
+lemma l_UN3_39:
+  exists-trace "Ex #i. F38() @ #i"
+
+lemma l_UN3_40:
+  exists-trace "Ex #i. F39() @ #i"
+
+lemma l_UN3_41:
+  exists-trace "Ex #i. F40() @ #i"
+
+lemma l_UN3_42:
+  exists-trace "Ex #i. F41() @ #i"
+
+lemma l_UN3_43:
+  exists-trace "Ex #i. F42() @ #i"
+
+lemma l_UN8_33:
+  exists-trace "Ex #i. F43() @ #i"
+
+lemma l_UN8_34:
+  exists-trace "Ex #i. F44() @ #i"
+
+lemma l_UN8_35:
+  exists-trace "Ex #i. F45() @ #i"
+
+lemma l_UN8_36:
+  exists-trace "Ex #i. F46() @ #i"
+
+lemma l_UN8_37:
+  exists-trace "Ex #i. F47() @ #i"
+
+lemma l_UN8_38:
+  exists-trace "Ex #i. F48() @ #i"
+
+lemma l_UB8_48:
+  exists-trace "Ex #i. F49() @ #i"
+
+lemma l_UB8_49:
+  exists-trace "Ex #i. F50() @ #i"
+
+lemma l_UB8_50:
+  exists-trace "Ex #i. F51() @ #i"
+
+lemma l_UB8_51:
+  exists-trace "Ex #i. F52() @ #i"
+
+lemma l_UB8_52:
+  exists-trace "Ex #i. F53() @ #i"
+
+lemma l_UB8_53:
+  exists-trace "Ex #i. F54() @ #i"
+
+end

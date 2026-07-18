@@ -1,0 +1,186 @@
+theory FuncShapeProbe
+begin
+
+functions: u/7, uu/7, uuu/7, uuuu/7, uuuuu/7, uuuuuu/7, uuuuuuu/7, uuuuuuuu/7, vvv/6, vvvv/6, vvvvv/6, w/16, ww/16, www/16, wwww/16, wwwww/16, q/20, p/2
+
+// FB: concl [Faa 45, Q(func) 38] — func occupancy via X flip at C>42
+rule FB_38:
+  [ In(<$dw, $dx>) ]
+  --[ F0() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Q(vvv($ai, $aj, $ak, $al, $am, $an)) ]
+
+// FB: concl [Faa 45, Q(func) 39] — func occupancy via X flip at C>42
+rule FB_39:
+  [ In(<$dw, $dx>) ]
+  --[ F1() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Q(vvvv($ai, $aj, $ak, $al, $am, $an)) ]
+
+// FB: concl [Faa 45, Q(func) 40] — func occupancy via X flip at C>42
+rule FB_40:
+  [ In(<$dw, $dx>) ]
+  --[ F2() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Q(vvvvv($ai, $aj, $ak, $al, $am, $an)) ]
+
+// FB: concl [Faa 45, Q(func) 41]
+rule FB_41:
+  [ In(<$dw, $dx>) ]
+  --[ F3() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Q(u($ai, $aj, $ak, $al, $am, $an, $ao)) ]
+
+// FB: concl [Faa 45, Q(func) 42]
+rule FB_42:
+  [ In(<$dw, $dx>) ]
+  --[ F4() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Q(uu($ai, $aj, $ak, $al, $am, $an, $ao)) ]
+
+// FB: concl [Faa 45, Q(func) 43]
+rule FB_43:
+  [ In(<$dw, $dx>) ]
+  --[ F5() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Q(uuu($ai, $aj, $ak, $al, $am, $an, $ao)) ]
+
+// FB: concl [Faa 45, Q(func) 44]
+rule FB_44:
+  [ In(<$dw, $dx>) ]
+  --[ F6() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Q(uuuu($ai, $aj, $ak, $al, $am, $an, $ao)) ]
+
+// FB: concl [Faa 45, Q(func) 45]
+rule FB_45:
+  [ In(<$dw, $dx>) ]
+  --[ F7() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Q(uuuuu($ai, $aj, $ak, $al, $am, $an, $ao)) ]
+
+// FB: concl [Faa 45, Q(func) 46]
+rule FB_46:
+  [ In(<$dw, $dx>) ]
+  --[ F8() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Q(uuuuuu($ai, $aj, $ak, $al, $am, $an, $ao)) ]
+
+// FB: concl [Faa 45, Q(func) 47]
+rule FB_47:
+  [ In(<$dw, $dx>) ]
+  --[ F9() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Q(uuuuuuu($ai, $aj, $ak, $al, $am, $an, $ao)) ]
+
+// FB: concl [Faa 45, Q(func) 48]
+rule FB_48:
+  [ In(<$dw, $dx>) ]
+  --[ F10() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Q(uuuuuuuu($ai, $aj, $ak, $al, $am, $an, $ao)) ]
+
+// FC: lone Q(q(20 args)) flat 106 — does the reference break inside q(...)?
+rule FC_1:
+  [ In(<$dw, $dx>) ]
+  --[ F11() ]->
+  [ Q(q($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap, $aq, $ar, $as, $at)) ]
+
+// FC: lone Q(p($aa, p($ab, ...))) deep chain — internal break shape
+rule FC_3:
+  [ In(<$dw, $dx>) ]
+  --[ F12() ]->
+  [ Q(p($aa, p($ab, p($ac, p($ad, p($ae, p($af, p($ag, p($ah, p($ai, p($aj, p($ak, p($al, p($am, $an)))))))))))))) ]
+
+// FD: lone Q(w(16 args)) flat 86 — lone-cell boundary
+rule FD_86:
+  [ In(<$dw, $dx>) ]
+  --[ F13() ]->
+  [ Q(w($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap)) ]
+
+// FD: lone Q(ww(16 args)) flat 87 — lone-cell boundary
+rule FD_87:
+  [ In(<$dw, $dx>) ]
+  --[ F14() ]->
+  [ Q(ww($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap)) ]
+
+// FD: lone Q(www(16 args)) flat 88 — lone-cell boundary
+rule FD_88:
+  [ In(<$dw, $dx>) ]
+  --[ F15() ]->
+  [ Q(www($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap)) ]
+
+// FD: lone Q(wwww(16 args)) flat 89 — lone-cell boundary
+rule FD_89:
+  [ In(<$dw, $dx>) ]
+  --[ F16() ]->
+  [ Q(wwww($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap)) ]
+
+// FD: lone Q(wwwww(16 args)) flat 90 — lone-cell boundary
+rule FD_90:
+  [ In(<$dw, $dx>) ]
+  --[ F17() ]->
+  [ Q(wwwww($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap)) ]
+
+// FE: [Q(q(20)) 106, Sib 30] — squeezed func fill
+rule FE_1:
+  [ In(<$dw, $dx>) ]
+  --[ F18() ]->
+  [ Q(q($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap, $aq, $ar, $as, $at)), Sib('aaaaaaaaaaaaaaaaaaa18') ]
+
+// FE: [Q(q(20)) 106, Faa 45] — squeezed func fill vs argfact
+rule FE_2:
+  [ In(<$dw, $dx>) ]
+  --[ F19() ]->
+  [ Q(q($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao, $ap, $aq, $ar, $as, $at)), Faa($au, $av, $aw, $ax, $ay, $az, $ba, $bb) ]
+
+lemma l_FB_38:
+  exists-trace "Ex #i. F0() @ #i"
+
+lemma l_FB_39:
+  exists-trace "Ex #i. F1() @ #i"
+
+lemma l_FB_40:
+  exists-trace "Ex #i. F2() @ #i"
+
+lemma l_FB_41:
+  exists-trace "Ex #i. F3() @ #i"
+
+lemma l_FB_42:
+  exists-trace "Ex #i. F4() @ #i"
+
+lemma l_FB_43:
+  exists-trace "Ex #i. F5() @ #i"
+
+lemma l_FB_44:
+  exists-trace "Ex #i. F6() @ #i"
+
+lemma l_FB_45:
+  exists-trace "Ex #i. F7() @ #i"
+
+lemma l_FB_46:
+  exists-trace "Ex #i. F8() @ #i"
+
+lemma l_FB_47:
+  exists-trace "Ex #i. F9() @ #i"
+
+lemma l_FB_48:
+  exists-trace "Ex #i. F10() @ #i"
+
+lemma l_FC_1:
+  exists-trace "Ex #i. F11() @ #i"
+
+lemma l_FC_3:
+  exists-trace "Ex #i. F12() @ #i"
+
+lemma l_FD_86:
+  exists-trace "Ex #i. F13() @ #i"
+
+lemma l_FD_87:
+  exists-trace "Ex #i. F14() @ #i"
+
+lemma l_FD_88:
+  exists-trace "Ex #i. F15() @ #i"
+
+lemma l_FD_89:
+  exists-trace "Ex #i. F16() @ #i"
+
+lemma l_FD_90:
+  exists-trace "Ex #i. F17() @ #i"
+
+lemma l_FE_1:
+  exists-trace "Ex #i. F18() @ #i"
+
+lemma l_FE_2:
+  exists-trace "Ex #i. F19() @ #i"
+
+end

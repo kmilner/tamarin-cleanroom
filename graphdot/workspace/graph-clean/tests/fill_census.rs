@@ -79,17 +79,19 @@ fn is_info_body(body: &str) -> bool {
 }
 
 fn dewrap(body: &str) -> String {
-    let t = body.replace("&nbsp;", "");
-    let t = t.replace(",\\l", ", ");
+    // `,\l` = a separator break (its trailing space is dropped at line end);
+    // `\l&nbsp;` = an indented continuation or an indented closer peel (no
+    // character lost); a remaining col-0 `\l)` = the fact-paren peel (its
+    // padded ` )` space was the break). Order matters.
+    let t = body.replace(",\\l", ", ");
+    let t = t.replace("\\l&nbsp;", "&nbsp;");
     let t = t.replace("\\l)", " )");
-    let t = t.replace("\\l", "");
+    let t = t.replace("\\l", "").replace("&nbsp;", "");
     unescape(&t)
 }
 
 fn flat_width(body: &str) -> usize {
-    let lost = body.matches(",\\l").count() + body.matches("\\l)").count();
-    let bare = unescape(&body.replace("\\l", "").replace("&nbsp;", ""));
-    bare.chars().count() + lost
+    dewrap(body).chars().count()
 }
 
 const FLOOR: usize = 20;

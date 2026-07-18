@@ -123,16 +123,162 @@ fn is_tuple(s: &str) -> bool {
     s.starts_with('<') && s.ends_with('>') && s.len() >= 2
 }
 
-/// A `Doc` for one tuple element / fact argument. Tuples recurse; every other
-/// shape (atom, function application, exponentiation, AC term) is a single fill
-/// token rendered from its flat text (these do not re-wrap internally in the
-/// observed cells — the wrap happens at the enclosing fact/tuple level).
+/// Split `s` at top-level `++` separators (a `(a++b++…)` union body), honoring
+/// nesting and quotes. Returns one piece when there is no top-level `++`.
+pub fn split_top_unions(s: &str) -> Vec<String> {
+    let chars: Vec<char> = s.chars().collect();
+    let mut parts: Vec<String> = Vec::new();
+    let mut cur = String::new();
+    let mut depth = 0i32;
+    let mut in_quote = false;
+    let mut i = 0;
+    while i < chars.len() {
+        let c = chars[i];
+        if in_quote {
+            cur.push(c);
+            if c == '\'' {
+                in_quote = false;
+            }
+            i += 1;
+            continue;
+        }
+        match c {
+            '\'' => {
+                in_quote = true;
+                cur.push(c);
+                i += 1;
+            }
+            '(' | '<' | '[' => {
+                depth += 1;
+                cur.push(c);
+                i += 1;
+            }
+            ')' | '>' | ']' => {
+                depth -= 1;
+                cur.push(c);
+                i += 1;
+            }
+            '+' if depth == 0 && i + 1 < chars.len() && chars[i + 1] == '+' => {
+                parts.push(std::mem::take(&mut cur));
+                i += 2;
+            }
+            _ => {
+                cur.push(c);
+                i += 1;
+            }
+        }
+    }
+    parts.push(cur);
+    parts
+}
+
+/// A parenthesized `++`-union `(a++b++…)`: ≥ 2 top-level `++`-separated pieces.
+fn union_parts(s: &str) -> Option<Vec<String>> {
+    if !(s.starts_with('(') && s.ends_with(')')) || s.len() < 2 {
+        return None;
+    }
+    let parts = split_top_unions(&s[1..s.len() - 1]);
+    if parts.len() >= 2 { Some(parts) } else { None }
+}
+
+/// An unpadded function application `name(args)`: identifier directly followed
+/// by `(` (no space after) with the matching `)` closing the string. Returns
+/// `(name, args)`.
+fn func_parts(s: &str) -> Option<(&str, Vec<String>)> {
+    let open = s.find('(')?;
+    if open == 0 || !s.ends_with(')') || s.len() < open + 2 {
+        return None;
+    }
+    let name = &s[..open];
+    if !name.chars().all(|c| c.is_alphanumeric() || c == '_' || c == '!') {
+        return None;
+    }
+    let inner = &s[open + 1..s.len() - 1];
+    if inner.starts_with(' ') {
+        return None; // padded fact form, not a function application
+    }
+    // the closing paren must match the opening one (reject `f(x)^g(y)`)
+    let mut depth = 0i32;
+    let mut in_quote = false;
+    for (idx, c) in s.char_indices() {
+        if in_quote {
+            if c == '\'' {
+                in_quote = false;
+            }
+            continue;
+        }
+        match c {
+            '\'' => in_quote = true,
+            '(' | '<' | '[' => depth += 1,
+            ')' | '>' | ']' => {
+                depth -= 1;
+                if depth == 0 && idx != s.len() - 1 {
+                    return None;
+                }
+            }
+            _ => {}
+        }
+    }
+    Some((name, split_top_commas(inner)))
+}
+
+/// A `Doc` for one tuple element / fact argument. Tuples, parenthesized
+/// `++`-unions and function applications recurse (each breaks internally in
+/// the observed cells — round-10 batteries B/D); every other shape (atom,
+/// exponentiation, other AC operator term) is a single fill token rendered
+/// from its flat text.
 fn arg_doc(s: &str) -> Doc {
     if is_tuple(s) {
         tuple_doc(&s[1..s.len() - 1])
+    } else if let Some(parts) = union_parts(s) {
+        union_doc(&parts)
+    } else if let Some((name, args)) = func_parts(s) {
+        func_doc(name, &args)
     } else {
         text(s)
     }
+}
+
+/// `(a++b++…)` — the elements fill and align one past the `(`; each `++` stays
+/// attached to the element it follows; the closing `)` is a fill element
+/// nested back one column, so it stays beside the last element when it fits
+/// and peels onto its own line under the `(` otherwise (probe battery R10-D:
+/// UA_20 fill + UB_39 `)`-peel vs UB_40 attached).
+fn union_doc(parts: &[String]) -> Doc {
+    let n = parts.len();
+    let mut toks: Vec<Doc> = Vec::with_capacity(n + 1);
+    for (i, e) in parts.iter().enumerate() {
+        let d = arg_doc(e);
+        if i + 1 < n {
+            toks.push(beside_op(d, text("++")));
+        } else {
+            toks.push(d);
+        }
+    }
+    toks.push(nest(-1, &pchar(')')));
+    beside_op(pchar('('), fcat(toks))
+}
+
+/// `name(a, b, …)` — an unpadded function application: the arguments fill
+/// after `name(` (continuations align at that column, one column deeper per
+/// nesting level in a chain), and the closing `)` stays ATTACHED to the last
+/// argument (probe battery R10-B: FD_90 internal break, FC_1/FC_3 fills and
+/// chains — the `)` never peels alone, unlike the fact-level `)`).
+fn func_doc(name: &str, args: &[String]) -> Doc {
+    let n = args.len();
+    let toks: Vec<Doc> = args
+        .iter()
+        .enumerate()
+        .map(|(i, a)| {
+            let d = arg_doc(a);
+            if i + 1 < n {
+                beside_op(d, text(","))
+            } else {
+                beside_op(d, pchar(')'))
+            }
+        })
+        .collect();
+    beside_op(text(&format!("{}(", name)), fsep(toks))
 }
 
 /// `<e1, …, en>` — the elements fill and align one past the `<`; the `>` is a
@@ -389,6 +535,68 @@ mod tests {
         assert_eq!(to_record(flat, 20), want);
         // Lone (width 87) stays flat.
         assert_eq!(to_record(flat, 87), "Ack( ~n.4, <x1.4, x2.4> )");
+    }
+
+    #[test]
+    fn func_internal_break_and_chain() {
+        // Live battery R10-B: a lone `Q( wwwww(16 args) )` at flat 90 breaks
+        // INSIDE the function — args fill to 87, continuation aligned after
+        // `wwwww(`, the func `)` ATTACHED to the last arg, fact `)` peeled
+        // (probeB_dots/l_FD_90.dot, byte-exact).
+        let args: Vec<String> = (0..16)
+            .map(|k| format!("$a{}", (b'a' + k as u8) as char))
+            .collect();
+        let flat = format!("Q( wwwww({}) )", args.join(", "));
+        let want = "Q( wwwww($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am, $an, $ao,\\l\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$ap)\\l)\\l";
+        assert_eq!(to_record(&flat, 87), want);
+        // A flat-88 func fact wraps by fact-paren peel only (l_FD_88.dot).
+        let flat88 = format!("Q( www({}) )", args.join(", "));
+        let want88 = format!("Q( www({})\\l)\\l", args.join(", "));
+        assert_eq!(to_record(&flat88, 87), want88);
+        // Deep right-nested chain: one break per level, indent +2 per level,
+        // the tail rides flat once it fits (l_FC_3.dot, byte-exact).
+        let mut chain = "$an".to_string();
+        for i in (0..13).rev() {
+            chain = format!("p($a{}, {})", (b'a' + i as u8) as char, chain);
+        }
+        let got = to_record(&format!("Q( {} )", chain), 87);
+        let want_chain = "Q( p($aa,\\l\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;p($ab,\\l\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;p($ac,\\l\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;p($ad, p($ae, p($af, p($ag, p($ah, p($ai, p($aj, p($ak, p($al, p($am, $an)))))))))))))\\l)\\l";
+        assert_eq!(got, want_chain);
+    }
+
+    #[test]
+    fn union_fill_and_close_peel() {
+        // Live battery R10-D: unions display parenthesized/unspaced, break
+        // AFTER `++` with the continuation one past the `(` (l_UA_20.dot).
+        let elems: Vec<String> = (0..20)
+            .map(|k| format!("$a{}", (b'a' + k as u8) as char))
+            .collect();
+        let flat = format!("U( ({}) )", elems.join("++"));
+        let want = "U( ($aa++$ab++$ac++$ad++$ae++$af++$ag++$ah++$ai++$aj++$ak++$al++$am++$an++$ao++$ap++\\l\
+&nbsp;&nbsp;&nbsp;&nbsp;$aq++$ar++$as++$at)\\l)\\l";
+        assert_eq!(to_record(&flat, 87), want);
+        // The union `)` peels to the `(` column when it does not fit beside
+        // the last element (l_UB_39.dot: line0 ends at 87 exactly) …
+        let q39 = format!("'{}05'", "z".repeat(39));
+        let flat39 = format!("U( ({}++$aa++$ab++$ac++$ad++$ae++$af++$ag++$ah) )", q39);
+        let want39 = format!(
+            "U( ({}++$aa++$ab++$ac++$ad++$ae++$af++$ag++$ah\\l&nbsp;&nbsp;&nbsp;)\\l)\\l",
+            q39
+        );
+        assert_eq!(to_record(&flat39, 87), want39);
+        // … and stays attached when the last element wraps with it
+        // (l_UB_40.dot).
+        let q40 = format!("'{}06'", "z".repeat(40));
+        let flat40 = format!("U( ({}++$aa++$ab++$ac++$ad++$ae++$af++$ag++$ah) )", q40);
+        let want40 = format!(
+            "U( ({}++$aa++$ab++$ac++$ad++$ae++$af++$ag++\\l&nbsp;&nbsp;&nbsp;&nbsp;$ah)\\l)\\l",
+            q40
+        );
+        assert_eq!(to_record(&flat40, 87), want40);
     }
 
     #[test]

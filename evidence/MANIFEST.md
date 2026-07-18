@@ -21,7 +21,8 @@ full historical set re-validates at 0 violations under the stricter rule.
 2026-07-18 (later): wf round-5 implementer (wf_b6a947c0-a82) audited — 153
 tool calls, 0 forbidden accesses, 0 web accesses; graphdot round-9 implementer
 (wf_6b16799d-1c9) audited — 156 tool calls, 0/0; producers round-1 implementer
-(wf_f9696b2b-75e) audited — 72 tool calls, 0/0; 39 sealed transcripts total.
+(wf_f9696b2b-75e) audited — 72 tool calls, 0/0; graphdot round-10 implementer
+(wf_58b2a176-d66) audited — 148 tool calls, 0/0; 40 sealed transcripts total.
 
 | Path | Agent | Role |
 |------|-------|------|
@@ -59,6 +60,7 @@ tool calls, 0 forbidden accesses, 0 web accesses; graphdot round-9 implementer
 | workflows/wf_b6a947c0-a82/agent-aac83361400743475.jsonl | round 5 (unit C) | wf corpus-divergence closure: equality-guards + quantifier fusion, sort-clash keying, tail (full gate 71→8 DIFF) |
 | workflows/wf_6b16799d-1c9/agent-a6d5afeb848c42e89.jsonl | round 9 (unit B) | fill-width allocation: two-layer trigger/fill model probe-exact 343/343, engine laziness fix, residue characterized (abbreviation-width = caller-input gap) |
 | workflows/wf_f9696b2b-75e/agent-abaf7a3894e2dccc3.jsonl | producers round 1 | web producer surface R1: shared HTML skin + center section fragments (324/324 corpus fragments byte-identical incl. envelope; live-probe replays 8/8) |
+| workflows/wf_58b2a176-d66/agent-ab3a750508a830592.jsonl | round 10 (unit B) | fill-width laws corrected by probe (sqa=none, C=flat+Σ(elems+1), bonus=⌊n/2⌋+2 cap 4), band-NONE 10.3%→5.83%, CellWidths override interface (probe byte-exactness 525/547) |
 
 Corresponding workspaces (../wellformedness, ../graphdot, ../weblayer) hold
 each agent's QUERIES.log, BEHAVIOR.md, REPORT*.md and code — cross-reference
@@ -81,6 +83,7 @@ the transcripts against those logs.
 | workflows/wf_b6a947c0-a82/agent-a351c5451327cd399.jsonl | wf round-5 delta audit (pass, 0 findings; closes the round-4 equality-guard advisory — clean side previously under-claimed vs the source, reached parity by probing) |
 | workflows/wf_6b16799d-1c9/agent-aef2578a65838b522.jsonl | graphdot round-9 delta audit (pass, 0 Dot.hs-resemblance findings; laziness = sanctioned BSD semantics; every fitted constant probe-traced, disjoint from source's 100/1.3/130/30; one non-blocking behavioral redo: reconcile sqa correction magnitude/placement) |
 | workflows/wf_f9696b2b-75e/agent-aad7d84bc51151972.jsonl | producers round-1 dual audit (pass; similarity: 0 violations, expression diverges materially from upstream; hygiene: finding PH-1 — scaffold SPEC/README cited upstream file paths, rewrite applied open-side, no contamination of sealed work) |
+| workflows/wf_58b2a176-d66/agent-abc902c75185add51.jsonl | graphdot round-10 delta audit (pass; round-9 sqa advisory resolved consistently, evidence-backed; size laws probe-traced to the column, refuting round-9's own 2n−4; no Dot.hs convergence) |
 
 Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUDIT.md,
 ../console/AUDIT.md, ../macros/AUDIT.md, ../injective/AUDIT.md, ../derivcheck/AUDIT.md.

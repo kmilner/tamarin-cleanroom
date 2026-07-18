@@ -447,3 +447,148 @@ across siblings collide -> occ>=2 -> ABBREVIATED, which corrupted the first
 - fill_census (crate group_widths, final): all-cells 95.572% (prop87 95.451%),
   wrapping 81.59% (81.09%), multi-cell 80.45% (79.90%), falseNeg 1000 (1843).
   GRAPHCLEAN_CORPUS roundtrip stays 12022/12022; all 55 tests green.
+
+## Session 10 (round 10) — audit redo (sqa placement), shape-pin batteries, band-NONE families, occupancy interface
+- Baseline gates re-run before any change: all tests green; corpus roundtrip
+  12022/12022; fill_census: all 95.572%, wrap 81.59%, multi 80.45%, falseNeg 1000.
+- AUDIT REDO analysis of ARCHIVED round-9 captures (r9/probe3_b3.tsv, captured
+  OUTPUT only): the LA/LB series [Faa 45 argfact, Sib s sqa] already
+  discriminates the two logged sqa models. Observed: s=41 both flat; s=43 Faa
+  WRAPS (band 64-66) while Sib stays FLAT (F64); s=45/47 both wrap; LB order
+  identical. Model LOG (C(sqa)=flat-4 sibling-occupancy, own check flat)
+  predicts at s=43: Faa FITS (budget 91-43=48) and Sib WRAPS (43>42) — BOTH
+  wrong. Model CODE (own eff=flat-2, occupancy=flat) predicts Faa wraps
+  (45>44) and Sib fits (41<=42) — both right. So the archive refutes the
+  QUERIES.log Session-9 wording; remaining ambiguity: occupancy correction
+  k in {0,1} (s=42 untested) and own discount d in {1,2} (s=44 untested)
+  — parity gaps. Live battery R10-A below closes them.
+- Corpus reads (captured OUTPUT: oracle/dot_corpus, r9/bands3.tsv re-analysis):
+  band-NONE wrap cells = 14695/142540 (10.3% of bands3 wrap rows), family split
+  func+abbr 10403 / abbr-only 1502 / func-only 1430 / plain 1360. Raw label
+  dumps (005bebc7fd01a01b, 0073d3e87669e9b4, 0011f263c0d9579a) show WHY:
+  (a) the reference breaks INSIDE function applications — `Out( sko(senc(~n.2,\l
+      <nbsp x14>~z))\l)\l`: break after an inner-func comma, continuation
+      aligned to the column after `senc(`; our cell-doc treats function
+      applications as unbreakable atoms => band-NONE.
+  (b) ++-union terms display PARENTHESIZED with unspaced `++`: `(y1++y2)`,
+      and break after `++` with the continuation aligned one past the `(`:
+      `(\<v1, hV1\>++\l<nbsp x8>\<v2, hV2\>)` — no union support in cell-doc.
+  (c) abbr cells (`UN9`, `PE1`...) break at widths far below any budget
+      (pre-abbreviation layout) — structurally unbandable post-abbreviation.
+  Purpose: pick probe-closable families (func, union) for round-10 scope 3.
+- LIVE battery R10-A (probeA.spthy AuditSqaProbe, 30 rules, :3200, r10/serve.sh
+  OOM-guarded; drive.py autoprove+graph-def -> r10/probeA_dots; server STOPPED):
+  RA [Faa 45, Sib s] s=40..48 step 1; RB [Faaa 46, Sib s] s=39..46; RC order
+  swaps s=42,44; RD triple [F 28, H 28, Sib s] s=30..35; RE floor [Wff 70,
+  Sib s] s=20..24. FINDINGS (r10/probeA_b3.tsv, band_dump):
+  * sqa OCCUPANCY correction k = 0 EXACT: the argfact partner flips at
+    s=43 (base 45) / s=42 (base 46) / s=32 (triple) — the plain flat-sum
+    crossing. C(sqa)=flat-4 (the QUERIES Session-9 wording) would put the
+    flips at 47/46 — refuted directly.
+  * sqa OWN-width discount: NOT a constant. Flip of the sib itself:
+    s=44 (budget 42, base-45 row), s=42 (budget 41, base-46), s=32 (budget 31,
+    triple), s=21 (floor 20). d=2 (shipped) fails RA_44/RC_44/RB_42/RB_43/
+    RD_32/RD_33 (probe score 440/446); d=1 fails RB_42/RD_32; d=0 (no
+    discount) scores 443/446 with the only misses LA_43/LB_43/RA_43 — a sib
+    at budget+1 saved beside a peel-only-wrapping 45-flat partner but NOT
+    beside a 46-flat one ([46,42] wraps) nor in the triple: the documented
+    +-1 coupled-fits/occ-relief flip, not a shape term.
+  * corpus check (r9/bands3.tsv re-eval, r10/trig_eval.py): ALL sqa variants
+    (d=0/1/2/3, occ-2/-4) are corpus-IDENTICAL (fp 1363 fn 721, 1.088% of
+    191596 multi-row cells) — the sqa term never decides a corpus cell; the
+    round-9 gain over flat-sum (1.46%) is entirely tuple 2n-4 + bonus.
+  * FILL layer refinement (r10/fill_eval.py over probeA + r9 probe2/3/4 + r8
+    grids, corpus bands3): the 5/6 quoted-atom-sibling discount OVERSHOOTS for
+    argfact receivers (RA_48 needs b<=42, 5/6 gives 46->clamp 44; RE_20 needs
+    67, gives 70) but is EXACT for tuple-fact receivers (I/Q series s=21..120).
+    Receiver-conditioned weight (5/6 iff receiver dtop>0) scores 351/362 probe
+    fill bands vs 346 (5/6 everywhere), corpus banded-fill unchanged 82.17%.
+  * RESOLUTION shipped in generate::group_widths: trigger eff = flat (no sqa
+    discount), fill w = 5/6 only for tuple-fact receivers. Corpus census
+    BYTE-IDENTICAL to round 9 (all 95.572%, wrap 81.59%, falseNeg 1000);
+    probeA census wrap 42/44 (was 31/44), falseNeg 6->0. BEHAVIOR.md §3f +
+    round-9 report annotated; QUERIES Session-9 "C(sqa)=flat-4" wording was a
+    stale mid-session hypothesis that fit the step-2 grid — now corrected.
+- LIVE battery R10-B (probeB.spthy FuncShapeProbe, 20 rules, :3201, stopped;
+  r10/probeB_dots, probeB_b3.tsv): FB [Faa 45, Q(func) s] s=38..48: X flips
+  42->43 (C(funcfact)=flat, NO correction) and the func fact's own flip is
+  43->44 (fit at budget+1 — the SAME [45, b+1] relief as the sqa sib; so the
+  relief is sib-shape-INDEPENDENT, further confirming it is row-coupled fits
+  noise, not a shape term). FD lone func facts: 86/87 flat, 88 wraps => the
+  87 boundary holds for func cells; FD_88/89 wrap by fact-)-peel ONLY (func
+  intact, line0 = flat-2); FD_90 (flat 90) breaks INSIDE the func: args fill
+  to 87, continuation aligned at the column AFTER `name(`, func ')' stays
+  ATTACHED to the last arg, fact ')' peels to col 0. FC_1 (flat 106) same;
+  FC_3 deep chain p($aa, p($ab, ...)): one break per nesting level, indent
+  +2 per level (= each nested call's post-`name(` column), tail rides flat
+  once it fits. FE squeezed func fills match prop-share: FE_1 [106, Sib 30]
+  12 elems line0; FE_2 [106, Faa 45] 11 elems; Faa 4+4 at b=26.
+- LIVE battery R10-C (probeC.spthy QuoteShapeProbe, 25 rules, :3202, stopped;
+  r10/probeC_dots, probeC_b3.tsv): QA 2-quote facts + QB quote+var facts:
+  X flips 42->43 (C=flat) and own flips 43->44 (b+1 relief) — IDENTICAL to
+  argfact/sqa/func: NO multi-quote corrections of any kind. QC quote-FIRST
+  3-elem tuple-fact sib (flats 40..48): X (Faa 45) wraps at EVERY probed sib
+  (>=40) => C(Qt) >= 43 = flat+3 (pure-var 3-tuple is flat+2); Qt own flip
+  45->46 => own budget reads 45 (pure-var read: 46 with the +4 bonus). Both
+  sides read ~+1 vs the pure-var tuple model — quote-in-tuple anomaly, to be
+  pinned by battery R10-E (position/count/arity variations + lower X-side
+  sweep).
+- LIVE battery R10-D (probeD.spthy UnionShapeProbe, 13 rules, :3203, stopped;
+  r10/probeD_dots): ++-union DISPLAY = parenthesized, unspaced:
+  `U( ($aa++$ab++...) )`; breaks AFTER `++` (separator trails), continuation
+  aligned ONE PAST the union `(`; the union `)` stays with the last element
+  iff it fits (UB_40/41) else peels to its own line at the `(` column
+  (UB_39) — exactly the tuple-`>` nest(-1) behavior; fact `)` peels to col 0.
+  Boundary: lone union fact line0 fits to 87 exactly (UB_38 87 flat-2-peel,
+  UB_39 88 -> `)` peel). Squeezed fills (UD_1 [union20 108, Sib 30] 13 elems
+  line0; UD_2 [108, Faa 45] 12 elems) need an INFLATED union width in the
+  share numerator (~flat + 2n-4, i.e. internally spaced ` ++ ` seps minus
+  parens); plain display-flat prop under-allocates 1-3 columns. DN_1
+  [chain 112, Sib 30] tail line needs ribbon >= 70 (5/6-discounted sib or an
+  inflated numerator; to pin). UC: unions render parenthesized inside tuples
+  and function args.
+- LIVE battery R10-E (probeE.spthy QuoteTuplePinProbe, 71 rules, :3204,
+  stopped; r10/probeE_dots, probeE_b3.tsv): PF pure-var 3-tuple control vs
+  PA/PB/PC (quote first/middle/last) vs PD (two quotes) vs PE (quote in
+  pair): ALL flip identically — quotes inside tuples contribute NOTHING;
+  the 3-tuple occupancy reads flat+4 (X flips 38->39) and the PAIR flat+3
+  (PE X flips 39->40), refuting 2n-4 (0/+2) at small n. UEV pure-var 5-union:
+  X flips 36->37 => C(5-union) = flat+6 exactly; own flip 47->48. UG/DN
+  squeezed fills: union line0 elems (14/12) and chain tails need an INTERNAL
+  fill numerator ~ flat + (elems+1) [union] / +1 per func node [chains].
+- LIVE battery R10-F (probeF.spthy SizeLawProbe, 55 rules, :3205, stopped;
+  r10/probeF_dots, probeF_b3.tsv): TN tuple X-flips: n=2 at 40, n=3 at 39,
+  n=4 at 38, n=6 at 36 (TN6_33..35 verified all-flat in raw dots) =>
+  OCCUPANCY LAW corr(n) = n+1, refuting 2n-4 everywhere but n=5. UN union
+  X-flips: n=3 at 39, n=8 at 34 (UN8_33 all-flat) => same n+1 law for
+  unions. TB/UB own flips: budget reads bonus {n=2:3, 3:3, 5:4-5, 6:5-6,
+  8:6-7} (intervals = the [45-partner, budget+1] relief ambiguity); r8
+  R_16_10/R_20_1 rows (re-analyzed, captured OUTPUT) force bonus <= 4 at
+  n = 16/20 => law floor(n/2)+2 for n <= 8, 4 beyond, consistent with every
+  row. Model scorecard (r10/trig4.py over ALL batteries incl re-dumped b4
+  TSVs): 722/731 probe cells (old round-9 model: 670/731), all 9 misses the
+  single relief pattern; corpus 1.203% vs old 1.051%, BUT on
+  abbreviation-free groups new 1.977% vs old 2.480% and 1399/1555 of the
+  old-new disagreements sit in abbreviated groups (widths unknowable from
+  display text) — probe-pinned law shipped.
+- Corpus re-dumps (captured OUTPUT): r10/bands4.tsv (11-field features incl
+  ctup/bmax), r10/bands5.tsv (after cell-doc extension). DEWRAP FIX: the
+  band/census tooling mis-reconstructed union-`)` peels (added a phantom
+  space); fixed in band_dump, fill_census, census, width_probe (indented
+  closer lines lose no character; only the col-0 fact-`)` regains its pad).
+- IMPLEMENTED (graph-clean): trigger corr(n)=n+1 + bonus law in
+  generate::cell_shape/group_widths; fill = internal numerator over sibling
+  occupancies (5/6 sqa for tuple receivers kept); union_doc + func_doc in
+  doclayout::arg_doc (recursive; union `)` = tuple-style nest(-1) peel, func
+  `)` attached to last arg); CellWidths / group_widths_with /
+  RawRule::{premise,conclusion}_widths override interface (absent =>
+  byte-identical, test-gated). New byte-fixture tests from probe captures
+  (FD_88/FD_90/FC_3 func, UA_20/UB_39/UB_40 union), supplied-widths tests.
+- FINAL GATES: 73 tests green; GRAPHCLEAN_CORPUS roundtrip 12022/12022;
+  alloc_corpus 12022/12022; fill_census corpus: all 96.580% (was 95.572%),
+  wrap 86.26% (81.59%), single 97.41% (94.75%), multi 85.29% (80.45%),
+  falseNeg 819 (1000). Probe censuses: A 42/44, B 19/20, C 32/34, D 12/12,
+  E 64/68, F 47/51, p2 129/133, p3 86/89, p4 9/10, r8 85/86 => 525/547 wrap
+  cells byte-exact (96.0%). Band-NONE 14695 -> 8305 (5.83%): plain 9,
+  abbr-only 14, func-only 646, func+abbr 7636. Servers: 3200-3205 all
+  stopped; 3200-3299 verified clear (see below).

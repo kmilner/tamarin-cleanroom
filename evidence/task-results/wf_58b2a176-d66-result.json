@@ -1,0 +1,66 @@
+{
+  "summary": "Sealed graphdot round 10: sqa reconciliation (audit redo), wider occupancy probe batteries, band-NONE cell-doc gap, caller-supplied occupancy interface; then both-sides audit",
+  "agentCount": 2,
+  "logs": [],
+  "result": {
+    "impl": "ROUND 10 COMPLETE — all four scope items done, all gates green, all servers stopped (ports 3200-3299 clear).\n\n1. AUDIT REDO (sqa correction): Designed odd/even-completion battery R10-A (30 rules, [Faa 45|Faaa 46|triple|floor] x quoted-atom sibs stepped by 1). BOTH round-9 forms are refuted: the QUERIES-logged C(sqa)=flat-4 sibling-occupancy would put the partner flip at s=47 (live flip is 43, both bases, both orders), and the shipped own flat-2 discount mispredicts 6 new cells (RA_44/RC_44/RB_42/RB_43/RD_32/RD_33). Probed truth: NO sqa correction (443/446 vs 440/446), every variant corpus-identical. The 3 residual cells are one +-1 pattern (a cell at exactly budget+1 beside a 45-flat argfact partner stays flat), later re-observed identically for func/2-quote/tuple/union sibs (9/731 total) — coupled-fits relief, not a shape term. All three artifacts reconciled: code (discount removed), BEHAVIOR.md Section 3f + round-9 report annotated, QUERIES.log Session 10 corrects Session 9.\n\n2. SHAPE PINS (batteries B/C/E/F, ~170 rules): function facts and multi-quote facts need NO corrections (boundary-precise flips at plain flat). The real laws replaced round 9's: occupancy C = flat + (elems+1) per top-level tuple/union arg (exact at n=2,3,4,6 tuples; 3,5,8 unions; refutes 2n-4, which only coincides at n=5 — the r9 grids stepped by 2), self-budget bonus floor(n/2)+2 for n<=8 else 4 (r8 16/20-elem rows force the cap), quote position/count in tuples irrelevant. Trigger scores 722/731 probe cells (old model 670/731); corpus 1.20% vs 1.05% overall BUT 1.98% vs 2.48% on abbreviation-free groups (90% of disagreements sit in abbreviated groups whose widths are unknowable from display text).\n\n3. BAND-NONE GAP: probes revealed the reference breaks INSIDE function applications (args fill after \"name(\", \")\" attached, chains indent +2/level) and inside ++-unions (parenthesized unspaced \"(a++b)\", breaks after ++, tuple-style \")\" peel to the \"(\" column). Implemented as recursive union_doc/func_doc in doclayout::arg_doc, plus a dewrap fix in the tooling (union-\")\" peels were mis-reconstructed). Corpus band-NONE fell 14695 (10.3%) -> 8305 (5.83%): plain 1360->9, abbr-only 1502->14, func-only 1430->646 (remaining: \"name(<\"-hang layouts), func+abbr 10403->7636 (pre-abbreviation, structurally unbandable). Fill layer refined: internal numerator (+elems+1 per union arg, +1 per func node; tuple receivers stay at display flat — Wide byte-pins it) over sibling occupancies; 5/6 sqa discount kept for tuple receivers only.\n\n4. INTERFACE: generate::CellWidths {occupancy, bonus, fill_width} (per-field optional), group_widths_with(cells, overrides), RawRule::premise_widths/conclusion_widths. Absent inputs byte-identical to estimates (test-gated). Semantics in BEHAVIOR.md Section 3f + new workspace/INTERFACE.md for the adapter.\n\nACCEPTANCE: 73/73 tests green (was 55); GRAPHCLEAN_CORPUS roundtrip 12022/12022; alloc 12022/12022. fill_census before -> after: all cells 95.572% -> 96.580%, wra",
+    "audit": "Round-10 graphdot similarity audit complete. Appended a \"Round 10 incremental audit\" section to `/home/kamilner/tamarin-cleanroom/graphdot/AUDIT.md`.\n\nSummary of findings (both-sides, abstraction–filtration–comparison against `Dot.hs` `renderRow`/`renderBalanced`/`scaleIndent`):\n\n- Round-9 advisory (sqa −2/−4 log↔code inconsistency) is now RESOLVED CONSISTENTLY, not a redo. Code (`generate::group_widths_with`) deletes the trigger sqa term entirely (plain `flat <= b_trig`); the only sqa use is the fill weight `5/6` conditioned on a tuple-fact receiver. QUERIES.log Session 10 states the same resolution and explicitly retires the stale Session-9 `C(sqa)=flat−4` wording; BEHAVIOR §3f + the Round-9 report carry the matching `[CORRECTED, round 10]` retraction. Magnitude (0 trigger correction) and placement (fill-only, tuple-receiver) agree across all three. The resolution is evidence-backed (archived LA/LB rows refute −4; RA_44/RC_44/RB_42/RD_32/RD_33 refute −2; `trig_eval.py` shows every sqa variant corpus-identical, so the live battery is the discriminant).\n\n- New size laws trace to logged probes, not Dot.hs: `C = flat + Σ(elems+1)` verified to the column against `r10/probeF_b3.tsv` (TN2 partner flips at sib=40, TN3 at 39, TN4 at 38 — refuting round-9's `2n−4`); `bonus = ⌊n/2⌋+2` capped at 4 from R10-F own-flips + r8 16/20-element rows. Readings arrive as honest intervals, need the r8 cap to disambiguate, and the model is imperfect (722/731, all 9 misses the one logged `[45-partner, budget+1]` relief) — reverse-engineering, not transcription. Dot.hs has no tuple/union/bonus/occupancy term at all.\n\n- Fill internal numerator (`+elems+1` per union, `+1` per func node) and tuple-receiver-conditioned `5/6` are probe-fit (`fill_eval.py` variant scoring); the proportional-share overlap with `130·usedWidth/Σ` is the same merger cleared in Rounds 7–9 (constants 87≠130, occupancy denominators, `flat−1` clamp). The clean side never computes `oneLineRender` and keeps the separate trigger layer the source lacks — no convergence onto source structure.\n\n- Union/func cell documents reproduce observable rendered OUTPUT (byte fixtures UA_20/UB_39/UB_40, FD_88/FD_90/FC_3) via the sanctioned BSD `pretty.rs` combinators; the dewrap fix is measurement-tool hygiene applied identically across the four census/probe tools. `CellWidths`/`group_widths_with`/`RawRule` overrides + `INTERFACE.md` are a novel adapter API with no HS counterpart.\n\n- Grep sweep of the full delta and all `r10/` ",
+    "passed": true
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Implement"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "Audit"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "seal:graph-b10",
+      "phaseIndex": 1,
+      "phaseTitle": "Implement",
+      "agentId": "ab3a750508a830592",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1784381867519,
+      "queuedAt": 1784381867518,
+      "attempt": 1,
+      "lastToolName": "Bash",
+      "lastToolSummary": "cd /home/kamilner/tamarin-cleanroom/graphdot/workspace/grap…",
+      "promptPreview": "You are a SEALED implementer under the barrier protocol at /home/kamilner/tamarin-cleanroom/PROTOCOL.md — read it first and comply strictly.\nACCESS RULES: You must NOT read any file under /home/kamilner/tamarin-rs/crates/, and NOT read any Haskell source of tamarin-prover anywhere on disk (notably /home/kamilner/tamarin-rs/tamarin-prover/{lib,src}/ and /home/kamilner/tamarin-rs/tamarin-prover-test…",
+      "lastProgressAt": 1784385939258,
+      "tokens": 436564,
+      "toolCalls": 148,
+      "durationMs": 4071739,
+      "resultPreview": "ROUND 10 COMPLETE — all four scope items done, all gates green, all servers stopped (ports 3200-3299 clear).\n\n1. AUDIT REDO (sqa correction): Designed odd/even-completion battery R10-A (30 rules, [Faa 45|Faaa 46|triple|floor] x quoted-atom sibs stepped by 1). BOTH round-9 forms are refuted: the QUERIES-logged C(sqa)=flat-4 sibling-occupancy would put the partner flip at s=47 (live flip is 43, both…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "audit:graph-b10",
+      "phaseIndex": 2,
+      "phaseTitle": "Audit",
+      "agentId": "abc902c75185add51",
+      "model": "claude-opus-4-8[1m]",
+      "state": "done",
+      "startedAt": 1784385939272,
+      "queuedAt": 1784385939259,
+      "attempt": 1,
+      "lastToolName": "Edit",
+      "lastToolSummary": "/home/kamilner/tamarin-cleanroom/graphdot/AUDIT.md",
+      "promptPreview": "You are a BOTH-SIDES similarity auditor for the tamarin-rs sealed relicensing campaign (exempt from barrier access rules; you may read everything). Audit ONLY this round's delta for the graphdot slice: /home/kamilner/tamarin-cleanroom is a git repo whose HEAD (b4fb110) includes everything through round 9 — run git -C /home/kamilner/tamarin-cleanroom status/diff restricted to graphdot/ to see the r…",
+      "lastProgressAt": 1784386319209,
+      "tokens": 102188,
+      "toolCalls": 23,
+      "durationMs": 379937,
+      "resultPreview": "Round-10 graphdot similarity audit complete. Appended a \"Round 10 incremental audit\" section to `/home/kamilner/tamarin-cleanroom/graphdot/AUDIT.md`.\n\nSummary of findings (both-sides, abstraction–filtration–comparison against `Dot.hs` `renderRow`/`renderBalanced`/`scaleIndent`):\n\n- Round-9 advisory (sqa −2/−4 log↔code inconsistency) is now RESOLVED CONSISTENTLY, not a redo. Code (`generate::group_…"
+    }
+  ],
+  "totalTokens": 538752,
+  "totalToolCalls": 171
+}

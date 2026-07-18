@@ -1,0 +1,229 @@
+theory QuoteShapeProbe
+begin
+
+// QA: concl [Faa 45, Qq 2-quote 41] — own flip 42+d2, occ flip 42+k2
+rule QA_41:
+  [ In(<$dw, $dx>) ]
+  --[ F0() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qq('aaaaaaaaaaaaaaaaaaaaa00', 'bbbb00') ]
+
+// QA: concl [Faa 45, Qq 2-quote 42] — own flip 42+d2, occ flip 42+k2
+rule QA_42:
+  [ In(<$dw, $dx>) ]
+  --[ F1() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qq('aaaaaaaaaaaaaaaaaaaaaa01', 'bbbb01') ]
+
+// QA: concl [Faa 45, Qq 2-quote 43] — own flip 42+d2, occ flip 42+k2
+rule QA_43:
+  [ In(<$dw, $dx>) ]
+  --[ F2() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qq('aaaaaaaaaaaaaaaaaaaaaaa02', 'bbbb02') ]
+
+// QA: concl [Faa 45, Qq 2-quote 44] — own flip 42+d2, occ flip 42+k2
+rule QA_44:
+  [ In(<$dw, $dx>) ]
+  --[ F3() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qq('aaaaaaaaaaaaaaaaaaaaaaaa03', 'bbbb03') ]
+
+// QA: concl [Faa 45, Qq 2-quote 45] — own flip 42+d2, occ flip 42+k2
+rule QA_45:
+  [ In(<$dw, $dx>) ]
+  --[ F4() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qq('aaaaaaaaaaaaaaaaaaaaaaaaa04', 'bbbb04') ]
+
+// QA: concl [Faa 45, Qq 2-quote 46] — own flip 42+d2, occ flip 42+k2
+rule QA_46:
+  [ In(<$dw, $dx>) ]
+  --[ F5() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qq('aaaaaaaaaaaaaaaaaaaaaaaaaa05', 'bbbb05') ]
+
+// QA: concl [Faa 45, Qq 2-quote 47] — own flip 42+d2, occ flip 42+k2
+rule QA_47:
+  [ In(<$dw, $dx>) ]
+  --[ F6() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qq('aaaaaaaaaaaaaaaaaaaaaaaaaaa06', 'bbbb06') ]
+
+// QA: concl [Faa 45, Qq 2-quote 48] — own flip 42+d2, occ flip 42+k2
+rule QA_48:
+  [ In(<$dw, $dx>) ]
+  --[ F7() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qq('aaaaaaaaaaaaaaaaaaaaaaaaaaaa07', 'bbbb07') ]
+
+// QA: concl [Faa 45, Qq 2-quote 49] — own flip 42+d2, occ flip 42+k2
+rule QA_49:
+  [ In(<$dw, $dx>) ]
+  --[ F8() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qq('aaaaaaaaaaaaaaaaaaaaaaaaaaaaa08', 'bbbb08') ]
+
+// QB: concl [Faa 45, Qm quote+var 41]
+rule QB_41:
+  [ In(<$dw, $dx>) ]
+  --[ F9() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qm('aaaaaaaaaaaaaaaaaaaaaaaaaa09', $ai) ]
+
+// QB: concl [Faa 45, Qm quote+var 42]
+rule QB_42:
+  [ In(<$dw, $dx>) ]
+  --[ F10() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qm('aaaaaaaaaaaaaaaaaaaaaaaaaaa10', $ai) ]
+
+// QB: concl [Faa 45, Qm quote+var 43]
+rule QB_43:
+  [ In(<$dw, $dx>) ]
+  --[ F11() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qm('aaaaaaaaaaaaaaaaaaaaaaaaaaaa11', $ai) ]
+
+// QB: concl [Faa 45, Qm quote+var 44]
+rule QB_44:
+  [ In(<$dw, $dx>) ]
+  --[ F12() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qm('aaaaaaaaaaaaaaaaaaaaaaaaaaaaa12', $ai) ]
+
+// QB: concl [Faa 45, Qm quote+var 45]
+rule QB_45:
+  [ In(<$dw, $dx>) ]
+  --[ F13() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qm('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa13', $ai) ]
+
+// QB: concl [Faa 45, Qm quote+var 46]
+rule QB_46:
+  [ In(<$dw, $dx>) ]
+  --[ F14() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qm('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa14', $ai) ]
+
+// QB: concl [Faa 45, Qm quote+var 47]
+rule QB_47:
+  [ In(<$dw, $dx>) ]
+  --[ F15() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qm('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa15', $ai) ]
+
+// QC: concl [Faa 45, Qt tuple-with-quote 38] — quote-in-tuple corrections
+rule QC_38:
+  [ In(<$dw, $dx>) ]
+  --[ F16() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qt(<'aaaaaaaaaaaaaaaaaa16', $ai, $aj>) ]
+
+// QC: concl [Faa 45, Qt tuple-with-quote 39] — quote-in-tuple corrections
+rule QC_39:
+  [ In(<$dw, $dx>) ]
+  --[ F17() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qt(<'aaaaaaaaaaaaaaaaaaa17', $ai, $aj>) ]
+
+// QC: concl [Faa 45, Qt tuple-with-quote 40] — quote-in-tuple corrections
+rule QC_40:
+  [ In(<$dw, $dx>) ]
+  --[ F18() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qt(<'aaaaaaaaaaaaaaaaaaaa18', $ai, $aj>) ]
+
+// QC: concl [Faa 45, Qt tuple-with-quote 41] — quote-in-tuple corrections
+rule QC_41:
+  [ In(<$dw, $dx>) ]
+  --[ F19() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qt(<'aaaaaaaaaaaaaaaaaaaaa19', $ai, $aj>) ]
+
+// QC: concl [Faa 45, Qt tuple-with-quote 42] — quote-in-tuple corrections
+rule QC_42:
+  [ In(<$dw, $dx>) ]
+  --[ F20() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qt(<'aaaaaaaaaaaaaaaaaaaaaa20', $ai, $aj>) ]
+
+// QC: concl [Faa 45, Qt tuple-with-quote 43] — quote-in-tuple corrections
+rule QC_43:
+  [ In(<$dw, $dx>) ]
+  --[ F21() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qt(<'aaaaaaaaaaaaaaaaaaaaaaa21', $ai, $aj>) ]
+
+// QC: concl [Faa 45, Qt tuple-with-quote 44] — quote-in-tuple corrections
+rule QC_44:
+  [ In(<$dw, $dx>) ]
+  --[ F22() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qt(<'aaaaaaaaaaaaaaaaaaaaaaaa22', $ai, $aj>) ]
+
+// QC: concl [Faa 45, Qt tuple-with-quote 45] — quote-in-tuple corrections
+rule QC_45:
+  [ In(<$dw, $dx>) ]
+  --[ F23() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qt(<'aaaaaaaaaaaaaaaaaaaaaaaaa23', $ai, $aj>) ]
+
+// QC: concl [Faa 45, Qt tuple-with-quote 46] — quote-in-tuple corrections
+rule QC_46:
+  [ In(<$dw, $dx>) ]
+  --[ F24() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qt(<'aaaaaaaaaaaaaaaaaaaaaaaaaa24', $ai, $aj>) ]
+
+lemma l_QA_41:
+  exists-trace "Ex #i. F0() @ #i"
+
+lemma l_QA_42:
+  exists-trace "Ex #i. F1() @ #i"
+
+lemma l_QA_43:
+  exists-trace "Ex #i. F2() @ #i"
+
+lemma l_QA_44:
+  exists-trace "Ex #i. F3() @ #i"
+
+lemma l_QA_45:
+  exists-trace "Ex #i. F4() @ #i"
+
+lemma l_QA_46:
+  exists-trace "Ex #i. F5() @ #i"
+
+lemma l_QA_47:
+  exists-trace "Ex #i. F6() @ #i"
+
+lemma l_QA_48:
+  exists-trace "Ex #i. F7() @ #i"
+
+lemma l_QA_49:
+  exists-trace "Ex #i. F8() @ #i"
+
+lemma l_QB_41:
+  exists-trace "Ex #i. F9() @ #i"
+
+lemma l_QB_42:
+  exists-trace "Ex #i. F10() @ #i"
+
+lemma l_QB_43:
+  exists-trace "Ex #i. F11() @ #i"
+
+lemma l_QB_44:
+  exists-trace "Ex #i. F12() @ #i"
+
+lemma l_QB_45:
+  exists-trace "Ex #i. F13() @ #i"
+
+lemma l_QB_46:
+  exists-trace "Ex #i. F14() @ #i"
+
+lemma l_QB_47:
+  exists-trace "Ex #i. F15() @ #i"
+
+lemma l_QC_38:
+  exists-trace "Ex #i. F16() @ #i"
+
+lemma l_QC_39:
+  exists-trace "Ex #i. F17() @ #i"
+
+lemma l_QC_40:
+  exists-trace "Ex #i. F18() @ #i"
+
+lemma l_QC_41:
+  exists-trace "Ex #i. F19() @ #i"
+
+lemma l_QC_42:
+  exists-trace "Ex #i. F20() @ #i"
+
+lemma l_QC_43:
+  exists-trace "Ex #i. F21() @ #i"
+
+lemma l_QC_44:
+  exists-trace "Ex #i. F22() @ #i"
+
+lemma l_QC_45:
+  exists-trace "Ex #i. F23() @ #i"
+
+lemma l_QC_46:
+  exists-trace "Ex #i. F24() @ #i"
+
+end

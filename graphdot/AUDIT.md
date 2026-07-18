@@ -1039,3 +1039,134 @@ or corpus band inversion (`bands3.tsv`, `fill_census.rs`), and none matches or d
 `pretty.rs` laziness is sanctioned BSD-library semantics. One non-blocking provenance-hygiene
 advisory (sqa −2/−4 log↔code inconsistency) issued as a behavioral redo.
 VERDICT: pass
+
+## Round 10 incremental audit — audit-redo reconciliation, size laws (elems+1 / ⌊n/2⌋+2), union/func cell documents, caller-supplied width interface
+
+**Scope.** This round's delta = the uncommitted working tree under `graphdot/` on top of `b4fb110`
+(confirmed via `git -C /home/kamilner/tamarin-cleanroom status`/`git diff -- graphdot/`). Touched:
+`generate.rs` (occupancy `elems+1` + bonus `⌊n/2⌋+2` rewrite of `cell_shape`/`group_widths`; new
+`union_elems`; `CellWidths` + `group_widths_with` + `RawRule::{premise,conclusion}_widths` override
+interface; fill numerator = internal width), `doclayout.rs` (new `split_top_unions`/`union_parts`/
+`func_parts`/`union_doc`/`func_doc` recursion in `arg_doc`, + two byte-fixture tests), `band_dump.rs`
+(`shape_features` `ctup`/`bmax` inversion columns + dewrap fix), `census.rs`/`fill_census.rs`/
+`width_probe.rs` (dewrap fix for indented closer-peels), `generate_tests.rs` (two override
+regression tests), plus new `INTERFACE.md`, the `r10/` probe artifacts (probeA–F + `_dots` + `_b3`
+TSVs, `b4_*` re-dumps, `bands4/5.tsv`, `genprobe*.py`, `trig4.py`/`fill4.py`/`fill_eval.py`/
+`trig_eval.py`), BEHAVIOR.md §3f + Round-10 report, and QUERIES.log Session 10.
+
+**Sides & method.** Abstraction–filtration–comparison against GPL source
+`lib/theory/src/Theory/Constraint/System/Dot.hs` (`renderRow`/`renderBalanced`/`scaleIndent`,
+lines 357–379) and its HughesPJ usage; sanctioned comparand `pretty-1.1.3.6` (BSD) filtered out.
+Source's protectable expression (re-read this round, lines 363–379): a **single-layer, shape-blind**
+allocation — `usedWidth_i = length(oneLineRender doc_i)`, `ratio = 100/Σ usedWidth`, each cell
+rendered at `lineLength = max(30, round(1.3·100·usedWidth_i/Σ))`, then `scaleIndent` ×1.5 on leading
+spaces. Distinctive tokens: `100`, `1.3`, `30`, indent-`1.5`, the `magic factor 1.3` comment,
+`renderBalanced`/`scaleIndent`/`usedWidths`/`oneLineRender`/`ratio`/`conv`/`widthRender`/`renderRow`.
+No trigger/fill split, no occupancy, no bonus, no tuple/union/quote/function shape term.
+
+### Round-9 advisory (sqa −2/−4 log↔code inconsistency) — RESOLVED CONSISTENTLY, not a redo
+
+The advisory required QUERIES Session 9, BEHAVIOR §3f, and the code to state the SAME magnitude AND
+placement for the single-quoted-atom correction. Verified across all three:
+
+- **Code** (`generate::group_widths_with`): the trigger has **no** sqa term at all — the round-9
+  `let eff = if sh.sqa … { flat − 2 }` line is deleted; the wrap test is the plain `flat <= b_trig`.
+  The only sqa use is the fill weight `w = if shapes[j].sqa && sh.tup_sur > 0 { 5/6 } else { 1 }`
+  (single-quoted-atom sibling of a **tuple-fact** receiver).
+- **QUERIES.log Session 10**: "RESOLUTION shipped … trigger eff = flat (no sqa discount), fill
+  w = 5/6 only for tuple-fact receivers", and explicitly retires the Session-9 wording: "`C(sqa)=
+  flat-4` … was a stale mid-session hypothesis that fit the step-2 grid — now corrected."
+- **BEHAVIOR §3f + Round-9 report**: "both round-9 single-quoted-atom corrections are refuted"; fill
+  "`w_j = 5/6` for single-quoted-atom siblings of a tuple-fact receiver … else 1"; and the Round-9
+  report carries a `[CORRECTED, round 10: …]` annotation retracting the −2/−4 terms.
+
+All three now agree: **no** sqa trigger correction (magnitude 0), fill-only placement conditioned on
+a tuple-fact receiver. The resolution is evidence-backed, not merely re-worded: the archived r9
+LA/LB rows refute the logged −4 occupancy (partner flips at s=43, not the predicted 47) and the new
+RA_44/RC_44/RB_42/RD_32/RD_33 rows refute the shipped −2 own-discount (no-correction scores 443/446
+vs 440/446); the advisory's "report which reproduces the cited census" ask is answered
+(`trig_eval.py`: every sqa variant is corpus-identical — the term never decides a corpus cell, so
+the live battery, not the census, is the discriminant). Session-9 log kept append-only with the
+correction annotated forward — standard log hygiene. **Advisory closed. No redo.**
+
+### The new size laws (`elems+1` occupancy, `⌊n/2⌋+2` bonus) — fitted to probes, no source analogue
+
+- **Structure unchanged from source-divergence.** Dot.hs still has one layer and no per-cell
+  trigger; the clean side keeps its round-8/9 **trigger/fill split**. The size laws only re-fit the
+  occupancy and bonus terms *inside* a structure (`b_trig = max(87 + bonus − Σ_{j≠i} C_j, 20)`,
+  wrap iff `flat > b_trig`) that has no counterpart in `renderBalanced`. Divergent structure, not
+  obfuscated copy.
+- **`C = flat + Σ_{tuple/union arg}(elems + 1)`** (`generate.rs`, `band_dump.rs::shape_features`
+  `ctup`) — Session-10 battery **R10-F**. Independently re-checked against `r10/probeF_b3.tsv`: the
+  fixed 45-flat argfact partner flips exactly when a plain 8-arg sib's occupancy crosses 42 — TN2
+  (2-tuple) at sib=40, TN3 at 39, TN4 at 38 (raw dot bands: F67 → 64-66), i.e. `flat + (n+1) > 42`.
+  Round-9's `2n−4` would put those flips at 43/41/39 — refuted to the column at n=2,3,4,6 and 3,5,8.
+  Dot.hs has NO tuple/union shape term; `usedWidths` measures whole-doc one-line lengths only.
+- **`bonus = ⌊n/2⌋ + 2`, capped at 4 for n ≥ 9** (`bmax`) — R10-F TB/UB own-flips (verified in
+  `probeF_b3.tsv`: TB2 own flip 45→46 ⇒ budget 45 ⇒ bonus 3 = ⌊2/2⌋+2; large-n readings are honest
+  intervals `{5:4-5,6:5-6,8:6-7}` from the ±1 relief) plus the r8 16/20-element rows forcing ≤ 4.
+  Absent from the source.
+- **The bonus/occupancy are genuinely reverse-engineered, not lifted:** the readings arrive as
+  intervals, require the r8 cap to disambiguate, and the shipped model is honestly imperfect
+  (722/731 probe cells; the 9 misses are ALL the one `[45-partner, budget+1]` coupled-`fits` relief,
+  logged as not modelable in closed form). Transcription does not leave a residual it cannot fit.
+- **Corpus honesty:** the new law scores 1.203 % vs round-9's 1.051 % on the *whole* corpus but
+  clearly better (1.98 % vs 2.48 %) on abbreviation-free groups, with ~90 % of disagreements in
+  abbreviated groups whose internal widths are unknowable from display text. Selected by logged
+  behavior (`trig4.py` scorecard over the re-dumped `b4_*` TSVs), not by fit to the source.
+
+### FILL internal numerator & tuple-receiver-conditioned 5/6 — probe-fit, pre-cleared merger
+
+Fill stays `clamp(round(87·N_i/(N_i + Σ_{j≠i} w_j·C_j)), 20, flat_i−1)`. Round-10 changes: numerator
+`N_i = flat + Σ_{union arg}(elems+1) + #func-nodes` (R10-D/E squeezed-union and chain-tail line0
+element counts — observable), denominator over occupancies `C_j`, and the 5/6 discount conditioned
+on a tuple-fact receiver (`fill_eval.py` v3/v4/v5 scored; receiver-conditioned wins 351/362 vs 346).
+The proportional-share overlap with the source's `130·usedWidth_i/Σ` is the SAME abstraction-level
+merger cleared in Rounds 7–9 (one obvious closed form, corpus-selected, constants 87≠130, weighted
+occupancy denominators, `flat−1` clamp vs `30`-floor). Moving the numerator toward "internal width"
+does NOT converge on the source: the clean side never computes `oneLineRender`; it uses a
+probe-fitted shape proxy and, unlike the source, keeps the wrap decision in a separate trigger layer
+the source lacks. `Wide`/`St_1_gNB` byte-pins hold. Not lifted.
+
+### Union / function-application cell documents — reproduce observable OUTPUT via BSD combinators
+
+`doclayout::union_doc`/`func_doc` (recursive through `arg_doc`) reproduce the reference's *rendered
+bytes* — union `(a++b)` parenthesized/unspaced, break after `++`, tuple-style `nest(-1)` `)` peel
+(fixtures UA_20/UB_39/UB_40); function `name(a,b)` breaking internally after `name(` with the func
+`)` attached to the last arg (fixtures FD_88/FD_90/FC_3). These are byte-observations of live probe
+`.dot` output (R10-B/D), not source structure — the term layout originates in the term library's
+pretty-printer (not Dot.hs, which never constructs a term Doc), and the clean side composes it from
+the sanctioned BSD `pretty.rs` primitives. No `renderBalanced`/`scaleIndent` machinery touched. The
+dewrap fix (indented closer-peels lose no character; only the col-0 fact-`)` regains its pad),
+applied identically across `band_dump`/`census`/`fill_census`/`width_probe`, is measurement-tool
+hygiene with no source lineage.
+
+### CellWidths / group_widths_with / RawRule width overrides — novel interface, no HS counterpart
+
+The override surface (per-field `occupancy`/`bonus`/`fill_width`, empty ⇒ byte-identical fallback,
+regression-gated by `supplied_cell_widths_override_estimates` and `raw_rule_supplied_widths_reach_
+cells`) and `INTERFACE.md` are a clean-side adapter API for a caller that knows the reference's
+UN-abbreviated internal widths. Dot.hs has no per-cell width-injection point; nothing to compare.
+No source identifier appears; the test's `bonus: Some(30)` is an arbitrary override input, not the
+source `max 30` floor.
+
+### Grep / provenance sweeps (this round's files)
+
+`git diff -- graphdot/` added lines and all `r10/` materials: **zero** occurrences of
+`renderBalanced`/`scaleIndent`/`usedWidths`/`oneLineRender`/`ratio`/`conv`/`widthRender`/`renderRow`/
+`magic`/`1.3`, and no `100`-as-totalWidth / `130` / `30`-as-floor / indent-`1.5` constant introduced
+in the delta source. Every round-10 constant (`elems+1`, `⌊n/2⌋+2`, cap 4, tuple-receiver 5/6, fill
+`+elems+1`/`+nfunc`) traces to a logged live probe battery (R10-A…F, verified against
+`probeF_b3.tsv`) or corpus census (`trig4.py`/`fill_eval.py` over `bands4/5.tsv`); none matches or
+derives from `renderBalanced`/`scaleIndent`/`renderRow`.
+
+### Findings surviving filtration (Round 10)
+
+Dot.hs-resemblance violations: **0**. The round-9 sqa advisory is resolved consistently across
+QUERIES.log, BEHAVIOR.md, and code (no trigger correction; fill-only, tuple-receiver-conditioned),
+with the resolution evidence-backed — closed, not a redo. All new size laws, fill terms, cell
+documents, and the width-override interface trace to logged probes/corpus and reproduce observable
+reference OUTPUT; none is transcribed from the single-layer, shape-blind `renderBalanced`. The
+`pretty.rs`-based union/func layout is sanctioned BSD-combinator composition. No source identifier
+constellation, non-observable constant, or structural transcription found.
+VERDICT: pass

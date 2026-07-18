@@ -92,31 +92,33 @@ fn dewrap(cell: &str) -> String {
     }
     let raw_lines: Vec<&str> = cell.split("\\l").collect();
     // Drop the trailing empty piece after the final "\l".
-    let mut lines: Vec<String> = Vec::new();
+    let mut lines: Vec<(bool, String)> = Vec::new();
     for (i, l) in raw_lines.iter().enumerate() {
         if i + 1 == raw_lines.len() && l.is_empty() {
             break;
         }
-        // Strip leading &nbsp; runs.
+        // Strip leading &nbsp; runs, remembering whether the line was indented
+        // (an indented closer peel loses no character; a col-0 `)` regains its
+        // padding space).
         let mut rest = *l;
+        let mut indented = false;
         while let Some(r) = rest.strip_prefix("&nbsp;") {
             rest = r;
+            indented = true;
         }
-        lines.push(unescape(rest));
+        lines.push((indented, unescape(rest)));
     }
     if lines.is_empty() {
         return String::new();
     }
-    let mut flat = lines[0].clone();
-    for li in &lines[1..] {
+    let mut flat = lines[0].1.clone();
+    for (indented, li) in &lines[1..] {
         if flat.ends_with(", ") {
             flat.push_str(li);
         } else if flat.ends_with(',') {
             flat.push(' ');
             flat.push_str(li);
-        } else if li == ">" {
-            flat.push_str(li);
-        } else if li == ")" {
+        } else if li == ")" && !indented {
             flat.push_str(" )");
         } else {
             flat.push_str(li);

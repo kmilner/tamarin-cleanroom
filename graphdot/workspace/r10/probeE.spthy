@@ -1,0 +1,638 @@
+theory QuoteTuplePinProbe
+begin
+
+builtins: multiset
+functions: p/2
+
+
+// PF: [Faa 45, pure-var 3-tuple 38] control
+rule PF_38:
+  [ In(<$dw, $dx>) ]
+  --[ F0() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qv(<$q00aaaaaaaaaaaaaaaaaa, $ai, $aj>) ]
+
+// PF: [Faa 45, pure-var 3-tuple 39] control
+rule PF_39:
+  [ In(<$dw, $dx>) ]
+  --[ F1() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qv(<$q01aaaaaaaaaaaaaaaaaaa, $ai, $aj>) ]
+
+// PF: [Faa 45, pure-var 3-tuple 40] control
+rule PF_40:
+  [ In(<$dw, $dx>) ]
+  --[ F2() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qv(<$q02aaaaaaaaaaaaaaaaaaaa, $ai, $aj>) ]
+
+// PF: [Faa 45, pure-var 3-tuple 41] control
+rule PF_41:
+  [ In(<$dw, $dx>) ]
+  --[ F3() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qv(<$q03aaaaaaaaaaaaaaaaaaaaa, $ai, $aj>) ]
+
+// PF: [Faa 45, pure-var 3-tuple 42] control
+rule PF_42:
+  [ In(<$dw, $dx>) ]
+  --[ F4() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qv(<$q04aaaaaaaaaaaaaaaaaaaaaa, $ai, $aj>) ]
+
+// PF: [Faa 45, pure-var 3-tuple 43] control
+rule PF_43:
+  [ In(<$dw, $dx>) ]
+  --[ F5() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qv(<$q05aaaaaaaaaaaaaaaaaaaaaaa, $ai, $aj>) ]
+
+// PF: [Faa 45, pure-var 3-tuple 44] control
+rule PF_44:
+  [ In(<$dw, $dx>) ]
+  --[ F6() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qv(<$q06aaaaaaaaaaaaaaaaaaaaaaaa, $ai, $aj>) ]
+
+// PF: [Faa 45, pure-var 3-tuple 45] control
+rule PF_45:
+  [ In(<$dw, $dx>) ]
+  --[ F7() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qv(<$q07aaaaaaaaaaaaaaaaaaaaaaaaa, $ai, $aj>) ]
+
+// PF: [Faa 45, pure-var 3-tuple 46] control
+rule PF_46:
+  [ In(<$dw, $dx>) ]
+  --[ F8() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qv(<$q08aaaaaaaaaaaaaaaaaaaaaaaaaa, $ai, $aj>) ]
+
+// PF: [Faa 45, pure-var 3-tuple 47] control
+rule PF_47:
+  [ In(<$dw, $dx>) ]
+  --[ F9() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qv(<$q09aaaaaaaaaaaaaaaaaaaaaaaaaaa, $ai, $aj>) ]
+
+// PA: [Faa 45, quote-first 3-tuple 36]
+rule PA_36:
+  [ In(<$dw, $dx>) ]
+  --[ F10() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qt(<'aaaaaaaaaaaaaa10', $ai, $aj>) ]
+
+// PA: [Faa 45, quote-first 3-tuple 37]
+rule PA_37:
+  [ In(<$dw, $dx>) ]
+  --[ F11() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qt(<'aaaaaaaaaaaaaaa11', $ai, $aj>) ]
+
+// PA: [Faa 45, quote-first 3-tuple 38]
+rule PA_38:
+  [ In(<$dw, $dx>) ]
+  --[ F12() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qt(<'aaaaaaaaaaaaaaaa12', $ai, $aj>) ]
+
+// PA: [Faa 45, quote-first 3-tuple 39]
+rule PA_39:
+  [ In(<$dw, $dx>) ]
+  --[ F13() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qt(<'aaaaaaaaaaaaaaaaa13', $ai, $aj>) ]
+
+// PA: [Faa 45, quote-first 3-tuple 40]
+rule PA_40:
+  [ In(<$dw, $dx>) ]
+  --[ F14() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qt(<'aaaaaaaaaaaaaaaaaa14', $ai, $aj>) ]
+
+// PA: [Faa 45, quote-first 3-tuple 41]
+rule PA_41:
+  [ In(<$dw, $dx>) ]
+  --[ F15() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qt(<'aaaaaaaaaaaaaaaaaaa15', $ai, $aj>) ]
+
+// PA: [Faa 45, quote-first 3-tuple 42]
+rule PA_42:
+  [ In(<$dw, $dx>) ]
+  --[ F16() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qt(<'aaaaaaaaaaaaaaaaaaaa16', $ai, $aj>) ]
+
+// PA: [Faa 45, quote-first 3-tuple 43]
+rule PA_43:
+  [ In(<$dw, $dx>) ]
+  --[ F17() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qt(<'aaaaaaaaaaaaaaaaaaaaa17', $ai, $aj>) ]
+
+// PA: [Faa 45, quote-first 3-tuple 44]
+rule PA_44:
+  [ In(<$dw, $dx>) ]
+  --[ F18() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qt(<'aaaaaaaaaaaaaaaaaaaaaa18', $ai, $aj>) ]
+
+// PA: [Faa 45, quote-first 3-tuple 45]
+rule PA_45:
+  [ In(<$dw, $dx>) ]
+  --[ F19() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qt(<'aaaaaaaaaaaaaaaaaaaaaaa19', $ai, $aj>) ]
+
+// PA: [Faa 45, quote-first 3-tuple 46]
+rule PA_46:
+  [ In(<$dw, $dx>) ]
+  --[ F20() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qt(<'aaaaaaaaaaaaaaaaaaaaaaaa20', $ai, $aj>) ]
+
+// PA: [Faa 45, quote-first 3-tuple 47]
+rule PA_47:
+  [ In(<$dw, $dx>) ]
+  --[ F21() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qt(<'aaaaaaaaaaaaaaaaaaaaaaaaa21', $ai, $aj>) ]
+
+// PB: [Faa 45, quote-middle 3-tuple 38]
+rule PB_38:
+  [ In(<$dw, $dx>) ]
+  --[ F22() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qm(<$ai, 'bbbbbbbbbbbbbbbb22', $aj>) ]
+
+// PB: [Faa 45, quote-middle 3-tuple 39]
+rule PB_39:
+  [ In(<$dw, $dx>) ]
+  --[ F23() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qm(<$ai, 'bbbbbbbbbbbbbbbbb23', $aj>) ]
+
+// PB: [Faa 45, quote-middle 3-tuple 40]
+rule PB_40:
+  [ In(<$dw, $dx>) ]
+  --[ F24() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qm(<$ai, 'bbbbbbbbbbbbbbbbbb24', $aj>) ]
+
+// PB: [Faa 45, quote-middle 3-tuple 41]
+rule PB_41:
+  [ In(<$dw, $dx>) ]
+  --[ F25() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qm(<$ai, 'bbbbbbbbbbbbbbbbbbb25', $aj>) ]
+
+// PB: [Faa 45, quote-middle 3-tuple 42]
+rule PB_42:
+  [ In(<$dw, $dx>) ]
+  --[ F26() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qm(<$ai, 'bbbbbbbbbbbbbbbbbbbb26', $aj>) ]
+
+// PB: [Faa 45, quote-middle 3-tuple 43]
+rule PB_43:
+  [ In(<$dw, $dx>) ]
+  --[ F27() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qm(<$ai, 'bbbbbbbbbbbbbbbbbbbbb27', $aj>) ]
+
+// PB: [Faa 45, quote-middle 3-tuple 44]
+rule PB_44:
+  [ In(<$dw, $dx>) ]
+  --[ F28() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qm(<$ai, 'bbbbbbbbbbbbbbbbbbbbbb28', $aj>) ]
+
+// PC: [Faa 45, quote-last 3-tuple 38]
+rule PC_38:
+  [ In(<$dw, $dx>) ]
+  --[ F29() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qw(<$ai, $aj, 'cccccccccccccccc29'>) ]
+
+// PC: [Faa 45, quote-last 3-tuple 39]
+rule PC_39:
+  [ In(<$dw, $dx>) ]
+  --[ F30() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qw(<$ai, $aj, 'ccccccccccccccccc30'>) ]
+
+// PC: [Faa 45, quote-last 3-tuple 40]
+rule PC_40:
+  [ In(<$dw, $dx>) ]
+  --[ F31() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qw(<$ai, $aj, 'cccccccccccccccccc31'>) ]
+
+// PC: [Faa 45, quote-last 3-tuple 41]
+rule PC_41:
+  [ In(<$dw, $dx>) ]
+  --[ F32() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qw(<$ai, $aj, 'ccccccccccccccccccc32'>) ]
+
+// PC: [Faa 45, quote-last 3-tuple 42]
+rule PC_42:
+  [ In(<$dw, $dx>) ]
+  --[ F33() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qw(<$ai, $aj, 'cccccccccccccccccccc33'>) ]
+
+// PC: [Faa 45, quote-last 3-tuple 43]
+rule PC_43:
+  [ In(<$dw, $dx>) ]
+  --[ F34() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qw(<$ai, $aj, 'ccccccccccccccccccccc34'>) ]
+
+// PC: [Faa 45, quote-last 3-tuple 44]
+rule PC_44:
+  [ In(<$dw, $dx>) ]
+  --[ F35() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qw(<$ai, $aj, 'cccccccccccccccccccccc35'>) ]
+
+// PD: [Faa 45, two-quote 3-tuple 36]
+rule PD_36:
+  [ In(<$dw, $dx>) ]
+  --[ F36() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Q2(<'aaaaaaaaa36', 'dddd36', $ai>) ]
+
+// PD: [Faa 45, two-quote 3-tuple 37]
+rule PD_37:
+  [ In(<$dw, $dx>) ]
+  --[ F37() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Q2(<'aaaaaaaaaa37', 'dddd37', $ai>) ]
+
+// PD: [Faa 45, two-quote 3-tuple 38]
+rule PD_38:
+  [ In(<$dw, $dx>) ]
+  --[ F38() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Q2(<'aaaaaaaaaaa38', 'dddd38', $ai>) ]
+
+// PD: [Faa 45, two-quote 3-tuple 39]
+rule PD_39:
+  [ In(<$dw, $dx>) ]
+  --[ F39() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Q2(<'aaaaaaaaaaaa39', 'dddd39', $ai>) ]
+
+// PD: [Faa 45, two-quote 3-tuple 40]
+rule PD_40:
+  [ In(<$dw, $dx>) ]
+  --[ F40() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Q2(<'aaaaaaaaaaaaa40', 'dddd40', $ai>) ]
+
+// PD: [Faa 45, two-quote 3-tuple 41]
+rule PD_41:
+  [ In(<$dw, $dx>) ]
+  --[ F41() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Q2(<'aaaaaaaaaaaaaa41', 'dddd41', $ai>) ]
+
+// PD: [Faa 45, two-quote 3-tuple 42]
+rule PD_42:
+  [ In(<$dw, $dx>) ]
+  --[ F42() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Q2(<'aaaaaaaaaaaaaaa42', 'dddd42', $ai>) ]
+
+// PD: [Faa 45, two-quote 3-tuple 43]
+rule PD_43:
+  [ In(<$dw, $dx>) ]
+  --[ F43() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Q2(<'aaaaaaaaaaaaaaaa43', 'dddd43', $ai>) ]
+
+// PE: [Faa 45, quote-in-pair 39]
+rule PE_39:
+  [ In(<$dw, $dx>) ]
+  --[ F44() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qp(<'eeeeeeeeeeeeeeeeeeeeee44', $ai>) ]
+
+// PE: [Faa 45, quote-in-pair 40]
+rule PE_40:
+  [ In(<$dw, $dx>) ]
+  --[ F45() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qp(<'eeeeeeeeeeeeeeeeeeeeeee45', $ai>) ]
+
+// PE: [Faa 45, quote-in-pair 41]
+rule PE_41:
+  [ In(<$dw, $dx>) ]
+  --[ F46() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qp(<'eeeeeeeeeeeeeeeeeeeeeeee46', $ai>) ]
+
+// PE: [Faa 45, quote-in-pair 42]
+rule PE_42:
+  [ In(<$dw, $dx>) ]
+  --[ F47() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qp(<'eeeeeeeeeeeeeeeeeeeeeeeee47', $ai>) ]
+
+// PE: [Faa 45, quote-in-pair 43]
+rule PE_43:
+  [ In(<$dw, $dx>) ]
+  --[ F48() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qp(<'eeeeeeeeeeeeeeeeeeeeeeeeee48', $ai>) ]
+
+// PE: [Faa 45, quote-in-pair 44]
+rule PE_44:
+  [ In(<$dw, $dx>) ]
+  --[ F49() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qp(<'eeeeeeeeeeeeeeeeeeeeeeeeeee49', $ai>) ]
+
+// PE: [Faa 45, quote-in-pair 45]
+rule PE_45:
+  [ In(<$dw, $dx>) ]
+  --[ F50() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Qp(<'eeeeeeeeeeeeeeeeeeeeeeeeeeee50', $ai>) ]
+
+// UEV: [Faa 45, pure-var 5-union 34] — C and own-budget pin
+rule UEV_34:
+  [ In(<$dw, $dx>) ]
+  --[ F51() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Un(($q51aa++$ai++$aj++$ak++$al)) ]
+
+// UEV: [Faa 45, pure-var 5-union 35] — C and own-budget pin
+rule UEV_35:
+  [ In(<$dw, $dx>) ]
+  --[ F52() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Un(($q52aaa++$ai++$aj++$ak++$al)) ]
+
+// UEV: [Faa 45, pure-var 5-union 36] — C and own-budget pin
+rule UEV_36:
+  [ In(<$dw, $dx>) ]
+  --[ F53() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Un(($q53aaaa++$ai++$aj++$ak++$al)) ]
+
+// UEV: [Faa 45, pure-var 5-union 37] — C and own-budget pin
+rule UEV_37:
+  [ In(<$dw, $dx>) ]
+  --[ F54() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Un(($q54aaaaa++$ai++$aj++$ak++$al)) ]
+
+// UEV: [Faa 45, pure-var 5-union 38] — C and own-budget pin
+rule UEV_38:
+  [ In(<$dw, $dx>) ]
+  --[ F55() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Un(($q55aaaaaa++$ai++$aj++$ak++$al)) ]
+
+// UEV: [Faa 45, pure-var 5-union 39] — C and own-budget pin
+rule UEV_39:
+  [ In(<$dw, $dx>) ]
+  --[ F56() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Un(($q56aaaaaaa++$ai++$aj++$ak++$al)) ]
+
+// UEV: [Faa 45, pure-var 5-union 40] — C and own-budget pin
+rule UEV_40:
+  [ In(<$dw, $dx>) ]
+  --[ F57() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Un(($q57aaaaaaaa++$ai++$aj++$ak++$al)) ]
+
+// UEV: [Faa 45, pure-var 5-union 41] — C and own-budget pin
+rule UEV_41:
+  [ In(<$dw, $dx>) ]
+  --[ F58() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Un(($q58aaaaaaaaa++$ai++$aj++$ak++$al)) ]
+
+// UEV: [Faa 45, pure-var 5-union 42] — C and own-budget pin
+rule UEV_42:
+  [ In(<$dw, $dx>) ]
+  --[ F59() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Un(($q59aaaaaaaaaa++$ai++$aj++$ak++$al)) ]
+
+// UEV: [Faa 45, pure-var 5-union 43] — C and own-budget pin
+rule UEV_43:
+  [ In(<$dw, $dx>) ]
+  --[ F60() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Un(($q60aaaaaaaaaaa++$ai++$aj++$ak++$al)) ]
+
+// UEV: [Faa 45, pure-var 5-union 44] — C and own-budget pin
+rule UEV_44:
+  [ In(<$dw, $dx>) ]
+  --[ F61() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Un(($q61aaaaaaaaaaaa++$ai++$aj++$ak++$al)) ]
+
+// UEV: [Faa 45, pure-var 5-union 45] — C and own-budget pin
+rule UEV_45:
+  [ In(<$dw, $dx>) ]
+  --[ F62() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Un(($q62aaaaaaaaaaaaa++$ai++$aj++$ak++$al)) ]
+
+// UEV: [Faa 45, pure-var 5-union 46] — C and own-budget pin
+rule UEV_46:
+  [ In(<$dw, $dx>) ]
+  --[ F63() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Un(($q63aaaaaaaaaaaaaa++$ai++$aj++$ak++$al)) ]
+
+// UEV: [Faa 45, pure-var 5-union 47] — C and own-budget pin
+rule UEV_47:
+  [ In(<$dw, $dx>) ]
+  --[ F64() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Un(($q64aaaaaaaaaaaaaaa++$ai++$aj++$ak++$al)) ]
+
+// UEV: [Faa 45, pure-var 5-union 48] — C and own-budget pin
+rule UEV_48:
+  [ In(<$dw, $dx>) ]
+  --[ F65() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Un(($q65aaaaaaaaaaaaaaaa++$ai++$aj++$ak++$al)) ]
+
+// UEV: [Faa 45, pure-var 5-union 49] — C and own-budget pin
+rule UEV_49:
+  [ In(<$dw, $dx>) ]
+  --[ F66() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Un(($q66aaaaaaaaaaaaaaaaa++$ai++$aj++$ak++$al)) ]
+
+// UG: [20-union 108, Fbb 20] fill point
+rule UG_1:
+  [ In(<$dw, $dx>) ]
+  --[ F67() ]->
+  [ U($aa++$ab++$ac++$ad++$ae++$af++$ag++$ah++$ai++$aj++$ak++$al++$am++$an++$ao++$ap++$aq++$ar++$as++$at), Fbb($au, $av, $aw) ]
+
+// UG: [20-union 108, Fcc 35] fill point
+rule UG_2:
+  [ In(<$dw, $dx>) ]
+  --[ F68() ]->
+  [ U($aa++$ab++$ac++$ad++$ae++$af++$ag++$ah++$ai++$aj++$ak++$al++$am++$an++$ao++$ap++$aq++$ar++$as++$at), Fcc($au, $av, $aw, $ax, $ay, $az) ]
+
+// DN: [deep chain 112, Fdd 45] fill point
+rule DN_2:
+  [ In(<$dw, $dx>) ]
+  --[ F69() ]->
+  [ Q(p($aa, p($ab, p($ac, p($ad, p($ae, p($af, p($ag, p($ah, p($ai, p($aj, p($ak, p($al, p($am, $an)))))))))))))), Fdd($au, $av, $aw, $ax, $ay, $az, $ba, $bb) ]
+
+lemma l_PF_38:
+  exists-trace "Ex #i. F0() @ #i"
+
+lemma l_PF_39:
+  exists-trace "Ex #i. F1() @ #i"
+
+lemma l_PF_40:
+  exists-trace "Ex #i. F2() @ #i"
+
+lemma l_PF_41:
+  exists-trace "Ex #i. F3() @ #i"
+
+lemma l_PF_42:
+  exists-trace "Ex #i. F4() @ #i"
+
+lemma l_PF_43:
+  exists-trace "Ex #i. F5() @ #i"
+
+lemma l_PF_44:
+  exists-trace "Ex #i. F6() @ #i"
+
+lemma l_PF_45:
+  exists-trace "Ex #i. F7() @ #i"
+
+lemma l_PF_46:
+  exists-trace "Ex #i. F8() @ #i"
+
+lemma l_PF_47:
+  exists-trace "Ex #i. F9() @ #i"
+
+lemma l_PA_36:
+  exists-trace "Ex #i. F10() @ #i"
+
+lemma l_PA_37:
+  exists-trace "Ex #i. F11() @ #i"
+
+lemma l_PA_38:
+  exists-trace "Ex #i. F12() @ #i"
+
+lemma l_PA_39:
+  exists-trace "Ex #i. F13() @ #i"
+
+lemma l_PA_40:
+  exists-trace "Ex #i. F14() @ #i"
+
+lemma l_PA_41:
+  exists-trace "Ex #i. F15() @ #i"
+
+lemma l_PA_42:
+  exists-trace "Ex #i. F16() @ #i"
+
+lemma l_PA_43:
+  exists-trace "Ex #i. F17() @ #i"
+
+lemma l_PA_44:
+  exists-trace "Ex #i. F18() @ #i"
+
+lemma l_PA_45:
+  exists-trace "Ex #i. F19() @ #i"
+
+lemma l_PA_46:
+  exists-trace "Ex #i. F20() @ #i"
+
+lemma l_PA_47:
+  exists-trace "Ex #i. F21() @ #i"
+
+lemma l_PB_38:
+  exists-trace "Ex #i. F22() @ #i"
+
+lemma l_PB_39:
+  exists-trace "Ex #i. F23() @ #i"
+
+lemma l_PB_40:
+  exists-trace "Ex #i. F24() @ #i"
+
+lemma l_PB_41:
+  exists-trace "Ex #i. F25() @ #i"
+
+lemma l_PB_42:
+  exists-trace "Ex #i. F26() @ #i"
+
+lemma l_PB_43:
+  exists-trace "Ex #i. F27() @ #i"
+
+lemma l_PB_44:
+  exists-trace "Ex #i. F28() @ #i"
+
+lemma l_PC_38:
+  exists-trace "Ex #i. F29() @ #i"
+
+lemma l_PC_39:
+  exists-trace "Ex #i. F30() @ #i"
+
+lemma l_PC_40:
+  exists-trace "Ex #i. F31() @ #i"
+
+lemma l_PC_41:
+  exists-trace "Ex #i. F32() @ #i"
+
+lemma l_PC_42:
+  exists-trace "Ex #i. F33() @ #i"
+
+lemma l_PC_43:
+  exists-trace "Ex #i. F34() @ #i"
+
+lemma l_PC_44:
+  exists-trace "Ex #i. F35() @ #i"
+
+lemma l_PD_36:
+  exists-trace "Ex #i. F36() @ #i"
+
+lemma l_PD_37:
+  exists-trace "Ex #i. F37() @ #i"
+
+lemma l_PD_38:
+  exists-trace "Ex #i. F38() @ #i"
+
+lemma l_PD_39:
+  exists-trace "Ex #i. F39() @ #i"
+
+lemma l_PD_40:
+  exists-trace "Ex #i. F40() @ #i"
+
+lemma l_PD_41:
+  exists-trace "Ex #i. F41() @ #i"
+
+lemma l_PD_42:
+  exists-trace "Ex #i. F42() @ #i"
+
+lemma l_PD_43:
+  exists-trace "Ex #i. F43() @ #i"
+
+lemma l_PE_39:
+  exists-trace "Ex #i. F44() @ #i"
+
+lemma l_PE_40:
+  exists-trace "Ex #i. F45() @ #i"
+
+lemma l_PE_41:
+  exists-trace "Ex #i. F46() @ #i"
+
+lemma l_PE_42:
+  exists-trace "Ex #i. F47() @ #i"
+
+lemma l_PE_43:
+  exists-trace "Ex #i. F48() @ #i"
+
+lemma l_PE_44:
+  exists-trace "Ex #i. F49() @ #i"
+
+lemma l_PE_45:
+  exists-trace "Ex #i. F50() @ #i"
+
+lemma l_UEV_34:
+  exists-trace "Ex #i. F51() @ #i"
+
+lemma l_UEV_35:
+  exists-trace "Ex #i. F52() @ #i"
+
+lemma l_UEV_36:
+  exists-trace "Ex #i. F53() @ #i"
+
+lemma l_UEV_37:
+  exists-trace "Ex #i. F54() @ #i"
+
+lemma l_UEV_38:
+  exists-trace "Ex #i. F55() @ #i"
+
+lemma l_UEV_39:
+  exists-trace "Ex #i. F56() @ #i"
+
+lemma l_UEV_40:
+  exists-trace "Ex #i. F57() @ #i"
+
+lemma l_UEV_41:
+  exists-trace "Ex #i. F58() @ #i"
+
+lemma l_UEV_42:
+  exists-trace "Ex #i. F59() @ #i"
+
+lemma l_UEV_43:
+  exists-trace "Ex #i. F60() @ #i"
+
+lemma l_UEV_44:
+  exists-trace "Ex #i. F61() @ #i"
+
+lemma l_UEV_45:
+  exists-trace "Ex #i. F62() @ #i"
+
+lemma l_UEV_46:
+  exists-trace "Ex #i. F63() @ #i"
+
+lemma l_UEV_47:
+  exists-trace "Ex #i. F64() @ #i"
+
+lemma l_UEV_48:
+  exists-trace "Ex #i. F65() @ #i"
+
+lemma l_UEV_49:
+  exists-trace "Ex #i. F66() @ #i"
+
+lemma l_UG_1:
+  exists-trace "Ex #i. F67() @ #i"
+
+lemma l_UG_2:
+  exists-trace "Ex #i. F68() @ #i"
+
+lemma l_DN_2:
+  exists-trace "Ex #i. F69() @ #i"
+
+end

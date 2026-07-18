@@ -78,11 +78,18 @@ fn is_info_body(b: &str) -> bool {
     b.starts_with('#') && b.contains(" : ")
 }
 fn dewrap(b: &str) -> String {
-    unescape(&b.replace("&nbsp;", "").replace(",\\l", ", ").replace("\\l)", " )").replace("\\l", ""))
+    // `,\l` = a separator break (the trailing space is dropped at line end);
+    // `\l&nbsp;` = an indented continuation or an indented closer peel (no
+    // character lost); a remaining col-0 `\l)` = the fact-paren peel (its
+    // padded ` )` space was the break). Order matters.
+    let t = b.replace(",\\l", ", ");
+    let t = t.replace("\\l&nbsp;", "&nbsp;");
+    let t = t.replace("\\l)", " )");
+    let t = t.replace("\\l", "").replace("&nbsp;", "");
+    unescape(&t)
 }
 fn flat_width(b: &str) -> usize {
-    let lost = b.matches(",\\l").count() + b.matches("\\l)").count();
-    unescape(&b.replace("\\l", "").replace("&nbsp;", "")).chars().count() + lost
+    dewrap(b).chars().count()
 }
 
 /// Smallest L (line length at ribbons 1.5) whose ribbon >= flat.
@@ -162,12 +169,15 @@ fn cell_status(flat_text: &str, body: &str, flat: usize) -> String {
 }
 
 /// Shape features of a cell's flat text, for occupancy-model fitting:
-/// `(dtop, drec, nq, sqa, nargs)` where `dtop` = Σ over TOP-LEVEL tuple args of
-/// (2·elems − 4), `drec` = the same over ALL tuple nodes recursively, `nq` =
-/// number of single-quoted constants anywhere, `sqa` = 1 if the cell is a fact
-/// with exactly one argument that is a quoted constant, `nargs` = top-level
-/// argument count (0 if the text is not a padded fact).
-fn shape_features(flat: &str) -> (i64, i64, i64, i64, i64, i64, i64) {
+/// `(dtop, drec, nq, sqa, nargs, nfunc, nabbr, ctup, bmax)` where `dtop` = Σ
+/// over TOP-LEVEL tuple args of (2·elems − 4), `drec` = the same over ALL
+/// tuple nodes recursively, `nq` = number of single-quoted constants anywhere,
+/// `sqa` = 1 if the cell is a fact with exactly one argument that is a quoted
+/// constant, `nargs` = top-level argument count (0 if the text is not a padded
+/// fact), `ctup` = Σ over top-level tuple AND `(a++b)`-union args of
+/// (elems + 1) (the round-10 occupancy law), `bmax` = max over those args of
+/// (elems/2 + 2) (the round-10 self-budget bonus law).
+fn shape_features(flat: &str) -> (i64, i64, i64, i64, i64, i64, i64, i64, i64) {
     fn split_args(s: &str) -> Vec<&str> {
         let mut parts = Vec::new();
         let (mut depth, mut inq, mut start) = (0i32, false, 0usize);
@@ -221,10 +231,44 @@ fn shape_features(flat: &str) -> (i64, i64, i64, i64, i64, i64, i64) {
             }
         }
     }
+    /// Union arg `(a++b++…)`: element count if `t` is a parenthesized
+    /// top-level `++` chain, else 0.
+    fn union_elems(t: &str) -> i64 {
+        let t = t.trim();
+        if !(t.starts_with('(') && t.ends_with(')')) {
+            return 0;
+        }
+        let inner = &t[1..t.len() - 1];
+        let b: Vec<(usize, char)> = inner.char_indices().collect();
+        let (mut depth, mut inq, mut n) = (0i32, false, 1i64);
+        let mut i = 0;
+        while i < b.len() {
+            let c = b[i].1;
+            if inq {
+                if c == '\'' {
+                    inq = false;
+                }
+            } else {
+                match c {
+                    '\'' => inq = true,
+                    '(' | '<' | '[' => depth += 1,
+                    ')' | '>' | ']' => depth -= 1,
+                    '+' if depth == 0 && i + 1 < b.len() && b[i + 1].1 == '+' => {
+                        n += 1;
+                        i += 1;
+                    }
+                    _ => {}
+                }
+            }
+            i += 1;
+        }
+        if n >= 2 { n } else { 0 }
+    }
     let nq = flat.split('\'').count() as i64 / 2;
     let (mut dtop, mut drec) = (0i64, 0i64);
     let mut nargs = 0i64;
     let mut sqa = 0i64;
+    let (mut ctup, mut bmax) = (0i64, 0i64);
     // function-application nodes inside the fact (name directly followed by
     // '(' with no ' ' after — the unpadded display form), e.g. senc(, pk(
     let nfunc = {
@@ -277,6 +321,16 @@ fn shape_features(flat: &str) -> (i64, i64, i64, i64, i64, i64, i64) {
                 nargs = args.len() as i64;
                 for a in &args {
                     tuple_nodes(a, true, &mut dtop, &mut drec);
+                    let t = a.trim();
+                    let elems = if t.starts_with('<') && t.ends_with('>') {
+                        split_args(&t[1..t.len() - 1]).len() as i64
+                    } else {
+                        union_elems(t)
+                    };
+                    if elems >= 2 {
+                        ctup += elems + 1;
+                        bmax = bmax.max(elems / 2 + 2);
+                    }
                 }
                 if args.len() == 1 {
                     let a = args[0].trim();
@@ -289,7 +343,7 @@ fn shape_features(flat: &str) -> (i64, i64, i64, i64, i64, i64, i64) {
             }
         }
     }
-    (dtop, drec, nq, sqa, nargs, nfunc, nabbr)
+    (dtop, drec, nq, sqa, nargs, nfunc, nabbr, ctup, bmax)
 }
 
 fn process_file(path: &std::path::Path, cache: &mut HashMap<(String, String), String>) -> Vec<String> {
@@ -371,10 +425,10 @@ fn process_file(path: &std::path::Path, cache: &mut HashMap<(String, String), St
                     cache.insert(key, s.clone());
                     s
                 };
-                let (dtop, drec, nq, sqa, nargs, nfunc, nabbr) = shape_features(&flat_text);
+                let (dtop, drec, nq, sqa, nargs, nfunc, nabbr, ctup, bmax) = shape_features(&flat_text);
                 cellfields.push(format!(
-                    "{}:{}:{}:{}:{}:{}:{}:{}:{}",
-                    flats[k], status, dtop, drec, nq, sqa, nargs, nfunc, nabbr
+                    "{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}",
+                    flats[k], status, dtop, drec, nq, sqa, nargs, nfunc, nabbr, ctup, bmax
                 ));
             }
             out.push(format!(

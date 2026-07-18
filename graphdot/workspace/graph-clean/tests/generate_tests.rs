@@ -322,3 +322,71 @@ fn legend_sink_block_and_invis_edges() {
     let invis = dot.find("[style=\"invis\"];").unwrap();
     assert!(invis > sink, "invis edge must follow the sink block");
 }
+
+/// The caller-supplied width interface (round 10): with no overrides the
+/// result is byte-identical to the estimate path; a supplied occupancy widens
+/// or narrows SIBLING budgets exactly as the display-text estimate would have;
+/// a supplied fill numerator moves the wrapped cell's own share.
+#[test]
+fn supplied_cell_widths_override_estimates() {
+    use graph_clean::generate::{group_widths, group_widths_with, CellWidths};
+    // [Faa 45, Sib 40]: T = 85 <= 87, nothing wraps under estimates.
+    let cells: Vec<String> = vec![
+        "Faa( $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah )".into(),
+        format!("Sib( '{}' )", "a".repeat(33)),
+    ];
+    // No-override call sites are byte-identical (regression gate).
+    assert_eq!(group_widths_with(&cells, &[]), group_widths(&cells));
+    assert_eq!(group_widths_with(&cells, &[None, None]), group_widths(&cells));
+    let flat0 = 45usize;
+    assert!(group_widths(&cells)[0] >= flat0, "estimate path: Faa stays flat");
+    // Supplying the sib's internal occupancy (say its UN-abbreviated width
+    // renders at 60 columns) shrinks Faa's budget below its flat: it wraps.
+    let ov = vec![None, Some(CellWidths::occupancy(60))];
+    let w = group_widths_with(&cells, &ov);
+    assert!(w[0] < flat0, "supplied sibling occupancy must trigger the wrap");
+    // The wrapping cell's own fill share follows the supplied numerator too.
+    let ov2 = vec![
+        Some(CellWidths { fill_width: Some(80), ..Default::default() }),
+        Some(CellWidths::occupancy(60)),
+    ];
+    let w2 = group_widths_with(&cells, &ov2);
+    assert!(w2[0] > w[0], "a larger supplied fill numerator widens the share");
+    // And a supplied bonus lifts the cell's own trigger budget.
+    let ov3 = vec![
+        Some(CellWidths { bonus: Some(30), ..Default::default() }),
+        Some(CellWidths::occupancy(60)),
+    ];
+    let w3 = group_widths_with(&cells, &ov3);
+    assert!(w3[0] >= flat0, "a supplied bonus can keep the cell flat");
+}
+
+/// The RawRule width plumbing: overrides reach the record's cells, and an
+/// absent override vector reproduces the estimate path byte-exactly.
+#[test]
+fn raw_rule_supplied_widths_reach_cells() {
+    use graph_clean::generate::CellWidths;
+    let base = || {
+        RawRule::new("#i : R[]", "#ffffff").conclusions(vec![
+            "Faa( $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah )".into(),
+            format!("Sib( '{}' )", "a".repeat(33)),
+        ])
+    };
+    let plain = System { nodes: vec![GraphNode::RawRule(base())], ..System::default() };
+    let with_none = System {
+        nodes: vec![GraphNode::RawRule(base().conclusion_widths(vec![None, None]))],
+        ..System::default()
+    };
+    assert_eq!(to_dot(&generate(&plain)), to_dot(&generate(&with_none)));
+    let with_occ = System {
+        nodes: vec![GraphNode::RawRule(
+            base().conclusion_widths(vec![None, Some(CellWidths::occupancy(60))]),
+        )],
+        ..System::default()
+    };
+    let dot_plain = to_dot(&generate(&plain));
+    let dot_occ = to_dot(&generate(&with_occ));
+    assert_ne!(dot_plain, dot_occ, "the supplied occupancy must change the layout");
+    assert!(dot_occ.contains("Faa( $aa,"), "Faa wraps under the supplied occupancy");
+    assert!(dot_occ.contains("\\l"), "wrapped cell present");
+}

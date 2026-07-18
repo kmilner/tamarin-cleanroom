@@ -1,0 +1,274 @@
+theory AuditSqaProbe
+begin
+
+// RA: concl [Faa 45, Sib 40] — X flips at s=42+k, sib at s=42+d
+rule RA_40:
+  [ In(<$dw, $dx>) ]
+  --[ F0() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaa00') ]
+
+// RA: concl [Faa 45, Sib 41] — X flips at s=42+k, sib at s=42+d
+rule RA_41:
+  [ In(<$dw, $dx>) ]
+  --[ F1() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa01') ]
+
+// RA: concl [Faa 45, Sib 42] — X flips at s=42+k, sib at s=42+d
+rule RA_42:
+  [ In(<$dw, $dx>) ]
+  --[ F2() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa02') ]
+
+// RA: concl [Faa 45, Sib 43] — X flips at s=42+k, sib at s=42+d
+rule RA_43:
+  [ In(<$dw, $dx>) ]
+  --[ F3() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa03') ]
+
+// RA: concl [Faa 45, Sib 44] — X flips at s=42+k, sib at s=42+d
+rule RA_44:
+  [ In(<$dw, $dx>) ]
+  --[ F4() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa04') ]
+
+// RA: concl [Faa 45, Sib 45] — X flips at s=42+k, sib at s=42+d
+rule RA_45:
+  [ In(<$dw, $dx>) ]
+  --[ F5() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa05') ]
+
+// RA: concl [Faa 45, Sib 46] — X flips at s=42+k, sib at s=42+d
+rule RA_46:
+  [ In(<$dw, $dx>) ]
+  --[ F6() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa06') ]
+
+// RA: concl [Faa 45, Sib 47] — X flips at s=42+k, sib at s=42+d
+rule RA_47:
+  [ In(<$dw, $dx>) ]
+  --[ F7() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa07') ]
+
+// RA: concl [Faa 45, Sib 48] — X flips at s=42+k, sib at s=42+d
+rule RA_48:
+  [ In(<$dw, $dx>) ]
+  --[ F8() ]->
+  [ Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa08') ]
+
+// RB: concl [Faaa 46, Sib 39] — X flips at s=41+k, sib at s=41+d
+rule RB_39:
+  [ In(<$dw, $dx>) ]
+  --[ F9() ]->
+  [ Faaa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaa09') ]
+
+// RB: concl [Faaa 46, Sib 40] — X flips at s=41+k, sib at s=41+d
+rule RB_40:
+  [ In(<$dw, $dx>) ]
+  --[ F10() ]->
+  [ Faaa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaa10') ]
+
+// RB: concl [Faaa 46, Sib 41] — X flips at s=41+k, sib at s=41+d
+rule RB_41:
+  [ In(<$dw, $dx>) ]
+  --[ F11() ]->
+  [ Faaa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa11') ]
+
+// RB: concl [Faaa 46, Sib 42] — X flips at s=41+k, sib at s=41+d
+rule RB_42:
+  [ In(<$dw, $dx>) ]
+  --[ F12() ]->
+  [ Faaa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa12') ]
+
+// RB: concl [Faaa 46, Sib 43] — X flips at s=41+k, sib at s=41+d
+rule RB_43:
+  [ In(<$dw, $dx>) ]
+  --[ F13() ]->
+  [ Faaa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa13') ]
+
+// RB: concl [Faaa 46, Sib 44] — X flips at s=41+k, sib at s=41+d
+rule RB_44:
+  [ In(<$dw, $dx>) ]
+  --[ F14() ]->
+  [ Faaa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa14') ]
+
+// RB: concl [Faaa 46, Sib 45] — X flips at s=41+k, sib at s=41+d
+rule RB_45:
+  [ In(<$dw, $dx>) ]
+  --[ F15() ]->
+  [ Faaa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa15') ]
+
+// RB: concl [Faaa 46, Sib 46] — X flips at s=41+k, sib at s=41+d
+rule RB_46:
+  [ In(<$dw, $dx>) ]
+  --[ F16() ]->
+  [ Faaa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah), Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa16') ]
+
+// RC: concl [Sib 42, Faa 45] — order-swapped RA
+rule RC_42:
+  [ In(<$dw, $dx>) ]
+  --[ F17() ]->
+  [ Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa17'), Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah) ]
+
+// RC: concl [Sib 44, Faa 45] — order-swapped RA
+rule RC_44:
+  [ In(<$dw, $dx>) ]
+  --[ F18() ]->
+  [ Sib('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18'), Faa($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah) ]
+
+// RD: concl [F 28, H 28, Sib 30] — X flips at s=31+k, sib at s=31+d
+rule RD_30:
+  [ In(<$dw, $dx>) ]
+  --[ F19() ]->
+  [ F($aa, $ab, $ac, $ad, $ae), H($af, $ag, $ah, $ai, $aj), Sib('aaaaaaaaaaaaaaaaaaa19') ]
+
+// RD: concl [F 28, H 28, Sib 31] — X flips at s=31+k, sib at s=31+d
+rule RD_31:
+  [ In(<$dw, $dx>) ]
+  --[ F20() ]->
+  [ F($aa, $ab, $ac, $ad, $ae), H($af, $ag, $ah, $ai, $aj), Sib('aaaaaaaaaaaaaaaaaaaa20') ]
+
+// RD: concl [F 28, H 28, Sib 32] — X flips at s=31+k, sib at s=31+d
+rule RD_32:
+  [ In(<$dw, $dx>) ]
+  --[ F21() ]->
+  [ F($aa, $ab, $ac, $ad, $ae), H($af, $ag, $ah, $ai, $aj), Sib('aaaaaaaaaaaaaaaaaaaaa21') ]
+
+// RD: concl [F 28, H 28, Sib 33] — X flips at s=31+k, sib at s=31+d
+rule RD_33:
+  [ In(<$dw, $dx>) ]
+  --[ F22() ]->
+  [ F($aa, $ab, $ac, $ad, $ae), H($af, $ag, $ah, $ai, $aj), Sib('aaaaaaaaaaaaaaaaaaaaaa22') ]
+
+// RD: concl [F 28, H 28, Sib 34] — X flips at s=31+k, sib at s=31+d
+rule RD_34:
+  [ In(<$dw, $dx>) ]
+  --[ F23() ]->
+  [ F($aa, $ab, $ac, $ad, $ae), H($af, $ag, $ah, $ai, $aj), Sib('aaaaaaaaaaaaaaaaaaaaaaa23') ]
+
+// RD: concl [F 28, H 28, Sib 35] — X flips at s=31+k, sib at s=31+d
+rule RD_35:
+  [ In(<$dw, $dx>) ]
+  --[ F24() ]->
+  [ F($aa, $ab, $ac, $ad, $ae), H($af, $ag, $ah, $ai, $aj), Sib('aaaaaaaaaaaaaaaaaaaaaaaa24') ]
+
+// RE: concl [Wff 70, Sib 20] — sib at floor 20: wraps at s=21+d_floor
+rule RE_20:
+  [ In(<$dw, $dx>) ]
+  --[ F25() ]->
+  [ Wff($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am), Sib('aaaaaaaaa25') ]
+
+// RE: concl [Wff 70, Sib 21] — sib at floor 20: wraps at s=21+d_floor
+rule RE_21:
+  [ In(<$dw, $dx>) ]
+  --[ F26() ]->
+  [ Wff($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am), Sib('aaaaaaaaaa26') ]
+
+// RE: concl [Wff 70, Sib 22] — sib at floor 20: wraps at s=21+d_floor
+rule RE_22:
+  [ In(<$dw, $dx>) ]
+  --[ F27() ]->
+  [ Wff($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am), Sib('aaaaaaaaaaa27') ]
+
+// RE: concl [Wff 70, Sib 23] — sib at floor 20: wraps at s=21+d_floor
+rule RE_23:
+  [ In(<$dw, $dx>) ]
+  --[ F28() ]->
+  [ Wff($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am), Sib('aaaaaaaaaaaa28') ]
+
+// RE: concl [Wff 70, Sib 24] — sib at floor 20: wraps at s=21+d_floor
+rule RE_24:
+  [ In(<$dw, $dx>) ]
+  --[ F29() ]->
+  [ Wff($aa, $ab, $ac, $ad, $ae, $af, $ag, $ah, $ai, $aj, $ak, $al, $am), Sib('aaaaaaaaaaaaa29') ]
+
+lemma l_RA_40:
+  exists-trace "Ex #i. F0() @ #i"
+
+lemma l_RA_41:
+  exists-trace "Ex #i. F1() @ #i"
+
+lemma l_RA_42:
+  exists-trace "Ex #i. F2() @ #i"
+
+lemma l_RA_43:
+  exists-trace "Ex #i. F3() @ #i"
+
+lemma l_RA_44:
+  exists-trace "Ex #i. F4() @ #i"
+
+lemma l_RA_45:
+  exists-trace "Ex #i. F5() @ #i"
+
+lemma l_RA_46:
+  exists-trace "Ex #i. F6() @ #i"
+
+lemma l_RA_47:
+  exists-trace "Ex #i. F7() @ #i"
+
+lemma l_RA_48:
+  exists-trace "Ex #i. F8() @ #i"
+
+lemma l_RB_39:
+  exists-trace "Ex #i. F9() @ #i"
+
+lemma l_RB_40:
+  exists-trace "Ex #i. F10() @ #i"
+
+lemma l_RB_41:
+  exists-trace "Ex #i. F11() @ #i"
+
+lemma l_RB_42:
+  exists-trace "Ex #i. F12() @ #i"
+
+lemma l_RB_43:
+  exists-trace "Ex #i. F13() @ #i"
+
+lemma l_RB_44:
+  exists-trace "Ex #i. F14() @ #i"
+
+lemma l_RB_45:
+  exists-trace "Ex #i. F15() @ #i"
+
+lemma l_RB_46:
+  exists-trace "Ex #i. F16() @ #i"
+
+lemma l_RC_42:
+  exists-trace "Ex #i. F17() @ #i"
+
+lemma l_RC_44:
+  exists-trace "Ex #i. F18() @ #i"
+
+lemma l_RD_30:
+  exists-trace "Ex #i. F19() @ #i"
+
+lemma l_RD_31:
+  exists-trace "Ex #i. F20() @ #i"
+
+lemma l_RD_32:
+  exists-trace "Ex #i. F21() @ #i"
+
+lemma l_RD_33:
+  exists-trace "Ex #i. F22() @ #i"
+
+lemma l_RD_34:
+  exists-trace "Ex #i. F23() @ #i"
+
+lemma l_RD_35:
+  exists-trace "Ex #i. F24() @ #i"
+
+lemma l_RE_20:
+  exists-trace "Ex #i. F25() @ #i"
+
+lemma l_RE_21:
+  exists-trace "Ex #i. F26() @ #i"
+
+lemma l_RE_22:
+  exists-trace "Ex #i. F27() @ #i"
+
+lemma l_RE_23:
+  exists-trace "Ex #i. F28() @ #i"
+
+lemma l_RE_24:
+  exists-trace "Ex #i. F29() @ #i"
+
+end

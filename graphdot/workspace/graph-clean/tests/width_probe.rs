@@ -46,11 +46,18 @@ fn strip_port(cell: &str) -> Option<&str> {
 }
 fn is_info_body(b: &str) -> bool { b.starts_with('#') && b.contains(" : ") }
 fn dewrap(b: &str) -> String {
-    unescape(&b.replace("&nbsp;", "").replace(",\\l", ", ").replace("\\l)", " )").replace("\\l", ""))
+    // `,\l` = a separator break (the trailing space is dropped at line end);
+    // `\l&nbsp;` = an indented continuation or an indented closer peel (no
+    // character lost); a remaining col-0 `\l)` = the fact-paren peel (its
+    // padded ` )` space was the break). Order matters.
+    let t = b.replace(",\\l", ", ");
+    let t = t.replace("\\l&nbsp;", "&nbsp;");
+    let t = t.replace("\\l)", " )");
+    let t = t.replace("\\l", "").replace("&nbsp;", "");
+    unescape(&t)
 }
 fn flat_width(b: &str) -> usize {
-    let lost = b.matches(",\\l").count() + b.matches("\\l)").count();
-    unescape(&b.replace("\\l", "").replace("&nbsp;", "")).chars().count() + lost
+    dewrap(b).chars().count()
 }
 fn band(flat: &str, body: &str) -> (usize, usize) {
     let mut lo = 0;

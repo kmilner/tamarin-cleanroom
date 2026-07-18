@@ -1,0 +1,125 @@
+theory UnionShapeProbe
+begin
+
+builtins: multiset
+
+functions: qq/1, p/2
+
+// UA: lone U(13-elem union) — display format + break shape
+rule UA_13:
+  [ In(<$dw, $dx>) ]
+  --[ F0() ]->
+  [ U($aa ++ $ab ++ $ac ++ $ad ++ $ae ++ $af ++ $ag ++ $ah ++ $ai ++ $aj ++ $ak ++ $al ++ $am) ]
+
+// UA: lone U(15-elem union) — display format + break shape
+rule UA_15:
+  [ In(<$dw, $dx>) ]
+  --[ F1() ]->
+  [ U($aa ++ $ab ++ $ac ++ $ad ++ $ae ++ $af ++ $ag ++ $ah ++ $ai ++ $aj ++ $ak ++ $al ++ $am ++ $an ++ $ao) ]
+
+// UA: lone U(20-elem union) — display format + break shape
+rule UA_20:
+  [ In(<$dw, $dx>) ]
+  --[ F2() ]->
+  [ U($aa ++ $ab ++ $ac ++ $ad ++ $ae ++ $af ++ $ag ++ $ah ++ $ai ++ $aj ++ $ak ++ $al ++ $am ++ $an ++ $ao ++ $ap ++ $aq ++ $ar ++ $as ++ $at) ]
+
+// UB: lone union with quote 37 — boundary sweep
+rule UB_37:
+  [ In(<$dw, $dx>) ]
+  --[ F3() ]->
+  [ U($aa ++ $ab ++ $ac ++ $ad ++ $ae ++ $af ++ $ag ++ $ah ++ 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz03') ]
+
+// UB: lone union with quote 38 — boundary sweep
+rule UB_38:
+  [ In(<$dw, $dx>) ]
+  --[ F4() ]->
+  [ U($aa ++ $ab ++ $ac ++ $ad ++ $ae ++ $af ++ $ag ++ $ah ++ 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz04') ]
+
+// UB: lone union with quote 39 — boundary sweep
+rule UB_39:
+  [ In(<$dw, $dx>) ]
+  --[ F5() ]->
+  [ U($aa ++ $ab ++ $ac ++ $ad ++ $ae ++ $af ++ $ag ++ $ah ++ 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz05') ]
+
+// UB: lone union with quote 40 — boundary sweep
+rule UB_40:
+  [ In(<$dw, $dx>) ]
+  --[ F6() ]->
+  [ U($aa ++ $ab ++ $ac ++ $ad ++ $ae ++ $af ++ $ag ++ $ah ++ 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz06') ]
+
+// UB: lone union with quote 41 — boundary sweep
+rule UB_41:
+  [ In(<$dw, $dx>) ]
+  --[ F7() ]->
+  [ U($aa ++ $ab ++ $ac ++ $ad ++ $ae ++ $af ++ $ag ++ $ah ++ 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz07') ]
+
+// UC: union inside a tuple arg
+rule UC_1:
+  [ In(<$dw, $dx>) ]
+  --[ F8() ]->
+  [ V(<$aa ++ $ab ++ $ac ++ $ad ++ $ae ++ $af, $be, 'ccccccccccccccccccccccccccccccx1'>) ]
+
+// UC: union inside a function argument
+rule UC_2:
+  [ In(<$dw, $dx>) ]
+  --[ F9() ]->
+  [ W(qq($aa ++ $ab ++ $ac ++ $ad ++ $ae ++ $af ++ $ag ++ $ah ++ $ai ++ $aj ++ $ak ++ $al ++ $am ++ $an), $be) ]
+
+// UD: [U(20-union), Sib 30] — squeezed union fill
+rule UD_1:
+  [ In(<$dw, $dx>) ]
+  --[ F10() ]->
+  [ U($aa ++ $ab ++ $ac ++ $ad ++ $ae ++ $af ++ $ag ++ $ah ++ $ai ++ $aj ++ $ak ++ $al ++ $am ++ $an ++ $ao ++ $ap ++ $aq ++ $ar ++ $as ++ $at), Sib('aaaaaaaaaaaaaaaaaaa10') ]
+
+// UD: [U(20-union), Faa 45] — squeezed union fill vs argfact
+rule UD_2:
+  [ In(<$dw, $dx>) ]
+  --[ F11() ]->
+  [ U($aa ++ $ab ++ $ac ++ $ad ++ $ae ++ $af ++ $ag ++ $ah ++ $ai ++ $aj ++ $ak ++ $al ++ $am ++ $an ++ $ao ++ $ap ++ $aq ++ $ar ++ $as ++ $at), Faa($au, $av, $aw, $ax, $ay, $az, $ba, $bb) ]
+
+// DN: [deep chain, Sib 30] — squeezed nested-func fill
+rule DN_1:
+  [ In(<$dw, $dx>) ]
+  --[ F12() ]->
+  [ Q(p($aa, p($ab, p($ac, p($ad, p($ae, p($af, p($ag, p($ah, p($ai, p($aj, p($ak, p($al, p($am, $an)))))))))))))), Sib('aaaaaaaaaaaaaaaaaaa12') ]
+
+lemma l_UA_13:
+  exists-trace "Ex #i. F0() @ #i"
+
+lemma l_UA_15:
+  exists-trace "Ex #i. F1() @ #i"
+
+lemma l_UA_20:
+  exists-trace "Ex #i. F2() @ #i"
+
+lemma l_UB_37:
+  exists-trace "Ex #i. F3() @ #i"
+
+lemma l_UB_38:
+  exists-trace "Ex #i. F4() @ #i"
+
+lemma l_UB_39:
+  exists-trace "Ex #i. F5() @ #i"
+
+lemma l_UB_40:
+  exists-trace "Ex #i. F6() @ #i"
+
+lemma l_UB_41:
+  exists-trace "Ex #i. F7() @ #i"
+
+lemma l_UC_1:
+  exists-trace "Ex #i. F8() @ #i"
+
+lemma l_UC_2:
+  exists-trace "Ex #i. F9() @ #i"
+
+lemma l_UD_1:
+  exists-trace "Ex #i. F10() @ #i"
+
+lemma l_UD_2:
+  exists-trace "Ex #i. F11() @ #i"
+
+lemma l_DN_1:
+  exists-trace "Ex #i. F12() @ #i"
+
+end

@@ -123,6 +123,8 @@ impl RuleInstance {
             premises: self.premises.iter().map(Fact::render_flat).collect(),
             info: render_info(&self.temporal, &self.rule, &self.actions),
             conclusions: self.conclusions.iter().map(Fact::render_flat).collect(),
+            prem_widths: Vec::new(),
+            concl_widths: Vec::new(),
             fillcolor: self.fillcolor.clone(),
             fontcolor: self.fontcolor.clone(),
             role: self.role.clone(),
@@ -142,6 +144,11 @@ pub struct RawRule {
     pub premises: Vec<String>,
     pub info: String,
     pub conclusions: Vec<String>,
+    /// Optional caller-supplied width inputs, one per premise cell (empty =
+    /// derive everything from the display text). See [`CellWidths`].
+    pub premise_widths: Vec<Option<CellWidths>>,
+    /// Optional caller-supplied width inputs, one per conclusion cell.
+    pub conclusion_widths: Vec<Option<CellWidths>>,
     pub fillcolor: String,
     pub fontcolor: String,
     pub role: String,
@@ -156,6 +163,8 @@ impl RawRule {
             premises: Vec::new(),
             info: info.into(),
             conclusions: Vec::new(),
+            premise_widths: Vec::new(),
+            conclusion_widths: Vec::new(),
             fillcolor: fillcolor.into(),
             fontcolor: "black".into(),
             role: Role::UNDEFINED.into(),
@@ -168,6 +177,17 @@ impl RawRule {
     }
     pub fn conclusions(mut self, cells: Vec<String>) -> Self {
         self.conclusions = cells;
+        self
+    }
+    /// Supply per-cell width inputs for the premise group (one entry per
+    /// premise cell; `None` entries fall back to display-text estimates).
+    pub fn premise_widths(mut self, w: Vec<Option<CellWidths>>) -> Self {
+        self.premise_widths = w;
+        self
+    }
+    /// Supply per-cell width inputs for the conclusion group.
+    pub fn conclusion_widths(mut self, w: Vec<Option<CellWidths>>) -> Self {
+        self.conclusion_widths = w;
         self
     }
     pub fn role(mut self, r: &str, fontcolor: &str) -> Self {
@@ -184,6 +204,8 @@ impl RawRule {
             premises: self.premises.clone(),
             info: self.info.clone(),
             conclusions: self.conclusions.clone(),
+            prem_widths: self.premise_widths.clone(),
+            concl_widths: self.conclusion_widths.clone(),
             fillcolor: self.fillcolor.clone(),
             fontcolor: self.fontcolor.clone(),
             role: self.role.clone(),
@@ -192,13 +214,48 @@ impl RawRule {
     }
 }
 
+/// Caller-supplied per-cell width inputs, overriding the shape-feature
+/// estimates [`group_widths`] derives from the cell's (post-abbreviation)
+/// display text. The reference decides row sharing on its *internal*
+/// (UN-abbreviated) term widths, which are structurally invisible to a crate
+/// consuming display text — a caller that knows them (e.g. an adapter sitting
+/// on the term representation) can pass them here (BEHAVIOR.md §3f, round 10).
+/// Every field is optional; an absent field (or an absent [`CellWidths`]
+/// altogether) falls back to the display-text estimate, byte-identically to
+/// the no-override path.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct CellWidths {
+    /// The cell's row **occupancy** `C` (columns it counts for in its
+    /// siblings' trigger budgets). Display-text default:
+    /// `flat + Σ_{top-level tuple/union args}(elems + 1)`.
+    pub occupancy: Option<i64>,
+    /// The cell's own trigger-budget **bonus**. Display-text default: the
+    /// largest `⌊elems/2⌋ + 2` over its top-level tuple/union args (4 for an
+    /// arg with ≥ 9 elements), 0 without such an arg.
+    pub bonus: Option<i64>,
+    /// The cell's **fill numerator** (its internal width in the proportional
+    /// fill share once it wraps). Display-text default:
+    /// `flat + Σ_{union args}(elems + 1) + #function-nodes`.
+    pub fill_width: Option<i64>,
+}
+
+impl CellWidths {
+    /// An override that fixes only the row occupancy.
+    pub fn occupancy(c: i64) -> Self {
+        CellWidths { occupancy: Some(c), ..Default::default() }
+    }
+}
+
 /// The flat (un-escaped, un-wrapped) content of a record, shared by the Term-based
 /// [`RuleInstance`] and the pre-rendered [`RawRule`]. Cell text is wrapped and
-/// escaped by [`build_record`].
+/// escaped by [`build_record`]. `prem_widths` / `concl_widths`, when non-empty,
+/// carry one optional [`CellWidths`] per premise / conclusion cell.
 struct RecordSpec {
     premises: Vec<String>,
     info: String,
     conclusions: Vec<String>,
+    prem_widths: Vec<Option<CellWidths>>,
+    concl_widths: Vec<Option<CellWidths>>,
     fillcolor: String,
     fontcolor: String,
     role: String,
@@ -474,13 +531,13 @@ pub fn generate(sys: &System) -> Graph {
 fn build_record(spec: &RecordSpec, ports_prem: &[String], port_info: &str, ports_concl: &[String]) -> Record {
     let mut columns: Vec<Vec<Cell>> = Vec::new();
     if !spec.premises.is_empty() {
-        columns.push(group_cells(&spec.premises, ports_prem));
+        columns.push(group_cells(&spec.premises, ports_prem, &spec.prem_widths));
     }
     // The info cell is its own single-cell group (full width), fed through the
     // faithful layout engine at [`FILL_WIDTH`].
     columns.push(vec![Cell::new(port_info, wrap_cell_dot(&spec.info, FILL_WIDTH as isize))]);
     if !spec.conclusions.is_empty() {
-        columns.push(group_cells(&spec.conclusions, ports_concl));
+        columns.push(group_cells(&spec.conclusions, ports_concl, &spec.concl_widths));
     }
     Record {
         columns,
@@ -491,15 +548,21 @@ fn build_record(spec: &RecordSpec, ports_prem: &[String], port_info: &str, ports
 }
 
 /// Shape features of one cell's flat text that enter the row-share model
-/// (probe-derived, BEHAVIOR.md §3f round 9): `flat` = display width; `dtop` =
-/// Σ over top-level tuple arguments of `2·elems − 4` (the width surplus of the
-/// reference's internal right-nested-pair form of an n-tuple over its flattened
-/// display); `sqa` = the cell is a fact with exactly one argument that is a
-/// single-quoted constant (whose internal form drops the quotes).
+/// (probe-derived, BEHAVIOR.md §3f rounds 9–10): `flat` = display width;
+/// `tup_sur` / `uni_sur` = Σ over top-level tuple / `(a++b)`-union arguments
+/// of `elems + 1` (the round-10 occupancy law, pinned at n = 2,3,4,6 tuples
+/// and 3,5,8 unions); `bmax` = the largest per-argument self-budget bonus
+/// `⌊elems/2⌋ + 2` (arguments with ≥ 9 elements contribute 4); `sqa` = the
+/// cell is a fact with exactly one argument that is a single-quoted constant
+/// (enters only the fill weight); `nfunc` = number of function-application
+/// nodes anywhere in the text (enters only the fill numerator).
 struct CellShape {
     flat: usize,
-    dtop: i64,
+    tup_sur: i64,
+    uni_sur: i64,
+    bmax: i64,
     sqa: bool,
+    nfunc: i64,
 }
 
 /// Split a term list at top-level `", "`, honoring nesting and quotes.
@@ -533,9 +596,42 @@ fn split_level(s: &str) -> Vec<&str> {
     parts
 }
 
+/// Element count of a parenthesized top-level `++`-union `(a++b++…)`, 0 for
+/// anything else.
+fn union_elems(t: &str) -> i64 {
+    if !(t.starts_with('(') && t.ends_with(')')) || t.len() < 2 {
+        return 0;
+    }
+    let inner = &t[1..t.len() - 1];
+    let b: Vec<char> = inner.chars().collect();
+    let (mut depth, mut inq, mut n) = (0i32, false, 1i64);
+    let mut i = 0;
+    while i < b.len() {
+        let c = b[i];
+        if inq {
+            if c == '\'' {
+                inq = false;
+            }
+        } else {
+            match c {
+                '\'' => inq = true,
+                '(' | '<' | '[' => depth += 1,
+                ')' | '>' | ']' => depth -= 1,
+                '+' if depth == 0 && i + 1 < b.len() && b[i + 1] == '+' => {
+                    n += 1;
+                    i += 1;
+                }
+                _ => {}
+            }
+        }
+        i += 1;
+    }
+    if n >= 2 { n } else { 0 }
+}
+
 fn cell_shape(flat: &str) -> CellShape {
     let width = flat.chars().count();
-    let mut dtop = 0i64;
+    let (mut tup_sur, mut uni_sur, mut bmax) = (0i64, 0i64, 0i64);
     let mut sqa = false;
     if let Some(open) = flat.find("( ") {
         // a padded fact with at least one argument (`Name( )` has none)
@@ -547,9 +643,18 @@ fn cell_shape(flat: &str) -> CellShape {
             let args = split_level(inner);
             for a in &args {
                 let t = a.trim();
-                if t.starts_with('<') && t.ends_with('>') {
-                    let elems = split_level(&t[1..t.len() - 1]).len() as i64;
-                    dtop += 2 * elems - 4;
+                let (elems, is_tuple) = if t.starts_with('<') && t.ends_with('>') {
+                    (split_level(&t[1..t.len() - 1]).len() as i64, true)
+                } else {
+                    (union_elems(t), false)
+                };
+                if elems >= 2 {
+                    if is_tuple {
+                        tup_sur += elems + 1;
+                    } else {
+                        uni_sur += elems + 1;
+                    }
+                    bmax = bmax.max(if elems <= 8 { elems / 2 + 2 } else { 4 });
                 }
             }
             if args.len() == 1 {
@@ -561,39 +666,79 @@ fn cell_shape(flat: &str) -> CellShape {
             }
         }
     }
-    CellShape { flat: width, dtop, sqa }
+    // function-application nodes: identifier directly followed by `(` with no
+    // space after (the unpadded display form), e.g. `senc(`, `pk(`
+    let bch: Vec<char> = flat.chars().collect();
+    let mut nfunc = 0i64;
+    for i in 1..bch.len() {
+        if bch[i] == '('
+            && (bch[i - 1].is_alphanumeric() || bch[i - 1] == '_')
+            && (i + 1 >= bch.len() || bch[i + 1] != ' ')
+        {
+            nfunc += 1;
+        }
+    }
+    CellShape { flat: width, tup_sur, uni_sur, bmax, sqa, nfunc }
 }
 
 /// The per-cell fit **budgets** of one record group (all premises together, or
 /// all conclusions together), from the cells' flat texts. Two probe-derived
-/// layers (BEHAVIOR.md §3f, round 9; every parameter pinned by live probe
-/// batteries — QUERIES.log Session 9):
+/// layers (BEHAVIOR.md §3f, rounds 9–10; every parameter pinned by live probe
+/// batteries — QUERIES.log Sessions 9–10):
 ///
 /// **Trigger** (which cells wrap). Each cell occupies
-/// `C_j = flat_j + dtop_j` columns of the row (`dtop` = the internal
-/// pair-nested surplus of top-level tuple args, `2n − 4` each); cell *i*'s
-/// trigger budget is `max(87 [+ 4 if cell i has a tuple arg with ≥ 3 elems and
-/// the row has ≥ 2 cells] − Σ_{j≠i} C_j, 20)`, and it wraps iff its effective
-/// width exceeds that budget — the effective width is `flat`, except that a
-/// single-quoted-atom fact above the floor measures `flat − 2` (its internal
-/// form drops the quotes). Exact on 343/343 probe cells across three live
-/// batteries; on the corpus it beats the round-6 flat-sum trigger (1.05 % vs
-/// 1.45 % cell error), with the residual dominated by cells whose widths the
-/// reference computes on the UN-abbreviated term (invisible here).
+/// `C_j = flat_j + Σ_{top-level tuple/union args}(elems + 1)` columns of the
+/// row (the round-10 size law: X-flip boundaries at n = 2,3,4,6 tuples and
+/// 3,5,8 unions are each exact to the column); cell *i*'s trigger budget is
+/// `max(87 + bonus_i − Σ_{j≠i} C_j, 20)` in a multi-cell row, where
+/// `bonus_i` = the largest `⌊elems/2⌋ + 2` over its tuple/union args (4 for
+/// an arg with ≥ 9 elements — the r8 16/20-element rows cap it), and it
+/// wraps iff its flat width exceeds that budget. A lone cell's budget is
+/// exactly 87. There is NO single-quoted-atom, multi-quote, or
+/// function-node correction (round-10 batteries A–C: every such sib flips
+/// exactly at the plain-flat crossing). The only systematic residual is the
+/// `[45-argfact partner, budget+1]` relief (9/731 probe cells, all one
+/// pattern: beside a 45-flat argfact partner a cell at exactly budget+1
+/// stays flat; beside 46 or in triples it does not) — the known ±1
+/// coupled-`fits` flip, not modelable in closed form.
 ///
 /// **Fill** (the ribbon a wrapping cell is laid out at):
-/// `max(round(87·flat_i / (flat_i + Σ_{j≠i} w_j·flat_j)), 20)` — proportional
-/// over display flats, with single-quoted-atom siblings discounted `w_j = 5/6`
-/// (probed: the [Big 87, atom s] fill follows 87²/(87 + 5s/6) across
-/// s = 12…120 with no saturation). Clamped below the cell's flat (a
-/// trigger-wrapped cell must actually break). A fitting cell keeps
-/// `max(trigger, flat)` so it renders flat; a lone cell's budget is exactly 87
-/// (no bonus — the probed single-cell boundary).
+/// `round(87·N_i / (N_i + Σ_{j≠i} w_j·flat_j))`, half-up, clamped to
+/// `[20, flat_i − 1]`, where the numerator `N_i = flat_i + Σ_{union
+/// args}(elems + 1) + nfunc_i` is the cell's *internal* width (unions carry
+/// their spaced internal separators, function applications ~1 column each —
+/// pinned by the UD/UG/DN/FE squeezed fills), and `w_j = 5/6` for
+/// single-quoted-atom siblings of a tuple-fact receiver (round-9 Q/I series:
+/// the [Big 87, atom s] fill follows 87²/(87 + 5s/6) across s = 12…120),
+/// else 1 (round-10 argfact receivers track the plain share). Tuple args do
+/// NOT enter the numerator (the live `Wide` record byte-pins the tuple
+/// receiver at the display-flat share). A fitting cell keeps
+/// `max(trigger, flat)` so it renders flat.
 pub fn group_widths(cells: &[String]) -> Vec<usize> {
+    group_widths_with(cells, &[])
+}
+
+/// [`group_widths`] with caller-supplied per-cell width inputs. `overrides` is
+/// either empty (all cells use display-text estimates — byte-identical to
+/// [`group_widths`]) or one `Option<CellWidths>` per cell; each present field
+/// of a present entry replaces the corresponding display-text estimate
+/// (occupancy `C`, budget bonus, fill numerator) for that cell, and every
+/// absent field falls back per-field. The display flat width itself always
+/// comes from the text (it *is* the rendered content).
+pub fn group_widths_with(cells: &[String], overrides: &[Option<CellWidths>]) -> Vec<usize> {
     let shapes: Vec<CellShape> = cells.iter().map(|t| cell_shape(t)).collect();
     let n = shapes.len();
     let full = FILL_WIDTH as i64; // 87
-    let cs: Vec<i64> = shapes.iter().map(|s| s.flat as i64 + s.dtop).collect();
+    let ov = |i: usize| -> Option<&CellWidths> { overrides.get(i).and_then(|o| o.as_ref()) };
+    let cs: Vec<i64> = shapes
+        .iter()
+        .enumerate()
+        .map(|(i, s)| {
+            ov(i)
+                .and_then(|w| w.occupancy)
+                .unwrap_or(s.flat as i64 + s.tup_sur + s.uni_sur)
+        })
+        .collect();
     let ctot: i64 = cs.iter().sum();
     let mut out = Vec::with_capacity(n);
     for (i, sh) in shapes.iter().enumerate() {
@@ -602,34 +747,39 @@ pub fn group_widths(cells: &[String]) -> Vec<usize> {
             out.push(full as usize);
             continue;
         }
-        let bonus = if sh.dtop > 0 { 4 } else { 0 };
+        let bonus = ov(i).and_then(|w| w.bonus).unwrap_or(sh.bmax);
         let b_trig = (full + bonus - (ctot - cs[i])).max(MIN_CELL_BUDGET as i64);
-        let eff = if sh.sqa && b_trig > MIN_CELL_BUDGET as i64 { flat - 2 } else { flat };
-        if eff <= b_trig {
+        if flat <= b_trig {
             // fits: any budget ≥ flat renders the cell flat
             out.push(b_trig.max(flat) as usize);
             continue;
         }
-        // wraps: proportional fill share (siblings at display flat, single-
-        // quoted-atom siblings discounted 5/6)
-        let mut t = flat as f64;
+        // wraps: proportional fill share; the numerator is the cell's internal
+        // width (union separators + function nodes), siblings at their
+        // occupancy C with single-quoted atoms discounted 5/6 for a
+        // tuple-fact receiver
+        let num = ov(i)
+            .and_then(|w| w.fill_width)
+            .unwrap_or(flat + sh.uni_sur + sh.nfunc) as f64;
+        let mut t = num;
         for j in 0..n {
             if j != i {
-                let w = if shapes[j].sqa { 5.0 / 6.0 } else { 1.0 };
-                t += w * shapes[j].flat as f64;
+                let w = if shapes[j].sqa && sh.tup_sur > 0 { 5.0 / 6.0 } else { 1.0 };
+                t += w * cs[j] as f64;
             }
         }
-        let mut b = ((full as f64) * (flat as f64) / t + 0.5).floor() as i64;
+        let mut b = ((full as f64) * num / t + 0.5).floor() as i64;
         b = b.max(MIN_CELL_BUDGET as i64).min((flat - 1).max(MIN_CELL_BUDGET as i64));
         out.push(b as usize);
     }
     out
 }
 
-/// Wrap every cell of one record group, sharing the row via [`group_widths`]
-/// and laying each cell out at its budget with the faithful engine.
-fn group_cells(flat_cells: &[String], ports: &[String]) -> Vec<Cell> {
-    let fills = group_widths(flat_cells);
+/// Wrap every cell of one record group, sharing the row via
+/// [`group_widths_with`] and laying each cell out at its budget with the
+/// faithful engine.
+fn group_cells(flat_cells: &[String], ports: &[String], widths: &[Option<CellWidths>]) -> Vec<Cell> {
+    let fills = group_widths_with(flat_cells, widths);
     flat_cells
         .iter()
         .zip(ports)

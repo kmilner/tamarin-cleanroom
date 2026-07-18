@@ -1,0 +1,20 @@
+digraph "G" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n5[shape="record",label="{{<n0> In( \<$dw, $dx\> )|<n1> In( \<zz, zy, zx, zw\> )}|{<n2> #i : TN6_34[F19( )]}|{<n3> Faa( $aa, $ab, $ac, $ad, $ae, $af, $ag, $ah )|<n4> T6( \<$q19a, $ai, zz, zy, zx, zw\> )}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+n6[label="#vf : isend",shape="ellipse"];
+n7[label="#vf.1 : isend",shape="ellipse"];
+n8[label="!KU( zz ) @ #vk.4",shape="ellipse",color="gray"];
+n9[label="!KU( zy ) @ #vk.6",shape="ellipse",color="gray"];
+n10[label="!KU( zx ) @ #vk.8",shape="ellipse",color="gray"];
+n11[label="!KU( zw ) @ #vk.9",shape="ellipse",color="gray"];
+n6 -> n5:n0[color="gray30"];
+n7 -> n5:n1[color="gray30"];
+n8 -> n7[color="red",style="dashed"];
+n9 -> n7[color="red",style="dashed"];
+n10 -> n7[color="red",style="dashed"];
+n11 -> n7[color="red",style="dashed"];
+
+}
