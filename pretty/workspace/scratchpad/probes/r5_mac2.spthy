@@ -1,0 +1,5 @@
+theory R5mac2 begin
+functions: h/1
+macros: aa(x) = h(x), bb(x) = x
+rule A: [ In(x) ] --[ Ev(aa(x), bb(x)) ]-> [ ]
+end

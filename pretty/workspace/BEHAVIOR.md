@@ -374,10 +374,16 @@ rule (modulo E) Name[attrs]:
 
 ### `macros:` block (rule-adjacent surface)
 
-* `text "macros: " <> sep (punctuate ',' items)` — all-or-nothing: one line
-  or EVERY macro on its own line aligned after `macros: ` (probe:p_mac1 —
-  m2 gets its own line though it would fit beside m1; target:issue777
-  one-line single macro).
+* `text "macros: " <> vcat (punctuate ',' items)` — the block ALWAYS breaks
+  (R5 GAP-2 correction; the earlier `sep`/all-or-nothing law was WRONG). The
+  first macro sits beside `macros: ` and every subsequent macro goes on its
+  own line aligned after `macros: ` (col 8), REGARDLESS of fit
+  (probe:r5_mac2 — two short macros that would fit one line still break;
+  probe:p_mac1; target:issue777 / probe:r5_mac1 — a lone macro is trivially
+  one line). Commas attach to the preceding macro; the last carries none.
+  (`sep` agreed with the true `vcat` law only when the list overflowed, which
+  every earlier witness happened to do — probe:r5_mac2 is the first
+  fits-but-still-breaks witness.)
 * Item: fact-style head with the `)` ATTACHED to the last param line
   (unlike facts), then `) =  body` — two spaces after `=` (the `= ` token
   plus hsep spacing); the body always sits beside and wraps internally
@@ -472,11 +478,25 @@ restriction Name:
 
 * The `axiom` keyword echoes as `restriction` with the identical wrapper
   (probe:q_ax1, target:Cronto_EA).
-* The expanded-formula comment content is byte-identical to the statement in
-  every observation: predicate expansion happens UPSTREAM of both renderings
-  (probe:q_pred1 — an MSR restriction through a predicate shows the
-  expansion in BOTH spots; sapic corpus files agree). Rendered as the same
-  formula twice.
+* **Statement vs expanded formula (R5 GAP-1).** The STATEMENT renders in MACRO
+  form (as written); the `expanded formula:` comment renders in the
+  macro/predicate-EXPANDED form. They are TWO DISTINCT formula values whenever
+  the restriction uses a macro (target:MacroInLemmasAndRestrictions — statement
+  `A( m(m3(x)) )`, expanded `A( x )`). PREDICATE expansion happens upstream of
+  BOTH renderings, so a predicate-only restriction still shows the two
+  identically (probe:q_pred1, target:features_predicates_minimal), and every
+  macro-free restriction renders the same formula twice (the earlier "byte-
+  identical in every observation" law — a special case, since no earlier probe
+  had a macro). The expanded formula is a caller-supplied opaque input (the
+  ported macro expansion), modeled as `Restriction.expanded`; safety is
+  classified on the statement (macro expansion is term-level, so quantifier
+  structure — hence the safety verdict — is identical either way).
+* LEMMAS with macros have NO separate expanded-formula comment: the STATEMENT
+  is the macro form (`l.formula`) and the guarded comment carries the EXPANDED
+  form as opaque input (already handled by `Guarded`) — confirmed for
+  exists-trace (target:MacroInLemmasAndRestrictions) and all-traces
+  (probe:r5_allmacro: statement `Ev( g(x) )`, guarded `Ev( h(x) )`). No lemma
+  model change was needed.
 * Safety classification (pinned by probes q_s1/q_s2 + q_w1 + 84-block corpus
   parity): a formula is safety iff its negation-normal form contains NO
   existential quantifier, msg-sort and temporal alike. Every ⇒-antecedent
@@ -527,6 +547,55 @@ by sorry                               (| the embedded proof, verbatim)
 * Restrictions outside the guarded fragment are a FATAL load error
   (probe:q_p1 raw), so the restriction renderer never sees them; lemmas
   outside it load fine and take the failed-conversion comment (probe:q_r1).
+
+## Theory frame (R5 GAP-3)
+
+Whole-echo assembly `theory <name> begin … end`. Curated byte targets: the
+round1-3 `targets/*.hs.txt` whole captures; 29 diverse files
+(tests/round5_theory.rs `whole_echo_frame_parity`) byte-verified end-to-end
+(builtins variety, macros, rules ± variants, loop breakers, SAPIC process
+attrs, restrictions ± safety ± expanded, lemmas all/exists ± attrs ± embedded
+proof, predicates, heuristic, tactic, section comments).
+
+* **Header / footer.** Always `theory NAME` then a blank, `begin`, a blank
+  (all 69 surveyed captures). No `configuration` string observed. Close: the
+  extracted echo ALWAYS ends with exactly THREE blank lines then `end` (all 44
+  surveyed captures). Those blanks are the residue the gate extraction leaves
+  after dropping the two trailing comment blocks that are OUT of this crate's
+  span — the wellformedness report and the `Generated from:` stamp — each a
+  single blank-separated slot, plus the blank before `end` (RAW tail of
+  target:MacroInLemmasAndRestrictions verified: `by sorry` · blank · wf-line ·
+  blank · Generated-block · blank · `end`).
+* **Signature first.** The signature block (`// Function signature …` + blank +
+  `builtins:`/`functions:`/`equations:`) is ALWAYS the first thing after
+  `begin`, even ahead of `tactic:` blocks (target:5G_AKA) and `heuristic:`
+  (target:contract). It is rendered from the `Signature`, never a theory item.
+* **Item order + spacing.** All other blocks are theory items in SOURCE order;
+  the frame stacks them with ONE blank line between successive items. Item
+  types observed: `macros:`, `predicate:` (grouped), rules, restrictions,
+  lemmas, `heuristic:`, `tactic:`, `section{* … *}` formal comments, and the
+  theory-level `/* looping facts with injective instances: … */` note.
+  Assembly = `join(["theory NAME", "begin", sig, items…], "\n\n") + "\n\n\n\nend"`.
+* **`heuristic:` line.** A single `heuristic: <value>` item (targets contract,
+  ct, running-example, accountability — value e.g. `p`, `o "oracle" …`).
+* **`predicate:` block.** One `predicate: <fact><=><formula>` per predicate; a
+  contiguous run renders as one item, blank-line separated. NO spaces around
+  `<=>`; the head is the R2 fact (`True( x )`), the body the R3 formula. The
+  body wraps at ABSOLUTE MARGIN 0 (column-1 nest), INDEPENDENT of the header
+  width (target:dmn-basic — `Sender_duplicate` and `Mixer_duplicate` bodies
+  both wrap at col 1 despite different name lengths, and a 66-column body row
+  fits ribbon 73 measured from col 1, not from the `<=>` column). A
+  `<>`-beside composition would instead indent the body under `<=>` — the
+  sanctioned HughesPJ `display` threads the current line width into each
+  `NilAbove` continuation (`lay2 k (NilAbove p) = nl `txt` lay k p`;
+  pretty-1.1.3.6 confirmed) — so the renderer splices the header textually onto
+  the margin-0 formula's first line instead of `<>`-ing it.
+* **Opaque / verbatim items.** `tactic:` (the whole contiguous region — sub-
+  tactics `presort:`/`prio:` carry NO blank-line separators, so the region is
+  one block; target:5G_AKA/alethea), `section{* … *}` formal comments
+  (target:Joux/Yubikey/contract), and top-level `/* … */` comments (looping-
+  facts note) are carried through the frame VERBATIM — their interior layout is
+  outside this crate's erasure surface, like guarded/proof text.
 
 ## UNOBSERVABLE (recorded per protocol, not guessed as pinned behavior)
 

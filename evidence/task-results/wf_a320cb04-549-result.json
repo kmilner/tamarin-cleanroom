@@ -1,0 +1,66 @@
+{
+  "summary": "Sealed pretty round 5: restriction expanded-formula field, macros vertical layout, theory-frame assembly — completing the batch echo; both-sides audit",
+  "agentCount": 2,
+  "logs": [],
+  "result": {
+    "impl": "All changes are confined to `/home/kamilner/tamarin-cleanroom/pretty/`; no commits, no files touched outside the workspace, OOM guards untouched, and the only Haskell read was the sanctioned BSD `pretty-1.1.3.6`. The `predtest` entries are build-artifact residue under `target/`, not source. Everything is green.\n\nRound 5 complete. Plain-text summary follows.\n\n---\n\nROUND 5 — three observable gaps closed; all suites green (83 tests: lib 6, round1 47, round2 9, round3 10, round4 6, round5 5); BEHAVIOR.md + QUERIES.log updated with each law.\n\nWITNESS / ORACLE WORK\n- Oracle-ran features/macros/MacroInLemmasAndRestrictions.spthy (the named witness) + RAW tail; 3 constructed probes (workspace/scratchpad/probes/r5_mac2, r5_mac1, r5_allmacro). Consulted the SANCTIONED BSD /home/kamilner/tamarin-cleanroom/graphdot/sanctioned/pretty-1.1.3.6 HughesPJ source (beside/display) to pin `<>` continuation semantics — no tamarin HS source read. All logged in QUERIES.log.\n\nGAP 1 — restriction statement vs expanded formula\n- Confirmed: statement renders MACRO form (`A( m(m3(x)) )`), the `expanded formula:` comment renders the macro-EXPANDED form (`A( x )`) — two distinct values (equal only when macro-free; predicate expansion is upstream of both).\n- Model: added `Restriction.expanded: Formula` (caller-supplied opaque input) in src/ast.rs; src/lemma.rs `restriction_doc` now renders `r.formula` in the statement and `r.expanded` in the comment.\n- Probed LEMMAS (exists- AND all-traces): they carry NO separate expanded comment — statement is macro-form, the guarded comment is the expanded opaque input (already handled). No lemma change needed.\n\nGAP 2 — macros block always breaks\n- Confirmed (probe:r5_mac2): two short macros that fit one line STILL break. src/macros.rs `macros_doc` changed `sep`→`vcat` (first macro beside `macros: `, each subsequent at col 8, commas on the preceding macro; single macro one line).\n\nGAP 3 — theory frame (`theory NAME begin … end`)\n- Implemented src/theory.rs `render`: `theory NAME`\\n\\n`begin`\\n\\n signature-first \\n\\n items(source order, one blank between) \\n\\n\\n\\n`end`. The 3 trailing blanks are the stripped-wf/stamp residue (RAW-tail verified; all 44 captures end that way).\n- Extended src/ast.rs `TheoryItem` so rules carry `AcVariants` and lemmas carry `Guarded`, plus `Heuristic(String)` and `Verbatim(String)` (opaque tactic:/section{* *}// looping-facts comments).\n- Implemented `render_predicates` (src/macros.rs): `predicate: <fact><=><formula>`, group blank-separated. Key finding (target dmn-basic + sanctioned HughesPJ): the body wraps at ABSOLUTE margin 0 independent of header width, so the header is spliced textually onto the margin-0 formula (a `<>`-beside would wrongly indent under `<=>`).\n- Acceptance test tests/round5_theory.rs `whole_echo_frame_parity`: reconstructs 29 diverse whole captures via a layout-insensitive parser and asserts render_theory byte-matches every one (exceeds the ≥15 requirement; spans builtins variety, macros, r",
+    "audit": "The round-5 both-sides similarity audit is complete and appended to `/home/kamilner/tamarin-cleanroom/pretty/AUDIT.md`.\n\nSummary of what I audited and found (round-5 delta = uncommitted working tree over cleanroom HEAD `8341919`, restricted to `pretty/`):\n\n**Scope**: `src/theory.rs` (the `theory … begin … end` frame, previously an `unimplemented!` stub), `src/macros.rs` (macros block `sep`→`vcat`; `render_predicates`), `src/lemma.rs` (restriction comment → `r.expanded`), `src/ast.rs` (`Restriction.expanded`; reshaped `TheoryItem`), `src/lib.rs`, plus tests + provenance notes + 3 probes.\n\n**Key findings — no violations:**\n- **Frame traversal (the mandated scrutiny point) does NOT mirror upstream's item-fold.** Upstream `prettyTheory` uses `foldTheoryItem` with 8 handlers over an 8-constructor `TheoryItem`, hoists config-blocks to the front and tactic/heuristic/cache to fixed slots from separate fields, and `vsep`s a `[Doc]`. The clean is a 7-arm `match` over its own erasure-driven enum (`Verbatim` collapses Text/Config/Translation/tactic/comments; `Heuristic` promoted; solver inputs item-bundled), does none of the hoisting, and assembles by column-0 `String` join. Materially different decomposition.\n- **Item order / spacing / 3-blank-before-`end` tail** are byte-forced merger; I independently re-verified the 3-blank tail across real captures (BP_IBS, C8, cav13, NSLPK3…) and the 29-file `whole_echo_frame_parity` reconstruction.\n- **Macros `sep`→`vcat`**: byte-forced by a logged `r5_mac2` falsification (two fitting macros still break); the block Doc construction (`\"macros: \" <> vcat`) stays divergent from upstream's `keyword_ \"macros:\" $$ nest 4` overlap trick. (I resolved the apparent `$$`/col-8 discrepancy: `prettyMacro`'s inner `nest 4` compounds to 8 > width-7, triggering `$$` overlap — source and oracle agree.)\n- **Restriction expanded split**: clean's own rendered-role field model (no `ogFormula :: Maybe`); safety-on-statement diverges from upstream's safety-on-`expandedFormula` but is provably byte-neutral (macros are term-level).\n- **Predicates**: margin-0 textual splice is byte-forced by `dmn-basic` and confirmed against the sanctioned BSD engine, with an explicit \"no tamarin HS source read\" log.\n- Identifier / constellation / constant / comment scans clean; suite green (83 tests).\n\nFour advisory non-blocking notes recorded (source-order vs hoisted heuristic/tactic/config; no cache slot; empirical tail; BSD-threading dependency).\n\nVERDICT: pass",
+    "passed": true
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Implement"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "Audit"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "seal:pretty-r5",
+      "phaseIndex": 1,
+      "phaseTitle": "Implement",
+      "agentId": "a2d8cbdd7c2f76260",
+      "model": "claude-opus-4-8[1m]",
+      "state": "done",
+      "startedAt": 1784419149988,
+      "queuedAt": 1784419149985,
+      "attempt": 1,
+      "lastToolName": "Bash",
+      "lastToolSummary": "cd /home/kamilner/tamarin-cleanroom/pretty/workspace/pretty…",
+      "promptPreview": "You are a SEALED implementer under the barrier protocol at /home/kamilner/tamarin-cleanroom/PROTOCOL.md — read it first and comply strictly.\nACCESS RULES: You must NOT read any file under /home/kamilner/tamarin-rs/crates/, and NOT read any Haskell source of tamarin-prover anywhere on disk (notably /home/kamilner/tamarin-rs/tamarin-prover/{lib,src}/ and /home/kamilner/tamarin-rs/tamarin-prover-test…",
+      "lastProgressAt": 1784421781345,
+      "tokens": 350525,
+      "toolCalls": 94,
+      "durationMs": 2631357,
+      "resultPreview": "All changes are confined to `/home/kamilner/tamarin-cleanroom/pretty/`; no commits, no files touched outside the workspace, OOM guards untouched, and the only Haskell read was the sanctioned BSD `pretty-1.1.3.6`. The `predtest` entries are build-artifact residue under `target/`, not source. Everything is green.\n\nRound 5 complete. Plain-text summary follows.\n\n---\n\nROUND 5 — three observable gaps cl…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "audit:pretty-r5",
+      "phaseIndex": 2,
+      "phaseTitle": "Audit",
+      "agentId": "a8f460a120615533d",
+      "model": "claude-opus-4-8[1m]",
+      "state": "done",
+      "startedAt": 1784421781357,
+      "queuedAt": 1784421781346,
+      "attempt": 1,
+      "lastToolName": "Edit",
+      "lastToolSummary": "/home/kamilner/tamarin-cleanroom/pretty/AUDIT.md",
+      "promptPreview": "You are a BOTH-SIDES similarity auditor for the tamarin-rs sealed relicensing campaign (exempt from barrier access rules; you may read everything). Audit ONLY this round's delta: /home/kamilner/tamarin-cleanroom HEAD (8341919) contains pretty rounds 1-4 — git -C /home/kamilner/tamarin-cleanroom status/diff restricted to pretty/ shows the round-5 delta (restriction expanded-field, macros layout, th…",
+      "lastProgressAt": 1784422639901,
+      "tokens": 161888,
+      "toolCalls": 33,
+      "durationMs": 858544,
+      "resultPreview": "The round-5 both-sides similarity audit is complete and appended to `/home/kamilner/tamarin-cleanroom/pretty/AUDIT.md`.\n\nSummary of what I audited and found (round-5 delta = uncommitted working tree over cleanroom HEAD `8341919`, restricted to `pretty/`):\n\n**Scope**: `src/theory.rs` (the `theory … begin … end` frame, previously an `unimplemented!` stub), `src/macros.rs` (macros block `sep`→`vcat`;…"
+    }
+  ],
+  "totalTokens": 512413,
+  "totalToolCalls": 127
+}

@@ -91,6 +91,7 @@ fn less(l: Term, r: Term) -> Formula {
 fn restriction(name: &str, f: Formula) -> Restriction {
     Restriction {
         name: name.into(),
+        expanded: f.clone(),
         formula: f,
     }
 }
@@ -188,6 +189,50 @@ fn restriction_wrapper_and_safety() {
         ),
     );
     assert!(render_restriction(&restriction("s", s8)).contains("// safety formula"));
+}
+
+#[test]
+fn restriction_macro_statement_vs_expanded() {
+    // GAP 1 — target:MacroInLemmasAndRestrictions: with a macro, the STATEMENT
+    // is rendered in MACRO form (`A( m(m3(x)) )`) while the expanded-formula
+    // comment is rendered in the macro-EXPANDED form (`A( x )`). Two distinct
+    // formulas; each renders in its own place. No safety line (a positive ∃
+    // conclusion defeats safety).
+    let app = |f: &str, args: Vec<Term>| Term::App(f.into(), args);
+    let stmt = forall(
+        vec![msgv("x"), nodev("i")],
+        implies(
+            action(
+                "A",
+                vec![app("m", vec![app("m3", vec![mvar("x")])])],
+                "i",
+            ),
+            exists(vec![msgv("y")], eq(mvar("x"), mvar("y"))),
+        ),
+    );
+    let expanded = forall(
+        vec![msgv("x"), nodev("i")],
+        implies(
+            action("A", vec![mvar("x")], "i"),
+            exists(vec![msgv("y")], eq(mvar("x"), mvar("y"))),
+        ),
+    );
+    let r = Restriction {
+        name: "OnlyValidProcessing".into(),
+        formula: stmt,
+        expanded,
+    };
+    let expected = [
+        "restriction OnlyValidProcessing:",
+        "  \"\u{2200} x #i. (A( m(m3(x)) ) @ #i) \u{21d2} (\u{2203} y. x = y)\"",
+        "",
+        "  /*",
+        "  expanded formula:",
+        "  \"\u{2200} x #i. (A( x ) @ #i) \u{21d2} (\u{2203} y. x = y)\"",
+        "  */",
+    ]
+    .join("\n");
+    assert_eq!(render_restriction(&r), expected);
 }
 
 #[test]
@@ -978,7 +1023,22 @@ fn parse_restriction(block: &str) -> Restriction {
     let had_safety = p.eat("// safety formula");
     p.ws();
     assert!(p.rest().is_empty(), "unparsed statement: {:?}", p.rest());
-    let r = Restriction { name, formula: f };
+    // Expanded-formula comment: parse the quoted formula after the
+    // `expanded formula:` header (macro/predicate-expanded — equals the
+    // statement in every macro-free capture, but parsed independently so a
+    // GAP-1 regression would surface as a divergence).
+    let comment = &block[stmt_end..];
+    let ex_hdr = "expanded formula:";
+    let ex_idx = comment.find(ex_hdr).expect("expanded formula header");
+    let mut pe = P::new(&comment[ex_idx + ex_hdr.len()..]);
+    pe.expect("\"");
+    let expanded = pe.formula();
+    pe.expect("\"");
+    let r = Restriction {
+        name,
+        formula: f,
+        expanded,
+    };
     // The renderer derives the safety line from the formula; cross-check the
     // classification against the capture here so a parity PASS can't hide a
     // misclassification compensated elsewhere.

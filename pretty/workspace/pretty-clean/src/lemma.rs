@@ -69,15 +69,17 @@ fn restriction_doc(r: &Restriction) -> Doc {
     if formula::is_safety(&r.formula) {
         d = above_op(d, nest(2, &text("// safety formula")));
     }
-    // One blank line, then the expanded-formula comment at col 2. The
-    // expanded content is byte-identical to the statement in every
-    // observation (probes q_w1/q_pred1: predicate expansion happens upstream
-    // of BOTH renderings), so the same formula renders twice.
+    // One blank line, then the expanded-formula comment at col 2. The STATEMENT
+    // renders `r.formula` (macros unexpanded); the comment renders
+    // `r.expanded` (macro/predicate-expanded — target:MacroInLemmasAndRestrictions
+    // shows the two differing, e.g. statement `A( m(m3(x)) )` vs expanded
+    // `A( x )`). Without macros the two are equal, so this reproduces the
+    // earlier same-formula-twice observation (probes q_w1/q_pred1).
     d = above_plus(d, text(""));
     let comment = above_op(
         above_op(
             above_op(text("/*"), text("expanded formula:")),
-            quoted_formula(&r.formula),
+            quoted_formula(&r.expanded),
         ),
         text("*/"),
     );

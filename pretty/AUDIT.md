@@ -884,3 +884,259 @@ Non-blocking notes (advisory, do NOT gate this round):
    break. Interface caveat, not a similarity finding.
 
 VERDICT: pass
+
+---
+
+## Round 5 — restriction expanded-field split, macros always-break, theory frame
+
+Delta audited: working tree vs committed HEAD `8341919` (rounds 1–4), restricted
+to `pretty/`. Source touch is five files — `src/theory.rs` (the `theory … begin
+… end` frame, previously an `unimplemented!` stub), `src/macros.rs` (macros
+block `sep`→`vcat`; `render_predicates` implemented), `src/lemma.rs`
+(restriction comment renders `r.expanded`), `src/ast.rs` (`Restriction.expanded`
+field; `TheoryItem` reshaped with `Rule(_, Option<AcVariants>)` /
+`Lemma(_, Option<Guarded>)` / `Heuristic` / `Verbatim`), `src/lib.rs` (public
+`render_macros`/`render_predicates` re-exports + doc) — plus test additions
+(`tests/round5_theory.rs`, the `expanded` field threaded through
+`round3_formulas.rs`'s fixture + parser and a new macro-restriction test), the
+provenance notes (BEHAVIOR.md "Theory frame"/macros/restriction, QUERIES.log R5
+block), and three macro probes. Whole suite green here (6+47+9+10+6+5 = 83).
+Method as before (AFC; byte-forced output filtered as merger, residue examined
+for protectable expression).
+
+Sealed side (upstream Haskell, `tamarin-rs/tamarin-prover/`), additional to
+prior rounds: theory frame — `TheoryObject.hs` `prettyTheory` (732–765) with
+`foldTheoryItem` (221–239) over the eight-constructor `TheoryItem`
+(`RuleItem`/`LemmaItem`/`TextItem`/`ConfigBlockItem`/`RestrictionItem`/
+`PredicateItem`/`MacroItem`/`TranslationItem`), `vsep = foldr ($--$) emptyDoc`
+(`Theory/Text/Pretty.hs` 83–84), `kwTheoryName`/`kwTheoryBegin`/`kwEnd`
+(119–130); macros — `prettyMacros`/`prettyMacro` (819–840); restriction —
+`prettyRestriction` (846–858); predicate — `prettyPredicate` (799–803).
+
+### 1. Theory-frame TRAVERSAL structure (special scrutiny)
+
+The mandate: the frame must not mirror upstream's item-fold decomposition
+beyond what output forces. It does not, on every axis.
+
+* **Decomposition diverges — erasure-driven, not upstream's semantic fold.**
+  Upstream dispatches through `foldTheoryItem` with **eight** handlers over an
+  eight-constructor `TheoryItem`. The clean's `render_item` is a **seven**-arm
+  `match` over its OWN `TheoryItem` enum (`Macros`, `Predicates`, `Rule`,
+  `Restriction`, `Lemma`, `Heuristic`, `Verbatim`). The partition is by CLEAN's
+  erasure surface — blocks that need a ported renderer (Rule/Restriction/Lemma/
+  Macros/Predicates) vs blocks that are opaque pre-rendered input (`Verbatim`
+  absorbs upstream's `TextItem`, `ConfigBlockItem`, `TranslationItem`, plus
+  `tactic:`, `options`, top-level `/* … */` comments) — NOT upstream's
+  semantic-item partition. The match-arm order (`Macros` first) does not follow
+  `foldTheoryItem`'s argument order (`fRule` first). The enum bundles the
+  solver inputs INTO the item (`Rule(Rule, Option<AcVariants>)`,
+  `Lemma(Lemma, Option<Guarded>)`) where upstream keeps them inside the rule/
+  lemma types and the fold passes `ppRule`/`prettyLemma ppPrf` — a different
+  carrier shape. `Heuristic` is promoted to an item; `Predicates` is a grouped
+  `Vec` (one item per contiguous run) where upstream folds one `PredicateItem`
+  at a time. This is a materially different traversal, not a re-encoding of the
+  fold.
+* **No hoisting / no config-to-front — a structural divergence (and latent
+  delta).** Upstream `prettyTheory` PARTITIONS: config-block items are
+  `filter`ed to the FRONT (before `begin`); `thyTactic`/`thyHeuristic`/`thyCache`
+  are pulled from separate theory FIELDS into a FIXED slot right after the
+  signature; only the non-config items keep source order. The clean does none of
+  this — it emits `theory NAME`, `begin`, signature, then ALL `thy.items` in
+  raw source order, with `heuristic:`/`tactic:`/config rendered wherever they sit
+  in the item list. For the corpus (heuristic/tactic declared early, no config
+  block) the output coincides; a late `heuristic:`/`tactic:` or any
+  `configuration:` would place it differently than upstream. That is a
+  correctness caveat (Note 1), and affirmatively it is the OPPOSITE of mirroring
+  the fold — a transcriber would have reproduced the front-filter and the
+  fixed-slot hoist.
+* **String assembly, not Doc composition.** Upstream builds a `[Doc]` and
+  `vsep`s it (`foldr ($--$)`), rendering the whole theory in ONE layout pass.
+  The clean renders each item to a **`String`** through its R1–R4 entry point
+  (each at column 0) and `join`s with `"\n\n"` (`parts.join`), then appends
+  `"\n\n\n\nend"`. Independent per-item rendering is only byte-correct because
+  theory items sit at column 0 in the echo (verified — the prior rounds' "render
+  once" caveat is thereby discharged for the frame, not by Doc composition but
+  by the col-0 observation). This is a distinct construction from `vsep` over
+  Docs, reaching the observed bytes.
+
+### 2. Item ordering / spacing / frame tail — byte-forced merger, provenance verified
+
+Everything the frame contributes is observable in the whole echo, hence
+compatibility content; provenance is pinned to real captures.
+
+* **Header / signature-first / one-blank-between-items** — `theory NAME`·blank·
+  `begin`·blank (69 surveyed captures); the signature block always first, ahead
+  of even `tactic:`/`heuristic:` (targets 5G_AKA, contract); items blank-line
+  separated in source order. All read off `round1-3/targets/*.hs.txt` and the
+  29-file `whole_echo_frame_parity` reconstruction. Byte-forced; matches
+  upstream's `vsep`/lineComment/`kwTheoryBegin` only in observable outcome.
+* **Three blank lines before `end`** — independently re-verified here across the
+  real captures (`*/`·`by sorry`·∅·∅·∅·`end`, exact on BP_IBS_2/3/4, C8,
+  cav13, NSLPK3 and the frame test's assertion). This is an EMPIRICAL constant
+  (44 surveyed captures, RAW-tail of MacroInLemmasAndRestrictions logged as
+  `by sorry`·wf-line·Generated-block·`end` blank-separated), not a lifted
+  magic number; the clean's "residue of the stripped wf report + `Generated
+  from:` stamp" is a rationalization of a pinned observation, not a mechanistic
+  read of `vsep`/`$--$` empty-handling. Byte-forced merger, provenance solid.
+
+### 3. Macros block `sep`→`vcat` (always-break) — byte-forced, divergent construction
+
+R2's macros block used `sep` (all-or-nothing; collapses to one line when it
+fits). R5 corrects it to `vcat` (always vertical). This is byte-forced and
+non-transcription:
+
+* **Forced by a logged falsification.** `probe:r5_mac2` (`aa(x)=h(x),
+  bb(x)=x` — two macros that fit ribbon on one line) still stacks `bb` on its
+  own col-8 line in the oracle; that refutes the R2 `sep` law (which every
+  earlier witness happened not to expose because it overflowed). BEHAVIOR.md/
+  QUERIES.log record the falsification. `vcat` (always-vertical) is THE
+  combinator that reproduces "always break", and it is a pre-existing BSD
+  `HughesPJ` export. `r5_mac1`/issue777 pin the trivial one-macro line.
+* **The BLOCK construction stays divergent from upstream.** Upstream is
+  `keyword_ "macros:" $$ nest 4 (vcat [prettyMacro <> comma | …])`: the col-8
+  layout arises from the **inner** `nest 4` on `prettyMacro`'s head compounding
+  with the outer `nest 4` to 8 > `len "macros:"` (7), so `$$`'s overlap inlines
+  the first macro beside `macros:` (confirmed: the read-upstream `$$ nest 4`
+  DOES produce the col-8 echo — the oracle and source agree). The clean reaches
+  the identical bytes by a completely different route: `text "macros: " <> vcat
+  (punctuate ',' items)` — a plain `<>`-beside off an 8-wide prefix, **no**
+  double-nest, **no** `$$`/overlap, and `punctuate` for the commas where
+  upstream hand-rolls `if i == length m - 1 then … else … <> comma`. Same
+  bytes, structurally unrelated Doc expression. A transcriber would have used
+  `$$`/`nest 4`; the clean did not (and, per QUERIES.log, derived `vcat` from
+  `r5_mac2`, not from the GPL integrator's blocker note that names upstream's
+  `$$`/vcat).
+
+### 4. Restriction statement/expanded split — own field model, safety divergence byte-equivalent
+
+R3 rendered `r.formula` in BOTH the statement and the `expanded formula:`
+comment (the then-valid "byte-identical in every observation" law). R5 adds
+`Restriction.expanded` and renders it in the comment.
+
+* **Byte-forced by a macro witness.** `target:MacroInLemmasAndRestrictions`
+  shows statement `A( m(m3(x)) )` vs expanded `A( x )` — two distinct formulas.
+  The clean models this as `formula` (statement, macro-form) + `expanded`
+  (comment, macro/predicate-expanded), the latter a **caller-supplied opaque
+  input** (the ported macro expansion), not derived in-crate. For macro-free
+  restrictions the two are equal, reproducing the R3 same-formula-twice bytes.
+* **Field model DIVERGES from upstream.** Upstream stores `Restriction rstrName
+  expandedFormula ogFormula` with `ogFormula :: Maybe`, statement =
+  `fromMaybe expandedFormula ogFormula`, comment = `expandedFormula` (guarded by
+  `case ogFormula of Just _`). The clean carries the **rendered roles**
+  (`formula` = the resolved statement, always present; `expanded` = the comment
+  body) with NO `Maybe`/`ogFormula` construct and its own field names — not
+  upstream's `expandedFormula`/`ogFormula` constellation.
+* **Safety on the statement vs upstream's on `expandedFormula` — divergent but
+  byte-equivalent.** Upstream computes `isSafetyFormula (formulaToGuarded_
+  expandedFormula)`; the clean keeps its R3 `is_safety(&r.formula)` (the
+  statement). These agree on every input because tamarin macros are **term**
+  macros (they substitute terms inside atoms and never add/remove quantifiers,
+  so the NNF existential structure — the sole safety input — is invariant) and
+  predicates are expanded upstream of BOTH forms. BEHAVIOR.md states exactly
+  this reasoning. A divergence in algorithm that is provably byte-neutral, i.e.
+  non-transcription, not a latent delta.
+
+### 5. Predicates block — byte-forced margin-0 splice (derived, not read)
+
+`render_predicates` emits `predicate: <fact><=><formula>` per predicate, a
+contiguous run blank-line separated. Upstream `prettyPredicate = kwPredicate <>
+colon <-> text (factstr ++ "<=>" ++ formulastr)` where `factstr`/`formulastr`
+are each `render`ed independently. The clean's `format!("predicate: {}<=>{}",
+render_fact(fact), formula::render(body))` reaches the same bytes by the same
+CATEGORY of technique (render sub-parts to strings at margin 0, then splice) —
+but this convergence is byte-forced, not a lift:
+
+* The splice is **compelled by an observable**: `target:dmn-basic` shows a
+  wrapping predicate body breaking at absolute margin 0 (column 1)
+  **independent of the header width** (`Sender_duplicate` vs `Mixer_duplicate`
+  bodies both at col 1; a 66-col row fits ribbon 73 measured from col 1). Only
+  a margin-0 standalone render + textual splice yields that; a `<>`-beside
+  would thread the current line width into each `NilAbove` continuation and
+  indent the body under `<=>`. The clean pinned this from dmn-basic and
+  **confirmed the `<>` threading by reading the SANCTIONED BSD
+  `pretty-1.1.3.6` `display`/`lay2`** (protocol-permitted), explicitly logging
+  "no tamarin HS source read". Derivation, not transcription.
+* The clean builds the head from a synthesised `Fact` routed through its own R2
+  `render_fact` and the body through its R3 `formula::render`, where upstream
+  uses `prettyFact prettyLVar`/`prettyLNFormula`. Own routing; `predicate:`/
+  `<=>`/no-surrounding-spaces are byte-forced.
+
+### 6. Identifier / constellation / constant / comment / test scan
+
+* Leakage grep of the R5-touched `src/` for the frame/macros/restriction/
+  predicate upstream surface (`prettyTheory`, `foldTheoryItem`, `prettyMacros`,
+  `prettyMacro`, `prettyPredicate`, `prettyRestriction`,
+  `prettyTranslationElement`, `ppItem`, `prettyConfigBlock`, the eight
+  `*Item` constructors, `thyItems`/`thySignature`/`thyHeuristic`/`thyTactic`/
+  `thyCache`, `kwTheory*`/`kwEnd`, `ppNonEmptyList`, `prettyVarList`,
+  `ogFormula`/`expandedFormula`, `formulaToGuarded`/`isSafetyFormula`,
+  `multiComment`, `keyword_`/`lineComment_`, `prettyGoalRankings`, `vsep`,
+  `ppCache`) and the pseudonymous author handles: **no matches**.
+* AST constellation DIVERGES. The clean's `TheoryItem` (7 variants, `Verbatim`/
+  `Heuristic`, item-bundled `Option<AcVariants>`/`Option<Guarded>`) does not
+  mirror upstream's eight `*Item` constructors; `Restriction {name, formula,
+  expanded}` is the clean's rendered-role model, not upstream's
+  `expandedFormula`/`ogFormula :: Maybe`.
+* Non-observable constants: the `\n\n\n\n` pre-`end` tail is empirically pinned
+  (44 captures, re-verified here), not a lifted number; the margin-0 predicate
+  splice is derived from dmn-basic; the one-blank-between-items is observed.
+  None lifted.
+* Comment lineage: the only external references in the delta are to the
+  SANCTIONED BSD library (`pretty-1.1.3.6` `display`/`lay2`; permitted) and to
+  the clean's own probes/targets — no tamarin source-file narration, no line
+  citations, no reproduced ghost comments.
+* `tests/round5_theory.rs`: probe-pinned unit fixtures (gap2 macros always-
+  break, predicate one-liner/group, margin-0 wrap, gap3 frame glue) plus
+  `whole_echo_frame_parity` — a **layout-insensitive** reconstruction that
+  reparses 29 diverse REAL captures (discarding all whitespace, so bytes can
+  only come from the renderer), rebuilds `Theory`+`Signature`, and byte-matches
+  `render_theory` against each capture (asserts ≥15). The parser asserts the
+  frame invariants (3-blank tail, signature-first) structurally rather than
+  trusting them. No lifted upstream text. Green here (5/5; frame parity 29/29).
+
+### Findings
+
+No violations. The theory frame is the round's scrutiny centre and is clean on
+the mandated axis: the traversal is a coarser, erasure-driven `match` (7 arms,
+`Verbatim`-collapse, item-bundled solver inputs, `Heuristic` promoted) that does
+NOT mirror upstream's eight-handler `foldTheoryItem`, performs none of
+upstream's config-to-front / tactic-heuristic-cache fixed-slot hoisting, and
+assembles by column-0 string-join rather than `vsep` over `[Doc]`. The parts
+that equal upstream — item order, one-blank separation, `theory`/`begin`/`end`
+keywords, the 3-blank pre-`end` tail — are byte-forced merger pinned to 44+29
+real captures. The macros `sep`→`vcat` correction is byte-forced by a logged
+`r5_mac2` falsification while the block's Doc construction stays divergent from
+upstream's `$$ nest 4`/overlap; the restriction `expanded` split uses the
+clean's own rendered-role field model (safety-on-statement is a divergent but
+provably byte-neutral algorithm, macros being term-level); the predicate
+margin-0 splice is derived from dmn-basic and confirmed against the sanctioned
+BSD engine, not from `prettyPredicate`. Identifier, constellation, constant,
+comment and test scans over the delta are clean.
+
+Non-blocking notes (advisory, do NOT gate this round):
+1. *Frame reordering deltas vs source, gate-backstopped.* The clean emits
+   `heuristic:`, `tactic:` and (unmodeled) `configuration:` in raw source-item
+   order, whereas upstream hoists `thyHeuristic`/`thyTactic` to a fixed slot
+   after the signature and `filter`s config blocks to the front (before
+   `begin`). Correct for the probed + curated corpus (these appear early / are
+   absent); a theory declaring `heuristic:`/`tactic:` after other items, or any
+   `configuration:` block, would order differently than upstream. This is a
+   correctness caveat — and affirmatively the non-mirroring of the fold — not a
+   similarity finding; the full-corpus frame gate is the backstop before wider
+   parity is claimed.
+2. *No `ppCache` slot modeled.* Upstream renders `ppCache thyCache` in the fixed
+   post-heuristic slot; for the no-prove echo the cache is `emptyDoc`/out of
+   span, so the clean omits it. A closed-theory cache surfaced in span would be
+   unmodeled — deferred/unobserved, consistent with the `--diff` deferrals of
+   prior rounds.
+3. *3-blank tail is empirically pinned, not derived.* It rests on the invariant
+   that the gate strips exactly the wf report + `Generated from:` stamp (each
+   one blank-separated slot). Any change to what the extraction drops must
+   re-verify the tail; strong across 44 captures today.
+4. *Predicate margin-0 splice rests on the sanctioned-BSD width threading.* The
+   textual splice (rather than `<>`) is required because BSD `display`/`lay2`
+   threads the line width into `NilAbove` continuations. A future doc-engine
+   change touching `NilAbove`/continuation nesting must re-check the dmn-basic
+   margin-0 predicate wrap.
+
+VERDICT: pass

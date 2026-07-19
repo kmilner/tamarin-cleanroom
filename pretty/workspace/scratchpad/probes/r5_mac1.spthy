@@ -1,0 +1,5 @@
+theory R5mac1 begin
+functions: h/1
+macros: onlyone(x) = h(x)
+rule A: [ In(x) ] --[ Ev(onlyone(x)) ]-> [ ]
+end

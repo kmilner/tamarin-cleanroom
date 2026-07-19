@@ -243,10 +243,20 @@ pub enum Atom {
 /// `restriction name: "formula"` plus the conditional `// safety formula`
 /// line and the `/* expanded formula: … */` comment (probe:q_w1). The
 /// `axiom` keyword echoes as a restriction too (probe:q_ax1).
+///
+/// `formula` is the STATEMENT as written (macros unexpanded); `expanded` is
+/// the macro/predicate-expanded formula shown in the `expanded formula:`
+/// comment. They differ ONLY when the restriction uses a macro
+/// (target:MacroInLemmasAndRestrictions — statement `A( m(m3(x)) )`, expanded
+/// `A( x )`); predicate expansion happens upstream of BOTH, so predicate-only
+/// restrictions render the two identically (probe:q_pred1). `expanded` is a
+/// caller-supplied opaque input (the ported macro/predicate expansion), NOT
+/// derived here.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Restriction {
     pub name: String,
     pub formula: Formula,
+    pub expanded: Formula,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -326,12 +336,31 @@ pub struct Theory {
     pub items: Vec<TheoryItem>,
 }
 
+/// One top-level theory item, in the order it appears in the echo (source
+/// order; the signature is NOT an item — it is rendered first from the
+/// separate `Signature`). The frame (`theory::render`) stacks these with a
+/// blank line between successive items. Rules carry their pre-computed
+/// `AcVariants` and lemmas their pre-computed `Guarded` (solver inputs) so the
+/// frame can dispatch to the R2/R3 entry points with the right arguments.
 #[derive(Debug, Clone, PartialEq)]
 pub enum TheoryItem {
+    /// The `macros:` block (rendered as one item).
     Macros(Vec<Macro>),
+    /// A contiguous run of `predicate:` declarations (rendered as one item,
+    /// blank-line separated internally).
     Predicates(Vec<Predicate>),
-    Rule(Rule),
+    /// One `rule (modulo E) …` block plus its AC-variants comment.
+    Rule(Rule, Option<AcVariants>),
+    /// One `restriction …` block (also legacy `axiom`).
     Restriction(Restriction),
-    Lemma(Lemma),
-    FormalComment { header: String, body: String },
+    /// One `lemma …` block plus its guarded-formula comment.
+    Lemma(Lemma, Option<Guarded>),
+    /// A theory-level `heuristic: <value>` line.
+    Heuristic(String),
+    /// An opaque top-level block carried through the frame VERBATIM (the
+    /// whole contiguous `tactic:` region, `section{* … *}` / `text{* … *}`
+    /// formal comments, `options`, user `/* … */` comments, …). Like the
+    /// guarded and proof text, its interior layout is outside this crate's
+    /// erasure surface — it is a pre-rendered input, re-emitted unchanged.
+    Verbatim(String),
 }

@@ -1,0 +1,6 @@
+theory R5allmacro begin
+functions: h/1
+macros: g(x) = h(x)
+rule A: [ In(x) ] --[ Ev(g(x)) ]-> [ ]
+lemma L: all-traces "All x #i. Ev(g(x))@i ==> Ex #j. Ev(g(x))@j"
+end

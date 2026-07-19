@@ -5,9 +5,10 @@
 //! inferred behavioral spec you build up as you probe the oracle.
 //!
 //! Implemented sub-targets: R1 (term core + signature block), R2 (rule
-//! blocks + macros surface), R3 (restriction / lemma / formula blocks).
-//! Still stubs: R4 predicates block and the top-level theory assembly
-//! (`theory::render`).
+//! blocks + macros surface), R3 (restriction / lemma / formula blocks), R4
+//! (macros / predicates blocks), and R5 — the top-level `theory <name> begin
+//! … end` frame (`theory::render`), the restriction statement/expanded-formula
+//! split, and the always-break macros layout.
 
 pub mod ast;
 pub mod doc; // BSD HughesPJ Doc engine — reuse graphdot's clean-room port.
@@ -39,6 +40,17 @@ pub fn render_signature_block(sig: &ast::Signature) -> String {
 /// R1: one term, rendered at the echo's layout parameters. See `term::render`.
 pub fn render_term(term: &ast::Term) -> String {
     term::render(term)
+}
+
+/// R4: the `macros:` block. See `macros::render_macros`.
+pub fn render_macros(macros: &[ast::Macro]) -> String {
+    macros::render_macros(macros)
+}
+
+/// R4: a contiguous run of `predicate:` declarations. See
+/// `macros::render_predicates`.
+pub fn render_predicates(preds: &[ast::Predicate]) -> String {
+    macros::render_predicates(preds)
 }
 
 /// R2: one whole rule block — header, body, blank line, loop-breaker line,
