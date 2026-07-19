@@ -1,0 +1,407 @@
+<br/>
+<h2>Fact Symbols with Injective Instances</h2><br/>
+<p class="monospace rules">None</p><br/>
+<h2>Multiset Rewriting Rules</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) isend:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> K( x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> In( x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) irecv:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( x ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) H_fresh:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Fr( ~x ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Fresh( $H, $x.1, ~x ), !HK( $H, $x.1, ~x ), H( $H ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !HK( $H, $x.1, ~x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) H_send:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !HK( $H, $x.1, x.2 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Send( $H, $x.1, x.2 ), H( $H ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( &lt;$x.1, x.2&gt; ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) H_send:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !HK( $H, $x, x.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--[</span> Send( $H, $x, x.1 ), H( $H ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( &lt;$x, x.1&gt; ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) H_receive:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In( &lt;$x.1, x.2&gt; ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Receive( $H, $x.1, x.2 ), !HK( $H, $x.1, x.2 ), H( $H ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !HK( $H, $x.1, x.2 ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) H_receive:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In( &lt;$x, x.1&gt; ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--[</span> Receive( $H, $x, x.1 ), !HK( $H, $x, x.1 ), H( $H ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !HK( $H, $x, x.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) H_send_S:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !HK( $H, $x.1, x.2 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Send( $H, $x.1, x.2 ), H( $H ), To( $A ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out_S( $H, $A, $x.1, x.2 ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">// loop breaker: [0]</span><br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) H_send_S:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !HK( $H, $x, x.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--[</span> Send( $H, $x, x.1 ), H( $H ), To( $A ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out_S( $H, $A, $x, x.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_comment">// loop breaker: [0]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) H_receive_S:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In_S( $A, $H, $x.1, x.2 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;Receive( $H, $x.1, x.2 ), !HK( $H, $x.1, x.2 ), H( $H ), From( $A )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !HK( $H, $x.1, x.2 ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) H_receive_S:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In_S( $A, $H, $x, x.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--[</span> Receive( $H, $x, x.1 ), !HK( $H, $x, x.1 ), H( $H ), From( $A )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !HK( $H, $x, x.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) H_send_S2:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !HK( $H, $x.1, x.2 ), !HK( $H, $y.1, y.2 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Send( $H, $x.1, x.2 ), Send( $H, $y.1, y.2 ), H( $H ), To( $A )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out_S( $H, $A, &lt;$x.1, $y.1&gt;, &lt;x.2, y.2&gt; ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">// loop breakers: [0,1]</span><br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) H_send_S2:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !HK( $H, $x, x.1 ), !HK( $H, $y, y.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--[</span> Send( $H, $x, x.1 ), Send( $H, $y, y.1 ), H( $H ), To( $A )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out_S( $H, $A, &lt;$x, $y&gt;, &lt;x.1, y.1&gt; ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_comment">// loop breakers: [0,1]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) H_send_S3:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !HK( $H, $x.1, x.2 ), !HK( $H, $y.1, y.2 ), !HK( $H, $z.1, z.2 )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;Send( $H, $x.1, x.2 ), Send( $H, $y.1, y.2 ),<br/>
+&nbsp;&nbsp;Send( $H, $z.1, z.2 ), H( $H ), To( $A )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out_S( $H, $A, &lt;$x.1, $y.1, $z.1&gt;, &lt;x.2, y.2, z.2&gt; )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">// loop breakers: [0,1,2]</span><br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) H_send_S3:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !HK( $H, $x, x.1 ), !HK( $H, $y, y.1 ), !HK( $H, $z, z.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Send( $H, $x, x.1 ), Send( $H, $y, y.1 ), Send( $H, $z, z.1 ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;H( $H ), To( $A )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out_S( $H, $A, &lt;$x, $y, $z&gt;, &lt;x.1, y.1, z.1&gt; ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_comment">// loop breakers: [0,1,2]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) H_send_S4:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;!HK( $H, $x.1, x.2 ), !HK( $H, $y.1, y.2 ), !HK( $H, $z.1, z.2 ),<br/>
+&nbsp;&nbsp;&nbsp;!HK( $H, $w.1, w.2 )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;Send( $H, $x.1, x.2 ), Send( $H, $y.1, y.2 ),<br/>
+&nbsp;&nbsp;Send( $H, $z.1, z.2 ), Send( $H, $w.1, w.2 ), H( $H ), To( $A )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;Out_S( $H, $A, &lt;$x.1, $y.1, $z.1, $w.1&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;x.2, y.2, z.2, w.2&gt;<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">// loop breakers: [0,1,2,3]</span><br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) H_send_S4:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;!HK( $H, $x, x.1 ), !HK( $H, $y, y.1 ), !HK( $H, $z, z.1 ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;!HK( $H, $w, w.1 )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Send( $H, $x, x.1 ), Send( $H, $y, y.1 ), Send( $H, $z, z.1 ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Send( $H, $w, w.1 ), H( $H ), To( $A )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Out_S( $H, $A, &lt;$x, $y, $z, $w&gt;, &lt;x.1, y.1, z.1, w.1&gt; )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_comment">// loop breakers: [0,1,2,3]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) H_receive_S2:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In_S( $A, $H, &lt;$x.1, $y.1&gt;, &lt;x.2, y.2&gt; ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;Receive( $H, $x.1, x.2 ), Receive( $H, $y.1, y.2 ),<br/>
+&nbsp;&nbsp;!HK( $H, $x.1, x.2 ), !HK( $H, $y.1, y.2 ), H( $H ), From( $A )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !HK( $H, $x.1, x.2 ), !HK( $H, $y.1, y.2 ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) H_receive_S2:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In_S( $A, $H, &lt;$x, $y&gt;, &lt;x.1, y.1&gt; ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Receive( $H, $x, x.1 ), Receive( $H, $y, y.1 ), !HK( $H, $x, x.1 ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;!HK( $H, $y, y.1 ), H( $H ), From( $A )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !HK( $H, $x, x.1 ), !HK( $H, $y, y.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) H_receive_S4:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;In_S( $A, $H, &lt;$x.1, $y.1, $z.1, $v.1&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;x.2, y.2, z.2, v.2&gt;<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;Receive( $H, $x.1, x.2 ), Receive( $H, $y.1, y.2 ),<br/>
+&nbsp;&nbsp;Receive( $H, $z.1, z.2 ), Receive( $H, $v.1, v.2 ),<br/>
+&nbsp;&nbsp;!HK( $H, $x.1, x.2 ), !HK( $H, $y.1, y.2 ), !HK( $H, $z.1, z.2 ),<br/>
+&nbsp;&nbsp;!HK( $H, $v.1, v.2 ), H( $H ), From( $A )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;!HK( $H, $x.1, x.2 ), !HK( $H, $y.1, y.2 ), !HK( $H, $z.1, z.2 ),<br/>
+&nbsp;&nbsp;&nbsp;!HK( $H, $v.1, v.2 )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) H_receive_S4:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In_S( $A, $H, &lt;$x, $y, $z, $v&gt;, &lt;x.1, y.1, z.1, v.1&gt; )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Receive( $H, $x, x.1 ), Receive( $H, $y, y.1 ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Receive( $H, $z, z.1 ), Receive( $H, $v, v.1 ), !HK( $H, $x, x.1 ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;!HK( $H, $y, y.1 ), !HK( $H, $z, z.1 ), !HK( $H, $v, v.1 ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;H( $H ), From( $A )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;!HK( $H, $x, x.1 ), !HK( $H, $y, y.1 ), !HK( $H, $z, z.1 ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;!HK( $H, $v, v.1 )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) ChanOut_S:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out_S( $A, $B, xn, x ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> ChanOut_S( $A, $B, xn, x ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Sec( $A, $B, xn, x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) ChanIn_S:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Sec( $A, $B, xn, x ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> ChanIn_S( $A, $B, xn, x ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In_S( $A, $B, xn, x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) ChanOut_C:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out_C( $A, $B, xn, x ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> ChanOut_C( $A, $B, xn, x ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Conf( $B, xn, x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) ChanIn_C:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Conf( $B, xn, x ), In( $A ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> ChanIn_C( $A, $B, xn, x ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In_C( $A, $B, xn, x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) ChanIn_CAdv:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In( &lt;$A, $B, xn, x&gt; ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> In_C( $A, $B, xn, x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) ChanOut_A:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out_A( $A, $B, xn, x ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> ChanOut_A( $A, $B, xn, x ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Auth( $A, xn, x ), Out( &lt;$A, $B, xn, x&gt; ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) ChanIn_A:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Auth( $A, xn, x ), In( $B ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> ChanIn_A( $A, $B, xn, x ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In_A( $A, $B, xn, x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) publickeyinfrastructure:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Fr( ~skX ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> LontermKey( $X, ~skX ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Ltk( $X, ~skX ), !Pk( $X, pk(~skX) ), Out( pk(~skX) ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) SetupAfterEA:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Ltk( $S, ~skS ), Fr( ~m ), Fr( ~rS ), Fr( ~rD ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;Setup( $H ), Roles( $H, $D, $P, $S ), Device( $H, $D ),<br/>
+&nbsp;&nbsp;InitK( $H, &#39;D&#39;, $D ), InitK( $H, &#39;P&#39;, $P ),<br/>
+&nbsp;&nbsp;InitK( $H, &#39;S&#39;, $S ), InitK( $H, &#39;m&#39;, m(~m) ),<br/>
+&nbsp;&nbsp;InitK( $H, &#39;idH&#39;, $idH ), InitK( $H, &#39;idS&#39;, $idS ),<br/>
+&nbsp;&nbsp;Rule3( $H, &#39;ICompare&#39;, &#39;m&#39; )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;AgSt_D7( $D, &#39;D_7&#39;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;$H, $idH, pk(~skS), $idS, $S, ~rS, ~rD&gt;<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;AgSt_S8( $S, &#39;S_8&#39;, &lt;~skS, $H, $idS, $idH, ~rS, ~rD&gt;<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;!HK( $H, &#39;D&#39;, $D ), !HK( $H, &#39;P&#39;, $P ),<br/>
+&nbsp;&nbsp;&nbsp;!HK( $H, &#39;S&#39;, $S ), !HK( $H, &#39;m&#39;, m(~m) ),<br/>
+&nbsp;&nbsp;&nbsp;!HK( $H, &#39;idH&#39;, $idH ), !HK( $H, &#39;idS&#39;, $idS ),<br/>
+&nbsp;&nbsp;&nbsp;AgSt_H6( $H, &#39;H_6&#39;, &lt;$D, $P, $S, m(~m), $idH, $idS&gt; )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) D_12:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;AgSt_D7( $D, &#39;D_7&#39;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;$H, $idH, pk(~skS), $idS, $S, ~rS, ~rD&gt;<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;In( senc(&lt;m(~m), ~rS2&gt;, f(&lt;~rS, ~rD&gt;)) ), Fr( ~vc )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> D( $D ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;AgSt_D13( $D, &#39;D_13&#39;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;$H, $idH, pk(~skS), $idS, $S, ~rS, ~rD, m(~m), ~rS2, ~vc&gt;<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;Out_S( $D, $H, &lt;&#39;vc&#39;, &#39;m&#39;&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;~vc, m(~m)&gt;<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) D_14:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;AgSt_D13( $D, &#39;D_13&#39;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;$H, $idH, pk(~skS), $idS, $S, ~rS, ~rD, m(~m), ~rS2, ~vc&gt;<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;In_S( $H, $D, &#39;vc&#39;, ~vc )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Dfin( ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( senc(f(&lt;m(~m), ~rS2&gt;), f(&lt;~rS, ~rD&gt;)) ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) S_10:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;AgSt_S8( $S, &#39;S_8&#39;, &lt;~skS, $H, $idS, $idH, ~rS, ~rD&gt;<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;In( m(~m) ), Fr( ~rS2 )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;AgSt_S11( $S, &#39;S_11&#39;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;~skS, $H, $idS, $idH, ~rS, ~rD, m(~m), ~rS2&gt;<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;Out( senc(&lt;m(~m), ~rS2&gt;, f(&lt;~rS, ~rD&gt;)) )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) S_16:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;AgSt_S11( $S, &#39;S_11&#39;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;~skS, $H, $idS, $idH, ~rS, ~rD, m(~m), ~rS2&gt;<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;In( senc(f(&lt;m(~m), ~rS2&gt;), f(&lt;~rS, ~rD&gt;)) )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Commit( $S, $H, m(~m) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) H_9:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;AgSt_H6( $H, &#39;H_6&#39;, &lt;$D, $P, $S, m(~m), $idH, $idS&gt; )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> H_role( $H, &#39;1&#39; ), Send( $H, &#39;m&#39;, m(~m) )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;AgSt_H9( $H, &#39;H_9&#39;, &lt;$D, $P, $S, m(~m), $idH, $idS&gt;<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;Out( &lt;&#39;m&#39;, m(~m)&gt; )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) H_13:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;AgSt_H9( $H, &#39;H_9&#39;, &lt;$D, $P, $S, m(~m), $idH, $idS&gt;<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;In_S( $D, $H, &lt;&#39;vc&#39;, &#39;m&#39;&gt;, &lt;~vc, m(~m)&gt;<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;H_role( $H, &#39;5&#39; ), Receive( $H, &#39;vc&#39;, ~vc ),<br/>
+&nbsp;&nbsp;Receive( $H, &#39;m&#39;, m(~m) ), Send( $H, &#39;vc&#39;, ~vc ),<br/>
+&nbsp;&nbsp;To( $D )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out_S( $H, $D, &#39;vc&#39;, ~vc ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">// loop breaker: [1]</span><br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span></p><br/>
+<h2>Restrictions of the Set of Traces</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">restriction</span> setup_for_IK:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>H #i<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>H( H ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span><span class="hl_operator">∃ </span>#j<span class="hl_operator">.</span> <span class="hl_operator">(</span>Setup( H ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>#j <span class="hl_operator">&lt;</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;expanded formula:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>H #i<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>H( H ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span><span class="hl_operator">∃ </span>#j<span class="hl_operator">.</span> <span class="hl_operator">(</span>Setup( H ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>#j <span class="hl_operator">&lt;</span> #i<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;*/</span><br/>
+<br/>
+<span class="hl_keyword">restriction</span> not_Chan_S_human_to_human:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>A B mn m #i #j #k<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>ChanOut_S( A, B, mn, m ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>H( A ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>H( B ) <span class="hl_operator">@</span> #k<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">⊥</span><span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;<span class="hl_comment">// safety formula</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;expanded formula:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>A B mn m #i #j #k<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span>ChanOut_S( A, B, mn, m ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>H( A ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>H( B ) <span class="hl_operator">@</span> #k<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">⊥</span><span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;*/</span><br/>
+<br/>
+<span class="hl_keyword">restriction</span> notSameRole:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>H1 H2 D1 D2 P1 P2 S1 S2 #i #j<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>Roles( H1, D1, P1, S1 ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Roles( H2, D2, P2, S2 ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>H1 <span class="hl_operator">=</span> D1<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>H1 <span class="hl_operator">=</span> D2<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>H1 <span class="hl_operator">=</span> P1<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>H1 <span class="hl_operator">=</span> P2<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>H1 <span class="hl_operator">=</span> S1<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>H1 <span class="hl_operator">=</span> S2<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>D1 <span class="hl_operator">=</span> P1<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>D1 <span class="hl_operator">=</span> P2<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>D1 <span class="hl_operator">=</span> S1<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>D1 <span class="hl_operator">=</span> S2<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>P1 <span class="hl_operator">=</span> S1<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>P1 <span class="hl_operator">=</span> S2<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;<span class="hl_comment">// safety formula</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;expanded formula:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>H1 H2 D1 D2 P1 P2 S1 S2 #i #j<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>Roles( H1, D1, P1, S1 ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Roles( H2, D2, P2, S2 ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>H1 <span class="hl_operator">=</span> D1<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>H1 <span class="hl_operator">=</span> D2<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>H1 <span class="hl_operator">=</span> P1<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>H1 <span class="hl_operator">=</span> P2<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>H1 <span class="hl_operator">=</span> S1<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>H1 <span class="hl_operator">=</span> S2<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>D1 <span class="hl_operator">=</span> P1<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>D1 <span class="hl_operator">=</span> P2<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>D1 <span class="hl_operator">=</span> S1<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>D1 <span class="hl_operator">=</span> S2<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>P1 <span class="hl_operator">=</span> S1<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>P1 <span class="hl_operator">=</span> S2<span class="hl_operator">)</span><span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;*/</span><br/>
+<br/>
+<span class="hl_keyword">restriction</span> Device:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>H1 H2 D #i #j<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>Device( H1, D ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Device( H2, D ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span>H1 <span class="hl_operator">=</span> H2<span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;<span class="hl_comment">// safety formula</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;expanded formula:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>H1 H2 D #i #j<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>Device( H1, D ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Device( H2, D ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span>H1 <span class="hl_operator">=</span> H2<span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;*/</span></p><br/>

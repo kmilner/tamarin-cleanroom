@@ -1,0 +1,111 @@
+<br/>
+<h2>Fact Symbols with Injective Instances</h2><br/>
+<p class="monospace rules">None</p><br/>
+<h2>Multiset Rewriting Rules</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) isend:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> K( x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> In( x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) irecv:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( x ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) Get_pk:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Pk( Server, Auth, Sibling, pk ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> Out( pk ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) Register:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Fr( ~x ), Fr( ~y ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Register( $Server, $Auth, $Sibling ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;!LtkAuth( $Auth, $Server, ~x ), !LtkSib( $Sibling, $Server, ~y ),<br/>
+&nbsp;&nbsp;&nbsp;!Pk( $Server, $Auth, $Sibling, pk(plus(~x, ~y)) )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) Reveal_LtkA:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !LtkAuth( $Auth, $Server, ~ltk ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> LtkRevealA( $Auth, $Server ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( ~ltk ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) Reveal_LtkAs:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !LtkSib( $Sibling, $Server, ~ltk ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> LtkRevealAs( $Sibling, $Server ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( ~ltk ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) Compromise_Secret_Channel:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Secret( $Sibling, pdec(enc(~n, pk), y) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> ReadSecret( $Sibling, pdec(enc(~n, pk), y) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( pdec(enc(~n, pk), y) ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) Client_1:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Pk( $Server, $Auth, $Sibling, pk ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> RequestAuth( $Server, $Auth, $Sibling ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( pk ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) Server_1:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In( pk ), Fr( ~n ), !Pk( $Server, $Auth, $Sibling, pk ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> InitAuth( $Server, $Auth, $Sibling, enc(~n, pk) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( enc(~n, pk) ), Server_1( pk, ~n ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) Authenticator_1:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In( enc(~n, pk) ), !Pk( $Server, $Auth, $Sibling, pk ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( enc(~n, pk) ), Authenticator_1( $Auth, enc(~n, pk) ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) Sibling_1:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;In( enc(~n, pk) ), !LtkSib( $Sibling, $Server, y ),<br/>
+&nbsp;&nbsp;&nbsp;!Pk( $Server, $Auth, $Sibling, pk )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Sibling( $Sibling, enc(~n, pk) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Secret( $Sibling, pdec(enc(~n, pk), y) ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) Authenticator_2:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;!Secret( $Sibling, pdec(enc(~n, pk), y) ),<br/>
+&nbsp;&nbsp;&nbsp;Authenticator_1( $Auth, enc(~n, pk) ),<br/>
+&nbsp;&nbsp;&nbsp;!LtkAuth( $Auth, $Server, x ), !Pk( $Server, $Auth, $Sibling, pk )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Authenticator( $Auth, enc(~n, pk) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( comb(pdec(enc(~n, pk), x), pdec(enc(~n, pk), y)) ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) Authenticator_2:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;!Secret( $Sibling, pdec(enc(~n, pk), y) ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Authenticator_1( $Auth, enc(~n, pk) ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;!LtkAuth( $Auth, $Server, x ), !Pk( $Server, $Auth, $Sibling, pk )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--[</span> Authenticator( $Auth, enc(~n, pk) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( z ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_keyword">variants</span> (<span class="hl_keyword">modulo</span> AC)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1. ~n    = ~n.9<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pk    = pk.9<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x     = x.9<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y     = y.9<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z     = dec(enc(~n.9, pk.9), plus(x.9, y.9))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;2. ~n    = ~n.11<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pk    = pk(plus(x.9, x.10))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x     = x.9<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y     = x.10<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z     = ~n.11<br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) Server_2:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In( n ), Server_1( pk, n ), !Pk( $Server, $Auth, $Sibling, pk ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Auth( $Server, $Auth, $Sibling, enc(n, pk) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( &#39;ok&#39; ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span></p><br/>

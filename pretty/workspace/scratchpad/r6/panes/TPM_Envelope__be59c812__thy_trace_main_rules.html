@@ -1,0 +1,104 @@
+<br/>
+<h2>Fact Symbols with Injective Instances</h2><br/>
+<p class="monospace rules">None</p><br/>
+<h2>Multiset Rewriting Rules</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) isend:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> K( x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> In( x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) irecv:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( x ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) PCR_Init:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Fr( ~aik ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> PCR_Init( ), PCR_Write( &#39;pcr0&#39; ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;PCR( &#39;pcr0&#39; ), PCR_Write( &#39;pcr0&#39; ), !AIK( ~aik ),<br/>
+&nbsp;&nbsp;&nbsp;Out( pk(~aik) )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) PCR_Extend:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> PCR_Write( x ), PCR( x ), In( y ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> PCR_Write( h(&lt;x, y&gt;) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> PCR( h(&lt;x, y&gt;) ), PCR_Write( h(&lt;x, y&gt;) ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">// loop breakers: [0,1]</span><br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) PCR_CertKey:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !AIK( aik ), !KeyTable( lock, sk ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( sign(&lt;&#39;certkey&#39;, lock, pk(sk)&gt;, aik) ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) PCR_Quote:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> PCR( x ), !AIK( aik ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> PCR_Read( x ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( sign(&lt;&#39;certpcr&#39;, x&gt;, aik) ), PCR( x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">// loop breaker: [0]</span><br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) PCR_Unbind:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> PCR( x ), !KeyTable( x, sk ), In( aenc(m, pk(sk)) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> PCR_Unbind( x, sk, m ), PCR_Read( x ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> PCR( x ), Out( m ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">// loop breaker: [0]</span><br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) Alice1:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Fr( ~n ), PCR( x ), PCR_Write( x ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> PCR_Write( h(&lt;x, ~n&gt;) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;PCR( h(&lt;x, ~n&gt;) ), PCR_Write( h(&lt;x, ~n&gt;) ),<br/>
+&nbsp;&nbsp;&nbsp;Alice1( ~n )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">// loop breakers: [1,2]</span><br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) Alice2:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;Alice1( n ), Fr( ~s ), !AIK( aik ),<br/>
+&nbsp;&nbsp;&nbsp;In( sign(&lt;&#39;certkey&#39;, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h(&lt;h(&lt;&#39;pcr0&#39;, n&gt;), &#39;obtain&#39;&gt;), pk&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aik)<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Secret( ~s ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( aenc(~s, pk) ), Alice2( n, ~s ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) Alice3:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;Alice2( n, s ), !AIK( aik ),<br/>
+&nbsp;&nbsp;&nbsp;In( sign(&lt;&#39;certpcr&#39;, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h(&lt;h(&lt;&#39;pcr0&#39;, n&gt;), &#39;deny&#39;&gt;)&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aik)<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Denied( s ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) CreateLockedKey:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> PCR( x ), Fr( ~sk ), In( lock ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> PCR_Read( x ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> PCR( x ), !KeyTable( h(&lt;x, lock&gt;), ~sk ), Out( pk(~sk) ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">// loop breaker: [0]</span><br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span></p><br/>
+<h2>Restrictions of the Set of Traces</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">restriction</span> PCR_Init_unique:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#i #j<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>PCR_Init( ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>PCR_Init( ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span>#i <span class="hl_operator">=</span> #j<span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;<span class="hl_comment">// safety formula</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;expanded formula:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#i #j<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>PCR_Init( ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>PCR_Init( ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span>#i <span class="hl_operator">=</span> #j<span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;*/</span></p><br/>

@@ -1,0 +1,252 @@
+<br/>
+<h2>Fact Symbols with Injective Instances</h2><br/>
+<p class="monospace rules">None</p><br/>
+<h2>Multiset Rewriting Rules</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) isend:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> K( x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> In( x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) irecv:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( x ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) ChanOut_S:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out_S( $A, $B, x ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> ChanOut_S( $A, $B, x ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Sec( $A, $B, x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) ChanIn_S:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Sec( $A, $B, x ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> ChanIn_S( $A, $B, x ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In_S( $A, $B, x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) ChanOut_A:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out_A( $A, x ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> ChanOut_A( $A, x ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Auth( $A, x ), Out( &lt;$A, x&gt; ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) ChanIn_A:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Auth( $A, x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> ChanIn_A( $A, x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> In_A( $A, x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) ChanOut_IR_HP:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out_IR_HP( $A, $B, m ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> ChanOut_IR_HP( $A, $B, m ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( &lt;$A, $B, m&gt; ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) ChanIn_IR_HP:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In( &lt;$A, $B, m&gt; ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> ChanIn_IR_HP( $A, $B, m ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In_IR_HP( $A, $B, m ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) ChanOut_IR_PS:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out_IR_PS( $A, $B, m ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> ChanOut_IR_PS( $A, $B, m ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( &lt;$A, $B, m&gt; ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) ChanIn_IR_PS:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In( &lt;$A, $B, m&gt; ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> ChanIn_IR_PS( $A, $B, m ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In_IR_PS( $A, $B, m ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) ChanOut_IR_SP:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out_IR_SP( $A, $B, m ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> ChanOut_IR_SP( $A, $B, m ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( &lt;$A, $B, m&gt; ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) ChanIn_IR_SP:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In( &lt;$A, $B, m&gt; ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> ChanIn_IR_SP( $A, $B, m ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In_IR_SP( $A, $B, m ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) ChanOut_IR_PH:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out_IR_PH( $A, $B, m ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> ChanOut_IR_PH( $A, $B, m ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( &lt;$A, $B, m&gt; ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) ChanIn_IR_PH:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In( &lt;$A, $B, m&gt; ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> ChanIn_IR_PH( $A, $B, m ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In_IR_PH( $A, $B, m ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) fakeEvidence:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In( &lt;ballot, evidence&gt; ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Evidence( ballot, evidence ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) publickeyinfrastructure:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Fr( ~skX ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> LongtermKey( $X, ~skX ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Ltk( $X, ~skX ), !Pk( $X, pk(~skX) ), Out( pk(~skX) ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) Setup:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Ltk( &#39;S&#39;, ~skS ), !Ltk( &#39;D1&#39;, ~sskD1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;Setup( ),<br/>
+&nbsp;&nbsp;BB_pskDs( &#39;BB&#39;, &lt;&#39;spkD&#39;, pk(~sskD1)&gt; ),<br/>
+&nbsp;&nbsp;BB_pkS( &#39;BB&#39;, &lt;&#39;spkS&#39;, pk(~skS)&gt; ),<br/>
+&nbsp;&nbsp;BB_H( &#39;BB&#39;, &lt;&#39;H&#39;, &#39;H1&#39;&gt; ),<br/>
+&nbsp;&nbsp;CastByCorresp( &#39;H1&#39;, pk(~sskD1) ), Voter( &#39;H1&#39; ),<br/>
+&nbsp;&nbsp;SecretKeyD( ~sskD1 ), Server( &#39;S&#39; ), Honest( &#39;S&#39; )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;Out( &lt;&#39;H1&#39;, &#39;D1&#39;, &#39;P&#39;, &#39;BB&#39;, $v1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&gt;<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;AgSt_D0( &#39;D1&#39;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;&#39;H1&#39;, &#39;S&#39;, pk(~skS), ~sskD1&gt;<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;AgSt_A0( &#39;A&#39;, &lt;&#39;S&#39;, &#39;BB&#39;, pk(~skS)&gt;<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;AgSt_P0( &#39;P&#39;, &#39;S&#39; ),<br/>
+&nbsp;&nbsp;&nbsp;AgSt_P1( &#39;P&#39;, &#39;H1&#39; ),<br/>
+&nbsp;&nbsp;&nbsp;AgSt_BB0( &#39;BB&#39;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;&#39;S&#39;, pk(~sskD1), pk(~skS), &#39;H1&#39;&gt;<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;Out_A( &#39;BB&#39;, &lt;&#39;spkD&#39;, pk(~sskD1)&gt; ),<br/>
+&nbsp;&nbsp;&nbsp;Out_A( &#39;BB&#39;, &lt;&#39;spkS&#39;, pk(~skS)&gt; ),<br/>
+&nbsp;&nbsp;&nbsp;Out_A( &#39;BB&#39;, &lt;&#39;H&#39;, &#39;H1&#39;&gt; ),<br/>
+&nbsp;&nbsp;&nbsp;AgSt_S0( &#39;S&#39;, &lt;~skS, pk(~sskD1)&gt; )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) D_1:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;AgSt_D0( $D, &lt;$H, $S, pkS, ~sskD&gt; ), In( &lt;$H, $D, v&gt; ),<br/>
+&nbsp;&nbsp;&nbsp;Fr( ~r )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> D1( ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( &lt;$D, $H, sg(encp(v, ~r, pkS), ~sskD)&gt; ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) P:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> AgSt_P0( $P, $S ), In_IR_HP( $H, $P, b ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Receive_R_HP( $H, $P, b ), Send_R_PS( $P, $S, b ), P1( ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out_IR_PS( $P, $S, b ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) S_1a:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;AgSt_S0( $S, &lt;~skS, pk(~sskDa)&gt; ),<br/>
+&nbsp;&nbsp;&nbsp;In_IR_PS( $P, $S, sg(encp(va, ra, pk(~skS)), ~sskDa) )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;Learn_S_ballot( $S, sg(encp(va, ra, pk(~skS)), ~sskDa) ),<br/>
+&nbsp;&nbsp;Receive_R_PS( $P, $S, sg(encp(va, ra, pk(~skS)), ~sskDa) ),<br/>
+&nbsp;&nbsp;Send_R_SP( $S, $P, sg(sg(encp(va, ra, pk(~skS)), ~sskDa), ~skS) ),<br/>
+&nbsp;&nbsp;S1( )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;AgSt_S1a( $S, &lt;~skS, sg(encp(va, ra, pk(~skS)), ~sskDa)&gt; ),<br/>
+&nbsp;&nbsp;&nbsp;Out_IR_SP( $S, $P, sg(sg(encp(va, ra, pk(~skS)), ~sskDa), ~skS) ),<br/>
+&nbsp;&nbsp;&nbsp;Out_A( $S, &lt;&#39;b&#39;, sg(encp(va, ra, pk(~skS)), ~sskDa)&gt;<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;Out_A( $S, &lt;&#39;bPrime&#39;, encp(va, ra, pk(~skS))&gt; ),<br/>
+&nbsp;&nbsp;&nbsp;Out_A( $S, &lt;&#39;v&#39;, va&gt; ),<br/>
+&nbsp;&nbsp;&nbsp;Out_A( $S,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;&#39;zkp&#39;, zkp(encp(va, ra, pk(~skS)), va, ~skS)&gt;<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) P_2:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> AgSt_P1( $P, $H ), In_IR_SP( $S, $P, c ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Receive_R_SP( $S, $P, c ), Send_R_PH( $P, $H, c ), P2( ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out_IR_PH( $P, $H, c ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) BB:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;AgSt_BB0( $BB, &lt;$S, spkDa, pkS, Ha&gt; ),<br/>
+&nbsp;&nbsp;&nbsp;In_A( $S, &lt;&#39;b&#39;, ba&gt; ),<br/>
+&nbsp;&nbsp;&nbsp;In_A( $S, &lt;&#39;bPrime&#39;, bPrimea&gt; ),<br/>
+&nbsp;&nbsp;&nbsp;In_A( $S, &lt;&#39;v&#39;, va&gt; ),<br/>
+&nbsp;&nbsp;&nbsp;In_A( $S, &lt;&#39;zkp&#39;, p&gt; )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;BB_rec( $BB, &lt;&#39;b&#39;, ba&gt; ),<br/>
+&nbsp;&nbsp;BB_woS( $BB, &lt;&#39;bPrime&#39;, bPrimea&gt; ),<br/>
+&nbsp;&nbsp;BB_tal( $BB, &lt;&#39;v&#39;, va&gt; ),<br/>
+&nbsp;&nbsp;BB_zkp( $BB, &lt;&#39;zkp&#39;, p&gt; ), End( )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;Out_A( $BB, &lt;&#39;b&#39;, ba&gt; ),<br/>
+&nbsp;&nbsp;&nbsp;Out_A( $BB, &lt;&#39;bPrime&#39;, bPrimea&gt; ),<br/>
+&nbsp;&nbsp;&nbsp;Out_A( $BB, &lt;&#39;v&#39;, va&gt; ),<br/>
+&nbsp;&nbsp;&nbsp;Out_A( $BB, &lt;&#39;zkp&#39;, p&gt; )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">// loop breakers: [1,2,3,4]</span><br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) A_1:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;AgSt_A0( $A, &lt;$S, $BB, pkS&gt; ),<br/>
+&nbsp;&nbsp;&nbsp;In_A( $BB, &lt;&#39;b&#39;, sg(bPrimea, sskDa)&gt; ),<br/>
+&nbsp;&nbsp;&nbsp;In_A( $BB, &lt;&#39;bPrime&#39;, bPrimea&gt; ),<br/>
+&nbsp;&nbsp;&nbsp;In_A( $BB, &lt;&#39;v&#39;, va&gt; ),<br/>
+&nbsp;&nbsp;&nbsp;In_A( $BB, &lt;&#39;zkp&#39;, p&gt; ),<br/>
+&nbsp;&nbsp;&nbsp;In_A( $BB, &lt;&#39;spkD&#39;, pk(sskDa)&gt; )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;Learn_A_proof( $A, &lt;&#39;zkp&#39;, p&gt; ),<br/>
+&nbsp;&nbsp;Learn_A_spkDSG( $A, &lt;&#39;spkD&#39;, pk(sskDa)&gt; ),<br/>
+&nbsp;&nbsp;Learn_A_Vs( $A, &lt;&#39;v&#39;, va&gt; ),<br/>
+&nbsp;&nbsp;Learn_A_Bs( $A, &lt;&#39;b&#39;, sg(bPrimea, sskDa)&gt; ),<br/>
+&nbsp;&nbsp;Learn_A_bPrimes( $A, &lt;&#39;bPrime&#39;, bPrimea&gt; ),<br/>
+&nbsp;&nbsp;VerifyA2( $A, verzkp(p, bPrimea, va, pkS) ), A1( )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span></p><br/>
+<h2>Restrictions of the Set of Traces</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">restriction</span> Chan_R_PS:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>A B m #i<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Send_R_PS( A, B, m ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#j<span class="hl_operator">.</span> Receive_R_PS( A, B, m ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span>&quot;<br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;expanded formula:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>A B m #i<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Send_R_PS( A, B, m ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#j<span class="hl_operator">.</span> Receive_R_PS( A, B, m ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;*/</span><br/>
+<br/>
+<span class="hl_keyword">restriction</span> Chan_R_SP:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>A B m #i<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Send_R_SP( A, B, m ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#j<span class="hl_operator">.</span> Receive_R_SP( A, B, m ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span>&quot;<br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;expanded formula:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>A B m #i<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Send_R_SP( A, B, m ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">∃ </span>#j<span class="hl_operator">.</span> Receive_R_SP( A, B, m ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;*/</span><br/>
+<br/>
+<span class="hl_keyword">restriction</span> OneSetup:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#i #j<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>Setup( ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Setup( ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span>#i <span class="hl_operator">=</span> #j<span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;<span class="hl_comment">// safety formula</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;expanded formula:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#i #j<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>Setup( ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Setup( ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span>#i <span class="hl_operator">=</span> #j<span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;*/</span></p><br/>

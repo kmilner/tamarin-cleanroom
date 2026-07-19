@@ -1140,3 +1140,174 @@ Non-blocking notes (advisory, do NOT gate this round):
    margin-0 predicate wrap.
 
 VERDICT: pass
+
+## Round 6 — web rendering mode (escaping, `hl_*` spans, width parameterization)
+
+R6 adds a second render TARGET to the same block-doc builders: the interactive
+server's HTML fragment bodies for the `main/message` / `main/rules` panes. The
+delta is one new module (`src/web.rs`, 249 lines), narrow `hl_*`-wrapper splices
+into `signature`/`rule`/`formula`/`lemma`, a `web_block_doc`/`decl_lines`
+signature split, and a capture-driven acceptance sweep (`tests/round6_web.rs` +
+`tests/common/mod.rs`). The doc engine (`doc.rs`) is UNMODIFIED — no new engine
+primitive was introduced for R6; the span injection rides the pre-existing R1
+`sized_text`/`beside_op`/`render_with`.
+
+Upstream comparison surface, both files GPL-v3 (Simon Meier, 2011) and read for
+this audit only: `lib/utils/src/Text/PrettyPrint/Html.hs` (the `HtmlDoc`
+newtype transformer, `withTag`, `escapeHtmlEntities`, `renderHtmlDoc`,
+`postprocessHtmlDoc`, `hlClass`) and `.../Highlight.hs` (`HighlightStyle =
+Keyword | Comment | Operator`, `highlight`, `keyword_`/`operator_`/`comment_`,
+`opParens`), plus the `src/Web/` theory-rendering paths that instantiate the
+polymorphic pretty-printer at `HtmlDoc Doc`.
+
+### The merger boundary (capture-forced; reproduction is not a finding)
+
+The served output fixes, and the sealed side is REQUIRED to reproduce: the three
+span class strings `hl_keyword` / `hl_operator` / `hl_comment`; the entity table
+`& < > " '` → `&amp; &lt; &gt; &quot; &#39;` (apostrophe as `&#39;`, never
+`&apos;`); the span BOUNDARIES (keyword covers the word incl. a declaration's
+trailing colon but not the trailing space; operator covers only connective/¬
+parens not app/fact/AC/pair parens; a `/*…*/` block is ONE comment span with
+nested keyword/operator spans straddling logical lines; leading indent OUTSIDE
+the span); the wrap COLUMNS; and the fact that the injected markup is
+layout-neutral (the wrap positions equal the plain render). All of these are
+capture-forced identity — matching them is compelled, not lineage.
+
+### Span-injection MECHANISM — the scrutiny centre: DIVERGENT
+
+The construction is the sealed side's own over its own (BSD-derived) Doc engine,
+not a transcription of the `HtmlDoc` combinator architecture. Point by point:
+
+* **Dispatch.** Upstream selects web vs batch by TYPE: it runs one polymorphic
+  pretty-printer at `Doc` (where `highlight _ = id`, `char`/`text` don't escape)
+  vs `HtmlDoc Doc` (a `newtype` Document transformer whose every combinator maps
+  through `getHtmlDoc` and whose `char`/`text`/`zeroWidthText` escape per
+  primitive at construction). The sealed side has NO newtype transformer and no
+  typeclass re-instantiation: a thread-local `HL: Cell<bool>` (RAII `HlGuard`)
+  makes the `hl_*` wrappers the identity in batch and active in web. One Doc
+  type, runtime flag — a structurally different dispatch than type-directed
+  instance resolution.
+
+* **Escaping site.** Upstream escapes at doc-CONSTRUCTION, per primitive
+  (`text = HtmlDoc . text . escapeHtmlEntities`). The sealed side escapes in a
+  single POST-render pass (`escape_and_expand`) over the flat string. Different
+  pipeline stage entirely; the R1–R5 builders are untouched by escaping.
+
+* **Tag injection.** Upstream's `withTag` splices the LITERAL `<span class="…">`
+  / `</span>` bytes as `unescapedZeroWidthText` at build time. The sealed side
+  splices PRIVATE control-char sentinels (`\u{1}<class>\u{2}` … `\u{3}`) via
+  `sized_text(0, …)` and defers the literal-tag emission to the same
+  `escape_and_expand` sweep (the `M_OPEN` arm writes `<span class="`, copies the
+  class raw, writes `">`; `M_CLOSE` writes `</span>`). The sentinels are a
+  sealed-side invention with no upstream counterpart. The only convergent SHAPE
+  — a zero-width marker before the inner and after it — is behaviorally forced
+  (the sole way to inject layout-neutral markup into a width-aware printer) and
+  is expressly grounded, in `web.rs` and BEHAVIOR.md, in the SANCTIONED BSD
+  `Annotated.HughesPJ` `AnnotStart`/`AnnotEnd` annotation model, i.e. the
+  post-render decorated-render idiom, NOT the GPL `HtmlDoc`.
+
+* **Postprocess split.** Upstream's `renderHtmlDoc = postprocessHtmlDoc . render
+  . getHtmlDoc` folds the leading-space→`&nbsp;` and line→`<br/>` conversion
+  into the same function. The sealed `escape_and_expand` DELIBERATELY leaves
+  indent spaces raw and emits `\n`, deferring `&nbsp;`/`<br/>` to a SIBLING
+  sealed unit ("producers-clean"); its escape table is cited to that sibling's
+  `escape_text`, not to `escapeHtmlEntities`. Different decomposition, and the
+  match-arm order (`& < > " '`) differs from upstream's (`< > & " '`).
+
+### Width parameterization — behaviorally pinned, not lifted
+
+`WEB_WIDTH = 100`, `WEB_RIBBON = 67`. Not read off source: DEFINITIVELY fit by a
+(deleted) corpus probe — 139/139 signature `functions:`/`builtins:` fills
+reconstructed from captures render byte-identical at `render_with(100, 67)`;
+ribbon 66 misses 10, 68 misses 9 — and independently equal to the PUBLIC default
+HughesPJ `Style` (`lineLength 100`, `ribbonsPerLine 1.5`, `round(66.67)=67`);
+batch's pre-existing 110/73 is the same 1.5 ratio. Width 100 is itself
+observable in the fills. Crucially the round does NOT claim to have recovered
+upstream's render call: it DOCUMENTS a proven impossibility that any single
+(w, r) reproduces the `sep`-based rule-body / restriction-quantifier wraps and
+pair/AC delimiter drops (the `c_mult` vs `d_exp` content-66 discriminator), and
+parks that as a dirty-room hypothesis. Empirically fitting what the captures
+allow, and honestly bounding what they don't, is the opposite of transcription.
+
+### Helper decomposition, identifier / constant / comment scans
+
+* **Helpers.** `hl_kw` / `hl_op_char` / `hl_op_text` / `hl_comment` / `hl_wrap`
+  parallel upstream's `keyword_` / `operator_` / `comment_` / `highlight` only
+  at the forced level of "there must be a marker per observable category." The
+  three categories are capture-forced (three class names in the output). The
+  sealed decomposition is its OWN: a `char` vs `text` operator split driven by
+  the sealed engine's distinct primitives (no upstream analog); `hl_wrap` takes
+  a raw class STRING over a pre-built doc — there is NO `HighlightStyle` enum, NO
+  `hlClass` mapping function, and NO `opParens` combinator (formula parens call
+  `hl_op_char('(')` inline). `annot` is not a general `withTag` (span/class are
+  hard-wired). No structural mirror of the class or its instances.
+
+* **Identifiers.** The R6 identifier set (`annot`, `escape_and_expand`,
+  `html_render`, `HlGuard`, `hl_on`, `M_OPEN`/`M_SEP`/`M_CLOSE`, `WEB_WIDTH`/
+  `WEB_RIBBON`, `web_block_doc`, `decl_lines`, `render_signature_body`,
+  `render_rule_bare`/`_block`, `render_msr_body`, `render_bare_rules_body`,
+  `render_restrictions_body`) has NO constellation overlap with upstream
+  (`withTag`, `getHtmlDoc`, `unescapedZeroWidthText`, `HighlightStyle`,
+  `hlClass`, `renderHtmlDoc`, `postprocessHtmlDoc`, `escapeHtmlEntities`,
+  `opParens`, `keyword_`). A repo-wide lineage grep over the whole delta returns
+  ONLY: the sanctioned BSD style-name refs (`HughesPJ`, `ribbonsPerLine`,
+  `sizedText`, `Annotated.HughesPJ AnnotStart/AnnotEnd`) and two forward-looking
+  dirty-room hypotheses that NAME `renderStyle defaultStyle` /
+  `prettyProtoRuleACInfo` as things a successor must READ — i.e. explicitly not
+  read here.
+
+* **Non-observable constants.** The `\u{1}/\u{2}/\u{3}` sentinels are a
+  sealed-side choice (justified: C0 controls are absent from theory content, so
+  they survive the escape pass); upstream has nothing equivalent. `WEB_WIDTH`/
+  `WEB_RIBBON` are derived (above). Clean.
+
+* **Comment lineage.** No reproduced ghost comments from `Html.hs`/`Highlight.hs`
+  (no GPL header, no "Copied from blaze-html", no `hlClass` case narration, no
+  tamarin source-file/line citations). Comments reference only the sanctioned
+  BSD library, the sibling producers-clean unit, and the round's own
+  probes/corpus/targets.
+
+* **Tests.** `tests/common/mod.rs` is a layout-INSENSITIVE parser lifted from
+  the crate's own round-5 inline parser (self-lineage, stated) — it consults
+  token order only, so a passing byte-compare proves the layout/spans/escaping
+  were RE-DERIVED, not copied. `round6_web.rs` decodes the sanctioned capture
+  envelopes and inverts the sibling skin; fixtures are captured served bytes
+  (the merger oracle), not transcribed upstream logic.
+
+### Findings
+
+No violations. On the mandated axis — the span-injection mechanism, the width
+parameterization, and the helper decomposition — the round is a genuine
+independent construction over the sealed side's own BSD-derived Doc engine:
+runtime-flag dispatch (not a newtype/typeclass transformer), post-render
+sentinel expansion (not per-primitive construction-time escaping with literal
+zero-width tag bytes), a decorated-render idiom sourced to the SANCTIONED
+`Annotated.HughesPJ` (not the GPL `HtmlDoc`), no `HighlightStyle`/`hlClass`/
+`opParens`/`withTag` structural mirror, and empirically-pinned widths with an
+honestly-bounded wrap gap rather than a recovered render call. The parts that
+equal upstream — the three `hl_*` class names, the five-entity escape table with
+`&#39;`, the span boundaries, and the layout-neutrality of the markers — are
+capture-forced merger pinned to the 82+82 real pane bodies. Identifier,
+constellation, constant, and comment scans over the delta are clean.
+
+Non-blocking notes (advisory, do NOT gate this round):
+1. *Layout parity is partial and openly disclosed.* The diagnostic `sweep_count`
+   (IGNORED) at (100, 67) reports byte-identical 206/367, token-content 331/367,
+   span-placement 348/367; every miss is inspected as line-wrapping-induced (a
+   dropped delimiter collapsing to a stray space, or a wrapped comment/span
+   inner), NOT a token/escape/span defect. This is a CORRECTNESS caveat carried
+   as a durable blocker with dirty-room hypotheses — not a similarity finding.
+   Only the signature bodies (82/82) are byte-green today; wider web parity must
+   await the render-width resolution before it is claimed.
+2. *Pattern-rendered, unobserved tokens.* `⊤`, `⊏`, `⇔`, `last(…)`, `⊐`, and
+   `macros:`/`predicate:` web spans have no corpus witness; they are spanned (or
+   left plain, for `last(`) by pattern and flagged in-code. A live probe
+   (e.g. `MacroGlobalVarNSPK3`) would be needed to confirm — consistent with the
+   `--diff`/unobserved deferrals of prior rounds.
+3. *Fact-symbols and embedded proof/guarded content are opaque pass-through*, not
+   modeled by this crate (carried verbatim, entity-escaped, unspanned) — matches
+   the captures and is not a rendering claim.
+4. *`render_formula` is unvalidated* (no formula-only web capture); it reuses the
+   restriction-validated operator spans. Deferred until a witness exists.
+
+VERDICT: pass

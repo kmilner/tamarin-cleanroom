@@ -34,7 +34,9 @@ pretty round-3 implementer (wf_1c3b9e54-e0c) audited — 143 tool calls, 0/0 (2 
 pretty round-4 implementer (wf_e752c3f6-6f4) audited — 131 tool calls, 0/0;
 graphdot round-13 implementer (wf_92d2ed53-daf) audited — 69 tool calls, 0/0;
 pretty round-5 implementer (wf_a320cb04-549) audited — 94 tool calls, 0/0;
-52 sealed transcripts total.
+pretty round-6 implementer (wf_524a70e3-32f) audited 2026-07-19 — 178 tool
+calls, 0/0;
+53 sealed transcripts total.
 
 | Path | Agent | Role |
 |------|-------|------|
@@ -85,6 +87,7 @@ pretty round-5 implementer (wf_a320cb04-549) audited — 94 tool calls, 0/0;
 | workflows/wf_e752c3f6-6f4/agent-a76c533bec1fe9206.jsonl | pretty round 4 | process=\"…\" attribute law (round-2 "dropped" belief refuted — SAPIC-free corpus artifact); >)-case proven already-fixed by R3 + app-join probe; stack overflow fixed by iterative Doc-engine rewrite (byte-neutral, 8MB-stack deep-file parity); unit R1–R4 COMPLETE |
 | workflows/wf_92d2ed53-daf/agent-ae03098e391b35ba6.jsonl | round 13 (unit B) | edge-layer completion: 11/11 (color,style) vocabulary (census-total, panic-on-unknown = totality proof), EndRef::Info both-ends anchor (port id = node_id − concl − 1, capture-verified); edge-section regeneration 12,022/12,022 byte-exact corpus-wide |
 | workflows/wf_a320cb04-549/agent-a2d8cbdd7c2f76260.jsonl | pretty round 5 | batch echo completed: Restriction.expanded field (statement=macro form, comment=expanded — probed both ways), macros always-break vcat law, theory-frame assembly + predicates margin-0 splice; whole-echo parity 29/29 captures |
+| workflows/wf_524a70e3-32f/agent-a4425b45974d3aa5f.jsonl | pretty round 6 | web rendering mode: hl_keyword/hl_operator/hl_comment vocabulary censused over 82+82 pane bodies, escape table = producers escape_text, WEB_WIDTH=100/RIBBON=67 pinned (139/139 fills); zero-width span-marker second render target (batch byte-identical via thread-local flag); signature-pane sweep 82/82 byte-identical through producers-skin composition + mutation check; DURABLE BLOCKER documented: sep-construct line wrapping fits no single (width,ribbon) — byte 206/367, span 348/367 |
 
 Corresponding workspaces (../wellformedness, ../graphdot, ../weblayer) hold
 each agent's QUERIES.log, BEHAVIOR.md, REPORT*.md and code — cross-reference
@@ -120,6 +123,7 @@ the transcripts against those logs.
 | workflows/wf_e752c3f6-6f4/agent-a815108459a348d7e.jsonl | pretty round-4 delta audit (pass; process attr byte-forced by probe capture, clean prints verbatim snippet vs upstream re-render machinery; stack fix = explicit-stack iteration on the BSD engine — GPL wrapper has no recursion to copy; owned-teardown Drop exists on neither side) |
 | workflows/wf_92d2ed53-daf/agent-a35e46f330272a8d9.jsonl | graphdot round-13 delta audit (pass; census independently reproduced to the count; style-first byte order of green/dotted = capture-forced merger; source has no edge-style enum; "info" is sealed coinage — source keys the cell Nothing) |
 | workflows/wf_a320cb04-549/agent-a8f460a120615533d.jsonl | pretty round-5 delta audit (pass; frame traversal does NOT mirror upstream's 8-handler item-fold — 7-arm match over erasure-driven enum, no hoisting; macros vcat byte-forced by falsification probe; resolved the apparent $$-vs-col-8 discrepancy showing source and oracle agree) |
+| workflows/wf_524a70e3-32f/agent-a25916549ba1b5872.jsonl | pretty round-6 delta audit (pass; mechanism DIVERGENT from HtmlDoc.hs — thread-local flag + post-render sentinel expansion vs newtype/typeclass transformer with per-primitive escaping; zero-width-marker shape grounded in sanctioned BSD AnnotStart/AnnotEnd; no HighlightStyle/hlClass/opParens/withTag counterparts; width 100/67 = public default Style, empirically pinned; capture-forced matches all traced to the 82+82 pane bodies) |
 
 Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUDIT.md,
 ../console/AUDIT.md, ../macros/AUDIT.md, ../injective/AUDIT.md, ../derivcheck/AUDIT.md.

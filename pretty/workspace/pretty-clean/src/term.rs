@@ -105,6 +105,7 @@ fn app_doc(f: &str, args: &[Term]) -> Doc {
 ///   * `>` sits beside the last element when that element ends a fill line,
 ///     but drops to its own line at the column of `<` (no nest) when the
 ///     last element is multi-line.
+///
 /// A Pair in LAST position flattens into the enclosing tuple; other positions
 /// keep their own delimiters (probe:t_pair).
 fn pair_doc(elems: &[Term]) -> Doc {

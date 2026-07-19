@@ -1,0 +1,824 @@
+<br/>
+<h2>Fact Symbols with Injective Instances</h2><br/>
+<p class="monospace rules">L_CellLocked(id,?,?), L_PureState(id,?,?)</p><br/>
+<h2>Multiset Rewriting Rules</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) isend:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> K( x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> In( x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) irecv:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( x ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) ReportRule[color=#ffffff, process=&quot;!&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In( &lt;x, loc&gt; ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Restr_ReportRule_1( loc ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( rep(x, loc) ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) Init[color=#ffffff, process=&quot;!&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> <span class="hl_operator">]</span> <span class="hl_operator">--[</span> Init( ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> State_( ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) p_0_[color=#ffffff, process=&quot;!&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_( ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !Semistate_1( ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) p_1_[color=#ffffff, process=&quot;!&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Semistate_1( ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> State_1( ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) p_0_1[color=#ffffff, process=&quot;|&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1( ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> State_11( ), State_12( ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) newstate_0_11[color=#ffffff,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;new state.1;&quot;, issapicrule,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_11( ), Fr( state.1 ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> State_111( state.1 ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) newstate_0_11[color=#ffffff,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;new state.1;&quot;, issapicrule,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_11( ), Fr( state ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> State_111( state ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) newStateChannelchannel_0_111[color=#ffffff,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;new StateChannel:channel;&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_111( state.1 ), Fr( StateChannel ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1111( StateChannel, state.1 ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) newStateChannelchannel_0_111[color=#ffffff,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;new StateChannel:channel;&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_111( state ), Fr( StateChannel ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1111( StateChannel, state ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) insertstateinit_0_1111[color=#ffffff,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;insert state.1,&#39;init&#39;;&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1111( StateChannel, state.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_11111( StateChannel, state.1 ),<br/>
+&nbsp;&nbsp;&nbsp;L_PureState( state.1, &#39;init&#39; )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) insertstateinit_0_1111[color=#ffffff,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;insert state.1,&#39;init&#39;;&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1111( StateChannel, state ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;State_11111( StateChannel, state ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;L_PureState( state, &#39;init&#39; )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) p_0_11111[color=#ffffff, process=&quot;!&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_11111( StateChannel, state.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Semistate_111111( StateChannel, state.1 ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) p_0_11111[color=#ffffff, process=&quot;!&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_11111( StateChannel, state ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Semistate_111111( StateChannel, state ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) p_1_11111[color=#ffffff, process=&quot;!&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Semistate_111111( StateChannel, state.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_111111( StateChannel, state.1 ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) p_1_11111[color=#ffffff, process=&quot;!&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Semistate_111111( StateChannel, state ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_111111( StateChannel, state ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) r_0_111111[color=#ffffff, process=&quot;r();&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_111111( StateChannel, state.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1111111( StateChannel, state.1 ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) r_0_111111[color=#ffffff,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;r();&quot;, issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_111111( StateChannel, state ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1111111( StateChannel, state ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) lockstate_0_1111111[color=#405280,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;lock state.1;&quot;, issapicrule,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;role=&#39;r&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1111111( StateChannel, state.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_11111111( StateChannel, state.1 ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) lockstate_0_1111111[color=#405280,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;lock state.1;&quot;, issapicrule,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;role=&#39;r&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1111111( StateChannel, state ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_11111111( StateChannel, state ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) lookupstateaslio_0_11111111[color=#405280,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;lookup state.1 as lio.1&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;no_derivcheck, issapicrule, role=&#39;r&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_11111111( StateChannel, state.1 ),<br/>
+&nbsp;&nbsp;&nbsp;L_PureState( state.1, lio.1 ), Fr( lock )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_111111111( StateChannel, lock, lio.1, state.1 ),<br/>
+&nbsp;&nbsp;&nbsp;L_CellLocked( state.1, lock )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) lookupstateaslio_0_11111111[color=#405280,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;lookup state.1 as lio.1&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;no_derivcheck, issapicrule, role=&#39;r&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;State_11111111( StateChannel, state ), L_PureState( state, lio ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fr( lock )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;State_111111111( StateChannel, lock, lio, state ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;L_CellLocked( state, lock )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) eventReadlio_0_111111111[color=#405280,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;event Read( lio.1 );&quot;, issapicrule,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;role=&#39;r&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_111111111( StateChannel, lock, lio.1, state.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Read( lio.1 ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1111111111( StateChannel, lock, lio.1, state.1 ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">// loop breaker: [0]</span><br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) eventReadlio_0_111111111[color=#405280,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;event Read( lio.1 );&quot;, issapicrule,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;role=&#39;r&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_111111111( StateChannel, lock, lio, state ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--[</span> Read( lio ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1111111111( StateChannel, lock, lio, state ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_comment">// loop breaker: [0]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) ini_0_1111111111[color=#405280,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;in(i.1);&quot;, issapicrule, role=&#39;r&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1111111111( StateChannel, lock, lio.1, state.1 ), In( i.1 )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_11111111111( StateChannel, lock, i.1, lio.1, state.1 ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) ini_0_1111111111[color=#405280,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;in(i.1);&quot;, issapicrule, role=&#39;r&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1111111111( StateChannel, lock, lio, state ), In( i ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_11111111111( StateChannel, lock, i, lio, state ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) newr_0_11111111111[color=#405280,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;new r.1;&quot;, issapicrule, role=&#39;r&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_11111111111( StateChannel, lock, i.1, lio.1, state.1 ),<br/>
+&nbsp;&nbsp;&nbsp;Fr( r.1 )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_111111111111( StateChannel, lock, i.1, lio.1, r.1, state.1 )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) newr_0_11111111111[color=#405280,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;new r.1;&quot;, issapicrule, role=&#39;r&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_11111111111( StateChannel, lock, i, lio, state ), Fr( r ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_111111111111( StateChannel, lock, i, lio, r, state ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) eventRemoteprogrilioilioloc_0_111111111111[color=#405280,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;event Remote( &lt;prog(r.1, i.1, lio.1), i.1, lio.1&gt;, &#39;loc&#39; );&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;r&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_111111111111( StateChannel, lock, i.1, lio.1, r.1, state.1 )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;Remote( &lt;prog(r.1, i.1, lio.1), i.1, lio.1&gt;, &#39;loc&#39; )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_1111111111111( StateChannel, lock, i.1, lio.1, r.1, state.1 )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) eventRemoteprogrilioilioloc_0_111111111111[color=#405280,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;event Remote( &lt;prog(r.1, i.1, lio.1), i.1, lio.1&gt;, &#39;loc&#39; );&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;r&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_111111111111( StateChannel, lock, i, lio, r, state ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--[</span> Remote( &lt;prog(r, i, lio), i, lio&gt;, &#39;loc&#39; ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1111111111111( StateChannel, lock, i, lio, r, state ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) outprogrilioreportprogrilioilio_0_1111111111111[color=#405280,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;out(&lt;prog(r.1, i.1, lio.1), report(&lt;prog(r.1, i.1, lio.1), i.1, lio.1&gt;)<br/>
+&gt;);&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;r&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_1111111111111( StateChannel, lock, i.1, lio.1, r.1, state.1 )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_11111111111111( StateChannel, lock, i.1, lio.1, r.1, state.1<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;Out( &lt;prog(r.1, i.1, lio.1), <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;report(&lt;prog(r.1, i.1, lio.1), i.1, lio.1&gt;)&gt;<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) outprogrilioreportprogrilioilio_0_1111111111111[color=#405280,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;out(&lt;prog(r.1, i.1, lio.1), report(&lt;prog(r.1, i.1, lio.1), i.1, lio.1&gt;)<br/>
+&gt;);&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;r&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1111111111111( StateChannel, lock, i, lio, r, state ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;State_11111111111111( StateChannel, lock, i, lio, r, state ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Out( &lt;prog(r, i, lio), report(&lt;prog(r, i, lio), i, lio&gt;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) insertstatelistprogriliolistilio_0_11111111111111[color=#405280,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;insert state.1,list(prog(r.1, i.1, lio.1), list(i.1, lio.1));&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;r&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_11111111111111( StateChannel, lock, i.1, lio.1, r.1, state.1<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;L_CellLocked( state.1, lock )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_111111111111111( StateChannel, lock, i.1, lio.1, r.1, state.1<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;L_PureState( state.1, list(prog(r.1, i.1, lio.1), list(i.1, lio.1))<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">// loop breaker: [1]</span><br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) insertstatelistprogriliolistilio_0_11111111111111[color=#405280,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;insert state.1,list(prog(r.1, i.1, lio.1), list(i.1, lio.1));&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;r&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;State_11111111111111( StateChannel, lock, i, lio, r, state ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;L_CellLocked( state, lock )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;State_111111111111111( StateChannel, lock, i, lio, r, state ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;L_PureState( state, list(prog(r, i, lio), list(i, lio)) )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_comment">// loop breaker: [1]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) unlockstate_0_111111111111111[color=#405280,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;unlock state.1;&quot;, issapicrule,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;role=&#39;r&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_111111111111111( StateChannel, lock, i.1, lio.1, r.1, state.1<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_1111111111111111( StateChannel, lock, i.1, lio.1, r.1,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;state.1<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) unlockstate_0_111111111111111[color=#405280,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;unlock state.1;&quot;, issapicrule,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;role=&#39;r&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_111111111111111( StateChannel, lock, i, lio, r, state ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1111111111111111( StateChannel, lock, i, lio, r, state ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) p_0_1111111111111111[color=#405280,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;0&quot;, issapicrule, role=&#39;r&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_1111111111111111( StateChannel, lock, i.1, lio.1, r.1,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;state.1<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) p_0_1111111111111111[color=#405280,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;0&quot;, issapicrule, role=&#39;r&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1111111111111111( StateChannel, lock, i, lio, r, state ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) p_0_111111112[color=#405280, process=&quot;0&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;r&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_111111112( StateChannel, state.1 ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) p_0_111111112[color=#405280,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;0&quot;, issapicrule, role=&#39;r&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_111111112( StateChannel, state ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) p_0_12[color=#ffffff, process=&quot;!&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_12( ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !Semistate_121( ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) p_1_12[color=#ffffff, process=&quot;!&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Semistate_121( ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> State_121( ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) newstate_0_121[color=#ffffff,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;new state2.1;&quot;, issapicrule,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_121( ), Fr( state2.1 ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> State_1211( state2.1 ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) newstate_0_121[color=#ffffff,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;new state2.1;&quot;, issapicrule,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_121( ), Fr( state2 ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> State_1211( state2 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) newStateChannelchannel_0_1211[color=#ffffff,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;new StateChannel.1:channel;&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1211( state2.1 ), Fr( StateChannel.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_12111( StateChannel.1, state2.1 ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) newStateChannelchannel_0_1211[color=#ffffff,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;new StateChannel.1:channel;&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1211( state2 ), Fr( StateChannel ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_12111( StateChannel, state2 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) insertstateinit_0_12111[color=#ffffff,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;insert state2.1,&#39;init&#39;;&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_12111( StateChannel.1, state2.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_121111( StateChannel.1, state2.1 ),<br/>
+&nbsp;&nbsp;&nbsp;L_PureState( state2.1, &#39;init&#39; )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) insertstateinit_0_12111[color=#ffffff,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;insert state2.1,&#39;init&#39;;&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_12111( StateChannel, state2 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;State_121111( StateChannel, state2 ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;L_PureState( state2, &#39;init&#39; )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) p_0_121111[color=#ffffff, process=&quot;!&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_121111( StateChannel.1, state2.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Semistate_1211111( StateChannel.1, state2.1 ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) p_0_121111[color=#ffffff, process=&quot;!&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_121111( StateChannel, state2 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Semistate_1211111( StateChannel, state2 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) p_1_121111[color=#ffffff, process=&quot;!&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Semistate_1211111( StateChannel.1, state2.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1211111( StateChannel.1, state2.1 ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) p_1_121111[color=#ffffff, process=&quot;!&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !Semistate_1211111( StateChannel, state2 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1211111( StateChannel, state2 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) v_0_1211111[color=#ffffff,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;v();&quot;, issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1211111( StateChannel.1, state2.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_12111111( StateChannel.1, state2.1 ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) v_0_1211111[color=#ffffff,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;v();&quot;, issapicrule, role=&#39;Process&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1211111( StateChannel, state2 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_12111111( StateChannel, state2 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) inior_0_12111111[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;in(&lt;i.2, o.2, r.2&gt;);&quot;, issapicrule,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_12111111( StateChannel.1, state2.1 ),<br/>
+&nbsp;&nbsp;&nbsp;In( &lt;i.2, o.2, r.2&gt; )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_121111111( StateChannel.1, state2.1, i.2, o.2, r.2 ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) inior_0_12111111[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;in(&lt;i.2, o.2, r.2&gt;);&quot;, issapicrule,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_12111111( StateChannel, state2 ), In( &lt;i, o, r&gt; ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_121111111( StateChannel, state2, i, o, r ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) lockstate_0_121111111[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;lock state2.1;&quot;, issapicrule,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_121111111( StateChannel.1, state2.1, i.2, o.2, r.2 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1211111111( StateChannel.1, state2.1, i.2, o.2, r.2 ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) lockstate_0_121111111[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;lock state2.1;&quot;, issapicrule,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_121111111( StateChannel, state2, i, o, r ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1211111111( StateChannel, state2, i, o, r ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) lookupstateaslio_0_1211111111[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;lookup state2.1 as lio.2&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;no_derivcheck, issapicrule, role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_1211111111( StateChannel.1, state2.1, i.2, o.2, r.2 ),<br/>
+&nbsp;&nbsp;&nbsp;L_PureState( state2.1, lio.2 ), Fr( lock.1 )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_12111111111( StateChannel.1, lock.1, state2.1, i.2, lio.2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;o.2, r.2<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;L_CellLocked( state2.1, lock.1 )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">// loop breaker: [1]</span><br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) lookupstateaslio_0_1211111111[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;lookup state2.1 as lio.2&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;no_derivcheck, issapicrule, role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;State_1211111111( StateChannel, state2, i, o, r ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;L_PureState( state2, lio ), Fr( lock )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;State_12111111111( StateChannel, lock, state2, i, lio, o, r ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;L_CellLocked( state2, lock )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_comment">// loop breaker: [1]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) eventReadlio_0_12111111111[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;event Read( lio.2 );&quot;, issapicrule,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_12111111111( StateChannel.1, lock.1, state2.1, i.2, lio.2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;o.2, r.2<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Read( lio.2 ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_121111111111( StateChannel.1, lock.1, state2.1, i.2, lio.2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;o.2, r.2<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) eventReadlio_0_12111111111[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;event Read( lio.2 );&quot;, issapicrule,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_12111111111( StateChannel, lock, state2, i, lio, o, r ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--[</span> Read( lio ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_121111111111( StateChannel, lock, state2, i, lio, o, r ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) ifoiliocheckreprloc_0_121111111111[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;if &lt;o.2, i.2, lio.2&gt;=check_rep(r.2, &#39;loc&#39;)&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_121111111111( StateChannel.1, lock.1, state2.1, i.2, lio.2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;o.2, r.2<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;Pred_Eq( &lt;o.2, i.2, lio.2&gt;, check_rep(r.2, &#39;loc&#39;) )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_1211111111111( StateChannel.1, lock.1, state2.1, i.2, lio.2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;o.2, r.2<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) ifoiliocheckreprloc_0_121111111111[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;if &lt;o.2, i.2, lio.2&gt;=check_rep(r.2, &#39;loc&#39;)&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_121111111111( StateChannel, lock, state2, i, lio, o, r ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--[</span> Pred_Eq( &lt;o, i, lio&gt;, z ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1211111111111( StateChannel, lock, state2, i, lio, o, r ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_keyword">variants</span> (<span class="hl_keyword">modulo</span> AC)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1. r     = r.12<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z     = check_rep(r.12, &#39;loc&#39;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;2. r     = rep(x.11, &#39;loc&#39;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z     = x.11<br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) ifoiliocheckreprloc_1_121111111111[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;if &lt;o.2, i.2, lio.2&gt;=check_rep(r.2, &#39;loc&#39;)&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_121111111111( StateChannel.1, lock.1, state2.1, i.2, lio.2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;o.2, r.2<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;Pred_Not_Eq( &lt;o.2, i.2, lio.2&gt;, check_rep(r.2, &#39;loc&#39;)<br/>
+&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_1211111111112( StateChannel.1, lock.1, state2.1, i.2, lio.2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;o.2, r.2<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) ifoiliocheckreprloc_1_121111111111[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;if &lt;o.2, i.2, lio.2&gt;=check_rep(r.2, &#39;loc&#39;)&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_121111111111( StateChannel, lock, state2, i, lio, o, r ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--[</span> Pred_Not_Eq( &lt;o, i, lio&gt;, z ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1211111111112( StateChannel, lock, state2, i, lio, o, r ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_keyword">variants</span> (<span class="hl_keyword">modulo</span> AC)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1. r     = r.12<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z     = check_rep(r.12, &#39;loc&#39;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;2. r     = rep(x.11, &#39;loc&#39;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z     = x.11<br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) eventLocaloilioloc_0_1211111111111[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;event Local( &lt;o.2, i.2, lio.2&gt;, &#39;loc&#39; );&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_1211111111111( StateChannel.1, lock.1, state2.1, i.2, lio.2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;o.2, r.2<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Local( &lt;o.2, i.2, lio.2&gt;, &#39;loc&#39; ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_12111111111111( StateChannel.1, lock.1, state2.1, i.2, lio.2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;o.2, r.2<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) eventLocaloilioloc_0_1211111111111[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;event Local( &lt;o.2, i.2, lio.2&gt;, &#39;loc&#39; );&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_1211111111111( StateChannel, lock, state2, i, lio, o, r ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--[</span> Local( &lt;o, i, lio&gt;, &#39;loc&#39; ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_12111111111111( StateChannel, lock, state2, i, lio, o, r )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) insertstatelistolistilio_0_12111111111111[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;insert state2.1,list(o.2, list(i.2, lio.2));&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_12111111111111( StateChannel.1, lock.1, state2.1, i.2, lio.2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;o.2, r.2<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;L_CellLocked( state2.1, lock.1 )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_121111111111111( StateChannel.1, lock.1, state2.1, i.2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lio.2, o.2, r.2<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;L_PureState( state2.1, list(o.2, list(i.2, lio.2)) )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">// loop breaker: [1]</span><br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) insertstatelistolistilio_0_12111111111111[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;insert state2.1,list(o.2, list(i.2, lio.2));&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;State_12111111111111( StateChannel, lock, state2, i, lio, o, r ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;L_CellLocked( state2, lock )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;State_121111111111111( StateChannel, lock, state2, i, lio, o, r ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;L_PureState( state2, list(o, list(i, lio)) )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_comment">// loop breaker: [1]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) unlockstate_0_121111111111111[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;unlock state2.1;&quot;, issapicrule,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_121111111111111( StateChannel.1, lock.1, state2.1, i.2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lio.2, o.2, r.2<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_1211111111111111( StateChannel.1, lock.1, state2.1, i.2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lio.2, o.2, r.2<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) unlockstate_0_121111111111111[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;unlock state2.1;&quot;, issapicrule,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_121111111111111( StateChannel, lock, state2, i, lio, o, r )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;State_1211111111111111( StateChannel, lock, state2, i, lio, o, r )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) p_0_1211111111111111[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;0&quot;, issapicrule, role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_1211111111111111( StateChannel.1, lock.1, state2.1, i.2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lio.2, o.2, r.2<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) p_0_1211111111111111[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;0&quot;, issapicrule, role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;State_1211111111111111( StateChannel, lock, state2, i, lio, o, r )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) insertstatelio_0_1211111111112[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;insert state2.1,lio.2;&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_1211111111112( StateChannel.1, lock.1, state2.1, i.2, lio.2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;o.2, r.2<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;L_CellLocked( state2.1, lock.1 )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_12111111111121( StateChannel.1, lock.1, state2.1, i.2, lio.2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;o.2, r.2<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;L_PureState( state2.1, lio.2 )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">// loop breaker: [1]</span><br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) insertstatelio_0_1211111111112[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;insert state2.1,lio.2;&quot;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;issapicrule, role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;State_1211111111112( StateChannel, lock, state2, i, lio, o, r ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;L_CellLocked( state2, lock )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;State_12111111111121( StateChannel, lock, state2, i, lio, o, r ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;L_PureState( state2, lio )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_comment">// loop breaker: [1]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) unlockstate_0_12111111111121[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;unlock state2.1;&quot;, issapicrule,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_12111111111121( StateChannel.1, lock.1, state2.1, i.2, lio.2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;o.2, r.2<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_121111111111211( StateChannel.1, lock.1, state2.1, i.2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lio.2, o.2, r.2<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) unlockstate_0_12111111111121[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;unlock state2.1;&quot;, issapicrule,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_12111111111121( StateChannel, lock, state2, i, lio, o, r )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_121111111111211( StateChannel, lock, state2, i, lio, o, r )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) p_0_121111111111211[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;0&quot;, issapicrule, role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;State_121111111111211( StateChannel.1, lock.1, state2.1, i.2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lio.2, o.2, r.2<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) p_0_121111111111211[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;0&quot;, issapicrule, role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_121111111111211( StateChannel, lock, state2, i, lio, o, r )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) p_0_12111111112[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;0&quot;, issapicrule, role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_12111111112( StateChannel.1, state2.1, i.2, o.2, r.2 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) p_0_12111111112[color=#658040,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;process=&quot;0&quot;, issapicrule, role=&#39;v&#39;]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> State_12111111112( StateChannel, state2, i, o, r ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;*/</span></p><br/>
+<h2>Restrictions of the Set of Traces</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">restriction</span> Restr_ReportRule_1:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>x #NOW<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Restr_ReportRule_1( x ) <span class="hl_operator">@</span> #NOW<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>x <span class="hl_operator">=</span> &#39;loc&#39;<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;<span class="hl_comment">// safety formula</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;expanded formula:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>x #NOW<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Restr_ReportRule_1( x ) <span class="hl_operator">@</span> #NOW<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>x <span class="hl_operator">=</span> &#39;loc&#39;<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;*/</span><br/>
+<br/>
+<span class="hl_keyword">restriction</span> predicate_eq:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#i a b<span class="hl_operator">.</span> <span class="hl_operator">(</span>Pred_Eq( a, b ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span>a <span class="hl_operator">=</span> b<span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;<span class="hl_comment">// safety formula</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;expanded formula:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#i a b<span class="hl_operator">.</span> <span class="hl_operator">(</span>Pred_Eq( a, b ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span>a <span class="hl_operator">=</span> b<span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;*/</span><br/>
+<br/>
+<span class="hl_keyword">restriction</span> predicate_not_eq:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#i a b<span class="hl_operator">.</span> <span class="hl_operator">(</span>Pred_Not_Eq( a, b ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>a <span class="hl_operator">=</span> b<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;<span class="hl_comment">// safety formula</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;expanded formula:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#i a b<span class="hl_operator">.</span> <span class="hl_operator">(</span>Pred_Not_Eq( a, b ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>a <span class="hl_operator">=</span> b<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;*/</span><br/>
+<br/>
+<span class="hl_keyword">restriction</span> single_session:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#i #j<span class="hl_operator">.</span> <span class="hl_operator">(</span><span class="hl_operator">(</span>Init( ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Init( ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span>#i <span class="hl_operator">=</span> #j<span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;<span class="hl_comment">// safety formula</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;expanded formula:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#i #j<span class="hl_operator">.</span> <span class="hl_operator">(</span><span class="hl_operator">(</span>Init( ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>Init( ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span>#i <span class="hl_operator">=</span> #j<span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;*/</span></p><br/>

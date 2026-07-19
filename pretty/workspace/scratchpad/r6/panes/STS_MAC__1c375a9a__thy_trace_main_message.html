@@ -1,0 +1,297 @@
+<h2>Signature</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">builtins:</span> diffie-hellman<br/>
+<span class="hl_keyword">functions:</span> KDF/1, fst/1, h/1, mac/2, pair/2, pk/1, sign/2, snd/1,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;true/0, verify/3<br/>
+<span class="hl_keyword">equations:</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fst(&lt;x.1, x.2&gt;) <span class="hl_operator">=</span> x.1,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;snd(&lt;x.1, x.2&gt;) <span class="hl_operator">=</span> x.2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;verify(sign(x.1, x.2), x.1, pk(x.2)) <span class="hl_operator">=</span> true</p><br/>
+<h2>Construction Rules</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_KDF:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( KDF(x) ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( KDF(x) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_fst:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( fst(x) ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( fst(x) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_h:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( h(x) ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( h(x) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_mac:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ), !KU( x.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> !KU( mac(x, x.1) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( mac(x, x.1) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_pair:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ), !KU( x.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> !KU( &lt;x, x.1&gt; ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( &lt;x, x.1&gt; ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_pk:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( pk(x) ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( pk(x) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_sign:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ), !KU( x.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> !KU( sign(x, x.1) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( sign(x, x.1) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_snd:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( snd(x) ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( snd(x) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_true:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( true ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( true ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_verify:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ), !KU( x.1 ), !KU( x.2 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> !KU( verify(x, x.1, x.2) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( verify(x, x.1, x.2) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) coerce:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) pub:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( $x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( $x ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) fresh:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Fr( ~x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( ~x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( ~x ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ), !KU( x.1 ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( x^x.1 ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( x^x.1 ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_inv:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( inv(x) ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( inv(x) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_one:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( one ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( one ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_DH_neutral:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( DH_neutral ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( DH_neutral ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_mult:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ), !KU( x.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> !KU( (x*x.1) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( (x*x.1) ) <span class="hl_operator">]</span></p><br/>
+<h2>Deconstruction Rules</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_0_fst:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( &lt;x.1, x.2&gt; ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x.1 ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_0_snd:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( &lt;x.1, x.2&gt; ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x.2 ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.2^x.3 ), !KU( x.1 ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x.2^(x.1*x.3) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.3^x.2 ), !KU( inv(x.2) ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x.3 ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.3^inv(x.2) ), !KU( x.2 ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x.3 ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.3^inv(x.4) ), !KU( inv(x.2) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.3^inv((x.2*x.4)) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.2^x.3 ), !KU( inv((x.3*x.4)) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.2^inv(x.4) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.2^x.3 ), !KU( (x.4*inv(x.3)) ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x.2^x.4 ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^inv(x.2) ), !KU( (x.2*x.3) ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x.4^x.3 ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.3^inv((x.2*x.4)) ), !KU( x.2 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.3^inv(x.4) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.3^(x.2*x.4) ), !KU( inv(x.2) ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x.3^x.4 ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.3^(x.4*inv(x.2)) ), !KU( x.2 ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x.3^x.4 ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.2^inv(x.3) ), !KU( (x.4*inv(x.5)) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.2^(x.4*inv((x.3*x.5))) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.3^(x.4*inv(x.5)) ), !KU( inv(x.2) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.3^(x.4*inv((x.2*x.5))) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.2^x.3 ), !KU( (x.4*inv((x.3*x.5))) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.2^(x.4*inv(x.5)) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^inv((x.2*x.5)) ), !KU( (x.2*x.3) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^(x.3*inv(x.5)) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^(x.3*x.5) ), !KU( (x.2*inv(x.3)) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^(x.2*x.5) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^(x.3*x.5) ), !KU( inv((x.2*x.3)) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^(x.5*inv(x.2)) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^(x.5*inv(x.2)) ), !KU( (x.2*x.3) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^(x.3*x.5) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.3^(x.4*inv((x.2*x.5))) ), !KU( x.2 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.3^(x.4*inv(x.5)) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^(x.5*inv(x.6)) ), !KU( (x.2*inv(x.3)) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^(x.2*x.5*inv((x.3*x.6))) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^(x.3*inv(x.2)) ), !KU( (x.2*inv(x.3)) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4 ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^inv((x.2*x.5)) ), !KU( (x.2*inv(x.3)) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^inv((x.3*x.5)) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^(x.3*inv(x.5)) ), !KU( inv((x.2*x.3)) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^inv((x.2*x.5)) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.2^(x.3*x.4) ), !KU( (x.5*inv((x.3*x.6))) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.2^(x.4*x.5*inv(x.6)) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^(x.5*inv((x.2*x.6))) ), !KU( (x.2*x.3) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^(x.3*x.5*inv(x.6)) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^(x.3*x.5*inv(x.2)) ), !KU( (x.2*inv(x.3)) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^x.5 ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.5^(x.4*inv(x.2)) ), !KU( (x.2*x.3*inv(x.4)) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.5^x.3 ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.5^inv((x.2*x.6)) ), !KU( (x.2*x.3*inv(x.4)) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.5^(x.3*inv((x.4*x.6))) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^(x.3*x.5*inv(x.6)) ), !KU( inv((x.2*x.3)) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^(x.5*inv((x.2*x.6))) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^(x.3*inv((x.2*x.5))) ), !KU( (x.2*inv(x.3)) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^inv(x.5) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.2^(x.3*inv(x.4)) ), !KU( (x.4*inv((x.3*x.5))) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.2^inv(x.5) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.5^(x.4*x.6*inv(x.2)) ), !KU( (x.2*x.3*inv(x.4)) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.5^(x.3*x.6) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.2^(x.3*inv(x.4)) ), !KU( (x.5*inv((x.3*x.6))) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.2^(x.5*inv((x.4*x.6))) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^(x.5*inv((x.2*x.6))) ), !KU( (x.2*inv(x.3)) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^(x.5*inv((x.3*x.6))) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.5^(x.4*inv((x.2*x.6))) ), !KU( (x.2*x.3*inv(x.4)) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.5^(x.3*inv(x.6)) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.5^(x.4*x.6*inv(x.2)) ), !KU( (x.2*inv((x.3*x.4))) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.5^(x.6*inv(x.3)) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.2^(x.3*inv(x.4)) ), !KU( (x.4*x.5*inv((x.3*x.6))) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.2^(x.5*inv(x.6)) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^(x.3*x.5*inv((x.2*x.6))) ), !KU( (x.2*inv(x.3)) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.4^(x.5*inv(x.6)) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.5^(x.6*inv((x.2*x.7))) ), !KU( (x.2*x.3*inv(x.4)) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.5^(x.3*x.6*inv((x.4*x.7))) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.5^(x.4*x.6*inv(x.7)) ), !KU( (x.2*inv((x.3*x.4))) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.5^(x.2*x.6*inv((x.3*x.7))) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.5^(x.4*inv((x.2*x.6))) ), !KU( (x.2*inv((x.3*x.4))) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.5^inv((x.3*x.6)) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.5^(x.4*x.6*inv((x.2*x.7))) ), !KU( (x.2*x.3*inv(x.4)) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.5^(x.3*x.6*inv(x.7)) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.2^(x.3*x.4*inv(x.5)) ), !KU( (x.5*x.6*inv((x.3*x.7))) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.2^(x.4*x.6*inv(x.7)) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.6^(x.5*inv((x.2*x.7))) ), !KU( (x.2*x.3*inv((x.4*x.5))) )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.6^(x.3*inv((x.4*x.7))) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.5^(x.4*x.6*inv((x.2*x.7))) ), !KU( (x.2*inv((x.3*x.4))) )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.5^(x.6*inv((x.3*x.7))) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_exp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;!KD( x.6^(x.5*x.7*inv((x.2*x.8))) ),<br/>
+&nbsp;&nbsp;&nbsp;!KU( (x.2*x.3*inv((x.4*x.5))) )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.6^(x.3*x.7*inv((x.4*x.8))) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_inv:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( inv(x.1) ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x.1 ) <span class="hl_operator">]</span></p><br/>

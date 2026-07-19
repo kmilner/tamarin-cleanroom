@@ -30,6 +30,7 @@ use crate::doc::{
 };
 use crate::formula;
 use crate::term::{RIBBON, WIDTH};
+use crate::web::{hl_comment, hl_kw, hl_wrap};
 
 /// One whole restriction block (also the echo of legacy `axiom` items —
 /// probe:q_ax1).
@@ -61,13 +62,16 @@ fn verbatim_doc(s: &str) -> Doc {
 
 // ── restrictions ────────────────────────────────────────────────────────────
 
-fn restriction_doc(r: &Restriction) -> Doc {
+pub(crate) fn restriction_doc(r: &Restriction) -> Doc {
+    // `restriction` is `hl_keyword`-spanned in web mode (name/colon plain); the
+    // `"…"` quotes stay plain with the formula's operator spans nested inside;
+    // identity in batch.
     let mut d = above_op(
-        text(&format!("restriction {}:", r.name)),
+        beside_op(hl_kw("restriction"), text(&format!(" {}:", r.name))),
         nest(2, &quoted_formula(&r.formula)),
     );
     if formula::is_safety(&r.formula) {
-        d = above_op(d, nest(2, &text("// safety formula")));
+        d = above_op(d, nest(2, &hl_comment("// safety formula")));
     }
     // One blank line, then the expanded-formula comment at col 2. The STATEMENT
     // renders `r.formula` (macros unexpanded); the comment renders
@@ -76,6 +80,9 @@ fn restriction_doc(r: &Restriction) -> Doc {
     // `A( x )`). Without macros the two are equal, so this reproduces the
     // earlier same-formula-twice observation (probes q_w1/q_pred1).
     d = above_plus(d, text(""));
+    // The whole `/* expanded formula: "…" */` block is ONE `hl_comment` span in
+    // web mode, with the expanded formula's operator spans nested inside
+    // (`expanded formula:` plain); identity in batch.
     let comment = above_op(
         above_op(
             above_op(text("/*"), text("expanded formula:")),
@@ -83,7 +90,7 @@ fn restriction_doc(r: &Restriction) -> Doc {
         ),
         text("*/"),
     );
-    above_plus(d, nest(2, &comment))
+    above_plus(d, nest(2, &hl_wrap("hl_comment", comment)))
 }
 
 // ── lemmas ──────────────────────────────────────────────────────────────────

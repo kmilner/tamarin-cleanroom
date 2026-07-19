@@ -1,0 +1,9 @@
+check_rep/2[destructor]
+fst/1
+get_rep/1[destructor]
+list/2
+pair/2
+prog/3
+rep/2[private,constructor]
+report/1
+snd/1

@@ -1,0 +1,46 @@
+<br/>
+<h2>Fact Symbols with Injective Instances</h2><br/>
+<p class="monospace rules">Counter(id,&lt;)</p><br/>
+<h2>Multiset Rewriting Rules</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) isend:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> K( x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> In( x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) irecv:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( x ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) Create:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Fr( ~s ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> Start( ~s ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> Counter( ~s, %1 ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) Inc:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In( %x ), Counter( s, %x ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Number( %x ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Counter( s, (%x%+%1) ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">// loop breaker: [1]</span><br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) AttackerMsg:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> Value( x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) AttackerPub:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In( $x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> PubValue( $x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) AttackerNat:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In( x ), Counter( ~s, x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> NatValue( x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) InOut:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In( %x ), In( (%x%+%1%+%1%+%1) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Out( &lt;(%x%+%1%+%1), %1, %1, %x, (%x%+%1), (%x%+%1)&gt; )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span></p><br/>

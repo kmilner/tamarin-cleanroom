@@ -29,6 +29,7 @@ use crate::doc::{
     beside_op, char, fsep, nest, punctuate, render_with, sep, text, vcat, Doc,
 };
 use crate::term::{self, RIBBON, WIDTH};
+use crate::web::{hl_kw, hl_op_char};
 use std::cmp::Ordering;
 
 /// Header comment above the declarations (byte-exact from every capture).
@@ -42,6 +43,20 @@ pub fn render(sig: &Signature) -> String {
 
 pub(crate) fn block_doc(sig: &Signature) -> Doc {
     let mut lines = vec![text(HEADER), text("")];
+    lines.extend(decl_lines(sig));
+    vcat(lines)
+}
+
+/// The web (R6) message-pane `Signature` body: the declaration lines WITHOUT
+/// the batch header comment and its blank line (BEHAVIOR.md "Web mode").
+pub(crate) fn web_block_doc(sig: &Signature) -> Doc {
+    vcat(decl_lines(sig))
+}
+
+/// The `builtins:` / `functions:` / `equations:` declaration lines, shared by
+/// the batch and web signature bodies.
+fn decl_lines(sig: &Signature) -> Vec<Doc> {
+    let mut lines = Vec::new();
     let builtin_names = builtins_line_entries(&sig.builtins);
     if !builtin_names.is_empty() {
         lines.push(fill_line(
@@ -54,14 +69,20 @@ pub(crate) fn block_doc(sig: &Signature) -> Doc {
         merged_function_items(sig).iter().map(|s| text(s)).collect(),
     ));
     lines.push(equations_doc(sig));
-    vcat(lines)
+    lines
 }
 
 /// `text prefix <> fsep (punctuate ',' items)`: comma attached to the
 /// preceding item, fill space between items, continuation aligned after the
-/// prefix (probe:b_all, probe:b_revealing-signing).
+/// prefix (probe:b_all, probe:b_revealing-signing). The `<keyword>:` head is
+/// `hl_keyword`-spanned in web mode (colon included, trailing space plain);
+/// identity in batch.
 fn fill_line(prefix: &str, items: Vec<Doc>) -> Doc {
-    beside_op(text(prefix), fsep(punctuate(&char(','), items)))
+    let kw = prefix.trim_end();
+    beside_op(
+        beside_op(hl_kw(kw), text(" ")),
+        fsep(punctuate(&char(','), items)),
+    )
 }
 
 // ── builtins line ───────────────────────────────────────────────────────────
@@ -202,7 +223,7 @@ fn equations_doc(sig: &Signature) -> Doc {
         "equations:"
     };
     let eqs = merged_equations(sig);
-    let mut elems = vec![text(header)];
+    let mut elems = vec![hl_kw(header)];
     for d in punctuate(&char(','), eqs.iter().map(equation_doc).collect()) {
         elems.push(nest(4, &d));
     }
@@ -210,11 +231,16 @@ fn equations_doc(sig: &Signature) -> Doc {
 }
 
 /// `sep [lhs, nest (-2) ("= " <> rhs)]`: one line `lhs = rhs`; an overlong
-/// equation drops `= rhs` to (equation indent − 2) (probe:e_long).
+/// equation drops `= rhs` to (equation indent − 2) (probe:e_long). The `=`
+/// glyph is `hl_operator`-spanned in web mode (trailing space plain); identity
+/// in batch.
 fn equation_doc(eq: &Equation) -> Doc {
     sep(vec![
         term::doc(&eq.lhs),
-        nest(-2, &beside_op(text("= "), term::doc(&eq.rhs))),
+        nest(
+            -2,
+            &beside_op(beside_op(hl_op_char('='), text(" ")), term::doc(&eq.rhs)),
+        ),
     ])
 }
 
@@ -274,6 +300,7 @@ enum CmpView<'a> {
 ///     left-to-right (contract checkpcs decided at argument 2);
 ///   * tuples take the head name `pair` (p_eqE: `g(…)` < `<x, y>`; p_eqG:
 ///     `<x, y>` < `z1(…)`) and right-nested binary arguments (p_eqI).
+///
 /// Classes that cannot appear in an equations block (literals, exp/AC
 /// operators, diff, pattern-match) are UNOBSERVABLE here; they are ranked
 /// with the applications under their rendered head spelling (flagged in

@@ -1,0 +1,74 @@
+<h2>Signature</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">functions:</span> blind/2, checksign/2, fst/1, pair/2, pk/1, sign/2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;snd/1, unblind/2<br/>
+<span class="hl_keyword">equations [convergent]:</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;checksign(sign(m, k), pk(k)) <span class="hl_operator">=</span> m,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fst(&lt;x.1, x.2&gt;) <span class="hl_operator">=</span> x.1,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;snd(&lt;x.1, x.2&gt;) <span class="hl_operator">=</span> x.2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;unblind(blind(m, r), r) <span class="hl_operator">=</span> m,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;unblind(sign(blind(m, r), k), r) <span class="hl_operator">=</span> sign(m, k)</p><br/>
+<h2>Construction Rules</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_blind:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ), !KU( x.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> !KU( blind(x, x.1) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( blind(x, x.1) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_checksign:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ), !KU( x.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> !KU( checksign(x, x.1) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( checksign(x, x.1) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_fst:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( fst(x) ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( fst(x) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_pair:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ), !KU( x.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> !KU( &lt;x, x.1&gt; ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( &lt;x, x.1&gt; ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_pk:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( pk(x) ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( pk(x) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_sign:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ), !KU( x.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> !KU( sign(x, x.1) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( sign(x, x.1) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_snd:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( snd(x) ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( snd(x) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_unblind:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ), !KU( x.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> !KU( unblind(x, x.1) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( unblind(x, x.1) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) coerce:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) pub:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( $x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( $x ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) fresh:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Fr( ~x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( ~x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( ~x ) <span class="hl_operator">]</span></p><br/>
+<h2>Deconstruction Rules</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_0_checksign:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( sign(m, k) ), !KU( pk(k) ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( m ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_0_fst:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( &lt;x.1, x.2&gt; ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x.1 ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_0_snd:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( &lt;x.1, x.2&gt; ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x.2 ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_0_unblind:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( blind(m, r) ), !KU( r ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( m ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_0_0_unblind_sign:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( blind(m, r) ), !KU( r ), !KU( k ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( sign(m, k) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_0_unblind:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( sign(blind(m, r), k) ), !KU( r ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( sign(m, k) ) <span class="hl_operator">]</span></p><br/>

@@ -1,0 +1,2 @@
+functions: MAC/2, concat/2, first/1, fst/1, h/1, pair/2, second/1,
+           snd/1

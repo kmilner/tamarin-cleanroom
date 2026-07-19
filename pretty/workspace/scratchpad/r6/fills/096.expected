@@ -1,0 +1,1 @@
+functions: adec/2, aenc/2, fst/1, h/1, pair/2, pk/1, snd/1

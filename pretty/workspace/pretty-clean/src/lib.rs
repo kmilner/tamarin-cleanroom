@@ -20,6 +20,7 @@ pub mod rule; // R2
 pub mod signature; // R1
 pub mod term; // R1 (deep core)
 pub mod theory; // top-level assembly
+pub mod web; // R6 — the interactive server's HTML rendering mode
 
 pub use ast::*;
 

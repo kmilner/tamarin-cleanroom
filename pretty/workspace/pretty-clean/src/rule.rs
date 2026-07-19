@@ -33,6 +33,7 @@ use crate::doc::{
     render_with, sep, text, vcat, Doc,
 };
 use crate::term::{self, RIBBON, WIDTH};
+use crate::web::{hl_comment, hl_kw, hl_op_text, hl_wrap};
 
 /// One fact: `Name( arg, … )`, persistent prefixed with `!`, annotations
 /// attached after the closing paren.
@@ -46,7 +47,7 @@ pub fn render(rule: &Rule, variants: Option<&AcVariants>) -> String {
     render_with(WIDTH, RIBBON, &block_doc(rule, variants))
 }
 
-fn block_doc(rule: &Rule, variants: Option<&AcVariants>) -> Doc {
+pub(crate) fn block_doc(rule: &Rule, variants: Option<&AcVariants>) -> Doc {
     let mut d = core_doc(rule);
     // `$+$` below the blank line: `$$` overlap would otherwise pull the
     // nested comment line up onto it.
@@ -58,8 +59,9 @@ fn block_doc(rule: &Rule, variants: Option<&AcVariants>) -> Doc {
 }
 
 /// Header + body (shared by the toplevel block and the AC rule re-rendered
-/// inside the variants comment).
-fn core_doc(rule: &Rule) -> Doc {
+/// inside the variants comment; also the bare construction/deconstruction
+/// message-pane rule form in web mode).
+pub(crate) fn core_doc(rule: &Rule) -> Doc {
     above_op(header_doc(rule), nest(3, &body_doc(rule)))
 }
 
@@ -69,18 +71,28 @@ fn core_doc(rule: &Rule) -> Doc {
 /// the colon; attributes fill-wrap aligned after the `[`
 /// (target:issue713, probe:p_rattr).
 fn header_doc(rule: &Rule) -> Doc {
-    let mut head = String::from("rule ");
+    // Keyword-prefix `rule ` (+ `(modulo E) `): `rule` and `modulo` are
+    // `hl_keyword`-spanned in web mode, the `(`/`)`/annotation between them
+    // plain; identity in batch (`rule (modulo E) `).
+    let mut prefix = hl_kw("rule");
     if let Some(m) = &rule.modulo {
-        head.push_str(&format!("(modulo {m}) "));
+        prefix = beside_op(
+            prefix,
+            beside_op(
+                text(" ("),
+                beside_op(hl_kw("modulo"), text(&format!(" {m}) "))),
+            ),
+        );
+    } else {
+        prefix = beside_op(prefix, text(" "));
     }
-    head.push_str(&rule.name);
     let attrs = attr_items(&rule.attributes);
     if attrs.is_empty() {
-        text(&format!("{head}:"))
+        beside_op(prefix, text(&format!("{}:", rule.name)))
     } else {
         beside_op(
             beside_op(
-                text(&format!("{head}[")),
+                beside_op(prefix, text(&format!("{}[", rule.name))),
                 fsep(punctuate(
                     &char(','),
                     attrs.iter().map(|a| text(a)).collect(),
@@ -157,7 +169,7 @@ fn body_doc(rule: &Rule) -> Doc {
 /// drops alone).
 fn arrow_doc(actions: &[Fact]) -> Doc {
     if actions.is_empty() {
-        text("-->")
+        hl_op_text("-->")
     } else {
         bracket_group("--[", actions, "]->")
     }
@@ -180,15 +192,17 @@ fn fact_list_doc(facts: &[Fact]) -> Doc {
 ///     share a fill line; Serv_1: `--[` alone although the first action
 ///     would fit beside it).
 fn bracket_group(open: &str, facts: &[Fact], close: &str) -> Doc {
+    // The bracket/arrow glyphs (`[` `]` `--[` `]->`) are `hl_operator`-spanned
+    // in web mode; the fact separators and the facts themselves stay plain.
     if facts.is_empty() {
-        return sep(vec![text(open), text(close)]);
+        return sep(vec![hl_op_text(open), hl_op_text(close)]);
     }
     sep(vec![
         sep(vec![
-            text(open),
+            hl_op_text(open),
             fsep(punctuate(&char(','), facts.iter().map(fact_doc).collect())),
         ]),
-        text(close),
+        hl_op_text(close),
     ])
 }
 
@@ -260,7 +274,10 @@ fn breaker_doc(indices: &[usize]) -> Option<Doc> {
     } else {
         "loop breakers"
     };
-    Some(text(&format!("// {noun}: [{list}]")))
+    // `hl_comment`-spanned in web mode — even the AC-side breaker inside a
+    // variants comment gets its OWN nested comment span (corpus:
+    // ISO_IEC9798_3_3 / TPM_Exclusive_Secrets).
+    Some(hl_comment(&format!("// {noun}: [{list}]")))
 }
 
 // ── the AC-variants comment ─────────────────────────────────────────────────
@@ -270,8 +287,11 @@ fn breaker_doc(indices: &[usize]) -> Option<Doc> {
 /// (probes p_var1, p_lbvar; targets cav13/Joux/CH07/mesh).
 fn comment_doc(variants: Option<&AcVariants>) -> Doc {
     let Some(v) = variants else {
-        return text("/* has exactly the trivial AC variant */");
+        return hl_comment("/* has exactly the trivial AC variant */");
     };
+    // The whole `/* … */` block is ONE `hl_comment` span in web mode, with the
+    // AC-rule re-render's own keyword/operator spans nested inside (identity in
+    // batch).
     let mut d = above_op(text("/*"), core_doc(&v.ac_rule));
     if !v.substitutions.is_empty() {
         d = above_op(d, nest(2, &substitutions_doc(&v.substitutions)));
@@ -279,7 +299,8 @@ fn comment_doc(variants: Option<&AcVariants>) -> Doc {
     if let Some(lb) = breaker_doc(&v.ac_rule.loop_breakers) {
         d = above_op(d, nest(2, &lb));
     }
-    above_op(d, text("*/"))
+    d = above_op(d, text("*/"));
+    hl_wrap("hl_comment", d)
 }
 
 /// `variants (modulo AC)` and the numbered groups, separated by lines of
@@ -288,7 +309,13 @@ fn comment_doc(variants: Option<&AcVariants>) -> Doc {
 /// targets cav13 (1 digit), CH07 (2), Joux (3)).
 fn substitutions_doc(groups: &[Vec<(Term, Term)>]) -> Doc {
     let width = groups.len().to_string().len();
-    let mut rows = vec![text("variants (modulo AC)")];
+    // `variants` and `modulo` are `hl_keyword`-spanned in web mode, the rest of
+    // the header plain; identity in batch (`variants (modulo AC)`).
+    let variants_header = beside_op(
+        hl_kw("variants"),
+        beside_op(text(" ("), beside_op(hl_kw("modulo"), text(" AC)"))),
+    );
+    let mut rows = vec![variants_header];
     for (i, group) in groups.iter().enumerate() {
         if i > 0 {
             rows.push(text(""));

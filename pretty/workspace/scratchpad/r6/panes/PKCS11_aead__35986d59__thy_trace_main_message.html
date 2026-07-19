@@ -1,0 +1,83 @@
+<h2>Signature</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">builtins:</span> multiset<br/>
+<span class="hl_keyword">functions:</span> fst/1, getIV/1, getTag/1, kdf/2, pair/2, sdec/4,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sdecSuc/4, senc/4, snd/1, true/0<br/>
+<span class="hl_keyword">equations:</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fst(&lt;x.1, x.2&gt;) <span class="hl_operator">=</span> x.1,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;getIV(senc(k, iv, t, m)) <span class="hl_operator">=</span> iv,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;getTag(senc(k, iv, t, m)) <span class="hl_operator">=</span> t,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;sdec(k, iv, t, senc(k, iv, t, m)) <span class="hl_operator">=</span> m,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;sdecSuc(k, iv, t, senc(k, iv, t, m)) <span class="hl_operator">=</span> true,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;snd(&lt;x.1, x.2&gt;) <span class="hl_operator">=</span> x.2</p><br/>
+<h2>Construction Rules</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_fst:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( fst(x) ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( fst(x) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_getIV:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( getIV(x) ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( getIV(x) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_getTag:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( getTag(x) ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( getTag(x) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_kdf:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ), !KU( x.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> !KU( kdf(x, x.1) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( kdf(x, x.1) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_pair:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ), !KU( x.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> !KU( &lt;x, x.1&gt; ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( &lt;x, x.1&gt; ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_sdec:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ), !KU( x.1 ), !KU( x.2 ), !KU( x.3 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> !KU( sdec(x, x.1, x.2, x.3) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( sdec(x, x.1, x.2, x.3) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_sdecSuc:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ), !KU( x.1 ), !KU( x.2 ), !KU( x.3 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> !KU( sdecSuc(x, x.1, x.2, x.3) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( sdecSuc(x, x.1, x.2, x.3) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_senc:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ), !KU( x.1 ), !KU( x.2 ), !KU( x.3 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> !KU( senc(x, x.1, x.2, x.3) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( senc(x, x.1, x.2, x.3) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_snd:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( snd(x) ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( snd(x) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_true:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( true ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( true ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) coerce:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) pub:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( $x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( $x ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) fresh:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Fr( ~x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( ~x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( ~x ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_union:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ), !KU( y ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( (x++y) ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( (x++y) ) <span class="hl_operator">]</span></p><br/>
+<h2>Deconstruction Rules</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_0_fst:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( &lt;x.1, x.2&gt; ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x.1 ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_0_getIV:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( senc(k, iv, t, m) ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( iv ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_0_getTag:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( senc(k, iv, t, m) ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( t ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_3_sdec:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( senc(k, iv, t, m) ), !KU( k ), !KU( iv ), !KU( t ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( m ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_0_snd:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( &lt;x.1, x.2&gt; ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x.2 ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_union:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( (x++y) ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x ) <span class="hl_operator">]</span></p><br/>

@@ -1,0 +1,109 @@
+<h2>Signature</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">functions:</span> comb/2, dec/2, enc/2, fst/1, h/1, pair/2, pdec/2, pk/1,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;plus/2, snd/1, split/2, transform/1<br/>
+<span class="hl_keyword">equations [convergent]:</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;comb(pdec(c, sk1), pdec(c, sk2)) <span class="hl_operator">=</span> dec(c, plus(sk1, sk2)),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;dec(enc(m, pk(sk)), sk) <span class="hl_operator">=</span> m,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fst(&lt;x.1, x.2&gt;) <span class="hl_operator">=</span> x.1,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;snd(&lt;x.1, x.2&gt;) <span class="hl_operator">=</span> x.2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;transform(pdec(c, pk)) <span class="hl_operator">=</span> dec(c, pk)</p><br/>
+<h2>Construction Rules</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_comb:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ), !KU( x.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> !KU( comb(x, x.1) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( comb(x, x.1) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_dec:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ), !KU( x.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> !KU( dec(x, x.1) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( dec(x, x.1) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_enc:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ), !KU( x.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> !KU( enc(x, x.1) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( enc(x, x.1) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_fst:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( fst(x) ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( fst(x) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_h:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( h(x) ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( h(x) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_pair:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ), !KU( x.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> !KU( &lt;x, x.1&gt; ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( &lt;x, x.1&gt; ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_pdec:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ), !KU( x.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> !KU( pdec(x, x.1) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( pdec(x, x.1) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_pk:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( pk(x) ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( pk(x) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_plus:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ), !KU( x.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> !KU( plus(x, x.1) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( plus(x, x.1) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_snd:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( snd(x) ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( snd(x) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_split:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ), !KU( x.1 ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> !KU( split(x, x.1) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( split(x, x.1) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) c_transform:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( transform(x) ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( transform(x) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) coerce:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) pub:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( $x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( $x ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) fresh:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Fr( ~x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> !KU( ~x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> !KU( ~x ) <span class="hl_operator">]</span></p><br/>
+<h2>Deconstruction Rules</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_0_comb:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( pdec(c, sk1) ), !KU( pdec(c, sk2) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( dec(c, plus(sk1, sk2)) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_0_comb:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;!KD( pdec(enc(x.3, pk(plus(sk1.1, sk2.2))), sk1.1) ),<br/>
+&nbsp;&nbsp;&nbsp;!KU( pdec(enc(x.3, pk(plus(sk1.1, sk2.2))), sk2.2) )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.3 ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_1_comb:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( pdec(c, sk2) ), !KU( pdec(c, sk1) ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( dec(c, plus(sk1, sk2)) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_1_comb:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;!KD( pdec(enc(x.3, pk(plus(sk1.1, sk2.2))), sk2.2) ),<br/>
+&nbsp;&nbsp;&nbsp;!KU( pdec(enc(x.3, pk(plus(sk1.1, sk2.2))), sk1.1) )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( x.3 ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_0_dec:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( enc(m, pk(sk)) ), !KU( sk ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( m ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_0_fst:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( &lt;x.1, x.2&gt; ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x.1 ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_0_snd:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( &lt;x.1, x.2&gt; ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x.2 ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_0_transform:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( pdec(c, pk) ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( dec(c, pk) ) <span class="hl_operator">]</span><br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) d_0_transform:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KD( pdec(enc(x.2, pk(pk.1)), pk.1) ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x.2 ) <span class="hl_operator">]</span></p><br/>

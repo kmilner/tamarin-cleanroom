@@ -646,3 +646,156 @@ proof, predicates, heuristic, tactic, section comments).
   of this crate (only the comment frame and headers are).
 * Restrictions whose formula falls outside the guarded fragment: fatal
   upstream error (probe:q_p1), unreachable for the renderer.
+
+## Web mode (R6) — the interactive server's HTML rendering of theory content
+
+The interactive server renders the SAME theory blocks the batch echo models, but
+as HTML fragment bodies for the `main/message` and `main/rules` panes (and the
+source views). Derived entirely from the 82 captured crawl manifests
+(weblayer/producers/oracle/captured_responses; sliced by extract_fragments.py
+into scratchpad/r6/panes) and doc-engine probes — no tamarin HS source read. The
+producers-clean skin (escape_text / postprocess_lines / `{html,title}` envelope,
+weblayer BEHAVIOR §2–4) consumes these bodies as OPAQUE input and wraps them;
+R6 PRODUCES the bodies. Acceptance composes R6 output through that skin and
+byte-compares the whole captured pane body.
+
+### Layout parameters — width 100, ribbon 67 (NOT the batch 110/73)
+
+DEFINITIVE (scratchpad zz_width_probe, deleted): all 139 signature
+`functions:`/`builtins:` fills reconstructed from the corpus render byte-identical
+at `render_with(100, 67, doc)`; ribbon 66 misses 10, ribbon 68 misses 9. These
+are the default HughesPJ `Style` (`lineLength = 100`, `ribbonsPerLine = 1.5`,
+`round(100/1.5) = 67`); batch mode is the same 1.5 ratio at lineLength 110
+(`round(110/1.5) = 73`). A fill item is kept on a line iff its END column ≤ the
+ribbon (probe:ribbon_boundary), but the fill has HughesPJ lookahead so this is
+NOT a per-item greedy rule — only the engine reproduces it.
+
+### The escape set — identical to producers `escape_text`
+
+`& < > " '` → `&amp; &lt; &gt; &quot; &#39;` (verified: the corpus entity
+inventory of message/rules bodies is exactly `&#39; &gt; &lt; &quot;` plus
+`&amp;`; no `&apos;`, no `\uXXXX`). Backslash and non-ASCII pass raw (the formula
+glyphs `∀ ∃ ⇒ ∧ ∨ ¬ ⊥ ⊏ ⊤ ⊐` are raw UTF-8). Leading indent spaces are NOT
+converted here — the producers postprocess turns them into `&nbsp;` runs. So an
+R6 body line carries: escaped content + `hl_*` spans + RAW leading spaces, one
+logical line per `\n`.
+
+### The `hl_*` span vocabulary (census over all 82+82 bodies)
+
+`hl_keyword` — 8 token kinds, the span covers the KEYWORD ONLY (incl the trailing
+colon of a declaration keyword, but NOT any trailing space):
+  * `rule`, `modulo` (every rule header AND every AC re-render inside a variants
+    comment; two separate spans, the `(`/`)`/name between them PLAIN);
+  * `variants` (the `variants (modulo AC)` line — `variants` spanned, the rest
+    plain);
+  * `restriction` (restriction header; name+`:` plain);
+  * `functions:`, `equations:`, `builtins:`, `equations [convergent]:`
+    (declaration keywords, colon INCLUDED).
+  Rule NAME, attribute list and the attribute brackets `[color=…, process="…"]`
+  are PLAIN (never spanned).
+
+`hl_operator` — 18 token kinds:
+  * rule structure `[`  `]`  `--[`  `]->`(`]-&gt;`)  `-->`(`--&gt;`);
+  * formula connective/negation parens `(` `)` — ONLY the connective-operand and
+    `¬`-argument parens; application `f(…)`, fact `Name( … )`, AC-operator
+    `(a*b)` and pair `<…>` delimiters are NEVER spanned (pair/AC `<`/`>` are only
+    entity-escaped);
+  * `=` (equation `=` AND the `Eq` atom `=`), `<` (the `Less`/temporal atom,
+    escaped `&lt;`), `@` (action-at), `.` (quantifier dot after binders);
+  * `∀ ` / `∃ ` (glyph + trailing space, one span), `⇒`, `∧`, `∨`, `¬`, `⊥`.
+  Observed-absent, rendered by pattern and FLAGGED (no corpus witness): `⊤`
+  (true), `⊏` (subterm), `⇔` (iff), `last(…)`, `⊐`. A variants-substitution `= `
+  (`~lv2  = ~lv2.4`) is PLAIN, not `hl_operator` (distinct from the equation `=`).
+  Binders, timepoints and all terms/facts inside atoms are PLAIN.
+
+`hl_comment` — the whole comment is ONE span, tags need not balance per line:
+  * `/* has exactly the trivial AC variant */` (single line);
+  * the multi-line `/* … variants (modulo AC) … */` block: span OPENS at `/*`,
+    CLOSES after `*/`, and the AC-rule re-render INSIDE it keeps its own nested
+    `hl_keyword`/`hl_operator` spans (spans NEST);
+  * the restriction `/* expanded formula: "…" */` block: same nesting (the
+    `expanded formula:` text plain, the quoted formula's operator spans nested);
+  * `// safety formula`, `// loop breaker: [n]`, `// loop breakers: [i,j]`.
+  A comment's leading indent spaces are OUTSIDE the span (raw, before the open).
+
+### Content structure vs the batch echo
+
+* NO signature header comment: the `Signature`/message body starts directly at
+  `builtins:` / `functions:` (the batch `// Function signature …` line is absent).
+* `main/message` bodies (three Keep-mode sections, producers §5): `Signature` =
+  the builtins/functions/equations block at web params, no header; `Construction
+  Rules` / `Deconstruction Rules` = the intruder rules rendered BARE — header +
+  body ONLY, NO variants comment / loop breaker — joined by ONE blank line.
+* `main/rules` bodies (producers §6): `Fact Symbols …` = one OPAQUE input line
+  (`None`, or `L_x(id,?,?), …` with `?`/`=`/`.`/`≤`/`<` placeholder chars,
+  entity-escaped, NO spans — carried through, not modeled); `Multiset Rewriting
+  Rules` = FULL rule blocks (header + body + blank + `/* variant */`), joined by
+  TWO blank lines; `Restrictions of the Set of Traces` = restriction blocks
+  (statement, `// safety formula` when safety, blank, `/* expanded formula: */`),
+  joined by one blank; `Macros` slot when present (UNOBSERVED in the 82-manifest
+  corpus — needs a live macros theory).
+* The restriction wrapper quotes (`&quot;…&quot;`) are PLAIN; the formula's
+  operator spans sit inside. Statement and expanded-formula render the two
+  distinct formula values (batch R5 GAP-1) at web params.
+
+### Implementation (pretty-clean, `web.rs` + span-site edits)
+
+One model, two render targets: the SAME block-doc builders
+(signature/rule/formula/lemma) emit glyphs through `hl_*` wrappers that, in web
+mode, wrap the glyph in a zero-width span-marker pair (mirroring the sanctioned
+`Annotated.HughesPJ` `AnnotStart`/`AnnotEnd`: `sized_text(0, …)` sentinels that
+flow through best/fits/lay at zero width, so LAYOUT is identical to plain), and
+in batch mode are the identity (byte-identical to R1–R5). `render_html`
+= `render_with(100, 67, doc)` then a post-pass that entity-escapes and expands
+the sentinels into `<span class="hl_…">`/`</span>`. Multi-line comment spans fall
+out naturally (open marker before `/*`, close after `*/`, `\n`s between). No
+change to the doc engine.
+
+### Web mode (R6) — LAYOUT BLOCKER (line wrapping of sep-based constructs)
+
+STATUS: span vocabulary, entity escaping, section structure/separators and token
+CONTENT are reproduced and validated corpus-wide; the SIGNATURE bodies render
+byte-identical (all 82 message-pane signatures — tests/round6_web.rs
+`signature_pane_sweep`, `signature_mutation_check`). The residual is line-WRAPPING
+of the `sep`-based constructs (rule bodies, restriction quantifiers) and the
+pair/AC delimiter drops.
+
+PROVEN IMPOSSIBILITY at any single (width, ribbon) with the faithful HughesPJ
+engine (the sanctioned pretty-1.1.3.6, which the batch R1–R5 output validates):
+* A nest-3 rule-BODY one-liner of content 66 (`c_mult`:
+  `[ !KU( x ), !KU( x.1 ) ] --[ !KU( (x*x.1) ) ]-> [ !KU( (x*x.1) ) ]`) WRAPS to
+  three rows in the captures, while a nest-3 bracket-group PREMISE of content 66
+  (`d_exp`: `[ !KD( x.5^(x.4*x.6*inv((x.2*x.7))) ), !KU( (x.2*x.3*inv(x.4)) ) ]`)
+  KEEPS its `]` — both in the SAME theory (Scott), same nest. This engine (and
+  the sanctioned `sep1`/`sepNB`/`fits`, budget `min(w-nest, r) - sl`) measures
+  the two IDENTICALLY (both content 66), so they wrap together at every (w,r)
+  (verified: both flip at width 69 / ribbon 67). Tamarin distinguishes them.
+* Independently: the signature `fsep` continuations reach absolute 78 (= nest 11
+  + ribbon 67), which needs ribbon 67 AND width ≥ 78; the nest-3 rule bodies wrap
+  at content 66, which needs an effective width ~67. No single width satisfies
+  both.
+Diagnostic sweep (tests/round6_web.rs `sweep_count`, IGNORED) at (100, 67):
+byte-identical 206/367 sections; token-CONTENT (spans stripped, unescaped,
+whitespace-collapsed) 331/367; SPAN-placement (class + normalized inner) 348/367.
+Every content/span miss inspected is layout-induced — a dropped pair/app
+delimiter (`…>) )` vs `…>)`) collapsing to a stray space, or a comment/inner
+span whose wrapped text differs; NOT a token or escaping bug. (Exception: 1 sig
+content miss is a harness artifact — `parse_signature` cannot recover
+`dest-pairing` from the shown functions, so it re-adds a constructor `fst/1`; the
+real adapter carries the builtin set, so the byte sweep uses a `dest-pairing`
+heuristic and passes 82/82.)
+
+WORKING HYPOTHESES for a successor / the dirty room (pick one to confirm):
+* Tamarin's web does NOT single-render each pane with `renderStyle defaultStyle`;
+  likely a per-element render (signature vs rules at different effective widths),
+  OR the pane is one stacked document where the HughesPJ ribbon mechanism
+  (`get (w - sl)` after each `NilAbove`) narrows deeper content cumulatively, OR
+  a bespoke rule/formula printer wraps bodies on a tighter threshold than `sep`.
+* The 1-column c_mult-vs-d_exp discrepancy hints the rule-BODY `sep`
+  (which carries the arrow's `nest (-1)` and a nested action bracket-group) is
+  measured 1 wider than a plain bracket-group in tamarin — worth an isolated
+  dirty-room probe of `prettyProtoRuleACInfo`/the web `render` call and its width.
+Pinned params in `web.rs` are (100, 67) — correct for the signature fills and
+the canonical default style; the rule/restriction wrap thresholds await this
+resolution. The span-injection / escaping / structure code is complete and
+correct and does not depend on the width fix.

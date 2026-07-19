@@ -1,0 +1,178 @@
+<br/>
+<h2>Fact Symbols with Injective Instances</h2><br/>
+<p class="monospace rules">S_Counter(id,.), Y_counter(id,.)</p><br/>
+<h2>Multiset Rewriting Rules</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) isend:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> K( x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> In( x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) irecv:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( x ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) isendHSM:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> HSMWrite( x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> InHSM( x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) irecvHSM:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> OutHSM( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> HSMRead( x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> Out( x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) read_AEAD:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !S_AEAD( pid, aead ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> AEADRead( aead ), HSMRead( aead ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( aead ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) write_AEAD:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> In( aead ), In( pid ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> AEADWrite( aead ), HSMWrite( aead ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !S_AEAD( pid, aead ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) HSMInit:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Fr( ~k ), Fr( ~kh ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Protocol( ), GenerateRole1( ~k ), MasterKey( ~k ), OneTime( )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !HSM( ~kh, ~k ), Out( ~kh ), !YSM_AEAD_YUBIKEY_OTP_DECODE( ~kh )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) YSM_AEAD_RANDOM_GENERATE:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;Fr( ~data ), InHSM( &lt;N, kh&gt; ), !HSM( kh, k ),<br/>
+&nbsp;&nbsp;&nbsp;!YSM_AEAD_RANDOM_GENERATE( kh )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> GenerateRandomAEAD( ~data ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;OutHSM( &lt;xorc(senc(keystream(kh, N), k), ~data), mac(~data, k)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&gt;<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) YSM_AEAD_GENERATE:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;InHSM( &lt;N, kh, data&gt; ), !HSM( kh, k ),<br/>
+&nbsp;&nbsp;&nbsp;!YSM_AEAD_GENERATE( kh )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;GenerateAEAD( data,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;xorc(senc(keystream(kh, N), k), data), mac(data, k)&gt;<br/>
+&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;OutHSM( &lt;xorc(senc(keystream(kh, N), k), data), mac(data, k)&gt;<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) YSM_AES_ESC_BLOCK_ENCRYPT:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;InHSM( &lt;kh, data&gt; ), !HSM( kh, k ),<br/>
+&nbsp;&nbsp;&nbsp;!YSM_AES_ESC_BLOCK_ENCRYPT( kh )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> OutHSM( senc(data, k) ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) YSM_AEAD_YUBIKEY_OTP_DECODE:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;InHSM( &lt;did, kh, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;xorc(senc(keystream(kh, N), k), &lt;k2, did&gt;), <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mac(&lt;k2, did&gt;, k)&gt;, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;senc(&lt;did, sc, rand&gt;, k2)&gt;<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;!HSM( kh, k ), !YSM_AEAD_YUBIKEY_OTP_DECODE( kh )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;OtpDecode( k2, k, &lt;did, sc, rand&gt;, sc,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;xorc(senc(keystream(kh, N), k), &lt;k2, did&gt;),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mac(&lt;k2, did&gt;, k)<br/>
+&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;OtpDecodeMaster( k2, k )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> OutHSM( sc ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) BuyANewYubikey:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;Fr( ~k2 ), Fr( ~pid ), Fr( ~sid ), !HSM( kh, ~k ),<br/>
+&nbsp;&nbsp;&nbsp;In( &#39;1&#39; )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Init( ~pid, ~k2 ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;Y_counter( ~pid, &#39;1&#39; ), !Y_Key( ~pid, ~k2 ),<br/>
+&nbsp;&nbsp;&nbsp;!Y_sid( ~pid, ~sid ), S_Counter( ~pid, &#39;1&#39; ),<br/>
+&nbsp;&nbsp;&nbsp;!S_AEAD( ~pid,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;xorc(senc(keystream(kh, ~pid), ~k), &lt;~k2, ~sid&gt;), <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mac(&lt;~k2, ~sid&gt;, ~k)&gt;<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;!S_sid( ~pid, ~sid ), Out( ~pid )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) Yubikey_Plugin:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Y_counter( pid, sc ), In( Ssc ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Yubi( pid, Ssc ), Smaller( sc, Ssc ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Y_counter( pid, Ssc ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">// loop breaker: [0]</span><br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) Yubikey_PressButton:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;Y_counter( pid, tc ), !Y_Key( pid, k2 ), !Y_sid( pid, sid ),<br/>
+&nbsp;&nbsp;&nbsp;Fr( ~pr ), Fr( ~nonce ), In( (&#39;1&#39;++tc) )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;YubiPress( pid, tc ),<br/>
+&nbsp;&nbsp;YubiPressOtp( pid, &lt;sid, tc, ~pr&gt;, tc, k2 )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;Y_counter( pid, (&#39;1&#39;++tc) ),<br/>
+&nbsp;&nbsp;&nbsp;Out( &lt;pid, ~nonce, senc(&lt;sid, tc, ~pr&gt;, k2)&gt; )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">// loop breaker: [0]</span><br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) Server_ReceiveOTP_NewSession:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;In( &lt;pid, nonce, senc(&lt;sid, tc, ~pr&gt;, k2)&gt; ),<br/>
+&nbsp;&nbsp;&nbsp;!HSM( kh, k ),<br/>
+&nbsp;&nbsp;&nbsp;!S_AEAD( pid,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;xorc(senc(keystream(kh, pid), k), &lt;k2, sid&gt;), <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mac(&lt;k2, sid&gt;, k)&gt;<br/>
+&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;S_Counter( pid, otc ), !S_sid( pid, sid )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;Login( pid, sid, tc, senc(&lt;sid, tc, ~pr&gt;, k2) ),<br/>
+&nbsp;&nbsp;LoginCounter( pid, otc, tc ), Smaller( otc, tc )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> S_Counter( pid, tc ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">// loop breaker: [3]</span><br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span></p><br/>
+<h2>Restrictions of the Set of Traces</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">restriction</span> smaller:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#i a b<span class="hl_operator">.</span> <span class="hl_operator">(</span>Smaller( a, b ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span><span class="hl_operator">∃ </span>z<span class="hl_operator">.</span> (a++z) <span class="hl_operator">=</span> b<span class="hl_operator">)</span>&quot;<br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;expanded formula:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#i a b<span class="hl_operator">.</span> <span class="hl_operator">(</span>Smaller( a, b ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span><span class="hl_operator">∃ </span>z<span class="hl_operator">.</span> (a++z) <span class="hl_operator">=</span> b<span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;*/</span><br/>
+<br/>
+<span class="hl_keyword">restriction</span> onetime:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#t3 #t4<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>OneTime( ) <span class="hl_operator">@</span> #t3<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>OneTime( ) <span class="hl_operator">@</span> #t4<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span>#t3 <span class="hl_operator">=</span> #t4<span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;<span class="hl_comment">// safety formula</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;expanded formula:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>#t3 #t4<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>OneTime( ) <span class="hl_operator">@</span> #t3<span class="hl_operator">)</span> <span class="hl_operator">∧</span> <span class="hl_operator">(</span>OneTime( ) <span class="hl_operator">@</span> #t4<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span>#t3 <span class="hl_operator">=</span> #t4<span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;*/</span></p><br/>

@@ -1,0 +1,295 @@
+<br/>
+<h2>Fact Symbols with Injective Instances</h2><br/>
+<p class="monospace rules">St_I(id,=,=,.,≤), St_R(id,=,=,.,≤)</p><br/>
+<h2>Multiset Rewriting Rules</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) isend:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !KU( x ) <span class="hl_operator">]</span> <span class="hl_operator">--[</span> K( x ) <span class="hl_operator">]-&gt;</span> <span class="hl_operator">[</span> In( x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) irecv:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( x ) <span class="hl_operator">]</span> <span class="hl_operator">--&gt;</span> <span class="hl_operator">[</span> !KD( x ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<br/>
+<br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) RegisterKey:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Fr( ~ltkA ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Key( ~ltkA ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !F_AgentKey( ~ltkA ), Out( pk(~ltkA) ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) CompromiseKey:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !F_AgentKey( ~ltk ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span> Compromise( pk(~ltk) ) <span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> Out( ~ltk ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) BindState_Init:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !F_AgentKey( ~ltkA ), !F_AgentKey( ~ltkB ), Fr( ~id ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;Paired( ~id, &#39;I&#39;, ~ltkA, ~ltkB ),<br/>
+&nbsp;&nbsp;Counter( ~id, &#39;0&#39; ),<br/>
+&nbsp;&nbsp;F_InvariantSource_I( ~id, ~ltkA, pk(~ltkB) )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> St_I( ~id, ~ltkA, pk(~ltkB), &#39;m0&#39;, &#39;0&#39; ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) BindState_Resp:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> !F_AgentKey( ~ltkA ), !F_AgentKey( ~ltkB ), Fr( ~id ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;Paired( ~id, &#39;R&#39;, ~ltkA, ~ltkB ),<br/>
+&nbsp;&nbsp;Counter( ~id, &#39;0&#39; ),<br/>
+&nbsp;&nbsp;F_InvariantSource_R( ~id, ~ltkA, pk(~ltkB) )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> St_R( ~id, ~ltkA, pk(~ltkB), &#39;m1&#39;, &#39;0&#39; ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) I_m0:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> St_I( ~id, ~ltkI, pkR, &#39;m0&#39;, ic ), Fr( ~ni ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;Begin( &#39;I&#39;, &lt;pk(~ltkI), pkR&gt;, S(ic) ),<br/>
+&nbsp;&nbsp;Counter( &lt;~id, &#39;m0&#39;&gt;, ic ), Gen( ~ni ),<br/>
+&nbsp;&nbsp;Injectivity( ~id, ic, ~ni ), Invariant_I( ~id, ~ltkI, pkR )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;St_I( ~id, ~ltkI, pkR, &lt;&#39;m2&#39;, ~ni&gt;, ic ), Out( ~ni )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) R_m1:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> St_R( ~id, ~ltkR, pkI, &#39;m1&#39;, rc ), Fr( ~nr ), In( ni ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;Begin( &#39;R&#39;, &lt;pkI, pk(~ltkR)&gt;, S(rc) ),<br/>
+&nbsp;&nbsp;Counter( &lt;~id, &#39;m1&#39;&gt;, rc ), Nonces( ~id, ni, ~nr ),<br/>
+&nbsp;&nbsp;Gen( ~nr ), Injectivity( ~id, rc, ~nr ),<br/>
+&nbsp;&nbsp;Invariant_R( ~id, ~ltkR, pkI )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;St_R( ~id, ~ltkR, pkI, &lt;&#39;m2&#39;, ni, ~nr&gt;, S(rc) ),<br/>
+&nbsp;&nbsp;&nbsp;Out( &lt;&lt;&#39;1&#39;, pk(~ltkR), pkI, ni, ~nr, S(rc)&gt;, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sign(&lt;&#39;1&#39;, pk(~ltkR), pkI, ni, ~nr, S(rc)&gt;, ~ltkR)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&gt;<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/* has exactly the trivial AC variant */</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) I_m2:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;St_I( ~id, ~ltkI, pkR, &lt;&#39;m2&#39;, ni&gt;, ic ),<br/>
+&nbsp;&nbsp;&nbsp;In( &lt;&lt;&#39;1&#39;, pkR, pk(~ltkI), ni, nr, src&gt;, sig&gt; )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;Eq( verify(sig, &lt;&#39;1&#39;, pkR, pk(~ltkI), ni, nr, src&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pkR),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;true<br/>
+&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;Eq( S(ic), src ), Counter( ~id, S(ic) ), Nonces( ~id, ni, nr ),<br/>
+&nbsp;&nbsp;Session( &#39;I&#39;, &lt;pk(~ltkI), pkR&gt;, &lt;ni, nr&gt;, src<br/>
+&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;Injectivity( ~id, ni, S(ic) ), Invariant_I( ~id, ~ltkI, pkR )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;St_I( ~id, ~ltkI, pkR, &#39;m0&#39;, S(ic) ),<br/>
+&nbsp;&nbsp;&nbsp;Out( &lt;&lt;&#39;2&#39;, pk(~ltkI), pkR, ni, nr, src&gt;, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sign(&lt;&#39;2&#39;, pk(~ltkI), pkR, ni, nr, src&gt;, ~ltkI)&gt;<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">// loop breaker: [0]</span><br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) I_m2:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;St_I( ~id, ~ltkI, pkR, &lt;&#39;m2&#39;, ni&gt;, ic ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In( &lt;&lt;&#39;1&#39;, pkR, pk(~ltkI), ni, nr, src&gt;, sig&gt; )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Eq( z, true ), Eq( S(ic), src ), Counter( ~id, S(ic) ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Nonces( ~id, ni, nr ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Session( &#39;I&#39;, &lt;pk(~ltkI), pkR&gt;, &lt;ni, nr&gt;, src<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Injectivity( ~id, ni, S(ic) ), Invariant_I( ~id, ~ltkI, pkR )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;St_I( ~id, ~ltkI, pkR, &#39;m0&#39;, S(ic) ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Out( &lt;&lt;&#39;2&#39;, pk(~ltkI), pkR, ni, nr, src&gt;, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sign(&lt;&#39;2&#39;, pk(~ltkI), pkR, ni, nr, src&gt;, ~ltkI)&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_keyword">variants</span> (<span class="hl_keyword">modulo</span> AC)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1. ~ltkI = ~ltkI.21<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ni    = ni.23<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nr    = nr.24<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pkR   = pkR.25<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sig   = sig.26<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src   = src.27<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z     = verify(sig.26,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;&#39;1&#39;, pkR.25, pk(~ltkI.21), ni.23, nr.24, src.27&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pkR.25)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;2. ~ltkI = ~ltkI.71<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ni    = ni.73<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nr    = nr.74<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pkR   = pk(x.139)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sig   = sign(&lt;&#39;1&#39;, pk(x.139), pk(~ltkI.71), ni.73, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nr.74, src.77&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x.139)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src   = src.77<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z     = true<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_comment">// loop breaker: [0]</span><br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) I_detect:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;St_I( ~id, ~ltkI, pkR, &lt;&#39;m2&#39;, ni&gt;, ic ),<br/>
+&nbsp;&nbsp;&nbsp;In( &lt;&lt;&#39;1&#39;, pkR, pk(~ltkI), ni, nr, src&gt;, sig&gt; )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;Eq( verify(sig, &lt;&#39;1&#39;, pkR, pk(~ltkI), ni, nr, src&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pkR),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;true<br/>
+&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;InEq( S(ic), src ), Detect( &lt;pk(~ltkI), pkR&gt; ),<br/>
+&nbsp;&nbsp;Counter( ~id, S(ic) ), Nonces( ~id, ni, nr ),<br/>
+&nbsp;&nbsp;Session( &#39;I&#39;, &lt;pk(~ltkI), pkR&gt;, &lt;ni, nr&gt;, src<br/>
+&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;Injectivity( ~id, ni, S(ic) ), Invariant_I( ~id, ~ltkI, pkR )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;Remediate_Compromise( ~id, ~ltkI, pkR, &#39;m0&#39;, S(ic) ),<br/>
+&nbsp;&nbsp;&nbsp;Out( &lt;&lt;&#39;2&#39;, pk(~ltkI), pkR, ni, nr, src&gt;, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sign(&lt;&#39;2&#39;, pk(~ltkI), pkR, ni, nr, src&gt;, ~ltkI)&gt;<br/>
+&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) I_detect:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;St_I( ~id, ~ltkI, pkR, &lt;&#39;m2&#39;, ni&gt;, ic ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In( &lt;&lt;&#39;1&#39;, pkR, pk(~ltkI), ni, nr, src&gt;, sig&gt; )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Eq( z, true ), InEq( S(ic), src ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Detect( &lt;pk(~ltkI), pkR&gt; ), Counter( ~id, S(ic) ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Nonces( ~id, ni, nr ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Session( &#39;I&#39;, &lt;pk(~ltkI), pkR&gt;, &lt;ni, nr&gt;, src<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Injectivity( ~id, ni, S(ic) ), Invariant_I( ~id, ~ltkI, pkR )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remediate_Compromise( ~id, ~ltkI, pkR, &#39;m0&#39;, S(ic) ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Out( &lt;&lt;&#39;2&#39;, pk(~ltkI), pkR, ni, nr, src&gt;, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sign(&lt;&#39;2&#39;, pk(~ltkI), pkR, ni, nr, src&gt;, ~ltkI)&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_keyword">variants</span> (<span class="hl_keyword">modulo</span> AC)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1. ~ltkI = ~ltkI.21<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ni    = ni.23<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nr    = nr.24<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pkR   = pkR.25<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sig   = sig.26<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src   = src.27<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z     = verify(sig.26,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;&#39;1&#39;, pkR.25, pk(~ltkI.21), ni.23, nr.24, src.27&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pkR.25)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;2. ~ltkI = ~ltkI.71<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ni    = ni.73<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nr    = nr.74<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pkR   = pk(x.139)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sig   = sign(&lt;&#39;1&#39;, pk(x.139), pk(~ltkI.71), ni.73, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nr.74, src.77&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x.139)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src   = src.77<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z     = true<br/>
+&nbsp;&nbsp;*/</span><br/>
+<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> E) R_m2:<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;St_R( ~id, ~ltkR, pkI, &lt;&#39;m2&#39;, ni, nr&gt;, src ),<br/>
+&nbsp;&nbsp;&nbsp;Fr( ~inj ),<br/>
+&nbsp;&nbsp;&nbsp;In( &lt;&lt;&#39;2&#39;, pkI, pk(~ltkR), ni, nr, src&gt;, sig&gt; )<br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;Eq( verify(sig, &lt;&#39;2&#39;, pkI, pk(~ltkR), ni, nr, src&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pkI),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;true<br/>
+&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;Completed( ~id ),<br/>
+&nbsp;&nbsp;Session( &#39;R&#39;, &lt;pkI, pk(~ltkR)&gt;, &lt;ni, nr&gt;, src<br/>
+&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;Counter( ~id, src ), Injectivity( ~id, nr, src ),<br/>
+&nbsp;&nbsp;Invariant_R( ~id, ~ltkR, pkI )<br/>
+&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> St_R( ~id, ~ltkR, pkI, &#39;m1&#39;, src ) <span class="hl_operator">]</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">// loop breaker: [0]</span><br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;<span class="hl_keyword">rule</span> (<span class="hl_keyword">modulo</span> AC) R_m2:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;St_R( ~id, ~ltkR, pkI, &lt;&#39;m2&#39;, ni, nr&gt;, src ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fr( ~inj ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In( &lt;&lt;&#39;2&#39;, pkI, pk(~ltkR), ni, nr, src&gt;, sig&gt; )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">--[</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Eq( z, true ), Completed( ~id ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Session( &#39;R&#39;, &lt;pkI, pk(~ltkR)&gt;, &lt;ni, nr&gt;, src<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Counter( ~id, src ), Injectivity( ~id, nr, src ),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Invariant_R( ~id, ~ltkR, pkI )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">]-&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">[</span> St_R( ~id, ~ltkR, pkI, &#39;m1&#39;, src ) <span class="hl_operator">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_keyword">variants</span> (<span class="hl_keyword">modulo</span> AC)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1. ~ltkR = ~ltkR.19<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ni    = ni.20<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nr    = nr.21<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pkI   = pkI.22<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sig   = sig.23<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src   = src.24<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z     = verify(sig.23,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;&#39;2&#39;, pkI.22, pk(~ltkR.19), ni.20, nr.21, src.24&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pkI.22)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;2. ~ltkR = ~ltkR.50<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ni    = ni.51<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nr    = nr.52<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pkI   = pk(x.96)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sig   = sign(&lt;&#39;2&#39;, pk(x.96), pk(~ltkR.50), ni.51, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nr.52, src.55&gt;,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x.96)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src   = src.55<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z     = true<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_comment">// loop breaker: [0]</span><br/>
+&nbsp;&nbsp;*/</span></p><br/>
+<h2>Restrictions of the Set of Traces</h2><br/>
+<p class="monospace rules"><span class="hl_keyword">restriction</span> Eq_testing:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>x y #i<span class="hl_operator">.</span> <span class="hl_operator">(</span>Eq( x, y ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span>x <span class="hl_operator">=</span> y<span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;<span class="hl_comment">// safety formula</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;expanded formula:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>x y #i<span class="hl_operator">.</span> <span class="hl_operator">(</span>Eq( x, y ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span>x <span class="hl_operator">=</span> y<span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;*/</span><br/>
+<br/>
+<span class="hl_keyword">restriction</span> InEq_testing:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>x y #i<span class="hl_operator">.</span> <span class="hl_operator">(</span>InEq( x, y ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>x <span class="hl_operator">=</span> y<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;<span class="hl_comment">// safety formula</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;expanded formula:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>x y #i<span class="hl_operator">.</span> <span class="hl_operator">(</span>InEq( x, y ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">⇒</span> <span class="hl_operator">(</span><span class="hl_operator">¬</span><span class="hl_operator">(</span>x <span class="hl_operator">=</span> y<span class="hl_operator">)</span><span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;*/</span><br/>
+<br/>
+<span class="hl_keyword">restriction</span> pairings_unique:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>id1 id2 role ki kr #i #j<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>Paired( id1, role, ki, kr ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Paired( id2, role, ki, kr ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>#i <span class="hl_operator">=</span> #j<span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;<span class="hl_comment">// safety formula</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="hl_comment">/*<br/>
+&nbsp;&nbsp;expanded formula:<br/>
+&nbsp;&nbsp;&quot;<span class="hl_operator">∀ </span>id1 id2 role ki kr #i #j<span class="hl_operator">.</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span><span class="hl_operator">(</span>Paired( id1, role, ki, kr ) <span class="hl_operator">@</span> #i<span class="hl_operator">)</span> <span class="hl_operator">∧</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>Paired( id2, role, ki, kr ) <span class="hl_operator">@</span> #j<span class="hl_operator">)</span><span class="hl_operator">)</span> <span class="hl_operator">⇒</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl_operator">(</span>#i <span class="hl_operator">=</span> #j<span class="hl_operator">)</span>&quot;<br/>
+&nbsp;&nbsp;*/</span></p><br/>

@@ -23,6 +23,7 @@ use crate::doc::{
 };
 use crate::rule::fact_doc;
 use crate::term::{self, RIBBON, WIDTH};
+use crate::web::{hl_op_char, hl_op_text};
 
 /// Render one formula at the echo's layout parameters, starting at column 0
 /// (top-level position — no enclosing parentheses).
@@ -32,11 +33,15 @@ pub fn render(f: &Formula) -> String {
 
 /// The formula's `Doc` in BARE position (top level or quantifier body).
 pub(crate) fn doc(f: &Formula) -> Doc {
+    // Every connective / quantifier / atom glyph is `hl_operator`-spanned in
+    // web mode; the parenthesized operands, `¬` and the quantifier `.` too
+    // (BEHAVIOR.md "Web mode"). Identity in batch. `⊤` (True) is spanned by
+    // pattern (UNOBSERVED in the web corpus — flagged).
     match f {
-        Formula::True => text("\u{22a4}"),
-        Formula::False => text("\u{22a5}"),
+        Formula::True => hl_op_text("\u{22a4}"),
+        Formula::False => hl_op_text("\u{22a5}"),
         Formula::Atom(a) => atom_doc(a),
-        Formula::Not(g) => beside_op(text("\u{ac}"), parens(doc(g))),
+        Formula::Not(g) => beside_op(hl_op_text("\u{ac}"), parens(doc(g))),
         Formula::And(l, r) => connective_doc(l, "\u{2227}", r),
         Formula::Or(l, r) => connective_doc(l, "\u{2228}", r),
         Formula::Implies(l, r) => connective_doc(l, "\u{21d2}", r),
@@ -47,7 +52,7 @@ pub(crate) fn doc(f: &Formula) -> Doc {
 }
 
 fn parens(d: Doc) -> Doc {
-    beside_op(beside_op(char('('), d), char(')'))
+    beside_op(beside_op(hl_op_char('('), d), hl_op_char(')'))
 }
 
 /// `(lhs) <glyph> (rhs)` — both operands parenthesized whatever they are
@@ -55,7 +60,7 @@ fn parens(d: Doc) -> Doc {
 /// rhs drops to the group origin (targets NSLPK3/Cronto).
 fn connective_doc(l: &Formula, glyph: &str, r: &Formula) -> Doc {
     sep(vec![
-        beside_space(parens(doc(l)), text(glyph)),
+        beside_space(parens(doc(l)), hl_op_text(glyph)),
         parens(doc(r)),
     ])
 }
@@ -65,9 +70,11 @@ fn connective_doc(l: &Formula, glyph: &str, r: &Formula) -> Doc {
 /// (quantifier origin + 1) (probe:q_l2 bw1/bw2).
 fn quantifier_doc(glyph: &str, vs: &[VarSpec], body: &Formula) -> Doc {
     let binders = fsep(vs.iter().map(|v| text(&term::var_str(v))).collect());
+    // `∀ ` / `∃ ` (glyph + trailing space, one span) and the binder `.` are
+    // `hl_operator`-spanned in web mode; the binders themselves plain.
     let head = beside_op(
-        beside_op(text(&format!("{glyph} ")), binders),
-        char('.'),
+        beside_op(hl_op_text(&format!("{glyph} ")), binders),
+        hl_op_char('.'),
     );
     sep(vec![head, nest(1, &doc(body))])
 }
@@ -80,7 +87,8 @@ fn atom_doc(a: &Atom) -> Doc {
         // oracle-pinned.
         Atom::LessMset(l, r) => relation_doc(l, "<", r),
         Atom::Subterm(l, r) => relation_doc(l, "\u{228f}", r),
-        Atom::Action(f, tp) => hsep(vec![fact_doc(f), char('@'), term::doc(tp)]),
+        Atom::Action(f, tp) => hsep(vec![fact_doc(f), hl_op_char('@'), term::doc(tp)]),
+        // `last(…)` UNOBSERVED in the web corpus — left unspanned, flagged.
         Atom::Last(tp) => beside_op(beside_op(text("last("), term::doc(tp)), char(')')),
         // UNOBSERVABLE placeholder (BEHAVIOR.md): predicates are expanded
         // upstream of the echo; rendered as a bare fact, not oracle-pinned.
@@ -91,8 +99,10 @@ fn atom_doc(a: &Atom) -> Doc {
 /// `lhs <glyph> rhs` for `=` / `<` / `⊏`: glyph attached to the lhs' last
 /// line, rhs drops to the atom origin on overflow (probe:q_l4).
 fn relation_doc(l: &crate::ast::Term, glyph: &str, r: &crate::ast::Term) -> Doc {
+    // The relation glyph (`=` / `<` / `⊏`) is `hl_operator`-spanned in web mode
+    // (`⊏` UNOBSERVED — spanned by pattern); the terms plain.
     sep(vec![
-        beside_space(term::doc(l), text(glyph)),
+        beside_space(term::doc(l), hl_op_text(glyph)),
         term::doc(r),
     ])
 }
