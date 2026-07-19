@@ -155,6 +155,7 @@ Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUD
 | workflows/wf_8b8fd87b-72e/ | uncited-file derivation audit + institutional-ownership research |
 | workflows/wf_5ec90b24-b26/ | tail-author affiliations, triviality classification, rewrite scoping |
 | standalone-agents/agent-a9c7edd67d24711cc.jsonl | contributor-provenance analysis (withheld from public mirror) |
+| standalone-agents/agent-ad7dc5e6adfd3d75c.jsonl | dirty-room diagnosis of the pretty R6 layout blocker (dirty-room/pretty_r7_layout_diagnosis.md): upstream escapes text BEFORE layout so the engine measures escaped width (&lt;/&gt;=4, &amp;=5, quotes 6/5); one pass, one style (100/67); law "one line iff escaped ≤ 67" zero exceptions over 3426 bodies; Part B sealed-safe block relayed into the R7 prompt |
 
 ## Supporting material
 
