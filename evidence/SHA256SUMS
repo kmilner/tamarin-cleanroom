@@ -370,6 +370,7 @@ c448249aa495d861891198e681a4aaac799fe106d6d378fcaa5c41e245eff2cd  ./evidence/lau
 537aa32e1b23d99cbc5169e0e1bb9c9f794868635dd01da9fcc7067091f80778  ./evidence/launch-scripts/pretty-r2-wf_a5ef3578-648.js
 d12a1d75d66e60a3e4b4ef02c2ef379f7f85423f4234dce6043e7265f9628dfe  ./evidence/launch-scripts/pretty-r3-wf_1c3b9e54-e0c.js
 cc794e85f4d42b7b92612463f54ff0a33c08bc66ef76bc5f81d3c4068e024681  ./evidence/launch-scripts/pretty-r4-wf_e752c3f6-6f4.js
+20a855c7aaac83dc4b84c5656df1a3abce4d0c71e627935f8ed6190c4054e78f  ./evidence/launch-scripts/pretty-r5-integration-wf_a25cc7a0-1bd.js
 b6eb122a4263239373b196df96cd3998581b51ac3902d5942b77dd4f06d509bb  ./evidence/launch-scripts/pretty-r5-wf_a320cb04-549.js
 3404b3620624208ca7b5e00410559446a9afb80a26fdacf56ac0fbc316037121  ./evidence/launch-scripts/producers-integration-wf_56cc20c9-d78.js
 992bf4227f967b97d6249adbef493a8b595b0dec81ddcd6fe9d2394e19143d14  ./evidence/launch-scripts/similarity-audit-wf_7197ba11-003.js
@@ -380,7 +381,7 @@ d7a219edc2fc91815117a009c5e4e255b654dfe0f0d6493be52ef5387da4bf49  ./evidence/lau
 0c91ee131665ff8e58d3ae0a6d55531d72d82cda734effb2ebce53041dc04d28  ./evidence/launch-scripts/wf-r6-pretty-r1-wf_cdfa493d-262.js
 2f7011be747ca40a7079a9b942e5ee5bcbf31cbe5ae477b007d408612a463828  ./evidence/launch-scripts/wf-sealed-round5-wf_b6a947c0-a82.js
 0cadaa204b3a313ccfdbbb2ee4a8a0e22543e91e30ccbf642d9171a8a1af37dc  ./evidence/main-session-dirty-room.jsonl
-d66e0a44f129eb7f268f97edf61cf06d9ec8b979ca4e205c8ac5752dfb56b3b3  ./evidence/MANIFEST.md
+a0caaf83b1288a3ad0a7b484408603b3bd80c64d5876879293f2c9c2c4e2cda5  ./evidence/MANIFEST.md
 dd3c7b7bfc898b6b56d30722964710f68cf97067cb0784aa6da2a69a0c0def05  ./evidence/standalone-agents/agent-a9c7edd67d24711cc.jsonl
 311b74b19f571a027a112d582e5809a470aa7e35288868e30ab8287c5ab906dd  ./evidence/standalone-agents/agent-aac7737a5d3b7d6e7.jsonl
 f9680e57bdbe43c763ed1268473e1b50b34ad49d88842b2c2fd238f43202a1dc  ./evidence/standalone-agents/agent-ac1b65c4df499573b.jsonl
@@ -406,6 +407,7 @@ c69537c9cf578b04cfe4b72f44b234ba84c45395ad591ebb183c37feaf1a36bf  ./evidence/tas
 60d989753a5d83844938ce92ae5b1f72e52fba49e2704823e1d7d4e02d79caed  ./evidence/task-results/wf_8ba08a93-8eb-result.json
 c46713a2e79d2edf8f81faefd971c5f449f23440a0cea20af90061bbec5bc454  ./evidence/task-results/wf_910e7687-413-result.json
 75198f2658709adda65991d3dfda1868fe8be64ada6c7d5068746bc92fb8312a  ./evidence/task-results/wf_92d2ed53-daf-result.json
+c35ba2293a03eae1b17aedfd0a1f882db1d37cafc3babb6b015861ae7aa4938c  ./evidence/task-results/wf_a25cc7a0-1bd-result.json
 eea565fc059307ef965c7d38b834f2840cc8f6fe50840f223f67301c9e8635b9  ./evidence/task-results/wf_a320cb04-549-result.json
 0a97d9ebf52c9e23a40f874f107348e7a32f1fb58f5a16e4111bf0f414697476  ./evidence/task-results/wf_a589ffe6-62f-fullgen-census/Cargo.lock
 d0d03372fb378e243d90d35f57708416e936346243a0fe83aff17190b26cc018  ./evidence/task-results/wf_a589ffe6-62f-fullgen-census/Cargo.toml
@@ -644,6 +646,9 @@ ff1a101069e166afdd807d13c16330fd460174648cda4d9456506502a975839e  ./evidence/wor
 a4209995a8632e06b8748a53859113299597fb09fd5617772503ee83003f7079  ./evidence/workflows/wf_92d2ed53-daf/agent-ae03098e391b35ba6.jsonl
 6f3875c7f24932f3b1af709e735c778f22edfc6ed650136b8c6d652fdc6d5a81  ./evidence/workflows/wf_92d2ed53-daf/agent-ae03098e391b35ba6.meta.json
 883f0efe1261ff8dd3ea4b5209021941e55da99e1de1e17dd7ad17b845305ad4  ./evidence/workflows/wf_92d2ed53-daf/journal.jsonl
+6909f32cd60f35a7daa8142d574dfd6d4d6abfc17bddb9645ea2003b5f824f14  ./evidence/workflows/wf_a25cc7a0-1bd/agent-a74d1c0fbacf43dec.jsonl
+6f3875c7f24932f3b1af709e735c778f22edfc6ed650136b8c6d652fdc6d5a81  ./evidence/workflows/wf_a25cc7a0-1bd/agent-a74d1c0fbacf43dec.meta.json
+da0d4d9ec26f530998519090094a4c25719f17aebf0993719fd0e76a0ac0cb82  ./evidence/workflows/wf_a25cc7a0-1bd/journal.jsonl
 550855744ee7d9361a42406e4f3cd0df645f4413acced01493f7f4fcae0b6f36  ./evidence/workflows/wf_a320cb04-549/agent-a2d8cbdd7c2f76260.jsonl
 6f3875c7f24932f3b1af709e735c778f22edfc6ed650136b8c6d652fdc6d5a81  ./evidence/workflows/wf_a320cb04-549/agent-a2d8cbdd7c2f76260.meta.json
 89eba34222c7d54eded7205874975fdc099c816179bf4686eaee5b9ff78598aa  ./evidence/workflows/wf_a320cb04-549/agent-a8f460a120615533d.jsonl
@@ -2519,7 +2524,7 @@ a6f353acf26cb37358117bc9382c6b404ee909d0467441d0af910285b266970b  ./injective/wo
 896c1b0f77c5d250ddc4dfcc32148141cf44ac71b2b2298e52a45f9d4fc6723a  ./injective/workspace/validation/scrape_run.log
 a7756a6bad1d40219fd878e560c59581961dcbe0992f9bdcb9986ef8af6c5c3d  ./injective/workspace/validation/scrape.sh
 1d2eacc0bda35949253b76bc82ae7a11cf7c5a753c8e2d65f181e2a3991a1a8d  ./injective/workspace/validation/trace_files.txt
-c54ae5dff1473b1c69bce4daeb5f3b27af18180f43dbe019365d95e6ff1ebce9  ./INTEGRATION_REPORT.md
+6e468c52f725634f3b3570fcc5c93b026a9a68a796569283dc0e04357ad35411  ./INTEGRATION_REPORT.md
 2472a2838feb49d6096e95314bef57d66198721b810c079934ff3e9b189a2db3  ./macros/AUDIT.md
 f396b73f89931c787b6fd8f099951fd5a7a27ce2b301ce6c4db9da9f4943e993  ./macros/oracle/examples/features/macros/MacroInLemmasAndRestrictions.spthy
 46a130611e88bf4dc7d46e2a93fab998124acc7fde61e037ee33a54a82f51d24  ./macros/oracle/examples/features/macros/MacroTestWithOracleRanking.spthy
