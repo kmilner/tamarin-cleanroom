@@ -18,12 +18,10 @@
 //!   interior spaces (probe:q_at1).
 
 use crate::ast::{Atom, Formula, VarSpec};
-use crate::doc::{
-    beside_op, beside_space, char, fsep, hsep, nest, render_with, sep, text, Doc,
-};
+use crate::doc::{beside_op, beside_space, fsep, hsep, nest, render_with, sep, Doc};
 use crate::rule::fact_doc;
 use crate::term::{self, RIBBON, WIDTH};
-use crate::web::{hl_op_char, hl_op_text};
+use crate::web::{hl_op_char, hl_op_text, w_char as char, w_text as text};
 
 /// Render one formula at the echo's layout parameters, starting at column 0
 /// (top-level position — no enclosing parentheses).

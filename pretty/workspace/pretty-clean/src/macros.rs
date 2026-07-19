@@ -35,12 +35,10 @@
 //! into continuations), so the header is spliced textually here.
 
 use crate::ast::{Fact, Macro, Predicate, Term};
-use crate::doc::{
-    beside_op, beside_space, char, fsep, hsep, punctuate, render_with, text,
-    vcat, Doc,
-};
+use crate::doc::{beside_op, beside_space, fsep, hsep, punctuate, render_with, vcat, Doc};
 use crate::rule::render_fact;
 use crate::term::{self, RIBBON, WIDTH};
+use crate::web::{w_char as char, w_text as text};
 
 pub fn render_macros(macros: &[Macro]) -> String {
     render_with(WIDTH, RIBBON, &macros_doc(macros))

@@ -25,11 +25,9 @@
 //!     overlong equation drops `= rhs` to (equation indent − 2).
 
 use crate::ast::{Equation, FunctionDecl, Signature, SortHint, Term, VarSpec};
-use crate::doc::{
-    beside_op, char, fsep, nest, punctuate, render_with, sep, text, vcat, Doc,
-};
+use crate::doc::{beside_op, fsep, nest, punctuate, render_with, sep, vcat, Doc};
 use crate::term::{self, RIBBON, WIDTH};
-use crate::web::{hl_kw, hl_op_char};
+use crate::web::{hl_kw, hl_op_char, w_char as char, w_text as text};
 use std::cmp::Ordering;
 
 /// Header comment above the declarations (byte-exact from every capture).

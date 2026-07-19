@@ -29,11 +29,11 @@
 
 use crate::ast::{AcVariants, Fact, FactAnnotation, Rule, RuleAttr, Term};
 use crate::doc::{
-    above_op, above_plus, beside_op, beside_space, char, fsep, nest, punctuate,
-    render_with, sep, text, vcat, Doc,
+    above_op, above_plus, beside_op, beside_space, fsep, nest, punctuate,
+    render_with, sep, vcat, Doc,
 };
 use crate::term::{self, RIBBON, WIDTH};
-use crate::web::{hl_comment, hl_kw, hl_op_text, hl_wrap};
+use crate::web::{hl_comment, hl_kw, hl_op_text, hl_wrap, w_char as char, w_text as text};
 
 /// One fact: `Name( arg, … )`, persistent prefixed with `!`, annotations
 /// attached after the closing paren.

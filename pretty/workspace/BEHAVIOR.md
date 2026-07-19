@@ -741,61 +741,105 @@ colon of a declaration keyword, but NOT any trailing space):
 ### Implementation (pretty-clean, `web.rs` + span-site edits)
 
 One model, two render targets: the SAME block-doc builders
-(signature/rule/formula/lemma) emit glyphs through `hl_*` wrappers that, in web
-mode, wrap the glyph in a zero-width span-marker pair (mirroring the sanctioned
-`Annotated.HughesPJ` `AnnotStart`/`AnnotEnd`: `sized_text(0, …)` sentinels that
-flow through best/fits/lay at zero width, so LAYOUT is identical to plain), and
-in batch mode are the identity (byte-identical to R1–R5). `render_html`
-= `render_with(100, 67, doc)` then a post-pass that entity-escapes and expands
-the sentinels into `<span class="hl_…">`/`</span>`. Multi-line comment spans fall
-out naturally (open marker before `/*`, close after `*/`, `\n`s between). No
-change to the doc engine.
+(term/signature/rule/formula/lemma) emit ALL text through the web-aware
+`w_text`/`w_char` constructors, and their styled glyphs additionally through the
+`hl_*` wrappers. In web mode `hl_*` wraps the glyph in a zero-width span-marker
+pair (mirroring the sanctioned `Annotated.HughesPJ` `AnnotStart`/`AnnotEnd`:
+`sized_text(0, …)` sentinels that flow through best/fits/lay at zero width, so
+the SPAN markers never affect layout), and `w_text`/`w_char` size each token to
+its ESCAPED width (see the R7 law below). In batch mode `w_text`/`w_char` ARE
+`doc::text`/`doc::char` and `hl_*` is the identity (byte-identical to R1–R5).
+`render_html` = `render_with(100, 67, doc)` then a post-pass that entity-escapes
+the raw text and expands the sentinels into `<span class="hl_…">`/`</span>`.
+Multi-line comment spans fall out naturally (open marker before `/*`, close after
+`*/`, `\n`s between). No change to the doc engine.
 
-### Web mode (R6) — LAYOUT BLOCKER (line wrapping of sep-based constructs)
+### Web mode (R7) — LAYOUT: measure ESCAPED width (RESOLVED)
 
-STATUS: span vocabulary, entity escaping, section structure/separators and token
-CONTENT are reproduced and validated corpus-wide; the SIGNATURE bodies render
-byte-identical (all 82 message-pane signatures — tests/round6_web.rs
-`signature_pane_sweep`, `signature_mutation_check`). The residual is line-WRAPPING
-of the `sep`-based constructs (rule bodies, restriction quantifiers) and the
-pair/AC delimiter drops.
+The R6 blocker (below) is RESOLVED. THE LAW: in web mode the layout engine
+charges each character its ENTITY-ESCAPED width, not its glyph width —
+`<`/`>` = 4 (`&lt;`/`&gt;`), `&` = 5, `"` = 6, `'` = 5, every other visible char
+= 1; leading indent is still free of the ribbon; span markers still zero-width.
+Equivalently: escape first, THEN lay out. The natural seam given the R6 design
+(post-render escape expansion) is to size each token to its escaped length while
+keeping the raw glyph as content — `web::w_text`/`w_char` do this via
+`doc::sized_text` (size-vs-content divergence), consulting an overridable
+per-char charge whose production value is `escaped_char_width`. Params stay
+(100, 67); batch is untouched (no escaping there → escaped width = glyph width →
+byte-frozen, R1–R5 all green).
 
-PROVEN IMPOSSIBILITY at any single (width, ribbon) with the faithful HughesPJ
-engine (the sanctioned pretty-1.1.3.6, which the batch R1–R5 output validates):
-* A nest-3 rule-BODY one-liner of content 66 (`c_mult`:
-  `[ !KU( x ), !KU( x.1 ) ] --[ !KU( (x*x.1) ) ]-> [ !KU( (x*x.1) ) ]`) WRAPS to
-  three rows in the captures, while a nest-3 bracket-group PREMISE of content 66
-  (`d_exp`: `[ !KD( x.5^(x.4*x.6*inv((x.2*x.7))) ), !KU( (x.2*x.3*inv(x.4)) ) ]`)
-  KEEPS its `]` — both in the SAME theory (Scott), same nest. This engine (and
-  the sanctioned `sep1`/`sepNB`/`fits`, budget `min(w-nest, r) - sl`) measures
-  the two IDENTICALLY (both content 66), so they wrap together at every (w,r)
-  (verified: both flip at width 69 / ribbon 67). Tamarin distinguishes them.
-* Independently: the signature `fsep` continuations reach absolute 78 (= nest 11
-  + ribbon 67), which needs ribbon 67 AND width ≥ 78; the nest-3 rule bodies wrap
-  at content 66, which needs an effective width ~67. No single width satisfies
-  both.
-Diagnostic sweep (tests/round6_web.rs `sweep_count`, IGNORED) at (100, 67):
-byte-identical 206/367 sections; token-CONTENT (spans stripped, unescaped,
-whitespace-collapsed) 331/367; SPAN-placement (class + normalized inner) 348/367.
-Every content/span miss inspected is layout-induced — a dropped pair/app
-delimiter (`…>) )` vs `…>)`) collapsing to a stray space, or a comment/inner
-span whose wrapped text differs; NOT a token or escaping bug. (Exception: 1 sig
-content miss is a harness artifact — `parse_signature` cannot recover
-`dest-pairing` from the shown functions, so it re-adds a constructor `fst/1`; the
-real adapter carries the builtin set, so the byte sweep uses a `dest-pairing`
-heuristic and passes 82/82.)
+WHY IT WORKS (the c_mult-vs-d_exp "impossibility" was measuring the wrong width):
+* B2 (rule-body / bracket-group ceiling 67). A body or bracket group stays one
+  line iff its ESCAPED width from the indentation column ≤ 67. Corpus census
+  (scratchpad/r7/census_b2.py over all 82 message panes; QUERIES.log R7):
+  one-line bodies MAX escaped width = 67 (glyph-max only 64!), cleanly-formed
+  wrapped bodies MIN reconstructed escaped width = 69, ZERO violations either
+  way. `c_mult` (`[ !KU( x ), !KU( x.1 ) ] --[ !KU( (x*x.1) ) ]-> [ !KU( (x*x.1) ) ]`)
+  is 66 GLYPHS but escaped 69 (the `>` in `]->`) → WRAPS; `d_exp`'s premise group
+  (no escapable chars, escaped 66) → keeps `]`. A glyph engine measures both 66
+  and cannot split them; the escaped charge forces it. (tests/round6_web.rs
+  `escaped_width_discriminates_c_mult_from_d_exp`.)
+* B3 (pair/AC/app delimiter drops). Same escaped charge inside the pair/AC/app
+  fills makes a trailing `>`/`)` reach the ribbon sooner and drop to its own line.
+  Witnesses (BP_IBS_4 rules pane): `Out( <'AUTH', pmult(~IBMasterPrivateKey, 'P')`
+  escaped end col 67 (glyph end only 48) and `Out( <'SIGN', GetIBMasterPublicKey(~IBMasterPrivateKey)`
+  escaped end col 69 (glyph end 58) — in both the pair `>` drops; a glyph engine
+  would keep it attached.
 
-WORKING HYPOTHESES for a successor / the dirty room (pick one to confirm):
-* Tamarin's web does NOT single-render each pane with `renderStyle defaultStyle`;
-  likely a per-element render (signature vs rules at different effective widths),
-  OR the pane is one stacked document where the HughesPJ ribbon mechanism
-  (`get (w - sl)` after each `NilAbove`) narrows deeper content cumulatively, OR
-  a bespoke rule/formula printer wraps bodies on a tighter threshold than `sep`.
-* The 1-column c_mult-vs-d_exp discrepancy hints the rule-BODY `sep`
-  (which carries the arrow's `nest (-1)` and a nested action bracket-group) is
-  measured 1 wider than a plain bracket-group in tamarin — worth an isolated
-  dirty-room probe of `prettyProtoRuleACInfo`/the web `render` call and its width.
-Pinned params in `web.rs` are (100, 67) — correct for the signature fills and
-the canonical default style; the rule/restriction wrap thresholds await this
-resolution. The span-injection / escaping / structure code is complete and
-correct and does not depend on the width fix.
+ONE ADDITIONAL FIX surfaced (not escaped-width, a by-analogy correction now
+pinned): exp `a^b^c` is a BESIDE composition (`hcat`), NOT a fill (`fcat`). No
+line ends at `^` in ANY batch OR web capture, so exp never breaks at the
+operator; when an operand is a wide AC term its OWN fill wraps internally while
+staying beside the `^` (web witness DHKEA_NAXOS `x.208^(x.209*h1(<…>)*` →
+`inv((…)))`). Batch-neutral (batch exps all fit one line, so `hcat` == `fcat`
+there; R1–R5 stay byte-frozen). BEHAVIOR.md's earlier "exp uses fcat by
+structural analogy — flagged" is now settled as `hcat`.
+
+ACCEPTANCE (tests/round6_web.rs, all PASSING, none ignored except the live
+replay which needs a running oracle):
+* `sweep_count` — SECTION byte parity 367/367 (sig 82, constr 164, msr 82,
+  restr 39); content 367/367; span 367/367. (Was 206/367 at R6.)
+* `full_message_pane_sweep` — 82/82 message panes byte-identical as WHOLE
+  responses, ALL sections (Signature + Construction + Deconstruction) from model.
+* `full_rules_pane_sweep` — 82/82 rules panes byte-identical as whole responses
+  (Multiset Rewriting Rules + Restrictions from model; `Fact Symbols …` line is
+  opaque solver input carried verbatim).
+* `signature_pane_sweep` / `signature_mutation_check` — unchanged, still green.
+* `escaped_charging_is_load_bearing` (web.rs unit) — the MUTATION check:
+  doctoring the per-char charge to glyph width turns `c_mult`'s 4-line wrapped
+  body into a 2-line one-liner, diverging from the capture → the byte gate
+  genuinely rides on the escaped charge.
+* `live_replay` (ignored; R6_LIVE_RAW) — replayed against TWO NEVER-CAPTURED
+  theories probed live from the HS oracle (classic/NSLPK3, classic/TLS_Handshake;
+  ports 3100/3101, stopped after): all 4 panes (message+rules each) byte-identical
+  through the same reconstruct→render→reassemble path. So the law generalises off
+  the corpus it was derived from.
+
+RESIDUAL FAMILIES the escaped-width law does NOT close: NONE — every captured
+message/rules section reaches byte parity.
+
+UNOBSERVABLE corners (unchanged by R7; escaped-width gives them the right WIDTH
+since none carry escapable-but-mismeasured chars, but their span/rendering is
+still capture-unbacked): the web operator glyphs `⊤ ⊏ ⇔ last( ⊐` (all 1-column,
+no corpus witness); `macros:` / `predicate:` web spans (0 in the 82-manifest
+corpus — need a live macros theory); formula-only web render (`render_formula`,
+lemma statements) has no formula-only web capture (its operator spans + escaped
+widths are exercised transitively via the 39 restriction panes). The
+`parse_signature` `dest-pairing` re-derivation remains a TEST-HARNESS artifact
+(the real adapter carries the builtin set), not a renderer issue.
+
+### Web mode (R6) — LAYOUT BLOCKER (SUPERSEDED by the R7 escaped-width law above)
+
+Kept for provenance. R6 reproduced the span vocabulary, entity escaping, section
+structure/separators and token CONTENT corpus-wide and rendered the SIGNATURE
+bodies byte-identical, but could not reproduce the line-WRAPPING of the
+`sep`-based constructs (rule bodies, restriction quantifiers) or the pair/AC
+delimiter drops. It (wrongly) proved this "impossible at any single (width,
+ribbon)" because it measured GLYPH width: a nest-3 rule body of content 66
+(`c_mult`) and a nest-3 bracket group of content 66 (`d_exp`) measure identically
+by glyph, so they wrap together at every (w,r) — yet the captures wrap the former
+and keep the latter. The missing variable was the ESCAPED width (`]->`'s `>`
+charges 4, so `c_mult` is escaped 69 while `d_exp` is escaped 66); once each
+token is charged its escaped width, the SAME faithful HughesPJ engine at the same
+(100, 67) splits them exactly as the captures do. The R6 diagnostic sweep stood
+at 206/367 byte / 331 content / 348 span; R7 is 367/367 on all three.

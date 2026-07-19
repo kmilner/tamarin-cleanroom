@@ -1311,3 +1311,268 @@ Non-blocking notes (advisory, do NOT gate this round):
    restriction-validated operator spans. Deferred until a witness exists.
 
 VERDICT: pass
+
+---
+
+## Round 7 — web-mode ESCAPED-width layout (R6 wrap blocker resolved)
+
+R7 closes the R6 web-layout blocker: it makes the web-mode layout engine charge
+each visible token its ENTITY-ESCAPED width (`<`/`>` = 4, `&` = 5, `"` = 6,
+`'` = 5, else 1) instead of its glyph width. Delta audited: working tree vs
+committed HEAD `38b958e` (rounds 1–6), restricted to `pretty/`. Source touch is
+seven files: `src/web.rs` (the escaped-width sizing machinery — `w_text`/
+`w_char`, `escaped_char_width`, a doctorable per-char `CHARGE`, and web-unit
+tests); `src/{formula,lemma,macros,rule,signature}.rs` (a mechanical import swap
+`use crate::web::{w_char as char, w_text as text}` so every content token flows
+through the web-aware constructors — behaviour-identical in batch); `src/term.rs`
+(same import swap plus the exp `fcat`→`hcat` correction); and `tests/
+round6_web.rs` (the R6 diagnostic promoted to a byte-parity acceptance plus new
+whole-pane + live-replay gates). The BSD doc engine (`src/doc.rs`) is **UNTOUCHED**
+this round — verified by `git diff --stat`; `sized_text`/`hcat`/`fcat`/`text`/
+`char` all pre-exist as BSD `HughesPJ` exports (R1 §2 provenance stands, no new
+engine primitive). Whole suite green here: lib 8 (incl. the two web units),
+R1 47, R2 9, web 6 (+1 ignored live replay) — and R1/R2 confirm batch is
+byte-frozen under the alias swap.
+
+**This round carried a RELAYED dirty-room behavioral block** (Part B of
+`evidence/dirty-room/pretty_r7_layout_diagnosis.md`). Two extra duties beyond the
+usual AFC audit: (1) verify Part B as relayed is genuinely behavioral — no
+upstream identifier, structure, or expression leaked through the channel, and the
+sealed implementation is the sealed side's OWN seam over its OWN Doc engine, not a
+reconstruction of the upstream escape-inside-the-`Document`-instance architecture;
+(2) the usual similarity audit of the delta against the upstream Haskell
+(`lib/utils/src/Text/PrettyPrint/Html.hs` — escaping-before-layout; and the rule
+printers in `lib/theory/src/Theory/Model/Rule.hs`).
+
+Sealed side (upstream Haskell, `tamarin-rs/tamarin-prover/`): the escape/layout
+site — `Html.hs` `Document (HtmlDoc d)` instance (102–105:
+`char = HtmlDoc . text . escapeHtmlEntities . return`, `text = HtmlDoc . text .
+escapeHtmlEntities`, `zeroWidthText = HtmlDoc . zeroWidthText .
+escapeHtmlEntities`), `escapeHtmlEntities` (140–149), `withTag`/
+`unescapedZeroWidthText` (57–64, 125–127), `renderHtmlDoc`/`postprocessHtmlDoc`
+(151–162), `hlClass` (129–135); the rule-body printer — `Rule.hs`
+`prettyRuleRestrGen` (1253–1268: `sep [nest 1 (ppFactsList prems), … , nest 1
+(ppFactsList concls)]`, `ppFactsList l = fsep [operator_ "[", ppFacts' l,
+operator_ "]"]`); the exp printer — `Term.hs` `prettyTerm` (278:
+`FApp (NoEq s) [t1,t2] | s == expSym -> ppTerm t1 <> text "^" <> ppTerm t2`).
+
+### 1. Part B channel integrity — the relayed block is behavioral (duty 1)
+
+Compared Part B (relayed into the sealed workspace) against Part A (open-side full
+upstream detail) clause by clause. Part B carries only observable rendering laws,
+numeric column costs, and capture-checkable predictions; it does not carry the
+upstream mechanism.
+
+* **No upstream identifiers.** Part A names `src/Web/Theory.hs`, `Html.hs`,
+  `Class.hs`, `messageSnippet`/`rulesSnippet`/`ppSection`, `HtmlDoc`, the
+  `Document` instance, `escapeHtmlEntities`, `withTag`,
+  `unescapedZeroWidthText`, `renderHtmlDoc`, `postprocessHtmlDoc`,
+  `prettyRuleAC`/`prettyNamedRule`/`prettyRuleRestrGen`, `ppFactsList`,
+  `operator_`, `Style{lineLength=100, ribbonsPerLine=1.5, mode=PageMode}`,
+  `renderStyle`. Part B contains **none** of these — no file path, no function
+  name, no type name. Its only pretty-printing vocabulary is generic and
+  already-owned by the sealed side's BSD engine ("page width", "ribbon",
+  "layout pass", "indentation column").
+* **No upstream expression.** Part A quotes the escape-instance code
+  (`char = HtmlDoc . text . escapeHtmlEntities . return`), the rule-body `sep`/
+  `fsep`/`ppFactsList` structure, and the `Style` record. Part B quotes **no**
+  code — it is prose, a five-row char→column table (observable-escape derived),
+  and glyph-string predictions. Every glyph string it cites
+  (`[ !KU( x ), !KU( x.1 ) ] --[ … ]-> …`, `Out( <'AUTH', …`) is served output
+  visible in the captures — merger, not expression.
+* **The escaped-width column costs and wrap positions are capture-forced.** The
+  entity table (`<`→`&lt;` = 4 chars, `&`→`&amp;` = 5, `"`→`&quot;` = 6,
+  `'`→`&#39;` = 5) was already established as observable in R6's served HTML; that
+  each such token is *measured* at that width is directly observable from the
+  wrap columns. The ceiling 67 and the `c_mult` (escaped 69 → wraps) vs `d_exp`
+  (escaped 66 → stays) split are observable in the panes. These are the
+  capture-forced merger content the sealed side is *required* to reproduce;
+  relaying them as numbers/predictions is not a leak.
+* **The one borderline structural relay is not operationalized.** Part B B0 says
+  "one layout pass over the whole pane document … the ribbon does not narrow as
+  the document gets deeper — each line is judged independently from its own
+  indentation column." The first clause echoes upstream's one-`HtmlDoc`-per-pane
+  shape, but it is immediately reduced to its *observable* consequence
+  (per-line ribbon reset, no cumulative narrowing, no per-family
+  re-parameterisation) — a property that is also true of the sealed side's OWN
+  BSD engine and is capture-checkable (a deep rule wraps at the same escaped
+  column as a shallow one). Decisively, **the sealed side did not adopt it**:
+  `render_bare_rules_body`/`render_msr_body`/`render_restrictions_body` STILL
+  render each rule/section independently at column 0 and `join` with newlines
+  (the R5/R6 col-0 architecture, byte-equivalent precisely because the ribbon
+  resets per line). The "whole pane" hint was neither needed nor reconstructed.
+
+### 2. The escaping-meets-sizing MECHANISM is the sealed side's own (duty 1, core)
+
+The mandated comparison: the sealed implementation must be its own seam over its
+own Doc engine, not a reconstruction of upstream's escape-inside-`HtmlDoc`
+architecture. It is genuinely independent — the two decompositions are opposite.
+
+* **Upstream (`Html.hs` 102–105).** The `HtmlDoc d` newtype's `Document` instance
+  overrides `char`/`text`/`zeroWidthText` to escape at CONSTRUCTION, per
+  primitive: the *already-escaped* string is fed to the inner `Doc`'s `text`, so
+  the inner engine's measured width IS the escaped length AND the rendered content
+  IS escaped — measurement and output are the SAME escaped string, produced by one
+  operation. Dispatch is type-directed: instantiate the polymorphic printer at
+  `HtmlDoc Doc` (web) vs `Doc` (batch).
+* **Sealed (`web.rs` `w_text`/`w_char`).** There is no newtype and no
+  type-directed instance. A thread-local `HL` flag switches `w_text`/`w_char`
+  between `doc::text`/`doc::char` (batch) and `sized_text(escaped_width(s), s)`
+  (web). In web mode the token's SIZE is a NUMERIC escaped width from a lookup
+  table (`escaped_char_width`), while its CONTENT stays the RAW glyph; escaping is
+  DEFERRED to a separate post-render pass (`escape_and_expand`) over the flat
+  string. Size and content are deliberately DECOUPLED — the size-vs-content
+  divergence that BSD `sized_text` provides and that upstream never uses for a
+  content token (upstream's escaped content has size == content length; upstream
+  reserves zero-width-text for span markers only).
+* **Opposite decompositions, same observable.** Upstream unifies
+  measurement+content into one construction-time escaped string; the sealed side
+  splits them (numeric charge now from a table, raw content now, escape later).
+  The place "where escaping meets sizing" in the clean crate is the `w_text`/
+  `w_char` → `sized_text` seam — the sealed side's OWN primitive use — not a port
+  of the `HtmlDoc` `Document` instance. A reconstruction would have escaped the
+  string before measuring (Part B even offers "escape first, then lay out" as an
+  equivalence); the sealed side did the reverse and kept its R6 post-pass escape.
+  That choice is affirmative non-reconstruction evidence.
+* **Orthogonal to the (already-divergent) body structure.** The escaped width is
+  applied at TOKEN sizing, leaving the R2 rule-body decomposition untouched. The
+  sealed body is `sep [sep [open, fsep facts], close]` (a nested all-or-nothing
+  sep, R2 §3), NOT upstream's `sep [nest 1 (ppFactsList …)]` with
+  `ppFactsList = fsep [operator_ "[", …, operator_ "]"]`. Upstream's escaped width
+  arises INSIDE `ppFactsList`'s `fsep` over escaped `operator_` strings; the
+  sealed's arises from `w_char('<')` / `hl_op_text("]->")` sizing at a different
+  site over a different structure. The mechanism cannot have been transcribed —
+  there is no shared decomposition to transcribe into.
+
+### 3. Delta similarity audit vs upstream (duty 2) — AFC
+
+* **Import-alias dispatch (`char`/`text` → `w_char`/`w_text`).** The five
+  content modules redirect their `char`/`text` imports to the web-aware
+  constructors, which fall through to `doc::char`/`doc::text` in batch (byte-
+  frozen — R1/R2 re-run green here) and size to escaped width in web. Upstream
+  gets web-vs-batch "for free" by instantiating one polymorphic printer at two
+  types; the sealed side has no typeclass, so it aliases through a runtime flag.
+  Its OWN dispatch mechanism, structurally unlike type-directed instance
+  resolution. No copy.
+* **exp `fcat`→`hcat` (term.rs) — byte-forced merger.** The chain is now joined
+  BESIDE (never breaks at `^`) instead of by a fill. This converges to upstream's
+  `ppTerm t1 <> text "^" <> ppTerm t2` (Term.hs 278, `<>` = non-breaking beside)
+  in behaviour, but it is byte-forced by an OBSERVABLE census — `scratchpad/r7/
+  census_b2.py` / QUERIES.log R7 record ZERO lines ending in `^` across all batch
+  OR web captures — and it settles R3's honestly-flagged "exp uses fcat by
+  structural analogy" via that census, not by reading `<>`. `hcat` is a
+  pre-existing BSD `HughesPJ` export; batch-neutral (batch exps fit one line, so
+  `hcat` == `fcat` there; R1–R5 stay byte-frozen). Same discipline as the R2/R3
+  `ppTerms` corrections — merger reached by falsifying/pinning a flagged guess.
+* **Escaped-width machinery (web.rs) — own construction.** `escaped_char_width`,
+  the doctorable `CHARGE` thread-local, `char_charge`/`escaped_width`,
+  `w_text`/`w_char` are all the sealed side's own. The five charge values are the
+  lengths of the observable entities (the comment `// &lt; &gt;` names the served
+  forms, not upstream source). No upstream identifier or expression appears.
+
+### 4. Byte-forced surface, filtered (merger; provenance logged)
+
+Observable in the served panes, hence compatibility content the sealed side must
+reproduce: the escaped-width column costs (4/4/5/6/5/1), the one-line ceiling 67
+(one-line max escaped = 67, wrapped min = 69; census over 82 message panes,
+`census_b2.py`), the `c_mult`/`d_exp` content-66 split, and the pair/AC/app
+`>`/`)` delimiter drop columns (BP_IBS_4 `Out( <'AUTH', …` escaped end col 67).
+All read off the r6 captures (the census script consults ONLY
+`scratchpad/r6/raw`, NO HS source — verified); the QUERIES.log R7 block records
+each prediction re-verified against captures before implementing — the fingerprint
+of black-box confirmation of a relayed law, not a source read.
+
+### 5. Identifier / constant / comment / test scan
+
+* Leakage grep of the R7-touched `src/` for the upstream surface
+  (`escapeHtmlEntities`, `HtmlDoc`, `getHtmlDoc`, `withTag`,
+  `unescapedZeroWidthText`, `postprocessHtmlDoc`, `renderHtmlDoc`, `hlClass`,
+  `HighlightDocument`, `prettyRuleRestrGen`, `ppFactsList`, `operator_`,
+  `opParens`, `blaze`, `renderStyle`, `defaultStyle`, `prettyProtoRuleACInfo`)
+  and the pseudonymous author handles: the ONLY matches are the BSD-attribution
+  references to the sanctioned `HughesPJ` default `Style` / `lineLength` /
+  `ribbonsPerLine` (in doc.rs's port header and web.rs's 100/67 justification —
+  accepted at R6, and the (100,67) is independently corpus-fit). No tamarin GPL
+  identifier is present.
+* **Non-observable constants.** None. The 4/4/5/6/5 charges are derived from the
+  observable entity table; 100/67 are the R6-pinned params (corpus-fit and the
+  BSD public default); the ceiling 67 / boundary 69 are census outputs. The
+  `\u{1}/\u{2}/\u{3}` sentinels are the R6 sealed-side invention (unchanged).
+* **Comment lineage.** No reproduced ghost comments from `Html.hs`/`Highlight.hs`
+  — no "Copied from blaze-html", no `hlClass` case narration, no
+  `escapeHtmlEntities` case-list narration, no source-file/line citations. R7
+  comments reference the sanctioned BSD library (`Annotated.HughesPJ`
+  `AnnotStart`/`AnnotEnd`, `sized_text`), the observable entities, and the round's
+  own census/captures. (Minor: `escaped_char_width`'s match-arm order
+  `< > & " '` coincides with upstream `escapeHtmlEntities`'s order, but the arms
+  are mutually exclusive char matches whose order is behaviourally inert, the
+  table is a fully-observable 5-char→width map, and the actual escaper
+  `escape_and_expand` lists them in a DIFFERENT order `& < > " '` — no shared
+  expression. Non-actionable.)
+* **Tests.** `sweep_count` promoted from an ignored diagnostic to a byte-parity
+  acceptance (asserts 0 misses / 367 sections); `full_message_pane_sweep` (82/82)
+  and `full_rules_pane_sweep` (82/82) reconstruct every pane FROM MODEL and
+  byte-compare whole responses through the R6 layout-INSENSITIVE parser (so a pass
+  proves the layout/wraps were RE-DERIVED, not copied); `escaped_charging_is_
+  load_bearing` is a MUTATION check (doctoring the charge to glyph width turns
+  `c_mult`'s 4-line body into a 2-line one-liner, diverging from the capture —
+  proving the gate rides on the escaped charge); `live_replay` (ignored; backed by
+  four real `scratchpad/r7/live/` envelopes probed from NSLPK3 / TLS_Handshake,
+  never-captured theories) exercises the law off its derivation corpus. Fixtures
+  are captured served bytes, not transcribed upstream logic. Re-run here: web 6/6
+  (+ ignored live), lib 8/8 (incl. both web units), R1 47/47, R2 9/9.
+
+### Findings
+
+No violations. On duty 1, the relayed Part B is genuinely behavioral: it carries
+no upstream file path, identifier, type, or code expression — only observable
+column costs, the ceiling/boundary numbers, and capture-checkable glyph-string
+predictions (all served content = merger); its single borderline structural
+phrase ("one layout pass over the whole pane") is reduced to an observable
+per-line-ribbon consequence and, tellingly, was NOT operationalized — the sealed
+side kept its col-0 per-item rendering. The escaping-meets-sizing MECHANISM is the
+sealed side's OWN seam: a runtime-flag `w_text`/`w_char` that sizes a token to a
+NUMERIC escaped width (a lookup table) over BSD `sized_text`'s size-vs-content
+divergence while keeping RAW content and deferring escaping to a post-pass — the
+opposite decomposition to upstream's construction-time per-primitive escaping in a
+type-directed `HtmlDoc` `Document` instance, and applied at a token site
+orthogonal to the already-divergent R2 rule-body structure. On duty 2, the delta
+is clean: the import-alias dispatch is the clean crate's own web/batch switch
+(not typeclass instantiation), the exp `fcat`→`hcat` correction is byte-forced
+merger pinned to a "zero `^`-terminated lines" census (settling R3's flagged
+guess, batch-neutral, on a pre-existing BSD primitive), and the escaped-width
+machinery introduces zero upstream identifiers/constants/comments. The parts that
+equal upstream — that layout measures escaped width, the escape table, the wrap
+columns — are capture-forced. Identifier, constant, comment, and test scans over
+the delta are clean; web byte parity is 367/367 and the batch suite is byte-frozen.
+
+Non-blocking notes (advisory, do NOT gate this round):
+1. *Batch byte-freeze rests on the alias fall-through, not a proof.* `w_text`/
+   `w_char` equal `doc::text`/`doc::char` exactly when `hl_on()` is false; the
+   R1–R5 byte parity re-verifies this behaviourally (R1/R2 re-run green here).
+   Any future change that makes `w_text`/`w_char` diverge from `doc::*` in batch
+   would silently move R1–R5 bytes — the batch parity corpus is the required
+   backstop.
+2. *`escaped_char_width` is the single source of the layout charge AND is asserted
+   equal to the escaper.* `escaped_char_width_matches_the_escaper` pins each
+   charge to `escape_and_expand`'s entity length; if the escape table ever gains
+   an entity (e.g. `/` → `&#47;`), both the escaper and the charge must move
+   together or the layout will mismeasure. Correct and tested today.
+3. *R6 UNOBSERVABLE corners carried forward, width now correct.* The web operator
+   glyphs `⊤ ⊏ ⇔ last( ⊐`, `macros:`/`predicate:` web spans, and the formula-only
+   web render (`render_formula`) remain capture-unbacked for their SPAN/rendering,
+   though escaped-width gives them the right WIDTH (none carry mismeasured escapable
+   chars). Consistent with prior rounds' UNOBSERVABLE register; a live macros
+   theory / formula-only capture would pin them.
+4. *`live_replay` is ignored (needs a running oracle).* Its four probed envelopes
+   are committed under `scratchpad/r7/live/`; the generalization claim rests on a
+   test that CI does not run by default. The four live panes were byte-identical
+   when probed (QUERIES.log R7), but this gate is opt-in via `R6_LIVE_RAW`.
+5. *SUPERSEDED R6 blocker text retained in BEHAVIOR.md for provenance* correctly
+   frames the old "impossibility" as a glyph-width mismeasurement; it introduces
+   no new upstream identifiers and its pre-existing dirty-room hypothesis naming
+   (`renderStyle defaultStyle`/`prettyProtoRuleACInfo` as things a SUCCESSOR must
+   read) was accepted at R6 and is now moot — the resolution came from the relayed
+   behavioral law + the sealed census, not from reading those symbols.
+
+VERDICT: pass

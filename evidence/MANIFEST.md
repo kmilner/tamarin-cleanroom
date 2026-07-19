@@ -36,7 +36,9 @@ graphdot round-13 implementer (wf_92d2ed53-daf) audited — 69 tool calls, 0/0;
 pretty round-5 implementer (wf_a320cb04-549) audited — 94 tool calls, 0/0;
 pretty round-6 implementer (wf_524a70e3-32f) audited 2026-07-19 — 178 tool
 calls, 0/0;
-53 sealed transcripts total.
+pretty round-7 implementer (wf_14b5da52-36a) audited 2026-07-19 — 85 tool
+calls, 0/0;
+54 sealed transcripts total.
 
 | Path | Agent | Role |
 |------|-------|------|
@@ -88,6 +90,7 @@ calls, 0/0;
 | workflows/wf_92d2ed53-daf/agent-ae03098e391b35ba6.jsonl | round 13 (unit B) | edge-layer completion: 11/11 (color,style) vocabulary (census-total, panic-on-unknown = totality proof), EndRef::Info both-ends anchor (port id = node_id − concl − 1, capture-verified); edge-section regeneration 12,022/12,022 byte-exact corpus-wide |
 | workflows/wf_a320cb04-549/agent-a2d8cbdd7c2f76260.jsonl | pretty round 5 | batch echo completed: Restriction.expanded field (statement=macro form, comment=expanded — probed both ways), macros always-break vcat law, theory-frame assembly + predicates margin-0 splice; whole-echo parity 29/29 captures |
 | workflows/wf_524a70e3-32f/agent-a4425b45974d3aa5f.jsonl | pretty round 6 | web rendering mode: hl_keyword/hl_operator/hl_comment vocabulary censused over 82+82 pane bodies, escape table = producers escape_text, WEB_WIDTH=100/RIBBON=67 pinned (139/139 fills); zero-width span-marker second render target (batch byte-identical via thread-local flag); signature-pane sweep 82/82 byte-identical through producers-skin composition + mutation check; DURABLE BLOCKER documented: sep-construct line wrapping fits no single (width,ribbon) — byte 206/367, span 348/367 |
+| workflows/wf_14b5da52-36a/agent-a9db9e3dd21aec13d.jsonl | pretty round 7 | escaped-width web layout (dirty-room Part B relayed as hypotheses, independently re-verified: B2 census one-line max 67 / wrapped min 69 zero violations, B3 drop witnesses): tokens sized to entity-escaped width via sized_text size-vs-content divergence, batch byte-frozen; exp hcat correction (zero ^-terminated lines census); sweep 206/367 → 367/367 sections, whole message+rules panes 82/82 + 82/82 byte-identical, live replays 2 never-captured theories 4/4 panes, escaped-charging mutation check; NO residual family — web pane surface at full byte parity |
 
 Corresponding workspaces (../wellformedness, ../graphdot, ../weblayer) hold
 each agent's QUERIES.log, BEHAVIOR.md, REPORT*.md and code — cross-reference
@@ -124,6 +127,7 @@ the transcripts against those logs.
 | workflows/wf_92d2ed53-daf/agent-a35e46f330272a8d9.jsonl | graphdot round-13 delta audit (pass; census independently reproduced to the count; style-first byte order of green/dotted = capture-forced merger; source has no edge-style enum; "info" is sealed coinage — source keys the cell Nothing) |
 | workflows/wf_a320cb04-549/agent-a8f460a120615533d.jsonl | pretty round-5 delta audit (pass; frame traversal does NOT mirror upstream's 8-handler item-fold — 7-arm match over erasure-driven enum, no hoisting; macros vcat byte-forced by falsification probe; resolved the apparent $$-vs-col-8 discrepancy showing source and oracle agree) |
 | workflows/wf_524a70e3-32f/agent-a25916549ba1b5872.jsonl | pretty round-6 delta audit (pass; mechanism DIVERGENT from HtmlDoc.hs — thread-local flag + post-render sentinel expansion vs newtype/typeclass transformer with per-primitive escaping; zero-width-marker shape grounded in sanctioned BSD AnnotStart/AnnotEnd; no HighlightStyle/hlClass/opParens/withTag counterparts; width 100/67 = public default Style, empirically pinned; capture-forced matches all traced to the 82+82 pane bodies) |
+| workflows/wf_14b5da52-36a/agent-aa9d1341911c1a04c.jsonl | pretty round-7 delta audit (pass; DUAL DUTY: (1) relay-channel integrity — Part B carries no upstream identifier/path/expression, only served-output merger; its one structural phrase was NOT operationalized (sealed side kept col-0 per-item rendering); (2) similarity — escaping-meets-sizing seam is the OPPOSITE decomposition to upstream's construction-time per-primitive escaping in the HtmlDoc Document instance; exp hcat = byte-forced merger on a BSD primitive; leakage grep clean; corroborated 367/367 + 82/82 + 82/82 + mutation + batch-frozen independently) |
 
 Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUDIT.md,
 ../console/AUDIT.md, ../macros/AUDIT.md, ../injective/AUDIT.md, ../derivcheck/AUDIT.md.

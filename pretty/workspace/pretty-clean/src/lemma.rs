@@ -25,12 +25,10 @@
 //! ```
 
 use crate::ast::{Guarded, Lemma, LemmaAttr, Restriction, TraceQuantifier};
-use crate::doc::{
-    above_op, above_plus, beside_op, fsep, nest, punctuate, render_with, sep, text, vcat, Doc,
-};
+use crate::doc::{above_op, above_plus, beside_op, fsep, nest, punctuate, render_with, sep, vcat, Doc};
 use crate::formula;
 use crate::term::{RIBBON, WIDTH};
-use crate::web::{hl_comment, hl_kw, hl_wrap};
+use crate::web::{hl_comment, hl_kw, hl_wrap, w_char as char, w_text as text};
 
 /// One whole restriction block (also the echo of legacy `axiom` items —
 /// probe:q_ax1).
@@ -48,10 +46,7 @@ pub fn render_lemma(l: &Lemma, guarded: Option<&Guarded>) -> String {
 /// `"formula"` — the quotes attach directly around the formula doc; interior
 /// breaks land one column past the opening quote's nesting (probe:q_l2).
 fn quoted_formula(f: &crate::ast::Formula) -> Doc {
-    beside_op(
-        beside_op(crate::doc::char('"'), formula::doc(f)),
-        crate::doc::char('"'),
-    )
+    beside_op(beside_op(char('"'), formula::doc(f)), char('"'))
 }
 
 /// A verbatim multi-line input block (guarded content, embedded proofs):
@@ -119,7 +114,7 @@ fn header_doc(l: &Lemma) -> Doc {
     beside_op(
         beside_op(
             text(&format!("lemma {} [", l.name)),
-            fsep(punctuate(&crate::doc::char(','), items)),
+            fsep(punctuate(&char(','), items)),
         ),
         text("]:"),
     )

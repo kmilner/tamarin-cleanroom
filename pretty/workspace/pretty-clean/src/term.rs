@@ -18,9 +18,8 @@
 //!   * `diff(l, r)` in application form.
 
 use crate::ast::{BinOp, SortHint, SuffixSort, Term, VarSpec};
-use crate::doc::{
-    beside_op, char, fcat, fsep, nest, punctuate, render_with, text, Doc,
-};
+use crate::doc::{beside_op, fcat, fsep, hcat, nest, punctuate, render_with, Doc};
+use crate::web::{w_char as char, w_text as text};
 
 /// Theory-echo layout parameters (SPEC; every wrap observation in
 /// BEHAVIOR.md reproduces at these settings).
@@ -129,12 +128,17 @@ fn collect_pair<'a>(elems: &'a [Term], out: &mut Vec<&'a Term>) {
 }
 
 /// `a^b^c`: chains flatten for BOTH association orders (probe:t_exp2), the
-/// `^` attaches to the preceding operand, no spaces, no parens added.
+/// `^` attaches to the preceding operand, no spaces, no parens added. The
+/// operands are joined BESIDE (`hcat`), never as a fill: a line is never broken
+/// at a `^` (no `^`-terminated line occurs in any batch or web capture — one-
+/// line max escaped census, QUERIES.log R7). When an operand is a wide AC term
+/// its OWN fill wraps internally, staying beside the `^` (web witness
+/// DHKEA_NAXOS `x.208^(x.209*h1(<…>)*` continuing to `inv((…)))`).
 fn exp_doc(t: &Term) -> Doc {
     let mut leaves: Vec<&Term> = Vec::new();
     collect_exp(t, &mut leaves);
     let docs = punctuate(&char('^'), leaves.into_iter().map(doc).collect());
-    fcat(docs)
+    hcat(docs)
 }
 
 fn collect_exp<'a>(t: &'a Term, out: &mut Vec<&'a Term>) {

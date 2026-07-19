@@ -294,12 +294,13 @@ fn raw_files(suffix: &str) -> Vec<PathBuf> {
 }
 
 #[test]
-#[ignore] // diagnostic for the R6 layout blocker (not a pass/fail acceptance)
 fn sweep_count() {
-    // Counts byte / token-content / span-placement matches per section without
-    // panicking, at the pinned (100, 67). R6_DBG=<kind> shows the first byte
-    // diffs, R6_DBGC=<kind> the first content diffs. See BEHAVIOR.md "Web mode
-    // (R6) — LAYOUT BLOCKER".
+    // SECTION-LEVEL acceptance: every captured pane section (Signature,
+    // Construction/Deconstruction rules, MSR rules, restrictions) re-rendered
+    // through the web path at the pinned (100, 67) with ESCAPED-width layout is
+    // byte-identical to its capture. R6_DBG=<kind> shows the first byte diffs,
+    // R6_DBGC=<kind> the first content diffs. Asserts zero byte misses at the end
+    // (was 206/367 before the escaped-width law; now 367/367).
     let mut ok = 0usize;
     let mut bad = 0usize;
     let mut kinds: std::collections::BTreeMap<&str, (usize, usize)> = Default::default();
@@ -416,6 +417,8 @@ fn sweep_count() {
         content_ok + content_bad,
         span_ok + span_bad,
     );
+    assert_eq!(bad, 0, "every pane section must render byte-identical");
+    assert_eq!(ok, 367, "expected 367 sections (82 sig + 164 constr + 82 msr + 39 restr)");
 }
 
 /// Strip spans, unescape entities, collapse all whitespace runs to one space —
@@ -498,6 +501,125 @@ fn signature_pane_sweep() {
 }
 
 #[test]
+fn full_message_pane_sweep() {
+    // WHOLE message response, byte-identical, with ALL THREE sections
+    // (Signature, Construction Rules, Deconstruction Rules) reconstructed from
+    // their models and re-rendered through the web path — nothing carried from
+    // the capture. Escaped-width layout closes the rule bodies the R6 blocker
+    // could not.
+    let files = raw_files("__message.raw");
+    assert!(files.len() >= 80, "expected ~82 message panes, got {}", files.len());
+    let mut n = 0;
+    for path in &files {
+        let raw = fs::read_to_string(path).unwrap();
+        let (html, title) = decode_envelope(&raw);
+        assert_eq!(title, "Message theory");
+        let (_, blocks) = parse_blocks(&unpostprocess(&html));
+        let heads: Vec<&str> = blocks.iter().map(|(h, _)| h.as_str()).collect();
+        assert_eq!(heads, ["Signature", "Construction Rules", "Deconstruction Rules"]);
+        assert_eq!(
+            rebuild_pane(&raw),
+            raw,
+            "message whole-response mismatch for {path:?}"
+        );
+        n += 1;
+    }
+    eprintln!("full_message_pane_sweep: {n} message panes byte-identical (all sections from model)");
+}
+
+#[test]
+fn full_rules_pane_sweep() {
+    // WHOLE rules response, byte-identical. `Multiset Rewriting Rules` and
+    // `Restrictions of the Set of Traces` are reconstructed from their models and
+    // re-rendered; `Fact Symbols with Injective Instances` is OPAQUE solver input
+    // (not modeled — BEHAVIOR.md R6) and carried through unchanged.
+    let files = raw_files("__rules.raw");
+    assert!(files.len() >= 80, "expected ~82 rules panes, got {}", files.len());
+    let mut n = 0;
+    let mut restr_panes = 0;
+    for path in &files {
+        let raw = fs::read_to_string(path).unwrap();
+        let (html, _title) = decode_envelope(&raw);
+        let (_, blocks) = parse_blocks(&unpostprocess(&html));
+        if blocks
+            .iter()
+            .any(|(h, _)| h == "Restrictions of the Set of Traces")
+        {
+            restr_panes += 1;
+        }
+        assert_eq!(
+            rebuild_pane(&raw),
+            raw,
+            "rules whole-response mismatch for {path:?}"
+        );
+        n += 1;
+    }
+    eprintln!("full_rules_pane_sweep: {n} rules panes byte-identical ({restr_panes} with restrictions; fact-symbol lines carried opaque)");
+}
+
+/// Reconstruct a WHOLE pane response from its captured envelope: parse every
+/// section, re-render the modeled ones (signature / rules / restrictions) through
+/// the web path, carry opaque ones (fact symbols) verbatim, and reassemble
+/// through the skin replica. The result should byte-equal the input envelope.
+fn rebuild_pane(raw: &str) -> String {
+    let (html, title) = decode_envelope(raw);
+    let (leading, blocks) = parse_blocks(&unpostprocess(&html));
+    let mut bodies: Vec<(&str, String)> = Vec::new();
+    for (h, body) in &blocks {
+        let pt = plain(body);
+        let rendered = match h.as_str() {
+            "Signature" => web::render_signature_body(&parse_signature(&pt)),
+            "Construction Rules" | "Deconstruction Rules" => {
+                let rules: Vec<_> =
+                    split_at_heads(&pt, "rule ").iter().map(|b| parse_bare_rule(b)).collect();
+                web::render_bare_rules_body(&rules)
+            }
+            "Multiset Rewriting Rules" => {
+                let rules: Vec<_> =
+                    split_at_heads(&pt, "rule ").iter().map(|b| parse_rule_block(b)).collect();
+                web::render_msr_body(&rules)
+            }
+            "Restrictions of the Set of Traces" => {
+                let rs: Vec<_> = split_at_heads(&pt, "restriction ")
+                    .iter()
+                    .map(|b| parse_restriction_block(b))
+                    .collect();
+                web::render_restrictions_body(&rs)
+            }
+            // Opaque solver input (fact symbols, macros) — carried verbatim.
+            _ => body.join("\n"),
+        };
+        bodies.push((h.as_str(), rendered));
+    }
+    let bref: Vec<(&str, Option<&str>)> =
+        bodies.iter().map(|(h, b)| (*h, Some(b.as_str()))).collect();
+    reassemble(&title, leading, &bref)
+}
+
+#[test]
+#[ignore] // live replay: needs envelopes freshly probed from the HS server (R6_LIVE_RAW)
+fn live_replay() {
+    // Replays the whole-pane byte gate against theories that were NEVER captured
+    // (envelopes probed live from the sanctioned HS server into R6_LIVE_RAW), so
+    // the escaped-width layout is exercised on unseen rule/restriction bodies, not
+    // the corpus it was derived from.
+    let dir = PathBuf::from(std::env::var("R6_LIVE_RAW").expect("set R6_LIVE_RAW"));
+    let mut files: Vec<PathBuf> = fs::read_dir(&dir)
+        .expect("R6_LIVE_RAW dir")
+        .map(|e| e.unwrap().path())
+        .filter(|p| p.to_str().unwrap().ends_with(".raw"))
+        .collect();
+    files.sort();
+    assert!(!files.is_empty(), "no live envelopes in {dir:?}");
+    for path in &files {
+        let raw = fs::read_to_string(path).unwrap();
+        assert_eq!(rebuild_pane(&raw), raw, "live whole-response mismatch for {path:?}");
+        eprintln!("live_replay OK: {}", path.file_name().unwrap().to_str().unwrap());
+    }
+    eprintln!("live_replay: {} live pane(s) byte-identical", files.len());
+}
+
+#[test]
 fn signature_mutation_check() {
     // Doctoring a rendered signature span must break the whole-response byte gate.
     let path = raw_files("__message.raw").into_iter().next().unwrap();
@@ -524,19 +646,24 @@ fn signature_mutation_check() {
 }
 
 #[test]
-#[ignore] // documents the R6 layout blocker; not a pass/fail acceptance
-fn layout_blocker_witness() {
-    // The faithful HughesPJ engine measures a nest-3 rule-body one-liner of
-    // content 66 (`c_mult`) IDENTICALLY to a nest-3 bracket-group premise of
-    // content 66, so at any single (width, ribbon) they wrap together — yet the
-    // captures wrap `c_mult`'s body while keeping `d_exp`'s premise `]`. At the
-    // pinned (100, 67) neither wraps (the signature fills need ribbon 67 with
-    // width >= 78). Witness: `c_mult`'s body stays on one line here.
+fn escaped_width_discriminates_c_mult_from_d_exp() {
+    // The blocker's "impossible" pair, now forced by the escaped-width law. Both
+    // constructs are 66 GLYPHS at nest 3, so a glyph-width engine measures them
+    // identically and wraps them together at every (width, ribbon). The captures
+    // do not: `c_mult`'s BODY carries a `>` in `]->` (escaped 69) and WRAPS to
+    // header + three rows; `d_exp`'s premise GROUP has no escapable chars
+    // (escaped 66) and KEEPS its `]` on one line. Escaped-width layout reproduces
+    // exactly this split at the single pinned (100, 67).
     use pretty_clean::ast::*;
-    let v = |n: &str, i: u64| Term::Var(VarSpec { name: n.into(), idx: i, sort: SortHint::Untagged, typ: None });
-    let m = Term::BinOp(BinOp::Mult, Box::new(v("x", 0)), Box::new(v("x", 1)));
+    let v = |n: &str, i: u64| {
+        Term::Var(VarSpec { name: n.into(), idx: i, sort: SortHint::Untagged, typ: None })
+    };
     let ku = |a: Vec<Term>| Fact { persistent: true, name: "KU".into(), args: a, annotations: vec![] };
-    let r = Rule {
+    let kd = |a: Vec<Term>| Fact { persistent: true, name: "KD".into(), args: a, annotations: vec![] };
+
+    // c_mult: [ !KU( x ), !KU( x.1 ) ] --[ !KU( (x*x.1) ) ]-> [ !KU( (x*x.1) ) ]
+    let m = Term::BinOp(BinOp::Mult, Box::new(v("x", 0)), Box::new(v("x", 1)));
+    let c_mult = Rule {
         name: "c_mult".into(),
         modulo: Some("AC".into()),
         attributes: vec![],
@@ -545,8 +672,48 @@ fn layout_blocker_witness() {
         conclusions: vec![ku(vec![m])],
         loop_breakers: vec![],
     };
-    let out = web::render_rule_bare(&r);
-    let lines = out.lines().count();
-    eprintln!("c_mult renders in {lines} lines (captures: 4 — header + 3 body rows):\n{out}");
-    assert_eq!(lines, 2, "engine keeps the content-66 body on one line at (100,67)");
+    let c_out = web::render_rule_bare(&c_mult);
+    assert_eq!(
+        c_out.lines().count(),
+        4,
+        "c_mult body (escaped 69) wraps to header + three rows:\n{c_out}"
+    );
+
+    // d_exp premise group:
+    //   [ !KD( x.5^(x.4*x.6*inv((x.2*x.7))) ), !KU( (x.2*x.3*inv(x.4)) ) ] --> [ ... ]
+    // its 66-glyph premise group carries no escapable chars (escaped 66) and
+    // stays on one line, so the whole body fits (a `-->` deconstruction body).
+    let ex = Term::BinOp(
+        BinOp::Exp,
+        Box::new(v("x", 5)),
+        Box::new(Term::BinOp(
+            BinOp::Mult,
+            Box::new(Term::BinOp(BinOp::Mult, Box::new(v("x", 4)), Box::new(v("x", 6)))),
+            Box::new(Term::App(
+                "inv".into(),
+                vec![Term::BinOp(BinOp::Mult, Box::new(v("x", 2)), Box::new(v("x", 7)))],
+            )),
+        )),
+    );
+    let prem2 = Term::BinOp(
+        BinOp::Mult,
+        Box::new(Term::BinOp(BinOp::Mult, Box::new(v("x", 2)), Box::new(v("x", 3)))),
+        Box::new(Term::App("inv".into(), vec![v("x", 4)])),
+    );
+    let d_exp = Rule {
+        name: "d_exp".into(),
+        modulo: Some("AC".into()),
+        attributes: vec![],
+        premises: vec![kd(vec![ex.clone()]), ku(vec![prem2])],
+        actions: vec![],
+        conclusions: vec![kd(vec![ex])],
+        loop_breakers: vec![],
+    };
+    let d_out = web::render_rule_bare(&d_exp);
+    // The premise group keeps its `]` on the same line as its facts — no bare
+    // `]` row — which a wrap would produce.
+    assert!(
+        !d_out.lines().any(|l| unescape(&strip_spans(l)).trim() == "]"),
+        "d_exp premise group (escaped 66) keeps its ] on one line:\n{d_out}"
+    );
 }
