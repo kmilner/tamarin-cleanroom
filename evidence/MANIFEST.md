@@ -160,6 +160,7 @@ Findings text: ../wellformedness/AUDIT.md, ../graphdot/AUDIT.md, ../weblayer/AUD
 | workflows/wf_5ec90b24-b26/ | tail-author affiliations, triviality classification, rewrite scoping |
 | standalone-agents/agent-a9c7edd67d24711cc.jsonl | contributor-provenance analysis (withheld from public mirror) |
 | standalone-agents/agent-ad7dc5e6adfd3d75c.jsonl | dirty-room diagnosis of the pretty R6 layout blocker (dirty-room/pretty_r7_layout_diagnosis.md): upstream escapes text BEFORE layout so the engine measures escaped width (&lt;/&gt;=4, &amp;=5, quotes 6/5); one pass, one style (100/67); law "one line iff escaped ≤ 67" zero exceptions over 3426 bodies; Part B sealed-safe block relayed into the R7 prompt |
+| standalone-agents/agent-a2410b840351f957b.jsonl | open-side integrator: pretty round 7 — main/message + main/rules ROUTED through clean web renderer + producers skin; 11 dead ported functions deleted across pretty_theory.rs/theory_html.rs (files survive, per-caller blockers named); AUTHOR DELTA: charlie-j citation off pretty_theory.rs, BTom-GH off theory_html.rs (both persist elsewhere); pane byte 167/170 (3 DIFF = pre-existing injective-facts solver gap, witnesses in both websweep baselines); 2 pre-existing cosmetic pane DIFFs FIXED (loop-breaker hl_comment span); wf_gate 419/0, pretty_gate 403/16, suites green, headers 133/0 stale; pane_byte_check.sh harness added (OOM guards + port-free wait) |
 
 ## Supporting material
 

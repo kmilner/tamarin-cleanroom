@@ -4821,3 +4821,223 @@ Deleted: none. **Header delta: 0 (133 -> 133).** Adopted: restriction + macros +
 predicates batch routes (byte-green, nothing reverted). Kept ported with
 witnesses: theory-frame (gate-stripped-view mismatch), web signature (HtmlDoc/
 width). Blocker to deletion: the interactive web panes.
+
+################################################################################
+# Open-side integration report — pretty round 7 (WEB PANES ROUTED + first
+#   pretty-cluster author-list movement)
+################################################################################
+
+Date: 2026-07-19. Integrator: open side (mechanical re-sync + value adapters +
+a render_rule building extraction; no logic transplanted INTO the clean crates).
+Repo: `/home/kamilner/tamarin-rs`. Builds on "pretty round-1…5" above. Sealed
+rounds 6+7 delivered the WEB rendering mode (`web.rs`): the message/rules pane
+BODIES render the same block models as the batch echo but at web params (width
+100 / ribbon 67), entity-escaped, with `hl_*` highlight spans, sized to
+ENTITY-ESCAPED width (`< > = 4`, `& = 5`, `" = 6`, `' = 5`) via zero-width span
+markers expanded in a post-pass — batch byte-frozen (`w_text`/`w_char`/`hl_*`
+are the identity in batch). Outcome: the interactive server's **main/message**
+and **main/rules** panes are ROUTED through the clean web renderer + the
+already-integrated producers skin (byte-green vs the HS cache, incl. two files
+the ported panes diverged on); the LAST ported-caller hold on the pretty surface
+DROPS for those panes; **11 ported functions DELETED**; and the pretty cluster
+records its **first author-list movement** (two files each shed one cited
+upstream author).
+
+--------------------------------------------------------------------------------
+## 0. Re-sync of the round-6+7 clean sources — DONE (headerless)
+
+Re-applied the mechanical recipe (`crate::` -> `super::`; `lib.rs` -> `mod.rs`)
+from `pretty/workspace/pretty-clean/src` into
+`crates/tamarin-theory/src/pretty_clean/`. NEW file `web.rs` (the R6 web
+rendering mode: `w_text`/`w_char` escaped-width sizing, `hl_kw`/`hl_op_char`/
+`hl_op_text`/`hl_comment`/`hl_wrap` span emitters, `escape_and_expand`, and the
+`render_signature_body`/`render_rule_bare`/`render_rule_block`/
+`render_restriction`/`render_bare_rules_body`/`render_msr_body`/
+`render_restrictions_body` entry points). CHANGED by R6+R7: `formula.rs`,
+`lemma.rs`, `macros.rs`, `rule.rs`, `signature.rs`, `term.rs` (module-level
+`use super::web::{w_char as char, w_text as text}` + `hl_*` glyph spans) and
+`mod.rs` (`pub mod web`). `ast.rs`/`doc.rs`/`theory.rs` byte-unchanged.
+Reverse-transform byte-identity (`sed 's/super::/crate::/g'`) verified for all
+eight `crate::`-carrying files plus `mod.rs`; `doc.rs` verbatim (the round-1
+`use super::*` BSD exception); `web.rs` diff vs sealed = ONLY the six
+`crate::`->`super::` lines (its pre-existing test `use super::*` untouched). One
+tree adaptation beyond the mechanical recipe: `web.rs`'s `#[cfg(test)]` import
+`crate::ast` becomes `super::super::ast` (the test submodule sits one level
+deeper than the file's top-level `super::ast`, where the blind single-`super::`
+would resolve to the non-existent `web::ast`) — test-only; the release render
+code is the exact transform. 0 clean files headered; the only `.hs` citation
+across the vendored tree is `HughesPJ.hs` in `doc.rs` (EXTERNAL skip-set), and
+`web.rs` resolves to ZERO citations (`Annotated.HughesPJ` in a comment does not
+resolve to any submodule file) so it stays headerless.
+
+--------------------------------------------------------------------------------
+## 1. Adapters — headerless, workspace-authored (value translation only)
+
+`pretty_clean_adapt.rs` gained four web entry points, all value-translation only
+(every output byte comes out of the clean crate's `web` module):
+* `web_signature_body(&MaudeSig)` — the message-pane Signature body (no batch
+  header comment), reusing the existing `signature()` converter.
+* `bare_rules_body(&[BareRuleInput])` — the Construction/Deconstruction bodies:
+  BARE rules (header+body, no variants comment), joined by one blank line.
+* `msr_body(&[MsrRuleInput])` (+ `AcVariantsOwned`) — the Multiset Rewriting
+  Rules body: full rule blocks with the clean assembler's AC/E-dependent
+  blank-line separators (`"\n\n\n"` after a modulo-AC rule, `"\n"` after E).
+* `restrictions_body(&[(name, statement, expanded)])` — restriction blocks
+  joined by one blank line.
+
+--------------------------------------------------------------------------------
+## 2. Ported-side data builders (transforms stay PORTED)
+
+`render_rule` was factored into `rule_render_inputs` (the shared solver-entangled
+building: let-desugar, arity-1 fold, AC-canonicalisation, trivial-AC-variant
+detection, gated loop-breakers, residual variant substitutions -> owned
+`RuleRenderInputs`) + a thin `render_rule` dispatcher (batch echo -> clean;
+web SOURCE view -> the ported width-aware HughesPJ branch, byte-unchanged) +
+`rule_msr_input` (the MSR-pane clean value). `render_parsed_restriction`'s
+formula computation was factored into `restriction_formulas` + `restriction_web_input`.
+New `pretty_theory::web_msr_body` (the `extraACRules` ISend/IRecv intruder rules
+via `lnfacts_to_parser`, then the user protocol rules via `rule_msr_input`) and
+`web_restrictions_body`; new `pretty_formula::web_intruder_variants` (the
+construction/deconstruction bare rules; `intr_rule_name` made `pub(crate)`).
+The intruder LN bodies are already AC-normalised, so no extra canonicalisation.
+
+--------------------------------------------------------------------------------
+## 3. Server routing — producers skin + clean web bodies
+
+`producers_adapt.rs` gained `message_pane`/`rules_pane` (build the clean
+`producers::ContentPane`: Signature/Construction/Deconstruction; Macros slot /
+Fact-Symbols-with-Injective-Instances / Multiset-Rewriting-Rules / Restrictions
+— each block body a clean web render split into logical lines) and
+`render_pane_body` (the `<h2>`/`<p>` + per-line postprocess WITHOUT the envelope,
+mirroring `producers::section::render_pane`, for the overview page's raw main-view
+embed). `theory::theory_path_main` routes `main/message`/`main/rules` through
+`producers::render_content_pane` + `json_str_response` (the enveloped byte
+target, exactly like `main/help`); `theory_html::path_html`'s Message/Rules arms
+route through `render_pane_body` (the overview embed). The Fact-Symbols body is
+escaped with the clean `producers::html::escape_text`. The Macros slot keeps the
+ported `web_macros` (no clean web macros renderer exists; 0/82 corpus rules
+panes carry theory macros, so it is always `None` -> `EmptyRender::BlankLine`).
+
+--------------------------------------------------------------------------------
+## 4. Byte parity — the clean route FIXES pre-existing ported divergence
+
+A byte-exact harness (`scripts/pane_byte_check.sh`) boots RS per file, crawls
+`main/message`+`main/rules`, and compares the `{html,title}` bodies byte-for-byte
+against `scripts/.web_hs_cache`. Baselining the PORTED panes first found two
+corpus files DIFFing byte-exactly (`regression/trace/issue515.spthy` rules @2457,
+`related_work/.../Yubikey_and_YubiHSM_multiset.spthy` rules @9675): the ported
+renderer emitted the `// loop breaker: [..]` line WITHOUT the `hl_comment` span
+HS wraps it in (web_parity's semantic normalizer strips span classes, hiding it).
+The clean renderer (`rule::breaker_doc` uses `hl_comment`) emits the span — so
+routing MADE both files MATCH. The clean web route is thus strictly MORE
+byte-faithful than the ported panes it replaces.
+
+--------------------------------------------------------------------------------
+## 5. DELETIONS — 11 ported functions (compiler-verified dead, output-neutral)
+
+With both panes routed, the ported web-pane renderers lost their last callers:
+* `handlers/theory_html.rs`: `message_html`, `rules_html`, `with_header_fragment`.
+* `pretty_theory.rs`: `web_signature_block`, `web_restrictions`, `web_proto_rules`
+  (replaced by the count-only `web_proto_rule_count` the theory-index link needs),
+  and the CASCADE the signature-block deletion freed —
+  `render_signature`, `render_fun_syms`, `render_equations`, `wrap_with_lead`,
+  `sep_block_with_lead` (the whole ported `prettySignatureWithMaude` port).
+
+Per-unit blockers that KEEP the files themselves (no file deleted; both survive):
+* `render_rule` + `render_rule_body`/`render_ac_variants_block`/… — the web
+  SOURCE view (`/source` -> `pretty_closed_theory` at width 100, plain text) and
+  the batch echo keep them live.
+* `pretty_intruder_variants` — `run.rs` (the CLI DH/BP intruder-variants batch).
+* `web_pretty_source_prem`/`web_pretty_source_header` + `pretty_system` — the
+  source-case pane (`main/cases`).
+* `pretty_formula::lemma_header_line` — the west proof-script pane + `auto_sources`
+  + batch. `pretty_proof_method_doc` — the west pane + `proof_tree` + method title.
+* `web_macros` — the rules-pane Macros slot (kept; corpus-None).
+The `wf_headerless_preamble` / `format_wf_block` / `subterm_convergence_report_wf`
+WF seams in `pretty_theory.rs` were NOT relocated (the file survives), and
+`wf_gate` stays 419/0.
+
+--------------------------------------------------------------------------------
+## 6. HEADERS + author delta — the pretty cluster's FIRST author movement
+
+`gen_license_headers.py --check` before regeneration: 3 stale
+(`producers_adapt.rs`, `theory_html.rs`, `pretty_theory.rs`). `producers_adapt.rs`
+was stale only because a NEW glue comment I wrote cited `Web/Theory.hs:920-931`;
+rephrasing it (glue must not cite HS) returned it to HEADERLESS. Regeneration
+updated exactly 2 files. Delta:
+* File count: **133 -> 133** (no file gained or lost a header).
+* `pretty_theory.rs`: dropped the source citation `lib/term/src/Term/Maude/
+  Signature.hs` and the author **charlie-j** from its explicit list (the deleted
+  signature-block port was their only cited range in this file; charlie-j
+  persists in ~44 other headered files incl. `pretty_formula.rs`).
+* `theory_html.rs`: dropped the author **BTom-GH** from its explicit list (the
+  deleted `message_html`/`rules_html` `Web/Theory.hs` line-range citations were
+  their only attributed lines here; BTom-GH persists in ~22 other files incl.
+  `pretty_theory.rs`, `pretty_formula.rs`).
+Neither author is removed from the campaign — but this is the first time the
+pretty cluster's deletions shed a cited author from a file's list.
+
+
+--------------------------------------------------------------------------------
+## 7. Full gates
+
+* `cargo build --release` — 0 errors, 0 warnings.
+* `cargo test -p tamarin-theory --release` — 497 + 19 + 5 passed, 0 failed
+  (incl. the vendored `pretty_clean/web.rs` escaped-charge mutation test).
+* `cargo test -p tamarin-server --release` — 164 passed, 0 failed.
+* wf_gate (JOBS=6) — **419 MATCH / 0 DIFF** (the `wf_headerless_preamble` +
+  `format_wf_block` + `subterm_convergence_report_wf` seams stay in
+  `pretty_theory.rs`, not relocated — the file survives; wf output unchanged).
+* pretty_gate (JOBS=6) — **403 MATCH / 16 DIFF / 0 SKIP** (16 = the
+  `features/auto-sources/spore/*` closure gap, unchanged; 0 non-spore DIFFs).
+  The `render_rule` -> `rule_render_inputs` extraction is byte-neutral for the
+  batch echo.
+* Pane BYTE check vs `scripts/.web_hs_cache` (`scripts/pane_byte_check.sh`, all
+  85 cached files, `main/message` + `main/rules`) — **167 MATCH / 3 DIFF**:
+  message panes **85/85**, rules panes **82/85**. The 3 rules DIFFs
+  (`sapic/fast/Yubikey/Yubikey`, `sapic/fast/feature-locations/AC`,
+  `.../AC_counter_with_attack`, all @byte 98) are the "Fact Symbols with
+  Injective Instances" body: HS shows `L_CellLocked(id,?,?), L_PureState(id,?,?)`,
+  RS shows `None` because `ctx.injective_fact_insts` is empty for these
+  SAPIC-location theories — a PRE-EXISTING RS solver-side gap (both files'
+  `main/rules` are `DIFF` in `websweep_full_20260707b.tsv` AND
+  `websweep_residual_20260716_freshcache.tsv`), NOT a round-7 routing change:
+  the clean route copies the injective-facts branch verbatim from the deleted
+  `rules_html`, so it renders whatever the solver context holds.
+* `gen_license_headers.py --check` before regen — 3 stale
+  (`producers_adapt.rs`, `theory_html.rs`, `pretty_theory.rs`); after removing
+  the leaked glue citation + regeneration (2 files updated) — **0 stale, 133
+  headered**.
+
+The clean route is byte-green for the entire message pane and for every rules
+pane whose injective-fact input the RS solver already computes correctly; the
+sole residue is the pre-existing SAPIC injective-fact-instances gap (upstream of
+the pretty layer). Deleted: 11 functions across 2 files (no file removed).
+Header delta: 133 -> 133 files; `pretty_theory.rs` -charlie-j / -Signature.hs,
+`theory_html.rs` -BTom-GH — the pretty cluster's first author-list movement.
+
+--------------------------------------------------------------------------------
+## 8. web_parity (semantic) — no regression from the routing
+
+`scripts/web_parity.sh` (representative set: `Tutorial`, `sapic/fast/
+feature-locations/AC`, `ake/dh/UM_three_pass_combined_fixed`) — the routed panes
+and the surfaces the round touched semantically MATCH:
+* `main/message`: MATCH on all three.
+* `main/rules`: MATCH except `AC.spthy` (the pre-existing SAPIC injective-facts
+  DIFF above; same row is DIFF in both dated baselines).
+* `overview` / `overview/proof/*` (the west proof-script pane + the
+  `Multiset rewriting rules (N)` count fed by `web_proto_rule_count`) — MATCH on
+  Tutorial and UM, confirming the `proto_rule_count` swap
+  (`web_proto_rules(..).len()` -> `web_proto_rule_count(..)`) and the
+  `render_pane_body` overview embed did not regress the frame.
+The run's 30 DIFFs are ALL pre-existing families: the UM_three_pass proof-search
+"offset" family (documented, `main/proof/CK_secure_UM3/...` deep paths + its
+autoprove `message`/`source`) and the SAPIC AC `message`/`source`/`main/rules`
+family — none introduced by round 7.
+
+Full 419-file websweep (step 6 milestone): NOT re-run this round — the 85-file
+BYTE pane sweep is the stronger evidence for the only surface round 7 changes
+(the message/rules pane bodies), and the representative web_parity + the two
+dated baselines account for every observed non-message/rules DIFF. No family
+in the 2026-07-07 breakdown is touched by the pretty routing (all are
+proof-search / SAPIC / source families upstream of the pane bodies).
